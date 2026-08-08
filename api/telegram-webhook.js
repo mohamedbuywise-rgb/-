@@ -1,35 +1,56 @@
-import { createClient } from '@supabase/supabase-js';
+import { transcribeVoice, classifyMessage } from '../lib/groq.js';
+import { sendTelegramMessage } from '../lib/telegram.js';
+import { recordExpense, sendMonthlyReport, sendWeeklyReport, sendDataExport, sendExpenseSearch } from '../lib/expenses.js';
+import { recordDebt, sendDebtsReport, sendPersonDebtDetail, settleDebtWithPerson } from '../lib/debts.js';
+import { upsertUser, hasActiveSubscription, getSubscriptionExpiry, activateSubscription, getChatIdByUserId } from '../lib/users.js';
+import { GUIDE_URL, ADMIN_TELEGRAM_ID, SUBSCRIPTION_DAYS, SUBSCRIPTION_PRICE_EGP, INSTAPAY_LINK, ADMIN_CONTACT_USERNAME } from '../lib/config.js';
 
-// ============ الإعدادات (بتيجي من Environment Variables في Vercel) ============
-const TELEGRAM_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
-const GROQ_API_KEY = process.env.GROQ_API_KEY;
-const GROQ_TEXT_MODEL = process.env.GROQ_TEXT_MODEL || 'llama-3.3-70b-versatile';
-const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+// ============ رسالة "محتاج تشترك" — بتتبعت لأي حد الاشتراك بتاعه مش فعّال ============
+function buildSubscriptionPrompt(isExpired) {
+  const intro = isExpired
+    ? '⏳ اشتراكك في فلوسي بوت خلص.'
+    : '🔒 محتاج تشترك الأول عشان تستخدم فلوسي بوت.';
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+  return (
+    `${intro}\n\n` +
+    `💳 الاشتراك الشهري: <b>${SUBSCRIPTION_PRICE_EGP} ج.م</b>\n` +
+    `1) حوّل عن طريق إنستا باي على: <code>${INSTAPAY_LINK}</code>\n` +
+    `2) ابعت سكرين شوت التحويل هنا في الشات، أو لـ ${ADMIN_CONTACT_USERNAME}\n\n` +
+    `بمجرد ما نتأكد من التحويل، هيتفعّل اشتراكك على طول وترجع تقدر تستخدم البوت عادي.`
+  );
+}
 
-const CATEGORIES = ['أكل', 'مواصلات', 'فواتير', 'تسوق', 'ترفيه', 'صحة', 'أخرى'];
+// ============ أمر الأدمن السرّي لتفعيل اشتراك مستخدم بعد ما يبعت إيصال الدفع ============
+// الصيغة: "فعل <telegram_user_id>" أو "فعل <telegram_user_id> <عدد الأيام>"
+// بيشتغل بس لو الرسالة جاية من ADMIN_TELEGRAM_ID، أي حد تاني بيتجاهل الأمر ده تمامًا.
+async function tryHandleAdminActivation(text, fromUserId, adminChatId) {
+  if (!ADMIN_TELEGRAM_ID || fromUserId !== ADMIN_TELEGRAM_ID) return false;
 
-const CATEGORY_EMOJI = {
-  'أكل': '🍔',
-  'مواصلات': '🚕',
-  'فواتير': '🧾',
-  'تسوق': '🛍️',
-  'ترفيه': '🎬',
-  'صحة': '💊',
-  'أخرى': '📌',
-};
+  const match = text.match(/^فعّ?ل\s+(\d+)(?:\s+(\d+))?$/);
+  if (!match) return false;
 
-const CATEGORY_COLOR = {
-  'أكل': '#FF6B6B',
-  'مواصلات': '#4ECDC4',
-  'فواتير': '#FFD166',
-  'تسوق': '#A78BFA',
-  'ترفيه': '#F472B6',
-  'صحة': '#34D399',
-  'أخرى': '#94A3B8',
-};
+  const targetUserId = Number(match[1]);
+  const days = match[2] ? Number(match[2]) : SUBSCRIPTION_DAYS;
+
+  const newExpiry = await activateSubscription(targetUserId, days);
+  if (!newExpiry) {
+    await sendTelegramMessage(adminChatId, '❌ حصل خطأ، اتأكد إن الـ user id صح.');
+    return true;
+  }
+
+  const formattedDate = newExpiry.toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' });
+  await sendTelegramMessage(adminChatId, `✅ تم تفعيل الاشتراك للمستخدم ${targetUserId} لحد ${formattedDate}.`);
+
+  // نحاول نبلّغ المستخدم نفسه لو عرفنا الـ chat_id بتاعه
+  const targetChatId = await getChatIdByUserId(targetUserId);
+  if (targetChatId) {
+    await sendTelegramMessage(
+      targetChatId,
+      `🎉 تم تفعيل اشتراكك في فلوسي بوت لحد ${formattedDate}.\nابعتلي فويس أو رسالة زي "صرفت 50 جنيه أكل" وابدأ على طول.`
+    );
+  }
+  return true;
+}
 
 // ============ نقطة الدخول - Vercel بينادي الدالة دي لكل ريكوست ============
 export default async function handler(req, res) {
@@ -46,10 +67,41 @@ export default async function handler(req, res) {
     const chatId = message.chat.id;
     const userId = message.from.id;
 
+    // بنسجل/نحدّث المستخدم مع كل رسالة، عشان الـ cron jobs تعرف تبعتله لوحدها بعدين
+    await upsertUser(userId, chatId);
+
+    // --- أمر الأدمن السرّي لتفعيل الاشتراكات — بيتفحص الأول وبيتجاهل تمامًا لو مش من الأدمن ---
+    if (message.text) {
+      const handledByAdmin = await tryHandleAdminActivation(message.text.trim(), userId, chatId);
+      if (handledByAdmin) return res.status(200).json({ ok: true });
+    }
+
+    // --- أمر "اشتراكي" — متاح دايمًا لأي حد، بيوريه حالة اشتراكه ---
+    if (message.text && ['اشتراكي', 'الاشتراك', '/subscription'].includes(message.text.trim())) {
+      const expiresAt = await getSubscriptionExpiry(userId);
+      const active = expiresAt && expiresAt.getTime() > Date.now();
+      if (active) {
+        const daysLeft = Math.ceil((expiresAt.getTime() - Date.now()) / (24 * 60 * 60 * 1000));
+        const formattedDate = expiresAt.toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' });
+        await sendTelegramMessage(chatId, `✅ اشتراكك شغال لحد ${formattedDate} (باقي ${daysLeft} يوم).`, 'HTML');
+      } else {
+        await sendTelegramMessage(chatId, buildSubscriptionPrompt(Boolean(expiresAt)), 'HTML');
+      }
+      return res.status(200).json({ ok: true });
+    }
+
+    // --- البوابة: أي استخدام تاني للبوت (صوت، مصروف، تقرير، إلخ) محتاج اشتراك فعّال ---
+    const subscribed = await hasActiveSubscription(userId);
+    if (!subscribed) {
+      const expiresAt = await getSubscriptionExpiry(userId);
+      await sendTelegramMessage(chatId, buildSubscriptionPrompt(Boolean(expiresAt)), 'HTML');
+      return res.status(200).json({ ok: true });
+    }
+
     // --- حالة 1: رسالة صوتية ---
     if (message.voice) {
       const text = await transcribeVoice(message.voice.file_id);
-      await handleExpenseText(text, userId, chatId);
+      await handleIncomingText(text, userId, chatId);
       return res.status(200).json({ ok: true });
     }
 
@@ -57,23 +109,77 @@ export default async function handler(req, res) {
     if (message.text) {
       const text = message.text.trim();
 
-      // أمر التقرير
-      if (text === 'تقرير' || text === 'التقرير' || text === '/report') {
-        await sendReport(userId, chatId);
+      // أمر التقرير الشهري
+      if (['تقرير', 'التقرير', '/report'].includes(text)) {
+        await sendMonthlyReport(userId, chatId);
+        return res.status(200).json({ ok: true });
+      }
+
+      // أمر التقرير الأسبوعي
+      if (['تقرير الاسبوع', 'تقرير الأسبوع', 'تقرير أسبوعي', 'الاسبوع', '/weekly'].includes(text)) {
+        await sendWeeklyReport(userId, chatId);
+        return res.status(200).json({ ok: true });
+      }
+
+      // أمر تصدير البيانات
+      if (['صدّر البيانات', 'صدر البيانات', 'تصدير البيانات', 'تصدير', '/export'].includes(text)) {
+        await sendDataExport(userId, chatId);
+        return res.status(200).json({ ok: true });
+      }
+
+      // أمر ملخص الديون العام
+      if (['ديون', 'الديون', '/debts'].includes(text)) {
+        await sendDebtsReport(userId, chatId);
+        return res.status(200).json({ ok: true });
+      }
+
+      // "ديون + اسم شخص" → تفاصيل الشخص ده بالذات
+      const personDetailMatch = text.match(/^(?:ديون|الديون)\s+(.+)$/);
+      if (personDetailMatch) {
+        const personName = personDetailMatch[1].trim();
+        await sendPersonDebtDetail(personName, userId, chatId);
+        return res.status(200).json({ ok: true });
+      }
+
+      // بحث في المصاريف: "دور على قهوة" / "ابحث عن قهوة" / "فين صرفت على قهوة" / "بحث قهوة"
+      const searchMatch = text.match(/^(?:دور على|ابحث عن|فين صرفت على|بحث)\s+(.+)$/);
+      if (searchMatch) {
+        const keyword = searchMatch[1].trim();
+        await sendExpenseSearch(keyword, userId, chatId);
         return res.status(200).json({ ok: true });
       }
 
       // أمر البداية
       if (text === '/start') {
+        const replyMarkup = GUIDE_URL
+          ? {
+              inline_keyboard: [
+                [{ text: '📖 دليل الاستخدام الكامل', web_app: { url: GUIDE_URL } }],
+              ],
+            }
+          : undefined;
+
         await sendTelegramMessage(
           chatId,
-          'أهلاً بيك في فلوسي 👋\nابعتلي فويس نوت أو رسالة زي "صرفت 50 جنيه أكل" وهسجلها لك.\nابعت "تقرير" في أي وقت عشان تشوف ملخص مصاريفك.'
+          'أهلاً بيك في فلوسي 👋\n\n' +
+            'ابعتلي فويس نوت أو رسالة زي "صرفت 50 جنيه أكل" وهسجلها لك.\n' +
+            'كمان تقدر تسجل ديون بينك وبين الناس، زي "عطيت محمد 200 جنيه" أو "استلفت من سارة 100 جنيه".\n\n' +
+            '📊 <b>تقرير</b> — ملخص شهري بالرسم البياني\n' +
+            '📅 <b>تقرير الأسبوع</b> — ملخص آخر 7 أيام\n' +
+            '💳 <b>ديون</b> — ملخص كل الديون\n' +
+            '👤 <b>ديون محمد</b> — تفاصيل الديون مع شخص معيّن\n' +
+            '✅ <b>خلصت مع محمد</b> — تسوية وتصفير الرصيد مع شخص\n' +
+            '🔍 <b>دور على قهوة</b> — بحث في مصاريفك بأي كلمة\n' +
+            '📁 <b>صدّر البيانات</b> — ملف CSV بكل بياناتك\n\n' +
+            (GUIDE_URL ? 'اضغط الزرار تحت عشان تشوف كل التفاصيل بشكل مرتّب 👇' : ''),
+          'HTML',
+          replyMarkup
         );
         return res.status(200).json({ ok: true });
       }
 
-      // غير كده، اعتبرها مصروف
-      await handleExpenseText(text, userId, chatId);
+      // غير كده، اعتبرها مصروف أو دين أو تسوية
+      await handleIncomingText(text, userId, chatId);
       return res.status(200).json({ ok: true });
     }
 
@@ -84,245 +190,32 @@ export default async function handler(req, res) {
   }
 }
 
-// ============ تفريغ الفويس نوت عبر Groq Whisper ============
-async function transcribeVoice(fileId) {
-  // 1) ناخد رابط الملف من تليجرام
-  const fileInfoRes = await fetch(
-    `https://api.telegram.org/bot${TELEGRAM_TOKEN}/getFile?file_id=${fileId}`
-  );
-  const fileInfo = await fileInfoRes.json();
-  const filePath = fileInfo.result.file_path;
-  const fileUrl = `https://api.telegram.org/file/bot${TELEGRAM_TOKEN}/${filePath}`;
-
-  // 2) نحمل الملف الصوتي
-  const audioRes = await fetch(fileUrl);
-  const audioBuffer = await audioRes.arrayBuffer();
-
-  // 3) نبعته لـ Groq Whisper
-  const formData = new FormData();
-  formData.append('file', new Blob([audioBuffer]), 'voice.ogg');
-  formData.append('model', 'whisper-large-v3');
-  formData.append('language', 'ar');
-
-  const groqRes = await fetch('https://api.groq.com/openai/v1/audio/transcriptions', {
-    method: 'POST',
-    headers: { Authorization: `Bearer ${GROQ_API_KEY}` },
-    body: formData,
-  });
-
-  const groqData = await groqRes.json();
-  console.log('GROQ_RESPONSE_STATUS:', groqRes.status);
-  console.log('GROQ_RESPONSE_BODY:', JSON.stringify(groqData));
-  return groqData.text || '';
-}
-
-// ============ استخراج المبلغ والفئة عبر Groq (نموذج نصي) ============
-async function extractExpense(text) {
-  const prompt = `استخرج من الجملة دي بيانات المصروف. الجملة بالعامية المصرية.
-رجّع JSON بس من غير أي شرح، بالشكل ده بالظبط:
-{"amount": رقم, "category": "واحدة من دول بالظبط: ${CATEGORIES.join(', ')}", "note": "وصف قصير"}
-
-لو الجملة مفيهاش رقم واضح، رجّع {"amount": null}.
-
-الجملة: "${text}"`;
-
-  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${GROQ_API_KEY}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      model: GROQ_TEXT_MODEL,
-      messages: [{ role: 'user', content: prompt }],
-      response_format: { type: 'json_object' },
-      temperature: 0,
-    }),
-  });
-
-  const data = await res.json();
-  console.log('GROQ_EXTRACT_RESPONSE_STATUS:', res.status);
-  console.log('GROQ_EXTRACT_RESPONSE_BODY:', JSON.stringify(data));
-  const rawText = data.choices?.[0]?.message?.content || '{}';
-
-  try {
-    return JSON.parse(rawText);
-  } catch {
-    return { amount: null };
-  }
-}
-
-// ============ معالجة نص المصروف: استخراج + تخزين + رد ============
-async function handleExpenseText(text, userId, chatId) {
+// ============ معالجة أي رسالة نصية: تصنيف ثم توجيه (مصروف / دين / تسوية) ============
+async function handleIncomingText(text, userId, chatId) {
   if (!text) {
     await sendTelegramMessage(chatId, 'معرفتش أفهم الرسالة، ممكن تعيدها؟');
     return;
   }
 
-  const expense = await extractExpense(text);
+  const result = await classifyMessage(text);
 
-  if (!expense.amount) {
-    await sendTelegramMessage(
-      chatId,
-      'مش قادر أحدد المبلغ من رسالتك 🤔\nجرب تبعت زي كده: "صرفت 50 جنيه أكل"'
-    );
+  if (result.type === 'expense' && result.amount) {
+    await recordExpense(result, text, userId, chatId);
     return;
   }
 
-  await supabase.from('expenses').insert({
-    telegram_user_id: userId,
-    amount: expense.amount,
-    category: expense.category || 'أخرى',
-    description: expense.note || text,
-  });
+  if (result.type === 'debt' && result.amount && result.person) {
+    await recordDebt(result, userId, chatId);
+    return;
+  }
 
-  // إجمالي اليوم
-  const startOfDay = new Date();
-  startOfDay.setHours(0, 0, 0, 0);
-
-  const { data: todayExpenses } = await supabase
-    .from('expenses')
-    .select('amount')
-    .eq('telegram_user_id', userId)
-    .gte('created_at', startOfDay.toISOString());
-
-  const todayTotal = (todayExpenses || []).reduce((sum, e) => sum + Number(e.amount), 0);
+  if (result.type === 'settlement' && result.person) {
+    await settleDebtWithPerson(result.person, userId, chatId);
+    return;
+  }
 
   await sendTelegramMessage(
     chatId,
-    `✅ <b>تمام، سجلت المصروف</b>\n${CATEGORY_EMOJI[expense.category] || '📌'} ${expense.category} · ${expense.amount} جنيه\n\n💰 إجمالي صرفك النهاردة: <b>${todayTotal} جنيه</b>`,
-    'HTML'
+    'مش قادر أحدد المبلغ من رسالتك 🤔\nجرب تبعت زي كده: "صرفت 50 جنيه أكل" أو "عطيت محمد 200 جنيه" أو "خلصت مع محمد"'
   );
-}
-
-// ============ بناء رابط الرسم البياني (Pie Chart) عبر QuickChart ============
-// ملاحظة: الأسماء جوه الصورة بالإيموجي بس (مش عربي) عشان نتجنب مشاكل رسم النص العربي
-// في مكتبات الرسم على السيرفر. الأسماء الكاملة بالعربي موجودة في الـ caption تحت الصورة.
-function buildChartUrl(sortedCategories, monthLabel) {
-  const labels = sortedCategories.map(([cat]) => CATEGORY_EMOJI[cat] || '📌');
-  const data = sortedCategories.map(([, amount]) => amount);
-  const colors = sortedCategories.map(([cat]) => CATEGORY_COLOR[cat] || '#94A3B8');
-
-  const chartConfig = {
-    type: 'doughnut',
-    data: {
-      labels,
-      datasets: [{ data, backgroundColor: colors, borderColor: '#1E1E2E', borderWidth: 3 }],
-    },
-    options: {
-      plugins: {
-        legend: {
-          position: 'bottom',
-          labels: { color: '#333', font: { size: 22 } },
-        },
-        title: {
-          display: true,
-          text: `Expense Report - ${monthLabel}`,
-          color: '#1E1E2E',
-          font: { size: 20 },
-        },
-        datalabels: {
-          display: true,
-          color: '#fff',
-          font: { size: 16, weight: 'bold' },
-          formatter: (value, ctx) => {
-            const total = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
-            return `${((value / total) * 100).toFixed(0)}%`;
-          },
-        },
-      },
-    },
-  };
-
-  const encoded = encodeURIComponent(JSON.stringify(chartConfig));
-  return `https://quickchart.io/chart?width=700&height=550&backgroundColor=white&c=${encoded}`;
-}
-
-// ============ التقرير الشهري ============
-async function sendReport(userId, chatId) {
-  const startOfMonth = new Date();
-  startOfMonth.setDate(1);
-  startOfMonth.setHours(0, 0, 0, 0);
-
-  const { data: expenses } = await supabase
-    .from('expenses')
-    .select('amount, category')
-    .eq('telegram_user_id', userId)
-    .gte('created_at', startOfMonth.toISOString());
-
-  if (!expenses || expenses.length === 0) {
-    await sendTelegramMessage(chatId, 'لسه معندكش مصاريف مسجلة الشهر ده.');
-    return;
-  }
-
-  const total = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
-
-  const byCategory = {};
-  const countByCategory = {};
-  for (const e of expenses) {
-    byCategory[e.category] = (byCategory[e.category] || 0) + Number(e.amount);
-    countByCategory[e.category] = (countByCategory[e.category] || 0) + 1;
-  }
-
-  const sortedCategories = Object.entries(byCategory).sort((a, b) => b[1] - a[1]);
-
-  const MONTH_NAMES = [
-    'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
-    'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر',
-  ];
-  const monthLabel = MONTH_NAMES[startOfMonth.getMonth()];
-  const topCategory = sortedCategories[0];
-
-  // كابشن نصي منسق تحت الصورة
-  let caption = `📊 <b>تقرير مصاريف ${monthLabel}</b>\n`;
-  caption += `━━━━━━━━━━━━━━━\n\n`;
-  caption += `💰 <b>الإجمالي:</b> ${total} جنيه\n`;
-  caption += `🧮 <b>عدد العمليات:</b> ${expenses.length}\n`;
-  caption += `🏆 <b>أكتر فئة:</b> ${topCategory[0]} ${CATEGORY_EMOJI[topCategory[0]] || ''}\n\n`;
-
-  for (const [cat, amount] of sortedCategories) {
-    const percent = ((amount / total) * 100).toFixed(0);
-    const emoji = CATEGORY_EMOJI[cat] || '📌';
-    caption += `${emoji} ${cat}: <b>${amount} جنيه</b> (${percent}%)\n`;
-  }
-
-  const chartUrl = buildChartUrl(sortedCategories, monthLabel);
-
-  try {
-    await sendTelegramPhoto(chatId, chartUrl, caption, 'HTML');
-  } catch (err) {
-    console.error('Chart send failed, falling back to text:', err);
-    await sendTelegramMessage(chatId, caption, 'HTML');
-  }
-}
-
-// ============ إرسال صورة عبر تليجرام (للرسم البياني) ============
-async function sendTelegramPhoto(chatId, photoUrl, caption, parseMode) {
-  const body = { chat_id: chatId, photo: photoUrl };
-  if (caption) body.caption = caption;
-  if (parseMode) body.parse_mode = parseMode;
-
-  const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-
-  const data = await res.json();
-  if (!data.ok) {
-    throw new Error(`sendPhoto failed: ${JSON.stringify(data)}`);
-  }
-  return data;
-}
-
-// ============ إرسال رسالة عبر تليجرام (بيدعم HTML formatting) ============
-async function sendTelegramMessage(chatId, text, parseMode) {
-  const body = { chat_id: chatId, text };
-  if (parseMode) body.parse_mode = parseMode;
-
-  await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
 }

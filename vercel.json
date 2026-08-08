@@ -8,7 +8,7 @@
   "functions": {
     "api/telegram-webhook.js": {
       "memory": 1536,
-      "maxDuration": 30
+      "maxDuration": 60
     },
     "api/cron-daily.js": {
       "memory": 1536,

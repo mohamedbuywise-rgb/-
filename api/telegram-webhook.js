@@ -6,6 +6,24 @@ import { upsertUser, hasActiveSubscription, getSubscriptionExpiry, activateSubsc
 import { createLinkCode } from '../lib/linking.js';
 import { GUIDE_URL, ADMIN_TELEGRAM_ID, SUBSCRIPTION_DAYS, SUBSCRIPTION_PRICE_EGP, INSTAPAY_LINK, ADMIN_CONTACT_USERNAME } from '../lib/config.js';
 
+// ============ نص دليل الأوامر — بيتبعت مع /start وبرضو متاح في أي وقت عن طريق "مساعدة" ============
+function buildCommandsGuide() {
+  return (
+    'ابعتلي فويس نوت أو رسالة زي "صرفت 50 جنيه أكل" وهسجلها لك.\n' +
+    'كمان تقدر تسجل ديون بينك وبين الناس، زي "عطيت محمد 200 جنيه" أو "استلفت من سارة 100 جنيه".\n\n' +
+    '📊 <b>تقرير</b> — ملخص شهري بالرسم البياني\n' +
+    '📅 <b>تقرير الأسبوع</b> — ملخص آخر 7 أيام\n' +
+    '💳 <b>ديون</b> — ملخص كل الديون\n' +
+    '👤 <b>ديون محمد</b> — تفاصيل الديون مع شخص معيّن\n' +
+    '✅ <b>خلصت مع محمد</b> — تسوية وتصفير الرصيد مع شخص\n' +
+    '🔍 <b>دور على قهوة</b> — بحث في مصاريفك بأي كلمة\n' +
+    '📁 <b>صدّر البيانات</b> — ملف بكل بياناتك (CSV و TXT)\n' +
+    '💰 <b>اشتراكي</b> — تعرف حالة اشتراكك وتاريخ انتهائه\n' +
+    '🔗 <b>/link</b> — كود لربط حسابك بالداشبورد على الموقع\n' +
+    '❓ <b>مساعدة</b> — تشوف القايمة دي تاني في أي وقت'
+  );
+}
+
 // ============ رسالة "محتاج تشترك" — بتتبعت لأي حد الاشتراك بتاعه مش فعّال ============
 function buildSubscriptionPrompt(isExpired) {
   const intro = isExpired
@@ -109,6 +127,15 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true });
     }
 
+    // --- أمر "مساعدة" — دليل كل أوامر البوت، متاح دايمًا لأي حد حتى من غير اشتراك فعّال ---
+    if (message.text && ['مساعدة', 'المساعدة', 'الأوامر', 'أوامر', '/help'].includes(message.text.trim())) {
+      const replyMarkup = GUIDE_URL
+        ? { inline_keyboard: [[{ text: '📖 دليل الاستخدام الكامل', web_app: { url: GUIDE_URL } }]] }
+        : undefined;
+      await sendTelegramMessage(chatId, '📋 <b>كل أوامر فلوسي بوت</b>\n\n' + buildCommandsGuide(), 'HTML', replyMarkup);
+      return res.status(200).json({ ok: true });
+    }
+
     // --- أمر "اشتراكي" — متاح دايمًا لأي حد، بيوريه حالة اشتراكه ---
     if (message.text && ['اشتراكي', 'الاشتراك', '/subscription'].includes(message.text.trim())) {
       const expiresAt = await getSubscriptionExpiry(userId);
@@ -195,16 +222,8 @@ export default async function handler(req, res) {
         await sendTelegramMessage(
           chatId,
           'أهلاً بيك في فلوسي 👋\n\n' +
-            'ابعتلي فويس نوت أو رسالة زي "صرفت 50 جنيه أكل" وهسجلها لك.\n' +
-            'كمان تقدر تسجل ديون بينك وبين الناس، زي "عطيت محمد 200 جنيه" أو "استلفت من سارة 100 جنيه".\n\n' +
-            '📊 <b>تقرير</b> — ملخص شهري بالرسم البياني\n' +
-            '📅 <b>تقرير الأسبوع</b> — ملخص آخر 7 أيام\n' +
-            '💳 <b>ديون</b> — ملخص كل الديون\n' +
-            '👤 <b>ديون محمد</b> — تفاصيل الديون مع شخص معيّن\n' +
-            '✅ <b>خلصت مع محمد</b> — تسوية وتصفير الرصيد مع شخص\n' +
-            '🔍 <b>دور على قهوة</b> — بحث في مصاريفك بأي كلمة\n' +
-            '📁 <b>صدّر البيانات</b> — ملف CSV بكل بياناتك\n' +
-            '🔗 <b>/link</b> — كود لربط حسابك بالداشبورد على الموقع\n\n' +
+            buildCommandsGuide() +
+            '\n\n' +
             (GUIDE_URL ? 'اضغط الزرار تحت عشان تشوف كل التفاصيل بشكل مرتّب 👇' : ''),
           'HTML',
           replyMarkup

@@ -92,6 +92,8 @@ async function transcribeVoice(fileId) {
   });
 
   const groqData = await groqRes.json();
+  console.log('GROQ_RESPONSE_STATUS:', groqRes.status);
+  console.log('GROQ_RESPONSE_BODY:', JSON.stringify(groqData));
   return groqData.text || '';
 }
 
@@ -118,6 +120,8 @@ async function extractExpense(text) {
   );
 
   const data = await res.json();
+  console.log('GEMINI_RESPONSE_STATUS:', res.status);
+  console.log('GEMINI_RESPONSE_BODY:', JSON.stringify(data));
   const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
 
   try {

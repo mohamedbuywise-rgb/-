@@ -3,14 +3,33 @@ import { createClient } from '@supabase/supabase-js';
 // ============ الإعدادات (بتيجي من Environment Variables في Vercel) ============
 const TELEGRAM_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const GROQ_API_KEY = process.env.GROQ_API_KEY;
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-2.0-flash';
+const GROQ_TEXT_MODEL = process.env.GROQ_TEXT_MODEL || 'llama-3.3-70b-versatile';
 const SUPABASE_URL = process.env.SUPABASE_URL;
 const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const CATEGORIES = ['أكل', 'مواصلات', 'فواتير', 'تسوق', 'ترفيه', 'صحة', 'أخرى'];
+
+const CATEGORY_EMOJI = {
+  'أكل': '🍔',
+  'مواصلات': '🚕',
+  'فواتير': '🧾',
+  'تسوق': '🛍️',
+  'ترفيه': '🎬',
+  'صحة': '💊',
+  'أخرى': '📌',
+};
+
+const CATEGORY_COLOR = {
+  'أكل': '#FF6B6B',
+  'مواصلات': '#4ECDC4',
+  'فواتير': '#FFD166',
+  'تسوق': '#A78BFA',
+  'ترفيه': '#F472B6',
+  'صحة': '#34D399',
+  'أخرى': '#94A3B8',
+};
 
 // ============ نقطة الدخول - Vercel بينادي الدالة دي لكل ريكوست ============
 export default async function handler(req, res) {
@@ -97,7 +116,7 @@ async function transcribeVoice(fileId) {
   return groqData.text || '';
 }
 
-// ============ استخراج المبلغ والفئة عبر Gemini ============
+// ============ استخراج المبلغ والفئة عبر Groq (نموذج نصي) ============
 async function extractExpense(text) {
   const prompt = `استخرج من الجملة دي بيانات المصروف. الجملة بالعامية المصرية.
 رجّع JSON بس من غير أي شرح، بالشكل ده بالظبط:
@@ -107,22 +126,24 @@ async function extractExpense(text) {
 
 الجملة: "${text}"`;
 
-  const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
-    {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: { responseMimeType: 'application/json' },
-      }),
-    }
-  );
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${GROQ_API_KEY}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      model: GROQ_TEXT_MODEL,
+      messages: [{ role: 'user', content: prompt }],
+      response_format: { type: 'json_object' },
+      temperature: 0,
+    }),
+  });
 
   const data = await res.json();
-  console.log('GEMINI_RESPONSE_STATUS:', res.status);
-  console.log('GEMINI_RESPONSE_BODY:', JSON.stringify(data));
-  const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text || '{}';
+  console.log('GROQ_EXTRACT_RESPONSE_STATUS:', res.status);
+  console.log('GROQ_EXTRACT_RESPONSE_BODY:', JSON.stringify(data));
+  const rawText = data.choices?.[0]?.message?.content || '{}';
 
   try {
     return JSON.parse(rawText);
@@ -169,8 +190,52 @@ async function handleExpenseText(text, userId, chatId) {
 
   await sendTelegramMessage(
     chatId,
-    `تمام ✅ سجلت ${expense.amount} جنيه (${expense.category})\nإجمالي صرفك النهاردة: ${todayTotal} جنيه`
+    `✅ <b>تمام، سجلت المصروف</b>\n${CATEGORY_EMOJI[expense.category] || '📌'} ${expense.category} · ${expense.amount} جنيه\n\n💰 إجمالي صرفك النهاردة: <b>${todayTotal} جنيه</b>`,
+    'HTML'
   );
+}
+
+// ============ بناء رابط الرسم البياني (Pie Chart) عبر QuickChart ============
+// ملاحظة: الأسماء جوه الصورة بالإيموجي بس (مش عربي) عشان نتجنب مشاكل رسم النص العربي
+// في مكتبات الرسم على السيرفر. الأسماء الكاملة بالعربي موجودة في الـ caption تحت الصورة.
+function buildChartUrl(sortedCategories, monthLabel) {
+  const labels = sortedCategories.map(([cat]) => CATEGORY_EMOJI[cat] || '📌');
+  const data = sortedCategories.map(([, amount]) => amount);
+  const colors = sortedCategories.map(([cat]) => CATEGORY_COLOR[cat] || '#94A3B8');
+
+  const chartConfig = {
+    type: 'doughnut',
+    data: {
+      labels,
+      datasets: [{ data, backgroundColor: colors, borderColor: '#1E1E2E', borderWidth: 3 }],
+    },
+    options: {
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: { color: '#333', font: { size: 22 } },
+        },
+        title: {
+          display: true,
+          text: `Expense Report - ${monthLabel}`,
+          color: '#1E1E2E',
+          font: { size: 20 },
+        },
+        datalabels: {
+          display: true,
+          color: '#fff',
+          font: { size: 16, weight: 'bold' },
+          formatter: (value, ctx) => {
+            const total = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+            return `${((value / total) * 100).toFixed(0)}%`;
+          },
+        },
+      },
+    },
+  };
+
+  const encoded = encodeURIComponent(JSON.stringify(chartConfig));
+  return `https://quickchart.io/chart?width=700&height=550&backgroundColor=white&c=${encoded}`;
 }
 
 // ============ التقرير الشهري ============
@@ -193,26 +258,71 @@ async function sendReport(userId, chatId) {
   const total = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
 
   const byCategory = {};
+  const countByCategory = {};
   for (const e of expenses) {
     byCategory[e.category] = (byCategory[e.category] || 0) + Number(e.amount);
+    countByCategory[e.category] = (countByCategory[e.category] || 0) + 1;
   }
 
   const sortedCategories = Object.entries(byCategory).sort((a, b) => b[1] - a[1]);
 
-  let report = `📊 تقرير الشهر\n\nإجمالي الصرف: ${total} جنيه\n\nتفاصيل حسب الفئة:\n`;
+  const MONTH_NAMES = [
+    'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
+    'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر',
+  ];
+  const monthLabel = MONTH_NAMES[startOfMonth.getMonth()];
+  const topCategory = sortedCategories[0];
+
+  // كابشن نصي منسق تحت الصورة
+  let caption = `📊 <b>تقرير مصاريف ${monthLabel}</b>\n`;
+  caption += `━━━━━━━━━━━━━━━\n\n`;
+  caption += `💰 <b>الإجمالي:</b> ${total} جنيه\n`;
+  caption += `🧮 <b>عدد العمليات:</b> ${expenses.length}\n`;
+  caption += `🏆 <b>أكتر فئة:</b> ${topCategory[0]} ${CATEGORY_EMOJI[topCategory[0]] || ''}\n\n`;
+
   for (const [cat, amount] of sortedCategories) {
     const percent = ((amount / total) * 100).toFixed(0);
-    report += `• ${cat}: ${amount} جنيه (${percent}%)\n`;
+    const emoji = CATEGORY_EMOJI[cat] || '📌';
+    caption += `${emoji} ${cat}: <b>${amount} جنيه</b> (${percent}%)\n`;
   }
 
-  await sendTelegramMessage(chatId, report);
+  const chartUrl = buildChartUrl(sortedCategories, monthLabel);
+
+  try {
+    await sendTelegramPhoto(chatId, chartUrl, caption, 'HTML');
+  } catch (err) {
+    console.error('Chart send failed, falling back to text:', err);
+    await sendTelegramMessage(chatId, caption, 'HTML');
+  }
 }
 
-// ============ إرسال رسالة عبر تليجرام ============
-async function sendTelegramMessage(chatId, text) {
+// ============ إرسال صورة عبر تليجرام (للرسم البياني) ============
+async function sendTelegramPhoto(chatId, photoUrl, caption, parseMode) {
+  const body = { chat_id: chatId, photo: photoUrl };
+  if (caption) body.caption = caption;
+  if (parseMode) body.parse_mode = parseMode;
+
+  const res = await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendPhoto`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+
+  const data = await res.json();
+  if (!data.ok) {
+    throw new Error(`sendPhoto failed: ${JSON.stringify(data)}`);
+  }
+  return data;
+}
+
+// ============ إرسال رسالة عبر تليجرام (بيدعم HTML formatting) ============
+async function sendTelegramMessage(chatId, text, parseMode) {
+  const body = { chat_id: chatId, text };
+  if (parseMode) body.parse_mode = parseMode;
+
   await fetch(`https://api.telegram.org/bot${TELEGRAM_TOKEN}/sendMessage`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ chat_id: chatId, text }),
+    body: JSON.stringify(body),
   });
 }

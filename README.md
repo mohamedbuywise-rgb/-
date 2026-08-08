@@ -13,9 +13,10 @@
 |---|---|
 | `TELEGRAM_BOT_TOKEN` | من BotFather على تليجرام |
 | `GROQ_API_KEY` | من console.groq.com → API Keys |
-| `GEMINI_API_KEY` | من aistudio.google.com → Get API Key |
 | `SUPABASE_URL` | من Supabase → Project Settings → API |
 | `SUPABASE_SERVICE_ROLE_KEY` | من Supabase → Project Settings → API (Service Role، مش Anon) |
+
+ملاحظة: البوت بيستخدم Groq بس لكل حاجة — تفريغ الصوت (`whisper-large-v3`) واستخراج المبلغ والفئة (`llama-3.3-70b-versatile`). مبقاش محتاج Gemini API key خالص.
 
 بعد ما تضيف المتغيرات، اعمل **Redeploy** للمشروع عشان القيم تتفعّل.
 
@@ -37,4 +38,4 @@ https://api.telegram.org/bot7123456789:AAExxxxx/setWebhook?url=https://floosy-bo
 
 ## ملاحظات
 - الفئات المتاحة حاليًا: أكل، مواصلات، فواتير، تسوق، ترفيه، صحة، أخرى (تقدر تعدلها في `CATEGORIES` بملف الكود)
-- لو Gemini مش راجع النتيجة صح، جرب تتأكد إن اسم الموديل في `GEMINI_MODEL` متاح فعليًا في حسابك (تقدر تحطه كـ Environment Variable لو محتاج تغيّره)
+- لو حابب تغيّر الموديل النصي المستخدم للاستخراج، ضيف Environment Variable اسمها `GROQ_TEXT_MODEL` (افتراضيًا `llama-3.3-70b-versatile`)

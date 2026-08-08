@@ -1,13 +1,5 @@
 -- شغّل الكود ده في Supabase -> SQL Editor -> New Query -> Run
 
--- ملحوظة: لو الجداول دي كانت موجودة عندك قبل كده، الـ "create table if not exists"
--- مش هيضيف الأعمدة/الجداول الجديدة تلقائيًا. شغّل السطرين دول كمان (آمنين، بيتخطوا لو موجودين):
-alter table if exists users add column if not exists is_active boolean not null default true;
-
--- تاريخ/وقت انتهاء الاشتراك الحالي. NULL يعني المستخدم لسه ماشتركش أبدًا (متقفل عليه البوت بالكامل).
--- لو موجود القيمة وأكبر من دلوقتي، يبقى الاشتراك فعّال.
-alter table if exists users add column if not exists subscription_expires_at timestamptz;
-
 create table if not exists expenses (
   id bigint generated always as identity primary key,
   telegram_user_id bigint not null,
@@ -60,6 +52,12 @@ create table if not exists users (
   last_seen_at timestamptz not null default now(),
   created_at timestamptz not null default now()
 );
+
+-- السطرين دول آمنين يتشغلوا في أي وقت (بيتخطوا لو العمود موجود أصلاً):
+-- تاريخ/وقت انتهاء الاشتراك الحالي. NULL يعني المستخدم لسه ماشتركش أبدًا (متقفل عليه البوت بالكامل).
+-- لو موجود القيمة وأكبر من دلوقتي، يبقى الاشتراك فعّال.
+alter table users add column if not exists subscription_expires_at timestamptz;
+alter table users add column if not exists is_active boolean not null default true;
 
 -- جدول تتبع آخر تذكير اتبعت عن ديون قديمة لكل شخص، عشان منزنقش المستخدم بنفس التذكير كل يوم
 create table if not exists debt_reminders (

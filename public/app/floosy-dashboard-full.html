@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>لوحة التحكم والتقارير - محاسبك الشخصي</title>
+
+    <!-- PWA -->
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#020617">
+    <link rel="apple-touch-icon" href="./icons/icon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="فلوسي بوت">
+
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Cairo', sans-serif; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .tab-btn { transition: all .2s ease; }
+        .tab-btn.active-tab { color: #34d399; }
+        .tab-btn.active-tab .tab-icon-wrap { background: rgba(52,211,153,0.15); border-color: rgba(52,211,153,0.35); }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: translateY(0);} }
+        .fade-up { animation: fadeUp .35s ease both; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex items-center justify-center p-4">
+
+    <button id="logoutBtn" class="fixed top-4 left-4 z-40 bg-slate-900 border border-slate-800 text-slate-300 text-xs font-semibold px-3 py-2 rounded-full flex items-center gap-1.5 hover:bg-slate-800 transition">
+        🚪 تسجيل خروج
+    </button>
+
+    <!-- Mockup Phone / Web Container -->
+    <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-[3rem] shadow-2xl overflow-hidden flex flex-col h-[750px]">
+
+        <!-- Header Bar -->
+        <div class="bg-slate-900/90 border-b border-slate-800/80 p-5 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-slate-950 font-black text-xl shadow-lg shadow-emerald-500/20" id="header-icon">📊</div>
+                <div>
+                    <h2 class="font-bold text-base text-slate-100 leading-tight" id="header-title">تقرير نهاية الشهر</h2>
+                    <span class="text-xs text-emerald-400 font-medium" id="header-sub">● تقييم أداء الشهر</span>
+                </div>
+            </div>
+            <div class="bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-full text-xs font-bold text-emerald-400" id="header-badge">
+                —
+            </div>
+        </div>
+
+        <!-- Scrollable Dashboard Content -->
+        <div class="flex-1 overflow-y-auto">
+
+        <!-- ===================== TAB: MONTHLY (default) ===================== -->
+        <div class="tab-content active fade-up p-5 space-y-4" id="tab-monthly">
+
+            <div class="bg-gradient-to-br from-emerald-950/60 to-slate-900 border border-emerald-500/30 rounded-3xl p-4 text-center space-y-2 shadow-lg">
+                <span class="text-xs text-emerald-400 font-semibold block" id="monthly-total-label">إجمالي صرفك الشهر ده</span>
+                <h3 class="text-3xl font-black text-emerald-300" id="monthly-total">—</h3>
+                <p class="text-[11px] text-slate-400" id="monthly-compare">لسه معندناش بيانات كفاية عشان نقارن بالشهر اللي فات.</p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl">
+                    <span class="text-[11px] text-slate-400 block mb-1">عدد العمليات الشهر ده</span>
+                    <span class="text-lg font-bold text-slate-200" id="monthly-count">—</span>
+                </div>
+                <div class="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl">
+                    <span class="text-[11px] text-slate-400 block mb-1">متوسط اليوم</span>
+                    <span class="text-lg font-bold text-rose-400" id="monthly-avg">—</span>
+                </div>
+            </div>
+
+            <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3" id="monthly-categories-card">
+                <h4 class="text-xs font-bold text-slate-300">أكثر فئات تم الصرف فيها:</h4>
+                <div class="space-y-2.5 text-xs" id="monthly-categories-list">
+                    <p class="text-slate-500">لسه معندكش مصاريف مسجلة الشهر ده.</p>
+                </div>
+            </div>
+
+            <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-3.5 flex items-start gap-3" id="monthly-tip-card" style="display:none;">
+                <div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold shrink-0 border border-emerald-500/30">💡</div>
+                <div class="text-xs text-slate-300 leading-relaxed" id="monthly-tip-text"></div>
+            </div>
+
+        </div>
+
+        <!-- ===================== TAB: DAILY ===================== -->
+        <div class="tab-content p-5 space-y-4" id="tab-daily">
+
+            <div class="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-4 space-y-3 shadow-lg">
+                <div class="flex justify-between items-center">
+                    <span class="text-xs text-slate-400 font-semibold">صرف النهاردة</span>
+                    <span class="text-[11px] text-slate-500" id="daily-date"></span>
+                </div>
+                <h3 class="text-3xl font-black text-rose-400" id="daily-total">—</h3>
+                <p class="text-[11px] text-slate-400" id="daily-note">لسه معندكش مصاريف مسجلة النهاردة.</p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl">
+                    <span class="text-[11px] text-slate-400 block mb-1">عدد العمليات</span>
+                    <span class="text-lg font-bold text-slate-200" id="daily-count">—</span>
+                </div>
+                <div class="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl">
+                    <span class="text-[11px] text-slate-400 block mb-1">متوسط يومك (الشهر ده)</span>
+                    <span class="text-lg font-bold text-emerald-400" id="daily-avg">—</span>
+                </div>
+            </div>
+
+            <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3">
+                <h4 class="text-xs font-bold text-slate-300">عمليات النهاردة:</h4>
+                <div class="space-y-1" id="daily-items-list">
+                    <p class="text-xs text-slate-500">لسه مفيش عمليات النهاردة.</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ===================== TAB: CATEGORIES ===================== -->
+        <div class="tab-content p-5 space-y-4" id="tab-categories">
+
+            <div class="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-4 text-center space-y-1 shadow-lg">
+                <span class="text-xs text-slate-400 font-semibold block">أكتر فئة بتاخد من ميزانيتك</span>
+                <h3 class="text-2xl font-black text-slate-100" id="top-category-name">—</h3>
+                <p class="text-[11px] text-rose-400 font-semibold" id="top-category-detail"></p>
+            </div>
+
+            <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-4">
+                <h4 class="text-xs font-bold text-slate-300">كل الفئات بالتفصيل:</h4>
+                <div class="space-y-2.5 text-xs" id="all-categories-list">
+                    <p class="text-slate-500">لسه معندكش مصاريف مسجلة الشهر ده.</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ===================== TAB: TIPS ===================== -->
+        <div class="tab-content p-5 space-y-3" id="tab-tips">
+
+            <div class="bg-gradient-to-br from-emerald-950/60 to-slate-900 border border-emerald-500/30 rounded-3xl p-4 text-center space-y-1 shadow-lg mb-1">
+                <span class="text-xs text-emerald-400 font-semibold block">نظرة على صرفك</span>
+                <h3 class="text-xl font-black text-slate-100" id="tips-headline">جاري التحليل...</h3>
+            </div>
+
+            <div id="tips-list" class="space-y-3">
+                <p class="text-xs text-slate-500 text-center p-4">لسه معندكش بيانات كفاية عشان نديك نصايح مبنية على صرفك الفعلي.</p>
+            </div>
+
+        </div>
+
+        <!-- ===================== TAB: DEBTS ===================== -->
+        <div class="tab-content p-5 space-y-4" id="tab-debts">
+
+            <div class="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-4 text-center space-y-1 shadow-lg">
+                <span class="text-xs text-slate-400 font-semibold block">صافي وضعك دلوقتي</span>
+                <h3 class="text-3xl font-black text-emerald-300" id="debts-net">—</h3>
+                <p class="text-[11px] text-slate-400" id="debts-net-note">لسه معندكش ديون مسجلة.</p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-slate-950/60 border border-emerald-500/20 p-3.5 rounded-2xl">
+                    <span class="text-[11px] text-slate-400 block mb-1">ليك عند الناس</span>
+                    <span class="text-lg font-bold text-emerald-400" id="debts-owed-to-you-total">—</span>
+                </div>
+                <div class="bg-slate-950/60 border border-rose-500/20 p-3.5 rounded-2xl">
+                    <span class="text-[11px] text-slate-400 block mb-1">عليك للناس</span>
+                    <span class="text-lg font-bold text-rose-400" id="debts-you-owe-total">—</span>
+                </div>
+            </div>
+
+            <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3" id="debts-owed-to-you-card" style="display:none;">
+                <h4 class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span> ليك عند الناس
+                </h4>
+                <div class="space-y-1" id="debts-owed-to-you-list"></div>
+            </div>
+
+            <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3" id="debts-you-owe-card" style="display:none;">
+                <h4 class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-rose-400"></span> عليك للناس
+                </h4>
+                <div class="space-y-1" id="debts-you-owe-list"></div>
+            </div>
+
+            <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-3.5 flex items-start gap-3">
+                <div class="w-8 h-8 rounded-full bg-slate-700/50 text-slate-300 flex items-center justify-center text-xs font-bold shrink-0 border border-slate-700">ℹ️</div>
+                <div class="text-xs text-slate-300 leading-relaxed">
+                    عشان تسجل سلفة جديدة، ابعت رسالة زي "عطيت محمد 200 جنيه" أو "استلفت من سارة 100 جنيه" في بوت تليجرام.
+                </div>
+            </div>
+
+        </div>
+
+        </div>
+
+        <!-- Bottom Tab Navigation -->
+        <div class="bg-slate-900 border-t border-slate-800/80 px-2 pt-2 pb-3 flex items-center justify-around">
+            <button class="tab-btn active-tab flex flex-col items-center gap-1 px-3 py-1 text-slate-500 text-[10px] font-semibold" data-tab="monthly" data-title="تقرير نهاية الشهر" data-sub="● تقييم أداء الشهر" data-icon="📊" data-badge="—">
+                <span class="tab-icon-wrap w-9 h-9 rounded-xl border border-transparent flex items-center justify-center text-base">📊</span>
+                شهري
+            </button>
+            <button class="tab-btn flex flex-col items-center gap-1 px-3 py-1 text-slate-500 text-[10px] font-semibold" data-tab="daily" data-title="تقرير اليوم" data-sub="● النهاردة" data-icon="🗓️" data-badge="—">
+                <span class="tab-icon-wrap w-9 h-9 rounded-xl border border-transparent flex items-center justify-center text-base">🗓️</span>
+                يومي
+            </button>
+            <button class="tab-btn flex flex-col items-center gap-1 px-3 py-1 text-slate-500 text-[10px] font-semibold" data-tab="categories" data-title="التصنيفات" data-sub="● صرف الشهر بالتفصيل" data-icon="🧾" data-badge="—">
+                <span class="tab-icon-wrap w-9 h-9 rounded-xl border border-transparent flex items-center justify-center text-base">🧾</span>
+                التصنيفات
+            </button>
+            <button class="tab-btn flex flex-col items-center gap-1 px-3 py-1 text-slate-500 text-[10px] font-semibold" data-tab="tips" data-title="نصايح التوفير" data-sub="● مخصصة ليك من محاسبك" data-icon="💡" data-badge="نصايح">
+                <span class="tab-icon-wrap w-9 h-9 rounded-xl border border-transparent flex items-center justify-center text-base">💡</span>
+                نصايح
+            </button>
+            <button class="tab-btn flex flex-col items-center gap-1 px-3 py-1 text-slate-500 text-[10px] font-semibold" data-tab="debts" data-title="الديون والسلف" data-sub="● متابعة اللي ليك واللي عليك" data-icon="🤝" data-badge="—">
+                <span class="tab-icon-wrap w-9 h-9 rounded-xl border border-transparent flex items-center justify-center text-base">🤝</span>
+                ديون
+            </button>
+        </div>
+
+        <!-- Footer Action (only visible on monthly tab) -->
+        <div class="p-4 bg-slate-900 border-t border-slate-800/80" id="footer-cta">
+            <button id="open-archive" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-3 rounded-2xl text-sm transition border border-slate-700 flex items-center justify-center gap-2">
+                <span>🗂️</span> أرشيف الشهور السابقة
+            </button>
+            <p class="text-[10px] text-slate-500 text-center mt-2">الشهر الجديد بيبدأ تلقائي أول كل شهر — مفيش حاجة تعملها.</p>
+        </div>
+
+    </div>
+
+    <!-- Archive Overlay -->
+    <div id="archive-overlay" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col h-[750px]">
+            <div class="bg-slate-900/90 border-b border-slate-800/80 p-5 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-slate-700 to-slate-600 flex items-center justify-center text-slate-100 font-black text-xl">🗂️</div>
+                    <div>
+                        <h2 class="font-bold text-base text-slate-100 leading-tight">أرشيف الشهور</h2>
+                        <span class="text-xs text-slate-400 font-medium">● ملخصات فقط، بدون تفاصيل يومية</span>
+                    </div>
+                </div>
+                <button id="close-archive" class="w-9 h-9 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-sm">✕</button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-5 space-y-3" id="archive-list">
+                <p class="text-xs text-slate-500 text-center p-4">جاري التحميل...</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ===== Supabase auth guard + logout =====
+           لازم يتحطوا نفس القيم اللي في floosy-onboarding.html */
+        const SUPABASE_URL = 'https://devywtyfzybnahdsqdkd.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_yHiX1cnEMCVEcjQxiIrqig_DRBiuveQ';
+        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const ONBOARDING_URL = 'floosy-onboarding.html';
+
+        const CATEGORY_EMOJI = { 'أكل':'🍔', 'مواصلات':'🚕', 'فواتير':'🧾', 'تسوق':'🛍️', 'ترفيه':'🎬', 'صحة':'💊', 'أخرى':'📌' };
+        const CATEGORY_BAR_COLOR = { 'أكل':'bg-rose-400', 'مواصلات':'bg-teal-400', 'فواتير':'bg-amber-400', 'تسوق':'bg-violet-400', 'ترفيه':'bg-pink-400', 'صحة':'bg-emerald-400', 'أخرى':'bg-slate-400' };
+        const fmt = (n) => `${Number(n).toLocaleString('ar-EG')} ج.م`;
+
+        let accessToken = null;
+
+        (async () => {
+            try {
+                const { data: { session } } = await sb.auth.getSession();
+                if (!session) { window.location.href = ONBOARDING_URL; return; }
+                accessToken = session.access_token;
+                await loadDashboard();
+            } catch (e) {
+                /* supabase not configured yet — page stays open for preview with static placeholders */
+            }
+        })();
+
+        document.getElementById('logoutBtn').addEventListener('click', async () => {
+            try { await sb.auth.signOut(); } catch (e) {}
+            window.location.href = ONBOARDING_URL;
+        });
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js').catch(() => {});
+        }
+
+        // ============ جلب البيانات الحقيقية من /api/dashboard-data وملء الشاشة بيها ============
+        async function loadDashboard() {
+            let data;
+            try {
+                const res = await fetch('/api/dashboard-data', {
+                    headers: { Authorization: `Bearer ${accessToken}` },
+                });
+                data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'فشل تحميل البيانات');
+            } catch (e) {
+                console.error('dashboard-data fetch failed:', e);
+                return;
+            }
+
+            if (data.linked === false) {
+                // الحساب لسه مش مربوط بتليجرام — رجّعه لشاشة الربط
+                window.location.href = ONBOARDING_URL;
+                return;
+            }
+
+            window.__dashboardData = data;
+
+            renderMonthly(data.month);
+            renderDaily(data.today);
+            renderCategories(data.month);
+            renderTips(data.month);
+            renderDebts(data.debts);
+            renderArchive(data.history);
+            updateHeaderForTab(document.querySelector('.tab-btn.active-tab').dataset.tab, data);
+        }
+
+        function renderMonthly(month) {
+            document.getElementById('monthly-total').textContent = fmt(month.total);
+            document.getElementById('monthly-count').textContent = `${month.count} عملية`;
+            const daysPassed = Math.max(1, new Date().getDate());
+            document.getElementById('monthly-avg').textContent = fmt(Math.round(month.total / daysPassed));
+
+            const compareEl = document.getElementById('monthly-compare');
+            if (month.prevTotal > 0) {
+                const diff = Math.round(Math.abs(((month.total - month.prevTotal) / month.prevTotal) * 100));
+                const dir = month.total >= month.prevTotal ? 'أكتر' : 'أقل';
+                compareEl.textContent = `صرفت ${diff}% ${dir} من ${month.prevLabel}`;
+            } else {
+                compareEl.textContent = 'لسه معندناش بيانات كفاية عشان نقارن بالشهر اللي فات.';
+            }
+
+            const listEl = document.getElementById('monthly-categories-list');
+            if (month.byCategory.length === 0) {
+                listEl.innerHTML = '<p class="text-slate-500">لسه معندكش مصاريف مسجلة الشهر ده.</p>';
+            } else {
+                listEl.innerHTML = month.byCategory.slice(0, 3).map((c) => `
+                    <div>
+                        <div class="flex justify-between mb-1 text-slate-300">
+                            <span>${CATEGORY_EMOJI[c.name] || '📌'} ${c.name}</span>
+                            <span class="font-bold text-slate-200">${fmt(c.amount)} (${c.percent}%)</span>
+                        </div>
+                        <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div class="${CATEGORY_BAR_COLOR[c.name] || 'bg-slate-400'} h-full rounded-full" style="width: ${c.percent}%"></div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            const tipCard = document.getElementById('monthly-tip-card');
+            if (month.byCategory.length > 0) {
+                tipCard.style.display = 'flex';
+                document.getElementById('monthly-tip-text').innerHTML =
+                    `<strong class="text-emerald-400 block mb-0.5">أكتر فئة صرفت فيها:</strong>` +
+                    `${CATEGORY_EMOJI[month.topCategory.name] || ''} ${month.topCategory.name} — ${fmt(month.topCategory.amount)} (${month.topCategory.percent}% من صرف الشهر)`;
+            } else {
+                tipCard.style.display = 'none';
+            }
+        }
+
+        function renderDaily(today) {
+            document.getElementById('daily-date').textContent =
+                new Date().toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long' });
+            document.getElementById('daily-total').textContent = fmt(today.total);
+            document.getElementById('daily-count').textContent = `${today.count} عملية`;
+            document.getElementById('daily-avg').textContent = fmt(today.avgPerDayThisMonth);
+            document.getElementById('daily-note').textContent =
+                today.count > 0 ? `سجلت ${today.count} عملية النهاردة.` : 'لسه معندكش مصاريف مسجلة النهاردة.';
+
+            const listEl = document.getElementById('daily-items-list');
+            if (today.items.length === 0) {
+                listEl.innerHTML = '<p class="text-xs text-slate-500">لسه مفيش عمليات النهاردة.</p>';
+            } else {
+                listEl.innerHTML = today.items.map((it, i) => `
+                    <div class="flex items-center justify-between py-2 ${i < today.items.length - 1 ? 'border-b border-slate-800/60' : ''}">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-sm">${CATEGORY_EMOJI[it.category] || '📌'}</span>
+                            <div>
+                                <p class="text-xs font-semibold text-slate-200">${(it.description && it.description.trim()) || it.category}</p>
+                                <p class="text-[10px] text-slate-500">${it.category} · ${new Date(it.created_at).toLocaleTimeString('ar-EG', { hour: 'numeric', minute: '2-digit' })}</p>
+                            </div>
+                        </div>
+                        <span class="text-xs font-bold text-rose-400">-${fmt(it.amount)}</span>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function renderCategories(month) {
+            if (month.topCategory) {
+                document.getElementById('top-category-name').textContent = `${CATEGORY_EMOJI[month.topCategory.name] || ''} ${month.topCategory.name}`;
+                document.getElementById('top-category-detail').textContent = `${fmt(month.topCategory.amount)} من إجمالي ${fmt(month.total)}`;
+            } else {
+                document.getElementById('top-category-name').textContent = 'لسه مفيش بيانات';
+                document.getElementById('top-category-detail').textContent = '';
+            }
+
+            const listEl = document.getElementById('all-categories-list');
+            if (month.byCategory.length === 0) {
+                listEl.innerHTML = '<p class="text-slate-500">لسه معندكش مصاريف مسجلة الشهر ده.</p>';
+            } else {
+                listEl.innerHTML = month.byCategory.map((c) => `
+                    <div>
+                        <div class="flex justify-between mb-1 text-slate-300">
+                            <span>${CATEGORY_EMOJI[c.name] || '📌'} ${c.name}</span>
+                            <span class="font-bold text-slate-200">${fmt(c.amount)} (${c.percent}%)</span>
+                        </div>
+                        <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div class="${CATEGORY_BAR_COLOR[c.name] || 'bg-slate-400'} h-full rounded-full" style="width: ${c.percent}%"></div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // نصايح مبنية على أرقام حقيقية بس — مفيش أي رقم متوقع أو متخيّل
+        function renderTips(month) {
+            const headline = document.getElementById('tips-headline');
+            const listEl = document.getElementById('tips-list');
+
+            if (month.byCategory.length === 0) {
+                headline.textContent = 'لسه معندكش بيانات';
+                return;
+            }
+
+            headline.textContent = `صرفت ${fmt(month.total)} في ${month.count} عملية الشهر ده`;
+
+            const tips = [];
+            const top = month.topCategory;
+            tips.push({
+                icon: CATEGORY_EMOJI[top.name] || '📌',
+                color: 'emerald',
+                title: `أكتر فئة صرفت فيها: ${top.name}`,
+                text: `${fmt(top.amount)} من إجمالي صرفك (${top.percent}%). لو قللت فيها شوية هتحس بفرق واضح في إجمالي الشهر.`,
+            });
+
+            if (month.prevTotal > 0) {
+                const diff = Math.round(((month.total - month.prevTotal) / month.prevTotal) * 100);
+                if (diff > 0) {
+                    tips.push({
+                        icon: '📈', color: 'rose',
+                        title: `صرفك زاد ${diff}% عن ${month.prevLabel}`,
+                        text: `صرفت ${fmt(month.prevTotal)} في ${month.prevLabel} مقابل ${fmt(month.total)} الشهر ده.`,
+                    });
+                } else if (diff < 0) {
+                    tips.push({
+                        icon: '📉', color: 'emerald',
+                        title: `صرفك قل ${Math.abs(diff)}% عن ${month.prevLabel}`,
+                        text: `عاش! صرفك الشهر ده أقل من ${month.prevLabel}.`,
+                    });
+                }
+            }
+
+            listEl.innerHTML = tips.map((t) => `
+                <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-3.5 flex items-start gap-3">
+                    <div class="w-8 h-8 rounded-full bg-${t.color}-500/20 text-${t.color}-400 flex items-center justify-center text-xs font-bold shrink-0 border border-${t.color}-500/30">${t.icon}</div>
+                    <div class="text-xs text-slate-300 leading-relaxed">
+                        <strong class="text-${t.color}-400 block mb-0.5">${t.title}</strong>
+                        ${t.text}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderDebts(debts) {
+            const netEl = document.getElementById('debts-net');
+            const noteEl = document.getElementById('debts-net-note');
+            netEl.textContent = `${debts.net >= 0 ? '+' : ''}${fmt(debts.net)}`;
+            netEl.className = `text-3xl font-black ${debts.net >= 0 ? 'text-emerald-300' : 'text-rose-400'}`;
+            if (debts.net === 0 && debts.owedToYouTotal === 0 && debts.youOweTotal === 0) {
+                noteEl.textContent = 'لسه معندكش ديون مسجلة.';
+            } else {
+                noteEl.textContent = debts.net >= 0 ? `ليك أكتر مما عليك بـ ${fmt(Math.abs(debts.net))}` : `عليك أكتر مما ليك بـ ${fmt(Math.abs(debts.net))}`;
+            }
+
+            document.getElementById('debts-owed-to-you-total').textContent = fmt(debts.owedToYouTotal);
+            document.getElementById('debts-you-owe-total').textContent = fmt(debts.youOweTotal);
+
+            const owedCard = document.getElementById('debts-owed-to-you-card');
+            const owedList = document.getElementById('debts-owed-to-you-list');
+            if (debts.owedToYou.length > 0) {
+                owedCard.style.display = 'block';
+                owedList.innerHTML = debts.owedToYou.map((p, i) => `
+                    <div class="flex items-center justify-between py-2 ${i < debts.owedToYou.length - 1 ? 'border-b border-slate-800/60' : ''}">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-sm">🧑</span>
+                            <p class="text-xs font-semibold text-slate-200">${p.name}</p>
+                        </div>
+                        <span class="text-xs font-bold text-emerald-400">+${fmt(p.amount)}</span>
+                    </div>
+                `).join('');
+            } else {
+                owedCard.style.display = 'none';
+            }
+
+            const oweCard = document.getElementById('debts-you-owe-card');
+            const oweList = document.getElementById('debts-you-owe-list');
+            if (debts.youOwe.length > 0) {
+                oweCard.style.display = 'block';
+                oweList.innerHTML = debts.youOwe.map((p, i) => `
+                    <div class="flex items-center justify-between py-2 ${i < debts.youOwe.length - 1 ? 'border-b border-slate-800/60' : ''}">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-8 h-8 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-sm">🧑</span>
+                            <p class="text-xs font-semibold text-slate-200">${p.name}</p>
+                        </div>
+                        <span class="text-xs font-bold text-rose-400">-${fmt(p.amount)}</span>
+                    </div>
+                `).join('');
+            } else {
+                oweCard.style.display = 'none';
+            }
+        }
+
+        function renderArchive(history) {
+            const listEl = document.getElementById('archive-list');
+            if (!history || history.length === 0) {
+                listEl.innerHTML = '<p class="text-xs text-slate-500 text-center p-4">لسه معندكش شهور سابقة فيها مصاريف مسجلة.</p>';
+                return;
+            }
+            listEl.innerHTML = history.map((h) => `
+                <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-1">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-xs text-slate-300 font-semibold block">${h.label} ${h.year}</span>
+                            <span class="text-[10px] text-slate-500">${h.count} عملية</span>
+                        </div>
+                        <span class="text-lg font-black text-slate-200">${fmt(h.total)}</span>
+                    </div>
+                    ${h.topCategoryName ? `<p class="text-[11px] text-slate-400">أكتر فئة صرف: ${CATEGORY_EMOJI[h.topCategoryName] || ''} ${h.topCategoryName}</p>` : ''}
+                </div>
+            `).join('');
+        }
+
+        // بيانات ديناميكية للـ badge والعنوان اللي فوق حسب التاب المفتوح، بدل نص ثابت في data-* attributes
+        function updateHeaderForTab(tab, data) {
+            const headerBadge = document.getElementById('header-badge');
+            if (tab === 'monthly') headerBadge.textContent = fmt(data.month.total) + ' اتصرفوا';
+            else if (tab === 'daily') headerBadge.textContent = fmt(data.today.total) + ' اتصرفوا';
+            else if (tab === 'categories') headerBadge.textContent = `${data.month.byCategory.length} فئات`;
+            else if (tab === 'debts') headerBadge.textContent = `${data.debts.net >= 0 ? '+' : ''}${fmt(data.debts.net)} صافي`;
+        }
+
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const headerTitle = document.getElementById('header-title');
+        const headerSub = document.getElementById('header-sub');
+        const headerIcon = document.getElementById('header-icon');
+        const headerBadge = document.getElementById('header-badge');
+        const footerCta = document.getElementById('footer-cta');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                tabBtns.forEach(b => { b.classList.remove('active-tab'); b.classList.add('text-slate-500'); });
+                btn.classList.add('active-tab');
+                btn.classList.remove('text-slate-500');
+
+                tabContents.forEach(c => c.classList.remove('active'));
+                const target = document.getElementById('tab-' + btn.dataset.tab);
+                target.classList.add('active');
+                target.classList.add('fade-up');
+
+                headerTitle.textContent = btn.dataset.title;
+                headerSub.textContent = btn.dataset.sub;
+                headerIcon.textContent = btn.dataset.icon;
+                headerBadge.textContent = btn.dataset.badge;
+
+                if (window.__dashboardData) updateHeaderForTab(btn.dataset.tab, window.__dashboardData);
+
+                footerCta.style.display = btn.dataset.tab === 'monthly' ? 'block' : 'none';
+            });
+        });
+
+        document.getElementById('open-archive').addEventListener('click', () => {
+            const overlay = document.getElementById('archive-overlay');
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+        });
+        document.getElementById('close-archive').addEventListener('click', () => {
+            const overlay = document.getElementById('archive-overlay');
+            overlay.classList.add('hidden');
+            overlay.classList.remove('flex');
+        });
+    </script>
+
+</body>
+</html>

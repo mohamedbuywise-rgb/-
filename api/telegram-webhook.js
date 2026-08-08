@@ -1,8 +1,9 @@
 import { transcribeVoice, classifyMessage } from '../lib/groq.js';
-import { sendTelegramMessage } from '../lib/telegram.js';
+import { sendTelegramMessage, forwardTelegramMessage } from '../lib/telegram.js';
 import { recordExpense, sendMonthlyReport, sendWeeklyReport, sendDataExport, sendExpenseSearch } from '../lib/expenses.js';
 import { recordDebt, sendDebtsReport, sendPersonDebtDetail, settleDebtWithPerson } from '../lib/debts.js';
 import { upsertUser, hasActiveSubscription, getSubscriptionExpiry, activateSubscription, getChatIdByUserId } from '../lib/users.js';
+import { createLinkCode } from '../lib/linking.js';
 import { GUIDE_URL, ADMIN_TELEGRAM_ID, SUBSCRIPTION_DAYS, SUBSCRIPTION_PRICE_EGP, INSTAPAY_LINK, ADMIN_CONTACT_USERNAME } from '../lib/config.js';
 
 // ============ رسالة "محتاج تشترك" — بتتبعت لأي حد الاشتراك بتاعه مش فعّال ============
@@ -74,6 +75,38 @@ export default async function handler(req, res) {
     if (message.text) {
       const handledByAdmin = await tryHandleAdminActivation(message.text.trim(), userId, chatId);
       if (handledByAdmin) return res.status(200).json({ ok: true });
+    }
+
+    // --- صورة (سكرين شوت تحويل الاشتراك) — بتتحول للأدمن على طول، حتى لو اليوزر لسه مش مشترك ---
+    // ده عشان اليوزر يقدر يبعت إيصال الدفع أول ما يشترك، من غير ما يتقفل عليه بالبوابة تحت.
+    if (message.photo) {
+      if (ADMIN_TELEGRAM_ID && userId !== ADMIN_TELEGRAM_ID) {
+        await forwardTelegramMessage(ADMIN_TELEGRAM_ID, chatId, message.message_id);
+        await sendTelegramMessage(
+          ADMIN_TELEGRAM_ID,
+          `👆 سكرين شوت تحويل من مستخدم.\nعشان تفعّله بعد ما تتأكد، ابعت:\n<code>فعل ${userId}</code>`,
+          'HTML'
+        );
+        await sendTelegramMessage(chatId, '✅ وصلت الصورة، هنتأكد ونفعّل اشتراكك في أقرب وقت.');
+      } else {
+        await sendTelegramMessage(chatId, 'استلمت الصورة 👍');
+      }
+      return res.status(200).json({ ok: true });
+    }
+
+    // --- أمر ربط الحساب بالداشبورد — متاح دايمًا حتى من غير اشتراك فعّال، عشان اليوزر يقدر يربط قبل ما يدفع ---
+    if (message.text && ['/link', 'ربط', 'اربط حسابي', 'ربط الحساب'].includes(message.text.trim())) {
+      const result = await createLinkCode(userId, chatId);
+      if (!result) {
+        await sendTelegramMessage(chatId, '❌ حصل خطأ، جرب تاني كمان شوية.');
+      } else {
+        await sendTelegramMessage(
+          chatId,
+          `🔗 <b>كود ربط حسابك بالداشبورد</b>\n\n<code>${result.code}</code>\n\nادخل بيه في صفحة "ربط الحساب" في موقع فلوسي بوت خلال 10 دقايق. لو الكود انتهى، ابعت /link تاني وهبعتلك كود جديد.`,
+          'HTML'
+        );
+      }
+      return res.status(200).json({ ok: true });
     }
 
     // --- أمر "اشتراكي" — متاح دايمًا لأي حد، بيوريه حالة اشتراكه ---
@@ -170,7 +203,8 @@ export default async function handler(req, res) {
             '👤 <b>ديون محمد</b> — تفاصيل الديون مع شخص معيّن\n' +
             '✅ <b>خلصت مع محمد</b> — تسوية وتصفير الرصيد مع شخص\n' +
             '🔍 <b>دور على قهوة</b> — بحث في مصاريفك بأي كلمة\n' +
-            '📁 <b>صدّر البيانات</b> — ملف CSV بكل بياناتك\n\n' +
+            '📁 <b>صدّر البيانات</b> — ملف CSV بكل بياناتك\n' +
+            '🔗 <b>/link</b> — كود لربط حسابك بالداشبورد على الموقع\n\n' +
             (GUIDE_URL ? 'اضغط الزرار تحت عشان تشوف كل التفاصيل بشكل مرتّب 👇' : ''),
           'HTML',
           replyMarkup

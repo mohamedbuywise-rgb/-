@@ -1,4 +1,6 @@
-const CACHE_NAME = 'floosy-cache-v1';
+// v2: لازم نغيّر الاسم عشان أي جهاز عنده الكاش القديم (اللي كان بيحفظ ردود الـ API غلط)
+// يمسحه فورًا ويبدأ من كاش جديد فاضي — خطوة activate تحت بتمسح أي CACHE_NAME قديم تلقائي.
+const CACHE_NAME = 'floosy-cache-v2';
 const PRECACHE_URLS = [
   './floosy-onboarding.html',
   './floosy-dashboard-full.html',
@@ -25,18 +27,29 @@ self.addEventListener('activate', (event) => {
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+
+  const url = new URL(event.request.url);
+
+  // ============ أي حاجة تحت /api/ لازم تروح للسيرفر على طول، من غير كاش خالص ============
+  // ده أهم سطر في الملف: كان الكاش قبل كده بيحفظ ردود /api/link-status و /api/dashboard-data
+  // (زي أي GET تاني)، فبعد ما المستخدم يربط حسابه أو يسجل مصروف جديد، كان بيفضل ياخد نفس
+  // الرد القديم المحفوظ للأبد — عشان كده كانت شاشة الربط بترجع تاني وكانت الأرقام مش بتتحدث.
+  // الحل: أي request لـ /api/* بيتبعت للنت مباشرة، من غير ما يتحط أو يتقرا من الكاش خالص.
+  if (url.pathname.startsWith('/api/')) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
+  // ============ باقي الملفات (HTML/CSS/JS/أيقونات): network-first مع fallback للكاش ============
+  // كده لو فيه نسخة جديدة من الصفحة اتنشرت، المستخدم هياخدها على طول لما يكون أونلاين،
+  // ومنستخدمش الكاش إلا لو النت فصل فعلاً (offline).
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      return (
-        cached ||
-        fetch(event.request)
-          .then((response) => {
-            const copy = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy)).catch(() => {});
-            return response;
-          })
-          .catch(() => cached)
-      );
-    })
+    fetch(event.request)
+      .then((response) => {
+        const copy = response.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy)).catch(() => {});
+        return response;
+      })
+      .catch(() => caches.match(event.request))
   );
 });

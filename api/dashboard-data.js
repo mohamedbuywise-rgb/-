@@ -91,6 +91,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json({
       linked: true,
+      telegramUserId,
       generatedAt: new Date().toISOString(),
       today: {
         total: todayTotal,

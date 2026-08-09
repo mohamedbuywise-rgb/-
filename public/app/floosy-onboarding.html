@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>فلوسي بوت — ابدأ دلوقتي</title>
+<title>فلوسي — ابدأ دلوقتي</title>
 
 <!-- PWA -->
 <link rel="manifest" href="./manifest.json">
@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="./icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="فلوسي بوت">
+<meta name="apple-mobile-web-app-title" content="فلوسي">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
@@ -85,7 +85,7 @@
 
 <!-- ============== ONBOARDING ============== -->
 <div class="screen bg-glow" id="onboarding">
-  <div class="top-brand"><span class="brand-dot"></span>فلوسي بوت</div>
+  <div class="top-brand"><span class="brand-dot"></span>فلوسي</div>
 
   <div class="slides">
     <div class="slide active" data-slide="0">
@@ -112,7 +112,7 @@
   </div>
 
   <div id="installBar">
-    <span class="ib-txt">📲 ثبّت فلوسي بوت على شاشتك الرئيسية عشان توصله بضغطة واحدة</span>
+    <span class="ib-txt">📲 ثبّت فلوسي على شاشتك الرئيسية عشان توصله بضغطة واحدة</span>
     <button id="installBtn">تثبيت</button>
   </div>
 
@@ -125,7 +125,7 @@
 <!-- ============== AUTH ============== -->
 <div class="screen bg-glow" id="auth" style="align-items:center; justify-content:center;">
   <div class="auth-card">
-    <div class="top-brand" style="padding-top:0; margin-bottom:8px;"><span class="brand-dot"></span>فلوسي بوت</div>
+    <div class="top-brand" style="padding-top:0; margin-bottom:8px;"><span class="brand-dot"></span>فلوسي</div>
     <p style="text-align:center; color:var(--muted-onDark); font-size:13px; margin-bottom:26px;">سجّل دخولك عشان تشوف تقاريرك ولوحة التحكم بتاعتك</p>
 
     <div class="auth-tabs">
@@ -161,15 +161,22 @@
 <!-- ============== LINK TELEGRAM ACCOUNT ============== -->
 <div class="screen bg-glow" id="linkScreen" style="display:none; align-items:center; justify-content:center;">
   <div class="auth-card">
-    <div class="top-brand" style="padding-top:0; margin-bottom:8px;"><span class="brand-dot"></span>فلوسي بوت</div>
+    <div class="top-brand" style="padding-top:0; margin-bottom:8px;"><span class="brand-dot"></span>فلوسي</div>
     <div class="slide-icon" style="margin:0 auto 20px;">🔗</div>
     <h2 class="disp" style="font-weight:900; font-size:19px; text-align:center; margin-bottom:10px;">اربط حسابك بالبوت</h2>
-    <p style="text-align:center; color:var(--muted-onDark); font-size:13px; line-height:1.9; margin-bottom:22px;">
-      عشان تشوف بياناتك الحقيقية في الداشبورد، لازم تربط حساب الموقع ده بحساب تليجرام بتاعك:
-      <br><br>
-      1️⃣ افتح بوت فلوسي على تليجرام<br>
-      2️⃣ ابعت له <b style="color:var(--onDark); direction:ltr; unicode-bidi:isolate; display:inline-block;">/link</b><br>
-      3️⃣ هيبعتلك كود من 6 أرقام — اكتبه هنا تحت
+    <p style="text-align:center; color:var(--muted-onDark); font-size:13px; line-height:1.9; margin-bottom:18px;">
+      عشان تشوف بياناتك الحقيقية في الداشبورد، لازم تربط حساب الموقع ده بحساب تليجرام بتاعك.
+      دوس الزرار تحت — هيفتحلك البوت وهيبعتلك الكود لوحده على طول:
+    </p>
+
+    <a href="https://t.me/Masaaref_bot?start=link" target="_blank" rel="noopener"
+       class="btn"
+       style="background:var(--ink-2); color:var(--onDark); border:1.5px solid rgba(210,164,74,0.35); margin-bottom:18px;">
+      💬 افتح البوت وابعتله الكود أوتوماتيك
+    </a>
+
+    <p style="text-align:center; color:var(--muted-onDark); font-size:12px; line-height:1.8; margin-bottom:22px;">
+      هيوصلك كود من 6 أرقام في تليجرام — ارجع هنا واكتبه تحت:
     </p>
 
     <div id="linkError" style="display:none; background:rgba(224,122,107,0.12); border:1px solid rgba(224,122,107,0.35); color:var(--danger); font-size:12.5px; border-radius:9px; padding:10px 12px; margin-bottom:14px;"></div>
@@ -308,7 +315,7 @@
         });
         if (error) { showError(translateError(error.message)); return; }
 
-        // save profile row too (needs a "profiles" table with RLS insert policy)
+        // بيتسجل صف في جدول profiles (شغّل sql/profiles.sql على Supabase عشان الجدول ده يتعمل)
         if (data.user) {
           await sb.from('profiles').upsert({ id: data.user.id, full_name: name, email });
         }

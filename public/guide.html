@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>فلوسي بوت — دليل الاستخدام</title>
+<title>فلوسي — دليل الاستخدام</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Tajawal:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -339,6 +339,7 @@
     <!-- ===================== المصاريف والديون ===================== -->
     <div class="section-group">
       <div class="group-title">تسجيل العمليات</div>
+      <div class="item-desc" style="margin-bottom:14px;">🎙️ كل أمر في الدليل ده شغال بالفويس نوت أو بالكتابة، بنفس الشكل بالظبط — مفيش فرق.</div>
 
       <div class="item" style="animation-delay:.05s">
         <div class="item-head"><span class="item-name">🎙️ تسجيل مصروف</span></div>
@@ -350,11 +351,20 @@
       </div>
 
       <div class="item" style="animation-delay:.1s">
-        <div class="item-head"><span class="item-name">🤝 تسجيل دين</span></div>
-        <div class="item-desc">لما تدي أو تاخد فلوس من حد، البوت بيسجلها كدين ويحسب الصافي بينكم أوتوماتيك.</div>
+        <div class="item-head"><span class="item-name">🤝 دين أو سلفة جديدة</span></div>
+        <div class="item-desc">لما تدي أو تاخد فلوس من حد، البوت بيسجلها ويحسب الصافي بينكم أوتوماتيك.</div>
         <div class="chat">
           <div class="bubble out">عطيت محمد 200 جنيه</div>
-          <div class="bubble in">✅ اتسجل: <b>محمد</b> عليه دلوقتي <b>200 جنيه</b> ليك</div>
+          <div class="bubble in">✅ بقى ليك عند <b>محمد</b> <b>200 جنيه</b></div>
+        </div>
+      </div>
+
+      <div class="item" style="animation-delay:.12s">
+        <div class="item-head"><span class="item-name">↩️ مرتجع (سداد دين قديم)</span></div>
+        <div class="item-desc">لو حد بيرجّعلك جزء أو كل اللي عليه، أو إنت بترجّع اللي عليك — قول "مرتجع" أو "رجّعت" صريح عشان البوت يفرقها عن دين جديد.</div>
+        <div class="chat">
+          <div class="bubble out">مرتجع من محمد 100 جنيه</div>
+          <div class="bubble in">✅ <b>محمد</b> رجّعلك <b>100 جنيه</b></div>
         </div>
       </div>
 
@@ -402,10 +412,10 @@
 
       <div class="item" style="animation-delay:.1s">
         <div class="item-head"><span class="item-name">👤 ديون [اسم]</span></div>
-        <div class="item-desc">تفاصيل كل العمليات مع شخص بعينه (مش الصافي بس)، زي كشف حساب كامل.</div>
+        <div class="item-desc">تفاصيل كل العمليات مع شخص بعينه (مش الصافي بس)، زي كشف حساب كامل. لو العمليات كتير، هيبعتلك بدل الرسالة الطويلة ملف PDF منظّم تقدر تراجعه مع الشخص بسهولة.</div>
         <div class="chat">
           <div class="bubble out">ديون محمد</div>
-          <div class="bubble in">👤 كل العمليات مع <b>محمد</b>: 3 عمليات، الصافي <b>200 جنيه</b> ليك</div>
+          <div class="bubble in">👤 إنت ليك عند <b>محمد</b> <b>200 جنيه</b> (3 عمليات)</div>
         </div>
       </div>
     </div>
@@ -450,7 +460,7 @@
 
     <div class="footer">
       <div class="barcode"></div>
-      <div class="footer-note">FLOOSY BOT — ابعت /start في أي وقت عشان تشوف الأوامر تاني</div>
+      <div class="footer-note">FLOOSY — ابعت /start في أي وقت عشان تشوف الأوامر تاني</div>
     </div>
 
   </div>

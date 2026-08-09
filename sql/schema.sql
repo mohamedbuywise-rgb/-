@@ -28,6 +28,11 @@ create table if not exists debts (
 create index if not exists idx_debts_user
   on debts (telegram_user_id, person_name);
 
+-- عمود "مرتجع": بيفرّق بين دين جديد وبين سداد (كلي أو جزئي) لدين موجود.
+-- مبيأثرش على حساب الصافي (لسه بيتحسب من direction زي ما هو)، بس بيغيّر الصياغة اللي المستخدم بيشوفها
+-- (مثلاً "محمد رجّعلك 500 جنيه" بدل "استلفت 500 جنيه من محمد").
+alter table debts add column if not exists is_repayment boolean not null default false;
+
 -- جدول تسويات الديون: كل صف بيمثل لحظة "خلصنا الحساب" مع شخص معيّن.
 -- بيتحسب صافي الرصيد بعد كده من العمليات اللي بعد آخر تسوية بس (من غير ما نمسح التاريخ القديم).
 create table if not exists debt_settlements (

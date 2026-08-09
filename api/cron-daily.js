@@ -50,7 +50,7 @@ async function sendOldDebtsReminder(userId, chatId) {
   let msg = `⏰ <b>تذكير بديون قديمة</b>\n━━━━━━━━━━━━━━━\n\n`;
   msg += `الديون دي عدّى عليها فترة من غير تسوية:\n\n`;
   for (const d of oldOnes) {
-    const who = d.net > 0 ? `${d.displayName} مديون لك بـ ${d.net} جنيه` : `إنت مديون لـ ${d.displayName} بـ ${Math.abs(d.net)} جنيه`;
+    const who = d.net > 0 ? `إنت ليك عند ${d.displayName} ${d.net} جنيه` : `إنت عليك لـ ${d.displayName} ${Math.abs(d.net)} جنيه`;
     msg += `• ${who} (من ${d.daysOld} يوم)\n`;
   }
   msg += `\nلو خلصتوا الحساب، ابعت "خلصت مع [الاسم]" عشان يتصفّر.`;
@@ -100,7 +100,7 @@ async function processUser(user, { isFriday, isLastDayOfMonth, monthKey }) {
       if (claimedRenewal) {
         await sendTelegramMessage(
           chatId,
-          `⏳ اشتراكك في فلوسي بوت هيخلص خلال ${daysLeft} يوم.\nابعت "اشتراكي" عشان تشوف تفاصيل التجديد.`
+          `⏳ اشتراكك في فلوسي هيخلص خلال ${daysLeft} يوم.\nابعت "اشتراكي" عشان تشوف تفاصيل التجديد.`
         );
       }
     }

@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>فلوسي بوت — فلوسك، من غير صداع</title>
+<title>فلوسي — فلوسك، من غير صداع</title>
 
 <!-- PWA -->
 <link rel="manifest" href="app/manifest.json">
@@ -11,7 +11,7 @@
 <link rel="apple-touch-icon" href="app/icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="فلوسي بوت">
+<meta name="apple-mobile-web-app-title" content="فلوسي">
 <link rel="icon" href="app/icons/icon-192.png">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -214,11 +214,9 @@
 </head>
 <body>
 
-<div class="ribbon">🧾 معاينة — رقم إنستا باي واليوزر لسه تجريبيين <span>السعر 99 ج.م نهائي</span></div>
-
 <nav>
   <div class="nav-inner">
-    <div class="brand"><span class="brand-dot"></span>فلوسي بوت</div>
+    <div class="brand"><span class="brand-dot"></span>فلوسي</div>
     <div class="nav-links">
       <a href="#report">شكل التقرير</a>
       <a href="#features">المميزات</a>
@@ -250,7 +248,7 @@
       <div class="phone-screen">
         <div class="phone-head">
           <div class="av">ف</div>
-          <div><b>فلوسي بوت</b><small>online</small></div>
+          <div><b>فلوسي</b><small>online</small></div>
         </div>
         <div class="bubble bubble-out">🎤 "صرفت 180 جنيه عشا في مطعم كرنك"</div>
         <div class="bubble bubble-in">
@@ -353,7 +351,7 @@
         </div>
 
       </div>
-      <div class="rc-foot">FLOOSY BOT — اتولّد أوتوماتيك بتاريخ 31 أغسطس 2026</div>
+      <div class="rc-foot">FLOOSY — اتولّد أوتوماتيك بتاريخ 31 أغسطس 2026</div>
     </div>
   </div>
 </section>
@@ -498,7 +496,7 @@
     </div>
     <div class="feat-grid reveal">
       <div class="feat-card"><div class="feat-icon">🎙️</div><div class="feat-title">تسجيل بالصوت أو النص</div><div class="feat-desc">"صرفت 50 جنيه أكل" — يتسجل فورًا بالفئة الصح، من غير كتابة.</div></div>
-      <div class="feat-card"><div class="feat-icon">🤝</div><div class="feat-title">متابعة الديون</div><div class="feat-desc">مين مديون لمين وصافي كل شخص، مع "خلصت مع فلان" للتسوية.</div></div>
+      <div class="feat-card"><div class="feat-icon">🤝</div><div class="feat-title">متابعة الديون</div><div class="feat-desc">مين ليه عند مين وصافي كل شخص، مع "خلصت مع فلان" للتسوية.</div></div>
       <div class="feat-card"><div class="feat-icon">📄</div><div class="feat-title">تقارير PDF كاملة</div><div class="feat-desc">يومي، أسبوعي، وشهري — برسم بياني ومقارنة بالشهر اللي فات.</div></div>
       <div class="feat-card"><div class="feat-icon">🔍</div><div class="feat-title">دور في مصاريفك</div><div class="feat-desc">"فين صرفت على قهوة" — يطلعلك كل النتايج والإجمالي فورًا.</div></div>
       <div class="feat-card"><div class="feat-icon">📊</div><div class="feat-title">تصدير CSV</div><div class="feat-desc">كل بياناتك في ملف واحد يفتح كويس على Excel وقت ما تحتاجه.</div></div>
@@ -531,7 +529,7 @@
     </div>
 
     <div class="price-box reveal">
-      <div class="price-per">فلوسي بوت — شهري</div>
+      <div class="price-per">فلوسي — شهري</div>
       <div class="price-tag">99<sup>ج.م</sup></div>
       <div class="price-per">بدون تجديد أوتوماتيك — بتحول بنفسك كل شهر</div>
       <div class="price-feats">
@@ -544,13 +542,32 @@
     </div>
 
     <div class="instapay-steps reveal">
-      <div class="step"><div class="step-num">1</div><div><strong>حوّل قيمة الاشتراك</strong><span>عن طريق إنستا باي على الرقم/الرابط ده</span></div></div>
-      <div class="ip-box">instapay/your-link-here <span class="tag-note">تجريبي</span></div>
-      <div class="step"><div class="step-num">2</div><div><strong>ابعت سكرين شوت التحويل</strong><span>على البوت نفسه، أو لـ @YourAdminUsername</span></div></div>
-      <div class="step"><div class="step-num">3</div><div><strong>يتفعّل اشتراكك</strong><span>غالبًا خلال دقائق</span></div></div>
+      <div class="step"><div class="step-num">1</div><div><strong>حوّل قيمة الاشتراك</strong><span>عن طريق إنستا باي على رقم فلوسي</span></div></div>
+      <div class="ip-box" id="ipBox" style="cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+        <span id="ipNumber" style="filter:blur(6px); user-select:none; transition:filter .2s;">01025204455</span>
+        <span id="ipToggle" style="font-family:'Cairo',sans-serif; font-weight:800; font-size:12px; color:var(--gold); white-space:nowrap;">👁️ إظهار الرقم</span>
+      </div>
+      <div class="step"><div class="step-num">2</div><div><strong>صوّر الإيصال</strong><span>سكرين شوت واضح فيه اسمك وقيمة التحويل</span></div></div>
+      <div class="step"><div class="step-num">3</div><div><strong>ابعت الصورة على البوت نفسه</strong><span>هيسألك على اسمك عشان نتأكد من التحويل بسرعة</span></div></div>
+      <div class="step"><div class="step-num">4</div><div><strong>يتفعّل اشتراكك</strong><span>غالبًا خلال دقائق بعد التأكد</span></div></div>
     </div>
   </div>
 </section>
+
+<script>
+  (() => {
+    const box = document.getElementById('ipBox');
+    const num = document.getElementById('ipNumber');
+    const toggle = document.getElementById('ipToggle');
+    if (!box) return;
+    let shown = false;
+    box.addEventListener('click', () => {
+      shown = !shown;
+      num.style.filter = shown ? 'none' : 'blur(6px)';
+      toggle.textContent = shown ? '🙈 إخفاء الرقم' : '👁️ إظهار الرقم';
+    });
+  })();
+</script>
 
 <!-- FAQ -->
 <section class="faq">
@@ -561,7 +578,7 @@
     </div>
     <div class="faq-list reveal">
       <details open><summary>البوت شغال بالمصري ولا لازم أكتب فصحى؟</summary><p>بالعامية المصرية عادي جدًا — "صرفت"، "عطيت"، "استلفت" كلها بيفهمها صح.</p></details>
-      <details><summary>لو دفعت وماتفعّلش، أعمل إيه؟</summary><p>ابعت للأدمن مباشرة على @YourAdminUsername مع صورة التحويل.</p></details>
+      <details><summary>لو دفعت وماتفعّلش، أعمل إيه؟</summary><p>تأكد إنك بعتت اسمك مع صورة الإيصال في نفس المحادثة، واستنى شوية — لو اتأخر عن المتوقع، ابعت للبوت "مساعدة" وهتلاقي وسيلة تواصل تانية.</p></details>
       <details><summary>التقرير في الصورة ده حقيقي؟</summary><p>أيوه، ده نفس تصميم الـ PDF اللي بيتولّد فعليًا من بياناتك — مش موك أب بعيد عن الواقع.</p></details>
       <details><summary>فين دليل الاستخدام الكامل؟</summary><p>ابعت /start للبوت وهتلاقي زرار "📖 دليل الاستخدام الكامل" بيفتح جوه تليجرام نفسه.</p></details>
     </div>
@@ -569,7 +586,7 @@
 </section>
 
 <footer>
-  فلوسي بوت — تتبع مصاريفك وديونك من غير ما تفكر
+  فلوسي — تتبع مصاريفك وديونك من غير ما تفكر
 </footer>
 
 <a class="fab" href="https://t.me/YourFloosyBotUsername" data-tg-link>💬 فتح البوت</a>

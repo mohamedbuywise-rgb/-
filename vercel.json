@@ -13,6 +13,10 @@
     "api/cron-daily.js": {
       "memory": 1536,
       "maxDuration": 60
+    },
+    "api/monthly-report-pdf.js": {
+      "memory": 1536,
+      "maxDuration": 60
     }
   }
 }

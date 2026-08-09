@@ -1,9 +1,9 @@
 // v2: لازم نغيّر الاسم عشان أي جهاز عنده الكاش القديم (اللي كان بيحفظ ردود الـ API غلط)
 // يمسحه فورًا ويبدأ من كاش جديد فاضي — خطوة activate تحت بتمسح أي CACHE_NAME قديم تلقائي.
-const CACHE_NAME = 'floosy-cache-v2';
+const CACHE_NAME = 'dabbar-cache-v2';
 const PRECACHE_URLS = [
-  './floosy-onboarding.html',
-  './floosy-dashboard-full.html',
+  './dabbar-onboarding.html',
+  './dabbar-dashboard-full.html',
   './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png'

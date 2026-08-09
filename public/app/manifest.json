@@ -1,8 +1,8 @@
 {
-  "name": "فلوسي — تتبع مصاريفك وديونك",
-  "short_name": "فلوسي",
+  "name": "Dabbar — تتبع مصاريفك وديونك",
+  "short_name": "Dabbar",
   "description": "تتبع مصاريفك وديونك بالصوت، وشوف تقاريرك أول بأول",
-  "start_url": "./floosy-onboarding.html",
+  "start_url": "./dabbar-onboarding.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",

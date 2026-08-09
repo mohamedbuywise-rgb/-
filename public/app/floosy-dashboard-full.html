@@ -100,6 +100,71 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
 
+    <!-- ============ حجب إجباري لحد التثبيت كـ Shortcut ============
+         لو المتصفح بيدعم beforeinstallprompt (كروم أندرويد غالبًا): حجب حقيقي، مينفعش يتخطاه غير بالتثبيت الفعلي.
+         لو المتصفح مبيدعمهاش (سفاري آيفون، أوبرا، فايرفوكس): مفيش API نقدر نتأكد بيها إنه ثبّت فعلاً،
+         فبنوريله تعليمات يدوية + زرار "تم التثبيت" يأكدها بنفسه (تقدير مش إجبار حقيقي، تقنيًا مستحيل غير كده). -->
+    <div id="installGate" style="display:none; position:fixed; inset:0; z-index:9999; background:#020617; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:32px;">
+        <div style="width:76px; height:76px; border-radius:20px; background:rgba(52,211,153,0.12); border:1.5px solid rgba(52,211,153,0.3); display:flex; align-items:center; justify-content:center; font-size:34px; margin-bottom:22px;">📲</div>
+        <h2 style="font-family:'Cairo',sans-serif; font-weight:900; font-size:21px; margin-bottom:12px; color:#f1f5f9;">ثبّت فلوسي على شاشتك الأول</h2>
+        <p style="color:#94a3b8; font-size:14px; line-height:1.9; max-width:320px; margin-bottom:26px;">عشان تفتح لوحة التحكم بسهولة في أي وقت من غير ما تدوّر على اللينك تاني، لازم تضيف فلوسي كـ Shortcut على شاشتك الرئيسية.</p>
+        <button id="installGateBtn" style="font-family:'Cairo',sans-serif; font-weight:800; font-size:14.5px; background:#34d399; color:#022c22; border:none; padding:15px 28px; border-radius:12px; cursor:pointer; margin-bottom:12px;">📲 ثبّت دلوقتي</button>
+        <div id="installGateManual" style="display:none; color:#94a3b8; font-size:12.5px; line-height:1.9; max-width:300px; margin-bottom:14px;"></div>
+        <button id="installGateConfirmBtn" style="display:none; background:none; border:1px solid rgba(148,163,184,0.3); color:#cbd5e1; font-family:'Tajawal',sans-serif; font-size:13px; padding:10px 18px; border-radius:10px; cursor:pointer;">✅ ثبّتها، كمّل</button>
+    </div>
+    <script>
+        (function () {
+            var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+            if (isStandalone) return; // متثبت فعلاً، مفيش داعي نعطّله
+
+            // لو سبق وأكّد التثبيت يدويًا (متصفح مبيدعمش beforeinstallprompt)، مانوريهوش الحجب تاني
+            if (localStorage.getItem('floosy-install-confirmed') === '1') return;
+
+            var gate = document.getElementById('installGate');
+            var installBtn = document.getElementById('installGateBtn');
+            var manualBox = document.getElementById('installGateManual');
+            var confirmBtn = document.getElementById('installGateConfirmBtn');
+            var deferredPrompt = null;
+            var supportsPrompt = false;
+
+            gate.style.display = 'flex';
+
+            window.addEventListener('beforeinstallprompt', function (e) {
+                e.preventDefault();
+                deferredPrompt = e;
+                supportsPrompt = true;
+            });
+
+            installBtn.addEventListener('click', async function () {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    var choice = await deferredPrompt.userChoice;
+                    deferredPrompt = null;
+                    if (choice.outcome === 'accepted') {
+                        gate.style.display = 'none';
+                    }
+                    return;
+                }
+                // مفيش prompt برمجي (سفاري آيفون / أوبرا / فايرفوكس) — نوريله تعليمات يدوية
+                var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+                manualBox.textContent = isIOS
+                    ? 'اضغط على زرار "مشاركة" (Share) تحت في المتصفح، وبعدين اختار "إضافة للشاشة الرئيسية" (Add to Home Screen).'
+                    : 'افتح قايمة المتصفح (٣ نقط فوق)، واختار "إضافة إلى الشاشة الرئيسية" أو "Install App".';
+                manualBox.style.display = 'block';
+                confirmBtn.style.display = 'inline-block';
+            });
+
+            confirmBtn.addEventListener('click', function () {
+                localStorage.setItem('floosy-install-confirmed', '1');
+                gate.style.display = 'none';
+            });
+
+            window.addEventListener('appinstalled', function () {
+                gate.style.display = 'none';
+            });
+        })();
+    </script>
+
     <!-- Main Web Container (Full Width) -->
     <div class="w-full max-w-4xl mx-auto bg-slate-900 flex-1 flex flex-col shadow-2xl overflow-hidden md:my-4 md:rounded-3xl md:border md:border-slate-800">
 
@@ -357,6 +422,33 @@
             <button id="pwa-install-btn" class="w-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold py-3.5 rounded-2xl text-sm transition flex items-center justify-center gap-2 hover:bg-emerald-500/20 mb-3 hidden">
                 📲 تثبيت التطبيق على الشاشة الرئيسية
             </button>
+
+            <!-- بطاقة الاشتراك — بتظهر بس لما التجربة تخلص أو الاشتراك ينتهي -->
+            <div id="account-subscription-card" class="hidden bg-gradient-to-br from-emerald-500/10 to-teal-500/5 border border-emerald-500/25 rounded-3xl p-5 space-y-4">
+                <div>
+                    <p id="account-sub-headline" class="text-sm font-black text-emerald-400 mb-1">—</p>
+                    <p id="account-sub-subline" class="text-xs text-slate-400 leading-relaxed">—</p>
+                </div>
+                <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-4 space-y-3 text-xs">
+                    <div class="flex items-start gap-2">
+                        <span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 flex items-center justify-center font-black text-[10px] shrink-0">1</span>
+                        <p class="text-slate-300">حوّل <b id="account-sub-price" class="text-emerald-400">100 ج.م</b> عن طريق إنستا باي على الرقم:
+                            <span id="account-sub-instapay" class="block mt-1 font-mono text-sm text-slate-100 bg-slate-900 rounded-lg px-3 py-2 select-all">—</span>
+                        </p>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 flex items-center justify-center font-black text-[10px] shrink-0">2</span>
+                        <p class="text-slate-300">صوّر الإيصال، واكتب اسمك اللي حولت بيه تحت الصورة</p>
+                    </div>
+                    <div class="flex items-start gap-2">
+                        <span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 flex items-center justify-center font-black text-[10px] shrink-0">3</span>
+                        <p class="text-slate-300">ابعت الصورة على بوت فلوسي في تليجرام — هيتفعّل اشتراكك على طول بعد التأكد</p>
+                    </div>
+                </div>
+                <a id="account-sub-open-bot" href="#" target="_blank" class="w-full bg-emerald-500 text-slate-950 font-black py-3.5 rounded-2xl text-sm flex items-center justify-center gap-2">
+                    💬 افتح بوت تليجرام
+                </a>
+            </div>
 
             <button id="account-logout-btn" class="w-full bg-slate-950/60 border border-rose-500/20 text-rose-400 font-bold py-3.5 rounded-2xl text-sm transition flex items-center justify-center gap-2 hover:bg-rose-500/10">
                 🚪 تسجيل خروج
@@ -683,6 +775,7 @@
             renderTips(data.month);
             renderDebts(data.debts);
             renderArchive(data.history);
+            renderSubscription(data.subscription);
             updateHeaderForTab(document.querySelector('.tab-btn.active-tab').dataset.tab, data);
 
             const label = document.getElementById('last-updated-label');
@@ -1063,7 +1156,37 @@
         });
 
         // ============ تاب "حسابي": بيانات البروفايل + حالة ربط تليجرام ============
-        async function loadAccountTab() {
+        // ============ بطاقة الاشتراك في تاب "حسابي" ============
+        // بتظهر بس لو مفيش اشتراك فعّال دلوقتي (يعني التجربة خلصت أو الاشتراك انتهى)
+        // نفس الرقم والسعر اللي البوت بيبعتهم على تليجرام، جايين من نفس الـ config عن طريق الـ API
+        const SUB_BOT_USERNAME = 'Masaaref_bot';
+        function renderSubscription(subscription) {
+            const card = document.getElementById('account-subscription-card');
+            if (!card || !subscription) return;
+
+            if (subscription.active) {
+                card.classList.add('hidden');
+                return;
+            }
+
+            card.classList.remove('hidden');
+            document.getElementById('account-sub-price').textContent = `${subscription.priceEgp} ج.م`;
+            document.getElementById('account-sub-instapay').textContent = subscription.instapayNumber || '—';
+            document.getElementById('account-sub-open-bot').href = `https://t.me/${SUB_BOT_USERNAME}`;
+
+            const headline = document.getElementById('account-sub-headline');
+            const subline = document.getElementById('account-sub-subline');
+
+            if (subscription.inTrial) {
+                headline.textContent = `🎁 باقي ${subscription.trialDaysLeft} يوم على تجربتك المجانية`;
+                subline.textContent = 'خلال الـ3 أيام دي هتشوف بنفسك إزاي فلوسي بيوفّرلك وقت وبيخليك متابع كل جنيه بيتصرف — من غير ما تفتح جدول ولا تكتب رقم بإيدك. اشترك دلوقتي عشان الخدمة متتقطعش.';
+            } else {
+                headline.textContent = '⏳ خلصت أيام التجربة المجانية';
+                subline.textContent = 'جربت 3 أيام وشفت إزاي فلوسي بيتابعلك مصاريفك وديونك أول بأول — دلوقتي كمّل معاك عشان متفوّتش أي تفصيلة من حساباتك، ب100 جنيه بس في الشهر.';
+            }
+        }
+
+
             if (!currentUser) return;
 
             const nameEl = document.getElementById('account-name');

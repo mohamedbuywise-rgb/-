@@ -2,11 +2,22 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>فلوسي بوت — فلوسك، من غير صداع</title>
+
+<!-- PWA -->
+<link rel="manifest" href="app/manifest.json">
+<meta name="theme-color" content="#12201B">
+<link rel="apple-touch-icon" href="app/icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="فلوسي بوت">
+<link rel="icon" href="app/icons/icon-192.png">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Tajawal:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   :root{
     --ink:#12201B;
@@ -213,7 +224,7 @@
       <a href="#features">المميزات</a>
       <a href="#pricing">الاشتراك</a>
     </div>
-    <a class="nav-cta" href="floosy-onboarding.html">🔐 دخول</a>
+    <a class="nav-cta" href="app/floosy-onboarding.html">🔐 دخول</a>
   </div>
 </nav>
 
@@ -225,7 +236,7 @@
       <h1 class="hero-title">تقولّي بالصوت،<br>وهو يطلعلك <em>تقرير كامل</em></h1>
       <p class="hero-sub">مصاريفك وديونك بيتسجلوا لوحدهم من رسالة صوت عادية، وفي آخر الشهر تلاقي تقرير PDF جاهز فيه كل التفاصيل ومقارنة بالشهر اللي فات — من غير ما تفتح جدول ولا تكتب رقم بإيدك.</p>
       <div class="cta-row">
-        <a class="btn btn-primary" href="https://t.me/Masaaref_bot">🚀 افتح البوت دلوقتي</a>
+        <a class="btn btn-primary" href="https://t.me/YourFloosyBotUsername" data-tg-link>🚀 افتح البوت دلوقتي</a>
         <a class="btn btn-outline" href="#report">📄 شوف شكل التقرير</a>
       </div>
       <div class="hero-stats">
@@ -466,7 +477,7 @@
 
       <!-- footer action -->
       <div class="p-4 bg-slate-900 border-t border-slate-800/80">
-        <a href="https://t.me/Masaaref_bot" class="block w-full text-center bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-3 rounded-2xl text-sm transition shadow-lg shadow-emerald-500/20">
+        <a href="https://t.me/YourFloosyBotUsername" data-tg-link class="block w-full text-center bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-3 rounded-2xl text-sm transition shadow-lg shadow-emerald-500/20">
           افتح البوت وشوف تقريرك إنت 🚀
         </a>
       </div>
@@ -529,7 +540,7 @@
         <div>✅ تقارير PDF يومية/أسبوعية/شهرية</div>
         <div>✅ تصدير CSV وقت ما تحتاج</div>
       </div>
-      <a class="btn btn-primary" style="width:100%; justify-content:center;" href="https://t.me/Masaaref_bot">💳 اشترك دلوقتي</a>
+      <a class="btn btn-primary" style="width:100%; justify-content:center;" href="https://t.me/YourFloosyBotUsername" data-tg-link>💳 اشترك دلوقتي</a>
     </div>
 
     <div class="instapay-steps reveal">
@@ -561,7 +572,7 @@
   فلوسي بوت — تتبع مصاريفك وديونك من غير ما تفكر
 </footer>
 
-<a class="fab" href="https://t.me/Masaaref_bot">💬 فتح البوت</a>
+<a class="fab" href="https://t.me/YourFloosyBotUsername" data-tg-link>💬 فتح البوت</a>
 
 <script>
   // reveal on scroll
@@ -599,6 +610,44 @@
       }
     });
   });
+</script>
+
+<script>
+  /* ========================================================
+     تليجرام بوت — عدّل اليوزرنيم هنا مرة واحدة بس، وهيتحدث
+     في كل الأزرار اللي في الصفحة أوتوماتيك (data-tg-link)
+  ========================================================= */
+  const BOT_USERNAME = 'Masaaref_bot';
+  document.querySelectorAll('[data-tg-link]').forEach((a) => {
+    a.href = `https://t.me/${BOT_USERNAME}`;
+  });
+
+  /* ========================================================
+     SUPABASE SETUP — نفس القيم اللي في app/floosy-onboarding.html
+     و app/floosy-dashboard-full.html بالظبط، عشان الجلسة تتعرف
+     صح على كل الصفحات (نفس مشروع Supabase).
+  ========================================================= */
+  const SUPABASE_URL = 'https://devywtyfzybnahdsqdkd.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_yHiX1cnEMCVEcjQxiIrqig_DRBiuveQ';
+
+  // ---- لو المستخدم مسجل دخول قبل كده (سيشن موجودة)، منعرضلوش صفحة التسويق تاني —
+  // بنوديه على طول للداشبورد بتاعه (أو لشاشة الربط لو لسه ماربطش حسابه بتليجرام).
+  // أول مرة (مفيش سيشن) بيفضل شايف صفحة الهبوط دي عادي عشان يعمل حساب/يسجل دخول.
+  (async () => {
+    try {
+      const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      const { data: { session } } = await sb.auth.getSession();
+      if (session) {
+        window.location.replace('app/floosy-onboarding.html');
+      }
+    } catch (e) {
+      // لو حصل أي خطأ (مثلاً Supabase مش متظبط لسه)، سيب المستخدم شايف صفحة الهبوط عادي
+    }
+  })();
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('app/sw.js', { scope: 'app/' }).catch(() => {});
+  }
 </script>
 
 </body>

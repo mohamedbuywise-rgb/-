@@ -16,12 +16,15 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
-    <!-- بنحدد الوضع (فاتح/غامق) بدري قبل ما الصفحة تترسم، عشان منشوفش "فلاش" بلون غلط لحظة الفتح -->
+    <!-- بنحدد الوضع (فاتح/غامق) بدري قبل ما الصفحة تترسم. الافتراضي دلوقتي "فاتح" -->
     <script>
         (function () {
             try {
                 var saved = localStorage.getItem('floosy-theme');
-                if (saved === 'light') document.documentElement.setAttribute('data-theme', 'light');
+                // لو مفيش حاجة محفوظة، أو المحفوظ "فاتح"، نطبق الفاتح. الغامق بيطبق بس لو هو اللي اختاره.
+                if (saved !== 'dark') {
+                    document.documentElement.setAttribute('data-theme', 'light');
+                }
             } catch (e) {}
         })();
     </script>
@@ -95,10 +98,10 @@
         html[data-theme="light"] .border-rose-500\/30 { border-color: rgba(244,63,94,0.3) !important; }
     </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex items-center justify-center p-4">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
 
-    <!-- Mockup Phone / Web Container -->
-    <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-[3rem] shadow-2xl overflow-hidden flex flex-col h-[750px]">
+    <!-- Main Web Container (Full Width) -->
+    <div class="w-full max-w-4xl mx-auto bg-slate-900 flex-1 flex flex-col shadow-2xl overflow-hidden md:my-4 md:rounded-3xl md:border md:border-slate-800">
 
         <!-- Brand Bar -->
         <div class="bg-slate-900/90 px-5 pt-4 pb-1 flex items-center justify-between">
@@ -198,6 +201,29 @@
                 </div>
             </div>
 
+            <!-- حركة السيولة اليومية (واصل من / واصل لـ) -->
+            <div class="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-4 space-y-3 shadow-lg">
+                <h4 class="text-xs font-bold text-slate-300 flex items-center justify-between">
+                    <span>حركة السيولة (النهاردة):</span>
+                    <span class="text-[9px] text-slate-500 font-normal">تتصفّر يومياً الساعة 12م</span>
+                </h4>
+                <div class="grid grid-cols-3 gap-2">
+                    <div class="bg-slate-950/40 p-2 rounded-xl border border-emerald-500/10 text-center">
+                        <span class="text-[9px] text-slate-500 block">داخل (واصل من)</span>
+                        <span class="text-xs font-bold text-emerald-400" id="flow-in">0</span>
+                    </div>
+                    <div class="bg-slate-950/40 p-2 rounded-xl border border-rose-500/10 text-center">
+                        <span class="text-[9px] text-slate-500 block">خارج (واصل لـ)</span>
+                        <span class="text-xs font-bold text-rose-400" id="flow-out">0</span>
+                    </div>
+                    <div class="bg-slate-950/40 p-2 rounded-xl border border-slate-700 text-center">
+                        <span class="text-[9px] text-slate-500 block">صافي الحركة</span>
+                        <span class="text-xs font-bold text-slate-200" id="flow-net">0</span>
+                    </div>
+                </div>
+                <p class="text-[9px] text-slate-500 text-center italic">⚠️ الصافي اليومي = (إجمالي الداخل) - (إجمالي الخارج) خلال النهاردة بس.</p>
+            </div>
+
             <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3">
                 <h4 class="text-xs font-bold text-slate-300">عمليات النهاردة:</h4>
                 <div class="space-y-1" id="daily-items-list">
@@ -280,6 +306,10 @@
                 </div>
             </div>
 
+            <button id="download-debts-pdf" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-3 rounded-2xl text-sm transition border border-slate-700 flex items-center justify-center gap-2 mt-2">
+                <span id="download-debts-pdf-icon">📄</span> <span id="download-debts-pdf-label">تحميل كشف حساب كل الديون (PDF)</span>
+            </button>
+
         </div>
 
         <!-- ===================== TAB: ACCOUNT ===================== -->
@@ -324,6 +354,10 @@
                 </span>
             </button>
 
+            <button id="pwa-install-btn" class="w-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold py-3.5 rounded-2xl text-sm transition flex items-center justify-center gap-2 hover:bg-emerald-500/20 mb-3 hidden">
+                📲 تثبيت التطبيق على الشاشة الرئيسية
+            </button>
+
             <button id="account-logout-btn" class="w-full bg-slate-950/60 border border-rose-500/20 text-rose-400 font-bold py-3.5 rounded-2xl text-sm transition flex items-center justify-center gap-2 hover:bg-rose-500/10">
                 🚪 تسجيل خروج
             </button>
@@ -362,20 +396,22 @@
 
         <!-- Footer Action (only visible on monthly tab) -->
         <div class="p-4 bg-slate-900 border-t border-slate-800/80" id="footer-cta">
-            <button id="download-monthly-pdf" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold py-3 rounded-2xl text-sm transition flex items-center justify-center gap-2 mb-2">
-                <span id="download-pdf-icon">📄</span> <span id="download-pdf-label">تقرير نهاية الشهر (PDF)</span>
-            </button>
-            <button id="open-archive" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-3 rounded-2xl text-sm transition border border-slate-700 flex items-center justify-center gap-2">
-                <span>🗂️</span> أرشيف الشهور السابقة
-            </button>
-            <p class="text-[10px] text-slate-500 text-center mt-2">الشهر الجديد بيبدأ تلقائي أول كل شهر — مفيش حاجة تعملها.</p>
+            <div class="flex gap-2 mb-1">
+                <button id="download-monthly-pdf" class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold py-2 rounded-xl text-xs transition flex items-center justify-center gap-2">
+                    <span id="download-pdf-icon">📄</span> <span id="download-pdf-label">تقرير PDF</span>
+                </button>
+                <button id="open-archive" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-2 rounded-xl text-xs transition border border-slate-700 flex items-center justify-center gap-2">
+                    <span>🗂️</span> الأرشيف
+                </button>
+            </div>
+            <p class="text-[9px] text-slate-500 text-center mt-1">تقدر تطلب التقرير في أي وقت خلال الشهر، مش لازم تستنى آخره.</p>
         </div>
 
     </div>
 
     <!-- Archive Overlay -->
     <div id="archive-overlay" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
-        <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-[2.5rem] shadow-2xl overflow-hidden flex flex-col h-[750px]">
+        <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[80vh]">
             <div class="bg-slate-900/90 border-b border-slate-800/80 p-5 flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-slate-700 to-slate-600 flex items-center justify-center text-slate-100 font-black text-xl">🗂️</div>
@@ -533,6 +569,72 @@
             navigator.serviceWorker.register('./sw.js').catch(() => {});
         }
 
+        // ============ PWA Install Logic ============
+        let deferredPrompt;
+        const pwaInstallBtn = document.getElementById('pwa-install-btn');
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            if (pwaInstallBtn) pwaInstallBtn.classList.remove('hidden');
+        });
+        if (pwaInstallBtn) {
+            pwaInstallBtn.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    if (outcome === 'accepted') pwaInstallBtn.classList.add('hidden');
+                    deferredPrompt = null;
+                } else {
+                    // تعليمات يدوية لو الـ prompt مش متاح
+                    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+                    if (isIOS) alert('على آيفون: اضغط على زرار "مشاركة" (Share) تحت، وبعدين اختار "إضافة للشاشة الرئيسية" (Add to Home Screen).');
+                    else alert('تقدر تثبت التطبيق من إعدادات المتصفح (ثلاث نقط فوق) واختيار "تثبيت التطبيق" أو "Install App".');
+                }
+            });
+        }
+        window.addEventListener('appinstalled', () => {
+            if (pwaInstallBtn) pwaInstallBtn.classList.add('hidden');
+        });
+
+        // ============ تحميل كشف حساب الديون الشامل PDF ============
+        document.getElementById('download-debts-pdf').addEventListener('click', async () => {
+            const btn = document.getElementById('download-debts-pdf');
+            const icon = document.getElementById('download-debts-pdf-icon');
+            const label = document.getElementById('download-debts-pdf-label');
+            const originalLabel = label.textContent;
+
+            btn.disabled = true;
+            icon.textContent = '⏳';
+            label.textContent = 'بنجهز الملف...';
+
+            try {
+                const res = await fetch('/api/debts-report-pdf', {
+                    headers: { Authorization: `Bearer ${accessToken}` },
+                });
+
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({}));
+                    throw new Error(err.error || 'فشل تحميل الملف');
+                }
+
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'كشف-الديون-الشامل.pdf';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+            } catch (e) {
+                alert(e.message || 'حصل خطأ، جرب تاني.');
+            } finally {
+                btn.disabled = false;
+                icon.textContent = '📄';
+                label.textContent = originalLabel;
+            }
+        });
+
         // ============ جلب البيانات الحقيقية من /api/dashboard-data وملء الشاشة بيها ============
         async function loadDashboard() {
             let data;
@@ -556,7 +658,7 @@
             window.__dashboardData = data;
 
             renderMonthly(data.month);
-            renderDaily(data.today);
+            renderDaily(data.today, data.flow);
             renderCategories(data.month);
             renderTips(data.month);
             renderDebts(data.debts);
@@ -613,7 +715,7 @@
             }
         }
 
-        function renderDaily(today) {
+        function renderDaily(today, flow) {
             document.getElementById('daily-date').textContent =
                 new Date().toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long' });
             document.getElementById('daily-total').textContent = fmt(today.total);
@@ -621,6 +723,13 @@
             document.getElementById('daily-avg').textContent = fmt(today.avgPerDayThisMonth);
             document.getElementById('daily-note').textContent =
                 today.count > 0 ? `سجلت ${today.count} عملية النهاردة.` : 'لسه معندكش مصاريف مسجلة النهاردة.';
+
+            if (flow) {
+                document.getElementById('flow-in').textContent = fmt(flow.in);
+                document.getElementById('flow-out').textContent = fmt(flow.out);
+                document.getElementById('flow-net').textContent = fmt(flow.net);
+                document.getElementById('flow-net').className = `text-xs font-bold ${flow.net >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+            }
 
             const listEl = document.getElementById('daily-items-list');
             if (today.items.length === 0) {

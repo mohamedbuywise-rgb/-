@@ -292,25 +292,28 @@ async function handleIncomingText(text, userId, chatId) {
     return;
   }
 
-  const result = await classifyMessage(text);
+  const transactions = await classifyMessage(text);
+  let successCount = 0;
 
-  if (result.type === 'expense' && result.amount) {
-    await recordExpense(result, text, userId, chatId);
-    return;
+  for (const result of transactions) {
+    if (result.type === 'expense' && result.amount) {
+      await recordExpense(result, text, userId, chatId);
+      successCount++;
+    } else if (result.type === 'debt' && result.amount && result.person) {
+      await recordDebt(result, userId, chatId);
+      successCount++;
+    } else if (result.type === 'settlement' && result.person) {
+      await settleDebtWithPerson(result.person, userId, chatId);
+      successCount++;
+    }
   }
 
-  if (result.type === 'debt' && result.amount && result.person) {
-    await recordDebt(result, userId, chatId);
-    return;
+  if (successCount === 0) {
+    await sendTelegramMessage(
+      chatId,
+      'مش قادر أحدد المعاملات من رسالتك 🤔\nجرب تبعت زي كده: "صرفت 50 جنيه أكل" أو "عطيت محمد 200 جنيه" أو "خلصت مع محمد"'
+    );
+  } else if (transactions.length > 1 && successCount > 0) {
+    await sendTelegramMessage(chatId, `✅ تم تسجيل ${successCount} معاملة بنجاح.`);
   }
-
-  if (result.type === 'settlement' && result.person) {
-    await settleDebtWithPerson(result.person, userId, chatId);
-    return;
-  }
-
-  await sendTelegramMessage(
-    chatId,
-    'مش قادر أحدد المبلغ من رسالتك 🤔\nجرب تبعت زي كده: "صرفت 50 جنيه أكل" أو "عطيت محمد 200 جنيه" أو "خلصت مع محمد"'
-  );
 }

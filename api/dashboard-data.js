@@ -89,6 +89,21 @@ export default async function handler(req, res) {
     const owedToYouTotal = owedToYou.reduce((sum, v) => sum + v.net, 0);
     const youOweTotal = youOwe.reduce((sum, v) => sum + Math.abs(v.net), 0);
 
+    // ---- حركة السيولة اليومية (واصل من / واصل لـ) ----
+    const { data: todayFlowData } = await supabase
+      .from('debts')
+      .select('amount, direction')
+      .eq('telegram_user_id', telegramUserId)
+      .gte('created_at', startOfDay.toISOString())
+      .lt('created_at', endOfDay.toISOString());
+
+    const flowIn = (todayFlowData || [])
+      .filter(d => d.direction === 'borrowed')
+      .reduce((sum, d) => sum + Number(d.amount), 0);
+    const flowOut = (todayFlowData || [])
+      .filter(d => d.direction === 'lent')
+      .reduce((sum, d) => sum + Number(d.amount), 0);
+
     return res.status(200).json({
       linked: true,
       telegramUserId,
@@ -119,6 +134,11 @@ export default async function handler(req, res) {
         youOweTotal,
         owedToYou: owedToYou.map((v) => ({ name: v.displayName, amount: v.net })),
         youOwe: youOwe.map((v) => ({ name: v.displayName, amount: Math.abs(v.net) })),
+      },
+      flow: {
+        in: flowIn,
+        out: flowOut,
+        net: flowIn - flowOut
       },
       history,
     });

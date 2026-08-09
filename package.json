@@ -9,6 +9,6 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.45.0",
     "@sparticuz/chromium": "^131.0.1",
-    "puppeteer-core": "^23.10.4"
+    "playwright-core": "^1.49.1"
   }
 }

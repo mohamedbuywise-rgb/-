@@ -55,8 +55,14 @@ export default async function handler(req, res) {
 
     const pdfBuffer = await renderPdfFromHtml(html);
 
+    const rawFileName = 'كشف-الديون-الشامل.pdf';
+    const encodedFileName = encodeURIComponent(rawFileName);
+
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', 'attachment; filename="كشف-الديون-الشامل.pdf"');
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="debts-report.pdf"; filename*=UTF-8''${encodedFileName}`
+    );
     return res.status(200).send(pdfBuffer);
   } catch (err) {
     console.error('debts-report-pdf error:', err);

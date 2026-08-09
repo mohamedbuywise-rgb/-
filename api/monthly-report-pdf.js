@@ -71,8 +71,14 @@ export default async function handler(req, res) {
 
     const pdfBuffer = await renderPdfFromHtml(html);
 
+    const rawFileName = `تقرير-${label}.pdf`;
+    const encodedFileName = encodeURIComponent(rawFileName);
+
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="تقرير-${label}.pdf"`);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="monthly-report.pdf"; filename*=UTF-8''${encodedFileName}`
+    );
     return res.status(200).send(pdfBuffer);
   } catch (err) {
     console.error('monthly-report-pdf error:', err);

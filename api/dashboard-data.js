@@ -27,15 +27,22 @@ export default async function handler(req, res) {
       return res.status(401).json({ error: 'انتهت صلاحية الجلسة، سجل دخول تاني.' });
     }
 
-    const { data: link } = await supabase
+    const { data: link, error: linkError } = await supabase
       .from('user_links')
       .select('telegram_user_id')
       .eq('auth_user_id', userData.user.id)
       .maybeSingle();
 
+    if (linkError) {
+      console.error('dashboard-data user_links lookup error:', JSON.stringify(linkError), 'auth_user_id:', userData.user.id);
+    }
+
     if (!link) {
+      console.log('dashboard-data: no link found for auth_user_id:', userData.user.id);
       return res.status(200).json({ linked: false });
     }
+
+    console.log('dashboard-data: linked to telegram_user_id:', link.telegram_user_id);
 
     const telegramUserId = link.telegram_user_id;
 

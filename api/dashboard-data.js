@@ -1,8 +1,7 @@
 import { supabase } from '../lib/supabaseClient.js';
 import { getMonthRange, getExpensesBetween, buildCategoryBreakdown } from '../lib/expenses.js';
 import { computeNetByPerson } from '../lib/debts.js';
-import { MONTH_NAMES, SUBSCRIPTION_PRICE_EGP, INSTAPAY_LINK } from '../lib/config.js';
-import { hasActiveSubscription, getSubscriptionExpiry, isInTrial, getTrialDaysLeft } from '../lib/users.js';
+import { MONTH_NAMES } from '../lib/config.js';
 
 // ============ GET /api/dashboard-data ============
 // بيرجّع بيانات حقيقية بس (صفر mock data): مصاريف النهاردة، مصاريف الشهر بالتصنيفات، والديون.
@@ -112,24 +111,10 @@ export default async function handler(req, res) {
       .filter(d => d.direction === 'lent')
       .reduce((sum, d) => sum + Number(d.amount), 0);
 
-    // ---- حالة الاشتراك/التجربة ----
-    const subActive = await hasActiveSubscription(telegramUserId);
-    const subExpiresAt = await getSubscriptionExpiry(telegramUserId);
-    const subInTrial = !subActive && (await isInTrial(telegramUserId));
-    const subTrialDaysLeft = subInTrial ? await getTrialDaysLeft(telegramUserId) : 0;
-
     return res.status(200).json({
       linked: true,
       telegramUserId,
       generatedAt: new Date().toISOString(),
-      subscription: {
-        active: subActive,
-        expiresAt: subExpiresAt ? subExpiresAt.toISOString() : null,
-        inTrial: subInTrial,
-        trialDaysLeft: subTrialDaysLeft,
-        priceEgp: SUBSCRIPTION_PRICE_EGP,
-        instapayNumber: INSTAPAY_LINK,
-      },
       today: {
         total: todayTotal,
         count: todayExpenses.length,

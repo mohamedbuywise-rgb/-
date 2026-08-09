@@ -2,7 +2,7 @@ import { transcribeVoice, classifyMessage } from '../lib/groq.js';
 import { sendTelegramMessage, forwardTelegramMessage } from '../lib/telegram.js';
 import { recordExpense, sendMonthlyReport, sendWeeklyReport, sendDataExport, sendExpenseSearch } from '../lib/expenses.js';
 import { recordDebt, sendDebtsReport, sendPersonDebtDetail, settleDebtWithPerson } from '../lib/debts.js';
-import { upsertUser, hasActiveSubscription, getSubscriptionExpiry, activateSubscription, getChatIdByUserId, isInTrial, getTrialDaysLeft } from '../lib/users.js';
+import { upsertUser, hasActiveSubscription, getSubscriptionExpiry, activateSubscription, getChatIdByUserId } from '../lib/users.js';
 import { createLinkCode } from '../lib/linking.js';
 import { GUIDE_URL, ADMIN_TELEGRAM_ID, SUBSCRIPTION_DAYS, SUBSCRIPTION_PRICE_EGP, INSTAPAY_LINK, ADMIN_CONTACT_USERNAME } from '../lib/config.js';
 
@@ -27,12 +27,10 @@ function buildCommandsGuide() {
 }
 
 // ============ رسالة "محتاج تشترك" — بتتبعت لأي حد الاشتراك بتاعه مش فعّال ============
-function buildSubscriptionPrompt(isExpired, trialEnded = false) {
+function buildSubscriptionPrompt(isExpired) {
   const intro = isExpired
     ? '⏳ اشتراكك في فلوسي خلص.'
-    : trialEnded
-      ? '⏳ خلصت أيام التجربة المجانية الـ3.\n\n💡 جربت 3 أيام وشفت إزاي فلوسي بيتابعلك مصاريفك وديونك أول بأول من غير ما تفتح جدول ولا تكتب رقم بإيدك — دلوقتي كمّل معاك عشان متفوّتش أي تفصيلة من حساباتك.'
-      : '🔒 محتاج تشترك الأول عشان تستخدم فلوسي.';
+    : '🔒 محتاج تشترك الأول عشان تستخدم فلوسي.';
 
   return (
     `${intro}\n\n` +
@@ -173,41 +171,18 @@ export default async function handler(req, res) {
         const daysLeft = Math.ceil((expiresAt.getTime() - Date.now()) / (24 * 60 * 60 * 1000));
         const formattedDate = expiresAt.toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' });
         await sendTelegramMessage(chatId, `✅ اشتراكك شغال لحد ${formattedDate} (باقي ${daysLeft} يوم).`, 'HTML');
-      } else if (await isInTrial(userId)) {
-        const trialDaysLeft = await getTrialDaysLeft(userId);
-        await sendTelegramMessage(
-          chatId,
-          `🎁 لسه في تجربتك المجانية، باقي ${trialDaysLeft} يوم.\n\n` +
-            `💡 استغل الأيام دي وشوف إزاي فلوسي بيوفّرلك وقت وبيتابعلك مصاريفك من غير أي مجهود. ` +
-            `بعد كده الاشتراك الشهري <b>${SUBSCRIPTION_PRICE_EGP} ج.م</b>.`,
-          'HTML'
-        );
       } else {
-        await sendTelegramMessage(chatId, buildSubscriptionPrompt(Boolean(expiresAt), true), 'HTML');
+        await sendTelegramMessage(chatId, buildSubscriptionPrompt(Boolean(expiresAt)), 'HTML');
       }
       return res.status(200).json({ ok: true });
     }
 
-    // --- البوابة: أي استخدام تاني للبوت (صوت، مصروف، تقرير، إلخ) محتاج اشتراك فعّال أو تجربة مجانية شغالة ---
+    // --- البوابة: أي استخدام تاني للبوت (صوت، مصروف، تقرير، إلخ) محتاج اشتراك فعّال ---
     const subscribed = await hasActiveSubscription(userId);
     if (!subscribed) {
-      const inTrial = await isInTrial(userId);
-      if (!inTrial) {
-        const expiresAt = await getSubscriptionExpiry(userId);
-        await sendTelegramMessage(chatId, buildSubscriptionPrompt(Boolean(expiresAt), true), 'HTML');
-        return res.status(200).json({ ok: true });
-      }
-      // لسه في التجربة المجانية — نديله تنبيه بسيط لو الأيام قربت تخلص، ونكمل عادي
-      const daysLeft = await getTrialDaysLeft(userId);
-      if (daysLeft <= 1) {
-        await sendTelegramMessage(
-          chatId,
-          `⏳ باقي أقل من يوم على نهاية تجربتك المجانية.\n\n` +
-            `💡 خلال الـ3 أيام دي شفت بنفسك إزاي فلوسي بيوفّرلك وقت وبيخليك متابع كل جنيه بيتصرف — ` +
-            `عشان الخدمة متتقطعش، اشترك بـ<b>${SUBSCRIPTION_PRICE_EGP} ج.م/شهر</b>.`,
-          'HTML'
-        );
-      }
+      const expiresAt = await getSubscriptionExpiry(userId);
+      await sendTelegramMessage(chatId, buildSubscriptionPrompt(Boolean(expiresAt)), 'HTML');
+      return res.status(200).json({ ok: true });
     }
 
     // --- حالة 1: رسالة صوتية — بتتفرّغ لنص وبعدين تتوجّه بنفس منطق الرسالة النصية بالظبط ---
@@ -236,8 +211,6 @@ export default async function handler(req, res) {
         await sendTelegramMessage(
           chatId,
           'أهلاً بيك في فلوسي 👋\n\n' +
-            '🎁 عندك 3 أيام تجربة مجانية بكل المميزات، وبعدها الاشتراك الشهري ' +
-            `<b>${SUBSCRIPTION_PRICE_EGP} ج.م</b>.\n\n` +
             buildCommandsGuide() +
             '\n\n' +
             (GUIDE_URL ? 'اضغط الزرار تحت عشان تشوف كل التفاصيل بشكل مرتّب 👇' : ''),

@@ -172,13 +172,13 @@
         <!-- ===================== TAB: DAILY ===================== -->
         <div class="tab-content p-5 space-y-4" id="tab-daily">
 
-            <div class="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-4 space-y-3 shadow-lg">
+            <div class="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-2xl p-3 space-y-1.5 shadow-lg">
                 <div class="flex justify-between items-center">
-                    <span class="text-xs text-slate-400 font-semibold">صرف النهاردة</span>
-                    <span class="text-[11px] text-slate-500" id="daily-date"></span>
+                    <span class="text-[11px] text-slate-400 font-semibold">صرف النهاردة</span>
+                    <span class="text-[10px] text-slate-500" id="daily-date"></span>
                 </div>
-                <h3 class="text-3xl font-black text-rose-400" id="daily-total">—</h3>
-                <p class="text-[11px] text-slate-400" id="daily-note">لسه معندكش مصاريف مسجلة النهاردة.</p>
+                <h3 class="text-xl font-black text-rose-400" id="daily-total">—</h3>
+                <p class="text-[10px] text-slate-400" id="daily-note">لسه معندكش مصاريف مسجلة النهاردة.</p>
             </div>
 
             <div class="flex items-start gap-2 bg-slate-950/40 border border-slate-800/70 rounded-2xl p-3">
@@ -424,6 +424,26 @@
             </div>
 
             <div class="flex-1 overflow-y-auto p-5 space-y-3" id="archive-list">
+                <p class="text-xs text-slate-500 text-center p-4">جاري التحميل...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Person Debt Detail Overlay -->
+    <div id="person-debt-overlay" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[80vh]">
+            <div class="bg-slate-900/90 border-b border-slate-800/80 p-5 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-slate-700 to-slate-600 flex items-center justify-center text-slate-100 font-black text-xl">🧑</div>
+                    <div>
+                        <h2 class="font-bold text-base text-slate-100 leading-tight" id="person-debt-name">—</h2>
+                        <span class="text-xs font-semibold" id="person-debt-net-line">—</span>
+                    </div>
+                </div>
+                <button id="close-person-debt" class="w-9 h-9 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-sm">✕</button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-5 space-y-2.5" id="person-debt-list">
                 <p class="text-xs text-slate-500 text-center p-4">جاري التحميل...</p>
             </div>
         </div>
@@ -845,7 +865,7 @@
             if (debts.owedToYou.length > 0) {
                 owedCard.style.display = 'block';
                 owedList.innerHTML = debts.owedToYou.map((p, i) => `
-                    <div class="flex items-center justify-between py-2 ${i < debts.owedToYou.length - 1 ? 'border-b border-slate-800/60' : ''}">
+                    <div class="flex items-center justify-between py-2 cursor-pointer active:opacity-70 ${i < debts.owedToYou.length - 1 ? 'border-b border-slate-800/60' : ''}" data-person-name="${p.name}">
                         <div class="flex items-center gap-2.5">
                             <span class="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-sm">🧑</span>
                             <p class="text-xs font-semibold text-slate-200">${p.name}</p>
@@ -862,7 +882,7 @@
             if (debts.youOwe.length > 0) {
                 oweCard.style.display = 'block';
                 oweList.innerHTML = debts.youOwe.map((p, i) => `
-                    <div class="flex items-center justify-between py-2 ${i < debts.youOwe.length - 1 ? 'border-b border-slate-800/60' : ''}">
+                    <div class="flex items-center justify-between py-2 cursor-pointer active:opacity-70 ${i < debts.youOwe.length - 1 ? 'border-b border-slate-800/60' : ''}" data-person-name="${p.name}">
                         <div class="flex items-center gap-2.5">
                             <span class="w-8 h-8 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-sm">🧑</span>
                             <p class="text-xs font-semibold text-slate-200">${p.name}</p>
@@ -872,6 +892,74 @@
                 `).join('');
             } else {
                 oweCard.style.display = 'none';
+            }
+
+            // نربط كل صف شخص بحدث الدوس عليه (بنعمله هنا كل مرة بعد ما الـ HTML يتحدّث)
+            document.querySelectorAll('#debts-owed-to-you-list [data-person-name], #debts-you-owe-list [data-person-name]').forEach((row) => {
+                row.addEventListener('click', () => openPersonDebtDetail(row.dataset.personName));
+            });
+        }
+
+        // ============ فتح تفاصيل شخص معيّن (كل عملياته) لما تدوس على اسمه في تبويب الديون ============
+        async function openPersonDebtDetail(personName) {
+            const overlay = document.getElementById('person-debt-overlay');
+            const nameEl = document.getElementById('person-debt-name');
+            const netLineEl = document.getElementById('person-debt-net-line');
+            const listEl = document.getElementById('person-debt-list');
+
+            nameEl.textContent = personName;
+            netLineEl.textContent = '—';
+            listEl.innerHTML = '<p class="text-xs text-slate-500 text-center p-4">جاري التحميل...</p>';
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+
+            try {
+                const res = await fetch(`/api/debt-person-detail?name=${encodeURIComponent(personName)}`, {
+                    headers: { Authorization: `Bearer ${accessToken}` },
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'فشل تحميل البيانات');
+
+                const net = data.relevantNet;
+                netLineEl.textContent = net === 0
+                    ? 'متعادلين، مفيش حد ليه على التاني حاجة'
+                    : (net > 0 ? `ليك عنده ${fmt(net)}` : `عليك له ${fmt(Math.abs(net))}`);
+                netLineEl.className = `text-xs font-semibold ${net > 0 ? 'text-emerald-400' : net < 0 ? 'text-rose-400' : 'text-slate-400'}`;
+
+                if (data.transactions.length === 0) {
+                    listEl.innerHTML = '<p class="text-xs text-slate-500 text-center p-4">مفيش عمليات.</p>';
+                    return;
+                }
+
+                listEl.innerHTML = data.transactions.map((t) => {
+                    const isLent = t.direction === 'lent';
+                    const label = t.isRepayment
+                        ? (isLent ? 'إنت رجّعت' : 'رجّعلك')
+                        : (isLent ? 'إنت ديت' : 'إنت استلفت');
+                    const emoji = t.isRepayment ? '↩️' : (isLent ? '📤' : '📥');
+                    const signColor = isLent ? 'text-emerald-400' : 'text-rose-400';
+                    const dateStr = new Date(t.createdAt).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' });
+                    return `
+                        <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-3 flex items-center justify-between">
+                            <div class="flex items-center gap-2.5">
+                                <span class="text-base">${emoji}</span>
+                                <div>
+                                    <p class="text-xs font-semibold text-slate-200">${label}${t.note ? ` — ${t.note}` : ''}</p>
+                                    <p class="text-[10px] text-slate-500">${dateStr}</p>
+                                </div>
+                            </div>
+                            <span class="text-xs font-bold ${signColor}">${fmt(t.amount)}</span>
+                        </div>
+                    `;
+                }).join('');
+
+                if (data.lastSettlement) {
+                    const settleDate = new Date(data.lastSettlement).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' });
+                    listEl.innerHTML += `<p class="text-[10px] text-slate-500 text-center pt-2">✅ آخر تسوية: ${settleDate} — الصافي فوق محسوب من وقتها بس</p>`;
+                }
+            } catch (e) {
+                console.error('debt-person-detail fetch failed:', e);
+                listEl.innerHTML = `<p class="text-xs text-rose-400 text-center p-4">${e.message || 'حصل خطأ، جرب تاني.'}</p>`;
             }
         }
 
@@ -1178,6 +1266,12 @@
         });
         document.getElementById('close-archive').addEventListener('click', () => {
             const overlay = document.getElementById('archive-overlay');
+            overlay.classList.add('hidden');
+            overlay.classList.remove('flex');
+        });
+
+        document.getElementById('close-person-debt').addEventListener('click', () => {
+            const overlay = document.getElementById('person-debt-overlay');
             overlay.classList.add('hidden');
             overlay.classList.remove('flex');
         });

@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabaseClient.js';
-import { computeNetByPerson } from '../lib/debts.js';
+import { getFullDebtReportData } from '../lib/debts.js';
 import { buildFullDebtReportHtml } from '../lib/debtReportTemplate.js';
 import { renderPdfFromHtml } from '../lib/pdf.js';
 
@@ -19,18 +19,19 @@ export default async function handler(req, res) {
       return res.status(401).json({ error: 'انتهت صلاحية الجلسة، سجل دخول تاني.' });
     }
 
-    const { data: link } = await supabase
+    const { data: link, error: linkError } = await supabase
       .from('user_links')
       .select('telegram_user_id')
       .eq('auth_user_id', userData.user.id)
       .maybeSingle();
+    if (linkError) console.error('debts-report-pdf user_links error:', JSON.stringify(linkError));
 
     if (!link) {
       return res.status(400).json({ error: 'لازم تربط حسابك بالبوت الأول.' });
     }
 
-    const netByPerson = await computeNetByPerson(link.telegram_user_id);
-    const entries = Object.values(netByPerson).filter((v) => v.net !== 0);
+    const byPerson = await getFullDebtReportData(link.telegram_user_id);
+    const entries = Object.values(byPerson).filter((v) => v.net !== 0);
 
     if (entries.length === 0) {
       return res.status(404).json({ error: 'معندكش ديون مستحقة حالياً.' });

@@ -11,7 +11,7 @@
     <link rel="apple-touch-icon" href="./icons/icon-192.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Dabbar">
+    <meta name="apple-mobile-web-app-title" content="دبّر">
 
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -106,8 +106,8 @@
          فبنوريله تعليمات يدوية + زرار "تم التثبيت" يأكدها بنفسه (تقدير مش إجبار حقيقي، تقنيًا مستحيل غير كده). -->
     <div id="installGate" style="display:none; position:fixed; inset:0; z-index:9999; background:#020617; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:32px;">
         <div style="width:76px; height:76px; border-radius:20px; background:rgba(52,211,153,0.12); border:1.5px solid rgba(52,211,153,0.3); display:flex; align-items:center; justify-content:center; font-size:34px; margin-bottom:22px;">📲</div>
-        <h2 style="font-family:'Cairo',sans-serif; font-weight:900; font-size:21px; margin-bottom:12px; color:#f1f5f9;">ثبّت Dabbar على شاشتك الأول</h2>
-        <p style="color:#94a3b8; font-size:14px; line-height:1.9; max-width:320px; margin-bottom:26px;">عشان تفتح لوحة التحكم بسهولة في أي وقت من غير ما تدوّر على اللينك تاني، لازم تضيف Dabbar كـ Shortcut على شاشتك الرئيسية.</p>
+        <h2 style="font-family:'Cairo',sans-serif; font-weight:900; font-size:21px; margin-bottom:12px; color:#f1f5f9;">ثبّت دبّر على شاشتك الأول</h2>
+        <p style="color:#94a3b8; font-size:14px; line-height:1.9; max-width:320px; margin-bottom:26px;">عشان تفتح لوحة التحكم بسهولة في أي وقت من غير ما تدوّر على اللينك تاني، لازم تضيف دبّر كـ Shortcut على شاشتك الرئيسية.</p>
         <button id="installGateBtn" style="font-family:'Cairo',sans-serif; font-weight:800; font-size:14.5px; background:#34d399; color:#022c22; border:none; padding:15px 28px; border-radius:12px; cursor:pointer; margin-bottom:12px;">📲 ثبّت دلوقتي</button>
         <div id="installGateManual" style="display:none; color:#94a3b8; font-size:12.5px; line-height:1.9; max-width:300px; margin-bottom:14px;"></div>
         <button id="installGateConfirmBtn" style="display:none; background:none; border:1px solid rgba(148,163,184,0.3); color:#cbd5e1; font-family:'Tajawal',sans-serif; font-size:13px; padding:10px 18px; border-radius:10px; cursor:pointer;">✅ ثبّتها، كمّل</button>
@@ -171,8 +171,8 @@
         <!-- Brand Bar -->
         <div class="bg-slate-900/90 px-5 pt-4 pb-1 flex items-center justify-between">
             <div class="flex items-center gap-2">
-                <img src="./icons/icon-192.png" alt="Dabbar" class="w-8 h-8 rounded-xl">
-                <span class="text-2xl font-black" style="font-family:'Cairo',sans-serif; letter-spacing:-0.5px; background:linear-gradient(90deg,#34d399,#2dd4bf); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;">Dabbar</span>
+                <img src="./icons/icon-192.png" alt="دبّر" class="w-8 h-8 rounded-xl">
+                <span class="text-2xl font-black" style="font-family:'Cairo',sans-serif; letter-spacing:-0.5px; background:linear-gradient(90deg,#34d399,#2dd4bf); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;">دبّر</span>
             </div>
             <button id="brandbar-theme-btn" title="تبديل المظهر" class="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-xs hover:bg-slate-700 transition">🌙</button>
         </div>
@@ -429,24 +429,59 @@
                     <p id="account-sub-headline" class="text-sm font-black text-emerald-400 mb-1">—</p>
                     <p id="account-sub-subline" class="text-xs text-slate-400 leading-relaxed">—</p>
                 </div>
-                <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-4 space-y-3 text-xs">
+
+                <!-- فورم رفع إثبات الدفع — بيتقفل بعد الإرسال ويتحول لحالة "قيد المراجعة" تحت -->
+                <div id="account-sub-form" class="bg-slate-950/60 border border-slate-800 rounded-2xl p-4 space-y-3 text-xs">
                     <div class="flex items-start gap-2">
-                        <span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 flex items-center justify-center font-black text-[10px] shrink-0">1</span>
-                        <p class="text-slate-300">حوّل <b id="account-sub-price" class="text-emerald-400">100 ج.م</b> عن طريق إنستا باي على الرقم:
-                            <span id="account-sub-instapay" class="block mt-1 font-mono text-sm text-slate-100 bg-slate-900 rounded-lg px-3 py-2 select-all">—</span>
-                        </p>
+                        <span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 flex items-center justify-center font-black text-[10px] shrink-0 mt-0.5">1</span>
+                        <div class="flex-1">
+                            <p class="text-slate-300 mb-1.5">حوّل <b id="account-sub-price" class="text-emerald-400">100 ج.م</b> عن طريق إنستا باي على الرقم:</p>
+                            <button type="button" id="account-sub-copy-btn" class="w-full flex items-center justify-between gap-2 bg-slate-900 border border-slate-800 rounded-lg px-3 py-2.5">
+                                <span id="account-sub-instapay" class="font-mono text-sm text-slate-100 select-all" dir="ltr">—</span>
+                                <span id="account-sub-copy-label" class="text-[10px] font-bold text-emerald-400 shrink-0">نسخ 📋</span>
+                            </button>
+                        </div>
                     </div>
+
                     <div class="flex items-start gap-2">
-                        <span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 flex items-center justify-center font-black text-[10px] shrink-0">2</span>
-                        <p class="text-slate-300">صوّر الإيصال، واكتب اسمك اللي حولت بيه تحت الصورة</p>
+                        <span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 flex items-center justify-center font-black text-[10px] shrink-0 mt-0.5">2</span>
+                        <div class="flex-1 space-y-2">
+                            <p class="text-slate-300">ارفع صورة إيصال التحويل:</p>
+                            <label for="account-sub-file" id="account-sub-dropzone" class="cursor-pointer flex flex-col items-center justify-center gap-1.5 border-2 border-dashed border-slate-700 rounded-xl py-5 px-3 text-center hover:border-emerald-500/40 transition">
+                                <span class="text-xl" id="account-sub-upload-icon">📸</span>
+                                <span class="text-[11px] font-bold text-slate-400" id="account-sub-upload-text">اضغط لرفع صورة الإيصال</span>
+                            </label>
+                            <input type="file" id="account-sub-file" accept="image/*" class="hidden">
+                            <img id="account-sub-preview" class="hidden w-full rounded-lg border border-slate-800 object-cover max-h-40" alt="معاينة الإيصال">
+                        </div>
                     </div>
+
                     <div class="flex items-start gap-2">
-                        <span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 flex items-center justify-center font-black text-[10px] shrink-0">3</span>
-                        <p class="text-slate-300">ابعت الصورة على بوت Dabbar في تليجرام — هيتفعّل اشتراكك على طول بعد التأكد</p>
+                        <span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 flex items-center justify-center font-black text-[10px] shrink-0 mt-0.5">3</span>
+                        <div class="flex-1">
+                            <p class="text-slate-300 mb-1.5">اسمك اللي حولت بيه (لو مختلف عن اسمك هنا):</p>
+                            <input type="text" id="account-sub-name" placeholder="مثال: محمد أحمد" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none focus:border-emerald-500/50">
+                        </div>
+                    </div>
+
+                    <p id="account-sub-error" class="hidden text-rose-400 text-[11px] font-bold"></p>
+
+                    <button type="button" id="account-sub-submit" disabled class="w-full bg-slate-800 text-slate-500 font-black py-3 rounded-xl text-xs transition flex items-center justify-center gap-2 cursor-not-allowed">
+                        أرسل إثبات التحويل
+                    </button>
+                </div>
+
+                <!-- حالة "قيد المراجعة" بعد الإرسال -->
+                <div id="account-sub-pending" class="hidden bg-amber-500/10 border border-amber-500/20 rounded-2xl p-3.5 flex items-center gap-3">
+                    <span class="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/25 flex items-center justify-center text-base shrink-0">⏳</span>
+                    <div>
+                        <p class="text-xs font-bold text-amber-400">جاري مراجعة الإثبات</p>
+                        <p class="text-[11px] text-amber-400/80">هيتفعّل اشتراكك خلال دقايق قليلة، وهتوصلك رسالة تأكيد على تليجرام</p>
                     </div>
                 </div>
-                <a id="account-sub-open-bot" href="#" target="_blank" class="w-full bg-emerald-500 text-slate-950 font-black py-3.5 rounded-2xl text-sm flex items-center justify-center gap-2">
-                    💬 افتح بوت تليجرام
+
+                <a id="account-sub-open-bot" href="#" target="_blank" class="w-full bg-slate-950/60 border border-slate-800 text-slate-300 font-bold py-3 rounded-2xl text-xs flex items-center justify-center gap-2">
+                    💬 أو ابعت الإيصال مباشرة على بوت تليجرام
                 </a>
             </div>
 
@@ -1179,14 +1214,88 @@
 
             if (subscription.inTrial) {
                 headline.textContent = `🎁 باقي ${subscription.trialDaysLeft} يوم على تجربتك المجانية`;
-                subline.textContent = 'خلال الـ3 أيام دي هتشوف بنفسك إزاي Dabbar بيوفّرلك وقت وبيخليك متابع كل جنيه بيتصرف — من غير ما تفتح جدول ولا تكتب رقم بإيدك. اشترك دلوقتي عشان الخدمة متتقطعش.';
+                subline.textContent = 'خلال الـ3 أيام دي هتشوف بنفسك إزاي دبّر بيوفّرلك وقت وبيخليك متابع كل جنيه بيتصرف — من غير ما تفتح جدول ولا تكتب رقم بإيدك. اشترك دلوقتي عشان الخدمة متتقطعش.';
             } else {
                 headline.textContent = '⏳ خلصت أيام التجربة المجانية';
-                subline.textContent = 'جربت 3 أيام وشفت إزاي Dabbar بيتابعلك مصاريفك وديونك أول بأول — دلوقتي كمّل معاك عشان متفوّتش أي تفصيلة من حساباتك، ب100 جنيه بس في الشهر.';
+                subline.textContent = 'جربت 3 أيام وشفت إزاي دبّر بيتابعلك مصاريفك وديونك أول بأول — دلوقتي كمّل معاك عشان متفوّتش أي تفصيلة من حساباتك، ب150 جنيه بس في الشهر.';
             }
         }
 
+        // ============ رفع إثبات دفع الاشتراك من الداشبورد (بديل لبعت السكرين شوت يدوي على تليجرام) ============
+        (function setupSubscriptionUpload() {
+            const fileInput = document.getElementById('account-sub-file');
+            const preview = document.getElementById('account-sub-preview');
+            const dropText = document.getElementById('account-sub-upload-text');
+            const dropIcon = document.getElementById('account-sub-upload-icon');
+            const submitBtn = document.getElementById('account-sub-submit');
+            const errorEl = document.getElementById('account-sub-error');
+            const copyBtn = document.getElementById('account-sub-copy-btn');
+            const copyLabel = document.getElementById('account-sub-copy-label');
+            if (!fileInput || !submitBtn) return;
 
+            let selectedBase64 = null;
+
+            copyBtn.addEventListener('click', () => {
+                const number = document.getElementById('account-sub-instapay').textContent;
+                if (!number || number === '—') return;
+                navigator.clipboard?.writeText(number).catch(() => {});
+                copyLabel.textContent = 'اتنسخ ✅';
+                setTimeout(() => { copyLabel.textContent = 'نسخ 📋'; }, 1500);
+            });
+
+            fileInput.addEventListener('change', () => {
+                const file = fileInput.files[0];
+                if (!file) return;
+                errorEl.classList.add('hidden');
+
+                const reader = new FileReader();
+                reader.onload = () => {
+                    selectedBase64 = reader.result;
+                    preview.src = selectedBase64;
+                    preview.classList.remove('hidden');
+                    dropText.textContent = 'تم اختيار الصورة — اضغط لتغييرها';
+                    dropIcon.textContent = '✅';
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('bg-slate-800', 'text-slate-500', 'cursor-not-allowed');
+                    submitBtn.classList.add('bg-emerald-500', 'text-slate-950', 'cursor-pointer');
+                };
+                reader.readAsDataURL(file);
+            });
+
+            submitBtn.addEventListener('click', async () => {
+                if (submitBtn.disabled || !selectedBase64) return;
+                submitBtn.disabled = true;
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = 'بنبعت الإثبات...';
+                errorEl.classList.add('hidden');
+
+                try {
+                    const res = await fetch('/api/subscription-proof', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: `Bearer ${accessToken}`,
+                        },
+                        body: JSON.stringify({
+                            imageBase64: selectedBase64,
+                            senderName: document.getElementById('account-sub-name').value.trim(),
+                        }),
+                    });
+                    const data = await res.json().catch(() => ({}));
+                    if (!res.ok) throw new Error(data.error || 'حصل خطأ، جرب تاني.');
+
+                    document.getElementById('account-sub-form').classList.add('hidden');
+                    document.getElementById('account-sub-pending').classList.remove('hidden');
+                } catch (e) {
+                    errorEl.textContent = e.message || 'حصل خطأ، جرب تاني.';
+                    errorEl.classList.remove('hidden');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+                }
+            });
+        })();
+
+        async function loadAccountTab() {
             if (!currentUser) return;
 
             const nameEl = document.getElementById('account-name');
@@ -1211,7 +1320,7 @@
                 try { await sb.from('profiles').upsert({ id: currentUser.id, full_name: metaName, email }); } catch (e) { /* ignore */ }
             }
 
-            const displayName = profile.full_name || metaName || 'مستخدم Dabbar';
+            const displayName = profile.full_name || metaName || 'مستخدم دبّر';
             nameEl.textContent = displayName;
             emailEl.textContent = profile.email || email || '—';
 

@@ -3,15 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>فلوسي — فلوسك، من غير صداع</title>
+<title>دبّر — فلوسك، من غير صداع</title>
 
 <!-- PWA -->
 <link rel="manifest" href="app/manifest.json">
-<meta name="theme-color" content="#12201B">
+<meta name="theme-color" content="#0E2340">
 <link rel="apple-touch-icon" href="app/icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="فلوسي">
+<meta name="apple-mobile-web-app-title" content="دبّر">
 <link rel="icon" href="app/icons/icon-192.png">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -19,23 +19,24 @@
 <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
+  /* ===== هوية دبّر الموحّدة: أبيض + أخضر (نفس القيم بالظبط في dabbar-onboarding.html و guide.html) ===== */
   :root{
-    --ink:#12201B;
-    --ink-2:#1A2B23;
-    --ink-3:#213329;
-    --paper:#F5F1E1;
-    --paper-dark:#EAE2C6;
-    --paper-edge:#DCD2AC;
-    --gold:#D2A44A;
-    --gold-deep:#8C6620;
-    --stamp:#C1543F;
-    --money:#2F6B4F;
-    --money-bright:#4CAE80;
-    --money-deep:#1F4E38;
-    --text:#241C12;
-    --onDark:#F3EFDD;
-    --muted:#726B57;
-    --muted-onDark:#9CAA9E;
+    --ink:#0F2A1F;
+    --ink-2:#153524;
+    --ink-3:#1B4029;
+    --paper:#FFFFFF;
+    --paper-dark:#EAF8F1;
+    --paper-edge:#DCF3E7;
+    --gold:#1FAA6E;
+    --gold-deep:#0E8C57;
+    --stamp:#E0574A;
+    --money:#1FAA6E;
+    --money-bright:#22C07E;
+    --money-deep:#0E8C57;
+    --text:#16241D;
+    --onDark:#F4FAF6;
+    --muted:#6B7B72;
+    --muted-onDark:#A8C2B4;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   html{scroll-behavior:smooth;}
@@ -103,6 +104,19 @@
   .typing i{ width:5px; height:5px; border-radius:50%; background:var(--muted); opacity:.5; animation:blink 1.2s infinite; }
   .typing i:nth-child(2){ animation-delay:.2s; } .typing i:nth-child(3){ animation-delay:.4s; }
   @keyframes blink{ 0%,80%,100%{opacity:.3} 40%{opacity:1} }
+
+  /* ===== value section ===== */
+  .value{ background:var(--paper); padding:64px 0 10px; }
+  .value-head{ max-width:620px; margin:0 auto; text-align:center; }
+  .value-head h2{ font-family:'Cairo',sans-serif; font-weight:900; font-size:26px; color:var(--ink); line-height:1.4; }
+  .value-head p{ color:var(--muted); font-size:14px; margin-top:12px; line-height:1.9; }
+  .value-grid{ display:grid; grid-template-columns:1fr; gap:14px; margin-top:34px; }
+  @media(min-width:640px){ .value-grid{ grid-template-columns:1fr 1fr; } }
+  @media(min-width:960px){ .value-grid{ grid-template-columns:repeat(4,1fr); } }
+  .value-card{ background:#fff; border:1px solid var(--paper-edge); border-radius:16px; padding:20px; }
+  .value-num{ font-family:'Cairo',sans-serif; font-weight:900; font-size:11.5px; color:var(--money-deep); background:var(--paper-dark); display:inline-block; padding:3px 10px; border-radius:8px; }
+  .value-card h4{ font-family:'Cairo',sans-serif; font-weight:800; font-size:14.5px; color:var(--ink); margin-top:12px; }
+  .value-card p{ font-size:12.5px; color:var(--muted); margin-top:6px; line-height:1.8; }
 
   /* ===== flow / signature section ===== */
   .flow{ background:var(--paper); padding:70px 0 40px; text-align:center; }
@@ -184,8 +198,10 @@
 
   /* ===== pricing ===== */
   .pricing{ background:var(--ink); color:var(--onDark); padding:80px 0; }
-  .price-box{ max-width:400px; margin:0 auto; background:var(--ink-2); border:1.5px solid rgba(210,164,74,0.3); border-radius:18px; padding:34px 28px; text-align:center; }
-  .price-tag{ font-family:'Cairo',sans-serif; font-weight:900; font-size:52px; color:var(--onDark); margin:14px 0 2px; }
+  .price-box{ max-width:440px; margin:0 auto; background:var(--ink-2); border:1.5px solid rgba(31,170,110,0.3); border-radius:18px; padding:34px 28px; text-align:center; }
+  .trial-badge{ display:inline-flex; align-items:center; gap:6px; background:rgba(31,170,110,0.15); border:1px solid rgba(31,170,110,0.35); color:var(--money-bright); font-family:'Cairo',sans-serif; font-weight:800; font-size:12.5px; padding:7px 16px; border-radius:100px; margin-bottom:18px; }
+  .price-then{ font-family:'Cairo',sans-serif; font-weight:700; font-size:11.5px; color:var(--muted-onDark); }
+  .price-tag{ font-family:'Cairo',sans-serif; font-weight:900; font-size:52px; color:var(--onDark); margin:6px 0 2px; }
   .price-tag sup{ font-size:18px; color:var(--gold); }
   .price-per{ color:var(--muted-onDark); font-size:13px; margin-bottom:24px; }
   .price-feats{ text-align:right; margin-bottom:26px; }
@@ -216,13 +232,13 @@
 
 <nav>
   <div class="nav-inner">
-    <div class="brand"><span class="brand-dot"></span>فلوسي</div>
+    <div class="brand"><span class="brand-dot"></span>دبّر</div>
     <div class="nav-links">
       <a href="#report">شكل التقرير</a>
       <a href="#features">المميزات</a>
       <a href="#pricing">الاشتراك</a>
     </div>
-    <a class="nav-cta" href="app/floosy-onboarding.html">🔐 دخول</a>
+    <a class="nav-cta" href="app/dabbar-onboarding.html">🔐 دخول</a>
   </div>
 </nav>
 
@@ -230,17 +246,17 @@
 <section class="hero">
   <div class="wrap hero-grid">
     <div>
-      <div class="hero-eyebrow">تليجرام بوت لتتبع فلوسك</div>
+      <div class="hero-eyebrow">دبّر — يتابعلك فلوسك على تليجرام</div>
       <h1 class="hero-title">تقولّي بالصوت،<br>وهو يطلعلك <em>تقرير كامل</em></h1>
       <p class="hero-sub">مصاريفك وديونك بيتسجلوا لوحدهم من رسالة صوت عادية، وفي آخر الشهر تلاقي تقرير PDF جاهز فيه كل التفاصيل ومقارنة بالشهر اللي فات — من غير ما تفتح جدول ولا تكتب رقم بإيدك.</p>
       <div class="cta-row">
-        <a class="btn btn-primary" href="https://t.me/YourFloosyBotUsername" data-tg-link>🚀 افتح البوت دلوقتي</a>
+        <a class="btn btn-primary" href="app/dabbar-onboarding.html">🚀 ابدأ تجربتك المجانية</a>
         <a class="btn btn-outline" href="#report">📄 شوف شكل التقرير</a>
       </div>
       <div class="hero-stats">
-        <div class="hstat"><b>100 ج.م</b><span>اشتراك شهري</span></div>
+        <div class="hstat"><b>3 أيام</b><span>تجربة مجانية</span></div>
+        <div class="hstat"><b>150 ج.م</b><span>بعدها شهريًا</span></div>
         <div class="hstat"><b>24/7</b><span>متاح على طول</span></div>
-        <div class="hstat"><b>3</b><span>تقارير تلقائية</span></div>
       </div>
     </div>
 
@@ -248,7 +264,7 @@
       <div class="phone-screen">
         <div class="phone-head">
           <div class="av">ف</div>
-          <div><b>فلوسي</b><small>online</small></div>
+          <div><b>دبّر</b><small>online</small></div>
         </div>
         <div class="bubble bubble-out">🎤 "صرفت 180 جنيه عشا في مطعم كرنك"</div>
         <div class="bubble bubble-in">
@@ -258,6 +274,22 @@
         <div class="bubble bubble-out">"تقرير"</div>
         <div class="typing"><i></i><i></i><i></i></div>
       </div>
+    </div>
+  </div>
+</section>
+
+<!-- VALUE -->
+<section class="value">
+  <div class="wrap">
+    <div class="value-head reveal">
+      <h2>مش تطبيق تحط فيه أرقام،<br>ده حد بيمسكلك حساباتك</h2>
+      <p>الفرق إن التطبيقات العادية بتاخد منك وقت عشان تسجّل، دبّر بياخد منك ثانيتين وبيرجعلك بصورة كاملة عن فلوسك من غير ما تفتح جدول ولا تدوّر على حاجة.</p>
+    </div>
+    <div class="value-grid reveal">
+      <div class="value-card"><div class="value-num">01</div><h4>تسجيل بالكلام العادي</h4><p>تكتب أو تبعت فويس نوت "صرفت 50 جنيه أكل" وخلاص، من غير فورمات ولا قوائم اختيار.</p></div>
+      <div class="value-card"><div class="value-num">02</div><h4>تصنيف وتحليل تلقائي</h4><p>كل عملية بتترتب في فئتها الصح لوحدها، وهتعرف فين بالظبط بيروح أكتر فلوسك.</p></div>
+      <div class="value-card"><div class="value-num">03</div><h4>متابعة الديون والسلف</h4><p>مين ليك ومين عليك، بتفاصيل كل عملية وتاريخها، من غير ما تنسى ولا تلخبط.</p></div>
+      <div class="value-card"><div class="value-num">04</div><h4>تقارير جاهزة يومي وشهري</h4><p>ملخص يومي، تقرير شهري كامل، وملف PDF جاهز تصدّره وقت ما تحب.</p></div>
     </div>
   </div>
 </section>
@@ -293,7 +325,7 @@
 
     <div class="report-card reveal" id="reportCard">
       <div class="rc-header">
-        <div class="rc-brand">تقرير <span>فلوسي</span></div>
+        <div class="rc-brand">تقرير <span>دبّر</span></div>
         <div class="rc-title">التقرير الشهري</div>
         <div class="rc-period">أغسطس 2026</div>
       </div>
@@ -308,7 +340,7 @@
           </div>
           <div class="rc-compare">↓ أقل من الشهر اللي فات بـ 550 جنيه (13%)</div>
           <div class="rc-chart">
-            <img loading="lazy" src="https://quickchart.io/chart?width=480&height=380&backgroundColor=%23F3EFDD&c=%7B%22type%22%3A%20%22doughnut%22%2C%20%22data%22%3A%20%7B%22labels%22%3A%20%5B%22%D8%A3%D9%83%D9%84%22%2C%20%22%D9%81%D9%88%D8%A7%D8%AA%D9%8A%D8%B1%22%2C%20%22%D9%85%D9%88%D8%A7%D8%B5%D9%84%D8%A7%D8%AA%22%2C%20%22%D8%AA%D8%B3%D9%88%D9%82%22%2C%20%22%D8%AA%D8%B1%D9%81%D9%8A%D9%87%22%5D%2C%20%22datasets%22%3A%20%5B%7B%22data%22%3A%20%5B1250%2C%20900%2C%20680%2C%20450%2C%20320%5D%2C%20%22backgroundColor%22%3A%20%5B%22%23FF6B6B%22%2C%20%22%23FFD166%22%2C%20%22%234ECDC4%22%2C%20%22%23A78BFA%22%2C%20%22%23F472B6%22%5D%2C%20%22borderColor%22%3A%20%22%23F3EFDD%22%2C%20%22borderWidth%22%3A%204%7D%5D%7D%2C%20%22options%22%3A%20%7B%22cutout%22%3A%20%2260%25%22%2C%20%22layout%22%3A%20%7B%22padding%22%3A%208%7D%2C%20%22plugins%22%3A%20%7B%22legend%22%3A%20%7B%22position%22%3A%20%22bottom%22%2C%20%22labels%22%3A%20%7B%22color%22%3A%20%22%23241C12%22%2C%20%22font%22%3A%20%7B%22size%22%3A%2015%7D%2C%20%22padding%22%3A%2012%2C%20%22boxWidth%22%3A%2014%7D%7D%7D%7D%7D" alt="رسم بياني لتوزيع المصاريف">
+            <img loading="lazy" src="https://quickchart.io/chart?width=480&height=380&backgroundColor=%23FFFFFF&c=%7B%22type%22%3A%20%22doughnut%22%2C%20%22data%22%3A%20%7B%22labels%22%3A%20%5B%22%D8%A3%D9%83%D9%84%22%2C%20%22%D9%81%D9%88%D8%A7%D8%AA%D9%8A%D8%B1%22%2C%20%22%D9%85%D9%88%D8%A7%D8%B5%D9%84%D8%A7%D8%AA%22%2C%20%22%D8%AA%D8%B3%D9%88%D9%82%22%2C%20%22%D8%AA%D8%B1%D9%81%D9%8A%D9%87%22%5D%2C%20%22datasets%22%3A%20%5B%7B%22data%22%3A%20%5B1250%2C%20900%2C%20680%2C%20450%2C%20320%5D%2C%20%22backgroundColor%22%3A%20%5B%22%23FF6B6B%22%2C%20%22%23FFD166%22%2C%20%22%234ECDC4%22%2C%20%22%23A78BFA%22%2C%20%22%23F472B6%22%5D%2C%20%22borderColor%22%3A%20%22%23FFFFFF%22%2C%20%22borderWidth%22%3A%204%7D%5D%7D%2C%20%22options%22%3A%20%7B%22cutout%22%3A%20%2260%25%22%2C%20%22layout%22%3A%20%7B%22padding%22%3A%208%7D%2C%20%22plugins%22%3A%20%7B%22legend%22%3A%20%7B%22position%22%3A%20%22bottom%22%2C%20%22labels%22%3A%20%7B%22color%22%3A%20%22%2316241D%22%2C%20%22font%22%3A%20%7B%22size%22%3A%2015%7D%2C%20%22padding%22%3A%2012%2C%20%22boxWidth%22%3A%2014%7D%7D%7D%7D%7D" alt="رسم بياني لتوزيع المصاريف">
           </div>
 
           <div class="cat-block">
@@ -351,7 +383,7 @@
         </div>
 
       </div>
-      <div class="rc-foot">FLOOSY — اتولّد أوتوماتيك بتاريخ 31 أغسطس 2026</div>
+      <div class="rc-foot">DABBAR — اتولّد أوتوماتيك بتاريخ 31 أغسطس 2026</div>
     </div>
   </div>
 </section>
@@ -362,7 +394,7 @@
     <div class="sc-head reveal" style="color:var(--onDark);">
       <div class="sc-eyebrow" style="color:var(--gold);">EP.001.B — لوحة أداءك</div>
       <h2 style="color:var(--onDark);">نفس البيانات، في شكل لوحة تحكم</h2>
-      <p style="color:var(--muted-onDark);">مش تصميم بديل عن الـ PDF — دي نفس الأرقام اللي البوت بيحسبها، معروضة بشكل تاني يومي وشهري.</p>
+      <p style="color:var(--muted-onDark);">مش تصميم بديل عن الـ PDF — دي نفس الأرقام اللي دبّر بيحسبها، معروضة بشكل تاني يومي وشهري.</p>
     </div>
 
     <div class="tabs reveal">
@@ -475,14 +507,14 @@
 
       <!-- footer action -->
       <div class="p-4 bg-slate-900 border-t border-slate-800/80">
-        <a href="https://t.me/YourFloosyBotUsername" data-tg-link class="block w-full text-center bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-3 rounded-2xl text-sm transition shadow-lg shadow-emerald-500/20">
-          افتح البوت وشوف تقريرك إنت 🚀
+        <a href="https://t.me/YourDabbarBotUsername" data-tg-link class="block w-full text-center bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-3 rounded-2xl text-sm transition shadow-lg shadow-emerald-500/20">
+          افتح دبّر وشوف تقريرك إنت 🚀
         </a>
       </div>
     </div>
 
     <p class="reveal" style="text-align:center; color:var(--muted-onDark); font-size:12px; margin-top:18px; max-width:420px; margin-left:auto; margin-right:auto;">
-      ملحوظة: البوت حاليًا بيتتبع المصاريف والديون بس (مفيش تتبع دخل شهري)، فكل رقم فوق ده من نفس بياناتك الحقيقية.
+      ملحوظة: دبّر حاليًا بيتتبع المصاريف والديون بس (مفيش تتبع دخل شهري)، فكل رقم فوق ده من نفس بياناتك الحقيقية.
     </p>
   </div>
 </section>
@@ -514,7 +546,7 @@
     </div>
     <div class="how-grid reveal">
       <div class="step"><div class="step-num">1</div><div><strong>ابعت فويس أو رسالة</strong><span>"صرفت 50 جنيه أكل" أو "استلفت من سارة 100 جنيه"</span></div></div>
-      <div class="step"><div class="step-num">2</div><div><strong>البوت يفهم ويصنّف</strong><span>بيفرّق لوحده بين مصروف، دين، أو تسوية دين</span></div></div>
+      <div class="step"><div class="step-num">2</div><div><strong>دبّر يفهم ويصنّف</strong><span>بيفرّق لوحده بين مصروف، دين، أو تسوية دين</span></div></div>
       <div class="step"><div class="step-num">3</div><div><strong>يتسجل ويتحسب أوتوماتيك</strong><span>وهيوصلك تقرير وتذكير من غير ما تطلبه</span></div></div>
     </div>
   </div>
@@ -525,30 +557,31 @@
   <div class="wrap">
     <div class="sec-head reveal">
       <div class="sec-eyebrow">EP.004 — الاشتراك</div>
-      <h2>اشتراك شهري واحد، كل المميزات</h2>
+      <h2>جرّب دبّر مجانًا 3 أيام</h2>
     </div>
 
     <div class="price-box reveal">
-      <div class="price-per">فلوسي — شهري</div>
-      <div class="price-tag">100<sup>ج.م</sup></div>
-      <div class="price-per">بدون تجديد أوتوماتيك — بتحول بنفسك كل شهر</div>
+      <div class="trial-badge">🎁 3 أيام تجربة مجانية بكل المميزات</div>
+      <div class="price-then">بعد التجربة، الاشتراك</div>
+      <div class="price-tag">150<sup>ج.م / شهريًا</sup></div>
+      <div class="price-per">بدون تجديد أوتوماتيك — بتحول بنفسك كل شهر، وتلغيه وقت ما تحب</div>
       <div class="price-feats">
         <div>✅ تسجيل صوتي غير محدود</div>
         <div>✅ متابعة ديون كاملة</div>
         <div>✅ تقارير PDF يومية/أسبوعية/شهرية</div>
         <div>✅ تصدير CSV وقت ما تحتاج</div>
       </div>
-      <a class="btn btn-primary" style="width:100%; justify-content:center;" href="https://t.me/YourFloosyBotUsername" data-tg-link>💳 اشترك دلوقتي</a>
+      <a class="btn btn-primary" style="width:100%; justify-content:center;" href="app/dabbar-onboarding.html">🚀 ابدأ تجربتك المجانية دلوقتي</a>
     </div>
 
     <div class="instapay-steps reveal">
-      <div class="step"><div class="step-num">1</div><div><strong>حوّل قيمة الاشتراك</strong><span>عن طريق إنستا باي على رقم فلوسي</span></div></div>
+      <div class="step"><div class="step-num">1</div><div><strong>حوّل قيمة الاشتراك</strong><span>عن طريق إنستا باي على رقم دبّر</span></div></div>
       <div class="ip-box" id="ipBox" style="cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:10px;">
         <span id="ipNumber" style="filter:blur(6px); user-select:none; transition:filter .2s;">01025204455</span>
         <span id="ipToggle" style="font-family:'Cairo',sans-serif; font-weight:800; font-size:12px; color:var(--gold); white-space:nowrap;">👁️ إظهار الرقم</span>
       </div>
       <div class="step"><div class="step-num">2</div><div><strong>صوّر الإيصال</strong><span>سكرين شوت واضح فيه اسمك وقيمة التحويل</span></div></div>
-      <div class="step"><div class="step-num">3</div><div><strong>ابعت الصورة على البوت نفسه</strong><span>هيسألك على اسمك عشان نتأكد من التحويل بسرعة</span></div></div>
+      <div class="step"><div class="step-num">3</div><div><strong>ابعت الصورة على دبّر في تليجرام</strong><span>هيسألك على اسمك عشان نتأكد من التحويل بسرعة</span></div></div>
       <div class="step"><div class="step-num">4</div><div><strong>يتفعّل اشتراكك</strong><span>غالبًا خلال دقائق بعد التأكد</span></div></div>
     </div>
   </div>
@@ -577,19 +610,19 @@
       <h2>محتاج تعرف إيه كمان</h2>
     </div>
     <div class="faq-list reveal">
-      <details open><summary>البوت شغال بالمصري ولا لازم أكتب فصحى؟</summary><p>بالعامية المصرية عادي جدًا — "صرفت"، "عطيت"، "استلفت" كلها بيفهمها صح.</p></details>
+      <details open><summary>دبّر شغال بالمصري ولا لازم أكتب فصحى؟</summary><p>بالعامية المصرية عادي جدًا — "صرفت"، "عطيت"، "استلفت" كلها بيفهمها صح.</p></details>
       <details><summary>لو دفعت وماتفعّلش، أعمل إيه؟</summary><p>تأكد إنك بعتت اسمك مع صورة الإيصال في نفس المحادثة، واستنى شوية — لو اتأخر عن المتوقع، ابعت للبوت "مساعدة" وهتلاقي وسيلة تواصل تانية.</p></details>
       <details><summary>التقرير في الصورة ده حقيقي؟</summary><p>أيوه، ده نفس تصميم الـ PDF اللي بيتولّد فعليًا من بياناتك — مش موك أب بعيد عن الواقع.</p></details>
-      <details><summary>فين دليل الاستخدام الكامل؟</summary><p>ابعت /start للبوت وهتلاقي زرار "📖 دليل الاستخدام الكامل" بيفتح جوه تليجرام نفسه.</p></details>
+      <details><summary>فين دليل الاستخدام الكامل؟</summary><p>ابعت /start لـ دبّر وهتلاقي زرار "📖 دليل الاستخدام الكامل" بيفتح جوه تليجرام نفسه.</p></details>
     </div>
   </div>
 </section>
 
 <footer>
-  فلوسي — تتبع مصاريفك وديونك من غير ما تفكر
+  دبّر — تتبع مصاريفك وديونك من غير ما تفكر
 </footer>
 
-<a class="fab" href="https://t.me/YourFloosyBotUsername" data-tg-link>💬 فتح البوت</a>
+<a class="fab" href="app/dabbar-onboarding.html">🚀 ابدأ مجانًا مع دبّر</a>
 
 <script>
   // reveal on scroll
@@ -640,8 +673,8 @@
   });
 
   /* ========================================================
-     SUPABASE SETUP — نفس القيم اللي في app/floosy-onboarding.html
-     و app/floosy-dashboard-full.html بالظبط، عشان الجلسة تتعرف
+     SUPABASE SETUP — نفس القيم اللي في app/dabbar-onboarding.html
+     و app/dabbar-dashboard-full.html بالظبط، عشان الجلسة تتعرف
      صح على كل الصفحات (نفس مشروع Supabase).
   ========================================================= */
   const SUPABASE_URL = 'https://devywtyfzybnahdsqdkd.supabase.co';
@@ -655,7 +688,7 @@
       const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
       const { data: { session } } = await sb.auth.getSession();
       if (session) {
-        window.location.replace('app/floosy-onboarding.html');
+        window.location.replace('app/dabbar-onboarding.html');
       }
     } catch (e) {
       // لو حصل أي خطأ (مثلاً Supabase مش متظبط لسه)، سيب المستخدم شايف صفحة الهبوط عادي

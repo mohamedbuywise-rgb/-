@@ -1,13 +1,13 @@
 {
-  "name": "فلوسي — تتبع مصاريفك وديونك",
-  "short_name": "فلوسي",
+  "name": "دبّر — تتبع مصاريفك وديونك",
+  "short_name": "دبّر",
   "description": "تتبع مصاريفك وديونك بالصوت، وشوف تقاريرك أول بأول",
-  "start_url": "./floosy-onboarding.html",
+  "start_url": "./dabbar-onboarding.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
-  "background_color": "#12201B",
-  "theme_color": "#12201B",
+  "background_color": "#FFFFFF",
+  "theme_color": "#1FAA6E",
   "dir": "rtl",
   "lang": "ar",
   "icons": [

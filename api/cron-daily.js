@@ -100,7 +100,7 @@ async function processUser(user, { isFriday, isLastDayOfMonth, monthKey }) {
       if (claimedRenewal) {
         await sendTelegramMessage(
           chatId,
-          `⏳ اشتراكك في فلوسي هيخلص خلال ${daysLeft} يوم.\nابعت "اشتراكي" عشان تشوف تفاصيل التجديد.`
+          `⏳ اشتراكك في دبّر هيخلص خلال ${daysLeft} يوم.\nابعت "اشتراكي" عشان تشوف تفاصيل التجديد.`
         );
       }
     }

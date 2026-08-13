@@ -1,6 +1,11 @@
 import { supabase } from '../lib/supabaseClient.js';
 
-// ============ POST /api/link-account ============
+// ============ POST /api/link-account (DEPRECATED) ============
+// ⚠️ مش مستخدم في شاشة onboarding الحالية بعد التبسيط لـ3 شاشات — بقى في مكانه
+// api/auth-by-code.js (بيعمل الحساب ويربطه ويرجّع session بكود الربط بس، من غير الحاجة
+// لجلسة Supabase موجودة قبل كده أو فورم إيميل/باسورد). سايبين الملف ده لأي كود قديم لسه
+// بيتصل بيه (مثلاً لو عندك نسخة onboarding مخصصة بتعتمد على تسجيل إيميل/باسورد حقيقي).
+//
 // بيتنادى من صفحة الداشبورد بعد ما المستخدم يكتب الكود اللي وصله من البوت (/link).
 // Body: { code: "123456" }
 // Header: Authorization: Bearer <supabase access token بتاع الجلسة الحالية>

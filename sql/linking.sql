@@ -1,6 +1,11 @@
 -- شغّل الكود ده في Supabase -> SQL Editor -> New Query -> Run
 -- ده migration جديد يضيف ربط حساب الموقع (Supabase Auth) بحساب تليجرام بتاع نفس المستخدم.
 -- من غير الربط ده، الداشبورد مش هيعرف يجيب بيانات المستخدم الصح من جدول expenses/debts.
+--
+-- ملحوظة مهمة (بعد تبسيط الـ onboarding لـ3 شاشات): دلوقتي مفيش فورم إيميل/باسورد منفصل خالص.
+-- المستخدم بيكتب كود الربط بس، والسيرفر (api/auth-by-code.js) هو اللي بيعمل حساب Supabase Auth
+-- تلقائي أول مرة (بإيميل صناعي مبني على telegram_user_id) ويربطه على طول — ده معناه إن الـ auth
+-- بقى معتمد على تليجرام بالكامل، مش على إيميل/باسورد حقيقيين بيدخلهم المستخدم بنفسه.
 
 -- ============ أكواد الربط المؤقتة (تتولد من /link في البوت، صالحة 10 دقايق) ============
 create table if not exists link_codes (
@@ -9,8 +14,14 @@ create table if not exists link_codes (
   chat_id bigint not null,
   expires_at timestamptz not null,
   used boolean not null default false,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  -- الاسم الأول بتاع المستخدم في تليجرام، بنحفظه هنا عشان نستخدمه كاسم افتراضي
+  -- لما نعمل حساب جديد تلقائي من شاشة الربط (من غير ما نطلب منه يكتب اسمه في فورم منفصل)
+  telegram_first_name text
 );
+
+-- آمن يتشغّل تاني حتى لو الجدول كان موجود قبل الإضافة دي
+alter table link_codes add column if not exists telegram_first_name text;
 
 create index if not exists idx_link_codes_telegram
   on link_codes (telegram_user_id);

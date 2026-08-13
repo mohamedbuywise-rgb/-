@@ -3,95 +3,112 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Dabbar — ابدأ دلوقتي</title>
+<title>دبّر — ابدأ دلوقتي</title>
 
 <!-- PWA -->
 <link rel="manifest" href="./manifest.json">
-<meta name="theme-color" content="#12201B">
+<meta name="theme-color" content="#1FAA6E">
 <link rel="apple-touch-icon" href="./icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Dabbar">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="دبّر">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
+  /* ===== هوية دبّر الموحّدة: أبيض + أخضر (زي index.html و guide.html بالظبط) ===== */
   :root{
-    --ink:#12201B; --ink-2:#1A2B23; --ink-3:#213329;
-    --gold:#D2A44A; --gold-deep:#8C6620;
-    --money:#2F6B4F; --money-bright:#4CAE80; --money-deep:#1F4E38;
-    --onDark:#F3EFDD; --muted-onDark:#9CAA9E;
-    --danger:#E07A6B;
+    --green:#1FAA6E; --green-deep:#0E8C57; --green-tint:#EAF8F1; --green-tint-2:#DCF3E7;
+    --ink:#0F2A1F; --text:#16241D; --muted:#6B7B72; --line:#E7EEE9; --paper:#FFFFFF;
+    --danger:#E0574A; --danger-tint:#FDECEA;
+    --warn:#8A5A17; --warn-bg:#FFF7ED; --warn-line:#FBD9A5;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
-  body{ font-family:'Tajawal',sans-serif; background:var(--ink); color:var(--onDark); min-height:100vh; overflow-x:hidden; }
+  body{ font-family:'Tajawal',sans-serif; background:#F6FAF7; color:var(--text); min-height:100vh; overflow-x:hidden; }
   .disp{ font-family:'Cairo',sans-serif; }
   .screen{ min-height:100vh; display:flex; flex-direction:column; }
-  .bg-glow{ background-image: radial-gradient(circle at 15% 0%, rgba(210,164,74,0.14), transparent 45%), radial-gradient(circle at 90% 100%, rgba(76,174,128,0.16), transparent 45%); }
 
-  /* ===== onboarding ===== */
-  #onboarding{ position:relative; }
+  /* ===== welcome / onboarding slides ===== */
+  #welcome{ position:relative; }
   .slides{ flex:1; position:relative; overflow:hidden; }
   .slide{ position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:0 30px; opacity:0; transform:translateX(24px); transition:opacity .35s ease, transform .35s ease; pointer-events:none; }
   .slide.active{ opacity:1; transform:translateX(0); pointer-events:auto; }
-  .slide-icon{ width:84px; height:84px; border-radius:24px; background:var(--ink-2); border:1.5px solid rgba(210,164,74,0.3); display:flex; align-items:center; justify-content:center; font-size:36px; margin-bottom:26px; }
-  .slide h2{ font-family:'Cairo',sans-serif; font-weight:900; font-size:24px; line-height:1.5; margin-bottom:12px; }
-  .slide h2 em{ font-style:normal; color:var(--money-bright); }
-  .slide p{ color:var(--muted-onDark); font-size:14.5px; line-height:1.9; max-width:320px; }
+  .slide-icon{ width:84px; height:84px; border-radius:22px; background:var(--green-tint); border:1.5px solid var(--green-tint-2); display:flex; align-items:center; justify-content:center; font-size:36px; margin-bottom:26px; }
+  .slide h2{ font-family:'Cairo',sans-serif; font-weight:900; font-size:24px; line-height:1.5; margin-bottom:12px; color:var(--ink); }
+  .slide h2 em{ font-style:normal; color:var(--green-deep); }
+  .slide p{ color:var(--muted); font-size:14.5px; line-height:1.9; max-width:320px; }
 
   .dots{ display:flex; justify-content:center; gap:7px; padding:18px 0; }
-  .dot{ width:7px; height:7px; border-radius:50%; background:rgba(243,239,221,0.2); transition:.25s; }
-  .dot.active{ width:20px; border-radius:5px; background:var(--gold); }
+  .dot{ width:7px; height:7px; border-radius:50%; background:var(--line); transition:.25s; }
+  .dot.active{ width:20px; border-radius:5px; background:var(--green); }
 
   .onb-footer{ padding:10px 24px 34px; display:flex; align-items:center; gap:12px; }
-  .btn{ font-family:'Cairo',sans-serif; font-weight:800; font-size:14.5px; padding:15px 22px; border-radius:12px; display:flex; align-items:center; justify-content:center; gap:8px; cursor:pointer; border:none; width:100%; }
-  .btn-primary{ background:var(--money-bright); color:#0E1D16; box-shadow:0 14px 30px -10px rgba(76,174,128,0.45); }
-  .btn-primary:hover{ filter:brightness(1.05); }
-  .skip-link{ background:none; border:none; color:var(--muted-onDark); font-family:'Tajawal',sans-serif; font-size:13px; padding:12px; cursor:pointer; white-space:nowrap; }
+  .btn{ font-family:'Cairo',sans-serif; font-weight:800; font-size:14.5px; padding:15px 22px; border-radius:12px; display:flex; align-items:center; justify-content:center; gap:8px; cursor:pointer; border:none; width:100%; text-decoration:none; }
+  .btn-primary{ background:var(--green); color:#fff; box-shadow:0 14px 30px -10px rgba(31,170,110,0.45); }
+  .btn-primary:hover{ filter:brightness(1.04); }
+  .btn-primary:disabled{ opacity:.5; cursor:not-allowed; filter:none; box-shadow:none; }
+  .btn-ghost{ background:var(--green-tint); color:var(--green-deep); }
+  .skip-link{ background:none; border:none; color:var(--muted); font-family:'Tajawal',sans-serif; font-size:13px; padding:12px; cursor:pointer; white-space:nowrap; }
 
-  .top-brand{ display:flex; align-items:center; justify-content:center; gap:8px; padding:26px 0 6px; font-family:'Cairo',sans-serif; font-weight:900; font-size:16px; }
-  .brand-dot{ width:7px; height:7px; border-radius:50%; background:var(--gold); }
+  .top-brand{ display:flex; align-items:center; justify-content:center; gap:8px; padding:26px 0 6px; font-family:'Cairo',sans-serif; font-weight:900; font-size:16px; color:var(--ink); }
+  .brand-dot{ width:9px; height:9px; border-radius:50%; background:var(--green); box-shadow:0 0 0 4px var(--green-tint); }
 
-  /* ===== install banner ===== */
-  #installBar{ display:none; align-items:center; gap:10px; background:var(--ink-2); border:1px solid rgba(210,164,74,0.3); border-radius:14px; padding:12px 14px; margin:0 20px 14px; }
-  #installBar.show{ display:flex; }
-  #installBar .ib-txt{ flex:1; font-size:12.5px; color:var(--muted-onDark); }
-  #installBar button{ font-family:'Cairo',sans-serif; font-weight:800; font-size:12px; background:var(--gold); color:#241C12; border:none; padding:8px 14px; border-radius:8px; cursor:pointer; white-space:nowrap; }
+  /* ===== link + create-account screen (merged, 3 خطوات) ===== */
+  #linkScreen{ display:none; align-items:center; justify-content:center; }
+  #linkScreen.active{ display:flex; }
+  .link-card{ width:100%; max-width:420px; margin:0 auto; padding:0 24px 40px; }
+  .link-card h2{ font-family:'Cairo',sans-serif; font-weight:900; font-size:19px; text-align:center; margin-bottom:8px; color:var(--ink); }
+  .link-card > p.sub{ text-align:center; color:var(--muted); font-size:13px; line-height:1.9; margin-bottom:20px; }
 
-  /* ===== auth ===== */
-  #auth{ display:none; }
-  #auth.active{ display:flex; }
-  .auth-card{ width:100%; max-width:400px; margin:0 auto; padding:0 24px 40px; }
-  .auth-tabs{ display:flex; background:var(--ink-2); border-radius:12px; padding:4px; margin-bottom:26px; }
-  .auth-tab{ flex:1; text-align:center; padding:11px; border-radius:9px; font-family:'Cairo',sans-serif; font-weight:800; font-size:13.5px; color:var(--muted-onDark); cursor:pointer; }
-  .auth-tab.active{ background:var(--money); color:#fff; }
+  .steps{ display:flex; flex-direction:column; gap:10px; margin-bottom:20px; }
+  .step{ display:flex; gap:12px; align-items:flex-start; background:var(--green-tint); border-radius:14px; padding:12px 14px; }
+  .step .num{ width:24px; height:24px; border-radius:50%; background:var(--green); color:#fff; font-family:'Cairo',sans-serif; font-weight:900; font-size:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .step .txt{ font-size:12.5px; line-height:1.8; color:var(--ink); padding-top:2px; }
+  .step .txt b{ font-family:'Cairo',sans-serif; }
+
   .field{ margin-bottom:16px; }
-  .field label{ display:block; font-family:'Cairo',sans-serif; font-weight:700; font-size:12.5px; margin-bottom:6px; color:var(--onDark); }
-  .field input{ width:100%; background:var(--ink-2); border:1.5px solid rgba(210,164,74,0.2); border-radius:10px; padding:13px 14px; font-family:'Tajawal',sans-serif; font-size:14px; color:var(--onDark); }
-  .field input:focus{ outline:none; border-color:var(--money-bright); }
-  .field input::placeholder{ color:#5C6B62; }
-  #authError{ display:none; background:rgba(224,122,107,0.12); border:1px solid rgba(224,122,107,0.35); color:var(--danger); font-size:12.5px; border-radius:9px; padding:10px 12px; margin-bottom:14px; }
-  #authError.show{ display:block; }
-  #authNotice{ display:none; background:rgba(76,174,128,0.12); border:1px solid rgba(76,174,128,0.35); color:var(--money-bright); font-size:12.5px; border-radius:9px; padding:10px 12px; margin-bottom:14px; line-height:1.7; }
-  #authNotice.show{ display:block; }
-  .spinner{ width:16px; height:16px; border:2px solid rgba(14,29,22,0.3); border-top-color:#0E1D16; border-radius:50%; animation:spin .7s linear infinite; }
+  .field label{ display:block; font-family:'Cairo',sans-serif; font-weight:700; font-size:12.5px; margin-bottom:6px; color:var(--ink); text-align:center; }
+  .field input{ width:100%; background:#fff; border:1.5px solid var(--line); border-radius:10px; padding:13px 14px; font-family:'Tajawal',sans-serif; font-size:14px; color:var(--text); text-align:center; letter-spacing:6px; font-weight:800; }
+  .field input:focus{ outline:none; border-color:var(--green); }
+  .field input::placeholder{ color:#B7C4BC; letter-spacing:normal; font-weight:400; }
+
+  #linkError{ display:none; background:var(--danger-tint); border:1px solid rgba(224,87,74,0.3); color:var(--danger); font-size:12.5px; border-radius:9px; padding:10px 12px; margin-bottom:14px; line-height:1.7; }
+  #linkError.show{ display:block; }
+  #linkNotice{ display:none; background:var(--green-tint); border:1px solid var(--green-tint-2); color:var(--green-deep); font-size:12.5px; border-radius:9px; padding:10px 12px; margin-bottom:14px; line-height:1.7; text-align:center; }
+  #linkNotice.show{ display:flex; align-items:center; justify-content:center; gap:8px; }
+
+  .spinner{ width:16px; height:16px; border:2px solid rgba(255,255,255,0.35); border-top-color:#fff; border-radius:50%; animation:spin .7s linear infinite; flex-shrink:0; }
+  .spinner-dark{ border:2px solid var(--green-tint-2); border-top-color:var(--green); }
   @keyframes spin{ to{ transform:rotate(360deg); } }
+
+  /* ===== تنويه تثبيت التطبيق الإجباري ===== */
+  .install-notice{ background:var(--warn-bg); border:1.5px solid var(--warn-line); border-radius:14px; padding:14px 16px; margin-bottom:18px; }
+  .install-notice-title{ font-family:'Cairo',sans-serif; font-weight:900; font-size:12.5px; color:var(--warn); display:flex; align-items:center; gap:6px; }
+  .install-notice-txt{ font-size:11.5px; color:var(--warn); line-height:1.8; margin-top:6px; opacity:.92; }
+  .install-btn{ margin-top:10px; background:#fff; border:1.5px solid var(--warn-line); color:var(--warn); font-family:'Cairo',sans-serif; font-weight:800; font-size:12.5px; padding:10px; border-radius:10px; width:100%; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; }
+  .install-btn.done{ background:var(--green-tint); border-color:var(--green-tint-2); color:var(--green-deep); }
+  .install-check{ display:flex; align-items:center; gap:8px; margin-top:10px; font-size:11.5px; color:var(--warn); cursor:pointer; }
+  .install-check input{ width:15px; height:15px; accent-color:var(--green); }
+
+  /* ===== success (بيتحول جواه نفس شاشة الربط، مش شاشة منفصلة) ===== */
+  .success-state{ display:none; text-align:center; }
+  .success-state.show{ display:block; }
+  .success-icon{ width:64px; height:64px; border-radius:18px; background:var(--green); color:#fff; display:flex; align-items:center; justify-content:center; font-size:28px; margin:0 auto 16px; }
 </style>
 </head>
 <body>
 
-<!-- ============== ONBOARDING ============== -->
-<div class="screen bg-glow" id="onboarding">
-  <div class="top-brand"><img src="./icons/icon-192.png" alt="Dabbar" style="width:20px;height:20px;border-radius:6px;">Dabbar</div>
+<!-- ============== 1) WELCOME ============== -->
+<div class="screen" id="welcome">
+  <div class="top-brand"><span class="brand-dot"></span>دبّر</div>
 
   <div class="slides">
     <div class="slide active" data-slide="0">
       <div class="slide-icon">🎙️</div>
       <h2>قوله بالصوت<br><em>وخلاص</em></h2>
-      <p>ابعت رسالة صوت عادية زي "صرفت 50 جنيه أكل"، والبوت يسجلها ويحطها في الفئة الصح لوحده.</p>
+      <p>ابعت رسالة صوت عادية زي "صرفت 50 جنيه أكل"، ودبّر يسجلها ويحطها في الفئة الصح لوحده.</p>
     </div>
     <div class="slide" data-slide="1">
       <div class="slide-icon">📊</div>
@@ -111,87 +128,68 @@
     <span class="dot" data-dot="2"></span>
   </div>
 
-  <div id="installBar">
-    <span class="ib-txt">📲 ثبّت Dabbar على شاشتك الرئيسية عشان توصله بضغطة واحدة</span>
-    <button id="installBtn">تثبيت</button>
-  </div>
-
   <div class="onb-footer">
     <button class="skip-link" id="skipBtn">تخطي</button>
     <button class="btn btn-primary" id="nextBtn">التالي</button>
   </div>
 </div>
 
-<!-- ============== AUTH ============== -->
-<div class="screen bg-glow" id="auth" style="align-items:center; justify-content:center;">
-  <div class="auth-card">
-    <div class="top-brand" style="padding-top:0; margin-bottom:8px;"><img src="./icons/icon-192.png" alt="Dabbar" style="width:20px;height:20px;border-radius:6px;">Dabbar</div>
-    <p style="text-align:center; color:var(--muted-onDark); font-size:13px; margin-bottom:26px;">سجّل دخولك عشان تشوف تقاريرك ولوحة التحكم بتاعتك</p>
+<!-- ============== 2) اربط حسابك بـ دبّر (مدمجة: افتح البوت + الكود + إنشاء الحساب تلقائي) ============== -->
+<div class="screen" id="linkScreen">
+  <div class="link-card">
 
-    <div class="auth-tabs">
-      <div class="auth-tab active" id="tabSignup">حساب جديد</div>
-      <div class="auth-tab" id="tabLogin">تسجيل الدخول</div>
+    <!-- حالة الإدخال -->
+    <div id="linkFormState">
+      <div class="top-brand" style="padding-top:0; margin-bottom:8px;"><span class="brand-dot"></span>دبّر</div>
+      <div class="slide-icon" style="margin:0 auto 18px;">🔗</div>
+      <h2>اربط حسابك بـ دبّر</h2>
+      <p class="sub">مفيش إيميل ولا باسورد — كل حاجة بتتعمل من تليجرام في 3 خطوات:</p>
+
+      <div class="steps">
+        <div class="step"><div class="num">1</div><div class="txt">افتح <b>دبّر على تليجرام</b> بضغطة واحدة</div></div>
+        <div class="step"><div class="num">2</div><div class="txt">هيبعتلك <b>كود من 6 أرقام</b> تلقائي</div></div>
+        <div class="step"><div class="num">3</div><div class="txt">اكتبه هنا — و<b>يتعمل حسابك ويترابط لوحده</b></div></div>
+      </div>
+
+      <a href="https://t.me/Masaaref_bot?start=link" target="_blank" rel="noopener" class="btn btn-ghost" style="margin-bottom:18px;">
+        💬 افتح دبّر وهيبعتلي الكود
+      </a>
+
+      <div id="linkError"></div>
+      <div id="linkNotice"></div>
+
+      <form id="linkForm">
+        <div class="field">
+          <label>كود الربط</label>
+          <input type="text" id="linkCodeInput" placeholder="123456" inputmode="numeric" maxlength="6" required>
+        </div>
+
+        <!-- ===== تنويه إجباري: تثبيت الداشبورد على الموبايل ===== -->
+        <div class="install-notice">
+          <div class="install-notice-title">📲 خطوة إجبارية قبل الدخول: ثبّت دبّر على شاشتك</div>
+          <div class="install-notice-txt">لازم تثبّت الداشبورد على موبايلك عشان تقدر توصله وتفتحه بضغطة واحدة في أي وقت، من غير ما تدوّر عليه في المتصفح كل مرة.</div>
+          <button type="button" class="install-btn" id="installBtn">➕ ثبّت الداشبورد دلوقتي</button>
+          <label class="install-check" id="installCheckWrap" style="display:none;">
+            <input type="checkbox" id="installCheck">
+            <span>ثبّتت دبّر على شاشتي الرئيسية بالفعل</span>
+          </label>
+        </div>
+
+        <button type="submit" class="btn btn-primary" id="linkSubmitBtn" disabled>
+          <span id="linkSubmitLabel">ثبّت التطبيق الأول عشان تكمل</span>
+        </button>
+      </form>
     </div>
 
-    <div id="authError"></div>
-    <div id="authNotice"></div>
+    <!-- حالة النجاح (مش شاشة منفصلة، بس تبديل جوه نفس الكارت لحد ما التحويل يحصل) -->
+    <div class="success-state" id="successState">
+      <div class="top-brand" style="padding-top:0; margin-bottom:18px; justify-content:center;"><span class="brand-dot"></span>دبّر</div>
+      <div class="success-icon">✅</div>
+      <h2>اتربط بنجاح!</h2>
+      <p class="sub">بنودّيك دلوقتي على الداشبورد بتاعك...</p>
+      <div style="display:flex; justify-content:center; margin-top:6px;"><div class="spinner spinner-dark"></div></div>
+    </div>
 
-    <form id="authForm">
-      <div class="field" id="nameField">
-        <label>الاسم</label>
-        <input type="text" id="nameInput" placeholder="اسمك الكامل">
-      </div>
-      <div class="field">
-        <label>البريد الإلكتروني</label>
-        <input type="email" id="emailInput" placeholder="example@email.com" required>
-      </div>
-      <div class="field">
-        <label>كلمة السر</label>
-        <input type="password" id="passwordInput" placeholder="••••••••" required minlength="6">
-      </div>
-      <button type="submit" class="btn btn-primary" id="submitBtn">
-        <span id="submitLabel">إنشاء حساب</span>
-      </button>
-    </form>
-
-    <button class="skip-link" id="backToOnbBtn" style="display:block; margin:16px auto 0;">◀ رجوع</button>
-  </div>
-</div>
-
-<!-- ============== LINK TELEGRAM ACCOUNT ============== -->
-<div class="screen bg-glow" id="linkScreen" style="display:none; align-items:center; justify-content:center;">
-  <div class="auth-card">
-    <div class="top-brand" style="padding-top:0; margin-bottom:8px;"><img src="./icons/icon-192.png" alt="Dabbar" style="width:20px;height:20px;border-radius:6px;">Dabbar</div>
-    <div class="slide-icon" style="margin:0 auto 20px;">🔗</div>
-    <h2 class="disp" style="font-weight:900; font-size:19px; text-align:center; margin-bottom:10px;">اربط حسابك بالبوت</h2>
-    <p style="text-align:center; color:var(--muted-onDark); font-size:13px; line-height:1.9; margin-bottom:18px;">
-      عشان تشوف بياناتك الحقيقية في الداشبورد، لازم تربط حساب الموقع ده بحساب تليجرام بتاعك.
-      دوس الزرار تحت — هيفتحلك البوت وهيبعتلك الكود لوحده على طول:
-    </p>
-
-    <a href="https://t.me/Masaaref_bot?start=link" target="_blank" rel="noopener"
-       class="btn"
-       style="background:var(--ink-2); color:var(--onDark); border:1.5px solid rgba(210,164,74,0.35); margin-bottom:18px;">
-      💬 افتح البوت وابعتله الكود أوتوماتيك
-    </a>
-
-    <p style="text-align:center; color:var(--muted-onDark); font-size:12px; line-height:1.8; margin-bottom:22px;">
-      هيوصلك كود من 6 أرقام في تليجرام — ارجع هنا واكتبه تحت:
-    </p>
-
-    <div id="linkError" style="display:none; background:rgba(224,122,107,0.12); border:1px solid rgba(224,122,107,0.35); color:var(--danger); font-size:12.5px; border-radius:9px; padding:10px 12px; margin-bottom:14px;"></div>
-
-    <form id="linkForm">
-      <div class="field">
-        <label>كود الربط</label>
-        <input type="text" id="linkCodeInput" placeholder="123456" inputmode="numeric" maxlength="6" required style="text-align:center; letter-spacing:4px; font-size:20px;">
-      </div>
-      <button type="submit" class="btn btn-primary" id="linkSubmitBtn">
-        <span id="linkSubmitLabel">تأكيد الربط</span>
-      </button>
-    </form>
-
-    <button class="skip-link" id="skipLinkBtn" style="display:block; margin:16px auto 0;">أربطه بعدين</button>
   </div>
 </div>
 
@@ -199,48 +197,31 @@
   /* ========================================================
      SUPABASE SETUP — استبدل القيمتين دول ببيانات مشروعك الحقيقي
      هتلاقيهم في: Supabase Dashboard → Project Settings → API
+     (لازم تكون نفس القيمتين المستخدمين في dabbar-dashboard-full.html بالظبط)
   ========================================================= */
   const SUPABASE_URL = 'https://devywtyfzybnahdsqdkd.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_yHiX1cnEMCVEcjQxiIrqig_DRBiuveQ';
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  // بما إن الصفحة دي والـ API endpoints (/api/link-status، /api/link-account) شغالين على
-  // نفس الدومين (نفس مشروع Vercel بتاع البوت)، مفيش داعي لأي رابط كامل — مسارات نسبية كفاية.
+  // بما إن الصفحة دي والـ API endpoints شغالين على نفس الدومين (نفس مشروع Vercel بتاع دبّر)،
+  // مفيش داعي لأي رابط كامل — مسارات نسبية كفاية.
   const DASHBOARD_URL = 'dabbar-dashboard-full.html';
 
-  // ---- if already logged in, check linking status before deciding where to go ----
+  // ---- لو المستخدم عنده جلسة شغالة أصلاً (رجع تاني على onboarding بالغلط)، نوديه على طول للداشبورد ----
   (async () => {
     try {
       const { data: { session } } = await sb.auth.getSession();
-      if (session) await routeAfterAuth(session);
-    } catch (e) { /* supabase not configured yet — stay on onboarding */ }
+      if (session) window.location.href = DASHBOARD_URL;
+    } catch (e) { /* مفيش جلسة، نكمل عادي */ }
   })();
 
-  // ---- بعد ما نتأكد إن فيه session، نشوف هل حساب الموقع ده مربوط بحساب تليجرام ولا لأ ----
-  async function routeAfterAuth(session) {
-    try {
-      const res = await fetch('/api/link-status', {
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      });
-      const data = await res.json();
-      if (data.linked) {
-        window.location.href = DASHBOARD_URL;
-      } else {
-        showLinkScreen();
-      }
-    } catch (e) {
-      // لو الـ API مش شغال لأي سبب، نسيب اليوزر يكمل عادي بدل ما يتعلق
-      window.location.href = DASHBOARD_URL;
-    }
-  }
-
-  // ---- onboarding slides ----
+  // ---- welcome slides ----
   const slides = document.querySelectorAll('.slide');
   const dots = document.querySelectorAll('.dot');
   const nextBtn = document.getElementById('nextBtn');
   const skipBtn = document.getElementById('skipBtn');
-  const onboarding = document.getElementById('onboarding');
-  const authScreen = document.getElementById('auth');
+  const welcome = document.getElementById('welcome');
+  const linkScreen = document.getElementById('linkScreen');
   let current = 0;
 
   function goToSlide(i) {
@@ -254,168 +235,125 @@
 
   nextBtn.addEventListener('click', () => {
     if (current < slides.length - 1) goToSlide(current + 1);
-    else showAuth();
+    else showLinkScreen();
   });
-  skipBtn.addEventListener('click', showAuth);
-  document.getElementById('backToOnbBtn').addEventListener('click', () => {
-    authScreen.classList.remove('active');
-    onboarding.style.display = 'flex';
-  });
+  skipBtn.addEventListener('click', showLinkScreen);
 
-  function showAuth() {
-    onboarding.style.display = 'none';
-    authScreen.classList.add('active');
+  function showLinkScreen() {
+    welcome.style.display = 'none';
+    linkScreen.classList.add('active');
   }
 
-  // ---- auth tabs ----
-  const tabSignup = document.getElementById('tabSignup');
-  const tabLogin = document.getElementById('tabLogin');
-  const nameField = document.getElementById('nameField');
-  const submitLabel = document.getElementById('submitLabel');
-  let mode = 'signup';
-
-  tabSignup.addEventListener('click', () => setMode('signup'));
-  tabLogin.addEventListener('click', () => setMode('login'));
-
-  function setMode(m) {
-    mode = m;
-    tabSignup.classList.toggle('active', m === 'signup');
-    tabLogin.classList.toggle('active', m === 'login');
-    nameField.style.display = m === 'signup' ? 'block' : 'none';
-    submitLabel.textContent = m === 'signup' ? 'إنشاء حساب' : 'تسجيل الدخول';
-    hideMessages();
-  }
-
-  const authError = document.getElementById('authError');
-  const authNotice = document.getElementById('authNotice');
-  function showError(msg) { authError.textContent = msg; authError.classList.add('show'); authNotice.classList.remove('show'); }
-  function showNotice(msg) { authNotice.textContent = msg; authNotice.classList.add('show'); authError.classList.remove('show'); }
-  function hideMessages() { authError.classList.remove('show'); authNotice.classList.remove('show'); }
-
-  // ---- auth submit ----
-  const authForm = document.getElementById('authForm');
-  const submitBtn = document.getElementById('submitBtn');
-
-  authForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    hideMessages();
-    const name = document.getElementById('nameInput').value.trim();
-    const email = document.getElementById('emailInput').value.trim();
-    const password = document.getElementById('passwordInput').value;
-
-    submitBtn.disabled = true;
-    submitLabel.innerHTML = '<span class="spinner"></span>';
-
-    try {
-      if (mode === 'signup') {
-        if (!name) { showError('من فضلك اكتب اسمك.'); return; }
-        const { data, error } = await sb.auth.signUp({
-          email, password,
-          options: { data: { full_name: name } }
-        });
-        if (error) { showError(translateError(error.message)); return; }
-
-        // بيتسجل صف في جدول profiles (شغّل sql/profiles.sql على Supabase عشان الجدول ده يتعمل)
-        if (data.user) {
-          await sb.from('profiles').upsert({ id: data.user.id, full_name: name, email });
-        }
-
-        if (!data.session) {
-          showNotice('اتبعتلك رابط تأكيد على بريدك الإلكتروني — دوس عليه عشان تفعّل حسابك.');
-          return;
-        }
-        await routeAfterAuth(data.session);
-      } else {
-        const { data, error } = await sb.auth.signInWithPassword({ email, password });
-        if (error) { showError(translateError(error.message)); return; }
-        await routeAfterAuth(data.session);
-      }
-    } catch (err) {
-      showError('مقدرناش نتواصل مع السيرفر دلوقتي. جرب تاني.');
-    } finally {
-      submitBtn.disabled = false;
-      submitLabel.textContent = mode === 'signup' ? 'إنشاء حساب' : 'تسجيل الدخول';
-    }
-  });
-
-  // ---- link screen ----
-  const linkScreen = document.getElementById('linkScreen');
+  // ---- link + auto account creation ----
   const linkForm = document.getElementById('linkForm');
   const linkCodeInput = document.getElementById('linkCodeInput');
   const linkSubmitBtn = document.getElementById('linkSubmitBtn');
   const linkSubmitLabel = document.getElementById('linkSubmitLabel');
   const linkError = document.getElementById('linkError');
+  const linkNotice = document.getElementById('linkNotice');
+  const linkFormState = document.getElementById('linkFormState');
+  const successState = document.getElementById('successState');
 
-  function showLinkScreen() {
-    onboarding.style.display = 'none';
-    authScreen.classList.remove('active');
-    linkScreen.style.display = 'flex';
-  }
-
-  document.getElementById('skipLinkBtn').addEventListener('click', () => {
-    window.location.href = DASHBOARD_URL;
-  });
+  function showError(msg) { linkError.textContent = msg; linkError.classList.add('show'); linkNotice.classList.remove('show'); }
+  function showNotice(msg) { linkNotice.textContent = msg; linkNotice.classList.add('show'); linkError.classList.remove('show'); }
+  function hideMessages() { linkError.classList.remove('show'); linkNotice.classList.remove('show'); }
 
   linkForm.addEventListener('submit', async (e) => {
     e.preventDefault();
-    linkError.style.display = 'none';
+    hideMessages();
     const code = linkCodeInput.value.trim();
 
     linkSubmitBtn.disabled = true;
-    linkSubmitLabel.innerHTML = '<span class="spinner"></span>';
+    linkSubmitLabel.innerHTML = '<span class="spinner"></span> بنعمل حسابك ونربطه...';
 
     try {
-      const { data: { session } } = await sb.auth.getSession();
-      if (!session) { window.location.href = DASHBOARD_URL; return; }
-
-      const res = await fetch('/api/link-account', {
+      const res = await fetch('/api/auth-by-code', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.access_token}`,
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code }),
       });
       const result = await res.json();
 
-      if (!res.ok) {
-        linkError.textContent = result.error || 'حصل خطأ، جرب تاني.';
-        linkError.style.display = 'block';
+      if (!res.ok || !result.session) {
+        showError(result.error || 'حصل خطأ، جرب تاني.');
         return;
       }
-      window.location.href = DASHBOARD_URL;
+
+      // نفعّل الجلسة الجاية من السيرفر في المتصفح، فيصير المستخدم مسجّل دخول فعليًا
+      const { error: setErr } = await sb.auth.setSession({
+        access_token: result.session.access_token,
+        refresh_token: result.session.refresh_token,
+      });
+      if (setErr) {
+        showError('اتربط حسابك بس حصلت مشكلة في فتح الجلسة، جرب تدخل تاني.');
+        return;
+      }
+
+      // ننتقل لحالة النجاح جوه نفس الكارت، وبعدها نحوّل تلقائي للداشبورد
+      linkFormState.style.display = 'none';
+      successState.classList.add('show');
+      setTimeout(() => { window.location.href = DASHBOARD_URL; }, 1100);
     } catch (err) {
-      linkError.textContent = 'مقدرناش نتواصل مع السيرفر دلوقتي. جرب تاني.';
-      linkError.style.display = 'block';
+      showError('مقدرناش نتواصل مع السيرفر دلوقتي. جرب تاني.');
     } finally {
-      linkSubmitBtn.disabled = false;
-      linkSubmitLabel.textContent = 'تأكيد الربط';
+      if (!successState.classList.contains('show')) {
+        linkSubmitBtn.disabled = !installedOrAcknowledged();
+        linkSubmitLabel.textContent = installedOrAcknowledged() ? 'تأكيد الربط' : 'ثبّت التطبيق الأول عشان تكمل';
+      }
     }
   });
 
-  function translateError(msg) {
-    if (/already registered/i.test(msg)) return 'البريد الإلكتروني ده متسجل قبل كده.';
-    if (/invalid login credentials/i.test(msg)) return 'البريد الإلكتروني أو كلمة السر غلط.';
-    if (/password/i.test(msg)) return 'كلمة السر لازم تكون 6 حروف على الأقل.';
-    return msg;
+  // ---- PWA install (إجباري قبل ما نسمح بتأكيد الربط) ----
+  let deferredPrompt = null;
+  let installAcknowledged = false;
+  const installBtn = document.getElementById('installBtn');
+  const installCheckWrap = document.getElementById('installCheckWrap');
+  const installCheck = document.getElementById('installCheck');
+
+  function installedOrAcknowledged() {
+    const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    return standalone || installAcknowledged || installCheck.checked;
   }
 
-  // ---- PWA install prompt ----
-  let deferredPrompt;
-  const installBar = document.getElementById('installBar');
+  function refreshSubmitState() {
+    const ok = installedOrAcknowledged();
+    linkSubmitBtn.disabled = !ok;
+    linkSubmitLabel.textContent = ok ? 'تأكيد الربط' : 'ثبّت التطبيق الأول عشان تكمل';
+  }
+
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
-    installBar.classList.add('show');
   });
-  document.getElementById('installBtn').addEventListener('click', async () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    await deferredPrompt.userChoice;
-    deferredPrompt = null;
-    installBar.classList.remove('show');
+
+  installBtn.addEventListener('click', async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const choice = await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      if (choice && choice.outcome === 'accepted') {
+        installAcknowledged = true;
+        installBtn.textContent = '✅ اتثبّت';
+        installBtn.classList.add('done');
+        refreshSubmitState();
+        return;
+      }
+    }
+    // لو المتصفح (زي Safari على iOS) مش بيدعم التثبيت الأوتوماتيك، نوريله تنويه يدوي
+    // ونسيبله يقر إنه ثبّت بنفسه (زرار "شير" ← "إضافة إلى الشاشة الرئيسية")
+    installCheckWrap.style.display = 'flex';
   });
-  window.addEventListener('appinstalled', () => installBar.classList.remove('show'));
+
+  installCheck.addEventListener('change', refreshSubmitState);
+  window.addEventListener('appinstalled', () => {
+    installAcknowledged = true;
+    installBtn.textContent = '✅ اتثبّت';
+    installBtn.classList.add('done');
+    refreshSubmitState();
+  });
+
+  // لو أصلاً مفتوح كـ standalone (يعني متثبّت أصلاً)، منعرضش التنويه كعقبة
+  refreshSubmitState();
 
   // ---- service worker ----
   if ('serviceWorker' in navigator) {

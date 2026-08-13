@@ -29,10 +29,10 @@ function buildCommandsGuide() {
 // ============ رسالة "محتاج تشترك" — بتتبعت لأي حد الاشتراك بتاعه مش فعّال ============
 function buildSubscriptionPrompt(isExpired, trialEnded = false) {
   const intro = isExpired
-    ? '⏳ اشتراكك في فلوسي خلص.'
+    ? '⏳ اشتراكك في دبّر خلص.'
     : trialEnded
-      ? '⏳ خلصت أيام التجربة المجانية الـ3.\n\n💡 جربت 3 أيام وشفت إزاي فلوسي بيتابعلك مصاريفك وديونك أول بأول من غير ما تفتح جدول ولا تكتب رقم بإيدك — دلوقتي كمّل معاك عشان متفوّتش أي تفصيلة من حساباتك.'
-      : '🔒 محتاج تشترك الأول عشان تستخدم فلوسي.';
+      ? '⏳ خلصت أيام التجربة المجانية الـ3.\n\n💡 جربت 3 أيام وشفت إزاي دبّر بيتابعلك مصاريفك وديونك أول بأول من غير ما تفتح جدول ولا تكتب رقم بإيدك — دلوقتي كمّل معاك عشان متفوّتش أي تفصيلة من حساباتك.'
+      : '🔒 محتاج تشترك الأول عشان تستخدم دبّر.';
 
   return (
     `${intro}\n\n` +
@@ -70,7 +70,7 @@ async function tryHandleAdminActivation(text, fromUserId, adminChatId) {
   if (targetChatId) {
     await sendTelegramMessage(
       targetChatId,
-      `🎉 تم تفعيل اشتراكك في فلوسي لحد ${formattedDate}.\nابعتلي فويس أو رسالة زي "صرفت 50 جنيه أكل" وابدأ على طول.`
+      `🎉 تم تفعيل اشتراكك في دبّر لحد ${formattedDate}.\nابعتلي فويس أو رسالة زي "صرفت 50 جنيه أكل" وابدأ على طول.`
     );
   }
   return true;
@@ -143,13 +143,13 @@ export default async function handler(req, res) {
     // في الموقع (رابط زي t.me/Masaaref_bot?start=link) — بنعامله بالظبط زي /link عادي، عشان الكود
     // يوصله على طول من غير ما يكتب حاجة بنفسه.
     if (message.text && ['/link', 'ربط', 'اربط حسابي', 'ربط الحساب', '/start link'].includes(message.text.trim())) {
-      const result = await createLinkCode(userId, chatId);
+      const result = await createLinkCode(userId, chatId, message.from.first_name || null);
       if (!result) {
         await sendTelegramMessage(chatId, '❌ حصل خطأ، جرب تاني كمان شوية.');
       } else {
         await sendTelegramMessage(
           chatId,
-          `🔗 <b>كود ربط حسابك بالداشبورد</b>\n\n<code>${result.code}</code>\n\nادخل بيه في صفحة "ربط الحساب" في موقع فلوسي خلال 10 دقايق. لو الكود انتهى، ابعت /link تاني وهبعتلك كود جديد.`,
+          `🔗 <b>كود ربط حسابك بالداشبورد</b>\n\n<code>${result.code}</code>\n\nادخل بيه في صفحة "ربط الحساب" في موقع دبّر خلال 10 دقايق. لو الكود انتهى، ابعت /link تاني وهبعتلك كود جديد.`,
           'HTML'
         );
       }
@@ -161,7 +161,7 @@ export default async function handler(req, res) {
       const replyMarkup = GUIDE_URL
         ? { inline_keyboard: [[{ text: '📖 دليل الاستخدام الكامل', web_app: { url: GUIDE_URL } }]] }
         : undefined;
-      await sendTelegramMessage(chatId, '📋 <b>كل أوامر فلوسي</b>\n\n' + buildCommandsGuide(), 'HTML', replyMarkup);
+      await sendTelegramMessage(chatId, '📋 <b>كل أوامر دبّر</b>\n\n' + buildCommandsGuide(), 'HTML', replyMarkup);
       return res.status(200).json({ ok: true });
     }
 
@@ -178,7 +178,7 @@ export default async function handler(req, res) {
         await sendTelegramMessage(
           chatId,
           `🎁 لسه في تجربتك المجانية، باقي ${trialDaysLeft} يوم.\n\n` +
-            `💡 استغل الأيام دي وشوف إزاي فلوسي بيوفّرلك وقت وبيتابعلك مصاريفك من غير أي مجهود. ` +
+            `💡 استغل الأيام دي وشوف إزاي دبّر بيوفّرلك وقت وبيتابعلك مصاريفك من غير أي مجهود. ` +
             `بعد كده الاشتراك الشهري <b>${SUBSCRIPTION_PRICE_EGP} ج.م</b>.`,
           'HTML'
         );
@@ -203,7 +203,7 @@ export default async function handler(req, res) {
         await sendTelegramMessage(
           chatId,
           `⏳ باقي أقل من يوم على نهاية تجربتك المجانية.\n\n` +
-            `💡 خلال الـ3 أيام دي شفت بنفسك إزاي فلوسي بيوفّرلك وقت وبيخليك متابع كل جنيه بيتصرف — ` +
+            `💡 خلال الـ3 أيام دي شفت بنفسك إزاي دبّر بيوفّرلك وقت وبيخليك متابع كل جنيه بيتصرف — ` +
             `عشان الخدمة متتقطعش، اشترك بـ<b>${SUBSCRIPTION_PRICE_EGP} ج.م/شهر</b>.`,
           'HTML'
         );
@@ -235,7 +235,7 @@ export default async function handler(req, res) {
 
         await sendTelegramMessage(
           chatId,
-          'أهلاً بيك في فلوسي 👋\n\n' +
+          'أهلاً بيك في دبّر 👋\n\n' +
             '🎁 عندك 3 أيام تجربة مجانية بكل المميزات، وبعدها الاشتراك الشهري ' +
             `<b>${SUBSCRIPTION_PRICE_EGP} ج.م</b>.\n\n` +
             buildCommandsGuide() +

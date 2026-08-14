@@ -92,13 +92,39 @@
   .install-check{ display:flex; align-items:center; gap:8px; margin-top:10px; font-size:11.5px; color:var(--warn); cursor:pointer; }
   .install-check input{ width:15px; height:15px; accent-color:var(--green); }
 
+  /* ===== تعليمات التثبيت اليدوي (تظهر لما مفيش نافذة تثبيت تلقائية — زي iPhone) ===== */
+  .manual-install{ display:none; background:#fff; border:1.5px solid var(--warn-line); border-radius:12px; padding:12px 14px; margin-top:10px; }
+  .manual-install.show{ display:block; }
+  .manual-install-title{ font-family:'Cairo',sans-serif; font-weight:800; font-size:11.5px; color:var(--ink); margin-bottom:8px; }
+  .manual-install ol{ margin:0; padding-inline-start:18px; display:flex; flex-direction:column; gap:6px; }
+  .manual-install li{ font-size:11.5px; color:var(--text); line-height:1.7; }
+  .manual-install li b{ color:var(--green-deep); font-family:'Cairo',sans-serif; }
+
   /* ===== success (بيتحول جواه نفس شاشة الربط، مش شاشة منفصلة) ===== */
   .success-state{ display:none; text-align:center; }
   .success-state.show{ display:block; }
   .success-icon{ width:64px; height:64px; border-radius:18px; background:var(--green); color:#fff; display:flex; align-items:center; justify-content:center; font-size:28px; margin:0 auto 16px; }
+
+  /* ===== تحذير: فاتح الصفحة جوه فيسبوك/انستجرام/ماسنجر (in-app browser) ===== */
+  .webview-banner{ display:none; position:sticky; top:0; z-index:50; background:var(--warn-bg); border-bottom:1.5px solid var(--warn-line); padding:12px 16px; }
+  .webview-banner.show{ display:block; }
+  .webview-banner-title{ font-family:'Cairo',sans-serif; font-weight:900; font-size:12.5px; color:var(--warn); display:flex; align-items:center; gap:6px; margin-bottom:4px; }
+  .webview-banner-txt{ font-size:11.5px; color:var(--warn); line-height:1.8; opacity:.95; }
+  .webview-open-btn{ margin-top:8px; background:var(--warn); color:#fff; font-family:'Cairo',sans-serif; font-weight:800; font-size:12px; padding:9px 14px; border-radius:9px; border:none; cursor:pointer; display:inline-flex; align-items:center; gap:6px; text-decoration:none; }
+  .webview-steps{ margin:8px 0 0; padding-inline-start:18px; display:flex; flex-direction:column; gap:4px; }
+  .webview-steps li{ font-size:11px; color:var(--warn); line-height:1.7; }
+  .webview-steps li b{ font-family:'Cairo',sans-serif; }
 </style>
 </head>
 <body>
+
+<!-- ============== 0) تحذير: المستخدم جوه متصفح تطبيق (فيسبوك/انستجرام/ماسنجر) ============== -->
+<div class="webview-banner" id="webviewBanner">
+  <div class="webview-banner-title">⚠️ افتح الرابط في المتصفح عشان تقدر تثبّت دبّر</div>
+  <div class="webview-banner-txt" id="webviewBannerTxt">إنت فاتح الرابط جوه التطبيق، وده بيمنع خاصية التثبيت. اضغط الزرار وهيتفتحلك في المتصفح.</div>
+  <button type="button" class="webview-open-btn" id="webviewOpenBtn" style="display:none;">🌐 افتح في المتصفح</button>
+  <ol class="webview-steps" id="webviewSteps" style="display:none;"></ol>
+</div>
 
 <!-- ============== 1) WELCOME ============== -->
 <div class="screen" id="welcome">
@@ -169,6 +195,10 @@
           <div class="install-notice-title">📲 خطوة إجبارية قبل الدخول: ثبّت دبّر على شاشتك</div>
           <div class="install-notice-txt">لازم تثبّت الداشبورد على موبايلك عشان تقدر توصله وتفتحه بضغطة واحدة في أي وقت، من غير ما تدوّر عليه في المتصفح كل مرة.</div>
           <button type="button" class="install-btn" id="installBtn">➕ ثبّت الداشبورد دلوقتي</button>
+          <div class="manual-install" id="manualInstall">
+            <div class="manual-install-title" id="manualInstallTitle">إزاي تثبّته يدوي:</div>
+            <ol id="manualInstallSteps"></ol>
+          </div>
           <label class="install-check" id="installCheckWrap" style="display:none;">
             <input type="checkbox" id="installCheck">
             <span>ثبّتت دبّر على شاشتي الرئيسية بالفعل</span>
@@ -213,6 +243,51 @@
       const { data: { session } } = await sb.auth.getSession();
       if (session) window.location.href = DASHBOARD_URL;
     } catch (e) { /* مفيش جلسة، نكمل عادي */ }
+  })();
+
+  // ---- كشف إن الصفحة مفتوحة جوه متصفح تطبيق (فيسبوك/انستجرام/ماسنجر) ----
+  (function detectInAppBrowser() {
+    const ua = navigator.userAgent || '';
+    const isFacebook = /FBAN|FBAV|FB_IAB/i.test(ua);
+    const isInstagram = /Instagram/i.test(ua);
+    const isMessenger = /MessengerForiOS|FBIOS/i.test(ua) && !isFacebook;
+    const isInApp = isFacebook || isInstagram || isMessenger;
+    if (!isInApp) return;
+
+    const isAndroid = /Android/.test(ua);
+    const isIOS = /iPhone|iPad|iPod/.test(ua);
+
+    const banner = document.getElementById('webviewBanner');
+    const openBtn = document.getElementById('webviewOpenBtn');
+    const stepsEl = document.getElementById('webviewSteps');
+    const txtEl = document.getElementById('webviewBannerTxt');
+    banner.classList.add('show');
+
+    if (isAndroid) {
+      // على أندرويد نقدر نجبر فتح Chrome مباشرة عن طريق intent link
+      const currentUrl = window.location.href;
+      const urlNoScheme = currentUrl.replace(/^https?:\/\//, '');
+      const intentUrl = `intent://${urlNoScheme}#Intent;scheme=https;package=com.android.chrome;end`;
+      openBtn.style.display = 'inline-flex';
+      openBtn.addEventListener('click', () => {
+        window.location.href = intentUrl;
+      });
+    } else if (isIOS) {
+      // على آيفون مفيش طريقة تقنية تفتح Safari تلقائي، فنوضح خطوات يدوية
+      txtEl.textContent = 'إنت فاتح الرابط جوه التطبيق، وده بيمنع خاصية التثبيت. اتبع الخطوات دي عشان تفتحه في Safari:';
+      stepsEl.style.display = 'flex';
+      stepsEl.style.flexDirection = 'column';
+      stepsEl.innerHTML = `
+        <li>دوس على <b>⋯</b> أو <b>⋮</b> فوق يمين الشاشة</li>
+        <li>اختار <b>"افتح في المتصفح" (Open in Browser / Safari)</b></li>
+        <li>الرابط هيفتح في Safari وتقدر تكمل التثبيت عادي</li>`;
+    } else {
+      openBtn.style.display = 'inline-flex';
+      openBtn.textContent = '🌐 افتح في المتصفح';
+      openBtn.addEventListener('click', () => {
+        window.open(window.location.href, '_blank');
+      });
+    }
   })();
 
   // ---- welcome slides ----
@@ -339,10 +414,39 @@
         return;
       }
     }
-    // لو المتصفح (زي Safari على iOS) مش بيدعم التثبيت الأوتوماتيك، نوريله تنويه يدوي
-    // ونسيبله يقر إنه ثبّت بنفسه (زرار "شير" ← "إضافة إلى الشاشة الرئيسية")
+    // لو المتصفح (زي Safari على iOS) مش بيدعم التثبيت الأوتوماتيك، نوريله خطوات يدوية واضحة
+    // حسب نوع جهازه، ونسيبله يقر إنه ثبّت بنفسه
+    showManualInstallSteps();
     installCheckWrap.style.display = 'flex';
   });
+
+  function showManualInstallSteps() {
+    const ua = navigator.userAgent || '';
+    const isIOS = /iPhone|iPad|iPod/.test(ua);
+    const isAndroid = /Android/.test(ua);
+    const steps = document.getElementById('manualInstallSteps');
+    const title = document.getElementById('manualInstallTitle');
+
+    if (isIOS) {
+      title.textContent = '📱 على آيفون (Safari):';
+      steps.innerHTML = `
+        <li>دوس على زرار <b>المشاركة (Share) 􀈂</b> تحت في المتصفح</li>
+        <li>اسكرول لحد ما تلاقي <b>"إضافة إلى الشاشة الرئيسية"</b> ودوس عليها</li>
+        <li>دوس <b>"إضافة"</b> فوق يمين — هتلاقي أيقونة دبّر على شاشتك</li>`;
+    } else if (isAndroid) {
+      title.textContent = '📱 على أندرويد:';
+      steps.innerHTML = `
+        <li>دوس على <b>الثلاث نقط ⋮</b> فوق يمين المتصفح</li>
+        <li>اختار <b>"إضافة إلى الشاشة الرئيسية"</b> أو <b>"تثبيت التطبيق"</b></li>
+        <li>أكّد بالضغط على <b>"إضافة" / "تثبيت"</b></li>`;
+    } else {
+      title.textContent = '💻 على الكمبيوتر:';
+      steps.innerHTML = `
+        <li>دوس على أيقونة <b>التثبيت ⊕</b> في شريط عنوان المتصفح</li>
+        <li>أو من قائمة المتصفح اختار <b>"تثبيت دبّر"</b></li>`;
+    }
+    document.getElementById('manualInstall').classList.add('show');
+  }
 
   installCheck.addEventListener('change', refreshSubmitState);
   window.addEventListener('appinstalled', () => {

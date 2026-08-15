@@ -1558,7 +1558,19 @@
             const sheetSub = document.getElementById('record-sheet-sub');
             const sheetBody = document.getElementById('record-sheet-body');
             const micSvg = `<svg width="30" height="30" viewBox="0 0 24 24" fill="none"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Z" stroke="#022c22" stroke-width="2.2" stroke-linecap="round"/><path d="M19 11a7 7 0 0 1-14 0M12 18v3" stroke="#022c22" stroke-width="2.2" stroke-linecap="round"/></svg>`;
-            let mediaRecorder = null, chunks = [], autoAdvance = null;
+            let mediaRecorder = null, chunks = [], autoAdvance = null, activeStream = null;
+
+            // ---- تسكير المايك فعليًا (مش بس إيقاف الـ MediaRecorder) ----
+            // mediaRecorder.stop() لوحدها بتوقف التسجيل بس المتصفح بيفضل شايل إذن المايك
+            // مفتوح لحد ما الـ tracks بتاعة الـ MediaStream تتقفل بالظبط بالطريقة دي. علطول ده
+            // اللي بيخلي مواقع/تابات تانية تحس إن المايك "مشغول" وميقدروش يستخدموه لحد ما
+            // يقفل التاب بتاعنا بالكامل. فلازم نعمل stop() لكل track بعد ما نخلص التسجيل دايمًا.
+            function releaseMic() {
+                if (activeStream) {
+                    activeStream.getTracks().forEach((track) => track.stop());
+                    activeStream = null;
+                }
+            }
 
             function openOverlay() { overlay.classList.remove('hidden'); overlay.classList.add('flex'); }
             function closeOverlay() {
@@ -1568,6 +1580,7 @@
                     mediaRecorder.onstop = null; // إلغاء بدون حفظ لو المستخدم قفل الشيت وهو لسه بيسجل
                     mediaRecorder.stop();
                 }
+                releaseMic();
             }
             document.getElementById('close-record-overlay').addEventListener('click', closeOverlay);
 
@@ -1622,6 +1635,7 @@
                 // تسجيل صوتي حقيقي من المتصفح، بيفضل شغال لحد ما المستخدم يدوس "خلصت"
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    activeStream = stream;
                     chunks = [];
                     mediaRecorder = new MediaRecorder(stream);
                     mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
@@ -1654,6 +1668,7 @@
                     </div>`;
 
                 mediaRecorder.onstop = async () => {
+                    releaseMic(); // نقفل المايك فورًا أول ما نخلص تسجيل، مش لازم نستنى رد الـ API
                     try {
                         const blob = new Blob(chunks, { type: mediaRecorder.mimeType || 'audio/webm' });
                         const audioBase64 = await blobToDataUrl(blob);

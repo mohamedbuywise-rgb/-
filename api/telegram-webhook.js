@@ -50,7 +50,7 @@ function buildSubscriptionPrompt(isExpired, trialEnded = false) {
 async function tryHandleAdminActivation(text, fromUserId, adminChatId) {
   if (!ADMIN_TELEGRAM_ID || fromUserId !== ADMIN_TELEGRAM_ID) return false;
 
-  const match = text.match(/^فعّ?ل\s+(\d+)(?:\s+(\d+))?$/);
+  const match = text.match(/^فعّ?ل\s+(-?\d+)(?:\s+(\d+))?$/);
   if (!match) return false;
 
   const targetUserId = Number(match[1]);

@@ -40,6 +40,17 @@
         @keyframes fadeUp { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: translateY(0);} }
         .fade-up { animation: fadeUp .35s ease both; }
 
+        /* سجّل مصروفك: مايك احترافي بحلقات صوتية متوسّعة */
+        @keyframes ringExpand{ 0%{ transform:scale(1); opacity:.55;} 100%{ transform:scale(1.65); opacity:0;} }
+        .mic-ring{ position:absolute; inset:0; border-radius:9999px; border:1.5px solid rgba(52,211,153,0.55); animation:ringExpand 2.2s cubic-bezier(.4,0,.2,1) infinite; }
+        .mic-ring.r2{ animation-delay:.7s; }
+        .mic-ring.r3{ animation-delay:1.4s; }
+        @keyframes micGlow{ 0%,100%{ box-shadow:0 0 0 0 rgba(52,211,153,0.35), 0 12px 34px -6px rgba(16,185,129,0.55);} 50%{ box-shadow:0 0 0 10px rgba(52,211,153,0.08), 0 12px 34px -6px rgba(16,185,129,0.7);} }
+        .mic-core{ animation:micGlow 2.2s ease-in-out infinite; }
+        @keyframes barBounce{ 0%,100%{ transform:scaleY(0.3);} 50%{ transform:scaleY(1);} }
+        .bar{ animation:barBounce .9s ease-in-out infinite; transform-origin:center; }
+        @keyframes spin{ to{ transform:rotate(360deg);} }
+
         /* ============================================================
            الوضع الفاتح — نسخة كاملة من كل الألوان المستخدمة في الصفحة.
            بتشتغل عن طريق [data-theme="light"] على <html>، والـ selector هنا
@@ -180,10 +191,10 @@
         <!-- Header Bar -->
         <div class="bg-slate-900/90 border-b border-slate-800/80 p-5 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-slate-950 font-black text-xl shadow-lg shadow-emerald-500/20" id="header-icon">📊</div>
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-slate-950 font-black text-xl shadow-lg shadow-emerald-500/20" id="header-icon">🗓️</div>
                 <div>
-                    <h2 class="font-bold text-base text-slate-100 leading-tight" id="header-title">تقرير نهاية الشهر</h2>
-                    <span class="text-xs text-emerald-400 font-medium" id="header-sub">● تقييم أداء الشهر</span>
+                    <h2 class="font-bold text-base text-slate-100 leading-tight" id="header-title">تقرير اليوم</h2>
+                    <span class="text-xs text-emerald-400 font-medium" id="header-sub">● النهاردة</span>
                 </div>
             </div>
             <div class="flex items-center gap-2">
@@ -201,7 +212,7 @@
         <div class="flex-1 overflow-y-auto">
 
         <!-- ===================== TAB: MONTHLY (default) ===================== -->
-        <div class="tab-content active fade-up p-5 space-y-4" id="tab-monthly">
+        <div class="tab-content p-5 space-y-4" id="tab-monthly">
 
             <div class="bg-gradient-to-br from-emerald-950/60 to-slate-900 border border-emerald-500/30 rounded-3xl p-4 text-center space-y-2 shadow-lg">
                 <span class="text-xs text-emerald-400 font-semibold block" id="monthly-total-label">إجمالي صرفك الشهر ده</span>
@@ -235,7 +246,19 @@
         </div>
 
         <!-- ===================== TAB: DAILY ===================== -->
-        <div class="tab-content p-5 space-y-4" id="tab-daily">
+        <div class="tab-content active fade-up p-5 space-y-4" id="tab-daily">
+
+            <!-- سجّل مصروفك: نفس تصميم البطاقات والتدرّجات الموجودة بالفعل -->
+            <button id="record-expense-btn" class="w-full flex items-center gap-3 bg-gradient-to-tr from-emerald-500 to-teal-400 text-slate-950 rounded-3xl p-4 shadow-lg shadow-emerald-500/20 active:scale-[0.98] transition">
+                <span class="w-11 h-11 rounded-2xl bg-slate-950/15 flex items-center justify-center">
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M19 11a7 7 0 0 1-14 0M12 18v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                </span>
+                <span class="text-right flex-1">
+                    <span class="block font-black text-sm">سجّل مصروفك</span>
+                    <span class="block text-[11px] font-semibold text-slate-900/70">قول اللي اتصرف وهسجله على طول</span>
+                </span>
+                <span class="text-slate-900/60 text-sm">‹</span>
+            </button>
 
             <div class="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-2xl p-3 space-y-1.5 shadow-lg">
                 <div class="flex justify-between items-center">
@@ -495,11 +518,11 @@
 
         <!-- Bottom Tab Navigation -->
         <div class="bg-slate-900 border-t border-slate-800/80 px-2 pt-2 pb-3 flex items-center justify-around">
-            <button class="tab-btn active-tab flex flex-col items-center gap-1 px-3 py-1 text-slate-500 text-[10px] font-semibold" data-tab="monthly" data-title="تقرير نهاية الشهر" data-sub="● تقييم أداء الشهر" data-icon="📊" data-badge="—">
+            <button class="tab-btn flex flex-col items-center gap-1 px-3 py-1 text-slate-500 text-[10px] font-semibold" data-tab="monthly" data-title="تقرير نهاية الشهر" data-sub="● تقييم أداء الشهر" data-icon="📊" data-badge="—">
                 <span class="tab-icon-wrap w-9 h-9 rounded-xl border border-transparent flex items-center justify-center text-base">📊</span>
                 شهري
             </button>
-            <button class="tab-btn flex flex-col items-center gap-1 px-3 py-1 text-slate-500 text-[10px] font-semibold" data-tab="daily" data-title="تقرير اليوم" data-sub="● النهاردة" data-icon="🗓️" data-badge="—">
+            <button class="tab-btn active-tab flex flex-col items-center gap-1 px-3 py-1 text-slate-500 text-[10px] font-semibold" data-tab="daily" data-title="تقرير اليوم" data-sub="● النهاردة" data-icon="🗓️" data-badge="—">
                 <span class="tab-icon-wrap w-9 h-9 rounded-xl border border-transparent flex items-center justify-center text-base">🗓️</span>
                 يومي
             </button>
@@ -522,7 +545,7 @@
         </div>
 
         <!-- Footer Action (only visible on monthly tab) -->
-        <div class="p-4 bg-slate-900 border-t border-slate-800/80" id="footer-cta">
+        <div class="p-4 bg-slate-900 border-t border-slate-800/80" id="footer-cta" style="display:none;">
             <div class="flex gap-2 mb-1">
                 <button id="download-monthly-pdf" class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold py-2 rounded-xl text-xs transition flex items-center justify-center gap-2">
                     <span id="download-pdf-icon">📄</span> <span id="download-pdf-label">تقرير PDF</span>
@@ -536,7 +559,27 @@
 
     </div>
 
+    <!-- Record Expense Overlay: نفس نمط الأوفرلاي الموجود (archive-overlay) -->
+    <div id="record-overlay" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-end md:items-center justify-center z-50">
+        <div class="max-w-md w-full bg-slate-900 border-t md:border border-slate-800 rounded-t-3xl md:rounded-3xl shadow-2xl overflow-hidden">
+            <div class="bg-slate-900/90 border-b border-slate-800/80 p-5 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-slate-950 font-black text-xl shadow-lg shadow-emerald-500/20" id="record-sheet-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Z" stroke="#022c22" stroke-width="2" stroke-linecap="round"/><path d="M19 11a7 7 0 0 1-14 0M12 18v3" stroke="#022c22" stroke-width="2" stroke-linecap="round"/></svg>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-base text-slate-100 leading-tight" id="record-sheet-title">بتسمعك دلوقتي...</h2>
+                        <span class="text-xs text-emerald-400 font-medium" id="record-sheet-sub">● اتكلم عادي، هفهم منك ويتسجل لوحده</span>
+                    </div>
+                </div>
+                <button id="close-record-overlay" class="w-9 h-9 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-sm">✕</button>
+            </div>
+            <div class="p-5" id="record-sheet-body"></div>
+        </div>
+    </div>
+
     <!-- Archive Overlay -->
+
     <div id="archive-overlay" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
         <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[80vh]">
             <div class="bg-slate-900/90 border-b border-slate-800/80 p-5 flex items-center justify-between">
@@ -613,6 +656,7 @@
         const ONBOARDING_URL = 'dabbar-onboarding.html';
 
         const CATEGORY_EMOJI = { 'أكل':'🍔', 'مواصلات':'🚕', 'فواتير':'🧾', 'تسوق':'🛍️', 'ترفيه':'🎬', 'صحة':'💊', 'أخرى':'📌' };
+        const CATEGORIES = Object.keys(CATEGORY_EMOJI);
         const CATEGORY_BAR_COLOR = { 'أكل':'bg-rose-400', 'مواصلات':'bg-teal-400', 'فواتير':'bg-amber-400', 'تسوق':'bg-violet-400', 'ترفيه':'bg-pink-400', 'صحة':'bg-emerald-400', 'أخرى':'bg-slate-400' };
         const fmt = (n) => `${Number(n).toLocaleString('ar-EG')} ج.م`;
 
@@ -1501,6 +1545,271 @@
             overlay.classList.add('hidden');
             overlay.classList.remove('flex');
         });
+
+        // ============ سجّل مصروفك (فويس) ============
+        // ملاحظة: التسجيل الصوتي الفعلي هنا بيستخدم MediaRecorder الحقيقي من المتصفح،
+        // لكن التفريغ والتصنيف لسه مش موصولين بباك-إند حقيقي — دي واجهة جاهزة للربط
+        // بنفس منطق lib/groq.js (transcribeVoice + classifyMessage) و lib/expenses.js (recordExpense)
+        // عن طريق إنشاء endpoint جديد زي /api/record-expense-voice يستقبل الملف الصوتي من الموقع.
+        (function () {
+            const overlay = document.getElementById('record-overlay');
+            const sheetIcon = document.getElementById('record-sheet-icon');
+            const sheetTitle = document.getElementById('record-sheet-title');
+            const sheetSub = document.getElementById('record-sheet-sub');
+            const sheetBody = document.getElementById('record-sheet-body');
+            const micSvg = `<svg width="30" height="30" viewBox="0 0 24 24" fill="none"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Z" stroke="#022c22" stroke-width="2.2" stroke-linecap="round"/><path d="M19 11a7 7 0 0 1-14 0M12 18v3" stroke="#022c22" stroke-width="2.2" stroke-linecap="round"/></svg>`;
+            let mediaRecorder = null, chunks = [], autoAdvance = null;
+
+            function openOverlay() { overlay.classList.remove('hidden'); overlay.classList.add('flex'); }
+            function closeOverlay() {
+                clearTimeout(autoAdvance);
+                overlay.classList.add('hidden'); overlay.classList.remove('flex');
+                if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                    mediaRecorder.onstop = null; // إلغاء بدون حفظ لو المستخدم قفل الشيت وهو لسه بيسجل
+                    mediaRecorder.stop();
+                }
+            }
+            document.getElementById('close-record-overlay').addEventListener('click', closeOverlay);
+
+            const secondaryBtn = (label) => `<button class="record-secondary w-full mt-2 bg-slate-950/60 border border-slate-800 text-slate-300 font-bold py-3 rounded-2xl text-xs">${label}</button>`;
+            const primaryBtn = (id, label) => `<button id="${id}" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold py-3 rounded-2xl text-sm transition">${label}</button>`;
+
+            async function showListening() {
+                clearTimeout(autoAdvance);
+                sheetIcon.innerHTML = micSvg.replace('30','20').replace('30','20');
+                sheetTitle.textContent = 'بتسمعك دلوقتي...';
+                sheetSub.textContent = '● اتكلم عادي، هفهم منك ويتسجل لوحده';
+                sheetBody.innerHTML = `
+                    <div class="flex flex-col items-center gap-6 py-5">
+                        <div class="relative w-28 h-28 flex items-center justify-center">
+                            <span class="mic-ring"></span><span class="mic-ring r2"></span><span class="mic-ring r3"></span>
+                            <div class="mic-core relative z-10 w-20 h-20 rounded-full bg-gradient-to-b from-emerald-400 to-teal-500 flex items-center justify-center border border-emerald-300/40">${micSvg}</div>
+                        </div>
+                        <div class="flex items-end gap-[3px] h-7">
+                            ${[9,15,22,13,19,10,17,8].map((h,i)=>`<span class="bar w-1 rounded-full bg-emerald-400/80" style="height:${h}px; animation-delay:${i*0.09}s;"></span>`).join('')}
+                        </div>
+                        <p class="text-xs text-slate-400 text-center leading-relaxed">قول اللي اتصرف زي ما هتقوله لصاحبك<br><span class="text-slate-500">"دفعت ١٠٠ جنيه تاكسي"</span></p>
+                        <button id="stop-record-btn" class="w-16 h-16 rounded-full bg-slate-950/60 border-2 border-rose-500/40 text-rose-400 flex items-center justify-center active:scale-95 transition">
+                            <span class="w-4 h-4 rounded-[4px] bg-rose-400"></span>
+                        </button>
+                        ${secondaryBtn('⌨️ اكتبه بإيدك بدل الصوت')}
+                    </div>`;
+                document.getElementById('stop-record-btn').onclick = stopAndShowResult;
+                sheetBody.querySelector('.record-secondary').onclick = showManual;
+
+                // تسجيل صوتي حقيقي من المتصفح (لسه من غير رفع لباك-إند)
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    chunks = [];
+                    mediaRecorder = new MediaRecorder(stream);
+                    mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
+                    mediaRecorder.start();
+                } catch (e) {
+                    console.warn('تعذّر الوصول للمايكروفون:', e);
+                }
+
+                autoAdvance = setTimeout(() => { if (document.getElementById('stop-record-btn')) stopAndShowResult(); }, 4000);
+            }
+
+            function stopAndShowResult() {
+                clearTimeout(autoAdvance);
+                if (!mediaRecorder) { showError('تعذّر الوصول للمايكروفون، جرب من غير كده أو اكتبها بإيدك.'); return; }
+
+                sheetIcon.innerHTML = '⏳';
+                sheetTitle.textContent = 'بحلل كلامك...';
+                sheetSub.textContent = '● ثانية وهرجعلك بالنتيجة';
+                sheetBody.innerHTML = `
+                    <div class="flex flex-col items-center gap-4 py-8">
+                        <div class="w-14 h-14 rounded-full border-4 border-slate-800 border-t-emerald-400" style="animation:spin 1s linear infinite;"></div>
+                        <p class="text-xs text-slate-400">بستخرج المبلغ والفئة من كلامك...</p>
+                    </div>`;
+
+                mediaRecorder.onstop = async () => {
+                    try {
+                        const blob = new Blob(chunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+                        const audioBase64 = await blobToDataUrl(blob);
+                        const data = await callRecordExpenseApi({ audioBase64 });
+                        handleApiResult(data);
+                    } catch (e) {
+                        console.error('record-expense-voice failed:', e);
+                        showError('حصل خطأ في تسجيل المصروف، جرب تاني.');
+                    }
+                };
+                mediaRecorder.stop();
+            }
+
+            function blobToDataUrl(blob) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(blob);
+                });
+            }
+
+            async function callRecordExpenseApi(body) {
+                const res = await fetch('/api/record-expense-voice', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+                    body: JSON.stringify(body),
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'حصل خطأ، جرب تاني.');
+                return data;
+            }
+
+            function handleApiResult(data) {
+                if (data.reason === 'trial_ended') { showTrialEnded(); return; }
+                if (data.ok === false) { showUnclear(data.heardText || ''); return; }
+                showSaved({ ...data.expense, heardText: data.heardText, todayTotal: data.todayTotal });
+                refreshDailyTabAfterSave();
+            }
+
+            function showTrialEnded() {
+                clearTimeout(autoAdvance);
+                sheetIcon.textContent = '⏳';
+                sheetTitle.textContent = 'خلصت أيام التجربة المجانية';
+                sheetSub.textContent = '● اشترك عشان تكمل تسجيل مصاريفك';
+                sheetBody.innerHTML = `
+                    <div class="space-y-3">
+                        <p class="text-xs text-slate-400 leading-relaxed text-center">جربت 3 أيام وشفت إزاي دبّر بيتابعلك مصاريفك أول بأول. عشان تكمّل تسجّل، فعّل اشتراكك من تاب "حسابي".</p>
+                        ${primaryBtn('go-subscribe-btn', '👤 روح لتاب حسابي')}
+                    </div>`;
+                document.getElementById('go-subscribe-btn').onclick = () => {
+                    closeOverlay();
+                    const accountTabBtn = document.querySelector('.tab-btn[data-tab="account"]');
+                    if (accountTabBtn) accountTabBtn.click();
+                };
+            }
+
+            function showError(message) {
+                sheetIcon.textContent = '⚠️';
+                sheetTitle.textContent = 'حصل خطأ';
+                sheetSub.textContent = '● جرب تاني';
+                sheetBody.innerHTML = `
+                    <div class="flex flex-col items-center gap-4 py-4">
+                        <p class="text-sm text-rose-400 text-center">${message}</p>
+                        ${primaryBtn('retry-record-btn', '🎙️ أعيد المحاولة')}
+                        ${secondaryBtn('⌨️ أدخلها بإيدي')}
+                    </div>`;
+                document.getElementById('retry-record-btn').onclick = showListening;
+                sheetBody.querySelector('.record-secondary').onclick = showManual;
+            }
+
+            function showUnclear(heardText) {
+                sheetIcon.textContent = '🤔';
+                sheetTitle.textContent = 'مش قادر أفهم بالظبط';
+                sheetSub.textContent = '● محتاج توضيح بسيط';
+                sheetBody.innerHTML = `
+                    <div class="space-y-3">
+                        <div class="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-3 text-[11px] text-amber-400 leading-relaxed">
+                            ${heardText ? `سمعتك بتقول: <span class="text-slate-300">"${heardText}"</span> — مش واضح المبلغ أو الفئة بالظبط.` : 'مسمعتش كلام واضح خالص.'}
+                        </div>
+                        <p class="text-xs text-slate-400">تحب تعمل إيه؟</p>
+                        ${primaryBtn('retry-record-btn', '🎙️ أعيد التسجيل تاني')}
+                        ${secondaryBtn('⌨️ أدخلها بإيدي')}
+                    </div>`;
+                document.getElementById('retry-record-btn').onclick = showListening;
+                sheetBody.querySelector('.record-secondary').onclick = showManual;
+            }
+
+            function showSaved(exp) {
+                sheetIcon.textContent = '✅';
+                sheetTitle.textContent = 'تمام، سجلت المصروف';
+                sheetSub.textContent = '● اتسجل وحُدّث حسابك أول بأول';
+                const detail = exp.note && exp.note.trim() ? ` (${exp.note.trim()})` : '';
+                sheetBody.innerHTML = `
+                    <div class="space-y-3">
+                        <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-4 space-y-3">
+                            <div class="flex items-center gap-2.5">
+                                <span class="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-base">${exp.emoji}</span>
+                                <div class="flex-1">
+                                    <p class="text-sm font-bold text-slate-100">${exp.category}${detail} · ${exp.amount} جنيه</p>
+                                    ${exp.heardText ? `<p class="text-[10px] text-slate-500">سمعتك بتقول: "${exp.heardText}"</p>` : ''}
+                                </div>
+                            </div>
+                            <div class="border-t border-slate-800/70 pt-2.5 flex items-center justify-between">
+                                <span class="text-[11px] text-slate-400">💰 إجمالي صرفك النهاردة</span>
+                                <span class="text-sm font-black text-rose-400">${exp.todayTotal} جنيه</span>
+                            </div>
+                        </div>
+                        ${primaryBtn('record-done-btn', 'تمام')}
+                    </div>`;
+                document.getElementById('record-done-btn').onclick = closeOverlay;
+                autoAdvance = setTimeout(closeOverlay, 1800);
+            }
+
+            // بعد الحفظ الفعلي: نعيد تحميل بيانات الداشبورد الحقيقية عشان قائمة عمليات
+            // النهاردة والإجمالي والتصنيفات تتحدث فورًا بنفس دالة loadDashboard الموجودة
+            function refreshDailyTabAfterSave() {
+                if (typeof loadDashboard === 'function') loadDashboard();
+            }
+
+            function showManual() {
+                clearTimeout(autoAdvance);
+                sheetIcon.textContent = '⌨️';
+                sheetTitle.textContent = 'إدخال يدوي';
+                sheetSub.textContent = '● لو الصوت مش مناسب دلوقتي';
+                sheetBody.innerHTML = `
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-[11px] text-slate-400 block mb-1.5">المبلغ</label>
+                            <input id="manual-amount" type="number" inputmode="decimal" class="w-full bg-slate-950/60 border border-slate-800 rounded-2xl px-4 py-3 text-slate-100 text-sm" placeholder="0 جنيه">
+                        </div>
+                        <div>
+                            <label class="text-[11px] text-slate-400 block mb-1.5">الفئة</label>
+                            <div class="flex flex-wrap gap-2" id="manual-category-picker">
+                                ${CATEGORIES.map((c, i) => `<button type="button" data-category="${c}" class="manual-cat-btn text-xs font-semibold px-3 py-2 rounded-xl border ${i === 0 ? 'bg-emerald-500/15 border-emerald-500/35 text-emerald-400' : 'bg-slate-950/60 border-slate-800 text-slate-300'}">${CATEGORY_EMOJI[c] || '📌'} ${c}</button>`).join('')}
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-[11px] text-slate-400 block mb-1.5">وصف (اختياري)</label>
+                            <input id="manual-note" class="w-full bg-slate-950/60 border border-slate-800 rounded-2xl px-4 py-3 text-slate-100 text-sm" placeholder="مثلاً: غدا مع صحابي">
+                        </div>
+                        <p id="manual-error" class="text-[11px] text-rose-400 hidden"></p>
+                        ${primaryBtn('manual-save-btn', '✅ تسجيل المصروف')}
+                    </div>`;
+
+                let selectedCategory = CATEGORIES[0];
+                sheetBody.querySelectorAll('.manual-cat-btn').forEach((btn) => {
+                    btn.onclick = () => {
+                        selectedCategory = btn.dataset.category;
+                        sheetBody.querySelectorAll('.manual-cat-btn').forEach((b) => b.className = 'manual-cat-btn text-xs font-semibold px-3 py-2 rounded-xl border bg-slate-950/60 border-slate-800 text-slate-300');
+                        btn.className = 'manual-cat-btn text-xs font-semibold px-3 py-2 rounded-xl border bg-emerald-500/15 border-emerald-500/35 text-emerald-400';
+                    };
+                });
+
+                document.getElementById('manual-save-btn').onclick = async () => {
+                    const amount = Number(document.getElementById('manual-amount').value);
+                    const note = document.getElementById('manual-note').value.trim();
+                    const errEl = document.getElementById('manual-error');
+                    if (!amount || amount <= 0) {
+                        errEl.textContent = 'اكتب مبلغ صحيح الأول.';
+                        errEl.classList.remove('hidden');
+                        return;
+                    }
+                    errEl.classList.add('hidden');
+                    try {
+                        const data = await callRecordExpenseApi({ amount, category: selectedCategory, note });
+                        handleApiResult(data);
+                    } catch (e) {
+                        console.error('manual record failed:', e);
+                        errEl.textContent = e.message || 'حصل خطأ، جرب تاني.';
+                        errEl.classList.remove('hidden');
+                    }
+                };
+            }
+
+            document.getElementById('record-expense-btn').addEventListener('click', () => {
+                openOverlay();
+                const sub = window.__dashboardData?.subscription;
+                if (sub && !sub.active && !sub.inTrial) {
+                    showTrialEnded();
+                } else {
+                    showListening();
+                }
+            });
+        })();
 
         document.getElementById('close-person-debt').addEventListener('click', () => {
             const overlay = document.getElementById('person-debt-overlay');

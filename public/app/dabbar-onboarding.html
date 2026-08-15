@@ -24,6 +24,7 @@
     --ink:#0F2A1F; --text:#16241D; --muted:#6B7B72; --line:#E7EEE9; --paper:#FFFFFF;
     --danger:#E0574A; --danger-tint:#FDECEA;
     --warn:#8A5A17; --warn-bg:#FFF7ED; --warn-line:#FBD9A5;
+    --amber:#C77D1E; --amber-tint:#FFF4E2; --amber-line:#F3D9A6;
   }
   *{box-sizing:border-box; margin:0; padding:0;}
   body{ font-family:'Tajawal',sans-serif; background:#F6FAF7; color:var(--text); min-height:100vh; overflow-x:hidden; }
@@ -68,11 +69,22 @@
   .step .txt{ font-size:12.5px; line-height:1.8; color:var(--ink); padding-top:2px; }
   .step .txt b{ font-family:'Cairo',sans-serif; }
 
-  .field{ margin-bottom:16px; }
-  .field label{ display:block; font-family:'Cairo',sans-serif; font-weight:700; font-size:12.5px; margin-bottom:6px; color:var(--ink); text-align:center; }
-  .field input{ width:100%; background:#fff; border:1.5px solid var(--line); border-radius:10px; padding:13px 14px; font-family:'Tajawal',sans-serif; font-size:14px; color:var(--text); text-align:center; letter-spacing:6px; font-weight:800; }
+  .field{ margin-bottom:14px; }
+  .field label{ display:block; font-family:'Cairo',sans-serif; font-weight:700; font-size:12.5px; margin-bottom:6px; color:var(--ink); }
+  .field input{ width:100%; background:#fff; border:1.5px solid var(--line); border-radius:10px; padding:13px 14px; font-family:'Tajawal',sans-serif; font-size:14px; color:var(--text); }
   .field input:focus{ outline:none; border-color:var(--green); }
-  .field input::placeholder{ color:#B7C4BC; letter-spacing:normal; font-weight:400; }
+  .field input::placeholder{ color:#B7C4BC; }
+
+  /* ===== تبديل بين "حساب جديد" و"عندي حساب" ===== */
+  .auth-toggle{ display:flex; background:var(--green-tint); border-radius:12px; padding:4px; margin-bottom:18px; }
+  .auth-toggle-btn{ flex:1; text-align:center; padding:9px; border-radius:9px; font-family:'Cairo',sans-serif; font-weight:800; font-size:12.5px; color:var(--muted); cursor:pointer; border:none; background:transparent; }
+  .auth-toggle-btn.active{ background:#fff; color:var(--green-deep); box-shadow:0 4px 10px -4px rgba(0,0,0,0.15); }
+
+  /* ===== تيزر ربط تليجرام (ميزة قادمة، مش شرط) ===== */
+  .teaser{ display:flex; align-items:center; gap:10px; background:var(--amber-tint); border:1px solid var(--amber-line); border-radius:12px; padding:10px 12px; margin-top:16px; }
+  .teaser-emoji{ font-size:18px; }
+  .teaser-txt{ font-size:11.5px; color:var(--amber); line-height:1.7; }
+  .teaser-txt b{ font-family:'Cairo',sans-serif; }
 
   #linkError{ display:none; background:var(--danger-tint); border:1px solid rgba(224,87,74,0.3); color:var(--danger); font-size:12.5px; border-radius:9px; padding:10px 12px; margin-bottom:14px; line-height:1.7; }
   #linkError.show{ display:block; }
@@ -160,34 +172,36 @@
   </div>
 </div>
 
-<!-- ============== 2) اربط حسابك بـ دبّر (مدمجة: افتح البوت + الكود + إنشاء الحساب تلقائي) ============== -->
+<!-- ============== 2) سجّل / سجّل دخول مباشرة — من غير تليجرام خالص ============== -->
 <div class="screen" id="linkScreen">
   <div class="link-card">
 
     <!-- حالة الإدخال -->
     <div id="linkFormState">
       <div class="top-brand" style="padding-top:0; margin-bottom:8px;"><span class="brand-dot"></span>دبّر</div>
-      <div class="slide-icon" style="margin:0 auto 18px;">🔗</div>
-      <h2>اربط حسابك بـ دبّر</h2>
-      <p class="sub">مفيش إيميل ولا باسورد — كل حاجة بتتعمل من تليجرام في 3 خطوات:</p>
+      <h2 id="authTitle">أنشئ حسابك في ثانيتين</h2>
+      <p class="sub" id="authSub">اكتب بياناتك وادخل على طول — مفيش خطوات زيادة.</p>
 
-      <div class="steps">
-        <div class="step"><div class="num">1</div><div class="txt">افتح <b>دبّر على تليجرام</b> بضغطة واحدة</div></div>
-        <div class="step"><div class="num">2</div><div class="txt">هيبعتلك <b>كود من 6 أرقام</b> تلقائي</div></div>
-        <div class="step"><div class="num">3</div><div class="txt">اكتبه هنا — و<b>يتعمل حسابك ويترابط لوحده</b></div></div>
+      <div class="auth-toggle">
+        <button type="button" class="auth-toggle-btn active" id="tabSignup">حساب جديد</button>
+        <button type="button" class="auth-toggle-btn" id="tabLogin">عندي حساب</button>
       </div>
-
-      <a href="https://t.me/Masaaref_bot?start=link" target="_blank" rel="noopener" class="btn btn-ghost" style="margin-bottom:18px;">
-        💬 افتح دبّر وهيبعتلي الكود
-      </a>
 
       <div id="linkError"></div>
       <div id="linkNotice"></div>
 
       <form id="linkForm">
+        <div class="field" id="nameField">
+          <label>الاسم</label>
+          <input type="text" id="nameInput" placeholder="اسمك">
+        </div>
         <div class="field">
-          <label>كود الربط</label>
-          <input type="text" id="linkCodeInput" placeholder="123456" inputmode="numeric" maxlength="6" required>
+          <label>الإيميل</label>
+          <input type="email" id="emailInput" placeholder="example@email.com" required>
+        </div>
+        <div class="field">
+          <label>كلمة السر</label>
+          <input type="password" id="passwordInput" placeholder="••••••••" minlength="6" required>
         </div>
 
         <!-- ===== تنويه إجباري: تثبيت الداشبورد على الموبايل ===== -->
@@ -209,13 +223,18 @@
           <span id="linkSubmitLabel">ثبّت التطبيق الأول عشان تكمل</span>
         </button>
       </form>
+
+      <div class="teaser">
+        <div class="teaser-emoji">🔥</div>
+        <div class="teaser-txt"><b>قريبًا:</b> سجّل مصاريفك بالصوت من تليجرام كمان، من غير ما تفتح الداشبورد أصلًا — هتقدر تفعّلها من الإعدادات وقتها.</div>
+      </div>
     </div>
 
-    <!-- حالة النجاح (مش شاشة منفصلة، بس تبديل جوه نفس الكارت لحد ما التحويل يحصل) -->
+    <!-- حالة النجاح (مش شاشة منفصلة، بس تبديل جوه نفس الكارت) -->
     <div class="success-state" id="successState">
       <div class="top-brand" style="padding-top:0; margin-bottom:18px; justify-content:center;"><span class="brand-dot"></span>دبّر</div>
       <div class="success-icon">✅</div>
-      <h2>اتربط بنجاح!</h2>
+      <h2 id="successTitle">اتعمل حسابك!</h2>
       <p class="sub">بنودّيك دلوقتي على الداشبورد بتاعك...</p>
       <div style="display:flex; justify-content:center; margin-top:6px;"><div class="spinner spinner-dark"></div></div>
     </div>
@@ -319,61 +338,112 @@
     linkScreen.classList.add('active');
   }
 
-  // ---- link + auto account creation ----
+  // ---- تسجيل مباشر (حساب جديد) أو تسجيل دخول (عندي حساب) — من غير تليجرام خالص ----
   const linkForm = document.getElementById('linkForm');
-  const linkCodeInput = document.getElementById('linkCodeInput');
+  const nameField = document.getElementById('nameField');
+  const nameInput = document.getElementById('nameInput');
+  const emailInput = document.getElementById('emailInput');
+  const passwordInput = document.getElementById('passwordInput');
   const linkSubmitBtn = document.getElementById('linkSubmitBtn');
   const linkSubmitLabel = document.getElementById('linkSubmitLabel');
   const linkError = document.getElementById('linkError');
   const linkNotice = document.getElementById('linkNotice');
   const linkFormState = document.getElementById('linkFormState');
   const successState = document.getElementById('successState');
+  const successTitle = document.getElementById('successTitle');
+  const authTitle = document.getElementById('authTitle');
+  const authSub = document.getElementById('authSub');
+  const tabSignup = document.getElementById('tabSignup');
+  const tabLogin = document.getElementById('tabLogin');
+
+  let mode = 'signup'; // 'signup' | 'login'
+
+  tabSignup.addEventListener('click', () => {
+    mode = 'signup';
+    tabSignup.classList.add('active'); tabLogin.classList.remove('active');
+    nameField.style.display = 'block';
+    authTitle.textContent = 'أنشئ حسابك في ثانيتين';
+    authSub.textContent = 'اكتب بياناتك وادخل على طول — مفيش خطوات زيادة.';
+    updateSubmitLabel();
+    hideMessages();
+  });
+  tabLogin.addEventListener('click', () => {
+    mode = 'login';
+    tabLogin.classList.add('active'); tabSignup.classList.remove('active');
+    nameField.style.display = 'none';
+    authTitle.textContent = 'سجّل دخولك';
+    authSub.textContent = 'اكتب إيميلك وكلمة السر.';
+    updateSubmitLabel();
+    hideMessages();
+  });
 
   function showError(msg) { linkError.textContent = msg; linkError.classList.add('show'); linkNotice.classList.remove('show'); }
   function showNotice(msg) { linkNotice.textContent = msg; linkNotice.classList.add('show'); linkError.classList.remove('show'); }
   function hideMessages() { linkError.classList.remove('show'); linkNotice.classList.remove('show'); }
 
+  function updateSubmitLabel() {
+    if (!installedOrAcknowledged()) {
+      linkSubmitLabel.textContent = 'ثبّت التطبيق الأول عشان تكمل';
+      linkSubmitBtn.disabled = true;
+      return;
+    }
+    linkSubmitLabel.textContent = mode === 'signup' ? 'ادخل دبّر 🚀' : 'تسجيل الدخول';
+    linkSubmitBtn.disabled = false;
+  }
+
   linkForm.addEventListener('submit', async (e) => {
     e.preventDefault();
     hideMessages();
-    const code = linkCodeInput.value.trim();
+    const email = emailInput.value.trim().toLowerCase();
+    const password = passwordInput.value;
+    const name = nameInput.value.trim();
+
+    if (!email || !password) {
+      showError('اكتب الإيميل وكلمة السر.');
+      return;
+    }
+    if (mode === 'signup' && password.length < 6) {
+      showError('كلمة السر لازم تكون 6 حروف/أرقام على الأقل.');
+      return;
+    }
 
     linkSubmitBtn.disabled = true;
-    linkSubmitLabel.innerHTML = '<span class="spinner"></span> بنعمل حسابك ونربطه...';
+    linkSubmitLabel.innerHTML = `<span class="spinner"></span> ${mode === 'signup' ? 'بنعمل حسابك...' : 'بندخّلك...'}`;
 
     try {
-      const res = await fetch('/api/auth-by-code', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code }),
-      });
-      const result = await res.json();
-
-      if (!res.ok || !result.session) {
-        showError(result.error || 'حصل خطأ، جرب تاني.');
-        return;
+      if (mode === 'signup') {
+        // 1) نعمل الحساب على السيرفر (بيتأكد أوتوماتيك، من غير إيميل تأكيد)
+        const res = await fetch('/api/auth-signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, password }),
+        });
+        const result = await res.json();
+        if (!res.ok || !result.ok) {
+          showError(result.error || 'حصل خطأ، جرب تاني.');
+          return;
+        }
       }
 
-      // نفعّل الجلسة الجاية من السيرفر في المتصفح، فيصير المستخدم مسجّل دخول فعليًا
-      const { error: setErr } = await sb.auth.setSession({
-        access_token: result.session.access_token,
-        refresh_token: result.session.refresh_token,
-      });
-      if (setErr) {
-        showError('اتربط حسابك بس حصلت مشكلة في فتح الجلسة، جرب تدخل تاني.');
+      // 2) في الحالتين (بعد إنشاء الحساب، أو تسجيل دخول لحساب موجود) بنسجل الدخول فعليًا
+      const { data: signInData, error: signInError } = await sb.auth.signInWithPassword({ email, password });
+      if (signInError || !signInData?.session) {
+        showError(mode === 'signup'
+          ? 'اتعمل حسابك بس حصلت مشكلة في تسجيل الدخول، جرب تدخل من "عندي حساب".'
+          : 'الإيميل أو كلمة السر غلط.');
         return;
       }
 
       // ننتقل لحالة النجاح جوه نفس الكارت، وبعدها نحوّل تلقائي للداشبورد
+      successTitle.textContent = mode === 'signup' ? 'اتعمل حسابك!' : 'أهلًا بيك تاني!';
       linkFormState.style.display = 'none';
       successState.classList.add('show');
-      setTimeout(() => { window.location.href = DASHBOARD_URL; }, 1100);
+      setTimeout(() => { window.location.href = DASHBOARD_URL; }, 900);
     } catch (err) {
       showError('مقدرناش نتواصل مع السيرفر دلوقتي. جرب تاني.');
     } finally {
       if (!successState.classList.contains('show')) {
-        linkSubmitBtn.disabled = !installedOrAcknowledged();
-        linkSubmitLabel.textContent = installedOrAcknowledged() ? 'تأكيد الربط' : 'ثبّت التطبيق الأول عشان تكمل';
+        updateSubmitLabel();
       }
     }
   });
@@ -391,9 +461,7 @@
   }
 
   function refreshSubmitState() {
-    const ok = installedOrAcknowledged();
-    linkSubmitBtn.disabled = !ok;
-    linkSubmitLabel.textContent = ok ? 'تأكيد الربط' : 'ثبّت التطبيق الأول عشان تكمل';
+    updateSubmitLabel();
   }
 
   window.addEventListener('beforeinstallprompt', (e) => {

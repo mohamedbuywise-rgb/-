@@ -1,6 +1,6 @@
 import { supabase } from '../lib/supabaseClient.js';
 import { sendTelegramMessage } from '../lib/telegram.js';
-import { sendMonthlyReport, sendWeeklyReport, sendReportPdf } from '../lib/expenses.js';
+import { sendMonthlyReport, sendWeeklyReport, sendReportPdf } from '../lib/expensesReports.js';
 import { getOldUnsettledDebtsSummary, recordDebtReminders } from '../lib/debts.js';
 import { getAllUsers } from '../lib/users.js';
 import { claimCronSlot } from '../lib/cronRuns.js';

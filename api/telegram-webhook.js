@@ -1,7 +1,9 @@
 import { transcribeVoice, classifyMessage } from '../lib/groq.js';
 import { sendTelegramMessage, forwardTelegramMessage } from '../lib/telegram.js';
-import { recordExpense, sendMonthlyReport, sendWeeklyReport, sendDataExport, sendExpenseSearch } from '../lib/expenses.js';
-import { recordDebt, sendDebtsReport, sendPersonDebtDetail, settleDebtWithPerson } from '../lib/debts.js';
+import { recordExpense, sendDataExport, sendExpenseSearch } from '../lib/expenses.js';
+import { sendMonthlyReport, sendWeeklyReport } from '../lib/expensesReports.js';
+import { recordDebt, settleDebtWithPerson } from '../lib/debts.js';
+import { sendDebtsReport, sendPersonDebtDetail } from '../lib/debtsReports.js';
 import { upsertUser, hasActiveSubscription, getSubscriptionExpiry, activateSubscription, getChatIdByUserId, isInTrial, getTrialDaysLeft } from '../lib/users.js';
 import { createLinkCode } from '../lib/linking.js';
 import { GUIDE_URL, ADMIN_TELEGRAM_ID, SUBSCRIPTION_DAYS, SUBSCRIPTION_PRICE_EGP, INSTAPAY_LINK, ADMIN_CONTACT_USERNAME } from '../lib/config.js';

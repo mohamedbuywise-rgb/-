@@ -1,14 +1,17 @@
 import { transcribeVoice, classifyMessage } from '../lib/groq.js';
 import { tryUseVoiceQuota } from '../lib/voiceUsage.js';
 import { tryUseTextQuota } from '../lib/textUsage.js';
-import { sendTelegramMessage, forwardTelegramMessage } from '../lib/telegram.js';
+import { sendTelegramMessage, forwardTelegramMessage, answerCallbackQuery } from '../lib/telegram.js';
 import { recordExpense, sendDataExport, sendExpenseSearch } from '../lib/expenses.js';
 import { sendMonthlyReport, sendWeeklyReport } from '../lib/expensesReports.js';
 import { recordDebt, settleDebtWithPerson } from '../lib/debts.js';
 import { sendDebtsReport, sendPersonDebtDetail } from '../lib/debtsReports.js';
 import { upsertUser, hasActiveSubscription, getSubscriptionExpiry, activateSubscription, getChatIdByUserId, isInTrial, getTrialDaysLeft } from '../lib/users.js';
 import { createLinkCode } from '../lib/linking.js';
-import { GUIDE_URL, ADMIN_TELEGRAM_ID, SUBSCRIPTION_DAYS, SUBSCRIPTION_PRICE_EGP, INSTAPAY_LINK, ADMIN_CONTACT_USERNAME, TELEGRAM_WEBHOOK_SECRET } from '../lib/config.js';
+import { resolveAmountConfidence } from '../lib/numberExtraction.js';
+import { normalizeEgyptianText } from '../lib/egyptianNormalize.js';
+import { createPendingConfirmation, getPendingConfirmation, deletePendingConfirmation } from '../lib/confirmations.js';
+import { CATEGORY_EMOJI, GUIDE_URL, ADMIN_TELEGRAM_ID, SUBSCRIPTION_DAYS, SUBSCRIPTION_PRICE_EGP, INSTAPAY_LINK, ADMIN_CONTACT_USERNAME, TELEGRAM_WEBHOOK_SECRET } from '../lib/config.js';
 
 // ============ نص دليل الأوامر — بيتبعت مع /start وبرضو متاح في أي وقت عن طريق "مساعدة" ============
 function buildCommandsGuide() {
@@ -99,6 +102,13 @@ export default async function handler(req, res) {
 
   try {
     const update = req.body;
+
+    // --- ضغطة على زرار تأكيد المبلغ (⬅️ من رسالة "تقصد X ولا Y؟") — مسار منفصل تمامًا عن الرسايل العادية ---
+    if (update.callback_query) {
+      await handleConfirmationCallback(update.callback_query);
+      return res.status(200).json({ ok: true });
+    }
+
     const message = update.message;
 
     if (!message) return res.status(200).json({ ok: true });
@@ -288,17 +298,6 @@ export default async function handler(req, res) {
   }
 }
 
-// ============ تحويل الأرقام العربية/الهندية والفارسية (٠١٢٣٤٥٦٧٨٩ / ۰۱۲۳۴۵۶۷۸۹) لأرقام إنجليزية عادية ============
-// من غير ده، لو المستخدم كتب "٨٠٠٠٠" بدل "80000"، النص بيروح للـ AI (Groq) زي ما هو والموديل
-// أحيانًا بيقرأ العدد أو الأصفار غلط (بيزوّد أو ينقّص صفر). التحويل ده بيتم أول حاجة قبل أي
-// معالجة تانية للنص، عشان كل حاجة بعد كده (تصنيف، أوامر، أسماء) تشتغل على أرقام إنجليزية مضمونة.
-function normalizeDigits(text) {
-  const arabicIndic = '٠١٢٣٤٥٦٧٨٩';
-  const persian = '۰۱۲۳۴۵۶۷۸۹';
-  return text.replace(/[٠-٩]/g, (d) => String(arabicIndic.indexOf(d)))
-             .replace(/[۰-۹]/g, (d) => String(persian.indexOf(d)));
-}
-
 // ============ نقطة توجيه موحّدة لأي نص جاي من المستخدم (سواء مكتوب أو مفرّغ من فويس نوت) ============
 // بتفحص الأوامر الثابتة الأول (تقرير/ديون/دور على/صدّر البيانات)، ولو مفيش أمر معروف تعتبرها
 // مصروف أو دين أو تسوية وتبعتها للتصنيف الذكي. المسار ده واحد لكل من الكتابة والصوت، عشان
@@ -309,7 +308,7 @@ async function routeUserMessage(text, userId, chatId) {
     return;
   }
 
-  text = normalizeDigits(text);
+  text = normalizeEgyptianText(text);
 
   // أمر التقرير الشهري
   if (['تقرير', 'التقرير', '/report'].includes(text)) {
@@ -355,7 +354,119 @@ async function routeUserMessage(text, userId, chatId) {
   await handleIncomingText(text, userId, chatId);
 }
 
+// ============ رد على ضغطة زرار تأكيد/رفض مبلغ معلّق ============
+// callback_data شكله "cy:<id>" (أيوه، سجّل زي ما هو) أو "cn:<id>" (لأ، إلغاء). الـ id بيرجّع
+// لنا المعاملة الكاملة من جدول pending_confirmations (شوف lib/confirmations.js).
+async function handleConfirmationCallback(cq) {
+  const callbackId = cq.id;
+  const data = String(cq.data || '');
+  const chatId = cq.message?.chat?.id;
+  const match = data.match(/^(cy|cn):(.+)$/);
+
+  if (!match) {
+    await answerCallbackQuery(callbackId);
+    return;
+  }
+
+  const [, action, id] = match;
+  const pending = await getPendingConfirmation(id);
+
+  if (!pending) {
+    await answerCallbackQuery(callbackId, '⏰ انتهت صلاحية التأكيد ده');
+    if (chatId) {
+      await sendTelegramMessage(chatId, '⏰ التأكيد ده اتلغى أو خلصت صلاحيته (أكتر من يوم). لو لسه محتاج تسجلها، ابعتها تاني.');
+    }
+    return;
+  }
+
+  await deletePendingConfirmation(id);
+
+  if (action === 'cn') {
+    await answerCallbackQuery(callbackId, 'اتلغت ❌');
+    await sendTelegramMessage(pending.chat_id, '❌ اتلغت المعاملة دي. ابعتها تاني بشكل أوضح (خصوصًا المبلغ) لو حابب تسجلها.');
+    return;
+  }
+
+  // action === 'cy' — المستخدم أكّد إن المبلغ اللي فهمناه صح، ننفّذ فعليًا دلوقتي بس
+  await answerCallbackQuery(callbackId, 'تمام ✅');
+  if (pending.kind === 'expense') {
+    await recordExpense(pending.payload, pending.raw_text || '', pending.telegram_user_id, pending.chat_id);
+  } else if (pending.kind === 'debt') {
+    await recordDebt(pending.payload, pending.telegram_user_id, pending.chat_id);
+  }
+}
+
+// ============ بناء نص السؤال عن المبلغ ============
+// لو فيه تعارض حجم واضح (10x/100x — أخطر أنواع غلط الـ ASR)، بنعرض الاختيار صراحةً بين رقم
+// الموديل والرقم الحتمي البديل بدل سؤال عمومي، عشان المستخدم يرد بضغطة واحدة بدل ما يعيد الكتابة.
+function buildAmountQuestion(modelAmount, deterministicAmounts, magnitudeConflict) {
+  if (magnitudeConflict && deterministicAmounts.length > 0) {
+    const alt = deterministicAmounts.find((n) => n !== modelAmount) ?? deterministicAmounts[0];
+    return `تقصد ${modelAmount} جنيه ولا ${alt} جنيه؟`;
+  }
+  return `تقصد ${modelAmount} جنيه؟`;
+}
+
+function confirmationKeyboard(id, modelAmount) {
+  return {
+    inline_keyboard: [[
+      { text: `✅ أيوه، ${modelAmount} جنيه`, callback_data: `cy:${id}` },
+      { text: '❌ لأ، إلغاء', callback_data: `cn:${id}` },
+    ]],
+  };
+}
+
+// ============ طلب تأكيد مصروف — مبلغه محتاج مراجعة قبل ما يتسجّل فعليًا ============
+async function askExpenseConfirmation(result, text, userId, chatId, conf) {
+  const id = await createPendingConfirmation(
+    userId, chatId, 'expense',
+    { amount: Number(result.amount), category: result.category, note: result.note || '' },
+    text
+  );
+  if (!id) {
+    await sendTelegramMessage(chatId, '⚠️ حصل خطأ وأنا بحاول أتأكد من المبلغ، جرب تبعتها تاني.');
+    return;
+  }
+  const emoji = CATEGORY_EMOJI[result.category] || '📌';
+  const detail = result.note && result.note.trim() ? ` (${result.note.trim()})` : '';
+  const question = buildAmountQuestion(Number(result.amount), conf.deterministicAmounts, conf.magnitudeConflict);
+  await sendTelegramMessage(
+    chatId,
+    `🤔 <b>مش متأكد من المبلغ</b>\n${emoji} ${result.category}${detail}\n${question}`,
+    'HTML',
+    confirmationKeyboard(id, Number(result.amount))
+  );
+}
+
+// ============ طلب تأكيد دين/سلفة — نفس فكرة المصروف بالظبط ============
+async function askDebtConfirmation(result, text, userId, chatId, conf) {
+  const id = await createPendingConfirmation(
+    userId, chatId, 'debt',
+    {
+      person: result.person, amount: Number(result.amount),
+      direction: result.direction === 'borrowed' ? 'borrowed' : 'lent',
+      is_repayment: Boolean(result.is_repayment), note: result.note || '',
+    },
+    text
+  );
+  if (!id) {
+    await sendTelegramMessage(chatId, '⚠️ حصل خطأ وأنا بحاول أتأكد من المبلغ، جرب تبعتها تاني.');
+    return;
+  }
+  const question = buildAmountQuestion(Number(result.amount), conf.deterministicAmounts, conf.magnitudeConflict);
+  await sendTelegramMessage(
+    chatId,
+    `🤔 <b>مش متأكد من المبلغ</b>\n👤 ${result.person}\n${question}`,
+    'HTML',
+    confirmationKeyboard(id, Number(result.amount))
+  );
+}
+
 // ============ التصنيف الذكي لأي رسالة (مصروف / دين / تسوية) — بيتنادى بس لو الرسالة مش أمر معروف ============
+// ملحوظة أساسية: المبلغ في أي معاملة مش بيتنفّذ (يتسجّل في الداتابيز) غير لو الثقة فيه عالية
+// (شوف lib/numberExtraction.js -> resolveAmountConfidence). لو محتاج تأكيد، بنطلبه من المستخدم
+// بزرار بدل ما نخمّن — وده بيتم لكل معاملة على حدة (مش الرسالة كلها) عشان لو فيه 3 عمليات
+// واضحة وواحدة بس غامضة، الـ3 بيتسجلوا فورًا وبنسأل بس عن اللي محتاجة تأكيد.
 async function handleIncomingText(text, userId, chatId) {
   if (!text) {
     await sendTelegramMessage(chatId, 'معرفتش أفهم الرسالة، ممكن تعيدها؟');
@@ -372,28 +483,45 @@ async function handleIncomingText(text, userId, chatId) {
     return;
   }
 
-  const transactions = await classifyMessage(text);
+  // ---- تطبيع (أرقام + تصحيحات إملائية شائعة) قبل التصنيف والاستخراج الحتمي، عشان الاتنين
+  // يشتغلوا على نفس النسخة بالظبط من النص ----
+  const normalizedText = normalizeEgyptianText(text);
+  const transactions = await classifyMessage(normalizedText);
   let successCount = 0;
+  let pendingCount = 0;
 
   for (const result of transactions) {
     if (result.type === 'expense' && result.amount) {
-      await recordExpense(result, text, userId, chatId);
-      successCount++;
+      const conf = resolveAmountConfidence(Number(result.amount), result.confidence, normalizedText);
+      if (conf.requiresConfirmation) {
+        await askExpenseConfirmation(result, normalizedText, userId, chatId, conf);
+        pendingCount++;
+      } else {
+        await recordExpense(result, normalizedText, userId, chatId);
+        successCount++;
+      }
     } else if (result.type === 'debt' && result.amount && result.person) {
-      await recordDebt(result, userId, chatId);
-      successCount++;
+      const conf = resolveAmountConfidence(Number(result.amount), result.confidence, normalizedText);
+      if (conf.requiresConfirmation) {
+        await askDebtConfirmation(result, normalizedText, userId, chatId, conf);
+        pendingCount++;
+      } else {
+        await recordDebt(result, userId, chatId);
+        successCount++;
+      }
     } else if (result.type === 'settlement' && result.person) {
       await settleDebtWithPerson(result.person, userId, chatId);
       successCount++;
     }
   }
 
-  if (successCount === 0) {
+  if (successCount === 0 && pendingCount === 0) {
     await sendTelegramMessage(
       chatId,
       'مش قادر أحدد المعاملات من رسالتك 🤔\nجرب تبعت زي كده: "صرفت 50 جنيه أكل" أو "عطيت محمد 200 جنيه" أو "خلصت مع محمد"'
     );
   } else if (transactions.length > 1 && successCount > 0) {
-    await sendTelegramMessage(chatId, `✅ تم تسجيل ${successCount} معاملة بنجاح.`);
+    const pendingNote = pendingCount > 0 ? ` (وفيه ${pendingCount} محتاجة تأكيد المبلغ فوق ⬆️)` : '';
+    await sendTelegramMessage(chatId, `✅ تم تسجيل ${successCount} معاملة بنجاح${pendingNote}.`);
   }
 }

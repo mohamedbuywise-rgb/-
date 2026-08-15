@@ -6,6 +6,8 @@ import { sendTelegramMessage } from '../lib/telegram.js';
 import { getChatIdByUserId, hasActiveSubscription, isInTrial } from '../lib/users.js';
 import { tryUseVoiceQuota } from '../lib/voiceUsage.js';
 import { tryUseTextQuota } from '../lib/textUsage.js';
+import { resolveAmountConfidence } from '../lib/numberExtraction.js';
+import { normalizeEgyptianText } from '../lib/egyptianNormalize.js';
 import { CATEGORY_EMOJI, CATEGORIES, DAILY_VOICE_LIMIT, DAILY_TEXT_LIMIT } from '../lib/config.js';
 
 // ============ POST /api/record-expense-voice ============
@@ -33,8 +35,19 @@ async function classifyTextToItems(text) {
   const items = [];
   for (const t of transactions || []) {
     if (t.type === 'expense' && Number(t.amount) > 0 && CATEGORIES.includes(t.category)) {
-      items.push({ kind: 'expense', amount: Number(t.amount), category: t.category, note: t.note || '' });
+      const conf = resolveAmountConfidence(Number(t.amount), t.confidence, text);
+      items.push({
+        kind: 'expense',
+        amount: Number(t.amount),
+        category: t.category,
+        note: t.note || '',
+        amountConfidence: conf.amountConfidence,
+        amountLowConfidence: conf.requiresConfirmation,
+        magnitudeConflict: conf.magnitudeConflict,
+        deterministicAmounts: conf.deterministicAmounts,
+      });
     } else if (t.type === 'debt' && t.person && Number(t.amount) > 0) {
+      const conf = resolveAmountConfidence(Number(t.amount), t.confidence, text);
       items.push({
         kind: 'debt',
         person: String(t.person).trim(),
@@ -42,6 +55,10 @@ async function classifyTextToItems(text) {
         direction: t.direction === 'borrowed' ? 'borrowed' : 'lent',
         isRepayment: Boolean(t.is_repayment),
         note: t.note || '',
+        amountConfidence: conf.amountConfidence,
+        amountLowConfidence: conf.requiresConfirmation,
+        magnitudeConflict: conf.magnitudeConflict,
+        deterministicAmounts: conf.deterministicAmounts,
       });
     } else if (t.type === 'settlement' && t.person) {
       items.push({ kind: 'settlement', person: String(t.person).trim() });
@@ -49,6 +66,55 @@ async function classifyTextToItems(text) {
     // أي نوع تاني (unknown أو بيانات ناقصة) بيتجاهل.
   }
   return items;
+}
+
+// ============ تحقّق من شكل العناصر الراجعة من الفرونت إند وقت التأكيد (confirmItems) ============
+// دي عناصر إحنا نفسنا بعتناها للفرونت إند قبل كده (preview بعد التصنيف)، فبنتأكد بس إن شكلها
+// سليم قبل ما نحفظها، من غير ما نعيد نداء Groq تاني (توفير تكلفة + سرعة).
+function sanitizeConfirmedItems(rawItems) {
+  const items = [];
+  for (const raw of Array.isArray(rawItems) ? rawItems : []) {
+    if (raw?.kind === 'expense' && Number(raw.amount) > 0 && CATEGORIES.includes(raw.category)) {
+      items.push({ kind: 'expense', amount: Number(raw.amount), category: raw.category, note: String(raw.note || '').slice(0, 200) });
+    } else if (raw?.kind === 'debt' && raw.person && Number(raw.amount) > 0) {
+      items.push({
+        kind: 'debt',
+        person: String(raw.person).trim().slice(0, 100),
+        amount: Number(raw.amount),
+        direction: raw.direction === 'borrowed' ? 'borrowed' : 'lent',
+        isRepayment: Boolean(raw.isRepayment),
+        note: String(raw.note || '').slice(0, 200),
+      });
+    } else if (raw?.kind === 'settlement' && raw.person) {
+      items.push({ kind: 'settlement', person: String(raw.person).trim().slice(0, 100) });
+    }
+  }
+  return items;
+}
+
+// ============ بناء نسخة preview من العناصر (نفس شكل savedItems) للعرض قبل الحفظ ============
+function buildPreviewItems(items) {
+  return items.map((item) => {
+    if (item.kind === 'expense') {
+      return {
+        kind: 'expense', amount: item.amount, category: item.category,
+        emoji: CATEGORY_EMOJI[item.category] || '📌', note: item.note || '',
+        lowConfidence: Boolean(item.amountLowConfidence),
+        magnitudeConflict: Boolean(item.magnitudeConflict),
+        altAmounts: item.deterministicAmounts || [],
+      };
+    }
+    if (item.kind === 'debt') {
+      return {
+        kind: 'debt', person: item.person, amount: item.amount, isLent: item.direction === 'lent',
+        isRepayment: item.isRepayment, note: item.note || '',
+        lowConfidence: Boolean(item.amountLowConfidence),
+        magnitudeConflict: Boolean(item.magnitudeConflict),
+        altAmounts: item.deterministicAmounts || [],
+      };
+    }
+    return { kind: 'settlement', person: item.person };
+  });
 }
 
 export default async function handler(req, res) {
@@ -89,14 +155,28 @@ export default async function handler(req, res) {
       }
     }
 
-    // ---- المصدر: تسجيل صوتي، أو إدخال يدوي مباشر من نفس الشيت ----
+    // ---- المصدر: تسجيل صوتي، تأكيد بعد المعاينة، أو إدخال يدوي مباشر من نفس الشيت ----
     const audioBase64 = String(req.body?.audioBase64 || '');
+    const confirmItems = req.body?.confirmItems;
     let text = '';
     // كل العناصر اللي هنسجّلها فعليًا في الآخر (مصاريف/ديون/تسويات)، كل واحد بشكل موحّد
     // { kind: 'expense'|'debt'|'settlement', ... } عشان الفرونت إند يعرضهم كلهم مرة واحدة.
     let items = [];
+    // لو true، معناها العناصر جاهزة للحفظ المباشر (تأكيد بعد معاينة، أو إدخال يدوي) —
+    // مفيش داعي نرجّع "needsConfirm" تاني في الحالة دي.
+    let skipConfirmStep = false;
 
-    if (audioBase64) {
+    if (Array.isArray(confirmItems)) {
+      // ---- المستخدم أكّد بعد ما شاف المعاينة (الخطوة اللي بعد الفويس) ----
+      // مفيش نداء لـ Groq هنا خالص — إحنا بعتنا العناصر دي بنفسنا قبل كده، بس بنتأكد من
+      // شكلها وبنحفظها زي ما هي.
+      items = sanitizeConfirmedItems(confirmItems);
+      text = String(req.body?.heardText || '').slice(0, 500);
+      skipConfirmStep = true;
+      if (items.length === 0) {
+        return res.status(400).json({ error: 'مفيش عناصر صالحة للحفظ.' });
+      }
+    } else if (audioBase64) {
       // ---- الحد اليومي لعدد التسجيلات الصوتية: بيحمينا من abuse يكلّفنا فلوس Groq ----
       // بيتفحص هنا بس (مش في الإدخال اليدوي) لأن اللي بيكلفنا هو استدعاء Groq نفسه.
       const allowed = await tryUseVoiceQuota(telegramUserId);
@@ -119,15 +199,23 @@ export default async function handler(req, res) {
       if (buffer.byteLength === 0) {
         return res.status(400).json({ error: 'مسجّلتش أي صوت، جرب تاني.' });
       }
+      // ---- تسجيل قصير جدًا (أقل من ~ثانية ونص من الصوت المضغوط) غالبًا سكوت/ضغطة غلط ----
+      // بنرفضه هنا قبل ما نستهلك نداء Groq أصلًا (توفير تكلفة + رد أسرع للمستخدم).
+      if (buffer.byteLength < 2000) {
+        return res.status(200).json({ ok: false, reason: 'too_short', error: 'التسجيل قصير جدًا، جرب تاني وقول العملية بوضوح.' });
+      }
       if (buffer.byteLength > MAX_AUDIO_BYTES) {
         return res.status(400).json({ error: 'التسجيل طويل أوي، جرب تسجيل أقصر.' });
       }
 
       // ---- تفريغ الصوت لنص عبر Groq Whisper (نفس الدالة اللي بيستخدمها بوت تليجرام) ----
-      text = (await transcribeAudioBuffer(buffer, 'expense.webm')).trim();
-      if (!text) {
+      const rawTranscript = (await transcribeAudioBuffer(buffer, 'expense.webm')).trim();
+      if (!rawTranscript) {
         return res.status(200).json({ ok: false, reason: 'unclear', heardText: '' });
       }
+      // ---- تطبيع (أرقام + تصحيحات إملائية شائعة) قبل أي معالجة تانية — نفس الخطوة بالظبط
+      // اللي بتحصل في بوت تليجرام، عشان الاستخراج الحتمي للأرقام والتصنيف يشتغلوا على نفس النص. ----
+      text = normalizeEgyptianText(rawTranscript);
 
       // ---- تصنيف الكلام: ممكن يرجع أكتر من معاملة مرة واحدة (نفس دالة البوت بالظبط) ----
       items = await classifyTextToItems(text);
@@ -137,6 +225,16 @@ export default async function handler(req, res) {
         // الواجهة تعرض حالة "كلام غير واضح"
         return res.status(200).json({ ok: false, reason: 'unclear', heardText: text });
       }
+
+      // ---- خطوة المعاينة/التأكيد: مش بنحفظ فورًا بعد الصوت ----
+      // بنرجّع العناصر اللي فهمناها للمستخدم يشوفها ويأكّد (أو يعيد التسجيل) قبل ما تتسجل
+      // فعليًا. ده شبكة أمان أخيرة ضد أي غلط فات كل فلاتر التفريغ والتصنيف.
+      return res.status(200).json({
+        ok: true,
+        needsConfirm: true,
+        heardText: text,
+        items: buildPreviewItems(items),
+      });
     } else {
       // ---- إدخال يدوي (لما المستخدم يختار "اكتبه بإيدك" في نفس الشيت) ----
       // مفيش اختيار فئة يدوي هنا ولا نوع (مصروف/دين) — بنبني جملة من المبلغ + الوصف ونمررها
@@ -162,12 +260,15 @@ export default async function handler(req, res) {
         });
       }
 
-      text = `${note} ${amount} جنيه`;
+      text = normalizeEgyptianText(`${note} ${amount} جنيه`);
       items = await classifyTextToItems(text);
       if (items.length === 0) {
         return res.status(200).json({ error: 'مش واضح لو ده مصروف ولا دين، جرب توصفه بشكل تاني.' });
       }
+      skipConfirmStep = true;
     }
+
+    void skipConfirmStep; // (باقي الكود بعد كده بيحفظ دايمًا — الاسم هنا للتوثيق بس)
 
     // ---- نسجّل كل العناصر فعليًا، كل واحد في الجدول بتاعه ----
     const savedItems = [];

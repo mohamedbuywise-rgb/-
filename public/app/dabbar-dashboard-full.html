@@ -249,7 +249,10 @@
         <div class="tab-content active fade-up p-5 space-y-4" id="tab-daily">
 
             <!-- تنويه بسيط: تسجيل صوتي واحد ممكن يشمل أكتر من مصروف/دين، فحد الـ30 يومي بيكفي فعليًا أي حد -->
-            <p class="text-[11px] text-slate-500 text-center px-2 -mb-1">💡 نصيحة: قول كل مصاريفك أو ديونك في تسجيل صوتي واحد (مثلاً: "صرفت 100 تاكسي و50 قهوة")، هيسجّلهم كلهم مرة واحدة.</p>
+            <div class="flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/20 rounded-xl px-2.5 py-1.5 -mb-1">
+                <span class="text-[10px] shrink-0">💡</span>
+                <p class="text-[9.5px] text-slate-500 leading-snug">قول كل مصاريفك أو ديونك في تسجيل صوتي واحد، مثلاً "صرفت 100 تاكسي و50 قهوة"، هيسجّلهم كلهم مرة واحدة.</p>
+            </div>
 
             <!-- سجّل مصروفك: نفس تصميم البطاقات والتدرّجات الموجودة بالفعل -->
             <button id="record-expense-btn" class="w-full flex items-center gap-3 bg-gradient-to-tr from-emerald-500 to-teal-400 text-slate-950 rounded-3xl p-4 shadow-lg shadow-emerald-500/20 active:scale-[0.98] transition">
@@ -272,12 +275,11 @@
                 <p class="text-[10px] text-slate-400" id="daily-note">لسه معندكش مصاريف مسجلة النهاردة.</p>
             </div>
 
-            <div class="flex items-start gap-2 bg-slate-950/40 border border-slate-800/70 rounded-2xl p-3">
-                <span class="text-sm leading-none mt-0.5">ℹ️</span>
-                <p class="text-[11px] text-slate-400 leading-relaxed">
-                    الصفحة دي بتوريك مصاريف <b class="text-slate-300">النهاردة بس</b>، وبتتصفّر تلقائي مع كل يوم جديد.
-                    كل عمليتك بردو محفوظة ومش بتتمسح — هتلاقيها كلها مجمّعة بالتفصيل في تبويب
-                    <b class="text-emerald-400">"شهري"</b>، وفي تقرير الـ PDF من أول يوم في الشهر لحد آخر يوم.
+            <div class="flex items-center gap-2 bg-slate-950/40 border border-slate-800/70 rounded-xl px-2.5 py-1.5">
+                <span class="w-4 h-4 rounded-full bg-sky-500/15 text-sky-400 flex items-center justify-center text-[9px] shrink-0">ℹ️</span>
+                <p class="text-[9.5px] text-slate-500 leading-snug">
+                    دي مصاريف <b class="text-slate-400 font-semibold">النهاردة بس</b> وبتتصفّر يوميًا، وكل عملياتك محفوظة في تبويب
+                    <b class="text-emerald-500 font-semibold">"شهري"</b> وفي تقرير PDF الشهري.
                 </p>
             </div>
 
@@ -1573,6 +1575,43 @@
                     activeStream.getTracks().forEach((track) => track.stop());
                     activeStream = null;
                 }
+                stopNoiseWatch();
+            }
+
+            // ============ رصد مستوى الدوشة أثناء التسجيل (Web Audio Analyser) ============
+            // مش بتوقف التسجيل ولا بتمنع حاجة — بس بتنبّه المستخدم لايف لو الدوشة حواليه عالية
+            // جدًا، عشان يقدر يمشي لمكان أهدى أو يتكلم أعلى قبل ما يدوس "خلصت"، بدل ما يكتشف
+            // بعد كده إن التسجيل مش واضح.
+            let noiseCtx = null, noiseRaf = null;
+            function startNoiseWatch(stream) {
+                try {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    if (!AudioCtx) return;
+                    noiseCtx = new AudioCtx();
+                    const source = noiseCtx.createMediaStreamSource(stream);
+                    const analyser = noiseCtx.createAnalyser();
+                    analyser.fftSize = 512;
+                    source.connect(analyser);
+                    const data = new Uint8Array(analyser.frequencyBinCount);
+                    let highStreak = 0;
+                    const tick = () => {
+                        analyser.getByteFrequencyData(data);
+                        const avg = data.reduce((a, b) => a + b, 0) / data.length;
+                        const warnEl = document.getElementById('noise-warning');
+                        // متوسط عالي جدًا وباستمرار (مش صوت كلام عادي متذبذب) = غالبًا دوشة خلفية.
+                        highStreak = avg > 70 ? highStreak + 1 : 0;
+                        if (warnEl) warnEl.classList.toggle('hidden', highStreak < 20);
+                        noiseRaf = requestAnimationFrame(tick);
+                    };
+                    tick();
+                } catch (e) {
+                    console.warn('noise watch unavailable:', e);
+                }
+            }
+            function stopNoiseWatch() {
+                if (noiseRaf) cancelAnimationFrame(noiseRaf);
+                noiseRaf = null;
+                if (noiseCtx) { noiseCtx.close().catch(() => {}); noiseCtx = null; }
             }
 
             function openOverlay() { overlay.classList.remove('hidden'); overlay.classList.add('flex'); }
@@ -1626,6 +1665,7 @@
                             ${[9,15,22,13,19,10,17,8].map((h,i)=>`<span class="bar w-1 rounded-full bg-emerald-400/80" style="height:${h}px; animation-delay:${i*0.09}s;"></span>`).join('')}
                         </div>
                         <p class="text-xs text-slate-400 text-center leading-relaxed">قول اللي اتصرف زي ما هتقوله لصاحبك<br><span class="text-slate-500">"دفعت ١٠٠ جنيه تاكسي"</span></p>
+                        <p id="noise-warning" class="hidden text-[11px] text-amber-400 text-center leading-relaxed">🔊 في دوشة حواليك، جرب مكان أهدى أو اتكلم أعلى شوية عشان السمع يبقى أوضح</p>
                         <button id="stop-record-btn" class="flex flex-col items-center gap-2 active:scale-95 transition">
                             <span class="w-16 h-16 rounded-full bg-emerald-500 text-slate-900 flex items-center justify-center shadow-lg shadow-emerald-500/30">
                                 <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#022c22" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -1637,12 +1677,25 @@
 
                 // تسجيل صوتي حقيقي من المتصفح، بيفضل شغال لحد ما المستخدم يدوس "خلصت"
                 try {
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    // ---- قيود جودة صوت واضحة بدل audio:true العامة ----
+                    // echoCancellation/noiseSuppression/autoGainControl بتحسّن وضوح الصوت
+                    // قبل ما يوصل أصلًا لـ Whisper، وده بيقلل الهلوسة والتكرار بشكل كبير
+                    // خصوصًا في أماكن فيها دوشة (شارع، مواصلات).
+                    const stream = await navigator.mediaDevices.getUserMedia({
+                        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+                    });
                     activeStream = stream;
                     chunks = [];
-                    mediaRecorder = new MediaRecorder(stream);
+                    // بت-ريت أعلى من الافتراضي (اللي بيبقى واطي جدًا زي 24-32kbps في بعض
+                    // المتصفحات) عشان جودة صوت أفضل تدخل على Whisper، من غير ما نقرب من
+                    // حد الـ 1.2MB بتاع 45 ثانية (128kbps × 45s ≈ 720KB، لسه في الأمان).
+                    const recorderOptions = { audioBitsPerSecond: 128000 };
+                    mediaRecorder = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+                        ? new MediaRecorder(stream, { ...recorderOptions, mimeType: 'audio/webm;codecs=opus' })
+                        : new MediaRecorder(stream, recorderOptions);
                     mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
                     mediaRecorder.start();
+                    startNoiseWatch(stream);
                 } catch (e) {
                     console.warn('تعذّر الوصول للمايكروفون:', e);
                     showError('محتاجين إذن استخدام المايكروفون عشان تسجّل بالصوت.');
@@ -1708,9 +1761,52 @@
             function handleApiResult(data) {
                 if (data.reason === 'trial_ended') { showTrialEnded(); return; }
                 if (data.reason === 'quota_exceeded') { showError(data.error || 'وصلت للحد الأقصى من التسجيلات الصوتية النهاردة، جرب تاني بكرة أو اكتبها بإيدك.'); return; }
+                if (data.reason === 'too_short') { showError(data.error || 'التسجيل قصير جدًا، جرب تاني.'); return; }
                 if (data.ok === false) { showUnclear(data.heardText || ''); return; }
+                if (data.needsConfirm) { showConfirm({ items: data.items || [], heardText: data.heardText || '' }); return; }
                 showSaved({ items: data.items || [], heardText: data.heardText, todayTotal: data.todayTotal });
                 refreshDailyTabAfterSave();
+            }
+
+            // ============ شاشة معاينة قبل الحفظ الفعلي ============
+            // بعد ما نفهم كلام المستخدم من الصوت، مش بنحفظ على طول — بنعرضله اللي فهمناه
+            // الأول ونستناه يأكّد، عشان لو حصل أي غلط في السمع أو التصنيف يقدر يلاقيه ويصلحه
+            // (بالتسجيل تاني) قبل ما يتسجل غلط في حسابه فعليًا.
+            function showConfirm({ items, heardText }) {
+                clearTimeout(autoAdvance);
+                const multi = items.length > 1;
+                const hasLowConfidence = items.some((it) => it.lowConfidence);
+                sheetIcon.textContent = hasLowConfidence ? '🤔' : '👀';
+                sheetTitle.textContent = multi ? `سمعت ${items.length} عمليات، صح كده؟` : 'سمعت العملية دي، صح كده؟';
+                sheetSub.textContent = hasLowConfidence ? '● فيه مبلغ مش متأكد منه، راجعه كويس' : '● راجعها كويس قبل الحفظ';
+                const rows = items.map((it, i) => `<div class="${i > 0 ? 'border-t border-slate-800/70 pt-2.5' : ''}">${renderSavedItemRow(it)}</div>`).join('');
+                sheetBody.innerHTML = `
+                    <div class="space-y-3">
+                        <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-4 space-y-2.5">
+                            ${rows}
+                            ${heardText ? `<p class="text-[10px] text-slate-500 pt-1">سمعتك بتقول: "${heardText}"</p>` : ''}
+                        </div>
+                        ${primaryBtn('confirm-save-btn', '✅ تمام، احفظ')}
+                        ${secondaryBtn('🎙️ لأ، سجّل تاني')}
+                    </div>`;
+                document.getElementById('confirm-save-btn').onclick = async () => {
+                    sheetIcon.innerHTML = '⏳';
+                    sheetTitle.textContent = 'بحفظ...';
+                    sheetSub.textContent = '';
+                    sheetBody.innerHTML = `
+                        <div class="flex flex-col items-center gap-4 py-8">
+                            <div class="w-14 h-14 rounded-full border-4 border-slate-800 border-t-emerald-400" style="animation:spin 1s linear infinite;"></div>
+                        </div>`;
+                    try {
+                        const data = await callRecordExpenseApi({ confirmItems: items, heardText });
+                        showSaved({ items: data.items || [], heardText: data.heardText, todayTotal: data.todayTotal });
+                        refreshDailyTabAfterSave();
+                    } catch (e) {
+                        console.error('confirm save failed:', e);
+                        showError('حصل خطأ في الحفظ، جرب تاني.');
+                    }
+                };
+                sheetBody.querySelector('.record-secondary').onclick = showListening;
             }
 
             function showTrialEnded() {
@@ -1765,12 +1861,25 @@
             // ممكن يكون فيها عنصر واحد بس، أو أكتر لو المستخدم قال أكتر من عملية في نفس التسجيل
             // (زي "٥٠ غدا و١٠٠ تاكسي وسوبر ماركت ١٥٠" أو "دفعت ٢٠٠ أكل وواصل من أحمد ٥٠٠").
             function renderSavedItemRow(it) {
+                // لو فيه تعارض حجم واضح (مثلاً الموديل سمع 1000 بس فيه 100 مذكورة برضو في نفس الجملة)،
+                // نوريه الرقم البديل صراحةً بدل تحذير عمومي بس — نفس فكرة "تقصد 100 ولا 1000؟" في تليجرام.
+                const altAmount = (it.magnitudeConflict && Array.isArray(it.altAmounts) && it.altAmounts.length)
+                    ? it.altAmounts.find((n) => n !== it.amount) ?? it.altAmounts[0]
+                    : null;
+                const lowConf = it.lowConfidence
+                    ? (altAmount
+                        ? `<span class="text-[10px] text-amber-400 block mt-0.5">⚠️ تقصد ${it.amount} ولا ${altAmount} جنيه؟ اتأكد قبل الحفظ</span>`
+                        : `<span class="text-[10px] text-amber-400 block mt-0.5">⚠️ اتأكد من المبلغ ده كويس</span>`)
+                    : '';
                 if (it.kind === 'expense') {
                     const detail = it.note && it.note.trim() ? ` (${it.note.trim()})` : '';
                     return `
                         <div class="flex items-center gap-2.5">
                             <span class="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-base shrink-0">${it.emoji}</span>
-                            <p class="text-sm font-bold text-slate-100 leading-snug">${it.category}${detail} · ${it.amount} جنيه</p>
+                            <div>
+                                <p class="text-sm font-bold text-slate-100 leading-snug">${it.category}${detail} · ${it.amount} جنيه</p>
+                                ${lowConf}
+                            </div>
                         </div>`;
                 }
                 if (it.kind === 'debt') {
@@ -1784,7 +1893,10 @@
                     return `
                         <div class="flex items-center gap-2.5">
                             <span class="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-base shrink-0">${emoji}</span>
-                            <p class="text-sm font-bold text-slate-100 leading-snug">${label} · ${it.amount} جنيه</p>
+                            <div>
+                                <p class="text-sm font-bold text-slate-100 leading-snug">${label} · ${it.amount} جنيه</p>
+                                ${lowConf}
+                            </div>
                         </div>`;
                 }
                 if (it.kind === 'settlement') {

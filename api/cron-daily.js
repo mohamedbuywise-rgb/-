@@ -4,6 +4,7 @@ import { sendMonthlyReport, sendWeeklyReport, sendReportPdf } from '../lib/expen
 import { getOldUnsettledDebtsSummary, recordDebtReminders } from '../lib/debts.js';
 import { getAllUsers } from '../lib/users.js';
 import { claimCronSlot } from '../lib/cronRuns.js';
+import { cleanupOldPendingConfirmations } from '../lib/confirmations.js';
 import { CRON_SECRET } from '../lib/config.js';
 
 // عدد المستخدمين اللي بيتعالجوا بالتوازي في نفس الوقت، بدل ما نلف عليهم واحد واحد.
@@ -135,6 +136,10 @@ export default async function handler(req, res) {
       return res.status(401).json({ ok: false, error: 'unauthorized' });
     }
   }
+
+  // تنضيف أي تأكيد مبلغ معلّق من غير رد لأكتر من يوم (شوف lib/confirmations.js) — منفصل تمامًا
+  // عن تقارير المستخدمين تحت، فبنسيبه يشتغل حتى لو فشل بشكل مستقل ومايوقفش باقي الكرون.
+  cleanupOldPendingConfirmations().catch((e) => console.error('cleanupOldPendingConfirmations failed:', e));
 
   const users = await getAllUsers();
 

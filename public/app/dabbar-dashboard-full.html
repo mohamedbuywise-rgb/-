@@ -1690,7 +1690,7 @@
             function handleApiResult(data) {
                 if (data.reason === 'trial_ended') { showTrialEnded(); return; }
                 if (data.ok === false) { showUnclear(data.heardText || ''); return; }
-                showSaved({ ...data.expense, heardText: data.heardText, todayTotal: data.todayTotal });
+                showSaved({ items: data.items || [], heardText: data.heardText, todayTotal: data.todayTotal });
                 refreshDailyTabAfterSave();
             }
 
@@ -1742,30 +1742,67 @@
                 sheetBody.querySelector('.record-secondary').onclick = showManual;
             }
 
-            function showSaved(exp) {
+            // ============ عرض كل العمليات اللي اتسجّلت من نفس الفويس (مصروف/دين/تسوية) ============
+            // ممكن يكون فيها عنصر واحد بس، أو أكتر لو المستخدم قال أكتر من عملية في نفس التسجيل
+            // (زي "٥٠ غدا و١٠٠ تاكسي وسوبر ماركت ١٥٠" أو "دفعت ٢٠٠ أكل وواصل من أحمد ٥٠٠").
+            function renderSavedItemRow(it) {
+                if (it.kind === 'expense') {
+                    const detail = it.note && it.note.trim() ? ` (${it.note.trim()})` : '';
+                    return `
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-base shrink-0">${it.emoji}</span>
+                            <p class="text-sm font-bold text-slate-100 leading-snug">${it.category}${detail} · ${it.amount} جنيه</p>
+                        </div>`;
+                }
+                if (it.kind === 'debt') {
+                    let label;
+                    if (it.isRepayment) {
+                        label = it.isLent ? `رجّعت لـ ${it.person}` : `${it.person} رجّعلك`;
+                    } else {
+                        label = it.isLent ? `بقى ليك عند ${it.person}` : `بقى عليك لـ ${it.person}`;
+                    }
+                    const emoji = it.isRepayment ? '↩️' : (it.isLent ? '📤' : '📥');
+                    return `
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-base shrink-0">${emoji}</span>
+                            <p class="text-sm font-bold text-slate-100 leading-snug">${label} · ${it.amount} جنيه</p>
+                        </div>`;
+                }
+                if (it.kind === 'settlement') {
+                    return it.ok
+                        ? `<div class="flex items-center gap-2.5">
+                            <span class="w-9 h-9 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-base shrink-0">✅</span>
+                            <p class="text-sm font-bold text-slate-100 leading-snug">اتسوى الحساب مع ${it.person}</p>
+                        </div>`
+                        : `<div class="flex items-center gap-2.5">
+                            <span class="w-9 h-9 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-base shrink-0">⚠️</span>
+                            <p class="text-sm font-bold text-slate-100 leading-snug">معنديش ديون مسجلة مع ${it.person}</p>
+                        </div>`;
+                }
+                return '';
+            }
+
+            function showSaved({ items, heardText, todayTotal }) {
+                const multi = items.length > 1;
                 sheetIcon.textContent = '✅';
-                sheetTitle.textContent = 'تمام، سجلت المصروف';
-                sheetSub.textContent = '● اتسجل وحُدّث حسابك أول بأول';
-                const detail = exp.note && exp.note.trim() ? ` (${exp.note.trim()})` : '';
+                sheetTitle.textContent = multi ? `تمام، سجلت ${items.length} عمليات` : 'تمام، سجلت العملية';
+                sheetSub.textContent = '● اتسجلوا وحُدّث حسابك أول بأول';
+                const rows = items.map((it) => `<div class="${items.indexOf(it) > 0 ? 'border-t border-slate-800/70 pt-2.5' : ''}">${renderSavedItemRow(it)}</div>`).join('');
                 sheetBody.innerHTML = `
                     <div class="space-y-3">
-                        <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-4 space-y-3">
-                            <div class="flex items-center gap-2.5">
-                                <span class="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-base">${exp.emoji}</span>
-                                <div class="flex-1">
-                                    <p class="text-sm font-bold text-slate-100">${exp.category}${detail} · ${exp.amount} جنيه</p>
-                                    ${exp.heardText ? `<p class="text-[10px] text-slate-500">سمعتك بتقول: "${exp.heardText}"</p>` : ''}
-                                </div>
-                            </div>
+                        <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-4 space-y-2.5">
+                            ${rows}
+                            ${heardText ? `<p class="text-[10px] text-slate-500 pt-1">سمعتك بتقول: "${heardText}"</p>` : ''}
+                            ${todayTotal !== null && todayTotal !== undefined ? `
                             <div class="border-t border-slate-800/70 pt-2.5 flex items-center justify-between">
                                 <span class="text-[11px] text-slate-400">💰 إجمالي صرفك النهاردة</span>
-                                <span class="text-sm font-black text-rose-400">${exp.todayTotal} جنيه</span>
-                            </div>
+                                <span class="text-sm font-black text-rose-400">${todayTotal} جنيه</span>
+                            </div>` : ''}
                         </div>
                         ${primaryBtn('record-done-btn', 'تمام')}
                     </div>`;
                 document.getElementById('record-done-btn').onclick = closeOverlay;
-                autoAdvance = setTimeout(closeOverlay, 1800);
+                autoAdvance = setTimeout(closeOverlay, multi ? 2600 : 1800);
             }
 
             // بعد الحفظ الفعلي: نعيد تحميل بيانات الداشبورد الحقيقية عشان قائمة عمليات

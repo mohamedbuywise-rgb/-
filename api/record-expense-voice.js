@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabaseClient.js';
 import { transcribeAudioBuffer, classifyMessage } from '../lib/groq.js';
-import { insertExpenseAndGetTodayTotal } from '../lib/expenses.js';
+import { insertExpense, getTodayExpensesTotal } from '../lib/expenses.js';
+import { insertDebt, insertDebtSettlement } from '../lib/debts.js';
 import { sendTelegramMessage } from '../lib/telegram.js';
 import { getChatIdByUserId, hasActiveSubscription, isInTrial } from '../lib/users.js';
 import { CATEGORY_EMOJI, CATEGORIES } from '../lib/config.js';
@@ -8,7 +9,9 @@ import { CATEGORY_EMOJI, CATEGORIES } from '../lib/config.js';
 // ============ POST /api/record-expense-voice ============
 // بتتنادى من زرار "سجّل مصروفك" في تاب "يومي" بالداشبورد.
 // بتاخد الصوت اللي المستخدم سجّله من المتصفح، تفرّغه وتصنّفه بنفس منطق بوت تليجرام
-// بالظبط (lib/groq.js)، وتسجّل المصروف في نفس جدول expenses (lib/expenses.js).
+// بالظبط (lib/groq.js). الفويس ممكن يكون فيه أكتر من عملية مرة واحدة (زي "٥٠ غدا و١٠٠
+// تاكسي" أو "دفعت ٢٠٠ سوبر ماركت وواصل من أحمد ٥٠٠") — بنسجّلهم كلهم مرة واحدة: مصاريف،
+// ديون/سلف، وتسويات حسابات، كل واحدة في الجدول بتاعها.
 //
 // Body: { audioBase64: "data:audio/webm;base64,...." }
 // Header: Authorization: Bearer <supabase access token بتاع الجلسة الحالية>
@@ -55,7 +58,9 @@ export default async function handler(req, res) {
     // ---- المصدر: تسجيل صوتي، أو إدخال يدوي مباشر من نفس الشيت ----
     const audioBase64 = String(req.body?.audioBase64 || '');
     let text = '';
-    let expenseTx = null;
+    // كل العناصر اللي هنسجّلها فعليًا في الآخر (مصاريف/ديون/تسويات)، كل واحد بشكل موحّد
+    // { kind: 'expense'|'debt'|'settlement', ... } عشان الفرونت إند يعرضهم كلهم مرة واحدة.
+    let items = [];
 
     if (audioBase64) {
       // ملحوظة: متصفحات زي Chrome على أندرويد بتسجل الصوت بصيغة فيها باراميترات زيادة
@@ -79,14 +84,30 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: false, reason: 'unclear', heardText: '' });
       }
 
-      // ---- تصنيف الكلام (نفس دالة البوت بالظبط) ----
+      // ---- تصنيف الكلام: ممكن يرجع أكتر من معاملة مرة واحدة (نفس دالة البوت بالظبط) ----
       const transactions = await classifyMessage(text);
-      expenseTx = (transactions || []).find(
-        (t) => t.type === 'expense' && Number(t.amount) > 0 && CATEGORIES.includes(t.category)
-      );
 
-      if (!expenseTx) {
-        // مش واضح / مش مصروف — بنرجّع النص اللي سمعناه عشان الواجهة تعرض حالة "كلام غير واضح"
+      for (const t of transactions || []) {
+        if (t.type === 'expense' && Number(t.amount) > 0 && CATEGORIES.includes(t.category)) {
+          items.push({ kind: 'expense', amount: Number(t.amount), category: t.category, note: t.note || '' });
+        } else if (t.type === 'debt' && t.person && Number(t.amount) > 0) {
+          items.push({
+            kind: 'debt',
+            person: String(t.person).trim(),
+            amount: Number(t.amount),
+            direction: t.direction === 'borrowed' ? 'borrowed' : 'lent',
+            isRepayment: Boolean(t.is_repayment),
+            note: t.note || '',
+          });
+        } else if (t.type === 'settlement' && t.person) {
+          items.push({ kind: 'settlement', person: String(t.person).trim() });
+        }
+        // أي نوع تاني (unknown أو بيانات ناقصة) بيتجاهل، زي منطق البوت بالظبط.
+      }
+
+      if (items.length === 0) {
+        // مفيش ولا عملية واحدة واضحة في كل اللي اتقال — بنرجّع النص اللي سمعناه عشان
+        // الواجهة تعرض حالة "كلام غير واضح"
         return res.status(200).json({ ok: false, reason: 'unclear', heardText: text });
       }
     } else {
@@ -97,35 +118,91 @@ export default async function handler(req, res) {
       if (!amount || amount <= 0) {
         return res.status(400).json({ error: 'المبلغ لازم يكون رقم أكبر من صفر.' });
       }
-      expenseTx = { amount, category: CATEGORIES.includes(category) ? category : 'أخرى', note };
+      items = [{ kind: 'expense', amount, category: CATEGORIES.includes(category) ? category : 'أخرى', note }];
       text = note || 'إدخال يدوي من الداشبورد';
     }
 
-    // ---- تسجيل المصروف فعليًا في نفس جدول expenses ----
-    const todayTotal = await insertExpenseAndGetTodayTotal(expenseTx, text, telegramUserId);
+    // ---- نسجّل كل العناصر فعليًا، كل واحد في الجدول بتاعه ----
+    const savedItems = [];
+    let hasExpense = false;
 
-    // ---- تأكيد على تليجرام كمان، لو المستخدم عنده chat_id (نفس تجربة البوت، من مكان تاني) ----
+    for (const item of items) {
+      if (item.kind === 'expense') {
+        await insertExpense(item, item.note || text, telegramUserId);
+        hasExpense = true;
+        savedItems.push({
+          kind: 'expense',
+          amount: item.amount,
+          category: item.category,
+          emoji: CATEGORY_EMOJI[item.category] || '📌',
+          note: item.note || '',
+        });
+      } else if (item.kind === 'debt') {
+        const result = await insertDebt(
+          { person: item.person, amount: item.amount, direction: item.direction, is_repayment: item.isRepayment, note: item.note },
+          telegramUserId
+        );
+        if (result.ok) {
+          savedItems.push({
+            kind: 'debt',
+            person: item.person,
+            amount: item.amount,
+            isLent: result.isLent,
+            isRepayment: result.isRepayment,
+          });
+        }
+      } else if (item.kind === 'settlement') {
+        const result = await insertDebtSettlement(item.person, telegramUserId);
+        savedItems.push({ kind: 'settlement', person: item.person, ok: result.ok, reason: result.reason || null });
+      }
+    }
+
+    if (savedItems.length === 0) {
+      return res.status(200).json({ ok: false, reason: 'unclear', heardText: text });
+    }
+
+    // ---- إجمالي مصروفات النهاردة (لو فيه مصروف واحد على الأقل من ضمن اللي اتسجّل) ----
+    const todayTotal = hasExpense ? await getTodayExpensesTotal(telegramUserId) : null;
+
+    // ---- تأكيد واحد على تليجرام يلخّص كل العمليات اللي اتسجّلت، لو المستخدم عنده chat_id ----
     const chatId = await getChatIdByUserId(telegramUserId);
     if (chatId) {
-      const detail = expenseTx.note && expenseTx.note.trim() && expenseTx.note.trim() !== expenseTx.category
-        ? ` (${expenseTx.note.trim()})`
-        : '';
-      sendTelegramMessage(
-        chatId,
-        `✅ <b>تمام، سجلت المصروف</b> (من الداشبورد)\n${CATEGORY_EMOJI[expenseTx.category] || '📌'} ${expenseTx.category}${detail} · ${expenseTx.amount} جنيه\n\n💰 إجمالي صرفك النهاردة: <b>${todayTotal} جنيه</b>`,
-        'HTML'
-      ).catch((e) => console.error('record-expense-voice: telegram notify failed', e));
+      const lines = savedItems.map((it) => {
+        if (it.kind === 'expense') {
+          const detail = it.note && it.note.trim() && it.note.trim() !== it.category ? ` (${it.note.trim()})` : '';
+          return `${it.emoji} ${it.category}${detail} · ${it.amount} جنيه`;
+        }
+        if (it.kind === 'debt') {
+          if (it.isRepayment) {
+            return it.isLent
+              ? `↩️ رجّعت لـ ${it.person} ${it.amount} جنيه`
+              : `↩️ ${it.person} رجّعلك ${it.amount} جنيه`;
+          }
+          return it.isLent
+            ? `📤 بقى ليك عند ${it.person} ${it.amount} جنيه`
+            : `📥 بقى عليك لـ ${it.person} ${it.amount} جنيه`;
+        }
+        if (it.kind === 'settlement') {
+          return it.ok ? `✅ اتسوى الحساب مع ${it.person}` : `⚠️ معنديش ديون مسجلة مع ${it.person}`;
+        }
+        return '';
+      });
+
+      const summaryHeader = savedItems.length > 1
+        ? `✅ <b>تمام، سجلت ${savedItems.length} عمليات</b> (من الداشبورد)`
+        : '✅ <b>تمام، سجلت العملية</b> (من الداشبورد)';
+
+      const totalLine = todayTotal !== null ? `\n\n💰 إجمالي صرفك النهاردة: <b>${todayTotal} جنيه</b>` : '';
+
+      sendTelegramMessage(chatId, `${summaryHeader}\n${lines.join('\n')}${totalLine}`, 'HTML').catch((e) =>
+        console.error('record-expense-voice: telegram notify failed', e)
+      );
     }
 
     return res.status(200).json({
       ok: true,
       heardText: text,
-      expense: {
-        amount: Number(expenseTx.amount),
-        category: expenseTx.category,
-        emoji: CATEGORY_EMOJI[expenseTx.category] || '📌',
-        note: expenseTx.note || '',
-      },
+      items: savedItems,
       todayTotal,
     });
   } catch (err) {

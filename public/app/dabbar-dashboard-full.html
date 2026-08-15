@@ -1,0 +1,1822 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>لوحة التحكم والتقارير - محاسبك الشخصي</title>
+
+    <!-- PWA -->
+    <link rel="manifest" href="./manifest.json">
+    <meta name="theme-color" content="#020617">
+    <link rel="apple-touch-icon" href="./icons/icon-192.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="دبّر">
+
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <!-- بنحدد الوضع (فاتح/غامق) بدري قبل ما الصفحة تترسم. الافتراضي دلوقتي "فاتح" -->
+    <script>
+        (function () {
+            try {
+                var saved = localStorage.getItem('dabbar-theme');
+                // لو مفيش حاجة محفوظة، أو المحفوظ "فاتح"، نطبق الفاتح. الغامق بيطبق بس لو هو اللي اختاره.
+                if (saved !== 'dark') {
+                    document.documentElement.setAttribute('data-theme', 'light');
+                }
+            } catch (e) {}
+        })();
+    </script>
+    <style>
+        body { font-family: 'Cairo', sans-serif; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .tab-btn { transition: all .2s ease; }
+        .tab-btn.active-tab { color: #34d399; }
+        .tab-btn.active-tab .tab-icon-wrap { background: rgba(52,211,153,0.15); border-color: rgba(52,211,153,0.35); }
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: translateY(0);} }
+        .fade-up { animation: fadeUp .35s ease both; }
+
+        /* سجّل مصروفك: مايك احترافي بحلقات صوتية متوسّعة */
+        @keyframes ringExpand{ 0%{ transform:scale(1); opacity:.55;} 100%{ transform:scale(1.65); opacity:0;} }
+        .mic-ring{ position:absolute; inset:0; border-radius:9999px; border:1.5px solid rgba(52,211,153,0.55); animation:ringExpand 2.2s cubic-bezier(.4,0,.2,1) infinite; }
+        .mic-ring.r2{ animation-delay:.7s; }
+        .mic-ring.r3{ animation-delay:1.4s; }
+        @keyframes micGlow{ 0%,100%{ box-shadow:0 0 0 0 rgba(52,211,153,0.35), 0 12px 34px -6px rgba(16,185,129,0.55);} 50%{ box-shadow:0 0 0 10px rgba(52,211,153,0.08), 0 12px 34px -6px rgba(16,185,129,0.7);} }
+        .mic-core{ animation:micGlow 2.2s ease-in-out infinite; }
+        @keyframes barBounce{ 0%,100%{ transform:scaleY(0.3);} 50%{ transform:scaleY(1);} }
+        .bar{ animation:barBounce .9s ease-in-out infinite; transform-origin:center; }
+        @keyframes spin{ to{ transform:rotate(360deg);} }
+
+        /* ============================================================
+           الوضع الفاتح — نسخة كاملة من كل الألوان المستخدمة في الصفحة.
+           بتشتغل عن طريق [data-theme="light"] على <html>، والـ selector هنا
+           عنده specificity أعلى من كلاسات Tailwind العادية فبيكسبها دايمًا
+           بغض النظر عن ترتيب التحميل.
+           ============================================================ */
+        html[data-theme="light"] body { background-color: #f8fafc; color: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
+        html[data-theme="light"] ::-webkit-scrollbar-thumb { background: #cbd5e1; }
+
+        /* خلفيات */
+        html[data-theme="light"] .bg-slate-950 { background-color: #f8fafc !important; }
+        html[data-theme="light"] .bg-slate-950\/40 { background-color: rgba(241,245,249,0.7) !important; }
+        html[data-theme="light"] .bg-slate-950\/60 { background-color: rgba(241,245,249,0.9) !important; }
+        html[data-theme="light"] .bg-slate-950\/80 { background-color: rgba(241,245,249,0.97) !important; }
+        html[data-theme="light"] .bg-slate-900 { background-color: #ffffff !important; }
+        html[data-theme="light"] .bg-slate-900\/90 { background-color: rgba(255,255,255,0.92) !important; }
+        html[data-theme="light"] .bg-slate-800 { background-color: #e2e8f0 !important; }
+        html[data-theme="light"] .bg-slate-700 { background-color: #cbd5e1 !important; }
+        html[data-theme="light"] .bg-slate-700\/50 { background-color: rgba(203,213,225,0.6) !important; }
+        html[data-theme="light"] .hover\:bg-slate-800:hover { background-color: #e2e8f0 !important; }
+        html[data-theme="light"] .hover\:bg-slate-700:hover { background-color: #cbd5e1 !important; }
+
+        /* تدرجات */
+        html[data-theme="light"] .from-slate-900 { --tw-gradient-from: #ffffff var(--tw-gradient-from-position); }
+        html[data-theme="light"] .to-slate-950 { --tw-gradient-to: #f1f5f9 var(--tw-gradient-to-position); }
+        html[data-theme="light"] .to-slate-900 { --tw-gradient-to: #f8fafc var(--tw-gradient-to-position); }
+        html[data-theme="light"] .from-emerald-950\/60 { --tw-gradient-from: rgba(209,250,229,0.8) var(--tw-gradient-from-position); }
+        html[data-theme="light"] .from-slate-700 { --tw-gradient-from: #cbd5e1 var(--tw-gradient-from-position); }
+        html[data-theme="light"] .to-slate-600 { --tw-gradient-to: #94a3b8 var(--tw-gradient-to-position); }
+
+        /* حدود */
+        html[data-theme="light"] .border-slate-800 { border-color: #e2e8f0 !important; }
+        html[data-theme="light"] .border-slate-800\/60 { border-color: rgba(226,232,240,0.9) !important; }
+        html[data-theme="light"] .border-slate-800\/70 { border-color: rgba(226,232,240,0.9) !important; }
+        html[data-theme="light"] .border-slate-800\/80 { border-color: rgba(226,232,240,0.95) !important; }
+        html[data-theme="light"] .border-slate-700 { border-color: #cbd5e1 !important; }
+
+        /* نصوص */
+        html[data-theme="light"] .text-slate-100 { color: #0f172a !important; }
+        html[data-theme="light"] .text-slate-200 { color: #1e293b !important; }
+        html[data-theme="light"] .text-slate-300 { color: #334155 !important; }
+        html[data-theme="light"] .text-slate-400 { color: #64748b !important; }
+        html[data-theme="light"] .text-slate-500 { color: #94a3b8 !important; }
+        html[data-theme="light"] .text-slate-600 { color: #94a3b8 !important; }
+
+        /* لون الأرقام والتفاصيل الكبيرة يبقى أغمق شوية في الفاتح عشان يبان واضح */
+        html[data-theme="light"] .text-emerald-300 { color: #059669 !important; }
+        html[data-theme="light"] .text-emerald-400 { color: #059669 !important; }
+        html[data-theme="light"] .text-rose-400 { color: #e11d48 !important; }
+
+        /* شارات وكروت صغيرة بألوان شفافة (badges) */
+        html[data-theme="light"] .bg-emerald-500\/15 { background-color: rgba(16,185,129,0.12) !important; }
+        html[data-theme="light"] .bg-rose-500\/15 { background-color: rgba(244,63,94,0.12) !important; }
+        html[data-theme="light"] .bg-rose-500\/20 { background-color: rgba(244,63,94,0.14) !important; }
+        html[data-theme="light"] .border-rose-500\/30 { border-color: rgba(244,63,94,0.3) !important; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
+
+    <!-- ============ حجب إجباري لحد التثبيت كـ Shortcut ============
+         لو المتصفح بيدعم beforeinstallprompt (كروم أندرويد غالبًا): حجب حقيقي، مينفعش يتخطاه غير بالتثبيت الفعلي.
+         لو المتصفح مبيدعمهاش (سفاري آيفون، أوبرا، فايرفوكس): مفيش API نقدر نتأكد بيها إنه ثبّت فعلاً،
+         فبنوريله تعليمات يدوية + زرار "تم التثبيت" يأكدها بنفسه (تقدير مش إجبار حقيقي، تقنيًا مستحيل غير كده). -->
+    <div id="installGate" style="display:none; position:fixed; inset:0; z-index:9999; background:#020617; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:32px;">
+        <div style="width:76px; height:76px; border-radius:20px; background:rgba(52,211,153,0.12); border:1.5px solid rgba(52,211,153,0.3); display:flex; align-items:center; justify-content:center; font-size:34px; margin-bottom:22px;">📲</div>
+        <h2 style="font-family:'Cairo',sans-serif; font-weight:900; font-size:21px; margin-bottom:12px; color:#f1f5f9;">ثبّت دبّر على شاشتك الأول</h2>
+        <p style="color:#94a3b8; font-size:14px; line-height:1.9; max-width:320px; margin-bottom:26px;">عشان تفتح لوحة التحكم بسهولة في أي وقت من غير ما تدوّر على اللينك تاني، لازم تضيف دبّر كـ Shortcut على شاشتك الرئيسية.</p>
+        <button id="installGateBtn" style="font-family:'Cairo',sans-serif; font-weight:800; font-size:14.5px; background:#34d399; color:#022c22; border:none; padding:15px 28px; border-radius:12px; cursor:pointer; margin-bottom:12px;">📲 ثبّت دلوقتي</button>
+        <div id="installGateManual" style="display:none; color:#94a3b8; font-size:12.5px; line-height:1.9; max-width:300px; margin-bottom:14px;"></div>
+        <button id="installGateConfirmBtn" style="display:none; background:none; border:1px solid rgba(148,163,184,0.3); color:#cbd5e1; font-family:'Tajawal',sans-serif; font-size:13px; padding:10px 18px; border-radius:10px; cursor:pointer;">✅ ثبّتها، كمّل</button>
+    </div>
+    <script>
+        (function () {
+            var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+            if (isStandalone) return; // متثبت فعلاً، مفيش داعي نعطّله
+
+            // لو سبق وأكّد التثبيت يدويًا (متصفح مبيدعمش beforeinstallprompt)، مانوريهوش الحجب تاني
+            if (localStorage.getItem('dabbar-install-confirmed') === '1') return;
+
+            var gate = document.getElementById('installGate');
+            var installBtn = document.getElementById('installGateBtn');
+            var manualBox = document.getElementById('installGateManual');
+            var confirmBtn = document.getElementById('installGateConfirmBtn');
+            var deferredPrompt = null;
+            var supportsPrompt = false;
+
+            gate.style.display = 'flex';
+
+            window.addEventListener('beforeinstallprompt', function (e) {
+                e.preventDefault();
+                deferredPrompt = e;
+                supportsPrompt = true;
+            });
+
+            installBtn.addEventListener('click', async function () {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    var choice = await deferredPrompt.userChoice;
+                    deferredPrompt = null;
+                    if (choice.outcome === 'accepted') {
+                        gate.style.display = 'none';
+                    }
+                    return;
+                }
+                // مفيش prompt برمجي (سفاري آيفون / أوبرا / فايرفوكس) — نوريله تعليمات يدوية
+                var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+                manualBox.textContent = isIOS
+                    ? 'اضغط على زرار "مشاركة" (Share) تحت في المتصفح، وبعدين اختار "إضافة للشاشة الرئيسية" (Add to Home Screen).'
+                    : 'افتح قايمة المتصفح (٣ نقط فوق)، واختار "إضافة إلى الشاشة الرئيسية" أو "Install App".';
+                manualBox.style.display = 'block';
+                confirmBtn.style.display = 'inline-block';
+            });
+
+            confirmBtn.addEventListener('click', function () {
+                localStorage.setItem('dabbar-install-confirmed', '1');
+                gate.style.display = 'none';
+            });
+
+            window.addEventListener('appinstalled', function () {
+                gate.style.display = 'none';
+            });
+        })();
+    </script>
+
+    <!-- Main Web Container (Full Width) -->
+    <div class="w-full max-w-4xl mx-auto bg-slate-900 flex-1 flex flex-col shadow-2xl overflow-hidden md:my-4 md:rounded-3xl md:border md:border-slate-800">
+
+        <!-- Brand Bar -->
+        <div class="bg-slate-900/90 px-5 pt-4 pb-1 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+                <img src="./icons/icon-192.png" alt="دبّر" class="w-8 h-8 rounded-xl">
+                <span class="text-2xl font-black" style="font-family:'Cairo',sans-serif; letter-spacing:-0.5px; background:linear-gradient(90deg,#34d399,#2dd4bf); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;">دبّر</span>
+            </div>
+            <button id="brandbar-theme-btn" title="تبديل المظهر" class="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-xs hover:bg-slate-700 transition">🌙</button>
+        </div>
+
+        <!-- Header Bar -->
+        <div class="bg-slate-900/90 border-b border-slate-800/80 p-5 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-slate-950 font-black text-xl shadow-lg shadow-emerald-500/20" id="header-icon">🗓️</div>
+                <div>
+                    <h2 class="font-bold text-base text-slate-100 leading-tight" id="header-title">تقرير اليوم</h2>
+                    <span class="text-xs text-emerald-400 font-medium" id="header-sub">● النهاردة</span>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button id="refresh-btn" title="تحديث دلوقتي" class="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-sm hover:bg-slate-700 transition">🔄</button>
+                <div class="bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-full text-xs font-bold text-emerald-400" id="header-badge">
+                    —
+                </div>
+            </div>
+        </div>
+        <div class="px-5 -mt-1 pb-1 text-left">
+            <span class="text-[9px] text-slate-600" id="last-updated-label"></span>
+        </div>
+
+        <!-- Scrollable Dashboard Content -->
+        <div class="flex-1 overflow-y-auto">
+
+        <!-- ===================== TAB: MONTHLY (default) ===================== -->
+        <div class="tab-content p-5 space-y-4" id="tab-monthly">
+
+            <div class="bg-gradient-to-br from-emerald-950/60 to-slate-900 border border-emerald-500/30 rounded-3xl p-4 text-center space-y-2 shadow-lg">
+                <span class="text-xs text-emerald-400 font-semibold block" id="monthly-total-label">إجمالي صرفك الشهر ده</span>
+                <h3 class="text-3xl font-black text-emerald-300" id="monthly-total">—</h3>
+                <p class="text-[11px] text-slate-400" id="monthly-compare">لسه معندناش بيانات كفاية عشان نقارن بالشهر اللي فات.</p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl">
+                    <span class="text-[11px] text-slate-400 block mb-1">عدد العمليات الشهر ده</span>
+                    <span class="text-lg font-bold text-slate-200" id="monthly-count">—</span>
+                </div>
+                <div class="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl">
+                    <span class="text-[11px] text-slate-400 block mb-1">متوسط اليوم</span>
+                    <span class="text-lg font-bold text-rose-400" id="monthly-avg">—</span>
+                </div>
+            </div>
+
+            <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3" id="monthly-categories-card">
+                <h4 class="text-xs font-bold text-slate-300">أكثر فئات تم الصرف فيها:</h4>
+                <div class="space-y-2.5 text-xs" id="monthly-categories-list">
+                    <p class="text-slate-500">لسه معندكش مصاريف مسجلة الشهر ده.</p>
+                </div>
+            </div>
+
+            <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-3.5 flex items-start gap-3" id="monthly-tip-card" style="display:none;">
+                <div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold shrink-0 border border-emerald-500/30">💡</div>
+                <div class="text-xs text-slate-300 leading-relaxed" id="monthly-tip-text"></div>
+            </div>
+
+        </div>
+
+        <!-- ===================== TAB: DAILY ===================== -->
+        <div class="tab-content active fade-up p-5 space-y-4" id="tab-daily">
+
+            <!-- سجّل مصروفك: نفس تصميم البطاقات والتدرّجات الموجودة بالفعل -->
+            <button id="record-expense-btn" class="w-full flex items-center gap-3 bg-gradient-to-tr from-emerald-500 to-teal-400 text-slate-950 rounded-3xl p-4 shadow-lg shadow-emerald-500/20 active:scale-[0.98] transition">
+                <span class="w-11 h-11 rounded-2xl bg-slate-950/15 flex items-center justify-center">
+                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M19 11a7 7 0 0 1-14 0M12 18v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                </span>
+                <span class="text-right flex-1">
+                    <span class="block font-black text-sm">سجّل مصروفك</span>
+                    <span class="block text-[11px] font-semibold text-slate-900/70">قول اللي اتصرف وهسجله على طول</span>
+                </span>
+                <span class="text-slate-900/60 text-sm">‹</span>
+            </button>
+
+            <div class="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-2xl p-3 space-y-1.5 shadow-lg">
+                <div class="flex justify-between items-center">
+                    <span class="text-[11px] text-slate-400 font-semibold">صرف النهاردة</span>
+                    <span class="text-[10px] text-slate-500" id="daily-date"></span>
+                </div>
+                <h3 class="text-xl font-black text-rose-400" id="daily-total">—</h3>
+                <p class="text-[10px] text-slate-400" id="daily-note">لسه معندكش مصاريف مسجلة النهاردة.</p>
+            </div>
+
+            <div class="flex items-start gap-2 bg-slate-950/40 border border-slate-800/70 rounded-2xl p-3">
+                <span class="text-sm leading-none mt-0.5">ℹ️</span>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                    الصفحة دي بتوريك مصاريف <b class="text-slate-300">النهاردة بس</b>، وبتتصفّر تلقائي مع كل يوم جديد.
+                    كل عمليتك بردو محفوظة ومش بتتمسح — هتلاقيها كلها مجمّعة بالتفصيل في تبويب
+                    <b class="text-emerald-400">"شهري"</b>، وفي تقرير الـ PDF من أول يوم في الشهر لحد آخر يوم.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl">
+                    <span class="text-[11px] text-slate-400 block mb-1">عدد العمليات</span>
+                    <span class="text-lg font-bold text-slate-200" id="daily-count">—</span>
+                </div>
+                <div class="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl">
+                    <span class="text-[11px] text-slate-400 block mb-1">متوسط يومك (الشهر ده)</span>
+                    <span class="text-lg font-bold text-emerald-400" id="daily-avg">—</span>
+                </div>
+            </div>
+
+            <!-- حركة السيولة اليومية (واصل من / واصل لـ) -->
+            <div class="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-4 space-y-3 shadow-lg">
+                <h4 class="text-xs font-bold text-slate-300 flex items-center justify-between">
+                    <span>حركة السيولة (النهاردة):</span>
+                    <span class="text-[9px] text-slate-500 font-normal">تتصفّر يومياً الساعة 12م</span>
+                </h4>
+                <div class="grid grid-cols-3 gap-2">
+                    <div class="bg-slate-950/40 p-2 rounded-xl border border-emerald-500/10 text-center">
+                        <span class="text-[9px] text-slate-500 block">داخل (واصل من)</span>
+                        <span class="text-xs font-bold text-emerald-400" id="flow-in">0</span>
+                    </div>
+                    <div class="bg-slate-950/40 p-2 rounded-xl border border-rose-500/10 text-center">
+                        <span class="text-[9px] text-slate-500 block">خارج (واصل لـ)</span>
+                        <span class="text-xs font-bold text-rose-400" id="flow-out">0</span>
+                    </div>
+                    <div class="bg-slate-950/40 p-2 rounded-xl border border-slate-700 text-center">
+                        <span class="text-[9px] text-slate-500 block">صافي الحركة</span>
+                        <span class="text-xs font-bold text-slate-200" id="flow-net">0</span>
+                    </div>
+                </div>
+                <p class="text-[9px] text-slate-500 text-center italic">⚠️ الصافي اليومي = (إجمالي الداخل) - (إجمالي الخارج) خلال النهاردة بس.</p>
+            </div>
+
+            <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3">
+                <h4 class="text-xs font-bold text-slate-300">عمليات النهاردة:</h4>
+                <div class="space-y-1" id="daily-items-list">
+                    <p class="text-xs text-slate-500">لسه مفيش عمليات النهاردة.</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ===================== TAB: CATEGORIES ===================== -->
+        <div class="tab-content p-5 space-y-4" id="tab-categories">
+
+            <div class="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-4 text-center space-y-1 shadow-lg">
+                <span class="text-xs text-slate-400 font-semibold block">أكتر فئة بتاخد من ميزانيتك</span>
+                <h3 class="text-2xl font-black text-slate-100" id="top-category-name">—</h3>
+                <p class="text-[11px] text-rose-400 font-semibold" id="top-category-detail"></p>
+            </div>
+
+            <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-4">
+                <h4 class="text-xs font-bold text-slate-300">كل الفئات بالتفصيل:</h4>
+                <div class="space-y-2.5 text-xs" id="all-categories-list">
+                    <p class="text-slate-500">لسه معندكش مصاريف مسجلة الشهر ده.</p>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ===================== TAB: TIPS ===================== -->
+        <div class="tab-content p-5 space-y-3" id="tab-tips">
+
+            <div class="bg-gradient-to-br from-emerald-950/60 to-slate-900 border border-emerald-500/30 rounded-3xl p-4 text-center space-y-1 shadow-lg mb-1">
+                <span class="text-xs text-emerald-400 font-semibold block">نظرة على صرفك</span>
+                <h3 class="text-xl font-black text-slate-100" id="tips-headline">جاري التحليل...</h3>
+            </div>
+
+            <div id="tips-list" class="space-y-3">
+                <p class="text-xs text-slate-500 text-center p-4">لسه معندكش بيانات كفاية عشان نديك نصايح مبنية على صرفك الفعلي.</p>
+            </div>
+
+        </div>
+
+        <!-- ===================== TAB: DEBTS ===================== -->
+        <div class="tab-content p-5 space-y-4" id="tab-debts">
+
+            <div class="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-4 text-center space-y-1 shadow-lg">
+                <span class="text-xs text-slate-400 font-semibold block">صافي وضعك دلوقتي</span>
+                <h3 class="text-3xl font-black text-emerald-300" id="debts-net">—</h3>
+                <p class="text-[11px] text-slate-400" id="debts-net-note">لسه معندكش ديون مسجلة.</p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-slate-950/60 border border-emerald-500/20 p-3.5 rounded-2xl">
+                    <span class="text-[11px] text-slate-400 block mb-1">ليك عند الناس</span>
+                    <span class="text-lg font-bold text-emerald-400" id="debts-owed-to-you-total">—</span>
+                </div>
+                <div class="bg-slate-950/60 border border-rose-500/20 p-3.5 rounded-2xl">
+                    <span class="text-[11px] text-slate-400 block mb-1">عليك للناس</span>
+                    <span class="text-lg font-bold text-rose-400" id="debts-you-owe-total">—</span>
+                </div>
+            </div>
+
+            <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3" id="debts-owed-to-you-card" style="display:none;">
+                <h4 class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span> ليك عند الناس
+                </h4>
+                <div class="space-y-1" id="debts-owed-to-you-list"></div>
+            </div>
+
+            <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3" id="debts-you-owe-card" style="display:none;">
+                <h4 class="text-xs font-bold text-slate-300 flex items-center gap-1.5">
+                    <span class="w-2 h-2 rounded-full bg-rose-400"></span> عليك للناس
+                </h4>
+                <div class="space-y-1" id="debts-you-owe-list"></div>
+            </div>
+
+            <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-3.5 flex items-start gap-3">
+                <div class="w-8 h-8 rounded-full bg-slate-700/50 text-slate-300 flex items-center justify-center text-xs font-bold shrink-0 border border-slate-700">ℹ️</div>
+                <div class="text-xs text-slate-300 leading-relaxed">
+                    عشان تسجل سلفة جديدة، ابعت رسالة زي "عطيت محمد 200 جنيه" أو "استلفت من سارة 100 جنيه" في بوت تليجرام.
+                </div>
+            </div>
+
+            <button id="download-debts-pdf" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-3 rounded-2xl text-sm transition border border-slate-700 flex items-center justify-center gap-2 mt-2">
+                <span id="download-debts-pdf-icon">📄</span> <span id="download-debts-pdf-label">تحميل كشف حساب كل الديون (PDF)</span>
+            </button>
+
+        </div>
+
+        <!-- ===================== TAB: ACCOUNT ===================== -->
+        <div class="tab-content p-5 space-y-4" id="tab-account">
+
+            <div class="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-5 flex flex-col items-center text-center gap-3 shadow-lg">
+                <div class="relative">
+                    <button id="avatar-btn" class="w-20 h-20 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-slate-950 font-black text-2xl overflow-hidden border-2 border-slate-800 shadow-lg" title="غيّر صورتك">
+                        <img id="account-avatar-img" class="w-full h-full object-cover hidden" alt="صورة البروفايل">
+                        <span id="account-avatar-initial">—</span>
+                    </button>
+                    <span class="absolute -bottom-1 -left-1 w-7 h-7 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs">📷</span>
+                    <input type="file" id="avatar-file-input" accept="image/*" class="hidden">
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-slate-100" id="account-name">—</h3>
+                    <p class="text-xs text-slate-400" id="account-email">—</p>
+                </div>
+            </div>
+
+            <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 flex items-center justify-between gap-3" id="account-telegram-card">
+                <div class="flex items-center gap-3">
+                    <span class="w-9 h-9 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-base">💬</span>
+                    <div>
+                        <p class="text-xs font-bold text-slate-200">حساب تليجرام</p>
+                        <p class="text-[11px] text-slate-500" id="account-telegram-status">جاري التحقق...</p>
+                    </div>
+                </div>
+                <span id="account-telegram-badge" class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-slate-800 text-slate-400">—</span>
+            </div>
+
+            <button id="account-theme-toggle" class="w-full bg-slate-950/60 border border-slate-800 rounded-3xl p-4 flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <span class="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-base" id="theme-toggle-icon">🌙</span>
+                    <div class="text-right">
+                        <p class="text-xs font-bold text-slate-200">الوضع الفاتح / الغامق</p>
+                        <p class="text-[11px] text-slate-500" id="theme-toggle-label">الوضع الغامق شغّال دلوقتي</p>
+                    </div>
+                </div>
+                <span class="relative inline-flex w-11 h-6 rounded-full bg-slate-700 transition-colors" id="theme-toggle-track">
+                    <span class="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform" id="theme-toggle-knob"></span>
+                </span>
+            </button>
+
+            <button id="pwa-install-btn" class="w-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold py-3.5 rounded-2xl text-sm transition flex items-center justify-center gap-2 hover:bg-emerald-500/20 mb-3 hidden">
+                📲 تثبيت التطبيق على الشاشة الرئيسية
+            </button>
+
+            <!-- بطاقة الاشتراك — بتظهر بس لما التجربة تخلص أو الاشتراك ينتهي -->
+            <div id="account-subscription-card" class="hidden bg-gradient-to-br from-emerald-500/10 to-teal-500/5 border border-emerald-500/25 rounded-3xl p-5 space-y-4">
+                <div>
+                    <p id="account-sub-headline" class="text-sm font-black text-emerald-400 mb-1">—</p>
+                    <p id="account-sub-subline" class="text-xs text-slate-400 leading-relaxed">—</p>
+                </div>
+
+                <!-- فورم رفع إثبات الدفع — بيتقفل بعد الإرسال ويتحول لحالة "قيد المراجعة" تحت -->
+                <div id="account-sub-form" class="bg-slate-950/60 border border-slate-800 rounded-2xl p-4 space-y-3 text-xs">
+                    <div class="flex items-start gap-2">
+                        <span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 flex items-center justify-center font-black text-[10px] shrink-0 mt-0.5">1</span>
+                        <div class="flex-1">
+                            <p class="text-slate-300 mb-1.5">حوّل <b id="account-sub-price" class="text-emerald-400">100 ج.م</b> عن طريق إنستا باي على الرقم:</p>
+                            <button type="button" id="account-sub-copy-btn" class="w-full flex items-center justify-between gap-2 bg-slate-900 border border-slate-800 rounded-lg px-3 py-2.5">
+                                <span id="account-sub-instapay" class="font-mono text-sm text-slate-100 select-all" dir="ltr">—</span>
+                                <span id="account-sub-copy-label" class="text-[10px] font-bold text-emerald-400 shrink-0">نسخ 📋</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-2">
+                        <span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 flex items-center justify-center font-black text-[10px] shrink-0 mt-0.5">2</span>
+                        <div class="flex-1 space-y-2">
+                            <p class="text-slate-300">ارفع صورة إيصال التحويل:</p>
+                            <label for="account-sub-file" id="account-sub-dropzone" class="cursor-pointer flex flex-col items-center justify-center gap-1.5 border-2 border-dashed border-slate-700 rounded-xl py-5 px-3 text-center hover:border-emerald-500/40 transition">
+                                <span class="text-xl" id="account-sub-upload-icon">📸</span>
+                                <span class="text-[11px] font-bold text-slate-400" id="account-sub-upload-text">اضغط لرفع صورة الإيصال</span>
+                            </label>
+                            <input type="file" id="account-sub-file" accept="image/*" class="hidden">
+                            <img id="account-sub-preview" class="hidden w-full rounded-lg border border-slate-800 object-cover max-h-40" alt="معاينة الإيصال">
+                        </div>
+                    </div>
+
+                    <div class="flex items-start gap-2">
+                        <span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 flex items-center justify-center font-black text-[10px] shrink-0 mt-0.5">3</span>
+                        <div class="flex-1">
+                            <p class="text-slate-300 mb-1.5">اسمك اللي حولت بيه (لو مختلف عن اسمك هنا):</p>
+                            <input type="text" id="account-sub-name" placeholder="مثال: محمد أحمد" class="w-full bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs text-slate-100 outline-none focus:border-emerald-500/50">
+                        </div>
+                    </div>
+
+                    <p id="account-sub-error" class="hidden text-rose-400 text-[11px] font-bold"></p>
+
+                    <button type="button" id="account-sub-submit" disabled class="w-full bg-slate-800 text-slate-500 font-black py-3 rounded-xl text-xs transition flex items-center justify-center gap-2 cursor-not-allowed">
+                        أرسل إثبات التحويل
+                    </button>
+                </div>
+
+                <!-- حالة "قيد المراجعة" بعد الإرسال -->
+                <div id="account-sub-pending" class="hidden bg-amber-500/10 border border-amber-500/20 rounded-2xl p-3.5 flex items-center gap-3">
+                    <span class="w-9 h-9 rounded-xl bg-amber-500/15 border border-amber-500/25 flex items-center justify-center text-base shrink-0">⏳</span>
+                    <div>
+                        <p class="text-xs font-bold text-amber-400">جاري مراجعة الإثبات</p>
+                        <p class="text-[11px] text-amber-400/80">هيتفعّل اشتراكك خلال دقايق قليلة، وهتوصلك رسالة تأكيد على تليجرام</p>
+                    </div>
+                </div>
+
+                <a id="account-sub-open-bot" href="#" target="_blank" class="w-full bg-slate-950/60 border border-slate-800 text-slate-300 font-bold py-3 rounded-2xl text-xs flex items-center justify-center gap-2">
+                    💬 أو ابعت الإيصال مباشرة على بوت تليجرام
+                </a>
+            </div>
+
+            <button id="account-logout-btn" class="w-full bg-slate-950/60 border border-rose-500/20 text-rose-400 font-bold py-3.5 rounded-2xl text-sm transition flex items-center justify-center gap-2 hover:bg-rose-500/10">
+                🚪 تسجيل خروج
+            </button>
+
+        </div>
+
+        </div>
+
+        <!-- Bottom Tab Navigation -->
+        <div class="bg-slate-900 border-t border-slate-800/80 px-2 pt-2 pb-3 flex items-center justify-around">
+            <button class="tab-btn flex flex-col items-center gap-1 px-3 py-1 text-slate-500 text-[10px] font-semibold" data-tab="monthly" data-title="تقرير نهاية الشهر" data-sub="● تقييم أداء الشهر" data-icon="📊" data-badge="—">
+                <span class="tab-icon-wrap w-9 h-9 rounded-xl border border-transparent flex items-center justify-center text-base">📊</span>
+                شهري
+            </button>
+            <button class="tab-btn active-tab flex flex-col items-center gap-1 px-3 py-1 text-slate-500 text-[10px] font-semibold" data-tab="daily" data-title="تقرير اليوم" data-sub="● النهاردة" data-icon="🗓️" data-badge="—">
+                <span class="tab-icon-wrap w-9 h-9 rounded-xl border border-transparent flex items-center justify-center text-base">🗓️</span>
+                يومي
+            </button>
+            <button class="tab-btn flex flex-col items-center gap-1 px-3 py-1 text-slate-500 text-[10px] font-semibold" data-tab="categories" data-title="التصنيفات" data-sub="● صرف الشهر بالتفصيل" data-icon="🧾" data-badge="—">
+                <span class="tab-icon-wrap w-9 h-9 rounded-xl border border-transparent flex items-center justify-center text-base">🧾</span>
+                التصنيفات
+            </button>
+            <button class="tab-btn flex flex-col items-center gap-1 px-3 py-1 text-slate-500 text-[10px] font-semibold" data-tab="tips" data-title="نصايح التوفير" data-sub="● مخصصة ليك من محاسبك" data-icon="💡" data-badge="نصايح">
+                <span class="tab-icon-wrap w-9 h-9 rounded-xl border border-transparent flex items-center justify-center text-base">💡</span>
+                نصايح
+            </button>
+            <button class="tab-btn flex flex-col items-center gap-1 px-3 py-1 text-slate-500 text-[10px] font-semibold" data-tab="debts" data-title="الديون والسلف" data-sub="● متابعة اللي ليك واللي عليك" data-icon="🤝" data-badge="—">
+                <span class="tab-icon-wrap w-9 h-9 rounded-xl border border-transparent flex items-center justify-center text-base">🤝</span>
+                ديون
+            </button>
+            <button class="tab-btn flex flex-col items-center gap-1 px-3 py-1 text-slate-500 text-[10px] font-semibold" data-tab="account" data-title="حسابي" data-sub="● بياناتك وإعداداتك" data-icon="👤" data-badge="حسابي">
+                <span class="tab-icon-wrap w-9 h-9 rounded-xl border border-transparent flex items-center justify-center text-base overflow-hidden" id="nav-avatar-wrap">👤</span>
+                حسابي
+            </button>
+        </div>
+
+        <!-- Footer Action (only visible on monthly tab) -->
+        <div class="p-4 bg-slate-900 border-t border-slate-800/80" id="footer-cta" style="display:none;">
+            <div class="flex gap-2 mb-1">
+                <button id="download-monthly-pdf" class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold py-2 rounded-xl text-xs transition flex items-center justify-center gap-2">
+                    <span id="download-pdf-icon">📄</span> <span id="download-pdf-label">تقرير PDF</span>
+                </button>
+                <button id="open-archive" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-2 rounded-xl text-xs transition border border-slate-700 flex items-center justify-center gap-2">
+                    <span>🗂️</span> الأرشيف
+                </button>
+            </div>
+            <p class="text-[9px] text-slate-500 text-center mt-1">تقدر تطلب التقرير في أي وقت خلال الشهر، مش لازم تستنى آخره.</p>
+        </div>
+
+    </div>
+
+    <!-- Record Expense Overlay: نفس نمط الأوفرلاي الموجود (archive-overlay) -->
+    <div id="record-overlay" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-end md:items-center justify-center z-50">
+        <div class="max-w-md w-full bg-slate-900 border-t md:border border-slate-800 rounded-t-3xl md:rounded-3xl shadow-2xl overflow-hidden">
+            <div class="bg-slate-900/90 border-b border-slate-800/80 p-5 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-slate-950 font-black text-xl shadow-lg shadow-emerald-500/20" id="record-sheet-icon">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Z" stroke="#022c22" stroke-width="2" stroke-linecap="round"/><path d="M19 11a7 7 0 0 1-14 0M12 18v3" stroke="#022c22" stroke-width="2" stroke-linecap="round"/></svg>
+                    </div>
+                    <div>
+                        <h2 class="font-bold text-base text-slate-100 leading-tight" id="record-sheet-title">بتسمعك دلوقتي...</h2>
+                        <span class="text-xs text-emerald-400 font-medium" id="record-sheet-sub">● اتكلم عادي، هفهم منك ويتسجل لوحده</span>
+                    </div>
+                </div>
+                <button id="close-record-overlay" class="w-9 h-9 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-sm">✕</button>
+            </div>
+            <div class="p-5" id="record-sheet-body"></div>
+        </div>
+    </div>
+
+    <!-- Archive Overlay -->
+
+    <div id="archive-overlay" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[80vh]">
+            <div class="bg-slate-900/90 border-b border-slate-800/80 p-5 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-slate-700 to-slate-600 flex items-center justify-center text-slate-100 font-black text-xl">🗂️</div>
+                    <div>
+                        <h2 class="font-bold text-base text-slate-100 leading-tight">أرشيف الشهور</h2>
+                        <span class="text-xs text-slate-400 font-medium">● ملخصات فقط، بدون تفاصيل يومية</span>
+                    </div>
+                </div>
+                <button id="close-archive" class="w-9 h-9 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-sm">✕</button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-5 space-y-3" id="archive-list">
+                <p class="text-xs text-slate-500 text-center p-4">جاري التحميل...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Person Debt Detail Overlay -->
+    <div id="person-debt-overlay" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[80vh]">
+            <div class="bg-slate-900/90 border-b border-slate-800/80 p-5 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-slate-700 to-slate-600 flex items-center justify-center text-slate-100 font-black text-xl">🧑</div>
+                    <div>
+                        <h2 class="font-bold text-base text-slate-100 leading-tight" id="person-debt-name">—</h2>
+                        <span class="text-xs font-semibold" id="person-debt-net-line">—</span>
+                    </div>
+                </div>
+                <button id="close-person-debt" class="w-9 h-9 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-sm">✕</button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-5 space-y-2.5" id="person-debt-list">
+                <p class="text-xs text-slate-500 text-center p-4">جاري التحميل...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Avatar Crop Overlay -->
+    <div id="avatar-crop-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-[2rem] shadow-2xl overflow-hidden flex flex-col">
+            <div class="bg-slate-900/90 border-b border-slate-800/80 p-4 flex items-center justify-between">
+                <h2 class="font-bold text-sm text-slate-100">اضبط صورتك</h2>
+                <button id="avatar-crop-close" class="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-sm">✕</button>
+            </div>
+
+            <div class="p-5 flex flex-col items-center gap-4">
+                <div id="avatar-crop-frame" class="relative w-64 h-64 rounded-full overflow-hidden border-2 border-emerald-500/40 bg-slate-950 touch-none cursor-grab">
+                    <canvas id="avatar-crop-canvas" width="600" height="600" class="w-full h-full"></canvas>
+                </div>
+
+                <div class="w-full flex items-center gap-3 px-2">
+                    <span class="text-xs text-slate-400">🔍</span>
+                    <input type="range" id="avatar-zoom-range" min="100" max="300" value="100" class="w-full accent-emerald-500">
+                </div>
+                <p class="text-[11px] text-slate-500 text-center">اسحب الصورة لتحريكها، واستخدم الشريط للتكبير</p>
+
+                <div id="avatar-crop-error" class="hidden w-full text-[11px] text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-xl p-2.5 text-center"></div>
+
+                <button id="avatar-crop-save" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold py-3 rounded-2xl text-sm transition flex items-center justify-center gap-2">
+                    <span id="avatar-save-icon">✅</span> <span id="avatar-save-label">حفظ الصورة</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /* ===== Supabase auth guard + logout =====
+           لازم يتحطوا نفس القيم اللي في dabbar-onboarding.html */
+        const SUPABASE_URL = 'https://devywtyfzybnahdsqdkd.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_yHiX1cnEMCVEcjQxiIrqig_DRBiuveQ';
+        const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const ONBOARDING_URL = 'dabbar-onboarding.html';
+
+        const CATEGORY_EMOJI = { 'أكل':'🍔', 'مواصلات':'🚕', 'فواتير':'🧾', 'تسوق':'🛍️', 'ترفيه':'🎬', 'صحة':'💊', 'أخرى':'📌' };
+        const CATEGORIES = Object.keys(CATEGORY_EMOJI);
+        const CATEGORY_BAR_COLOR = { 'أكل':'bg-rose-400', 'مواصلات':'bg-teal-400', 'فواتير':'bg-amber-400', 'تسوق':'bg-violet-400', 'ترفيه':'bg-pink-400', 'صحة':'bg-emerald-400', 'أخرى':'bg-slate-400' };
+        const fmt = (n) => `${Number(n).toLocaleString('ar-EG')} ج.م`;
+
+        // ============ الوضع الفاتح/الغامق — بيتخزن في localStorage على جهاز المستخدم ============
+        const THEME_KEY = 'dabbar-theme';
+
+        function getTheme() {
+            return document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+        }
+
+        function applyThemeToggleUI(theme) {
+            const icon = document.getElementById('theme-toggle-icon');
+            const label = document.getElementById('theme-toggle-label');
+            const track = document.getElementById('theme-toggle-track');
+            const knob = document.getElementById('theme-toggle-knob');
+            if (!icon) return;
+            if (theme === 'light') {
+                icon.textContent = '☀️';
+                label.textContent = 'الوضع الفاتح شغّال دلوقتي';
+                track.classList.remove('bg-slate-700');
+                track.classList.add('bg-amber-400');
+                knob.style.transform = 'translateX(-20px)';
+            } else {
+                icon.textContent = '🌙';
+                label.textContent = 'الوضع الغامق شغّال دلوقتي';
+                track.classList.remove('bg-amber-400');
+                track.classList.add('bg-slate-700');
+                knob.style.transform = '';
+            }
+        }
+
+        function setTheme(theme) {
+            if (theme === 'light') document.documentElement.setAttribute('data-theme', 'light');
+            else document.documentElement.removeAttribute('data-theme');
+            try { localStorage.setItem(THEME_KEY, theme); } catch (e) {}
+            applyThemeToggleUI(theme);
+        }
+
+        // الثيم نفسه بيتطبق بدري في <head> (عشان منشوفش فلاش)، هنا بس بنظبط شكل السويتش والنص يتوافق معاه
+        applyThemeToggleUI(getTheme());
+
+        document.getElementById('account-theme-toggle').addEventListener('click', () => {
+            setTheme(getTheme() === 'light' ? 'dark' : 'light');
+        });
+        const brandBarThemeBtn = document.getElementById('brandbar-theme-btn');
+        if (brandBarThemeBtn) {
+            brandBarThemeBtn.textContent = getTheme() === 'light' ? '☀️' : '🌙';
+            brandBarThemeBtn.addEventListener('click', () => {
+                const next = getTheme() === 'light' ? 'dark' : 'light';
+                setTheme(next);
+                brandBarThemeBtn.textContent = next === 'light' ? '☀️' : '🌙';
+            });
+        }
+
+        let accessToken = null;
+        let currentUser = null;
+
+        (async () => {
+            try {
+                const { data: { session } } = await sb.auth.getSession();
+                if (!session) { window.location.href = ONBOARDING_URL; return; }
+                accessToken = session.access_token;
+                currentUser = session.user;
+                await loadDashboard();
+                await loadAccountTab();
+                setupAutoRefresh();
+            } catch (e) {
+                /* supabase not configured يعني، بيسيب الصفحة مفتوحة عشان المعاينة بس */
+            }
+        })();
+
+        // ============ تحديث تلقائي: مفيش سيرفر بيبعتلنا "لايف" (مفيش WebSocket)، فبنعوّض الفرق بـ:
+        // (1) لما يرجع للصفحة (بعد ما يسجل مصروف في تليجرام مثلاً وبيرجع للمتصفح) — يحدّث فورًا
+        // (2) polling كل 20 ثانية طول ما الصفحة فاتحة وظاهرة قدامه، عشان يبقى شبه لايف
+        // (3) زرار تحديث يدوي 🔄 لو عايز يتأكد فورًا ============
+        function setupAutoRefresh() {
+            document.addEventListener('visibilitychange', () => {
+                if (document.visibilityState === 'visible') loadDashboard();
+            });
+            window.addEventListener('focus', () => loadDashboard());
+
+            setInterval(() => {
+                if (document.visibilityState === 'visible') loadDashboard();
+            }, 20000);
+
+            document.getElementById('refresh-btn').addEventListener('click', async (e) => {
+                const btn = e.currentTarget;
+                btn.classList.add('animate-spin');
+                await loadDashboard();
+                setTimeout(() => btn.classList.remove('animate-spin'), 300);
+            });
+        }
+
+        // تسجيل الخروج بقى موجود بس جوه تاب "حسابي" (مش زرار عائم فوق الصفحة زي الأول)
+        async function doLogout() {
+            try { await sb.auth.signOut(); } catch (e) {}
+            window.location.href = ONBOARDING_URL;
+        }
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./sw.js').catch(() => {});
+        }
+
+        // ============ PWA Install Logic ============
+        let deferredPrompt;
+        const pwaInstallBtn = document.getElementById('pwa-install-btn');
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            if (pwaInstallBtn) pwaInstallBtn.classList.remove('hidden');
+        });
+        if (pwaInstallBtn) {
+            pwaInstallBtn.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    if (outcome === 'accepted') pwaInstallBtn.classList.add('hidden');
+                    deferredPrompt = null;
+                } else {
+                    // تعليمات يدوية لو الـ prompt مش متاح
+                    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+                    if (isIOS) alert('على آيفون: اضغط على زرار "مشاركة" (Share) تحت، وبعدين اختار "إضافة للشاشة الرئيسية" (Add to Home Screen).');
+                    else alert('تقدر تثبت التطبيق من إعدادات المتصفح (ثلاث نقط فوق) واختيار "تثبيت التطبيق" أو "Install App".');
+                }
+            });
+        }
+        window.addEventListener('appinstalled', () => {
+            if (pwaInstallBtn) pwaInstallBtn.classList.add('hidden');
+        });
+
+        // ============ تحميل كشف حساب الديون الشامل PDF ============
+        document.getElementById('download-debts-pdf').addEventListener('click', async () => {
+            const btn = document.getElementById('download-debts-pdf');
+            const icon = document.getElementById('download-debts-pdf-icon');
+            const label = document.getElementById('download-debts-pdf-label');
+            const originalLabel = label.textContent;
+
+            btn.disabled = true;
+            icon.textContent = '⏳';
+            label.textContent = 'بنجهز الملف...';
+
+            try {
+                const res = await fetch('/api/debts-report-pdf', {
+                    headers: { Authorization: `Bearer ${accessToken}` },
+                });
+
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({}));
+                    throw new Error(err.error || 'فشل تحميل الملف');
+                }
+
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'كشف-الديون-الشامل.pdf';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+            } catch (e) {
+                alert(e.message || 'حصل خطأ، جرب تاني.');
+            } finally {
+                btn.disabled = false;
+                icon.textContent = '📄';
+                label.textContent = originalLabel;
+            }
+        });
+
+        // ============ جلب البيانات الحقيقية من /api/dashboard-data وملء الشاشة بيها ============
+        async function loadDashboard() {
+            let data;
+            try {
+                const res = await fetch('/api/dashboard-data', {
+                    headers: { Authorization: `Bearer ${accessToken}` },
+                });
+                data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'فشل تحميل البيانات');
+            } catch (e) {
+                console.error('dashboard-data fetch failed:', e);
+                return;
+            }
+
+            if (data.linked === false) {
+                // الحساب لسه مش مربوط بتليجرام — رجّعه لشاشة الربط
+                window.location.href = ONBOARDING_URL;
+                return;
+            }
+
+            window.__dashboardData = data;
+
+            renderMonthly(data.month);
+            renderDaily(data.today, data.flow);
+            renderCategories(data.month);
+            renderTips(data.month);
+            renderDebts(data.debts);
+            renderArchive(data.history);
+            renderSubscription(data.subscription);
+            updateHeaderForTab(document.querySelector('.tab-btn.active-tab').dataset.tab, data);
+
+            const label = document.getElementById('last-updated-label');
+            if (label) {
+                const now = new Date();
+                label.textContent = `آخر تحديث ${now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}`;
+            }
+        }
+
+        function renderMonthly(month) {
+            document.getElementById('monthly-total').textContent = fmt(month.total);
+            document.getElementById('monthly-count').textContent = `${month.count} عملية`;
+            const daysPassed = Math.max(1, new Date().getDate());
+            document.getElementById('monthly-avg').textContent = fmt(Math.round(month.total / daysPassed));
+
+            const compareEl = document.getElementById('monthly-compare');
+            if (month.prevTotal > 0) {
+                const diff = Math.round(Math.abs(((month.total - month.prevTotal) / month.prevTotal) * 100));
+                const dir = month.total >= month.prevTotal ? 'أكتر' : 'أقل';
+                compareEl.textContent = `صرفت ${diff}% ${dir} من ${month.prevLabel}`;
+            } else {
+                compareEl.textContent = 'لسه معندناش بيانات كفاية عشان نقارن بالشهر اللي فات.';
+            }
+
+            const listEl = document.getElementById('monthly-categories-list');
+            if (month.byCategory.length === 0) {
+                listEl.innerHTML = '<p class="text-slate-500">لسه معندكش مصاريف مسجلة الشهر ده.</p>';
+            } else {
+                listEl.innerHTML = month.byCategory.slice(0, 3).map((c) => `
+                    <div>
+                        <div class="flex justify-between mb-1 text-slate-300">
+                            <span>${CATEGORY_EMOJI[c.name] || '📌'} ${c.name}</span>
+                            <span class="font-bold text-slate-200">${fmt(c.amount)} (${c.percent}%)</span>
+                        </div>
+                        <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div class="${CATEGORY_BAR_COLOR[c.name] || 'bg-slate-400'} h-full rounded-full" style="width: ${c.percent}%"></div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            const tipCard = document.getElementById('monthly-tip-card');
+            if (month.byCategory.length > 0) {
+                tipCard.style.display = 'flex';
+                document.getElementById('monthly-tip-text').innerHTML =
+                    `<strong class="text-emerald-400 block mb-0.5">أكتر فئة صرفت فيها:</strong>` +
+                    `${CATEGORY_EMOJI[month.topCategory.name] || ''} ${month.topCategory.name} — ${fmt(month.topCategory.amount)} (${month.topCategory.percent}% من صرف الشهر)`;
+            } else {
+                tipCard.style.display = 'none';
+            }
+        }
+
+        function renderDaily(today, flow) {
+            document.getElementById('daily-date').textContent =
+                new Date().toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long' });
+            document.getElementById('daily-total').textContent = fmt(today.total);
+            document.getElementById('daily-count').textContent = `${today.count} عملية`;
+            document.getElementById('daily-avg').textContent = fmt(today.avgPerDayThisMonth);
+            document.getElementById('daily-note').textContent =
+                today.count > 0 ? `سجلت ${today.count} عملية النهاردة.` : 'لسه معندكش مصاريف مسجلة النهاردة.';
+
+            if (flow) {
+                document.getElementById('flow-in').textContent = fmt(flow.in);
+                document.getElementById('flow-out').textContent = fmt(flow.out);
+                document.getElementById('flow-net').textContent = fmt(flow.net);
+                document.getElementById('flow-net').className = `text-xs font-bold ${flow.net >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+            }
+
+            const listEl = document.getElementById('daily-items-list');
+            if (today.items.length === 0) {
+                listEl.innerHTML = '<p class="text-xs text-slate-500">لسه مفيش عمليات النهاردة.</p>';
+            } else {
+                listEl.innerHTML = today.items.map((it, i) => `
+                    <div class="flex items-center justify-between py-2 ${i < today.items.length - 1 ? 'border-b border-slate-800/60' : ''}">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-sm">${CATEGORY_EMOJI[it.category] || '📌'}</span>
+                            <div>
+                                <p class="text-xs font-semibold text-slate-200">${(it.description && it.description.trim()) || it.category}</p>
+                                <p class="text-[10px] text-slate-500">${it.category} · ${new Date(it.created_at).toLocaleTimeString('ar-EG', { hour: 'numeric', minute: '2-digit' })}</p>
+                            </div>
+                        </div>
+                        <span class="text-xs font-bold text-rose-400">-${fmt(it.amount)}</span>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function renderCategories(month) {
+            if (month.topCategory) {
+                document.getElementById('top-category-name').textContent = `${CATEGORY_EMOJI[month.topCategory.name] || ''} ${month.topCategory.name}`;
+                document.getElementById('top-category-detail').textContent = `${fmt(month.topCategory.amount)} من إجمالي ${fmt(month.total)}`;
+            } else {
+                document.getElementById('top-category-name').textContent = 'لسه مفيش بيانات';
+                document.getElementById('top-category-detail').textContent = '';
+            }
+
+            const listEl = document.getElementById('all-categories-list');
+            if (month.byCategory.length === 0) {
+                listEl.innerHTML = '<p class="text-slate-500">لسه معندكش مصاريف مسجلة الشهر ده.</p>';
+            } else {
+                listEl.innerHTML = month.byCategory.map((c) => `
+                    <div>
+                        <div class="flex justify-between mb-1 text-slate-300">
+                            <span>${CATEGORY_EMOJI[c.name] || '📌'} ${c.name}</span>
+                            <span class="font-bold text-slate-200">${fmt(c.amount)} (${c.percent}%)</span>
+                        </div>
+                        <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div class="${CATEGORY_BAR_COLOR[c.name] || 'bg-slate-400'} h-full rounded-full" style="width: ${c.percent}%"></div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // نصايح مبنية على أرقام حقيقية بس — مفيش أي رقم متوقع أو متخيّل
+        function renderTips(month) {
+            const headline = document.getElementById('tips-headline');
+            const listEl = document.getElementById('tips-list');
+
+            if (month.byCategory.length === 0) {
+                headline.textContent = 'لسه معندكش بيانات';
+                return;
+            }
+
+            headline.textContent = `صرفت ${fmt(month.total)} في ${month.count} عملية الشهر ده`;
+
+            const tips = [];
+            const top = month.topCategory;
+            tips.push({
+                icon: CATEGORY_EMOJI[top.name] || '📌',
+                color: 'emerald',
+                title: `أكتر فئة صرفت فيها: ${top.name}`,
+                text: `${fmt(top.amount)} من إجمالي صرفك (${top.percent}%). لو قللت فيها شوية هتحس بفرق واضح في إجمالي الشهر.`,
+            });
+
+            if (month.prevTotal > 0) {
+                const diff = Math.round(((month.total - month.prevTotal) / month.prevTotal) * 100);
+                if (diff > 0) {
+                    tips.push({
+                        icon: '📈', color: 'rose',
+                        title: `صرفك زاد ${diff}% عن ${month.prevLabel}`,
+                        text: `صرفت ${fmt(month.prevTotal)} في ${month.prevLabel} مقابل ${fmt(month.total)} الشهر ده.`,
+                    });
+                } else if (diff < 0) {
+                    tips.push({
+                        icon: '📉', color: 'emerald',
+                        title: `صرفك قل ${Math.abs(diff)}% عن ${month.prevLabel}`,
+                        text: `عاش! صرفك الشهر ده أقل من ${month.prevLabel}.`,
+                    });
+                }
+            }
+
+            listEl.innerHTML = tips.map((t) => `
+                <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-3.5 flex items-start gap-3">
+                    <div class="w-8 h-8 rounded-full bg-${t.color}-500/20 text-${t.color}-400 flex items-center justify-center text-xs font-bold shrink-0 border border-${t.color}-500/30">${t.icon}</div>
+                    <div class="text-xs text-slate-300 leading-relaxed">
+                        <strong class="text-${t.color}-400 block mb-0.5">${t.title}</strong>
+                        ${t.text}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderDebts(debts) {
+            const netEl = document.getElementById('debts-net');
+            const noteEl = document.getElementById('debts-net-note');
+            netEl.textContent = `${debts.net >= 0 ? '+' : ''}${fmt(debts.net)}`;
+            netEl.className = `text-3xl font-black ${debts.net >= 0 ? 'text-emerald-300' : 'text-rose-400'}`;
+            if (debts.net === 0 && debts.owedToYouTotal === 0 && debts.youOweTotal === 0) {
+                noteEl.textContent = 'لسه معندكش ديون مسجلة.';
+            } else {
+                noteEl.textContent = debts.net >= 0 ? `ليك أكتر مما عليك بـ ${fmt(Math.abs(debts.net))}` : `عليك أكتر مما ليك بـ ${fmt(Math.abs(debts.net))}`;
+            }
+
+            document.getElementById('debts-owed-to-you-total').textContent = fmt(debts.owedToYouTotal);
+            document.getElementById('debts-you-owe-total').textContent = fmt(debts.youOweTotal);
+
+            const owedCard = document.getElementById('debts-owed-to-you-card');
+            const owedList = document.getElementById('debts-owed-to-you-list');
+            if (debts.owedToYou.length > 0) {
+                owedCard.style.display = 'block';
+                owedList.innerHTML = debts.owedToYou.map((p, i) => `
+                    <div class="flex items-center justify-between py-2 cursor-pointer active:opacity-70 ${i < debts.owedToYou.length - 1 ? 'border-b border-slate-800/60' : ''}" data-person-name="${p.name}">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-sm">🧑</span>
+                            <p class="text-xs font-semibold text-slate-200">${p.name}</p>
+                        </div>
+                        <span class="text-xs font-bold text-emerald-400">+${fmt(p.amount)}</span>
+                    </div>
+                `).join('');
+            } else {
+                owedCard.style.display = 'none';
+            }
+
+            const oweCard = document.getElementById('debts-you-owe-card');
+            const oweList = document.getElementById('debts-you-owe-list');
+            if (debts.youOwe.length > 0) {
+                oweCard.style.display = 'block';
+                oweList.innerHTML = debts.youOwe.map((p, i) => `
+                    <div class="flex items-center justify-between py-2 cursor-pointer active:opacity-70 ${i < debts.youOwe.length - 1 ? 'border-b border-slate-800/60' : ''}" data-person-name="${p.name}">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-8 h-8 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-sm">🧑</span>
+                            <p class="text-xs font-semibold text-slate-200">${p.name}</p>
+                        </div>
+                        <span class="text-xs font-bold text-rose-400">-${fmt(p.amount)}</span>
+                    </div>
+                `).join('');
+            } else {
+                oweCard.style.display = 'none';
+            }
+
+            // نربط كل صف شخص بحدث الدوس عليه (بنعمله هنا كل مرة بعد ما الـ HTML يتحدّث)
+            document.querySelectorAll('#debts-owed-to-you-list [data-person-name], #debts-you-owe-list [data-person-name]').forEach((row) => {
+                row.addEventListener('click', () => openPersonDebtDetail(row.dataset.personName));
+            });
+        }
+
+        // ============ فتح تفاصيل شخص معيّن (كل عملياته) لما تدوس على اسمه في تبويب الديون ============
+        async function openPersonDebtDetail(personName) {
+            const overlay = document.getElementById('person-debt-overlay');
+            const nameEl = document.getElementById('person-debt-name');
+            const netLineEl = document.getElementById('person-debt-net-line');
+            const listEl = document.getElementById('person-debt-list');
+
+            nameEl.textContent = personName;
+            netLineEl.textContent = '—';
+            listEl.innerHTML = '<p class="text-xs text-slate-500 text-center p-4">جاري التحميل...</p>';
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+
+            try {
+                const res = await fetch(`/api/debt-person-detail?name=${encodeURIComponent(personName)}`, {
+                    headers: { Authorization: `Bearer ${accessToken}` },
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'فشل تحميل البيانات');
+
+                const net = data.relevantNet;
+                netLineEl.textContent = net === 0
+                    ? 'متعادلين، مفيش حد ليه على التاني حاجة'
+                    : (net > 0 ? `ليك عنده ${fmt(net)}` : `عليك له ${fmt(Math.abs(net))}`);
+                netLineEl.className = `text-xs font-semibold ${net > 0 ? 'text-emerald-400' : net < 0 ? 'text-rose-400' : 'text-slate-400'}`;
+
+                if (data.transactions.length === 0) {
+                    listEl.innerHTML = '<p class="text-xs text-slate-500 text-center p-4">مفيش عمليات.</p>';
+                    return;
+                }
+
+                listEl.innerHTML = data.transactions.map((t) => {
+                    const isLent = t.direction === 'lent';
+                    const label = t.isRepayment
+                        ? (isLent ? 'إنت رجّعت' : 'رجّعلك')
+                        : (isLent ? 'إنت ديت' : 'إنت استلفت');
+                    const emoji = t.isRepayment ? '↩️' : (isLent ? '📤' : '📥');
+                    const signColor = isLent ? 'text-emerald-400' : 'text-rose-400';
+                    const dateStr = new Date(t.createdAt).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' });
+                    return `
+                        <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-3 flex items-center justify-between">
+                            <div class="flex items-center gap-2.5">
+                                <span class="text-base">${emoji}</span>
+                                <div>
+                                    <p class="text-xs font-semibold text-slate-200">${label}${t.note ? ` — ${t.note}` : ''}</p>
+                                    <p class="text-[10px] text-slate-500">${dateStr}</p>
+                                </div>
+                            </div>
+                            <span class="text-xs font-bold ${signColor}">${fmt(t.amount)}</span>
+                        </div>
+                    `;
+                }).join('');
+
+                if (data.lastSettlement) {
+                    const settleDate = new Date(data.lastSettlement).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' });
+                    listEl.innerHTML += `<p class="text-[10px] text-slate-500 text-center pt-2">✅ آخر تسوية: ${settleDate} — الصافي فوق محسوب من وقتها بس</p>`;
+                }
+            } catch (e) {
+                console.error('debt-person-detail fetch failed:', e);
+                listEl.innerHTML = `<p class="text-xs text-rose-400 text-center p-4">${e.message || 'حصل خطأ، جرب تاني.'}</p>`;
+            }
+        }
+
+        function renderArchive(history) {
+            const listEl = document.getElementById('archive-list');
+            if (!history || history.length === 0) {
+                listEl.innerHTML = '<p class="text-xs text-slate-500 text-center p-4">لسه معندكش شهور سابقة فيها مصاريف مسجلة.</p>';
+                return;
+            }
+            listEl.innerHTML = history.map((h) => `
+                <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-1">
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <span class="text-xs text-slate-300 font-semibold block">${h.label} ${h.year}</span>
+                            <span class="text-[10px] text-slate-500">${h.count} عملية</span>
+                        </div>
+                        <span class="text-lg font-black text-slate-200">${fmt(h.total)}</span>
+                    </div>
+                    ${h.topCategoryName ? `<p class="text-[11px] text-slate-400">أكتر فئة صرف: ${CATEGORY_EMOJI[h.topCategoryName] || ''} ${h.topCategoryName}</p>` : ''}
+                </div>
+            `).join('');
+        }
+
+        // بيانات ديناميكية للـ badge والعنوان اللي فوق حسب التاب المفتوح، بدل نص ثابت في data-* attributes
+        function updateHeaderForTab(tab, data) {
+            const headerBadge = document.getElementById('header-badge');
+            if (tab === 'monthly') headerBadge.textContent = fmt(data.month.total) + ' اتصرفوا';
+            else if (tab === 'daily') headerBadge.textContent = fmt(data.today.total) + ' اتصرفوا';
+            else if (tab === 'categories') headerBadge.textContent = `${data.month.byCategory.length} فئات`;
+            else if (tab === 'debts') headerBadge.textContent = `${data.debts.net >= 0 ? '+' : ''}${fmt(data.debts.net)} صافي`;
+        }
+
+        const tabBtns = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        const headerTitle = document.getElementById('header-title');
+        const headerSub = document.getElementById('header-sub');
+        const headerIcon = document.getElementById('header-icon');
+        const headerBadge = document.getElementById('header-badge');
+        const footerCta = document.getElementById('footer-cta');
+
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                tabBtns.forEach(b => { b.classList.remove('active-tab'); b.classList.add('text-slate-500'); });
+                btn.classList.add('active-tab');
+                btn.classList.remove('text-slate-500');
+
+                tabContents.forEach(c => c.classList.remove('active'));
+                const target = document.getElementById('tab-' + btn.dataset.tab);
+                target.classList.add('active');
+                target.classList.add('fade-up');
+
+                headerTitle.textContent = btn.dataset.title;
+                headerSub.textContent = btn.dataset.sub;
+                headerIcon.textContent = btn.dataset.icon;
+                headerBadge.textContent = btn.dataset.badge;
+
+                if (window.__dashboardData) updateHeaderForTab(btn.dataset.tab, window.__dashboardData);
+                if (btn.dataset.tab === 'account') loadAccountTab();
+
+                footerCta.style.display = btn.dataset.tab === 'monthly' ? 'block' : 'none';
+            });
+        });
+
+        // ============ تحميل نفس تقرير الـ PDF الشهري اللي البوت بيبعته، بس من الموقع ============
+        document.getElementById('download-monthly-pdf').addEventListener('click', async () => {
+            const btn = document.getElementById('download-monthly-pdf');
+            const icon = document.getElementById('download-pdf-icon');
+            const label = document.getElementById('download-pdf-label');
+            const originalLabel = label.textContent;
+
+            btn.disabled = true;
+            icon.textContent = '⏳';
+            label.textContent = 'بنجهز الملف...';
+
+            try {
+                const res = await fetch('/api/monthly-report-pdf?offset=0', {
+                    headers: { Authorization: `Bearer ${accessToken}` },
+                });
+
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({}));
+                    throw new Error(err.error || 'فشل تحميل الملف');
+                }
+
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'تقرير-الشهر.pdf';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+            } catch (e) {
+                alert(e.message || 'حصل خطأ، جرب تاني.');
+            } finally {
+                btn.disabled = false;
+                icon.textContent = '📄';
+                label.textContent = originalLabel;
+            }
+        });
+
+        // ============ تاب "حسابي": بيانات البروفايل + حالة ربط تليجرام ============
+        // ============ بطاقة الاشتراك في تاب "حسابي" ============
+        // بتظهر بس لو مفيش اشتراك فعّال دلوقتي (يعني التجربة خلصت أو الاشتراك انتهى)
+        // نفس الرقم والسعر اللي البوت بيبعتهم على تليجرام، جايين من نفس الـ config عن طريق الـ API
+        const SUB_BOT_USERNAME = 'Masaaref_bot';
+        function renderSubscription(subscription) {
+            const card = document.getElementById('account-subscription-card');
+            if (!card || !subscription) return;
+
+            if (subscription.active) {
+                card.classList.add('hidden');
+                return;
+            }
+
+            card.classList.remove('hidden');
+            document.getElementById('account-sub-price').textContent = `${subscription.priceEgp} ج.م`;
+            document.getElementById('account-sub-instapay').textContent = subscription.instapayNumber || '—';
+            document.getElementById('account-sub-open-bot').href = `https://t.me/${SUB_BOT_USERNAME}`;
+
+            const headline = document.getElementById('account-sub-headline');
+            const subline = document.getElementById('account-sub-subline');
+
+            if (subscription.inTrial) {
+                headline.textContent = `🎁 باقي ${subscription.trialDaysLeft} يوم على تجربتك المجانية`;
+                subline.textContent = 'خلال الـ3 أيام دي هتشوف بنفسك إزاي دبّر بيوفّرلك وقت وبيخليك متابع كل جنيه بيتصرف — من غير ما تفتح جدول ولا تكتب رقم بإيدك. اشترك دلوقتي عشان الخدمة متتقطعش.';
+            } else {
+                headline.textContent = '⏳ خلصت أيام التجربة المجانية';
+                subline.textContent = 'جربت 3 أيام وشفت إزاي دبّر بيتابعلك مصاريفك وديونك أول بأول — دلوقتي كمّل معاك عشان متفوّتش أي تفصيلة من حساباتك، ب150 جنيه بس في الشهر.';
+            }
+        }
+
+        // ============ رفع إثبات دفع الاشتراك من الداشبورد (بديل لبعت السكرين شوت يدوي على تليجرام) ============
+        (function setupSubscriptionUpload() {
+            const fileInput = document.getElementById('account-sub-file');
+            const preview = document.getElementById('account-sub-preview');
+            const dropText = document.getElementById('account-sub-upload-text');
+            const dropIcon = document.getElementById('account-sub-upload-icon');
+            const submitBtn = document.getElementById('account-sub-submit');
+            const errorEl = document.getElementById('account-sub-error');
+            const copyBtn = document.getElementById('account-sub-copy-btn');
+            const copyLabel = document.getElementById('account-sub-copy-label');
+            if (!fileInput || !submitBtn) return;
+
+            let selectedBase64 = null;
+
+            copyBtn.addEventListener('click', () => {
+                const number = document.getElementById('account-sub-instapay').textContent;
+                if (!number || number === '—') return;
+                navigator.clipboard?.writeText(number).catch(() => {});
+                copyLabel.textContent = 'اتنسخ ✅';
+                setTimeout(() => { copyLabel.textContent = 'نسخ 📋'; }, 1500);
+            });
+
+            fileInput.addEventListener('change', () => {
+                const file = fileInput.files[0];
+                if (!file) return;
+                errorEl.classList.add('hidden');
+
+                const reader = new FileReader();
+                reader.onload = () => {
+                    selectedBase64 = reader.result;
+                    preview.src = selectedBase64;
+                    preview.classList.remove('hidden');
+                    dropText.textContent = 'تم اختيار الصورة — اضغط لتغييرها';
+                    dropIcon.textContent = '✅';
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('bg-slate-800', 'text-slate-500', 'cursor-not-allowed');
+                    submitBtn.classList.add('bg-emerald-500', 'text-slate-950', 'cursor-pointer');
+                };
+                reader.readAsDataURL(file);
+            });
+
+            submitBtn.addEventListener('click', async () => {
+                if (submitBtn.disabled || !selectedBase64) return;
+                submitBtn.disabled = true;
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = 'بنبعت الإثبات...';
+                errorEl.classList.add('hidden');
+
+                try {
+                    const res = await fetch('/api/misc?action=subscription-proof', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            Authorization: `Bearer ${accessToken}`,
+                        },
+                        body: JSON.stringify({
+                            imageBase64: selectedBase64,
+                            senderName: document.getElementById('account-sub-name').value.trim(),
+                        }),
+                    });
+                    const data = await res.json().catch(() => ({}));
+                    if (!res.ok) throw new Error(data.error || 'حصل خطأ، جرب تاني.');
+
+                    document.getElementById('account-sub-form').classList.add('hidden');
+                    document.getElementById('account-sub-pending').classList.remove('hidden');
+                } catch (e) {
+                    errorEl.textContent = e.message || 'حصل خطأ، جرب تاني.';
+                    errorEl.classList.remove('hidden');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = originalText;
+                }
+            });
+        })();
+
+        async function loadAccountTab() {
+            if (!currentUser) return;
+
+            const nameEl = document.getElementById('account-name');
+            const emailEl = document.getElementById('account-email');
+            const initialEl = document.getElementById('account-avatar-initial');
+            const imgEl = document.getElementById('account-avatar-img');
+            const navAvatarWrap = document.getElementById('nav-avatar-wrap');
+
+            const metaName = currentUser.user_metadata?.full_name || '';
+            const email = currentUser.email || '';
+
+            let profile = null;
+            try {
+                const { data } = await sb.from('profiles').select('full_name, email, avatar_url').eq('id', currentUser.id).maybeSingle();
+                profile = data;
+            } catch (e) {
+                /* جدول profiles لسه ما اتعملش — شغّل sql/profiles.sql على Supabase */
+            }
+
+            if (!profile) {
+                profile = { full_name: metaName, email, avatar_url: null };
+                try { await sb.from('profiles').upsert({ id: currentUser.id, full_name: metaName, email }); } catch (e) { /* ignore */ }
+            }
+
+            const displayName = profile.full_name || metaName || 'مستخدم دبّر';
+            nameEl.textContent = displayName;
+            emailEl.textContent = profile.email || email || '—';
+
+            if (profile.avatar_url) {
+                const src = profile.avatar_url + (profile.avatar_url.includes('?') ? '&' : '?') + 't=' + Date.now();
+                imgEl.src = src;
+                imgEl.classList.remove('hidden');
+                initialEl.classList.add('hidden');
+                navAvatarWrap.innerHTML = `<img src="${src}" class="w-full h-full object-cover" alt="">`;
+            } else {
+                initialEl.textContent = displayName.trim().charAt(0).toUpperCase() || '👤';
+                imgEl.classList.add('hidden');
+                initialEl.classList.remove('hidden');
+                navAvatarWrap.textContent = '👤';
+            }
+
+            // حالة ربط تليجرام — بتيجي من نفس استجابة /api/dashboard-data
+            const statusEl = document.getElementById('account-telegram-status');
+            const badgeEl = document.getElementById('account-telegram-badge');
+            const tgId = window.__dashboardData?.telegramUserId;
+            if (tgId) {
+                statusEl.textContent = `مربوط بحساب تليجرام #${tgId}`;
+                badgeEl.textContent = '✅ متصل';
+                badgeEl.className = 'text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-400';
+            } else {
+                statusEl.textContent = 'حسابك لسه مش مربوط بتليجرام';
+                badgeEl.textContent = '⚠️ مش متصل';
+                badgeEl.className = 'text-[10px] font-bold px-2.5 py-1 rounded-full bg-rose-500/15 text-rose-400';
+            }
+        }
+
+        // زرار تسجيل الخروج جوه تاب "حسابي" — المكان الوحيد اللي فيه دلوقتي
+        document.getElementById('account-logout-btn').addEventListener('click', doLogout);
+
+        // ============ رفع وقص صورة البروفايل (canvas بسيط، بدون أي مكتبة خارجية) ============
+        const avatarBtn = document.getElementById('avatar-btn');
+        const avatarFileInput = document.getElementById('avatar-file-input');
+        const cropOverlay = document.getElementById('avatar-crop-overlay');
+        const cropCanvas = document.getElementById('avatar-crop-canvas');
+        const cropCtx = cropCanvas.getContext('2d');
+        const cropFrame = document.getElementById('avatar-crop-frame');
+        const zoomRange = document.getElementById('avatar-zoom-range');
+        const cropError = document.getElementById('avatar-crop-error');
+        const cropSaveBtn = document.getElementById('avatar-crop-save');
+        const CROP_SIZE = 600; // دقة الكانفاس الداخلية (بتترسم في إطار قطره 256px على الشاشة)
+
+        let cropImg = null;
+        let baseScale = 1, zoom = 1, offsetX = 0, offsetY = 0;
+        let dragging = false, dragStartX = 0, dragStartY = 0, dragOffsetStartX = 0, dragOffsetStartY = 0;
+
+        avatarBtn.addEventListener('click', () => avatarFileInput.click());
+
+        avatarFileInput.addEventListener('change', () => {
+            const file = avatarFileInput.files[0];
+            avatarFileInput.value = ''; // يسمح تختار نفس الملف تاني لو عايز
+            if (!file) return;
+            if (!file.type.startsWith('image/')) { alert('من فضلك اختار ملف صورة.'); return; }
+            if (file.size > 8 * 1024 * 1024) { alert('الصورة كبيرة أوي، اختار صورة أصغر من 8 ميجابايت.'); return; }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                cropImg = new Image();
+                cropImg.onload = () => {
+                    baseScale = Math.max(CROP_SIZE / cropImg.naturalWidth, CROP_SIZE / cropImg.naturalHeight);
+                    zoom = 1; offsetX = 0; offsetY = 0;
+                    zoomRange.value = 100;
+                    cropError.classList.add('hidden');
+                    drawCrop();
+                    cropOverlay.classList.remove('hidden');
+                    cropOverlay.classList.add('flex');
+                };
+                cropImg.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+
+        function clampOffsets() {
+            const w = cropImg.naturalWidth * baseScale * zoom;
+            const h = cropImg.naturalHeight * baseScale * zoom;
+            const maxX = Math.max(0, w / 2 - CROP_SIZE / 2);
+            const maxY = Math.max(0, h / 2 - CROP_SIZE / 2);
+            offsetX = Math.min(maxX, Math.max(-maxX, offsetX));
+            offsetY = Math.min(maxY, Math.max(-maxY, offsetY));
+        }
+
+        function drawCrop() {
+            if (!cropImg) return;
+            clampOffsets();
+            cropCtx.clearRect(0, 0, CROP_SIZE, CROP_SIZE);
+            const w = cropImg.naturalWidth * baseScale * zoom;
+            const h = cropImg.naturalHeight * baseScale * zoom;
+            cropCtx.drawImage(cropImg, CROP_SIZE / 2 + offsetX - w / 2, CROP_SIZE / 2 + offsetY - h / 2, w, h);
+        }
+
+        zoomRange.addEventListener('input', () => {
+            zoom = Number(zoomRange.value) / 100;
+            drawCrop();
+        });
+
+        cropFrame.addEventListener('pointerdown', (e) => {
+            if (!cropImg) return;
+            dragging = true;
+            cropFrame.setPointerCapture(e.pointerId);
+            cropFrame.classList.add('cursor-grabbing');
+            dragStartX = e.clientX; dragStartY = e.clientY;
+            dragOffsetStartX = offsetX; dragOffsetStartY = offsetY;
+        });
+        cropFrame.addEventListener('pointermove', (e) => {
+            if (!dragging) return;
+            const rect = cropFrame.getBoundingClientRect();
+            const ratio = CROP_SIZE / rect.width;
+            offsetX = dragOffsetStartX + (e.clientX - dragStartX) * ratio;
+            offsetY = dragOffsetStartY + (e.clientY - dragStartY) * ratio;
+            drawCrop();
+        });
+        function endCropDrag() {
+            dragging = false;
+            cropFrame.classList.remove('cursor-grabbing');
+        }
+        cropFrame.addEventListener('pointerup', endCropDrag);
+        cropFrame.addEventListener('pointerleave', endCropDrag);
+
+        function closeCropOverlay() {
+            cropOverlay.classList.add('hidden');
+            cropOverlay.classList.remove('flex');
+        }
+        document.getElementById('avatar-crop-close').addEventListener('click', closeCropOverlay);
+
+        cropSaveBtn.addEventListener('click', async () => {
+            if (!cropImg || !currentUser) return;
+            const icon = document.getElementById('avatar-save-icon');
+            const label = document.getElementById('avatar-save-label');
+            cropSaveBtn.disabled = true;
+            icon.textContent = '⏳';
+            label.textContent = 'بنحفظ الصورة...';
+            cropError.classList.add('hidden');
+
+            try {
+                const blob = await new Promise((resolve) => cropCanvas.toBlob(resolve, 'image/jpeg', 0.88));
+                if (!blob) throw new Error('حصل خطأ في تجهيز الصورة.');
+
+                const path = `${currentUser.id}/avatar.jpg`;
+                const { error: uploadError } = await sb.storage.from('avatars').upload(path, blob, {
+                    upsert: true,
+                    contentType: 'image/jpeg',
+                });
+                if (uploadError) throw uploadError;
+
+                const { data: pub } = sb.storage.from('avatars').getPublicUrl(path);
+
+                const { error: dbError } = await sb.from('profiles').upsert({
+                    id: currentUser.id,
+                    avatar_url: pub.publicUrl,
+                    email: currentUser.email || null,
+                });
+                if (dbError) throw dbError;
+
+                closeCropOverlay();
+                await loadAccountTab();
+            } catch (e) {
+                console.error('avatar upload failed:', e);
+                cropError.textContent = 'مقدرناش نحفظ الصورة. تأكد إنك شغّلت sql/profiles.sql على Supabase (بتعمل bucket الصور)، وجرب تاني.';
+                cropError.classList.remove('hidden');
+            } finally {
+                cropSaveBtn.disabled = false;
+                icon.textContent = '✅';
+                label.textContent = 'حفظ الصورة';
+            }
+        });
+
+        document.getElementById('open-archive').addEventListener('click', () => {
+            const overlay = document.getElementById('archive-overlay');
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+        });
+        document.getElementById('close-archive').addEventListener('click', () => {
+            const overlay = document.getElementById('archive-overlay');
+            overlay.classList.add('hidden');
+            overlay.classList.remove('flex');
+        });
+
+        // ============ سجّل مصروفك (فويس) ============
+        // ملاحظة: التسجيل الصوتي الفعلي هنا بيستخدم MediaRecorder الحقيقي من المتصفح،
+        // لكن التفريغ والتصنيف لسه مش موصولين بباك-إند حقيقي — دي واجهة جاهزة للربط
+        // بنفس منطق lib/groq.js (transcribeVoice + classifyMessage) و lib/expenses.js (recordExpense)
+        // عن طريق إنشاء endpoint جديد زي /api/record-expense-voice يستقبل الملف الصوتي من الموقع.
+        (function () {
+            const overlay = document.getElementById('record-overlay');
+            const sheetIcon = document.getElementById('record-sheet-icon');
+            const sheetTitle = document.getElementById('record-sheet-title');
+            const sheetSub = document.getElementById('record-sheet-sub');
+            const sheetBody = document.getElementById('record-sheet-body');
+            const micSvg = `<svg width="30" height="30" viewBox="0 0 24 24" fill="none"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Z" stroke="#022c22" stroke-width="2.2" stroke-linecap="round"/><path d="M19 11a7 7 0 0 1-14 0M12 18v3" stroke="#022c22" stroke-width="2.2" stroke-linecap="round"/></svg>`;
+            let mediaRecorder = null, chunks = [], autoAdvance = null;
+
+            function openOverlay() { overlay.classList.remove('hidden'); overlay.classList.add('flex'); }
+            function closeOverlay() {
+                clearTimeout(autoAdvance);
+                overlay.classList.add('hidden'); overlay.classList.remove('flex');
+                if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+                    mediaRecorder.onstop = null; // إلغاء بدون حفظ لو المستخدم قفل الشيت وهو لسه بيسجل
+                    mediaRecorder.stop();
+                }
+            }
+            document.getElementById('close-record-overlay').addEventListener('click', closeOverlay);
+
+            const secondaryBtn = (label) => `<button class="record-secondary w-full mt-2 bg-slate-950/60 border border-slate-800 text-slate-300 font-bold py-3 rounded-2xl text-xs">${label}</button>`;
+            const primaryBtn = (id, label) => `<button id="${id}" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold py-3 rounded-2xl text-sm transition">${label}</button>`;
+
+            async function showListening() {
+                clearTimeout(autoAdvance);
+                sheetIcon.innerHTML = micSvg.replace('30','20').replace('30','20');
+                sheetTitle.textContent = 'بتسمعك دلوقتي...';
+                sheetSub.textContent = '● اتكلم عادي، هفهم منك ويتسجل لوحده';
+                sheetBody.innerHTML = `
+                    <div class="flex flex-col items-center gap-6 py-5">
+                        <div class="relative w-28 h-28 flex items-center justify-center">
+                            <span class="mic-ring"></span><span class="mic-ring r2"></span><span class="mic-ring r3"></span>
+                            <div class="mic-core relative z-10 w-20 h-20 rounded-full bg-gradient-to-b from-emerald-400 to-teal-500 flex items-center justify-center border border-emerald-300/40">${micSvg}</div>
+                        </div>
+                        <div class="flex items-end gap-[3px] h-7">
+                            ${[9,15,22,13,19,10,17,8].map((h,i)=>`<span class="bar w-1 rounded-full bg-emerald-400/80" style="height:${h}px; animation-delay:${i*0.09}s;"></span>`).join('')}
+                        </div>
+                        <p class="text-xs text-slate-400 text-center leading-relaxed">قول اللي اتصرف زي ما هتقوله لصاحبك<br><span class="text-slate-500">"دفعت ١٠٠ جنيه تاكسي"</span></p>
+                        <button id="stop-record-btn" class="w-16 h-16 rounded-full bg-slate-950/60 border-2 border-rose-500/40 text-rose-400 flex items-center justify-center active:scale-95 transition">
+                            <span class="w-4 h-4 rounded-[4px] bg-rose-400"></span>
+                        </button>
+                        ${secondaryBtn('⌨️ اكتبه بإيدك بدل الصوت')}
+                    </div>`;
+                document.getElementById('stop-record-btn').onclick = stopAndShowResult;
+                sheetBody.querySelector('.record-secondary').onclick = showManual;
+
+                // تسجيل صوتي حقيقي من المتصفح (لسه من غير رفع لباك-إند)
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    chunks = [];
+                    mediaRecorder = new MediaRecorder(stream);
+                    mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
+                    mediaRecorder.start();
+                } catch (e) {
+                    console.warn('تعذّر الوصول للمايكروفون:', e);
+                }
+
+                autoAdvance = setTimeout(() => { if (document.getElementById('stop-record-btn')) stopAndShowResult(); }, 4000);
+            }
+
+            function stopAndShowResult() {
+                clearTimeout(autoAdvance);
+                if (!mediaRecorder) { showError('تعذّر الوصول للمايكروفون، جرب من غير كده أو اكتبها بإيدك.'); return; }
+
+                sheetIcon.innerHTML = '⏳';
+                sheetTitle.textContent = 'بحلل كلامك...';
+                sheetSub.textContent = '● ثانية وهرجعلك بالنتيجة';
+                sheetBody.innerHTML = `
+                    <div class="flex flex-col items-center gap-4 py-8">
+                        <div class="w-14 h-14 rounded-full border-4 border-slate-800 border-t-emerald-400" style="animation:spin 1s linear infinite;"></div>
+                        <p class="text-xs text-slate-400">بستخرج المبلغ والفئة من كلامك...</p>
+                    </div>`;
+
+                mediaRecorder.onstop = async () => {
+                    try {
+                        const blob = new Blob(chunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+                        const audioBase64 = await blobToDataUrl(blob);
+                        const data = await callRecordExpenseApi({ audioBase64 });
+                        handleApiResult(data);
+                    } catch (e) {
+                        console.error('record-expense-voice failed:', e);
+                        showError('حصل خطأ في تسجيل المصروف، جرب تاني.');
+                    }
+                };
+                mediaRecorder.stop();
+            }
+
+            function blobToDataUrl(blob) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(blob);
+                });
+            }
+
+            async function callRecordExpenseApi(body) {
+                const res = await fetch('/api/record-expense-voice', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+                    body: JSON.stringify(body),
+                });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'حصل خطأ، جرب تاني.');
+                return data;
+            }
+
+            function handleApiResult(data) {
+                if (data.reason === 'trial_ended') { showTrialEnded(); return; }
+                if (data.ok === false) { showUnclear(data.heardText || ''); return; }
+                showSaved({ ...data.expense, heardText: data.heardText, todayTotal: data.todayTotal });
+                refreshDailyTabAfterSave();
+            }
+
+            function showTrialEnded() {
+                clearTimeout(autoAdvance);
+                sheetIcon.textContent = '⏳';
+                sheetTitle.textContent = 'خلصت أيام التجربة المجانية';
+                sheetSub.textContent = '● اشترك عشان تكمل تسجيل مصاريفك';
+                sheetBody.innerHTML = `
+                    <div class="space-y-3">
+                        <p class="text-xs text-slate-400 leading-relaxed text-center">جربت 3 أيام وشفت إزاي دبّر بيتابعلك مصاريفك أول بأول. عشان تكمّل تسجّل، فعّل اشتراكك من تاب "حسابي".</p>
+                        ${primaryBtn('go-subscribe-btn', '👤 روح لتاب حسابي')}
+                    </div>`;
+                document.getElementById('go-subscribe-btn').onclick = () => {
+                    closeOverlay();
+                    const accountTabBtn = document.querySelector('.tab-btn[data-tab="account"]');
+                    if (accountTabBtn) accountTabBtn.click();
+                };
+            }
+
+            function showError(message) {
+                sheetIcon.textContent = '⚠️';
+                sheetTitle.textContent = 'حصل خطأ';
+                sheetSub.textContent = '● جرب تاني';
+                sheetBody.innerHTML = `
+                    <div class="flex flex-col items-center gap-4 py-4">
+                        <p class="text-sm text-rose-400 text-center">${message}</p>
+                        ${primaryBtn('retry-record-btn', '🎙️ أعيد المحاولة')}
+                        ${secondaryBtn('⌨️ أدخلها بإيدي')}
+                    </div>`;
+                document.getElementById('retry-record-btn').onclick = showListening;
+                sheetBody.querySelector('.record-secondary').onclick = showManual;
+            }
+
+            function showUnclear(heardText) {
+                sheetIcon.textContent = '🤔';
+                sheetTitle.textContent = 'مش قادر أفهم بالظبط';
+                sheetSub.textContent = '● محتاج توضيح بسيط';
+                sheetBody.innerHTML = `
+                    <div class="space-y-3">
+                        <div class="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-3 text-[11px] text-amber-400 leading-relaxed">
+                            ${heardText ? `سمعتك بتقول: <span class="text-slate-300">"${heardText}"</span> — مش واضح المبلغ أو الفئة بالظبط.` : 'مسمعتش كلام واضح خالص.'}
+                        </div>
+                        <p class="text-xs text-slate-400">تحب تعمل إيه؟</p>
+                        ${primaryBtn('retry-record-btn', '🎙️ أعيد التسجيل تاني')}
+                        ${secondaryBtn('⌨️ أدخلها بإيدي')}
+                    </div>`;
+                document.getElementById('retry-record-btn').onclick = showListening;
+                sheetBody.querySelector('.record-secondary').onclick = showManual;
+            }
+
+            function showSaved(exp) {
+                sheetIcon.textContent = '✅';
+                sheetTitle.textContent = 'تمام، سجلت المصروف';
+                sheetSub.textContent = '● اتسجل وحُدّث حسابك أول بأول';
+                const detail = exp.note && exp.note.trim() ? ` (${exp.note.trim()})` : '';
+                sheetBody.innerHTML = `
+                    <div class="space-y-3">
+                        <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-4 space-y-3">
+                            <div class="flex items-center gap-2.5">
+                                <span class="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-base">${exp.emoji}</span>
+                                <div class="flex-1">
+                                    <p class="text-sm font-bold text-slate-100">${exp.category}${detail} · ${exp.amount} جنيه</p>
+                                    ${exp.heardText ? `<p class="text-[10px] text-slate-500">سمعتك بتقول: "${exp.heardText}"</p>` : ''}
+                                </div>
+                            </div>
+                            <div class="border-t border-slate-800/70 pt-2.5 flex items-center justify-between">
+                                <span class="text-[11px] text-slate-400">💰 إجمالي صرفك النهاردة</span>
+                                <span class="text-sm font-black text-rose-400">${exp.todayTotal} جنيه</span>
+                            </div>
+                        </div>
+                        ${primaryBtn('record-done-btn', 'تمام')}
+                    </div>`;
+                document.getElementById('record-done-btn').onclick = closeOverlay;
+                autoAdvance = setTimeout(closeOverlay, 1800);
+            }
+
+            // بعد الحفظ الفعلي: نعيد تحميل بيانات الداشبورد الحقيقية عشان قائمة عمليات
+            // النهاردة والإجمالي والتصنيفات تتحدث فورًا بنفس دالة loadDashboard الموجودة
+            function refreshDailyTabAfterSave() {
+                if (typeof loadDashboard === 'function') loadDashboard();
+            }
+
+            function showManual() {
+                clearTimeout(autoAdvance);
+                sheetIcon.textContent = '⌨️';
+                sheetTitle.textContent = 'إدخال يدوي';
+                sheetSub.textContent = '● لو الصوت مش مناسب دلوقتي';
+                sheetBody.innerHTML = `
+                    <div class="space-y-3">
+                        <div>
+                            <label class="text-[11px] text-slate-400 block mb-1.5">المبلغ</label>
+                            <input id="manual-amount" type="number" inputmode="decimal" class="w-full bg-slate-950/60 border border-slate-800 rounded-2xl px-4 py-3 text-slate-100 text-sm" placeholder="0 جنيه">
+                        </div>
+                        <div>
+                            <label class="text-[11px] text-slate-400 block mb-1.5">الفئة</label>
+                            <div class="flex flex-wrap gap-2" id="manual-category-picker">
+                                ${CATEGORIES.map((c, i) => `<button type="button" data-category="${c}" class="manual-cat-btn text-xs font-semibold px-3 py-2 rounded-xl border ${i === 0 ? 'bg-emerald-500/15 border-emerald-500/35 text-emerald-400' : 'bg-slate-950/60 border-slate-800 text-slate-300'}">${CATEGORY_EMOJI[c] || '📌'} ${c}</button>`).join('')}
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-[11px] text-slate-400 block mb-1.5">وصف (اختياري)</label>
+                            <input id="manual-note" class="w-full bg-slate-950/60 border border-slate-800 rounded-2xl px-4 py-3 text-slate-100 text-sm" placeholder="مثلاً: غدا مع صحابي">
+                        </div>
+                        <p id="manual-error" class="text-[11px] text-rose-400 hidden"></p>
+                        ${primaryBtn('manual-save-btn', '✅ تسجيل المصروف')}
+                    </div>`;
+
+                let selectedCategory = CATEGORIES[0];
+                sheetBody.querySelectorAll('.manual-cat-btn').forEach((btn) => {
+                    btn.onclick = () => {
+                        selectedCategory = btn.dataset.category;
+                        sheetBody.querySelectorAll('.manual-cat-btn').forEach((b) => b.className = 'manual-cat-btn text-xs font-semibold px-3 py-2 rounded-xl border bg-slate-950/60 border-slate-800 text-slate-300');
+                        btn.className = 'manual-cat-btn text-xs font-semibold px-3 py-2 rounded-xl border bg-emerald-500/15 border-emerald-500/35 text-emerald-400';
+                    };
+                });
+
+                document.getElementById('manual-save-btn').onclick = async () => {
+                    const amount = Number(document.getElementById('manual-amount').value);
+                    const note = document.getElementById('manual-note').value.trim();
+                    const errEl = document.getElementById('manual-error');
+                    if (!amount || amount <= 0) {
+                        errEl.textContent = 'اكتب مبلغ صحيح الأول.';
+                        errEl.classList.remove('hidden');
+                        return;
+                    }
+                    errEl.classList.add('hidden');
+                    try {
+                        const data = await callRecordExpenseApi({ amount, category: selectedCategory, note });
+                        handleApiResult(data);
+                    } catch (e) {
+                        console.error('manual record failed:', e);
+                        errEl.textContent = e.message || 'حصل خطأ، جرب تاني.';
+                        errEl.classList.remove('hidden');
+                    }
+                };
+            }
+
+            document.getElementById('record-expense-btn').addEventListener('click', () => {
+                openOverlay();
+                const sub = window.__dashboardData?.subscription;
+                if (sub && !sub.active && !sub.inTrial) {
+                    showTrialEnded();
+                } else {
+                    showListening();
+                }
+            });
+        })();
+
+        document.getElementById('close-person-debt').addEventListener('click', () => {
+            const overlay = document.getElementById('person-debt-overlay');
+            overlay.classList.add('hidden');
+            overlay.classList.remove('flex');
+        });
+    </script>
+
+</body>
+</html>

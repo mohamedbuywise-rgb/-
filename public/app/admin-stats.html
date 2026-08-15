@@ -125,7 +125,7 @@ async function loadStats() {
     const { data: { session } } = await sb.auth.getSession();
     const token = session?.access_token;
 
-    const res = await fetch('/api/admin-stats', {
+    const res = await fetch('/api/misc?action=admin-stats', {
       headers: { Authorization: `Bearer ${token}` },
     });
     const data = await res.json();
@@ -168,7 +168,7 @@ async function init() {
 
   // نجرب نجيب /api/admin-stats — لو رجع 403 يبقى مش أدمن
   const token = session.access_token;
-  const res = await fetch('/api/admin-stats', {
+  const res = await fetch('/api/misc?action=admin-stats', {
     headers: { Authorization: `Bearer ${token}` },
   });
 

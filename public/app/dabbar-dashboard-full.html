@@ -1314,7 +1314,7 @@
                 errorEl.classList.add('hidden');
 
                 try {
-                    const res = await fetch('/api/subscription-proof', {
+                    const res = await fetch('/api/misc?action=subscription-proof', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',

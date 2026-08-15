@@ -518,13 +518,13 @@
 
         <!-- Bottom Tab Navigation -->
         <div class="bg-slate-900 border-t border-slate-800/80 px-2 pt-2 pb-3 flex items-center justify-around">
-            <button class="tab-btn flex flex-col items-center gap-1 px-3 py-1 text-slate-500 text-[10px] font-semibold" data-tab="monthly" data-title="تقرير نهاية الشهر" data-sub="● تقييم أداء الشهر" data-icon="📊" data-badge="—">
-                <span class="tab-icon-wrap w-9 h-9 rounded-xl border border-transparent flex items-center justify-center text-base">📊</span>
-                شهري
-            </button>
             <button class="tab-btn active-tab flex flex-col items-center gap-1 px-3 py-1 text-slate-500 text-[10px] font-semibold" data-tab="daily" data-title="تقرير اليوم" data-sub="● النهاردة" data-icon="🗓️" data-badge="—">
                 <span class="tab-icon-wrap w-9 h-9 rounded-xl border border-transparent flex items-center justify-center text-base">🗓️</span>
                 يومي
+            </button>
+            <button class="tab-btn flex flex-col items-center gap-1 px-3 py-1 text-slate-500 text-[10px] font-semibold" data-tab="monthly" data-title="تقرير نهاية الشهر" data-sub="● تقييم أداء الشهر" data-icon="📊" data-badge="—">
+                <span class="tab-icon-wrap w-9 h-9 rounded-xl border border-transparent flex items-center justify-center text-base">📊</span>
+                شهري
             </button>
             <button class="tab-btn flex flex-col items-center gap-1 px-3 py-1 text-slate-500 text-[10px] font-semibold" data-tab="categories" data-title="التصنيفات" data-sub="● صرف الشهر بالتفصيل" data-icon="🧾" data-badge="—">
                 <span class="tab-icon-wrap w-9 h-9 rounded-xl border border-transparent flex items-center justify-center text-base">🧾</span>
@@ -1574,11 +1574,32 @@
             const secondaryBtn = (label) => `<button class="record-secondary w-full mt-2 bg-slate-950/60 border border-slate-800 text-slate-300 font-bold py-3 rounded-2xl text-xs">${label}</button>`;
             const primaryBtn = (id, label) => `<button id="${id}" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold py-3 rounded-2xl text-sm transition">${label}</button>`;
 
-            async function showListening() {
+            // ============ الحالة الأولى: المايك واقف وموش بيسجل، مستني المستخدم يدوس عليه ============
+            // العميل هو اللي متحكم بالكامل: يدوس على المايك يبدأ التسجيل، ويدوس على "خلصت"
+            // (أو يدوس على المايك تاني) عشان يوقف. مفيش أي توقيت تلقائي بيقطع الكلام.
+            function showIdle() {
+                clearTimeout(autoAdvance);
+                sheetIcon.innerHTML = micSvg.replace('30','20').replace('30','20');
+                sheetTitle.textContent = 'جاهز تسجّل مصروفك؟';
+                sheetSub.textContent = '● دوس على المايك عشان تبدأ';
+                sheetBody.innerHTML = `
+                    <div class="flex flex-col items-center gap-6 py-5">
+                        <button id="start-record-btn" class="relative w-28 h-28 flex items-center justify-center active:scale-95 transition">
+                            <div class="relative z-10 w-20 h-20 rounded-full bg-gradient-to-b from-emerald-400 to-teal-500 flex items-center justify-center border border-emerald-300/40 shadow-lg shadow-emerald-500/20">${micSvg}</div>
+                        </button>
+                        <p class="text-xs text-slate-400 text-center leading-relaxed">دوس على المايك وقول اللي اتصرف زي ما هتقوله لصاحبك<br><span class="text-slate-500">"دفعت ١٠٠ جنيه تاكسي"</span></p>
+                        ${secondaryBtn('⌨️ اكتبه بإيدك بدل الصوت')}
+                    </div>`;
+                document.getElementById('start-record-btn').onclick = startListening;
+                sheetBody.querySelector('.record-secondary').onclick = showManual;
+            }
+
+            // ============ الحالة التانية: التسجيل شغّال فعليًا، المستخدم هو اللي بيوقفه بإيده ============
+            async function startListening() {
                 clearTimeout(autoAdvance);
                 sheetIcon.innerHTML = micSvg.replace('30','20').replace('30','20');
                 sheetTitle.textContent = 'بتسمعك دلوقتي...';
-                sheetSub.textContent = '● اتكلم عادي، هفهم منك ويتسجل لوحده';
+                sheetSub.textContent = '● اتكلم عادي، ودوس "خلصت" لما تخلص';
                 sheetBody.innerHTML = `
                     <div class="flex flex-col items-center gap-6 py-5">
                         <div class="relative w-28 h-28 flex items-center justify-center">
@@ -1589,15 +1610,16 @@
                             ${[9,15,22,13,19,10,17,8].map((h,i)=>`<span class="bar w-1 rounded-full bg-emerald-400/80" style="height:${h}px; animation-delay:${i*0.09}s;"></span>`).join('')}
                         </div>
                         <p class="text-xs text-slate-400 text-center leading-relaxed">قول اللي اتصرف زي ما هتقوله لصاحبك<br><span class="text-slate-500">"دفعت ١٠٠ جنيه تاكسي"</span></p>
-                        <button id="stop-record-btn" class="w-16 h-16 rounded-full bg-slate-950/60 border-2 border-rose-500/40 text-rose-400 flex items-center justify-center active:scale-95 transition">
-                            <span class="w-4 h-4 rounded-[4px] bg-rose-400"></span>
+                        <button id="stop-record-btn" class="flex flex-col items-center gap-2 active:scale-95 transition">
+                            <span class="w-16 h-16 rounded-full bg-emerald-500 text-slate-900 flex items-center justify-center shadow-lg shadow-emerald-500/30">
+                                <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#022c22" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </span>
+                            <span class="text-xs font-bold text-emerald-400">خلصت</span>
                         </button>
-                        ${secondaryBtn('⌨️ اكتبه بإيدك بدل الصوت')}
                     </div>`;
                 document.getElementById('stop-record-btn').onclick = stopAndShowResult;
-                sheetBody.querySelector('.record-secondary').onclick = showManual;
 
-                // تسجيل صوتي حقيقي من المتصفح (لسه من غير رفع لباك-إند)
+                // تسجيل صوتي حقيقي من المتصفح، بيفضل شغال لحد ما المستخدم يدوس "خلصت"
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                     chunks = [];
@@ -1606,10 +1628,17 @@
                     mediaRecorder.start();
                 } catch (e) {
                     console.warn('تعذّر الوصول للمايكروفون:', e);
+                    showError('محتاجين إذن استخدام المايكروفون عشان تسجّل بالصوت.');
+                    return;
                 }
 
-                autoAdvance = setTimeout(() => { if (document.getElementById('stop-record-btn')) stopAndShowResult(); }, 4000);
+                // حد أقصى أماني بس (دقيقتين) عشان التسجيل ميفضلش شغال لو المستخدم نسي التاب مفتوح.
+                // مش المفروض يوصله أي مستخدم عادي بيسجل مصروف، فمش هو اللي بيتحكم في التوقيت الفعلي.
+                autoAdvance = setTimeout(() => { if (document.getElementById('stop-record-btn')) stopAndShowResult(); }, 120000);
             }
+
+            // بيتفضل موجود عشان أي كود قديم بينادي عليه (retry بعد نتيجة غير واضحة مثلاً)
+            const showListening = showIdle;
 
             function stopAndShowResult() {
                 clearTimeout(autoAdvance);

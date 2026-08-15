@@ -58,7 +58,10 @@ export default async function handler(req, res) {
     let expenseTx = null;
 
     if (audioBase64) {
-      const match = audioBase64.match(/^data:audio\/[a-zA-Z0-9.+-]+;base64,(.+)$/);
+      // ملحوظة: متصفحات زي Chrome على أندرويد بتسجل الصوت بصيغة فيها باراميترات زيادة
+      // بعد نوع الملف، زي "audio/webm;codecs=opus" بدل "audio/webm" بس. الـ regex هنا
+      // لازم يتقبل أي باراميترات زيادة قبل "base64," مش يفترض إنها مش موجودة.
+      const match = audioBase64.match(/^data:audio\/[a-zA-Z0-9.+-]+(?:;[^,]+)*;base64,(.+)$/);
       if (!match) {
         return res.status(400).json({ error: 'ملف صوتي غير صالح، جرب تاني.' });
       }

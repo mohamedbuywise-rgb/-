@@ -4,7 +4,9 @@ import { insertExpense, getTodayExpensesTotal } from '../lib/expenses.js';
 import { insertDebt, insertDebtSettlement } from '../lib/debts.js';
 import { sendTelegramMessage } from '../lib/telegram.js';
 import { getChatIdByUserId, hasActiveSubscription, isInTrial } from '../lib/users.js';
-import { CATEGORY_EMOJI, CATEGORIES } from '../lib/config.js';
+import { tryUseVoiceQuota } from '../lib/voiceUsage.js';
+import { tryUseTextQuota } from '../lib/textUsage.js';
+import { CATEGORY_EMOJI, CATEGORIES, DAILY_VOICE_LIMIT, DAILY_TEXT_LIMIT } from '../lib/config.js';
 
 // ============ POST /api/record-expense-voice ============
 // بتتنادى من زرار "سجّل مصروفك" في تاب "يومي" بالداشبورد.
@@ -15,7 +17,39 @@ import { CATEGORY_EMOJI, CATEGORIES } from '../lib/config.js';
 //
 // Body: { audioBase64: "data:audio/webm;base64,...." }
 // Header: Authorization: Bearer <supabase access token بتاع الجلسة الحالية>
-const MAX_AUDIO_BYTES = 8 * 1024 * 1024; // 8MB كفاية جدًا لتسجيل صوتي لمدة قليلة من الثواني
+// كانت 8MB قبل كده — ده كتير جدًا لتسجيل صوتي حقيقي (45 ثانية بالكتير)، وكان بيسمح بثغرة:
+// حد يبعت request مباشر (مش من الواجهة) بملف مضغوط بمعدل بت واطي جدًا يقدر يمثل ساعة صوت كاملة
+// جوه الـ 8MB دي، وده بيكلفنا فلوس Groq حقيقية على كل طلب. الفرونت إند بيوقف التسجيل أوتوماتيك
+// بعد 45 ثانية (شوف dabbar-dashboard-full.html)، فـ1.2MB كفاية جدًا لتسجيل 45 ثانية بأي معدل بت
+// واقعي (WebM/Opus بيدي كذا كيلوبايت بس للثانية)، مع هامش أمان معقول.
+const MAX_AUDIO_BYTES = 1.2 * 1024 * 1024;
+
+// ============ بتحوّل أي نص (سواء جاي من تفريغ صوت أو من إدخال يدوي) لعناصر جاهزة للتسجيل ============
+// نفس منطق التصنيف بالظبط (classifyMessage) بيتفهم مصروف أو دين أو تسوية من النص، فمفيش داعي
+// لاختيار فئة يدوي — الموديل هو اللي بيحدد الفئة (لو مصروف) أو نوع المعاملة (لو دين/تسوية) من كلام
+// المستخدم نفسه، بالظبط زي ما بيحصل في الفويس.
+async function classifyTextToItems(text) {
+  const transactions = await classifyMessage(text);
+  const items = [];
+  for (const t of transactions || []) {
+    if (t.type === 'expense' && Number(t.amount) > 0 && CATEGORIES.includes(t.category)) {
+      items.push({ kind: 'expense', amount: Number(t.amount), category: t.category, note: t.note || '' });
+    } else if (t.type === 'debt' && t.person && Number(t.amount) > 0) {
+      items.push({
+        kind: 'debt',
+        person: String(t.person).trim(),
+        amount: Number(t.amount),
+        direction: t.direction === 'borrowed' ? 'borrowed' : 'lent',
+        isRepayment: Boolean(t.is_repayment),
+        note: t.note || '',
+      });
+    } else if (t.type === 'settlement' && t.person) {
+      items.push({ kind: 'settlement', person: String(t.person).trim() });
+    }
+    // أي نوع تاني (unknown أو بيانات ناقصة) بيتجاهل.
+  }
+  return items;
+}
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -63,6 +97,17 @@ export default async function handler(req, res) {
     let items = [];
 
     if (audioBase64) {
+      // ---- الحد اليومي لعدد التسجيلات الصوتية: بيحمينا من abuse يكلّفنا فلوس Groq ----
+      // بيتفحص هنا بس (مش في الإدخال اليدوي) لأن اللي بيكلفنا هو استدعاء Groq نفسه.
+      const allowed = await tryUseVoiceQuota(telegramUserId);
+      if (!allowed) {
+        return res.status(200).json({
+          ok: false,
+          reason: 'quota_exceeded',
+          error: `🎙️ خد راحة من التسجيلات الصوتية النهاردة (استخدمتها ${DAILY_VOICE_LIMIT} مرة، تسلم إيدك 💪). اكتبها دلوقتي وهتتسجل عادي، وترجعلك الميزة الصوتية تاني بكرة.`,
+        });
+      }
+
       // ملحوظة: متصفحات زي Chrome على أندرويد بتسجل الصوت بصيغة فيها باراميترات زيادة
       // بعد نوع الملف، زي "audio/webm;codecs=opus" بدل "audio/webm" بس. الـ regex هنا
       // لازم يتقبل أي باراميترات زيادة قبل "base64," مش يفترض إنها مش موجودة.
@@ -85,25 +130,7 @@ export default async function handler(req, res) {
       }
 
       // ---- تصنيف الكلام: ممكن يرجع أكتر من معاملة مرة واحدة (نفس دالة البوت بالظبط) ----
-      const transactions = await classifyMessage(text);
-
-      for (const t of transactions || []) {
-        if (t.type === 'expense' && Number(t.amount) > 0 && CATEGORIES.includes(t.category)) {
-          items.push({ kind: 'expense', amount: Number(t.amount), category: t.category, note: t.note || '' });
-        } else if (t.type === 'debt' && t.person && Number(t.amount) > 0) {
-          items.push({
-            kind: 'debt',
-            person: String(t.person).trim(),
-            amount: Number(t.amount),
-            direction: t.direction === 'borrowed' ? 'borrowed' : 'lent',
-            isRepayment: Boolean(t.is_repayment),
-            note: t.note || '',
-          });
-        } else if (t.type === 'settlement' && t.person) {
-          items.push({ kind: 'settlement', person: String(t.person).trim() });
-        }
-        // أي نوع تاني (unknown أو بيانات ناقصة) بيتجاهل، زي منطق البوت بالظبط.
-      }
+      items = await classifyTextToItems(text);
 
       if (items.length === 0) {
         // مفيش ولا عملية واحدة واضحة في كل اللي اتقال — بنرجّع النص اللي سمعناه عشان
@@ -112,14 +139,34 @@ export default async function handler(req, res) {
       }
     } else {
       // ---- إدخال يدوي (لما المستخدم يختار "اكتبه بإيدك" في نفس الشيت) ----
+      // مفيش اختيار فئة يدوي هنا ولا نوع (مصروف/دين) — بنبني جملة من المبلغ + الوصف ونمررها
+      // لنفس دالة التصنيف (classifyMessage) اللي بتستخدمها الفويس بالظبط، فالموديل هو اللي
+      // بيحدد الفئة أو إنها دين/تسوية من كلام المستخدم نفسه (زي "واصل من أحمد" أو "صرفت قهوة").
       const amount = Number(req.body?.amount);
-      const category = String(req.body?.category || 'أخرى');
       const note = String(req.body?.note || '').trim().slice(0, 200);
       if (!amount || amount <= 0) {
         return res.status(400).json({ error: 'المبلغ لازم يكون رقم أكبر من صفر.' });
       }
-      items = [{ kind: 'expense', amount, category: CATEGORIES.includes(category) ? category : 'أخرى', note }];
-      text = note || 'إدخال يدوي من الداشبورد';
+      if (!note) {
+        return res.status(400).json({ error: 'اكتب وصف قصير للعملية عشان نقدر نحددها صح.' });
+      }
+
+      // ---- نفس الحد اليومي المطبّق على رسايل النص في تليجرام، عشان مفيش ثغرة لو حد استخدم
+      // الإدخال اليدوي بالداشبورد بدل الصوت (بردو بينادي نفس مكالمة التصنيف بالـ AI) ----
+      const allowedText = await tryUseTextQuota(telegramUserId);
+      if (!allowedText) {
+        return res.status(200).json({
+          ok: false,
+          reason: 'quota_exceeded',
+          error: `📝 خد راحة من التسجيل النهاردة (استخدمته ${DAILY_TEXT_LIMIT} مرة، تسلم إيدك 💪). هترجعلك الميزة تاني بكرة.`,
+        });
+      }
+
+      text = `${note} ${amount} جنيه`;
+      items = await classifyTextToItems(text);
+      if (items.length === 0) {
+        return res.status(200).json({ error: 'مش واضح لو ده مصروف ولا دين، جرب توصفه بشكل تاني.' });
+      }
     }
 
     // ---- نسجّل كل العناصر فعليًا، كل واحد في الجدول بتاعه ----

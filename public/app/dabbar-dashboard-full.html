@@ -248,6 +248,9 @@
         <!-- ===================== TAB: DAILY ===================== -->
         <div class="tab-content active fade-up p-5 space-y-4" id="tab-daily">
 
+            <!-- تنويه بسيط: تسجيل صوتي واحد ممكن يشمل أكتر من مصروف/دين، فحد الـ30 يومي بيكفي فعليًا أي حد -->
+            <p class="text-[11px] text-slate-500 text-center px-2 -mb-1">💡 نصيحة: قول كل مصاريفك أو ديونك في تسجيل صوتي واحد (مثلاً: "صرفت 100 تاكسي و50 قهوة")، هيسجّلهم كلهم مرة واحدة.</p>
+
             <!-- سجّل مصروفك: نفس تصميم البطاقات والتدرّجات الموجودة بالفعل -->
             <button id="record-expense-btn" class="w-full flex items-center gap-3 bg-gradient-to-tr from-emerald-500 to-teal-400 text-slate-950 rounded-3xl p-4 shadow-lg shadow-emerald-500/20 active:scale-[0.98] transition">
                 <span class="w-11 h-11 rounded-2xl bg-slate-950/15 flex items-center justify-center">
@@ -1646,9 +1649,9 @@
                     return;
                 }
 
-                // حد أقصى أماني بس (دقيقتين) عشان التسجيل ميفضلش شغال لو المستخدم نسي التاب مفتوح.
-                // مش المفروض يوصله أي مستخدم عادي بيسجل مصروف، فمش هو اللي بيتحكم في التوقيت الفعلي.
-                autoAdvance = setTimeout(() => { if (document.getElementById('stop-record-btn')) stopAndShowResult(); }, 120000);
+                // حد أقصى للتسجيل (45 ثانية) — كفاية تقول فيها 4-6 عمليات براحتك، وبيحمي هامش
+                // الربح في الاشتراك من تسجيلات طويلة أوي بتكلّف فلوس Groq زيادة عن اللازم.
+                autoAdvance = setTimeout(() => { if (document.getElementById('stop-record-btn')) stopAndShowResult(); }, 45000);
             }
 
             // بيتفضل موجود عشان أي كود قديم بينادي عليه (retry بعد نتيجة غير واضحة مثلاً)
@@ -1704,6 +1707,7 @@
 
             function handleApiResult(data) {
                 if (data.reason === 'trial_ended') { showTrialEnded(); return; }
+                if (data.reason === 'quota_exceeded') { showError(data.error || 'وصلت للحد الأقصى من التسجيلات الصوتية النهاردة، جرب تاني بكرة أو اكتبها بإيدك.'); return; }
                 if (data.ok === false) { showUnclear(data.heardText || ''); return; }
                 showSaved({ items: data.items || [], heardText: data.heardText, todayTotal: data.todayTotal });
                 refreshDailyTabAfterSave();
@@ -1838,27 +1842,13 @@
                             <input id="manual-amount" type="number" inputmode="decimal" class="w-full bg-slate-950/60 border border-slate-800 rounded-2xl px-4 py-3 text-slate-100 text-sm" placeholder="0 جنيه">
                         </div>
                         <div>
-                            <label class="text-[11px] text-slate-400 block mb-1.5">الفئة</label>
-                            <div class="flex flex-wrap gap-2" id="manual-category-picker">
-                                ${CATEGORIES.map((c, i) => `<button type="button" data-category="${c}" class="manual-cat-btn text-xs font-semibold px-3 py-2 rounded-xl border ${i === 0 ? 'bg-emerald-500/15 border-emerald-500/35 text-emerald-400' : 'bg-slate-950/60 border-slate-800 text-slate-300'}">${CATEGORY_EMOJI[c] || '📌'} ${c}</button>`).join('')}
-                            </div>
-                        </div>
-                        <div>
-                            <label class="text-[11px] text-slate-400 block mb-1.5">وصف (اختياري)</label>
-                            <input id="manual-note" class="w-full bg-slate-950/60 border border-slate-800 rounded-2xl px-4 py-3 text-slate-100 text-sm" placeholder="مثلاً: غدا مع صحابي">
+                            <label class="text-[11px] text-slate-400 block mb-1.5">وصف</label>
+                            <input id="manual-note" class="w-full bg-slate-950/60 border border-slate-800 rounded-2xl px-4 py-3 text-slate-100 text-sm" placeholder="مثلاً: غدا مع صحابي، أو واصل من أحمد، أو سلفت كريم">
+                            <p class="text-[10px] text-slate-500 mt-1.5">هنحدد الفئة (أو إنه دين) أوتوماتيك من الوصف.</p>
                         </div>
                         <p id="manual-error" class="text-[11px] text-rose-400 hidden"></p>
-                        ${primaryBtn('manual-save-btn', '✅ تسجيل المصروف')}
+                        ${primaryBtn('manual-save-btn', '✅ تسجيل العملية')}
                     </div>`;
-
-                let selectedCategory = CATEGORIES[0];
-                sheetBody.querySelectorAll('.manual-cat-btn').forEach((btn) => {
-                    btn.onclick = () => {
-                        selectedCategory = btn.dataset.category;
-                        sheetBody.querySelectorAll('.manual-cat-btn').forEach((b) => b.className = 'manual-cat-btn text-xs font-semibold px-3 py-2 rounded-xl border bg-slate-950/60 border-slate-800 text-slate-300');
-                        btn.className = 'manual-cat-btn text-xs font-semibold px-3 py-2 rounded-xl border bg-emerald-500/15 border-emerald-500/35 text-emerald-400';
-                    };
-                });
 
                 document.getElementById('manual-save-btn').onclick = async () => {
                     const amount = Number(document.getElementById('manual-amount').value);
@@ -1869,9 +1859,14 @@
                         errEl.classList.remove('hidden');
                         return;
                     }
+                    if (!note) {
+                        errEl.textContent = 'اكتب وصف قصير للعملية عشان نحدد نوعها صح.';
+                        errEl.classList.remove('hidden');
+                        return;
+                    }
                     errEl.classList.add('hidden');
                     try {
-                        const data = await callRecordExpenseApi({ amount, category: selectedCategory, note });
+                        const data = await callRecordExpenseApi({ amount, note });
                         handleApiResult(data);
                     } catch (e) {
                         console.error('manual record failed:', e);

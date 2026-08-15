@@ -1,4 +1,6 @@
 import { transcribeVoice, classifyMessage } from '../lib/groq.js';
+import { tryUseVoiceQuota } from '../lib/voiceUsage.js';
+import { tryUseTextQuota } from '../lib/textUsage.js';
 import { sendTelegramMessage, forwardTelegramMessage } from '../lib/telegram.js';
 import { recordExpense, sendDataExport, sendExpenseSearch } from '../lib/expenses.js';
 import { sendMonthlyReport, sendWeeklyReport } from '../lib/expensesReports.js';
@@ -6,7 +8,7 @@ import { recordDebt, settleDebtWithPerson } from '../lib/debts.js';
 import { sendDebtsReport, sendPersonDebtDetail } from '../lib/debtsReports.js';
 import { upsertUser, hasActiveSubscription, getSubscriptionExpiry, activateSubscription, getChatIdByUserId, isInTrial, getTrialDaysLeft } from '../lib/users.js';
 import { createLinkCode } from '../lib/linking.js';
-import { GUIDE_URL, ADMIN_TELEGRAM_ID, SUBSCRIPTION_DAYS, SUBSCRIPTION_PRICE_EGP, INSTAPAY_LINK, ADMIN_CONTACT_USERNAME } from '../lib/config.js';
+import { GUIDE_URL, ADMIN_TELEGRAM_ID, SUBSCRIPTION_DAYS, SUBSCRIPTION_PRICE_EGP, INSTAPAY_LINK, ADMIN_CONTACT_USERNAME, TELEGRAM_WEBHOOK_SECRET } from '../lib/config.js';
 
 // ============ نص دليل الأوامر — بيتبعت مع /start وبرضو متاح في أي وقت عن طريق "مساعدة" ============
 function buildCommandsGuide() {
@@ -82,6 +84,17 @@ async function tryHandleAdminActivation(text, fromUserId, adminChatId) {
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(200).send('Bot is running');
+  }
+
+  // ---- تأمين الويب هوك: نتأكد إن الطلب جاي فعليًا من تليجرام مش من أي حد عارف الرابط ----
+  // من غير الفحص ده، أي حد يعرف رابط الويب هوك يقدر يبعت POST مباشر ويتظاهر إنه ADMIN_TELEGRAM_ID
+  // (بمجرد ما يحط نفس الرقم في message.from.id بالطلب المزيّف)، ويفعّل اشتراكات ببلاش لنفسه أو
+  // لأي حد. تليجرام بيبعت الهيدر ده تلقائيًا مع كل ريكوست حقيقي لو ضبطناه وقت setWebhook (شوف README).
+  if (TELEGRAM_WEBHOOK_SECRET) {
+    const incomingSecret = req.headers['x-telegram-bot-api-secret-token'];
+    if (incomingSecret !== TELEGRAM_WEBHOOK_SECRET) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
   }
 
   try {
@@ -216,6 +229,21 @@ export default async function handler(req, res) {
     // (قبل كده كانت بتتفرّغ وتروح على طول للتصنيف الذكي (مصروف/دين) من غير ما تعدّي على أوامر
     // زي "تقرير" أو "ديون" أو "دور على" — يعني الأوامر دي كانت مش شغالة بالصوت. اتصلحت دلوقتي.)
     if (message.voice) {
+      // ---- نفس الحد اليومي المطبّق في الداشبورد، عشان مفيش ثغرة لو حد استخدم تليجرام بدل الموقع ----
+      const allowed = await tryUseVoiceQuota(userId);
+      if (!allowed) {
+        await sendTelegramMessage(chatId, '🎙️ خد راحة من التسجيلات الصوتية النهاردة (استخدمتها كتير، تسلم إيدك 💪). ابعتها كتابةً دلوقتي وهتتسجل عادي، وترجعلك الميزة الصوتية تاني بكرة.');
+        return res.status(200).json({ ok: true });
+      }
+      // ---- نفس حد الـ45 ثانية المطبّق على تسجيل الداشبورد (شوف dabbar-dashboard-full.html)،
+      // عشان تليجرام كان بيسمح بفويس نوت بأي طول من غير حماية، وده بيكلّف فلوس Groq زيادة
+      // (تكلفة Whisper بتتحسب على مدة الصوت). تليجرام بيبعتلنا مدة التسجيل جاهزة في الرسالة
+      // نفسها (duration بالثواني)، فمحتاجين نتأكد منها بس قبل ما ننزّل الملف ونكلّم Groq أصلًا.
+      const MAX_TELEGRAM_VOICE_SECONDS = 45;
+      if (Number(message.voice.duration) > MAX_TELEGRAM_VOICE_SECONDS) {
+        await sendTelegramMessage(chatId, `🎙️ التسجيل طويل أوي، جرب تختصره في ${MAX_TELEGRAM_VOICE_SECONDS} ثانية (كفاية تقول فيها كذا مصروف براحتك).`);
+        return res.status(200).json({ ok: true });
+      }
       const text = await transcribeVoice(message.voice.file_id);
       await routeUserMessage(text, userId, chatId);
       return res.status(200).json({ ok: true });
@@ -331,6 +359,16 @@ async function routeUserMessage(text, userId, chatId) {
 async function handleIncomingText(text, userId, chatId) {
   if (!text) {
     await sendTelegramMessage(chatId, 'معرفتش أفهم الرسالة، ممكن تعيدها؟');
+    return;
+  }
+
+  // ---- الحد اليومي لعدد رسايل النص اللي بتتصنّف بالـ AI: نفس فكرة تسجيلات الصوت بالظبط ----
+  const allowed = await tryUseTextQuota(userId);
+  if (!allowed) {
+    await sendTelegramMessage(
+      chatId,
+      '📝 خد راحة شوية (استخدمت رسايلك النهاردة، تسلم إيدك 💪). هترجعلك الميزة تاني بكرة.'
+    );
     return;
   }
 

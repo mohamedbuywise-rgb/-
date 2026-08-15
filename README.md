@@ -4,6 +4,7 @@
 - افتح مشروعك في Supabase → SQL Editor → New Query
 - الصق محتوى `sql/schema.sql` وشغّله (Run)
 - لو عندك مشروع قديم شغّال بالفعل، السكريبت آمن يتشغّل تاني (`create table if not exists`) وهيضيف بس الجداول الجديدة: `debt_settlements` و `users`
+- **مهم:** شغّل كمان `sql/voice-usage.sql` (نفس الطريقة) — ده بيضيف الحد اليومي لعدد التسجيلات الصوتية لكل مستخدم، عشان محدش يقدر يعمل abuse يكلّفنا فلوس Groq. من غيره التسجيل الصوتي هيفضل شغال بس من غير أي حد أقصى.
 
 ## 2) رفع الكود
 - ارفع الفولدر ده كامل على GitHub repo جديد
@@ -17,6 +18,8 @@
 | `SUPABASE_URL` | من Supabase → Project Settings → API | ✅ |
 | `SUPABASE_SERVICE_ROLE_KEY` | من Supabase → Project Settings → API (Service Role، مش Anon) | ✅ |
 | `CRON_SECRET` | أي قيمة سرّية تختارها إنت | اختياري، بس ننصح بيه (تأمين الـ cron endpoint) |
+| `TELEGRAM_WEBHOOK_SECRET` | أي قيمة سرّية تختارها إنت (حروف/أرقام، من غير مسافات) | **✅ مهم جدًا قبل الإطلاق** — من غيرها أي حد عارف رابط الويب هوك يقدر يبعت رسايل مزيّفة للبوت وينتحل صفة الأدمن (شوف خطوة 4) |
+| `DAILY_VOICE_LIMIT` | عدد تسجيلات الصوت المسموحة لكل مستخدم في اليوم، افتراضيًا `50` | اختياري (50 كتير جدًا لأي استخدام حقيقي، غيّره لو عايز) |
 | `GROQ_TEXT_MODEL` | افتراضيًا `llama-3.3-70b-versatile` | اختياري |
 | `ADMIN_TELEGRAM_ID` | الـ Telegram user id بتاعك إنت (الأدمن) — ابعت أي رسالة لـ `@userinfobot` عشان تعرفه | ✅ (عشان تقدر تفعّل اشتراكات) |
 | `SUBSCRIPTION_DAYS` | مدة الاشتراك بالأيام بعد كل تفعيل، افتراضيًا `30` | اختياري |
@@ -29,15 +32,19 @@
 بعد ما تضيف المتغيرات، اعمل **Redeploy** للمشروع عشان القيم تتفعّل (ولازم تعمل Redeploy كمان أول مرة عشان الـ Cron Job في `vercel.json` يتسجّل).
 
 ## 4) ربط الـ Webhook (مرة واحدة بس)
-افتح الرابط ده في المتصفح بعد ما تستبدل القيم:
+**لازم تضيف `TELEGRAM_WEBHOOK_SECRET` في Environment Variables الأول (خطوة 3) وتعمل Redeploy، قبل ما تربط الويب هوك.**
+
+افتح الرابط ده في المتصفح بعد ما تستبدل القيم (لاحظ إضافة `secret_token` في الآخر — ده بالظبط نفس القيمة اللي حطيتها في `TELEGRAM_WEBHOOK_SECRET`):
 ```
-https://api.telegram.org/bot<TELEGRAM_BOT_TOKEN>/setWebhook?url=<VERCEL_URL>/api/telegram-webhook
+https://api.telegram.org/bot<TELEGRAM_BOT_TOKEN>/setWebhook?url=<VERCEL_URL>/api/telegram-webhook&secret_token=<TELEGRAM_WEBHOOK_SECRET>
 ```
 مثال:
 ```
-https://api.telegram.org/bot7123456789:AAExxxxx/setWebhook?url=https://floosy-bot.vercel.app/api/telegram-webhook
+https://api.telegram.org/bot7123456789:AAExxxxx/setWebhook?url=https://floosy-bot.vercel.app/api/telegram-webhook&secret_token=my-super-secret-123
 ```
 لازم يرجعلك `{"ok":true,...}`.
+
+⚠️ **مهم:** لو مش هتحط `TELEGRAM_WEBHOOK_SECRET`، البوت هيفضل شغال بس أي حد عارف رابط الويب هوك (مش سري أوي، بيبان لو حد دوّر) هيقدر يبعت طلبات مباشرة ويتظاهر إنه إنت (الأدمن) ويفعّل اشتراكات ببلاش لنفسه. ننصح بشدة تحطها قبل ما تطلق فعليًا.
 
 ## 5) جرب البوت
 - افتح البوت في تليجرام، ابعت `/start` عشان تشوف كل الأوامر

@@ -17,6 +17,13 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  // مهم جدًا: من غير الهيدرز دي، المتصفح أو أي CDN بينفّذ caching على الـ GET ده
+  // ولو حصل ده، بعد أي عملية ربط جديدة (auth-by-code) هيفضل يرجّع نفس الرد القديم
+  // (زي linked:false) من غير ما يبعت الطلب فعليًا للسيرفر تاني — وده كان سبب اللفة اللي كانت بتحصل.
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+
   try {
     const token = (req.headers.authorization || '').replace('Bearer ', '').trim();
     if (!token) {

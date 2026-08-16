@@ -944,6 +944,7 @@
             try {
                 const res = await fetch('/api/dashboard-data', {
                     headers: { Authorization: `Bearer ${accessToken}` },
+                    cache: 'no-store',
                 });
                 data = await res.json();
                 if (!res.ok) throw new Error(data.error || 'فشل تحميل البيانات');

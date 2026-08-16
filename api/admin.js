@@ -1,38 +1,21 @@
 import { supabase } from '../lib/supabaseClient.js';
 import { sendTelegramMessage, sendTelegramPhoto } from '../lib/telegram.js';
 import { getChatIdByUserId } from '../lib/users.js';
-import { ADMIN_TELEGRAM_ID, SUBSCRIPTION_PRICE_EGP } from '../lib/config.js';
+import { ADMIN_TELEGRAM_ID, ADMIN_PASSWORD, SUBSCRIPTION_PRICE_EGP } from '../lib/config.js';
 
 // ============ GET /api/admin  (كان /api/admin-stats) ============
-// صفحة إحصائيات خاصة بالأدمن بس (مالك المشروع). بتتأمّن بطريقتين مع بعض:
-// 1. لازم تيجي بتوكن Supabase Auth صحيح (بعد تسجيل الدخول).
-// 2. الحساب المرتبط بالتوكن ده لازم يكون telegram_user_id بتاعه == ADMIN_TELEGRAM_ID
-//    اللي انت حاططه في Environment Variables على Vercel.
-// أي حد تاني (حتى لو عنده حساب عادي مسجل ومشترك) هياخد 403.
+// صفحة إحصائيات خاصة بالأدمن بس (مالك المشروع). مفيش حساب Supabase/تليجرام هنا خالص —
+// بس باسورد واحد ثابت (ADMIN_PASSWORD في Environment Variables على Vercel)، والصفحة
+// بتبعته في الـ Authorization header زي: `Bearer <الباسورد>`.
 async function handleStats(req, res) {
-  if (!ADMIN_TELEGRAM_ID) {
+  if (!ADMIN_PASSWORD) {
     return res.status(500).json({
-      error: 'لازم تضيف ADMIN_TELEGRAM_ID في Environment Variables على Vercel الأول.',
+      error: 'لازم تضيف ADMIN_PASSWORD في Environment Variables على Vercel الأول.',
     });
   }
 
   const token = (req.headers.authorization || '').replace('Bearer ', '').trim();
-  if (!token) {
-    return res.status(401).json({ error: 'لازم تسجل دخول الأول.' });
-  }
-
-  const { data: userData, error: authError } = await supabase.auth.getUser(token);
-  if (authError || !userData?.user) {
-    return res.status(401).json({ error: 'انتهت صلاحية الجلسة، سجل دخول تاني.' });
-  }
-
-  const { data: link } = await supabase
-    .from('user_links')
-    .select('telegram_user_id')
-    .eq('auth_user_id', userData.user.id)
-    .maybeSingle();
-
-  if (!link || Number(link.telegram_user_id) !== Number(ADMIN_TELEGRAM_ID)) {
+  if (!token || token !== ADMIN_PASSWORD) {
     return res.status(403).json({ error: 'الصفحة دي للأدمن بس.' });
   }
 

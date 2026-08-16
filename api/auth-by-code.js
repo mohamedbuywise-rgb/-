@@ -28,17 +28,29 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'اكتب الكود المكوّن من 6 أرقام اللي وصلك من دبّر على تليجرام.' });
     }
 
-    // ---- 1) نتحقق من الكود ----
-    const { data: linkCode, error: codeError } = await supabase
+    // ---- 1) نحجز الكود فورًا (atomic claim) قبل أي حاجة تانية ----
+    // ده بيمنع الـ race condition اللي كانت بتحصل لو طلبين وصلوا بنفس الكود في نفس اللحظة
+    // (double-submit من تاتش مزدوج على الموبايل مثلًا): قبل كده كنا بنتحقق إن الكود used=false
+    // وبعدين نسجله used=true في آخر الفانكشن، فطلبين كانوا يقدروا يعدّوا من التحقق قبل ما أي
+    // واحد فيهم يسجل الكود مستخدم — وكل واحد كان بيعمل حساب Auth منفصل ويمسح ربط التاني.
+    // دلوقتي: أول طلب بيوصل هو اللي بياخد الصف الفعلي من الـ update ده (شرط used=false)، وأي
+    // طلب تاني بنفس الكود هيلاقي 0 صفوف اتأثرت ويترفض على طول من غير ما يعمل أي حساب.
+    const { data: claimedRows, error: claimError } = await supabase
       .from('link_codes')
-      .select('*')
+      .update({ used: true })
       .eq('code', code)
       .eq('used', false)
-      .maybeSingle();
+      .select('*');
 
-    if (codeError || !linkCode) {
+    if (claimError) {
+      console.error('auth-by-code claim error:', claimError);
+      return res.status(500).json({ error: 'حصل خطأ، جرب تاني.' });
+    }
+    if (!claimedRows || claimedRows.length === 0) {
       return res.status(400).json({ error: 'الكود غلط أو اتستخدم قبل كده.' });
     }
+    const linkCode = claimedRows[0];
+
     if (new Date(linkCode.expires_at).getTime() < Date.now()) {
       return res.status(400).json({ error: 'الكود ده منتهي. افتح دبّر على تليجرام تاني وابعتله /link عشان تاخد كود جديد.' });
     }
@@ -98,8 +110,6 @@ export default async function handler(req, res) {
       console.error('auth-by-code link insert error:', linkError);
       return res.status(500).json({ error: 'حصل خطأ في الربط، جرب تاني.' });
     }
-
-    await supabase.from('link_codes').update({ used: true }).eq('code', code);
 
     // ---- 5) نولّد جلسة فعلية (access_token/refresh_token) للحساب ده من غير باسورد ----
     // بنستخدم generateLink (بالـ service role) لعمل magic-link، وبعدين نحوّله لجلسة حقيقية

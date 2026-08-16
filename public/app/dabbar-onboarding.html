@@ -333,8 +333,16 @@
   function showNotice(msg) { linkNotice.textContent = msg; linkNotice.classList.add('show'); linkError.classList.remove('show'); }
   function hideMessages() { linkError.classList.remove('show'); linkNotice.classList.remove('show'); }
 
+  // ---- قفل ضد الإرسال المزدوج ----
+  // تعطيل الزرار (disabled = true) وحده مش سريع كفاية أحيانًا: تاتش مزدوج سريع على الموبايل
+  // ممكن يطلق حدثين "submit" قبل ما الـ disabled يمنع الحدث التاني فعليًا. الـ flag ده بيتفحص
+  // كأول سطر في الـ handler، فبيوقف أي محاولة تانية فورًا وهو لسه شغال، مهما كان توقيت الأحداث.
+  let isSubmitting = false;
+
   linkForm.addEventListener('submit', async (e) => {
     e.preventDefault();
+    if (isSubmitting) return;
+    isSubmitting = true;
     hideMessages();
     const code = linkCodeInput.value.trim();
 
@@ -372,6 +380,7 @@
       showError('مقدرناش نتواصل مع السيرفر دلوقتي. جرب تاني.');
     } finally {
       if (!successState.classList.contains('show')) {
+        isSubmitting = false;
         linkSubmitBtn.disabled = !installedOrAcknowledged();
         linkSubmitLabel.textContent = installedOrAcknowledged() ? 'تأكيد الربط' : 'ثبّت التطبيق الأول عشان تكمل';
       }

@@ -1,7 +1,7 @@
 import { supabase } from '../lib/supabaseClient.js';
 import { getMonthRange, getExpensesBetween, buildCategoryBreakdown } from '../lib/expenses.js';
 import { computeNetByPerson } from '../lib/debts.js';
-import { MONTH_NAMES, SUBSCRIPTION_PRICE_EGP, INSTAPAY_LINK } from '../lib/config.js';
+import { MONTH_NAMES, CATEGORY_EMOJI, SUBSCRIPTION_PRICE_EGP, INSTAPAY_LINK } from '../lib/config.js';
 import { hasActiveSubscription, getSubscriptionExpiry, isInTrial, getTrialDaysLeft } from '../lib/users.js';
 
 // ============ GET /api/dashboard-data ============
@@ -89,6 +89,45 @@ export default async function handler(req, res) {
       });
     }
 
+    // ---- الهدف المالي النشط (لو موجود) — نفس جدول goals اللي البوت بيستخدمه ----
+    const { data: goalRow, error: goalError } = await supabase
+      .from('goals')
+      .select('*')
+      .eq('telegram_user_id', telegramUserId)
+      .eq('is_active', true)
+      .limit(1)
+      .maybeSingle();
+    if (goalError) console.error('dashboard-data goal lookup error:', JSON.stringify(goalError));
+
+    const goal = goalRow
+      ? {
+          id: goalRow.id,
+          title: goalRow.title,
+          targetAmount: Number(goalRow.target_amount),
+          savedAmount: Number(goalRow.saved_amount),
+          targetDate: goalRow.target_date,
+          percent: Math.min(100, Math.round((Number(goalRow.saved_amount) / Number(goalRow.target_amount)) * 100)),
+        }
+      : null;
+
+    // ---- توقّع نهاية الشهر + اقتراح ذكي (كله محسوب من أرقام حقيقية فوق، صفر أرقام مختلقة) ----
+    const daysInMonth = new Date(start.getFullYear(), start.getMonth() + 1, 0).getDate();
+    const projectedTotal = Math.round(avgPerDayThisMonth * daysInMonth);
+    const projectedDayLabel = MONTH_NAMES[start.getMonth()];
+
+    let potentialSaving = 0;
+    if (prevTotal > 0 && projectedTotal < prevTotal) {
+      potentialSaving = Math.round(((prevTotal - projectedTotal) / 10)) * 10; // تقريب لأقرب 10 جنيه
+    }
+
+    const smart = {
+      projectedTotal,
+      daysInMonth,
+      daysPassed: daysPassedThisMonth,
+      projectedLabel: projectedDayLabel,
+      potentialSaving,
+    };
+
     // ---- الديون ----
     const netByPerson = await computeNetByPerson(telegramUserId);
     const entries = Object.values(netByPerson).filter((v) => v.net !== 0);
@@ -111,6 +150,43 @@ export default async function handler(req, res) {
     const flowOut = (todayFlowData || [])
       .filter(d => d.direction === 'lent')
       .reduce((sum, d) => sum + Number(d.amount), 0);
+
+    // ---- "Financial Wrapped" السنة الحالية — استعلام واحد بس لكل السنة (مش شهر شهر) عشان يفضل خفيف ----
+    const DISCRETIONARY_CATEGORIES = ['تسوق', 'ترفيه', 'اشتراكات', 'هدايا وتبرعات', 'شخصي وعناية'];
+    const yearStart = new Date(start.getFullYear(), 0, 1);
+    const yearEnd = new Date(start.getFullYear() + 1, 0, 1);
+    const yearExpenses = await getExpensesBetween(telegramUserId, yearStart, yearEnd);
+
+    let wrapped = null;
+    if (yearExpenses.length > 0) {
+      const yearTotal = yearExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
+      const yearBreakdown = buildCategoryBreakdown(yearExpenses);
+      const discretionaryTotal = yearBreakdown
+        .filter((c) => DISCRETIONARY_CATEGORIES.includes(c.name))
+        .reduce((sum, c) => sum + Number(c.amount), 0);
+      const savedEstimate = Math.round((discretionaryTotal * 0.2) / 10) * 10;
+
+      const perMonth = {};
+      for (const e of yearExpenses) {
+        const m = new Date(e.created_at).getMonth();
+        perMonth[m] = (perMonth[m] || 0) + Number(e.amount);
+      }
+      const monthEntries = Object.entries(perMonth).map(([m, total]) => ({ month: Number(m), total }));
+      const bestMonth = monthEntries.length > 0
+        ? monthEntries.reduce((a, b) => (a.total < b.total ? a : b))
+        : null;
+
+      wrapped = {
+        year: start.getFullYear(),
+        total: yearTotal,
+        count: yearExpenses.length,
+        topCategory: yearBreakdown[0] || null,
+        byCategory: yearBreakdown.slice(0, 5).map((b) => ({ name: b.name, amount: b.amount, percent: Number(b.percent) })),
+        savedEstimate,
+        bestMonthLabel: bestMonth ? MONTH_NAMES[bestMonth.month] : null,
+        bestMonthTotal: bestMonth ? bestMonth.total : null,
+      };
+    }
 
     // ---- حالة الاشتراك/التجربة ----
     const subActive = await hasActiveSubscription(telegramUserId);
@@ -163,6 +239,9 @@ export default async function handler(req, res) {
         net: flowIn - flowOut
       },
       history,
+      goal,
+      smart,
+      wrapped,
     });
   } catch (err) {
     console.error('dashboard-data error:', err);

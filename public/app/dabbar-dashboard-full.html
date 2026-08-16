@@ -377,6 +377,113 @@
 
         </div>
 
+        <!-- ===================== TAB: ASSISTANT (دبّر الذكي) ===================== -->
+        <div class="tab-content p-5 space-y-4" id="tab-assistant">
+
+            <div class="bg-gradient-to-br from-emerald-950/60 to-slate-900 border border-emerald-500/30 rounded-3xl p-4 text-center space-y-1.5 shadow-lg">
+                <span class="text-xs text-emerald-400 font-semibold block">مساعدك المالي الشخصي</span>
+                <h3 class="text-xl font-black text-slate-100">دبّر بيفكر معاك 🧠</h3>
+                <p class="text-[11px] text-slate-400">اقتراحات وتوقعات وشات مبني على بياناتك الحقيقية بس</p>
+            </div>
+
+            <!-- اقتراح ذكي تلقائي -->
+            <div id="asst-suggestion-card" class="hidden bg-gradient-to-br from-emerald-500/15 to-slate-900 border border-emerald-500/30 rounded-2xl p-4 flex items-start gap-3">
+                <div class="w-9 h-9 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm shrink-0 border border-emerald-500/30">💡</div>
+                <div class="flex-1 space-y-2">
+                    <p class="text-xs text-slate-200 leading-relaxed" id="asst-suggestion-text"></p>
+                    <button id="asst-suggestion-action" class="text-[11px] font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-900 py-2 px-3 rounded-xl transition"></button>
+                </div>
+            </div>
+
+            <!-- توقّع نهاية الشهر -->
+            <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-4 flex items-center gap-3">
+                <div class="w-9 h-9 rounded-full bg-slate-800 text-slate-300 flex items-center justify-center text-sm shrink-0 border border-slate-700">📈</div>
+                <p class="text-xs text-slate-300 leading-relaxed" id="asst-projection-text">جاري حساب التوقع...</p>
+            </div>
+
+            <!-- الهدف المالي -->
+            <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3">
+                <h4 class="text-xs font-bold text-slate-300 flex items-center gap-1.5">🎯 هدفك المالي</h4>
+
+                <!-- مفيش هدف حاليًا -->
+                <div id="asst-goal-empty" class="space-y-2.5">
+                    <p class="text-[11px] text-slate-500">مفيش هدف مسجل دلوقتي. حدد هدف وابدأ توفر ليه.</p>
+                    <input id="asst-goal-title" type="text" placeholder="اسم الهدف (مثلاً: لابتوب)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-100 placeholder-slate-500 outline-none focus:border-emerald-500/50">
+                    <div class="flex gap-2">
+                        <input id="asst-goal-amount" type="number" inputmode="numeric" placeholder="المبلغ المطلوب" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-100 placeholder-slate-500 outline-none focus:border-emerald-500/50">
+                        <input id="asst-goal-date" type="date" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-100 outline-none focus:border-emerald-500/50">
+                    </div>
+                    <button id="asst-goal-create-btn" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold py-2.5 rounded-xl text-xs transition">ابدأ الهدف ده</button>
+                    <p id="asst-goal-error" class="hidden text-[11px] text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-lg p-2 text-center"></p>
+                </div>
+
+                <!-- هدف نشط -->
+                <div id="asst-goal-active" class="hidden space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-bold text-slate-100" id="asst-goal-title-label">—</span>
+                        <span class="text-xs font-black text-emerald-400" id="asst-goal-percent">0%</span>
+                    </div>
+                    <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden">
+                        <div id="asst-goal-bar" class="h-full bg-gradient-to-l from-emerald-400 to-teal-400 rounded-full transition-all" style="width:0%"></div>
+                    </div>
+                    <div class="flex justify-between text-[11px] text-slate-400">
+                        <span>وفرت: <b class="text-slate-200" id="asst-goal-saved">—</b></span>
+                        <span>الهدف: <b class="text-slate-200" id="asst-goal-target">—</b></span>
+                    </div>
+                    <p id="asst-goal-daily-line" class="text-[10.5px] text-slate-500"></p>
+                    <div class="flex gap-2">
+                        <input id="asst-goal-contribute-amount" type="number" inputmode="numeric" placeholder="وفرت كام؟" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 placeholder-slate-500 outline-none focus:border-emerald-500/50">
+                        <button id="asst-goal-contribute-btn" class="bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold py-2 px-4 rounded-xl text-xs transition">إضافة</button>
+                    </div>
+                    <button id="asst-goal-cancel-btn" class="w-full text-[11px] text-rose-400 hover:text-rose-300 py-1.5 transition">إلغاء الهدف</button>
+                </div>
+            </div>
+
+            <!-- Smart Receipt Scanner -->
+            <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-2.5">
+                <h4 class="text-xs font-bold text-slate-300 flex items-center gap-1.5">📸 امسح فاتورة</h4>
+                <p class="text-[11px] text-slate-500">صوّر فاتورة أو إيصال، ودبّر هيقرأ المبلغ والفئة ويسجله تلقائي.</p>
+                <input type="file" id="asst-receipt-input" accept="image/*" capture="environment" class="hidden">
+                <button id="asst-receipt-btn" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-3 rounded-2xl text-xs transition border border-slate-700 flex items-center justify-center gap-2">
+                    <span id="asst-receipt-icon">📎</span> <span id="asst-receipt-label">اختار صورة الفاتورة</span>
+                </button>
+                <div id="asst-receipt-result" class="hidden text-[11px] rounded-xl p-3 leading-relaxed"></div>
+            </div>
+
+            <!-- Financial Wrapped -->
+            <button id="asst-wrapped-open" class="w-full bg-gradient-to-br from-slate-900 to-slate-950 border border-emerald-500/25 rounded-3xl p-4 flex items-center gap-3 text-right transition hover:border-emerald-500/40">
+                <div class="w-11 h-11 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-lg shrink-0">🎁</div>
+                <div class="flex-1">
+                    <h4 class="text-sm font-bold text-slate-100">Wrapped سنة <span id="asst-wrapped-year">—</span></h4>
+                    <p class="text-[11px] text-slate-400">ملخص سنتك المالية بالكامل — جاهز للمشاركة</p>
+                </div>
+                <span class="text-slate-500 text-xs">‹</span>
+            </button>
+
+            <!-- اسأل دبّر -->
+            <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3">
+                <h4 class="text-xs font-bold text-slate-300 flex items-center gap-1.5">💬 اسأل دبّر</h4>
+                <div id="asst-chat-log" class="space-y-2.5 max-h-72 overflow-y-auto">
+                    <div class="flex items-start gap-2">
+                        <span class="w-7 h-7 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-xs shrink-0">✨</span>
+                        <div class="bg-slate-900 border border-slate-800 rounded-2xl rounded-tr-sm px-3 py-2 text-[11.5px] text-slate-300 leading-relaxed">
+                            أهلاً! اسألني أي حاجة عن مصاريفك أو ديونك أو هدفك، وهجاوبك من بياناتك الحقيقية.
+                        </div>
+                    </div>
+                </div>
+                <div class="flex gap-1.5 flex-wrap" id="asst-chat-suggestions">
+                    <button class="asst-chip text-[10.5px] bg-slate-900 border border-slate-800 text-slate-400 px-2.5 py-1.5 rounded-full">صرفت زيادة ليه الشهر ده؟</button>
+                    <button class="asst-chip text-[10.5px] bg-slate-900 border border-slate-800 text-slate-400 px-2.5 py-1.5 rounded-full">إزاي أوفر أكتر؟</button>
+                    <button class="asst-chip text-[10.5px] bg-slate-900 border border-slate-800 text-slate-400 px-2.5 py-1.5 rounded-full">أقدر أشتري حاجة بـ 1000 جنيه؟</button>
+                </div>
+                <div class="flex gap-2">
+                    <input id="asst-chat-input" type="text" placeholder="اكتب سؤالك..." maxlength="500" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-100 placeholder-slate-500 outline-none focus:border-emerald-500/50">
+                    <button id="asst-chat-send" class="bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold w-10 h-10 rounded-xl text-sm transition shrink-0 flex items-center justify-center">➤</button>
+                </div>
+            </div>
+
+        </div>
+
         <!-- ===================== TAB: ACCOUNT ===================== -->
         <div class="tab-content p-5 space-y-4" id="tab-account">
 
@@ -515,6 +622,10 @@
                 <span class="tab-icon-wrap w-9 h-9 rounded-xl border border-transparent flex items-center justify-center text-base">🤝</span>
                 ديون
             </button>
+            <button class="tab-btn flex flex-col items-center gap-1 px-3 py-1 text-slate-500 text-[10px] font-semibold" data-tab="assistant" data-title="دبّر الذكي" data-sub="● مساعدك المالي الشخصي" data-icon="✨" data-badge="جديد">
+                <span class="tab-icon-wrap w-9 h-9 rounded-xl border border-transparent flex items-center justify-center text-base">✨</span>
+                مساعد
+            </button>
             <button class="tab-btn flex flex-col items-center gap-1 px-3 py-1 text-slate-500 text-[10px] font-semibold" data-tab="account" data-title="حسابي" data-sub="● بياناتك وإعداداتك" data-icon="👤" data-badge="حسابي">
                 <span class="tab-icon-wrap w-9 h-9 rounded-xl border border-transparent flex items-center justify-center text-base overflow-hidden" id="nav-avatar-wrap">👤</span>
                 حسابي
@@ -601,6 +712,51 @@
                     <span id="avatar-save-icon">✅</span> <span id="avatar-save-label">حفظ الصورة</span>
                 </button>
             </div>
+        </div>
+    </div>
+
+    <!-- Financial Wrapped — Shareable Card Overlay -->
+    <div id="wrapped-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="max-w-sm w-full flex flex-col gap-3">
+            <div class="flex items-center justify-between px-1">
+                <h2 class="font-bold text-sm text-slate-100">Wrapped سنتك المالية</h2>
+                <button id="wrapped-close" class="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-sm">✕</button>
+            </div>
+
+            <!-- الكارت نفسه — ده اللي بيتصور/بيتشارك -->
+            <div id="wrapped-card" class="rounded-[2rem] p-6 text-center space-y-4 shadow-2xl" style="background: linear-gradient(155deg, #022c22 0%, #020617 55%, #020617 100%); border: 1px solid rgba(52,211,153,0.35);">
+                <div class="space-y-1">
+                    <span class="text-[11px] tracking-widest text-emerald-400 font-bold">DABBAR WRAPPED</span>
+                    <h3 class="text-2xl font-black text-slate-50">في سنة <span id="wrapped-year">2026</span></h3>
+                </div>
+
+                <div class="space-y-1 py-2">
+                    <span class="text-[11px] text-slate-400 block">إجمالي ما صرفته</span>
+                    <p class="text-4xl font-black text-emerald-300" id="wrapped-total">—</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2.5 text-right">
+                    <div class="bg-white/5 border border-white/10 rounded-2xl p-3">
+                        <span class="text-[10px] text-slate-400 block mb-1">أكبر بند</span>
+                        <span class="text-xs font-bold text-slate-100" id="wrapped-top-cat">—</span>
+                    </div>
+                    <div class="bg-white/5 border border-white/10 rounded-2xl p-3">
+                        <span class="text-[10px] text-slate-400 block mb-1">وفرت تقريبًا</span>
+                        <span class="text-xs font-bold text-emerald-300" id="wrapped-saved">—</span>
+                    </div>
+                    <div class="bg-white/5 border border-white/10 rounded-2xl p-3 col-span-2">
+                        <span class="text-[10px] text-slate-400 block mb-1">أحسن شهر ماليًا</span>
+                        <span class="text-xs font-bold text-slate-100" id="wrapped-best-month">—</span>
+                    </div>
+                </div>
+
+                <span class="text-[10px] text-slate-500 block">دبّر · محاسبك الشخصي</span>
+            </div>
+
+            <button id="wrapped-share-btn" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold py-3 rounded-2xl text-sm transition flex items-center justify-center gap-2">
+                <span>📤</span> شارك الكارت
+            </button>
+            <p id="wrapped-empty-note" class="hidden text-[11px] text-slate-400 text-center bg-slate-900 border border-slate-800 rounded-xl p-3">لسه معندكش مصاريف كفاية السنة دي عشان نلخصلك Wrapped.</p>
         </div>
     </div>
 
@@ -811,6 +967,7 @@
             renderDebts(data.debts);
             renderArchive(data.history);
             renderSubscription(data.subscription);
+            renderAssistant(data);
             updateHeaderForTab(document.querySelector('.tab-btn.active-tab').dataset.tab, data);
 
             const label = document.getElementById('last-updated-label');
@@ -1111,6 +1268,291 @@
             `).join('');
         }
 
+        // ============================================================
+        // ============ تاب "مساعد" (دبّر الذكي) — رندر البيانات ============
+        // ============================================================
+        function renderAssistant(data) {
+            window.__goalState = data.goal || null;
+            window.__wrappedData = data.wrapped || null;
+            renderAsstSuggestion(data.smart, data.goal);
+            renderAsstProjection(data.smart, data.month);
+            renderAsstGoal(data.goal);
+            document.getElementById('asst-wrapped-year').textContent = data.wrapped ? data.wrapped.year : new Date().getFullYear();
+        }
+
+        function renderAsstSuggestion(smart, goal) {
+            const card = document.getElementById('asst-suggestion-card');
+            const textEl = document.getElementById('asst-suggestion-text');
+            const actionBtn = document.getElementById('asst-suggestion-action');
+            if (!smart || !smart.potentialSaving || smart.potentialSaving <= 0) {
+                card.classList.add('hidden');
+                return;
+            }
+            card.classList.remove('hidden');
+            if (goal) {
+                textEl.textContent = `لاحظنا إنك على مسار توفير حوالي ${fmt(smart.potentialSaving)} الشهر ده مقارنة بمعدلك المعتاد. تحب تحولهم لهدف "${goal.title}"؟`;
+                actionBtn.textContent = `أضف ${fmt(smart.potentialSaving)} لهدفي`;
+                actionBtn.onclick = () => goalContribute(smart.potentialSaving);
+            } else {
+                textEl.textContent = `لاحظنا إنك ممكن توفر حوالي ${fmt(smart.potentialSaving)} الشهر ده. عايز تبدأ هدف توفير بيهم؟`;
+                actionBtn.textContent = 'ابدأ هدف بالمبلغ ده';
+                actionBtn.onclick = () => {
+                    document.getElementById('asst-goal-amount').value = smart.potentialSaving;
+                    document.getElementById('asst-goal-title').focus();
+                };
+            }
+        }
+
+        function renderAsstProjection(smart, month) {
+            const el = document.getElementById('asst-projection-text');
+            if (!smart) { el.textContent = 'لسه معندناش بيانات كفاية عشان نتوقع نهاية الشهر.'; return; }
+            let text = `على المعدل الحالي، متوقع صرفك يوصل لحوالي <b class="text-slate-100">${fmt(smart.projectedTotal)}</b> بنهاية ${smart.projectedLabel} (اتصرف ${smart.daysPassed} من ${smart.daysInMonth} يوم).`;
+            if (month && month.prevTotal > 0) {
+                text += smart.projectedTotal > month.prevTotal
+                    ? ` ده أكتر من ${month.prevLabel} (${fmt(month.prevTotal)}).`
+                    : ` ده أقل من ${month.prevLabel} (${fmt(month.prevTotal)}) — تمام كده! 👏`;
+            }
+            el.innerHTML = text;
+        }
+
+        function renderAsstGoal(goal) {
+            const emptyEl = document.getElementById('asst-goal-empty');
+            const activeEl = document.getElementById('asst-goal-active');
+            if (!goal) {
+                emptyEl.classList.remove('hidden');
+                activeEl.classList.add('hidden');
+                return;
+            }
+            emptyEl.classList.add('hidden');
+            activeEl.classList.remove('hidden');
+            document.getElementById('asst-goal-title-label').textContent = goal.title;
+            document.getElementById('asst-goal-percent').textContent = `${goal.percent}%`;
+            document.getElementById('asst-goal-bar').style.width = `${goal.percent}%`;
+            document.getElementById('asst-goal-saved').textContent = fmt(goal.savedAmount);
+            document.getElementById('asst-goal-target').textContent = fmt(goal.targetAmount);
+
+            const dailyLineEl = document.getElementById('asst-goal-daily-line');
+            if (goal.targetDate) {
+                const today = new Date(); today.setHours(0, 0, 0, 0);
+                const target = new Date(goal.targetDate);
+                const daysLeft = Math.ceil((target - today) / (1000 * 60 * 60 * 24));
+                if (daysLeft > 0) {
+                    const remaining = Math.max(0, goal.targetAmount - goal.savedAmount);
+                    const perDay = Math.ceil(remaining / daysLeft);
+                    dailyLineEl.textContent = `📅 محتاج توفر ${fmt(perDay)} يوميًا عشان توصل الهدف (${daysLeft} يوم متبقي)`;
+                } else {
+                    dailyLineEl.textContent = '⚠️ ميعاد الهدف فات — ممكن تحدّث التاريخ.';
+                }
+            } else {
+                dailyLineEl.textContent = '';
+            }
+        }
+
+        // ============ نداء عام لـ /api/assistant ============
+        async function asstApi(action, payload) {
+            const res = await fetch('/api/assistant', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+                body: JSON.stringify({ action, ...payload }),
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(data.error || 'حصل خطأ، جرب تاني.');
+            return data;
+        }
+
+        // ---- إنشاء هدف ----
+        document.getElementById('asst-goal-create-btn').addEventListener('click', async () => {
+            const btn = document.getElementById('asst-goal-create-btn');
+            const errEl = document.getElementById('asst-goal-error');
+            errEl.classList.add('hidden');
+            const title = document.getElementById('asst-goal-title').value.trim();
+            const targetAmount = Number(document.getElementById('asst-goal-amount').value);
+            const targetDate = document.getElementById('asst-goal-date').value || null;
+
+            btn.disabled = true;
+            const original = btn.textContent;
+            btn.textContent = 'جاري الحفظ...';
+            try {
+                await asstApi('goal_create', { title, targetAmount, targetDate });
+                document.getElementById('asst-goal-title').value = '';
+                document.getElementById('asst-goal-amount').value = '';
+                document.getElementById('asst-goal-date').value = '';
+                await loadDashboard();
+            } catch (e) {
+                errEl.textContent = e.message;
+                errEl.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = original;
+            }
+        });
+
+        // ---- إضافة مبلغ موفّر على الهدف ----
+        async function goalContribute(amount) {
+            try {
+                const result = await asstApi('goal_contribute', { amount });
+                await loadDashboard();
+                if (result.achieved) alert('🎉 مبروك! وصلت لهدفك بالكامل.');
+            } catch (e) {
+                alert(e.message);
+            }
+        }
+        document.getElementById('asst-goal-contribute-btn').addEventListener('click', () => {
+            const input = document.getElementById('asst-goal-contribute-amount');
+            const amount = Number(input.value);
+            if (!amount || amount <= 0) { alert('اكتب مبلغ صحيح.'); return; }
+            input.value = '';
+            goalContribute(amount);
+        });
+
+        // ---- إلغاء الهدف ----
+        document.getElementById('asst-goal-cancel-btn').addEventListener('click', async () => {
+            if (!confirm('متأكد عايز تلغي الهدف؟')) return;
+            try {
+                await asstApi('goal_cancel', {});
+                await loadDashboard();
+            } catch (e) {
+                alert(e.message);
+            }
+        });
+
+        // ============ Smart Receipt Scanner ============
+        const asstReceiptInput = document.getElementById('asst-receipt-input');
+        document.getElementById('asst-receipt-btn').addEventListener('click', () => asstReceiptInput.click());
+        asstReceiptInput.addEventListener('change', async () => {
+            const file = asstReceiptInput.files[0];
+            asstReceiptInput.value = '';
+            if (!file) return;
+            if (!file.type.startsWith('image/')) { alert('من فضلك اختار ملف صورة.'); return; }
+            if (file.size > 8 * 1024 * 1024) { alert('الصورة كبيرة أوي، اختار صورة أصغر من 8 ميجابايت.'); return; }
+
+            const icon = document.getElementById('asst-receipt-icon');
+            const label = document.getElementById('asst-receipt-label');
+            const btn = document.getElementById('asst-receipt-btn');
+            const resultEl = document.getElementById('asst-receipt-result');
+            resultEl.classList.add('hidden');
+            btn.disabled = true;
+            icon.textContent = '⏳';
+            label.textContent = 'دبّر بيقرا الفاتورة...';
+
+            try {
+                const base64 = await new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(file);
+                });
+
+                const result = await asstApi('receipt_scan', { imageBase64: base64, mimeType: file.type });
+                resultEl.className = 'text-[11px] rounded-xl p-3 leading-relaxed bg-emerald-500/10 border border-emerald-500/25 text-emerald-300';
+                resultEl.textContent = `✅ اتسجل: ${fmt(result.expense.amount)} — ${CATEGORY_EMOJI[result.expense.category] || ''} ${result.expense.category}${result.merchant ? ` (${result.merchant})` : ''}`;
+                resultEl.classList.remove('hidden');
+                await loadDashboard();
+            } catch (e) {
+                resultEl.className = 'text-[11px] rounded-xl p-3 leading-relaxed bg-rose-500/10 border border-rose-500/25 text-rose-300';
+                resultEl.textContent = `⚠️ ${e.message}`;
+                resultEl.classList.remove('hidden');
+            } finally {
+                btn.disabled = false;
+                icon.textContent = '📎';
+                label.textContent = 'اختار صورة الفاتورة';
+            }
+        });
+
+        // ============ Financial Wrapped modal ============
+        const wrappedModal = document.getElementById('wrapped-modal');
+        document.getElementById('asst-wrapped-open').addEventListener('click', () => {
+            const w = window.__wrappedData;
+            const shareBtn = document.getElementById('wrapped-share-btn');
+            const emptyNote = document.getElementById('wrapped-empty-note');
+            if (!w) {
+                document.getElementById('wrapped-card').classList.add('hidden');
+                shareBtn.classList.add('hidden');
+                emptyNote.classList.remove('hidden');
+            } else {
+                document.getElementById('wrapped-card').classList.remove('hidden');
+                shareBtn.classList.remove('hidden');
+                emptyNote.classList.add('hidden');
+                document.getElementById('wrapped-year').textContent = w.year;
+                document.getElementById('wrapped-total').textContent = fmt(w.total);
+                document.getElementById('wrapped-top-cat').textContent = w.topCategory ? `${CATEGORY_EMOJI[w.topCategory.name] || ''} ${w.topCategory.name}` : '—';
+                document.getElementById('wrapped-saved').textContent = w.savedEstimate > 0 ? fmt(w.savedEstimate) : '—';
+                document.getElementById('wrapped-best-month').textContent = w.bestMonthLabel ? `${w.bestMonthLabel} (${fmt(w.bestMonthTotal)})` : '—';
+            }
+            wrappedModal.classList.remove('hidden');
+            wrappedModal.classList.add('flex');
+        });
+        document.getElementById('wrapped-close').addEventListener('click', () => {
+            wrappedModal.classList.add('hidden');
+            wrappedModal.classList.remove('flex');
+        });
+        document.getElementById('wrapped-share-btn').addEventListener('click', async () => {
+            const w = window.__wrappedData;
+            const text = w
+                ? `في سنة ${w.year}:\n💰 صرفت ${fmt(w.total)}\n🔝 أكبر بند: ${w.topCategory ? w.topCategory.name : '—'}\n💡 وفرت تقريبًا ${fmt(w.savedEstimate)}\n🏆 أحسن شهر: ${w.bestMonthLabel || '—'}\n\nمع دبّر — محاسبك الشخصي`
+                : 'دبّر — محاسبك الشخصي';
+            if (navigator.share) {
+                try { await navigator.share({ text }); } catch (e) {}
+            } else {
+                try {
+                    await navigator.clipboard.writeText(text);
+                    alert('تم نسخ ملخص Wrapped، تقدر تلزقه فين ما تحب.');
+                } catch (e) {
+                    alert(text);
+                }
+            }
+        });
+
+        // ============ اسأل دبّر — شات ============
+        const asstChatLog = document.getElementById('asst-chat-log');
+        function appendChatBubble(text, from) {
+            const wrap = document.createElement('div');
+            if (from === 'user') {
+                wrap.className = 'flex items-start gap-2 justify-end';
+                wrap.innerHTML = `<div class="bg-emerald-500 text-slate-900 rounded-2xl rounded-tl-sm px-3 py-2 text-[11.5px] font-semibold leading-relaxed max-w-[85%]"></div>`;
+                wrap.firstElementChild.textContent = text;
+            } else {
+                wrap.className = 'flex items-start gap-2';
+                wrap.innerHTML = `<span class="w-7 h-7 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-xs shrink-0">✨</span>
+                    <div class="bg-slate-900 border border-slate-800 rounded-2xl rounded-tr-sm px-3 py-2 text-[11.5px] text-slate-300 leading-relaxed max-w-[85%]"></div>`;
+                wrap.lastElementChild.textContent = text;
+            }
+            asstChatLog.appendChild(wrap);
+            asstChatLog.scrollTop = asstChatLog.scrollHeight;
+            return wrap;
+        }
+
+        async function sendAsstChat(question) {
+            if (!question) return;
+            appendChatBubble(question, 'user');
+            const typingBubble = appendChatBubble('بيكتب...', 'bot');
+            const sendBtn = document.getElementById('asst-chat-send');
+            sendBtn.disabled = true;
+            try {
+                const result = await asstApi('ask', { question });
+                typingBubble.lastElementChild.textContent = result.answer;
+            } catch (e) {
+                typingBubble.lastElementChild.textContent = `⚠️ ${e.message}`;
+            } finally {
+                sendBtn.disabled = false;
+                asstChatLog.scrollTop = asstChatLog.scrollHeight;
+            }
+        }
+
+        document.getElementById('asst-chat-send').addEventListener('click', () => {
+            const input = document.getElementById('asst-chat-input');
+            const q = input.value.trim();
+            if (!q) return;
+            input.value = '';
+            sendAsstChat(q);
+        });
+        document.getElementById('asst-chat-input').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') document.getElementById('asst-chat-send').click();
+        });
+        document.querySelectorAll('.asst-chip').forEach((chip) => {
+            chip.addEventListener('click', () => sendAsstChat(chip.textContent));
+        });
+
         // بيانات ديناميكية للـ badge والعنوان اللي فوق حسب التاب المفتوح، بدل نص ثابت في data-* attributes
         function updateHeaderForTab(tab, data) {
             const headerBadge = document.getElementById('header-badge');
@@ -1118,6 +1560,7 @@
             else if (tab === 'daily') headerBadge.textContent = fmt(data.today.total) + ' اتصرفوا';
             else if (tab === 'categories') headerBadge.textContent = `${data.month.byCategory.length} فئات`;
             else if (tab === 'debts') headerBadge.textContent = `${data.debts.net >= 0 ? '+' : ''}${fmt(data.debts.net)} صافي`;
+            else if (tab === 'assistant') headerBadge.textContent = data.goal ? `${data.goal.percent}% للهدف` : 'جديد';
         }
 
         const tabBtns = document.querySelectorAll('.tab-btn');

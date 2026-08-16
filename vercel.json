@@ -17,6 +17,10 @@
     "api/reports.js": {
       "memory": 1536,
       "maxDuration": 60
+    },
+    "api/assistant.js": {
+      "memory": 1024,
+      "maxDuration": 45
     }
   }
 }

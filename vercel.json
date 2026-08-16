@@ -1,0 +1,26 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron-daily",
+      "schedule": "5 22 * * *"
+    }
+  ],
+  "functions": {
+    "api/telegram-webhook.js": {
+      "memory": 1536,
+      "maxDuration": 60
+    },
+    "api/cron-daily.js": {
+      "memory": 1536,
+      "maxDuration": 60
+    },
+    "api/monthly-report-pdf.js": {
+      "memory": 1536,
+      "maxDuration": 60
+    },
+    "api/debts-report-pdf.js": {
+      "memory": 1536,
+      "maxDuration": 60
+    }
+  }
+}

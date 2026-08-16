@@ -755,7 +755,7 @@
             label.textContent = 'بنجهز الملف...';
 
             try {
-                const res = await fetch('/api/debts-report-pdf', {
+                const res = await fetch('/api/reports?type=debts', {
                     headers: { Authorization: `Bearer ${accessToken}` },
                 });
 
@@ -1042,7 +1042,7 @@
             overlay.classList.add('flex');
 
             try {
-                const res = await fetch(`/api/debt-person-detail?name=${encodeURIComponent(personName)}`, {
+                const res = await fetch(`/api/reports?type=person&name=${encodeURIComponent(personName)}`, {
                     headers: { Authorization: `Bearer ${accessToken}` },
                 });
                 const data = await res.json();
@@ -1163,7 +1163,7 @@
             label.textContent = 'بنجهز الملف...';
 
             try {
-                const res = await fetch('/api/monthly-report-pdf?offset=0', {
+                const res = await fetch('/api/reports?type=monthly&offset=0', {
                     headers: { Authorization: `Bearer ${accessToken}` },
                 });
 
@@ -1270,7 +1270,7 @@
                 errorEl.classList.add('hidden');
 
                 try {
-                    const res = await fetch('/api/subscription-proof', {
+                    const res = await fetch('/api/admin', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',

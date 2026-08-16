@@ -100,70 +100,6 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
 
-    <!-- ============ حجب إجباري لحد التثبيت كـ Shortcut ============
-         لو المتصفح بيدعم beforeinstallprompt (كروم أندرويد غالبًا): حجب حقيقي، مينفعش يتخطاه غير بالتثبيت الفعلي.
-         لو المتصفح مبيدعمهاش (سفاري آيفون، أوبرا، فايرفوكس): مفيش API نقدر نتأكد بيها إنه ثبّت فعلاً،
-         فبنوريله تعليمات يدوية + زرار "تم التثبيت" يأكدها بنفسه (تقدير مش إجبار حقيقي، تقنيًا مستحيل غير كده). -->
-    <div id="installGate" style="display:none; position:fixed; inset:0; z-index:9999; background:#020617; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:32px;">
-        <div style="width:76px; height:76px; border-radius:20px; background:rgba(52,211,153,0.12); border:1.5px solid rgba(52,211,153,0.3); display:flex; align-items:center; justify-content:center; font-size:34px; margin-bottom:22px;">📲</div>
-        <h2 style="font-family:'Cairo',sans-serif; font-weight:900; font-size:21px; margin-bottom:12px; color:#f1f5f9;">ثبّت دبّر على شاشتك الأول</h2>
-        <p style="color:#94a3b8; font-size:14px; line-height:1.9; max-width:320px; margin-bottom:26px;">عشان تفتح لوحة التحكم بسهولة في أي وقت من غير ما تدوّر على اللينك تاني، لازم تضيف دبّر كـ Shortcut على شاشتك الرئيسية.</p>
-        <button id="installGateBtn" style="font-family:'Cairo',sans-serif; font-weight:800; font-size:14.5px; background:#34d399; color:#022c22; border:none; padding:15px 28px; border-radius:12px; cursor:pointer; margin-bottom:12px;">📲 ثبّت دلوقتي</button>
-        <div id="installGateManual" style="display:none; color:#94a3b8; font-size:12.5px; line-height:1.9; max-width:300px; margin-bottom:14px;"></div>
-        <button id="installGateConfirmBtn" style="display:none; background:none; border:1px solid rgba(148,163,184,0.3); color:#cbd5e1; font-family:'Tajawal',sans-serif; font-size:13px; padding:10px 18px; border-radius:10px; cursor:pointer;">✅ ثبّتها، كمّل</button>
-    </div>
-    <script>
-        (function () {
-            var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-            if (isStandalone) return; // متثبت فعلاً، مفيش داعي نعطّله
-
-            // لو سبق وأكّد التثبيت يدويًا (متصفح مبيدعمش beforeinstallprompt)، مانوريهوش الحجب تاني
-            if (localStorage.getItem('dabbar-install-confirmed') === '1') return;
-
-            var gate = document.getElementById('installGate');
-            var installBtn = document.getElementById('installGateBtn');
-            var manualBox = document.getElementById('installGateManual');
-            var confirmBtn = document.getElementById('installGateConfirmBtn');
-            var deferredPrompt = null;
-            var supportsPrompt = false;
-
-            gate.style.display = 'flex';
-
-            window.addEventListener('beforeinstallprompt', function (e) {
-                e.preventDefault();
-                deferredPrompt = e;
-                supportsPrompt = true;
-            });
-
-            installBtn.addEventListener('click', async function () {
-                if (deferredPrompt) {
-                    deferredPrompt.prompt();
-                    var choice = await deferredPrompt.userChoice;
-                    deferredPrompt = null;
-                    if (choice.outcome === 'accepted') {
-                        gate.style.display = 'none';
-                    }
-                    return;
-                }
-                // مفيش prompt برمجي (سفاري آيفون / أوبرا / فايرفوكس) — نوريله تعليمات يدوية
-                var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-                manualBox.textContent = isIOS
-                    ? 'اضغط على زرار "مشاركة" (Share) تحت في المتصفح، وبعدين اختار "إضافة للشاشة الرئيسية" (Add to Home Screen).'
-                    : 'افتح قايمة المتصفح (٣ نقط فوق)، واختار "إضافة إلى الشاشة الرئيسية" أو "Install App".';
-                manualBox.style.display = 'block';
-                confirmBtn.style.display = 'inline-block';
-            });
-
-            confirmBtn.addEventListener('click', function () {
-                localStorage.setItem('dabbar-install-confirmed', '1');
-                gate.style.display = 'none';
-            });
-
-            window.addEventListener('appinstalled', function () {
-                gate.style.display = 'none';
-            });
-        })();
-    </script>
 
     <!-- Main Web Container (Full Width) -->
     <div class="w-full max-w-4xl mx-auto bg-slate-900 flex-1 flex flex-col shadow-2xl overflow-hidden md:my-4 md:rounded-3xl md:border md:border-slate-800">
@@ -526,9 +462,21 @@
                 </span>
             </button>
 
-            <button id="pwa-install-btn" class="w-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold py-3.5 rounded-2xl text-sm transition flex items-center justify-center gap-2 hover:bg-emerald-500/20 mb-3 hidden">
-                📲 تثبيت التطبيق على الشاشة الرئيسية
-            </button>
+            <!-- تنويه تثبيت صغير — بيظهر بس لو مش مثبّت بعد ولسه ما اتقفلش قبل كده، مش حاجز ولا بيمنع حاجة -->
+            <div id="install-notice" class="hidden bg-slate-950/60 border border-slate-800 rounded-3xl p-4 mb-3">
+                <div class="flex items-start gap-3">
+                    <span class="w-9 h-9 shrink-0 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-base">📲</span>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs font-bold text-slate-200 mb-0.5">ثبّت دبّر على شاشتك الرئيسية</p>
+                        <p class="text-[11px] text-slate-500 leading-relaxed" id="install-notice-sub">تفتح لوحة التحكم بضغطة واحدة من غير ما تدوّر على اللينك تاني.</p>
+                        <p class="hidden text-[11px] text-slate-500 leading-relaxed mt-1.5" id="install-notice-manual"></p>
+                    </div>
+                    <button id="install-notice-close" title="إخفاء" class="shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-slate-500 hover:bg-slate-800 hover:text-slate-300 transition text-xs">✕</button>
+                </div>
+                <button id="pwa-install-btn" class="w-full mt-3 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold py-2.5 rounded-xl text-xs transition hover:bg-emerald-500/20">
+                    تثبيت دلوقتي
+                </button>
+            </div>
 
             <!-- بطاقة الاشتراك — بتظهر بس لما التجربة تخلص أو الاشتراك ينتهي -->
             <div id="account-subscription-card" class="hidden bg-gradient-to-br from-emerald-500/10 to-teal-500/5 border border-emerald-500/25 rounded-3xl p-5 space-y-4">
@@ -872,31 +820,71 @@
             navigator.serviceWorker.register('./sw.js').catch(() => {});
         }
 
-        // ============ PWA Install Logic ============
+        // ============ تنويه التثبيت (جوه تاب "حسابي" بس) ============
+        // مجرد تنويه بسيط غير مانع — لو المستخدم قفله أو ثبّت التطبيق فعلاً، مابيظهرش تاني خالص.
+        // لو المتصفح بيدعم beforeinstallprompt (كروم أندرويد غالبًا) بيظهر زرار تثبيت فعلي بضغطة واحدة.
+        // لو مش بيدعمها (سفاري آيفون / أوبرا / فايرفوكس) بيظهر بس تعليمات نصية مختصرة تحت العنوان.
         let deferredPrompt;
+        const installNotice = document.getElementById('install-notice');
+        const installNoticeManual = document.getElementById('install-notice-manual');
+        const installNoticeClose = document.getElementById('install-notice-close');
         const pwaInstallBtn = document.getElementById('pwa-install-btn');
+
+        function isStandaloneMode() {
+            return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+        }
+
+        function showInstallNotice() {
+            if (!installNotice) return;
+            if (isStandaloneMode()) return; // متثبت فعلاً
+            if (localStorage.getItem('dabbar-install-dismissed') === '1') return; // قفلها قبل كده
+            installNotice.classList.remove('hidden');
+
+            if (!deferredPrompt) {
+                // مفيش prompt برمجي — نوري تعليمات نصية بدل الزرار
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+                if (installNoticeManual) {
+                    installNoticeManual.textContent = isIOS
+                        ? 'اضغط على زرار "مشاركة" (Share) تحت في المتصفح، وبعدين اختار "إضافة للشاشة الرئيسية".'
+                        : 'افتح قايمة المتصفح (٣ نقط فوق يمين)، واختار "إضافة إلى الشاشة الرئيسية" أو "Install App".';
+                    installNoticeManual.classList.remove('hidden');
+                }
+                if (pwaInstallBtn) pwaInstallBtn.classList.add('hidden');
+            }
+        }
+
+        // نستنى ثانية بسيطة قبل ما نوري التنويه، عشان لو beforeinstallprompt هيطلق هيبقى وصل خلاصه
+        setTimeout(showInstallNotice, 800);
+
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            if (pwaInstallBtn) pwaInstallBtn.classList.remove('hidden');
         });
+
         if (pwaInstallBtn) {
             pwaInstallBtn.addEventListener('click', async () => {
                 if (deferredPrompt) {
                     deferredPrompt.prompt();
                     const { outcome } = await deferredPrompt.userChoice;
-                    if (outcome === 'accepted') pwaInstallBtn.classList.add('hidden');
                     deferredPrompt = null;
-                } else {
-                    // تعليمات يدوية لو الـ prompt مش متاح
-                    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
-                    if (isIOS) alert('على آيفون: اضغط على زرار "مشاركة" (Share) تحت، وبعدين اختار "إضافة للشاشة الرئيسية" (Add to Home Screen).');
-                    else alert('تقدر تثبت التطبيق من إعدادات المتصفح (ثلاث نقط فوق) واختيار "تثبيت التطبيق" أو "Install App".');
+                    if (outcome === 'accepted') {
+                        localStorage.setItem('dabbar-install-dismissed', '1');
+                        if (installNotice) installNotice.classList.add('hidden');
+                    }
                 }
             });
         }
+
+        if (installNoticeClose) {
+            installNoticeClose.addEventListener('click', () => {
+                localStorage.setItem('dabbar-install-dismissed', '1');
+                if (installNotice) installNotice.classList.add('hidden');
+            });
+        }
+
         window.addEventListener('appinstalled', () => {
-            if (pwaInstallBtn) pwaInstallBtn.classList.add('hidden');
+            localStorage.setItem('dabbar-install-dismissed', '1');
+            if (installNotice) installNotice.classList.add('hidden');
         });
 
         // ============ تحميل كشف حساب الديون الشامل PDF ============

@@ -1,20 +1,12 @@
-import { createClient } from '@supabase/supabase-js';
 import { supabase } from '../lib/supabaseClient.js';
-import { SUPABASE_URL, SUPABASE_ANON_KEY } from '../lib/config.js';
-
-// عميل بالـ anon key، مستخدم بس عشان نحوّل magic-link (اللي بنولّده بالـ service role) لجلسة
-// فعلية (access_token/refresh_token). لازم يكون عميل منفصل عن `supabase` (اللي بيستخدم service
-// role key) لأن verifyOtp بيتصرف كأنه "طلب من المتصفح" مش عملية إدارية.
-const supabaseAnon = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // ============ POST /api/auth-by-code ============
-// الخطوة الوحيدة المطلوبة من المستخدم في شاشة "اربط حسابك بـ دبّر" الجديدة:
-// يفتح البوت، ياخد كود الربط من 6 أرقام، ويكتبه هنا. الـ endpoint ده بيعمل 3 حاجات مرة واحدة:
-//   1) لو أول مرة: بيعمل حساب Supabase Auth تلقائي (إيميل صناعي مبني على الـ telegram_user_id،
-//      مفيش باسورد يدوي خالص) + صف في profiles باسمه من تليجرام.
-//   2) لو حساب موجود قبل كده لنفس telegram_user_id: بيستخدمه هو بالظبط (مفيش تكرار حسابات).
-//   3) بيربط (أو يعيد تأكيد الربط في) جدول user_links، ويرجّع session جاهزة للمتصفح
-//      (access_token/refresh_token) عشان الداشبورد يشتغل على طول من غير أي خطوة تسجيل دخول تانية.
+// دلوقتي التسجيل بقى بإيميل/باسورد عادي (شوف dabbar-onboarding.html)، والـ endpoint ده
+// بقى شغله الوحيد إنه "يربط" حساب الموقع بتاع المستخدم (اللي هو مسجل دخول فيه فعلاً)
+// بحساب تليجرام بتاعه، عن طريق كود الـ 6 أرقام اللي بيجيله من البوت.
+//
+// لازم Header: Authorization: Bearer <supabase access token> (جلسة المستخدم بعد ما يسجل دخول
+// بالإيميل/الباسورد من صفحة الأونبوردنج). من غيره منعرفش نربط الكود بحساب مين.
 //
 // Body: { code: "123456" }
 export default async function handler(req, res) {
@@ -23,18 +15,39 @@ export default async function handler(req, res) {
   }
 
   try {
+    // ---- 0) نتأكد إن فيه مستخدم مسجل دخول فعلاً (بالإيميل/الباسورد) قبل أي حاجة تانية ----
+    const token = (req.headers.authorization || '').replace('Bearer ', '').trim();
+    if (!token) {
+      return res.status(401).json({ error: 'لازم تسجل دخول بالإيميل والباسورد الأول.' });
+    }
+
+    const { data: userData, error: authError } = await supabase.auth.getUser(token);
+    if (authError || !userData?.user) {
+      return res.status(401).json({ error: 'انتهت صلاحية الجلسة، سجل دخول تاني.' });
+    }
+    const authUserId = userData.user.id;
+
     const code = String(req.body?.code || '').trim();
     if (!/^\d{6}$/.test(code)) {
       return res.status(400).json({ error: 'اكتب الكود المكوّن من 6 أرقام اللي وصلك من دبّر على تليجرام.' });
     }
 
+    // ---- 0.5) التثبيت الإجباري: على كل الأجهزة من غير استثناء، لازم الصفحة تكون فعليًا
+    // standalone (يعني اتفتحت من الأيقونة بعد تثبيت حقيقي على الشاشة الرئيسية)، مش بس
+    // تصميميًا في الفرونت إند — عشان محدش يقدر يلف على الشرط ده من الـ DevTools أو بتعديل
+    // الكود في المتصفح.
+    const isStandalone = req.body?.standalone === true;
+    if (!isStandalone) {
+      return res.status(400).json({
+        error: 'لازم تثبّت "دبّر" على شاشتك الرئيسية وتفتحه من الأيقونة عشان تقدر تكمل الربط.',
+      });
+    }
+
     // ---- 1) نحجز الكود فورًا (atomic claim) قبل أي حاجة تانية ----
-    // ده بيمنع الـ race condition اللي كانت بتحصل لو طلبين وصلوا بنفس الكود في نفس اللحظة
-    // (double-submit من تاتش مزدوج على الموبايل مثلًا): قبل كده كنا بنتحقق إن الكود used=false
-    // وبعدين نسجله used=true في آخر الفانكشن، فطلبين كانوا يقدروا يعدّوا من التحقق قبل ما أي
-    // واحد فيهم يسجل الكود مستخدم — وكل واحد كان بيعمل حساب Auth منفصل ويمسح ربط التاني.
-    // دلوقتي: أول طلب بيوصل هو اللي بياخد الصف الفعلي من الـ update ده (شرط used=false)، وأي
-    // طلب تاني بنفس الكود هيلاقي 0 صفوف اتأثرت ويترفض على طول من غير ما يعمل أي حساب.
+    // ده بيمنع الـ race condition اللي ممكن تحصل لو طلبين وصلوا بنفس الكود في نفس اللحظة
+    // (double-submit من تاتش مزدوج على الموبايل مثلًا): أول طلب بيوصل هو اللي بياخد الصف الفعلي
+    // من الـ update ده (شرط used=false)، وأي طلب تاني بنفس الكود هيلاقي 0 صفوف اتأثرت ويترفض
+    // على طول من غير ما يعمل أي ربط.
     const { data: claimedRows, error: claimError } = await supabase
       .from('link_codes')
       .update({ used: true })
@@ -56,53 +69,10 @@ export default async function handler(req, res) {
     }
 
     const telegramUserId = linkCode.telegram_user_id;
-    const firstName = linkCode.telegram_first_name || null;
-    // إيميل صناعي ثابت لكل telegram_user_id — المستخدم مش شايفه ومش بيدخله بنفسه أبدًا،
-    // هو بس معرّف داخلي فريد يربط حساب Supabase Auth بحساب تليجرام بتاعه.
-    const syntheticEmail = `tg${telegramUserId}@dabbar-users.app`;
 
-    // ---- 2) هل حساب تليجرام ده مربوط قبل كده بحساب موقع؟ لو أيوه، بنستخدمه هو بالظبط ----
-    const { data: existingLink } = await supabase
-      .from('user_links')
-      .select('auth_user_id')
-      .eq('telegram_user_id', telegramUserId)
-      .maybeSingle();
-
-    let authUserId = existingLink?.auth_user_id || null;
-
-    if (!authUserId) {
-      // ---- 3) أول مرة: نعمل حساب Supabase Auth جديد تلقائي (من غير باسورد يدوي) ----
-      const { data: created, error: createError } = await supabase.auth.admin.createUser({
-        email: syntheticEmail,
-        email_confirm: true,
-        user_metadata: {
-          full_name: firstName || 'مستخدم دبّر',
-          telegram_user_id: telegramUserId,
-          auth_source: 'telegram',
-        },
-      });
-
-      if (createError || !created?.user) {
-        console.error('auth-by-code createUser error:', createError);
-        return res.status(500).json({ error: 'حصل خطأ في عمل الحساب، جرب تاني.' });
-      }
-      authUserId = created.user.id;
-
-      // بيتسجل صف في جدول profiles (شغّل sql/profiles.sql على Supabase عشان الجدول ده يتعمل)
-      const { error: profileError } = await supabase.from('profiles').upsert({
-        id: authUserId,
-        full_name: firstName || 'مستخدم دبّر',
-        email: syntheticEmail,
-      });
-      if (profileError) {
-        // بنطبعها في اللوج عشان تبان في Vercel Logs، لكن منوقفش العملية —
-        // فيه fallback في الداشبورد بيعمل upsert تاني لو لقى profile فاضي.
-        console.error('auth-by-code profile upsert error:', profileError);
-      }
-    }
-
-    // ---- 4) نربط (أو نأكد ربط) حساب الموقع بحساب تليجرام ----
-    // بنشيل أي ربط قديم لنفس الحسابين الاتنين الأول عشان نضمن كل حساب موقع = حساب تليجرام واحد بس.
+    // ---- 2) نربط (أو نأكد ربط) حساب الموقع (auth_user_id بتاع المستخدم المسجل دخول دلوقتي)
+    // بحساب تليجرام ده. بنشيل أي ربط قديم لنفس الحسابين الاتنين الأول عشان نضمن كل حساب
+    // موقع = حساب تليجرام واحد بس، والعكس (كل حساب تليجرام مربوط بحساب موقع واحد بس) ----
     await supabase.from('user_links').delete().eq('auth_user_id', authUserId);
     await supabase.from('user_links').delete().eq('telegram_user_id', telegramUserId);
 
@@ -116,36 +86,7 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'حصل خطأ في الربط، جرب تاني.' });
     }
 
-    // ---- 5) نولّد جلسة فعلية (access_token/refresh_token) للحساب ده من غير باسورد ----
-    // بنستخدم generateLink (بالـ service role) لعمل magic-link، وبعدين نحوّله لجلسة حقيقية
-    // بـ verifyOtp (بالـ anon key). المستخدم مش بيشوف أي إيميل ولا لينك — كله بيحصل في السيرفر.
-    const { data: linkData, error: genError } = await supabase.auth.admin.generateLink({
-      type: 'magiclink',
-      email: syntheticEmail,
-    });
-
-    if (genError || !linkData?.properties?.hashed_token) {
-      console.error('auth-by-code generateLink error:', genError);
-      return res.status(500).json({ error: 'اتربط حسابك بنجاح بس حصلت مشكلة في فتح الجلسة، جرب تدخل تاني.' });
-    }
-
-    const { data: verifyData, error: verifyError } = await supabaseAnon.auth.verifyOtp({
-      type: 'magiclink',
-      token_hash: linkData.properties.hashed_token,
-    });
-
-    if (verifyError || !verifyData?.session) {
-      console.error('auth-by-code verifyOtp error:', verifyError);
-      return res.status(500).json({ error: 'اتربط حسابك بنجاح بس حصلت مشكلة في فتح الجلسة، جرب تدخل تاني.' });
-    }
-
-    return res.status(200).json({
-      ok: true,
-      session: {
-        access_token: verifyData.session.access_token,
-        refresh_token: verifyData.session.refresh_token,
-      },
-    });
+    return res.status(200).json({ ok: true });
   } catch (err) {
     console.error('auth-by-code error:', err);
     return res.status(500).json({ error: 'حصل خطأ غير متوقع، جرب تاني.' });

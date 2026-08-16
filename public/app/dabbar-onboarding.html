@@ -73,24 +73,32 @@
   .field input{ width:100%; background:#fff; border:1.5px solid var(--line); border-radius:10px; padding:13px 14px; font-family:'Tajawal',sans-serif; font-size:14px; color:var(--text); text-align:center; letter-spacing:6px; font-weight:800; }
   .field input:focus{ outline:none; border-color:var(--green); }
   .field input::placeholder{ color:#B7C4BC; letter-spacing:normal; font-weight:400; }
+  /* حقول الإيميل/الباسورد/الاسم بتاعة شاشة الدخول — نص عادي من غير letter-spacing بتاع الكود */
+  .field input.text-input{ letter-spacing:normal; font-weight:500; text-align:right; }
+  .field input.text-input::placeholder{ text-align:right; }
 
-  #linkError{ display:none; background:var(--danger-tint); border:1px solid rgba(224,87,74,0.3); color:var(--danger); font-size:12.5px; border-radius:9px; padding:10px 12px; margin-bottom:14px; line-height:1.7; }
-  #linkError.show{ display:block; }
-  #linkNotice{ display:none; background:var(--green-tint); border:1px solid var(--green-tint-2); color:var(--green-deep); font-size:12.5px; border-radius:9px; padding:10px 12px; margin-bottom:14px; line-height:1.7; text-align:center; }
-  #linkNotice.show{ display:flex; align-items:center; justify-content:center; gap:8px; }
+  /* ===== تابس تسجيل الدخول / حساب جديد ===== */
+  .auth-tabs{ display:flex; background:var(--green-tint); border-radius:12px; padding:4px; margin-bottom:20px; gap:4px; }
+  .auth-tab{ flex:1; border:none; background:transparent; font-family:'Cairo',sans-serif; font-weight:800; font-size:13px; color:var(--muted); padding:10px 8px; border-radius:9px; cursor:pointer; }
+  .auth-tab.active{ background:#fff; color:var(--green-deep); box-shadow:0 2px 8px -2px rgba(15,42,31,0.15); }
+
+  #linkError, #authError{ display:none; background:var(--danger-tint); border:1px solid rgba(224,87,74,0.3); color:var(--danger); font-size:12.5px; border-radius:9px; padding:10px 12px; margin-bottom:14px; line-height:1.7; }
+  #linkError.show, #authError.show{ display:block; }
+  #linkNotice, #authNotice{ display:none; background:var(--green-tint); border:1px solid var(--green-tint-2); color:var(--green-deep); font-size:12.5px; border-radius:9px; padding:10px 12px; margin-bottom:14px; line-height:1.7; text-align:center; }
+  #linkNotice.show, #authNotice.show{ display:flex; align-items:center; justify-content:center; gap:8px; }
 
   .spinner{ width:16px; height:16px; border:2px solid rgba(255,255,255,0.35); border-top-color:#fff; border-radius:50%; animation:spin .7s linear infinite; flex-shrink:0; }
   .spinner-dark{ border:2px solid var(--green-tint-2); border-top-color:var(--green); }
   @keyframes spin{ to{ transform:rotate(360deg); } }
 
   /* ===== تنويه تثبيت التطبيق الإجباري ===== */
-  .install-notice{ background:var(--warn-bg); border:1.5px solid var(--warn-line); border-radius:14px; padding:14px 16px; margin-bottom:18px; }
-  .install-notice-title{ font-family:'Cairo',sans-serif; font-weight:900; font-size:12.5px; color:var(--warn); display:flex; align-items:center; gap:6px; }
-  .install-notice-txt{ font-size:11.5px; color:var(--warn); line-height:1.8; margin-top:6px; opacity:.92; }
-  .install-btn{ margin-top:10px; background:#fff; border:1.5px solid var(--warn-line); color:var(--warn); font-family:'Cairo',sans-serif; font-weight:800; font-size:12.5px; padding:10px; border-radius:10px; width:100%; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; }
-  .install-btn.done{ background:var(--green-tint); border-color:var(--green-tint-2); color:var(--green-deep); }
-  .install-check{ display:flex; align-items:center; gap:8px; margin-top:10px; font-size:11.5px; color:var(--warn); cursor:pointer; }
-  .install-check input{ width:15px; height:15px; accent-color:var(--green); }
+  .install-notice{ background:linear-gradient(180deg, var(--warn-bg) 0%, #FFFDFA 100%); border:1.5px solid var(--warn-line); border-radius:16px; padding:20px 18px 16px; margin-bottom:18px; text-align:center; box-shadow:0 10px 24px -16px rgba(138,90,23,0.35); }
+  .install-icon{ width:46px; height:46px; border-radius:14px; background:#fff; border:1.5px solid var(--warn-line); display:flex; align-items:center; justify-content:center; font-size:20px; margin:0 auto 10px; box-shadow:0 4px 10px -4px rgba(138,90,23,0.25); }
+  .install-notice-title{ font-family:'Cairo',sans-serif; font-weight:900; font-size:13px; color:var(--warn); letter-spacing:.2px; }
+  .install-notice-txt{ font-size:12px; color:var(--warn); line-height:1.9; margin-top:8px; opacity:.95; }
+  .install-notice-txt b{ font-family:'Cairo',sans-serif; color:var(--ink); }
+  .install-btn{ margin-top:14px; background:var(--warn); border:none; color:#fff; font-family:'Cairo',sans-serif; font-weight:800; font-size:13px; padding:12px; border-radius:11px; width:100%; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; box-shadow:0 12px 24px -12px rgba(138,90,23,0.55); }
+  .install-btn.done{ background:var(--green); box-shadow:0 12px 24px -12px rgba(31,170,110,0.5); }
 
   /* ===== تعليمات التثبيت اليدوي (تظهر لما مفيش نافذة تثبيت تلقائية — زي iPhone) ===== */
   .manual-install{ display:none; background:#fff; border:1.5px solid var(--warn-line); border-radius:12px; padding:12px 14px; margin-top:10px; }
@@ -126,37 +134,40 @@
   <ol class="webview-steps" id="webviewSteps" style="display:none;"></ol>
 </div>
 
-<!-- ============== 1) WELCOME ============== -->
-<div class="screen" id="welcome">
-  <div class="top-brand"><span class="brand-dot"></span>دبّر</div>
+<!-- ============== 1) تسجيل الدخول / إنشاء حساب بالإيميل والباسورد ============== -->
+<div class="screen" id="authScreen" style="align-items:center; justify-content:center;">
+  <div class="link-card">
+    <div class="top-brand" style="padding-top:0; margin-bottom:8px;"><span class="brand-dot"></span>دبّر</div>
+    <div class="slide-icon" style="margin:0 auto 18px;">👋</div>
+    <h2 id="authTitle">أهلاً بيك في دبّر</h2>
+    <p class="sub" id="authSub">سجّل دخول أو اعمل حساب جديد عشان تكمل.</p>
 
-  <div class="slides">
-    <div class="slide active" data-slide="0">
-      <div class="slide-icon">🎙️</div>
-      <h2>قوله بالصوت<br><em>وخلاص</em></h2>
-      <p>ابعت رسالة صوت عادية زي "صرفت 50 جنيه أكل"، ودبّر يسجلها ويحطها في الفئة الصح لوحده.</p>
+    <div class="auth-tabs">
+      <button type="button" class="auth-tab active" id="tabLogin" data-mode="login">تسجيل الدخول</button>
+      <button type="button" class="auth-tab" id="tabSignup" data-mode="signup">حساب جديد</button>
     </div>
-    <div class="slide" data-slide="1">
-      <div class="slide-icon">📊</div>
-      <h2>تقاريرك جاهزة<br><em>يومي وشهري</em></h2>
-      <p>من غير ما تفتح جدول ولا تكتب رقم بإيدك، هتلاقي كل حاجة اتحسبت ومقارنة بالشهر اللي فات.</p>
-    </div>
-    <div class="slide" data-slide="2">
-      <div class="slide-icon">🤝</div>
-      <h2>الديون من غير<br><em>لخبطة</em></h2>
-      <p>مين ليك ومين عليك، وتفاصيل كل سلفة وميعاد ردها، كله في مكان واحد بيتحدث لوحده.</p>
-    </div>
-  </div>
 
-  <div class="dots">
-    <span class="dot active" data-dot="0"></span>
-    <span class="dot" data-dot="1"></span>
-    <span class="dot" data-dot="2"></span>
-  </div>
+    <div id="authError"></div>
+    <div id="authNotice"></div>
 
-  <div class="onb-footer">
-    <button class="skip-link" id="skipBtn">تخطي</button>
-    <button class="btn btn-primary" id="nextBtn">التالي</button>
+    <form id="authForm">
+      <div class="field" id="nameField" style="display:none;">
+        <label>الاسم</label>
+        <input type="text" id="nameInput" class="text-input" placeholder="اسمك">
+      </div>
+      <div class="field">
+        <label>الإيميل</label>
+        <input type="email" id="emailInput" class="text-input" placeholder="you@example.com" required>
+      </div>
+      <div class="field">
+        <label>الباسورد</label>
+        <input type="password" id="passwordInput" class="text-input" placeholder="••••••••" minlength="6" required>
+      </div>
+
+      <button type="submit" class="btn btn-primary" id="authSubmitBtn">
+        <span id="authSubmitLabel">تسجيل الدخول</span>
+      </button>
+    </form>
   </div>
 </div>
 
@@ -168,13 +179,13 @@
     <div id="linkFormState">
       <div class="top-brand" style="padding-top:0; margin-bottom:8px;"><span class="brand-dot"></span>دبّر</div>
       <div class="slide-icon" style="margin:0 auto 18px;">🔗</div>
-      <h2>اربط حسابك بـ دبّر</h2>
-      <p class="sub">مفيش إيميل ولا باسورد — كل حاجة بتتعمل من تليجرام في 3 خطوات:</p>
+      <h2>اربط حسابك بتليجرام</h2>
+      <p class="sub">خطوة أخيرة عشان أي حاجة تسجّلها في تليجرام تظهر في الداشبورد على طول:</p>
 
       <div class="steps">
         <div class="step"><div class="num">1</div><div class="txt">افتح <b>دبّر على تليجرام</b> بضغطة واحدة</div></div>
         <div class="step"><div class="num">2</div><div class="txt">هيبعتلك <b>كود من 6 أرقام</b> تلقائي</div></div>
-        <div class="step"><div class="num">3</div><div class="txt">اكتبه هنا — و<b>يتعمل حسابك ويترابط لوحده</b></div></div>
+        <div class="step"><div class="num">3</div><div class="txt">اكتبه هنا — و<b>يترابط حسابك على طول</b></div></div>
       </div>
 
       <a href="https://t.me/Masaaref_bot?start=link" target="_blank" rel="noopener" class="btn btn-ghost" style="margin-bottom:18px;">
@@ -190,23 +201,20 @@
           <input type="text" id="linkCodeInput" placeholder="123456" inputmode="numeric" maxlength="6" required>
         </div>
 
-        <!-- ===== تنويه إجباري: تثبيت الداشبورد على الموبايل ===== -->
+        <!-- ===== تنويه إجباري: تثبيت دبّر على الشاشة الرئيسية ===== -->
         <div class="install-notice">
-          <div class="install-notice-title">📲 خطوة إجبارية قبل الدخول: ثبّت دبّر على شاشتك</div>
-          <div class="install-notice-txt">لازم تثبّت الداشبورد على موبايلك عشان تقدر توصله وتفتحه بضغطة واحدة في أي وقت، من غير ما تدوّر عليه في المتصفح كل مرة.</div>
-          <button type="button" class="install-btn" id="installBtn">➕ ثبّت الداشبورد دلوقتي</button>
+          <div class="install-icon">🔒</div>
+          <div class="install-notice-title">خطوة إجبارية قبل الدخول</div>
+          <div class="install-notice-txt">عشان نظامنا يقدر يربط حسابك ويعرض بياناتك بأمان، لازم تثبّت <b>"دبّر"</b> على شاشتك الرئيسية وتفتحه منها — الخطوة دي أساسية ومفيش غنى عنها عشان نقدر نكمل.</div>
+          <button type="button" class="install-btn" id="installBtn">➕ تثبّت "دبّر" دلوقتي</button>
           <div class="manual-install" id="manualInstall">
             <div class="manual-install-title" id="manualInstallTitle">إزاي تثبّته يدوي:</div>
             <ol id="manualInstallSteps"></ol>
           </div>
-          <label class="install-check" id="installCheckWrap" style="display:none;">
-            <input type="checkbox" id="installCheck">
-            <span>ثبّتت دبّر على شاشتي الرئيسية بالفعل</span>
-          </label>
         </div>
 
         <button type="submit" class="btn btn-primary" id="linkSubmitBtn" disabled>
-          <span id="linkSubmitLabel">ثبّت التطبيق الأول عشان تكمل</span>
+          <span id="linkSubmitLabel">🔒 لازم تفتح دبّر من الأيقونة الأول</span>
         </button>
       </form>
     </div>
@@ -237,11 +245,22 @@
   // مفيش داعي لأي رابط كامل — مسارات نسبية كفاية.
   const DASHBOARD_URL = 'dabbar-dashboard-full.html';
 
-  // ---- لو المستخدم عنده جلسة شغالة أصلاً (رجع تاني على onboarding بالغلط)، نوديه على طول للداشبورد ----
+  // ---- لو المستخدم عنده جلسة شغالة أصلاً (رجع تاني على onboarding بالغلط) ----
+  // لو حسابه مربوط بتليجرام خلاص → نوديه على طول للداشبورد.
+  // لو مسجل دخول بس لسه مربوطش تليجرام → نوريله شاشة الربط بالكود مباشرة (من غير ما نطلب منه يسجل دخول تاني).
   (async () => {
     try {
       const { data: { session } } = await sb.auth.getSession();
-      if (session) window.location.href = DASHBOARD_URL;
+      if (!session) return; // مفيش جلسة، يفضل على شاشة تسجيل الدخول
+      const res = await fetch('/api/dashboard-data', {
+        headers: { Authorization: `Bearer ${session.access_token}` },
+      });
+      const result = await res.json().catch(() => ({}));
+      if (result && result.linked === false) {
+        showLinkScreen();
+      } else {
+        window.location.href = DASHBOARD_URL;
+      }
     } catch (e) { /* مفيش جلسة، نكمل عادي */ }
   })();
 
@@ -290,34 +309,124 @@
     }
   })();
 
-  // ---- welcome slides ----
-  const slides = document.querySelectorAll('.slide');
-  const dots = document.querySelectorAll('.dot');
-  const nextBtn = document.getElementById('nextBtn');
-  const skipBtn = document.getElementById('skipBtn');
-  const welcome = document.getElementById('welcome');
+  // ---- شاشة تسجيل الدخول / إنشاء حساب (إيميل + باسورد + اسم) ----
+  const authScreen = document.getElementById('authScreen');
   const linkScreen = document.getElementById('linkScreen');
-  let current = 0;
-
-  function goToSlide(i) {
-    slides[current].classList.remove('active');
-    dots[current].classList.remove('active');
-    current = i;
-    slides[current].classList.add('active');
-    dots[current].classList.add('active');
-    nextBtn.textContent = current === slides.length - 1 ? 'ابدأ دلوقتي' : 'التالي';
-  }
-
-  nextBtn.addEventListener('click', () => {
-    if (current < slides.length - 1) goToSlide(current + 1);
-    else showLinkScreen();
-  });
-  skipBtn.addEventListener('click', showLinkScreen);
 
   function showLinkScreen() {
-    welcome.style.display = 'none';
+    authScreen.style.display = 'none';
     linkScreen.classList.add('active');
   }
+
+  const tabLogin = document.getElementById('tabLogin');
+  const tabSignup = document.getElementById('tabSignup');
+  const nameField = document.getElementById('nameField');
+  const nameInput = document.getElementById('nameInput');
+  const emailInput = document.getElementById('emailInput');
+  const passwordInput = document.getElementById('passwordInput');
+  const authForm = document.getElementById('authForm');
+  const authSubmitBtn = document.getElementById('authSubmitBtn');
+  const authSubmitLabel = document.getElementById('authSubmitLabel');
+  const authError = document.getElementById('authError');
+  const authNotice = document.getElementById('authNotice');
+  const authTitle = document.getElementById('authTitle');
+  const authSub = document.getElementById('authSub');
+
+  let authMode = 'login';
+
+  function showAuthError(msg) { authError.textContent = msg; authError.classList.add('show'); authNotice.classList.remove('show'); }
+  function showAuthNotice(msg) { authNotice.textContent = msg; authNotice.classList.add('show'); authError.classList.remove('show'); }
+  function hideAuthMessages() { authError.classList.remove('show'); authNotice.classList.remove('show'); }
+
+  function setAuthMode(mode) {
+    authMode = mode;
+    hideAuthMessages();
+    const isSignup = mode === 'signup';
+    tabSignup.classList.toggle('active', isSignup);
+    tabLogin.classList.toggle('active', !isSignup);
+    nameField.style.display = isSignup ? 'block' : 'none';
+    nameInput.required = isSignup;
+    authTitle.textContent = isSignup ? 'اعمل حسابك في دبّر' : 'أهلاً بيك تاني في دبّر';
+    authSub.textContent = isSignup ? 'اسمك وإيميلك وباسورد عشان تدخل الداشبورد.' : 'سجّل دخول بالإيميل والباسورد بتاعك.';
+    authSubmitLabel.textContent = isSignup ? 'إنشاء الحساب' : 'تسجيل الدخول';
+  }
+
+  tabLogin.addEventListener('click', () => setAuthMode('login'));
+  tabSignup.addEventListener('click', () => setAuthMode('signup'));
+
+  let authSubmitting = false;
+
+  authForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (authSubmitting) return;
+    authSubmitting = true;
+    hideAuthMessages();
+
+    const email = emailInput.value.trim();
+    const password = passwordInput.value;
+    const fullName = nameInput.value.trim();
+
+    authSubmitBtn.disabled = true;
+    authSubmitLabel.innerHTML = `<span class="spinner"></span> ${authMode === 'signup' ? 'بنعمل حسابك...' : 'بندخّلك...'}`;
+
+    try {
+      if (authMode === 'signup') {
+        if (!fullName) {
+          showAuthError('اكتب اسمك الأول.');
+          return;
+        }
+        const { data, error } = await sb.auth.signUp({
+          email,
+          password,
+          options: { data: { full_name: fullName } },
+        });
+        if (error) {
+          showAuthError(error.message === 'User already registered'
+            ? 'الإيميل ده متسجل قبل كده، سجّل دخول بدل ما تعمل حساب جديد.'
+            : 'حصل خطأ في إنشاء الحساب، جرب تاني.');
+          return;
+        }
+        // نسجّل صف في profiles بأول فرصة (RLS بتسمح بس لصاحب الحساب يعمل insert لنفسه)
+        if (data?.user) {
+          await sb.from('profiles').upsert({ id: data.user.id, full_name: fullName, email }).catch(() => {});
+        }
+        if (!data.session) {
+          // فيه إعدادات Supabase بتطلب تأكيد الإيميل قبل ما تدّي session — لو كده، نوضح للمستخدم
+          showAuthNotice('اتعمل حسابك! تحقق من إيميلك وأكّده، وبعدين ارجع سجّل دخول من هنا.');
+          setAuthMode('login');
+          emailInput.value = email;
+          return;
+        }
+        showLinkScreen();
+      } else {
+        const { data, error } = await sb.auth.signInWithPassword({ email, password });
+        if (error) {
+          showAuthError('الإيميل أو الباسورد غلط.');
+          return;
+        }
+        if (!data.session) {
+          showAuthError('حصل خطأ في تسجيل الدخول، جرب تاني.');
+          return;
+        }
+        // نتأكد هو مربوط بتليجرام قبل كده ولا لأ — لو مربوط، نروح على طول للداشبورد
+        const res = await fetch('/api/dashboard-data', {
+          headers: { Authorization: `Bearer ${data.session.access_token}` },
+        });
+        const result = await res.json().catch(() => ({}));
+        if (result && result.linked === false) {
+          showLinkScreen();
+        } else {
+          window.location.href = DASHBOARD_URL;
+        }
+      }
+    } catch (err) {
+      showAuthError('مقدرناش نتواصل مع السيرفر دلوقتي. جرب تاني.');
+    } finally {
+      authSubmitting = false;
+      authSubmitBtn.disabled = false;
+      authSubmitLabel.textContent = authMode === 'signup' ? 'إنشاء الحساب' : 'تسجيل الدخول';
+    }
+  });
 
   // ---- link + auto account creation ----
   const linkForm = document.getElementById('linkForm');
@@ -347,28 +456,29 @@
     const code = linkCodeInput.value.trim();
 
     linkSubmitBtn.disabled = true;
-    linkSubmitLabel.innerHTML = '<span class="spinner"></span> بنعمل حسابك ونربطه...';
+    linkSubmitLabel.innerHTML = '<span class="spinner"></span> بنربط حسابك...';
 
     try {
-      const res = await fetch('/api/auth-by-code', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ code }),
-      });
-      const result = await res.json();
-
-      if (!res.ok || !result.session) {
-        showError(result.error || 'حصل خطأ، جرب تاني.');
+      const { data: { session } } = await sb.auth.getSession();
+      if (!session) {
+        showError('لازم تسجل دخول الأول.');
+        authScreen.style.display = 'flex';
+        linkScreen.classList.remove('active');
         return;
       }
 
-      // نفعّل الجلسة الجاية من السيرفر في المتصفح، فيصير المستخدم مسجّل دخول فعليًا
-      const { error: setErr } = await sb.auth.setSession({
-        access_token: result.session.access_token,
-        refresh_token: result.session.refresh_token,
+      const res = await fetch('/api/auth-by-code', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ code, standalone: isStandalone() }),
       });
-      if (setErr) {
-        showError('اتربط حسابك بس حصلت مشكلة في فتح الجلسة، جرب تدخل تاني.');
+      const result = await res.json();
+
+      if (!res.ok || !result.ok) {
+        showError(result.error || 'حصل خطأ، جرب تاني.');
         return;
       }
 
@@ -381,28 +491,30 @@
     } finally {
       if (!successState.classList.contains('show')) {
         isSubmitting = false;
-        linkSubmitBtn.disabled = !installedOrAcknowledged();
-        linkSubmitLabel.textContent = installedOrAcknowledged() ? 'تأكيد الربط' : 'ثبّت التطبيق الأول عشان تكمل';
+        refreshSubmitState();
       }
     }
   });
 
-  // ---- PWA install (إجباري قبل ما نسمح بتأكيد الربط) ----
-  let deferredPrompt = null;
-  let installAcknowledged = false;
-  const installBtn = document.getElementById('installBtn');
-  const installCheckWrap = document.getElementById('installCheckWrap');
-  const installCheck = document.getElementById('installCheck');
+  // ---- PWA install ----
+  // إجباري فعليًا على كل الأجهزة من غير استثناء (أندرويد، كمبيوتر، آيفون): لازم الصفحة تكون
+  // شغالة standalone فعلاً (يعني اتفتحت من الأيقونة بعد تثبيت حقيقي على الشاشة الرئيسية)،
+  // مش بس إنه ضغط "تثبيت" أو أقرّ بإنه عمل كده. نفس الشرط اتأكد منه في السيرفر كمان
+  // (api/auth-by-code.js بيرفض أي طلب مش standalone)، فمفيش طريقة يتلف عليه من الفرونت إند.
+  const ua = navigator.userAgent || '';
+  const isIOS = /iPhone|iPad|iPod/.test(ua);
 
-  function installedOrAcknowledged() {
-    const standalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
-    return standalone || installAcknowledged || installCheck.checked;
+  let deferredPrompt = null;
+  const installBtn = document.getElementById('installBtn');
+
+  function isStandalone() {
+    return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
   }
 
   function refreshSubmitState() {
-    const ok = installedOrAcknowledged();
+    const ok = isStandalone();
     linkSubmitBtn.disabled = !ok;
-    linkSubmitLabel.textContent = ok ? 'تأكيد الربط' : 'ثبّت التطبيق الأول عشان تكمل';
+    linkSubmitLabel.textContent = ok ? '✅ تأكيد الربط' : '🔒 لازم تفتح دبّر من الأيقونة الأول';
   }
 
   window.addEventListener('beforeinstallprompt', (e) => {
@@ -416,22 +528,18 @@
       const choice = await deferredPrompt.userChoice;
       deferredPrompt = null;
       if (choice && choice.outcome === 'accepted') {
-        installAcknowledged = true;
-        installBtn.textContent = '✅ اتثبّت';
+        installBtn.textContent = '✅ اتثبّت — دلوقتي افتح دبّر من الأيقونة على شاشتك';
         installBtn.classList.add('done');
         refreshSubmitState();
         return;
       }
     }
     // لو المتصفح (زي Safari على iOS) مش بيدعم التثبيت الأوتوماتيك، نوريله خطوات يدوية واضحة
-    // حسب نوع جهازه، ونسيبله يقر إنه ثبّت بنفسه
+    // حسب نوع جهازه.
     showManualInstallSteps();
-    installCheckWrap.style.display = 'flex';
   });
 
   function showManualInstallSteps() {
-    const ua = navigator.userAgent || '';
-    const isIOS = /iPhone|iPad|iPod/.test(ua);
     const isAndroid = /Android/.test(ua);
     const steps = document.getElementById('manualInstallSteps');
     const title = document.getElementById('manualInstallTitle');
@@ -441,29 +549,36 @@
       steps.innerHTML = `
         <li>دوس على زرار <b>المشاركة (Share) 􀈂</b> تحت في المتصفح</li>
         <li>اسكرول لحد ما تلاقي <b>"إضافة إلى الشاشة الرئيسية"</b> ودوس عليها</li>
-        <li>دوس <b>"إضافة"</b> فوق يمين — هتلاقي أيقونة دبّر على شاشتك</li>`;
+        <li>دوس <b>"إضافة"</b> فوق يمين</li>
+        <li><b>اقفل الصفحة دي وافتح دبّر من الأيقونة اللي على شاشتك</b> — مش هتقدر تكمل من هنا</li>`;
     } else if (isAndroid) {
       title.textContent = '📱 على أندرويد:';
       steps.innerHTML = `
         <li>دوس على <b>الثلاث نقط ⋮</b> فوق يمين المتصفح</li>
         <li>اختار <b>"إضافة إلى الشاشة الرئيسية"</b> أو <b>"تثبيت التطبيق"</b></li>
-        <li>أكّد بالضغط على <b>"إضافة" / "تثبيت"</b></li>`;
+        <li>أكّد بالضغط على <b>"إضافة" / "تثبيت"</b></li>
+        <li><b>اقفل الصفحة دي وافتح دبّر من الأيقونة اللي على شاشتك</b> — مش هتقدر تكمل من هنا</li>`;
     } else {
       title.textContent = '💻 على الكمبيوتر:';
       steps.innerHTML = `
         <li>دوس على أيقونة <b>التثبيت ⊕</b> في شريط عنوان المتصفح</li>
-        <li>أو من قائمة المتصفح اختار <b>"تثبيت دبّر"</b></li>`;
+        <li>أو من قائمة المتصفح اختار <b>"تثبيت دبّر"</b></li>
+        <li><b>افتح دبّر بعد كده من الأيقونة اللي اتثبّتت</b> عشان تقدر تكمل</li>`;
     }
     document.getElementById('manualInstall').classList.add('show');
   }
 
-  installCheck.addEventListener('change', refreshSubmitState);
   window.addEventListener('appinstalled', () => {
-    installAcknowledged = true;
-    installBtn.textContent = '✅ اتثبّت';
+    installBtn.textContent = '✅ اتثبّت — دلوقتي افتح دبّر من الأيقونة على شاشتك';
     installBtn.classList.add('done');
     refreshSubmitState();
   });
+
+  // لو المستخدم رجع للتبويب/فتح الصفحة تاني بعد ما ثبّت (standalone بقى true)، نفكّ القفل تلقائي
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') refreshSubmitState();
+  });
+  window.addEventListener('focus', refreshSubmitState);
 
   // لو أصلاً مفتوح كـ standalone (يعني متثبّت أصلاً)، منعرضش التنويه كعقبة
   refreshSubmitState();

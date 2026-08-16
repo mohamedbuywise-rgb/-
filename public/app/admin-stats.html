@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>إحصائيات الأدمن - دبّر</title>
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  body { font-family: 'Cairo', sans-serif; background:#020617; color:#f1f5f9; }
+  .card { background: linear-gradient(180deg, rgba(30,41,59,.6), rgba(15,23,42,.6)); border:1px solid rgba(148,163,184,.12); }
+  .glow { box-shadow: 0 0 40px -12px rgba(52,211,153,.25); }
+  .skeleton { animation: pulse 1.4s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:.9} }
+</style>
+</head>
+<body class="min-h-screen">
+
+<div id="gate" class="min-h-screen flex items-center justify-center p-6">
+  <div class="card glow rounded-2xl p-8 max-w-sm w-full text-center">
+    <div id="gate-loading">
+      <div class="w-10 h-10 border-4 border-emerald-400/30 border-t-emerald-400 rounded-full animate-spin mx-auto mb-4"></div>
+      <p class="text-slate-300">بنتأكد إنك الأدمن...</p>
+    </div>
+    <div id="gate-denied" class="hidden">
+      <p class="text-4xl mb-3">🚫</p>
+      <p class="font-bold text-lg mb-1">الصفحة دي للأدمن بس</p>
+      <p id="gate-denied-msg" class="text-sm text-slate-400 mb-5">لازم تسجل دخول بحساب مرتبط بحساب التليجرام بتاع الأدمن.</p>
+      <a href="./dabbar-onboarding.html" class="inline-block bg-emerald-500 text-slate-950 font-bold px-5 py-2.5 rounded-xl">تسجيل الدخول</a>
+    </div>
+  </div>
+</div>
+
+<div id="app" class="hidden max-w-2xl mx-auto p-5 pb-16">
+
+  <div class="flex items-center justify-between mb-6 pt-2">
+    <div>
+      <h1 class="text-xl font-black">📊 إحصائيات دبّر</h1>
+      <p id="generated-at" class="text-xs text-slate-500 mt-1"></p>
+    </div>
+    <button id="refresh-btn" class="bg-slate-800 hover:bg-slate-700 text-sm font-bold px-4 py-2 rounded-xl">🔄 تحديث</button>
+  </div>
+
+  <div id="stats-loading" class="grid grid-cols-2 gap-3">
+    <div class="card rounded-2xl p-4 h-24 skeleton"></div>
+    <div class="card rounded-2xl p-4 h-24 skeleton"></div>
+    <div class="card rounded-2xl p-4 h-24 skeleton"></div>
+    <div class="card rounded-2xl p-4 h-24 skeleton"></div>
+  </div>
+
+  <div id="stats-content" class="hidden">
+
+    <!-- المستخدمين -->
+    <p class="text-xs font-bold text-slate-500 mb-2 mt-1">المستخدمين</p>
+    <div class="grid grid-cols-2 gap-3 mb-6">
+      <div class="card rounded-2xl p-4">
+        <p class="text-2xl font-black" id="stat-total-users">—</p>
+        <p class="text-xs text-slate-400 mt-1">إجمالي المسجلين</p>
+      </div>
+      <div class="card rounded-2xl p-4">
+        <p class="text-2xl font-black text-emerald-400" id="stat-active-subs">—</p>
+        <p class="text-xs text-slate-400 mt-1">مشتركين نشطين دلوقتي</p>
+      </div>
+      <div class="card rounded-2xl p-4">
+        <p class="text-2xl font-black" id="stat-active-accounts">—</p>
+        <p class="text-xs text-slate-400 mt-1">حسابات شغالة</p>
+      </div>
+      <div class="card rounded-2xl p-4">
+        <p class="text-2xl font-black text-sky-400" id="stat-new-7d">—</p>
+        <p class="text-xs text-slate-400 mt-1">تسجيلات آخر 7 أيام</p>
+      </div>
+    </div>
+
+    <!-- الفلوس -->
+    <p class="text-xs font-bold text-slate-500 mb-2">المكسب</p>
+    <div class="card glow rounded-2xl p-5 mb-4">
+      <p class="text-xs text-slate-400 mb-1">المكسب من المشتركين النشطين دلوقتي</p>
+      <p class="text-3xl font-black text-emerald-400" id="stat-revenue-active">— ج.م</p>
+      <p class="text-[11px] text-slate-500 mt-1">= عدد المشتركين النشطين × سعر الاشتراك</p>
+    </div>
+
+    <div class="grid grid-cols-2 gap-3 mb-6">
+      <div class="card rounded-2xl p-4">
+        <p class="text-2xl font-black" id="stat-approved-payments">—</p>
+        <p class="text-xs text-slate-400 mt-1">عمليات دفع مقبولة (كل الوقت)</p>
+      </div>
+      <div class="card rounded-2xl p-4">
+        <p class="text-2xl font-black text-amber-400" id="stat-pending-payments">—</p>
+        <p class="text-xs text-slate-400 mt-1">في انتظار المراجعة</p>
+      </div>
+    </div>
+
+    <div class="card rounded-2xl p-4">
+      <p class="text-xs text-slate-400 mb-1">إجمالي كل عمليات الدفع اللي اتقبلت (تراكمي)</p>
+      <p class="text-2xl font-black" id="stat-revenue-total">— ج.م</p>
+    </div>
+
+    <p class="text-[11px] text-slate-600 text-center mt-8">
+      الأرقام دي بتتحسب لحظة فتح الصفحة — دوس "تحديث" لأحدث نسخة.
+    </p>
+  </div>
+
+  <div id="stats-error" class="hidden card rounded-2xl p-5 text-center text-red-400 text-sm"></div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://devywtyfzybnahdsqdkd.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_yHiX1cnEMCVEcjQxiIrqig_DRBiuveQ';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+const $ = (id) => document.getElementById(id);
+
+function fmt(n) {
+  return new Intl.NumberFormat('ar-EG').format(n || 0);
+}
+
+async function loadStats() {
+  $('stats-content').classList.add('hidden');
+  $('stats-error').classList.add('hidden');
+  $('stats-loading').classList.remove('hidden');
+
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    const token = session?.access_token;
+
+    const res = await fetch('/api/admin', {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      throw new Error(data.error || 'حصل خطأ');
+    }
+
+    $('stat-total-users').textContent = fmt(data.users.total);
+    $('stat-active-subs').textContent = fmt(data.users.activeSubscribers);
+    $('stat-active-accounts').textContent = fmt(data.users.activeAccounts);
+    $('stat-new-7d').textContent = fmt(data.users.newLast7Days);
+
+    $('stat-revenue-active').textContent = fmt(data.revenue.currentActiveSubscribersEgp) + ' ج.م';
+    $('stat-approved-payments').textContent = fmt(data.revenue.approvedPaymentsCount);
+    $('stat-pending-payments').textContent = fmt(data.revenue.pendingPaymentsCount);
+    $('stat-revenue-total').textContent = fmt(data.revenue.approvedPaymentsEgp) + ' ج.م';
+
+    const d = new Date(data.generatedAt);
+    $('generated-at').textContent = 'آخر تحديث: ' + d.toLocaleString('ar-EG');
+
+    $('stats-loading').classList.add('hidden');
+    $('stats-content').classList.remove('hidden');
+  } catch (err) {
+    $('stats-loading').classList.add('hidden');
+    $('stats-error').textContent = err.message || 'حصل خطأ في جلب البيانات';
+    $('stats-error').classList.remove('hidden');
+  }
+}
+
+async function init() {
+  const { data: { session } } = await sb.auth.getSession();
+
+  if (!session) {
+    $('gate-denied-msg').textContent = 'لازم تسجل دخول الأول.';
+    $('gate-loading').classList.add('hidden');
+    $('gate-denied').classList.remove('hidden');
+    return;
+  }
+
+  // نجرب نجيب /api/admin-stats — لو رجع 403 يبقى مش أدمن
+  const token = session.access_token;
+  const res = await fetch('/api/admin', {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+
+  if (res.status === 403) {
+    $('gate-denied-msg').textContent = 'الصفحة دي متاحة بس لحساب الأدمن.';
+    $('gate-loading').classList.add('hidden');
+    $('gate-denied').classList.remove('hidden');
+    return;
+  }
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({}));
+    $('gate-denied-msg').textContent = data.error || 'حصل خطأ، حاول تاني.';
+    $('gate-loading').classList.add('hidden');
+    $('gate-denied').classList.remove('hidden');
+    return;
+  }
+
+  $('gate').classList.add('hidden');
+  $('app').classList.remove('hidden');
+
+  const data = await res.json();
+  renderFromData(data);
+}
+
+function renderFromData(data) {
+  $('stat-total-users').textContent = fmt(data.users.total);
+  $('stat-active-subs').textContent = fmt(data.users.activeSubscribers);
+  $('stat-active-accounts').textContent = fmt(data.users.activeAccounts);
+  $('stat-new-7d').textContent = fmt(data.users.newLast7Days);
+
+  $('stat-revenue-active').textContent = fmt(data.revenue.currentActiveSubscribersEgp) + ' ج.م';
+  $('stat-approved-payments').textContent = fmt(data.revenue.approvedPaymentsCount);
+  $('stat-pending-payments').textContent = fmt(data.revenue.pendingPaymentsCount);
+  $('stat-revenue-total').textContent = fmt(data.revenue.approvedPaymentsEgp) + ' ج.م';
+
+  const d = new Date(data.generatedAt);
+  $('generated-at').textContent = 'آخر تحديث: ' + d.toLocaleString('ar-EG');
+
+  $('stats-loading').classList.add('hidden');
+  $('stats-content').classList.remove('hidden');
+}
+
+$('refresh-btn').addEventListener('click', loadStats);
+init();
+</script>
+</body>
+</html>

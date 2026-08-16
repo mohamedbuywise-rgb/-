@@ -40,17 +40,6 @@
         @keyframes fadeUp { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: translateY(0);} }
         .fade-up { animation: fadeUp .35s ease both; }
 
-        /* سجّل مصروفك: مايك احترافي بحلقات صوتية متوسّعة */
-        @keyframes ringExpand{ 0%{ transform:scale(1); opacity:.55;} 100%{ transform:scale(1.65); opacity:0;} }
-        .mic-ring{ position:absolute; inset:0; border-radius:9999px; border:1.5px solid rgba(52,211,153,0.55); animation:ringExpand 2.2s cubic-bezier(.4,0,.2,1) infinite; }
-        .mic-ring.r2{ animation-delay:.7s; }
-        .mic-ring.r3{ animation-delay:1.4s; }
-        @keyframes micGlow{ 0%,100%{ box-shadow:0 0 0 0 rgba(52,211,153,0.35), 0 12px 34px -6px rgba(16,185,129,0.55);} 50%{ box-shadow:0 0 0 10px rgba(52,211,153,0.08), 0 12px 34px -6px rgba(16,185,129,0.7);} }
-        .mic-core{ animation:micGlow 2.2s ease-in-out infinite; }
-        @keyframes barBounce{ 0%,100%{ transform:scaleY(0.3);} 50%{ transform:scaleY(1);} }
-        .bar{ animation:barBounce .9s ease-in-out infinite; transform-origin:center; }
-        @keyframes spin{ to{ transform:rotate(360deg);} }
-
         /* ============================================================
            الوضع الفاتح — نسخة كاملة من كل الألوان المستخدمة في الصفحة.
            بتشتغل عن طريق [data-theme="light"] على <html>، والـ selector هنا
@@ -191,10 +180,10 @@
         <!-- Header Bar -->
         <div class="bg-slate-900/90 border-b border-slate-800/80 p-5 flex items-center justify-between">
             <div class="flex items-center gap-3">
-                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-slate-950 font-black text-xl shadow-lg shadow-emerald-500/20" id="header-icon">🗓️</div>
+                <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-slate-950 font-black text-xl shadow-lg shadow-emerald-500/20" id="header-icon">📊</div>
                 <div>
-                    <h2 class="font-bold text-base text-slate-100 leading-tight" id="header-title">تقرير اليوم</h2>
-                    <span class="text-xs text-emerald-400 font-medium" id="header-sub">● النهاردة</span>
+                    <h2 class="font-bold text-base text-slate-100 leading-tight" id="header-title">تقرير نهاية الشهر</h2>
+                    <span class="text-xs text-emerald-400 font-medium" id="header-sub">● تقييم أداء الشهر</span>
                 </div>
             </div>
             <div class="flex items-center gap-2">
@@ -212,7 +201,7 @@
         <div class="flex-1 overflow-y-auto">
 
         <!-- ===================== TAB: MONTHLY (default) ===================== -->
-        <div class="tab-content p-5 space-y-4" id="tab-monthly">
+        <div class="tab-content active fade-up p-5 space-y-4" id="tab-monthly">
 
             <div class="bg-gradient-to-br from-emerald-950/60 to-slate-900 border border-emerald-500/30 rounded-3xl p-4 text-center space-y-2 shadow-lg">
                 <span class="text-xs text-emerald-400 font-semibold block" id="monthly-total-label">إجمالي صرفك الشهر ده</span>
@@ -246,25 +235,7 @@
         </div>
 
         <!-- ===================== TAB: DAILY ===================== -->
-        <div class="tab-content active fade-up p-5 space-y-4" id="tab-daily">
-
-            <!-- تنويه بسيط: تسجيل صوتي واحد ممكن يشمل أكتر من مصروف/دين، فحد الـ30 يومي بيكفي فعليًا أي حد -->
-            <div class="flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/20 rounded-xl px-2.5 py-1.5 -mb-1">
-                <span class="text-[10px] shrink-0">💡</span>
-                <p class="text-[9.5px] text-slate-500 leading-snug">قول كل مصاريفك أو ديونك في تسجيل صوتي واحد، مثلاً "صرفت 100 تاكسي و50 قهوة"، هيسجّلهم كلهم مرة واحدة.</p>
-            </div>
-
-            <!-- سجّل مصروفك: نفس تصميم البطاقات والتدرّجات الموجودة بالفعل -->
-            <button id="record-expense-btn" class="w-full flex items-center gap-3 bg-gradient-to-tr from-emerald-500 to-teal-400 text-slate-950 rounded-3xl p-4 shadow-lg shadow-emerald-500/20 active:scale-[0.98] transition">
-                <span class="w-11 h-11 rounded-2xl bg-slate-950/15 flex items-center justify-center">
-                    <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Z" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path d="M19 11a7 7 0 0 1-14 0M12 18v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-                </span>
-                <span class="text-right flex-1">
-                    <span class="block font-black text-sm">سجّل مصروفك</span>
-                    <span class="block text-[11px] font-semibold text-slate-900/70">قول اللي اتصرف وهسجله على طول</span>
-                </span>
-                <span class="text-slate-900/60 text-sm">‹</span>
-            </button>
+        <div class="tab-content p-5 space-y-4" id="tab-daily">
 
             <div class="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-2xl p-3 space-y-1.5 shadow-lg">
                 <div class="flex justify-between items-center">
@@ -275,11 +246,12 @@
                 <p class="text-[10px] text-slate-400" id="daily-note">لسه معندكش مصاريف مسجلة النهاردة.</p>
             </div>
 
-            <div class="flex items-center gap-2 bg-slate-950/40 border border-slate-800/70 rounded-xl px-2.5 py-1.5">
-                <span class="w-4 h-4 rounded-full bg-sky-500/15 text-sky-400 flex items-center justify-center text-[9px] shrink-0">ℹ️</span>
-                <p class="text-[9.5px] text-slate-500 leading-snug">
-                    دي مصاريف <b class="text-slate-400 font-semibold">النهاردة بس</b> وبتتصفّر يوميًا، وكل عملياتك محفوظة في تبويب
-                    <b class="text-emerald-500 font-semibold">"شهري"</b> وفي تقرير PDF الشهري.
+            <div class="flex items-start gap-2 bg-slate-950/40 border border-slate-800/70 rounded-2xl p-3">
+                <span class="text-sm leading-none mt-0.5">ℹ️</span>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                    الصفحة دي بتوريك مصاريف <b class="text-slate-300">النهاردة بس</b>، وبتتصفّر تلقائي مع كل يوم جديد.
+                    كل عمليتك بردو محفوظة ومش بتتمسح — هتلاقيها كلها مجمّعة بالتفصيل في تبويب
+                    <b class="text-emerald-400">"شهري"</b>، وفي تقرير الـ PDF من أول يوم في الشهر لحد آخر يوم.
                 </p>
             </div>
 
@@ -523,13 +495,13 @@
 
         <!-- Bottom Tab Navigation -->
         <div class="bg-slate-900 border-t border-slate-800/80 px-2 pt-2 pb-3 flex items-center justify-around">
-            <button class="tab-btn active-tab flex flex-col items-center gap-1 px-3 py-1 text-slate-500 text-[10px] font-semibold" data-tab="daily" data-title="تقرير اليوم" data-sub="● النهاردة" data-icon="🗓️" data-badge="—">
-                <span class="tab-icon-wrap w-9 h-9 rounded-xl border border-transparent flex items-center justify-center text-base">🗓️</span>
-                يومي
-            </button>
-            <button class="tab-btn flex flex-col items-center gap-1 px-3 py-1 text-slate-500 text-[10px] font-semibold" data-tab="monthly" data-title="تقرير نهاية الشهر" data-sub="● تقييم أداء الشهر" data-icon="📊" data-badge="—">
+            <button class="tab-btn active-tab flex flex-col items-center gap-1 px-3 py-1 text-slate-500 text-[10px] font-semibold" data-tab="monthly" data-title="تقرير نهاية الشهر" data-sub="● تقييم أداء الشهر" data-icon="📊" data-badge="—">
                 <span class="tab-icon-wrap w-9 h-9 rounded-xl border border-transparent flex items-center justify-center text-base">📊</span>
                 شهري
+            </button>
+            <button class="tab-btn flex flex-col items-center gap-1 px-3 py-1 text-slate-500 text-[10px] font-semibold" data-tab="daily" data-title="تقرير اليوم" data-sub="● النهاردة" data-icon="🗓️" data-badge="—">
+                <span class="tab-icon-wrap w-9 h-9 rounded-xl border border-transparent flex items-center justify-center text-base">🗓️</span>
+                يومي
             </button>
             <button class="tab-btn flex flex-col items-center gap-1 px-3 py-1 text-slate-500 text-[10px] font-semibold" data-tab="categories" data-title="التصنيفات" data-sub="● صرف الشهر بالتفصيل" data-icon="🧾" data-badge="—">
                 <span class="tab-icon-wrap w-9 h-9 rounded-xl border border-transparent flex items-center justify-center text-base">🧾</span>
@@ -550,7 +522,7 @@
         </div>
 
         <!-- Footer Action (only visible on monthly tab) -->
-        <div class="p-4 bg-slate-900 border-t border-slate-800/80" id="footer-cta" style="display:none;">
+        <div class="p-4 bg-slate-900 border-t border-slate-800/80" id="footer-cta">
             <div class="flex gap-2 mb-1">
                 <button id="download-monthly-pdf" class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold py-2 rounded-xl text-xs transition flex items-center justify-center gap-2">
                     <span id="download-pdf-icon">📄</span> <span id="download-pdf-label">تقرير PDF</span>
@@ -564,27 +536,7 @@
 
     </div>
 
-    <!-- Record Expense Overlay: نفس نمط الأوفرلاي الموجود (archive-overlay) -->
-    <div id="record-overlay" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-end md:items-center justify-center z-50">
-        <div class="max-w-md w-full bg-slate-900 border-t md:border border-slate-800 rounded-t-3xl md:rounded-3xl shadow-2xl overflow-hidden">
-            <div class="bg-slate-900/90 border-b border-slate-800/80 p-5 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-slate-950 font-black text-xl shadow-lg shadow-emerald-500/20" id="record-sheet-icon">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Z" stroke="#022c22" stroke-width="2" stroke-linecap="round"/><path d="M19 11a7 7 0 0 1-14 0M12 18v3" stroke="#022c22" stroke-width="2" stroke-linecap="round"/></svg>
-                    </div>
-                    <div>
-                        <h2 class="font-bold text-base text-slate-100 leading-tight" id="record-sheet-title">بتسمعك دلوقتي...</h2>
-                        <span class="text-xs text-emerald-400 font-medium" id="record-sheet-sub">● اتكلم عادي، هفهم منك ويتسجل لوحده</span>
-                    </div>
-                </div>
-                <button id="close-record-overlay" class="w-9 h-9 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-sm">✕</button>
-            </div>
-            <div class="p-5" id="record-sheet-body"></div>
-        </div>
-    </div>
-
     <!-- Archive Overlay -->
-
     <div id="archive-overlay" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
         <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[80vh]">
             <div class="bg-slate-900/90 border-b border-slate-800/80 p-5 flex items-center justify-between">
@@ -660,9 +612,8 @@
         const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         const ONBOARDING_URL = 'dabbar-onboarding.html';
 
-        const CATEGORY_EMOJI = { 'أكل':'🍔', 'مواصلات':'🚕', 'فواتير':'🧾', 'تسوق':'🛍️', 'ترفيه':'🎬', 'صحة':'💊', 'أخرى':'📌' };
-        const CATEGORIES = Object.keys(CATEGORY_EMOJI);
-        const CATEGORY_BAR_COLOR = { 'أكل':'bg-rose-400', 'مواصلات':'bg-teal-400', 'فواتير':'bg-amber-400', 'تسوق':'bg-violet-400', 'ترفيه':'bg-pink-400', 'صحة':'bg-emerald-400', 'أخرى':'bg-slate-400' };
+        const CATEGORY_EMOJI = { 'أكل':'🍔', 'مواصلات':'🚕', 'فواتير':'🧾', 'تسوق':'🛍️', 'ترفيه':'🎬', 'صحة':'💊', 'تعليم':'📚', 'منزل وأثاث':'🏠', 'ملابس':'👕', 'اشتراكات':'🔁', 'هدايا وتبرعات':'🎁', 'شخصي وعناية':'🧴' };
+        const CATEGORY_BAR_COLOR = { 'أكل':'bg-rose-400', 'مواصلات':'bg-teal-400', 'فواتير':'bg-amber-400', 'تسوق':'bg-violet-400', 'ترفيه':'bg-pink-400', 'صحة':'bg-emerald-400', 'تعليم':'bg-blue-400', 'منزل وأثاث':'bg-orange-400', 'ملابس':'bg-fuchsia-400', 'اشتراكات':'bg-indigo-400', 'هدايا وتبرعات':'bg-amber-500', 'شخصي وعناية':'bg-cyan-400' };
         const fmt = (n) => `${Number(n).toLocaleString('ar-EG')} ج.م`;
 
         // ============ الوضع الفاتح/الغامق — بيتخزن في localStorage على جهاز المستخدم ============
@@ -1319,7 +1270,7 @@
                 errorEl.classList.add('hidden');
 
                 try {
-                    const res = await fetch('/api/misc?action=subscription-proof', {
+                    const res = await fetch('/api/subscription-proof', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -1550,454 +1501,6 @@
             overlay.classList.add('hidden');
             overlay.classList.remove('flex');
         });
-
-        // ============ سجّل مصروفك (فويس) ============
-        // ملاحظة: التسجيل الصوتي الفعلي هنا بيستخدم MediaRecorder الحقيقي من المتصفح،
-        // لكن التفريغ والتصنيف لسه مش موصولين بباك-إند حقيقي — دي واجهة جاهزة للربط
-        // بنفس منطق lib/groq.js (transcribeVoice + classifyMessage) و lib/expenses.js (recordExpense)
-        // عن طريق إنشاء endpoint جديد زي /api/record-expense-voice يستقبل الملف الصوتي من الموقع.
-        (function () {
-            const overlay = document.getElementById('record-overlay');
-            const sheetIcon = document.getElementById('record-sheet-icon');
-            const sheetTitle = document.getElementById('record-sheet-title');
-            const sheetSub = document.getElementById('record-sheet-sub');
-            const sheetBody = document.getElementById('record-sheet-body');
-            const micSvg = `<svg width="30" height="30" viewBox="0 0 24 24" fill="none"><path d="M12 15a3 3 0 0 0 3-3V6a3 3 0 0 0-6 0v6a3 3 0 0 0 3 3Z" stroke="#022c22" stroke-width="2.2" stroke-linecap="round"/><path d="M19 11a7 7 0 0 1-14 0M12 18v3" stroke="#022c22" stroke-width="2.2" stroke-linecap="round"/></svg>`;
-            let mediaRecorder = null, chunks = [], autoAdvance = null, activeStream = null;
-
-            // ---- تسكير المايك فعليًا (مش بس إيقاف الـ MediaRecorder) ----
-            // mediaRecorder.stop() لوحدها بتوقف التسجيل بس المتصفح بيفضل شايل إذن المايك
-            // مفتوح لحد ما الـ tracks بتاعة الـ MediaStream تتقفل بالظبط بالطريقة دي. علطول ده
-            // اللي بيخلي مواقع/تابات تانية تحس إن المايك "مشغول" وميقدروش يستخدموه لحد ما
-            // يقفل التاب بتاعنا بالكامل. فلازم نعمل stop() لكل track بعد ما نخلص التسجيل دايمًا.
-            function releaseMic() {
-                if (activeStream) {
-                    activeStream.getTracks().forEach((track) => track.stop());
-                    activeStream = null;
-                }
-                stopNoiseWatch();
-            }
-
-            // ============ رصد مستوى الدوشة أثناء التسجيل (Web Audio Analyser) ============
-            // مش بتوقف التسجيل ولا بتمنع حاجة — بس بتنبّه المستخدم لايف لو الدوشة حواليه عالية
-            // جدًا، عشان يقدر يمشي لمكان أهدى أو يتكلم أعلى قبل ما يدوس "خلصت"، بدل ما يكتشف
-            // بعد كده إن التسجيل مش واضح.
-            let noiseCtx = null, noiseRaf = null;
-            function startNoiseWatch(stream) {
-                try {
-                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
-                    if (!AudioCtx) return;
-                    noiseCtx = new AudioCtx();
-                    const source = noiseCtx.createMediaStreamSource(stream);
-                    const analyser = noiseCtx.createAnalyser();
-                    analyser.fftSize = 512;
-                    source.connect(analyser);
-                    const data = new Uint8Array(analyser.frequencyBinCount);
-                    let highStreak = 0;
-                    const tick = () => {
-                        analyser.getByteFrequencyData(data);
-                        const avg = data.reduce((a, b) => a + b, 0) / data.length;
-                        const warnEl = document.getElementById('noise-warning');
-                        // متوسط عالي جدًا وباستمرار (مش صوت كلام عادي متذبذب) = غالبًا دوشة خلفية.
-                        highStreak = avg > 70 ? highStreak + 1 : 0;
-                        if (warnEl) warnEl.classList.toggle('hidden', highStreak < 20);
-                        noiseRaf = requestAnimationFrame(tick);
-                    };
-                    tick();
-                } catch (e) {
-                    console.warn('noise watch unavailable:', e);
-                }
-            }
-            function stopNoiseWatch() {
-                if (noiseRaf) cancelAnimationFrame(noiseRaf);
-                noiseRaf = null;
-                if (noiseCtx) { noiseCtx.close().catch(() => {}); noiseCtx = null; }
-            }
-
-            function openOverlay() { overlay.classList.remove('hidden'); overlay.classList.add('flex'); }
-            function closeOverlay() {
-                clearTimeout(autoAdvance);
-                overlay.classList.add('hidden'); overlay.classList.remove('flex');
-                if (mediaRecorder && mediaRecorder.state !== 'inactive') {
-                    mediaRecorder.onstop = null; // إلغاء بدون حفظ لو المستخدم قفل الشيت وهو لسه بيسجل
-                    mediaRecorder.stop();
-                }
-                releaseMic();
-            }
-            document.getElementById('close-record-overlay').addEventListener('click', closeOverlay);
-
-            const secondaryBtn = (label) => `<button class="record-secondary w-full mt-2 bg-slate-950/60 border border-slate-800 text-slate-300 font-bold py-3 rounded-2xl text-xs">${label}</button>`;
-            const primaryBtn = (id, label) => `<button id="${id}" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold py-3 rounded-2xl text-sm transition">${label}</button>`;
-
-            // ============ الحالة الأولى: المايك واقف وموش بيسجل، مستني المستخدم يدوس عليه ============
-            // العميل هو اللي متحكم بالكامل: يدوس على المايك يبدأ التسجيل، ويدوس على "خلصت"
-            // (أو يدوس على المايك تاني) عشان يوقف. مفيش أي توقيت تلقائي بيقطع الكلام.
-            function showIdle() {
-                clearTimeout(autoAdvance);
-                sheetIcon.innerHTML = micSvg.replace('30','20').replace('30','20');
-                sheetTitle.textContent = 'جاهز تسجّل مصروفك؟';
-                sheetSub.textContent = '● دوس على المايك عشان تبدأ';
-                sheetBody.innerHTML = `
-                    <div class="flex flex-col items-center gap-6 py-5">
-                        <button id="start-record-btn" class="relative w-28 h-28 flex items-center justify-center active:scale-95 transition">
-                            <div class="relative z-10 w-20 h-20 rounded-full bg-gradient-to-b from-emerald-400 to-teal-500 flex items-center justify-center border border-emerald-300/40 shadow-lg shadow-emerald-500/20">${micSvg}</div>
-                        </button>
-                        <p class="text-xs text-slate-400 text-center leading-relaxed">دوس على المايك وقول اللي اتصرف زي ما هتقوله لصاحبك<br><span class="text-slate-500">"دفعت ١٠٠ جنيه تاكسي"</span></p>
-                        ${secondaryBtn('⌨️ اكتبه بإيدك بدل الصوت')}
-                    </div>`;
-                document.getElementById('start-record-btn').onclick = startListening;
-                sheetBody.querySelector('.record-secondary').onclick = showManual;
-            }
-
-            // ============ الحالة التانية: التسجيل شغّال فعليًا، المستخدم هو اللي بيوقفه بإيده ============
-            async function startListening() {
-                clearTimeout(autoAdvance);
-                sheetIcon.innerHTML = micSvg.replace('30','20').replace('30','20');
-                sheetTitle.textContent = 'بتسمعك دلوقتي...';
-                sheetSub.textContent = '● اتكلم عادي، ودوس "خلصت" لما تخلص';
-                sheetBody.innerHTML = `
-                    <div class="flex flex-col items-center gap-6 py-5">
-                        <div class="relative w-28 h-28 flex items-center justify-center">
-                            <span class="mic-ring"></span><span class="mic-ring r2"></span><span class="mic-ring r3"></span>
-                            <div class="mic-core relative z-10 w-20 h-20 rounded-full bg-gradient-to-b from-emerald-400 to-teal-500 flex items-center justify-center border border-emerald-300/40">${micSvg}</div>
-                        </div>
-                        <div class="flex items-end gap-[3px] h-7">
-                            ${[9,15,22,13,19,10,17,8].map((h,i)=>`<span class="bar w-1 rounded-full bg-emerald-400/80" style="height:${h}px; animation-delay:${i*0.09}s;"></span>`).join('')}
-                        </div>
-                        <p class="text-xs text-slate-400 text-center leading-relaxed">قول اللي اتصرف زي ما هتقوله لصاحبك<br><span class="text-slate-500">"دفعت ١٠٠ جنيه تاكسي"</span></p>
-                        <p id="noise-warning" class="hidden text-[11px] text-amber-400 text-center leading-relaxed">🔊 في دوشة حواليك، جرب مكان أهدى أو اتكلم أعلى شوية عشان السمع يبقى أوضح</p>
-                        <button id="stop-record-btn" class="flex flex-col items-center gap-2 active:scale-95 transition">
-                            <span class="w-16 h-16 rounded-full bg-emerald-500 text-slate-900 flex items-center justify-center shadow-lg shadow-emerald-500/30">
-                                <svg width="26" height="26" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="#022c22" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                            </span>
-                            <span class="text-xs font-bold text-emerald-400">خلصت</span>
-                        </button>
-                    </div>`;
-                document.getElementById('stop-record-btn').onclick = stopAndShowResult;
-
-                // تسجيل صوتي حقيقي من المتصفح، بيفضل شغال لحد ما المستخدم يدوس "خلصت"
-                try {
-                    // ---- قيود جودة صوت واضحة بدل audio:true العامة ----
-                    // echoCancellation/noiseSuppression/autoGainControl بتحسّن وضوح الصوت
-                    // قبل ما يوصل أصلًا لـ Whisper، وده بيقلل الهلوسة والتكرار بشكل كبير
-                    // خصوصًا في أماكن فيها دوشة (شارع، مواصلات).
-                    const stream = await navigator.mediaDevices.getUserMedia({
-                        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-                    });
-                    activeStream = stream;
-                    chunks = [];
-                    // بت-ريت أعلى من الافتراضي (اللي بيبقى واطي جدًا زي 24-32kbps في بعض
-                    // المتصفحات) عشان جودة صوت أفضل تدخل على Whisper، من غير ما نقرب من
-                    // حد الـ 1.2MB بتاع 45 ثانية (128kbps × 45s ≈ 720KB، لسه في الأمان).
-                    const recorderOptions = { audioBitsPerSecond: 128000 };
-                    mediaRecorder = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
-                        ? new MediaRecorder(stream, { ...recorderOptions, mimeType: 'audio/webm;codecs=opus' })
-                        : new MediaRecorder(stream, recorderOptions);
-                    mediaRecorder.ondataavailable = (e) => chunks.push(e.data);
-                    mediaRecorder.start();
-                    startNoiseWatch(stream);
-                } catch (e) {
-                    console.warn('تعذّر الوصول للمايكروفون:', e);
-                    showError('محتاجين إذن استخدام المايكروفون عشان تسجّل بالصوت.');
-                    return;
-                }
-
-                // حد أقصى للتسجيل (45 ثانية) — كفاية تقول فيها 4-6 عمليات براحتك، وبيحمي هامش
-                // الربح في الاشتراك من تسجيلات طويلة أوي بتكلّف فلوس Groq زيادة عن اللازم.
-                autoAdvance = setTimeout(() => { if (document.getElementById('stop-record-btn')) stopAndShowResult(); }, 45000);
-            }
-
-            // بيتفضل موجود عشان أي كود قديم بينادي عليه (retry بعد نتيجة غير واضحة مثلاً)
-            const showListening = showIdle;
-
-            function stopAndShowResult() {
-                clearTimeout(autoAdvance);
-                if (!mediaRecorder) { showError('تعذّر الوصول للمايكروفون، جرب من غير كده أو اكتبها بإيدك.'); return; }
-
-                sheetIcon.innerHTML = '⏳';
-                sheetTitle.textContent = 'بحلل كلامك...';
-                sheetSub.textContent = '● ثانية وهرجعلك بالنتيجة';
-                sheetBody.innerHTML = `
-                    <div class="flex flex-col items-center gap-4 py-8">
-                        <div class="w-14 h-14 rounded-full border-4 border-slate-800 border-t-emerald-400" style="animation:spin 1s linear infinite;"></div>
-                        <p class="text-xs text-slate-400">بستخرج المبلغ والفئة من كلامك...</p>
-                    </div>`;
-
-                mediaRecorder.onstop = async () => {
-                    releaseMic(); // نقفل المايك فورًا أول ما نخلص تسجيل، مش لازم نستنى رد الـ API
-                    try {
-                        const blob = new Blob(chunks, { type: mediaRecorder.mimeType || 'audio/webm' });
-                        const audioBase64 = await blobToDataUrl(blob);
-                        const data = await callRecordExpenseApi({ audioBase64 });
-                        handleApiResult(data);
-                    } catch (e) {
-                        console.error('record-expense-voice failed:', e);
-                        showError('حصل خطأ في تسجيل المصروف، جرب تاني.');
-                    }
-                };
-                mediaRecorder.stop();
-            }
-
-            function blobToDataUrl(blob) {
-                return new Promise((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result);
-                    reader.onerror = reject;
-                    reader.readAsDataURL(blob);
-                });
-            }
-
-            async function callRecordExpenseApi(body) {
-                const res = await fetch('/api/record-expense-voice', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
-                    body: JSON.stringify(body),
-                });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.error || 'حصل خطأ، جرب تاني.');
-                return data;
-            }
-
-            function handleApiResult(data) {
-                if (data.reason === 'trial_ended') { showTrialEnded(); return; }
-                if (data.reason === 'quota_exceeded') { showError(data.error || 'وصلت للحد الأقصى من التسجيلات الصوتية النهاردة، جرب تاني بكرة أو اكتبها بإيدك.'); return; }
-                if (data.reason === 'too_short') { showError(data.error || 'التسجيل قصير جدًا، جرب تاني.'); return; }
-                if (data.ok === false) { showUnclear(data.heardText || ''); return; }
-                if (data.needsConfirm) { showConfirm({ items: data.items || [], heardText: data.heardText || '' }); return; }
-                showSaved({ items: data.items || [], heardText: data.heardText, todayTotal: data.todayTotal });
-                refreshDailyTabAfterSave();
-            }
-
-            // ============ شاشة معاينة قبل الحفظ الفعلي ============
-            // بعد ما نفهم كلام المستخدم من الصوت، مش بنحفظ على طول — بنعرضله اللي فهمناه
-            // الأول ونستناه يأكّد، عشان لو حصل أي غلط في السمع أو التصنيف يقدر يلاقيه ويصلحه
-            // (بالتسجيل تاني) قبل ما يتسجل غلط في حسابه فعليًا.
-            function showConfirm({ items, heardText }) {
-                clearTimeout(autoAdvance);
-                const multi = items.length > 1;
-                const hasLowConfidence = items.some((it) => it.lowConfidence);
-                sheetIcon.textContent = hasLowConfidence ? '🤔' : '👀';
-                sheetTitle.textContent = multi ? `سمعت ${items.length} عمليات، صح كده؟` : 'سمعت العملية دي، صح كده؟';
-                sheetSub.textContent = hasLowConfidence ? '● فيه مبلغ مش متأكد منه، راجعه كويس' : '● راجعها كويس قبل الحفظ';
-                const rows = items.map((it, i) => `<div class="${i > 0 ? 'border-t border-slate-800/70 pt-2.5' : ''}">${renderSavedItemRow(it)}</div>`).join('');
-                sheetBody.innerHTML = `
-                    <div class="space-y-3">
-                        <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-4 space-y-2.5">
-                            ${rows}
-                            ${heardText ? `<p class="text-[10px] text-slate-500 pt-1">سمعتك بتقول: "${heardText}"</p>` : ''}
-                        </div>
-                        ${primaryBtn('confirm-save-btn', '✅ تمام، احفظ')}
-                        ${secondaryBtn('🎙️ لأ، سجّل تاني')}
-                    </div>`;
-                document.getElementById('confirm-save-btn').onclick = async () => {
-                    sheetIcon.innerHTML = '⏳';
-                    sheetTitle.textContent = 'بحفظ...';
-                    sheetSub.textContent = '';
-                    sheetBody.innerHTML = `
-                        <div class="flex flex-col items-center gap-4 py-8">
-                            <div class="w-14 h-14 rounded-full border-4 border-slate-800 border-t-emerald-400" style="animation:spin 1s linear infinite;"></div>
-                        </div>`;
-                    try {
-                        const data = await callRecordExpenseApi({ confirmItems: items, heardText });
-                        showSaved({ items: data.items || [], heardText: data.heardText, todayTotal: data.todayTotal });
-                        refreshDailyTabAfterSave();
-                    } catch (e) {
-                        console.error('confirm save failed:', e);
-                        showError('حصل خطأ في الحفظ، جرب تاني.');
-                    }
-                };
-                sheetBody.querySelector('.record-secondary').onclick = showListening;
-            }
-
-            function showTrialEnded() {
-                clearTimeout(autoAdvance);
-                sheetIcon.textContent = '⏳';
-                sheetTitle.textContent = 'خلصت أيام التجربة المجانية';
-                sheetSub.textContent = '● اشترك عشان تكمل تسجيل مصاريفك';
-                sheetBody.innerHTML = `
-                    <div class="space-y-3">
-                        <p class="text-xs text-slate-400 leading-relaxed text-center">جربت 3 أيام وشفت إزاي دبّر بيتابعلك مصاريفك أول بأول. عشان تكمّل تسجّل، فعّل اشتراكك من تاب "حسابي".</p>
-                        ${primaryBtn('go-subscribe-btn', '👤 روح لتاب حسابي')}
-                    </div>`;
-                document.getElementById('go-subscribe-btn').onclick = () => {
-                    closeOverlay();
-                    const accountTabBtn = document.querySelector('.tab-btn[data-tab="account"]');
-                    if (accountTabBtn) accountTabBtn.click();
-                };
-            }
-
-            function showError(message) {
-                sheetIcon.textContent = '⚠️';
-                sheetTitle.textContent = 'حصل خطأ';
-                sheetSub.textContent = '● جرب تاني';
-                sheetBody.innerHTML = `
-                    <div class="flex flex-col items-center gap-4 py-4">
-                        <p class="text-sm text-rose-400 text-center">${message}</p>
-                        ${primaryBtn('retry-record-btn', '🎙️ أعيد المحاولة')}
-                        ${secondaryBtn('⌨️ أدخلها بإيدي')}
-                    </div>`;
-                document.getElementById('retry-record-btn').onclick = showListening;
-                sheetBody.querySelector('.record-secondary').onclick = showManual;
-            }
-
-            function showUnclear(heardText) {
-                sheetIcon.textContent = '🤔';
-                sheetTitle.textContent = 'مش قادر أفهم بالظبط';
-                sheetSub.textContent = '● محتاج توضيح بسيط';
-                sheetBody.innerHTML = `
-                    <div class="space-y-3">
-                        <div class="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-3 text-[11px] text-amber-400 leading-relaxed">
-                            ${heardText ? `سمعتك بتقول: <span class="text-slate-300">"${heardText}"</span> — مش واضح المبلغ أو الفئة بالظبط.` : 'مسمعتش كلام واضح خالص.'}
-                        </div>
-                        <p class="text-xs text-slate-400">تحب تعمل إيه؟</p>
-                        ${primaryBtn('retry-record-btn', '🎙️ أعيد التسجيل تاني')}
-                        ${secondaryBtn('⌨️ أدخلها بإيدي')}
-                    </div>`;
-                document.getElementById('retry-record-btn').onclick = showListening;
-                sheetBody.querySelector('.record-secondary').onclick = showManual;
-            }
-
-            // ============ عرض كل العمليات اللي اتسجّلت من نفس الفويس (مصروف/دين/تسوية) ============
-            // ممكن يكون فيها عنصر واحد بس، أو أكتر لو المستخدم قال أكتر من عملية في نفس التسجيل
-            // (زي "٥٠ غدا و١٠٠ تاكسي وسوبر ماركت ١٥٠" أو "دفعت ٢٠٠ أكل وواصل من أحمد ٥٠٠").
-            function renderSavedItemRow(it) {
-                // لو فيه تعارض حجم واضح (مثلاً الموديل سمع 1000 بس فيه 100 مذكورة برضو في نفس الجملة)،
-                // نوريه الرقم البديل صراحةً بدل تحذير عمومي بس — نفس فكرة "تقصد 100 ولا 1000؟" في تليجرام.
-                const altAmount = (it.magnitudeConflict && Array.isArray(it.altAmounts) && it.altAmounts.length)
-                    ? it.altAmounts.find((n) => n !== it.amount) ?? it.altAmounts[0]
-                    : null;
-                const lowConf = it.lowConfidence
-                    ? (altAmount
-                        ? `<span class="text-[10px] text-amber-400 block mt-0.5">⚠️ تقصد ${it.amount} ولا ${altAmount} جنيه؟ اتأكد قبل الحفظ</span>`
-                        : `<span class="text-[10px] text-amber-400 block mt-0.5">⚠️ اتأكد من المبلغ ده كويس</span>`)
-                    : '';
-                if (it.kind === 'expense') {
-                    const detail = it.note && it.note.trim() ? ` (${it.note.trim()})` : '';
-                    return `
-                        <div class="flex items-center gap-2.5">
-                            <span class="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-base shrink-0">${it.emoji}</span>
-                            <div>
-                                <p class="text-sm font-bold text-slate-100 leading-snug">${it.category}${detail} · ${it.amount} جنيه</p>
-                                ${lowConf}
-                            </div>
-                        </div>`;
-                }
-                if (it.kind === 'debt') {
-                    let label;
-                    if (it.isRepayment) {
-                        label = it.isLent ? `رجّعت لـ ${it.person}` : `${it.person} رجّعلك`;
-                    } else {
-                        label = it.isLent ? `بقى ليك عند ${it.person}` : `بقى عليك لـ ${it.person}`;
-                    }
-                    const emoji = it.isRepayment ? '↩️' : (it.isLent ? '📤' : '📥');
-                    return `
-                        <div class="flex items-center gap-2.5">
-                            <span class="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-base shrink-0">${emoji}</span>
-                            <div>
-                                <p class="text-sm font-bold text-slate-100 leading-snug">${label} · ${it.amount} جنيه</p>
-                                ${lowConf}
-                            </div>
-                        </div>`;
-                }
-                if (it.kind === 'settlement') {
-                    return it.ok
-                        ? `<div class="flex items-center gap-2.5">
-                            <span class="w-9 h-9 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-base shrink-0">✅</span>
-                            <p class="text-sm font-bold text-slate-100 leading-snug">اتسوى الحساب مع ${it.person}</p>
-                        </div>`
-                        : `<div class="flex items-center gap-2.5">
-                            <span class="w-9 h-9 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-base shrink-0">⚠️</span>
-                            <p class="text-sm font-bold text-slate-100 leading-snug">معنديش ديون مسجلة مع ${it.person}</p>
-                        </div>`;
-                }
-                return '';
-            }
-
-            function showSaved({ items, heardText, todayTotal }) {
-                const multi = items.length > 1;
-                sheetIcon.textContent = '✅';
-                sheetTitle.textContent = multi ? `تمام، سجلت ${items.length} عمليات` : 'تمام، سجلت العملية';
-                sheetSub.textContent = '● اتسجلوا وحُدّث حسابك أول بأول';
-                const rows = items.map((it) => `<div class="${items.indexOf(it) > 0 ? 'border-t border-slate-800/70 pt-2.5' : ''}">${renderSavedItemRow(it)}</div>`).join('');
-                sheetBody.innerHTML = `
-                    <div class="space-y-3">
-                        <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-4 space-y-2.5">
-                            ${rows}
-                            ${heardText ? `<p class="text-[10px] text-slate-500 pt-1">سمعتك بتقول: "${heardText}"</p>` : ''}
-                            ${todayTotal !== null && todayTotal !== undefined ? `
-                            <div class="border-t border-slate-800/70 pt-2.5 flex items-center justify-between">
-                                <span class="text-[11px] text-slate-400">💰 إجمالي صرفك النهاردة</span>
-                                <span class="text-sm font-black text-rose-400">${todayTotal} جنيه</span>
-                            </div>` : ''}
-                        </div>
-                        ${primaryBtn('record-done-btn', 'تمام')}
-                    </div>`;
-                document.getElementById('record-done-btn').onclick = closeOverlay;
-                autoAdvance = setTimeout(closeOverlay, multi ? 2600 : 1800);
-            }
-
-            // بعد الحفظ الفعلي: نعيد تحميل بيانات الداشبورد الحقيقية عشان قائمة عمليات
-            // النهاردة والإجمالي والتصنيفات تتحدث فورًا بنفس دالة loadDashboard الموجودة
-            function refreshDailyTabAfterSave() {
-                if (typeof loadDashboard === 'function') loadDashboard();
-            }
-
-            function showManual() {
-                clearTimeout(autoAdvance);
-                sheetIcon.textContent = '⌨️';
-                sheetTitle.textContent = 'إدخال يدوي';
-                sheetSub.textContent = '● لو الصوت مش مناسب دلوقتي';
-                sheetBody.innerHTML = `
-                    <div class="space-y-3">
-                        <div>
-                            <label class="text-[11px] text-slate-400 block mb-1.5">المبلغ</label>
-                            <input id="manual-amount" type="number" inputmode="decimal" class="w-full bg-slate-950/60 border border-slate-800 rounded-2xl px-4 py-3 text-slate-100 text-sm" placeholder="0 جنيه">
-                        </div>
-                        <div>
-                            <label class="text-[11px] text-slate-400 block mb-1.5">وصف</label>
-                            <input id="manual-note" class="w-full bg-slate-950/60 border border-slate-800 rounded-2xl px-4 py-3 text-slate-100 text-sm" placeholder="مثلاً: غدا مع صحابي، أو واصل من أحمد، أو سلفت كريم">
-                            <p class="text-[10px] text-slate-500 mt-1.5">هنحدد الفئة (أو إنه دين) أوتوماتيك من الوصف.</p>
-                        </div>
-                        <p id="manual-error" class="text-[11px] text-rose-400 hidden"></p>
-                        ${primaryBtn('manual-save-btn', '✅ تسجيل العملية')}
-                    </div>`;
-
-                document.getElementById('manual-save-btn').onclick = async () => {
-                    const amount = Number(document.getElementById('manual-amount').value);
-                    const note = document.getElementById('manual-note').value.trim();
-                    const errEl = document.getElementById('manual-error');
-                    if (!amount || amount <= 0) {
-                        errEl.textContent = 'اكتب مبلغ صحيح الأول.';
-                        errEl.classList.remove('hidden');
-                        return;
-                    }
-                    if (!note) {
-                        errEl.textContent = 'اكتب وصف قصير للعملية عشان نحدد نوعها صح.';
-                        errEl.classList.remove('hidden');
-                        return;
-                    }
-                    errEl.classList.add('hidden');
-                    try {
-                        const data = await callRecordExpenseApi({ amount, note });
-                        handleApiResult(data);
-                    } catch (e) {
-                        console.error('manual record failed:', e);
-                        errEl.textContent = e.message || 'حصل خطأ، جرب تاني.';
-                        errEl.classList.remove('hidden');
-                    }
-                };
-            }
-
-            document.getElementById('record-expense-btn').addEventListener('click', () => {
-                openOverlay();
-                const sub = window.__dashboardData?.subscription;
-                if (sub && !sub.active && !sub.inTrial) {
-                    showTrialEnded();
-                } else {
-                    showListening();
-                }
-            });
-        })();
 
         document.getElementById('close-person-debt').addEventListener('click', () => {
             const overlay = document.getElementById('person-debt-overlay');

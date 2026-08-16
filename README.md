@@ -4,8 +4,8 @@
 - افتح مشروعك في Supabase → SQL Editor → New Query
 - الصق محتوى `sql/schema.sql` وشغّله (Run)
 - لو عندك مشروع قديم شغّال بالفعل، السكريبت آمن يتشغّل تاني (`create table if not exists`) وهيضيف بس الجداول الجديدة: `debt_settlements` و `users`
-- **مهم:** شغّل كمان `sql/voice-usage.sql` (نفس الطريقة) — ده بيضيف الحد اليومي لعدد التسجيلات الصوتية لكل مستخدم، عشان محدش يقدر يعمل abuse يكلّفنا فلوس Groq. من غيره التسجيل الصوتي هيفضل شغال بس من غير أي حد أقصى.
-- **مهم:** شغّل كمان `sql/pending-confirmations.sql` — ده بيضيف جدول التأكيدات المعلّقة (لما مبلغ الفويس/الرسالة يكون محتاج تأكيد من المستخدم قبل ما يتسجل، شوف `lib/numberExtraction.js`). من غيره زرار التأكيد في تليجرام هيدّي خطأ.
+- **جديد — ميزة الأهداف المالية:** روح SQL Editor تاني وشغّل `sql/goals.sql` (منفصل عن `schema.sql`، بيعمل جدول `goals` بس)
+- **جديد — ميزة "امسح فاتورة" (Scan Anything):** بتستخدم موديل Vision من Groq. الافتراضي متظبط في `lib/config.js` (`GROQ_VISION_MODEL`)، بس لو حصل خطأ من Groq بيقول الموديل مش موجود، ادخل console.groq.com/docs/models ودوّر على أحدث موديل بيدعم الصور، وحطه في `GROQ_VISION_MODEL` في Environment Variables على Vercel.
 
 ## 2) رفع الكود
 - ارفع الفولدر ده كامل على GitHub repo جديد
@@ -19,8 +19,6 @@
 | `SUPABASE_URL` | من Supabase → Project Settings → API | ✅ |
 | `SUPABASE_SERVICE_ROLE_KEY` | من Supabase → Project Settings → API (Service Role، مش Anon) | ✅ |
 | `CRON_SECRET` | أي قيمة سرّية تختارها إنت | اختياري، بس ننصح بيه (تأمين الـ cron endpoint) |
-| `TELEGRAM_WEBHOOK_SECRET` | أي قيمة سرّية تختارها إنت (حروف/أرقام، من غير مسافات) | **✅ مهم جدًا قبل الإطلاق** — من غيرها أي حد عارف رابط الويب هوك يقدر يبعت رسايل مزيّفة للبوت وينتحل صفة الأدمن (شوف خطوة 4) |
-| `DAILY_VOICE_LIMIT` | عدد تسجيلات الصوت المسموحة لكل مستخدم في اليوم، افتراضيًا `50` | اختياري (50 كتير جدًا لأي استخدام حقيقي، غيّره لو عايز) |
 | `GROQ_TEXT_MODEL` | افتراضيًا `llama-3.3-70b-versatile` | اختياري |
 | `ADMIN_TELEGRAM_ID` | الـ Telegram user id بتاعك إنت (الأدمن) — ابعت أي رسالة لـ `@userinfobot` عشان تعرفه | ✅ (عشان تقدر تفعّل اشتراكات) |
 | `SUBSCRIPTION_DAYS` | مدة الاشتراك بالأيام بعد كل تفعيل، افتراضيًا `30` | اختياري |
@@ -33,19 +31,15 @@
 بعد ما تضيف المتغيرات، اعمل **Redeploy** للمشروع عشان القيم تتفعّل (ولازم تعمل Redeploy كمان أول مرة عشان الـ Cron Job في `vercel.json` يتسجّل).
 
 ## 4) ربط الـ Webhook (مرة واحدة بس)
-**لازم تضيف `TELEGRAM_WEBHOOK_SECRET` في Environment Variables الأول (خطوة 3) وتعمل Redeploy، قبل ما تربط الويب هوك.**
-
-افتح الرابط ده في المتصفح بعد ما تستبدل القيم (لاحظ إضافة `secret_token` في الآخر — ده بالظبط نفس القيمة اللي حطيتها في `TELEGRAM_WEBHOOK_SECRET`):
+افتح الرابط ده في المتصفح بعد ما تستبدل القيم:
 ```
-https://api.telegram.org/bot<TELEGRAM_BOT_TOKEN>/setWebhook?url=<VERCEL_URL>/api/telegram-webhook&secret_token=<TELEGRAM_WEBHOOK_SECRET>
+https://api.telegram.org/bot<TELEGRAM_BOT_TOKEN>/setWebhook?url=<VERCEL_URL>/api/telegram-webhook
 ```
 مثال:
 ```
-https://api.telegram.org/bot7123456789:AAExxxxx/setWebhook?url=https://floosy-bot.vercel.app/api/telegram-webhook&secret_token=my-super-secret-123
+https://api.telegram.org/bot7123456789:AAExxxxx/setWebhook?url=https://floosy-bot.vercel.app/api/telegram-webhook
 ```
 لازم يرجعلك `{"ok":true,...}`.
-
-⚠️ **مهم:** لو مش هتحط `TELEGRAM_WEBHOOK_SECRET`، البوت هيفضل شغال بس أي حد عارف رابط الويب هوك (مش سري أوي، بيبان لو حد دوّر) هيقدر يبعت طلبات مباشرة ويتظاهر إنه إنت (الأدمن) ويفعّل اشتراكات ببلاش لنفسه. ننصح بشدة تحطها قبل ما تطلق فعليًا.
 
 ## 5) جرب البوت
 - افتح البوت في تليجرام، ابعت `/start` عشان تشوف كل الأوامر
@@ -68,6 +62,13 @@ https://api.telegram.org/bot7123456789:AAExxxxx/setWebhook?url=https://floosy-bo
 | `ديون محمد` | كل تفاصيل العمليات مع محمد بالتحديد (مش الصافي بس) |
 | `دور على قهوة` / `ابحث عن قهوة` / `فين صرفت على قهوة` | يدورلك في كل مصاريفك على أي كلمة (وصف أو فئة) ويطلعلك النتايج + الإجمالي |
 | `صدّر البيانات` | يبعتلك ملف CSV فيه كل المصاريف والديون (يفتح كويس على Excel) |
+| `هدفي 20000 لابتوب خلال 60 يوم` | يسجل هدف ماليّ جديد، ولو حددت مدة بيحسبلك "محتاج توفر كام يوميًا" |
+| `وفرت 500` | يضيف مبلغ موفّر على هدفك الحالي، وبيقولك كام باقي والنسبة |
+| `هدفي` | يعرضلك حالة هدفك الحالي (شريط تقدم + المتبقي) |
+| `احذف هدفي` | يلغي الهدف الحالي عشان تقدر تبدأ هدف جديد |
+| `حلل الشهر` | ملخص Wrapped للشهر: أكبر تسريب، فرصة توفير تقديرية، ومقارنة بالشهر اللي فات |
+| (ابعت صورة فاتورة) | يقرا المبلغ والفئة تلقائيًا من الصورة (Groq Vision) ويسجلها كمصروف عادي |
+| (ابعت أي سؤال حر عن فلوسك) | زي "صرفت كام على الأكل الشهر ده؟" — بيرد بناءً على بياناتك الحقيقية |
 
 ## ⏰ التقارير والتذكيرات التلقائية (Cron Job)
 - في `vercel.json` كرون واحد بيشتغل يوميًا الساعة **9 مساءً بتوقيت القاهرة** (`0 19 * * *` بتوقيت UTC — القاهرة UTC+2)، وبينادي `/api/cron-daily`

@@ -1,10 +1,10 @@
 import { supabase } from '../lib/supabaseClient.js';
 import { sendTelegramMessage } from '../lib/telegram.js';
-import { sendMonthlyReport, sendWeeklyReport, sendReportPdf } from '../lib/expensesReports.js';
+import { sendMonthlyReport, sendWeeklyReport, sendReportPdf } from '../lib/expenses.js';
 import { getOldUnsettledDebtsSummary, recordDebtReminders } from '../lib/debts.js';
+import { generateFriendlyReminderIntro } from '../lib/groq.js';
 import { getAllUsers } from '../lib/users.js';
 import { claimCronSlot } from '../lib/cronRuns.js';
-import { cleanupOldPendingConfirmations } from '../lib/confirmations.js';
 import { CRON_SECRET } from '../lib/config.js';
 
 // عدد المستخدمين اللي بيتعالجوا بالتوازي في نفس الوقت، بدل ما نلف عليهم واحد واحد.
@@ -48,7 +48,11 @@ async function sendOldDebtsReminder(userId, chatId) {
   const oldOnes = await getOldUnsettledDebtsSummary(userId);
   if (!oldOnes) return;
 
-  let msg = `⏰ <b>تذكير بديون قديمة</b>\n━━━━━━━━━━━━━━━\n\n`;
+  // --- جملة افتتاحية متنوعة بدل نص ثابت كل مرة (اختيارية: لو Groq فشل، بنرجع للعنوان الثابت المعتاد) ---
+  const friendlyIntro = await generateFriendlyReminderIntro().catch(() => '');
+  let msg = friendlyIntro
+    ? `⏰ ${friendlyIntro}\n━━━━━━━━━━━━━━━\n\n`
+    : `⏰ <b>تذكير بديون قديمة</b>\n━━━━━━━━━━━━━━━\n\n`;
   msg += `الديون دي عدّى عليها فترة من غير تسوية:\n\n`;
   for (const d of oldOnes) {
     const who = d.net > 0 ? `إنت ليك عند ${d.displayName} ${d.net} جنيه` : `إنت عليك لـ ${d.displayName} ${Math.abs(d.net)} جنيه`;
@@ -136,10 +140,6 @@ export default async function handler(req, res) {
       return res.status(401).json({ ok: false, error: 'unauthorized' });
     }
   }
-
-  // تنضيف أي تأكيد مبلغ معلّق من غير رد لأكتر من يوم (شوف lib/confirmations.js) — منفصل تمامًا
-  // عن تقارير المستخدمين تحت، فبنسيبه يشتغل حتى لو فشل بشكل مستقل ومايوقفش باقي الكرون.
-  cleanupOldPendingConfirmations().catch((e) => console.error('cleanupOldPendingConfirmations failed:', e));
 
   const users = await getAllUsers();
 

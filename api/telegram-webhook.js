@@ -1,17 +1,12 @@
-import { transcribeVoice, classifyMessage } from '../lib/groq.js';
-import { tryUseVoiceQuota } from '../lib/voiceUsage.js';
-import { tryUseTextQuota } from '../lib/textUsage.js';
-import { sendTelegramMessage, forwardTelegramMessage, answerCallbackQuery } from '../lib/telegram.js';
-import { recordExpense, sendDataExport, sendExpenseSearch } from '../lib/expenses.js';
-import { sendMonthlyReport, sendWeeklyReport } from '../lib/expensesReports.js';
-import { recordDebt, settleDebtWithPerson } from '../lib/debts.js';
-import { sendDebtsReport, sendPersonDebtDetail } from '../lib/debtsReports.js';
+import { transcribeVoice, classifyMessage, answerDataQuestion, extractReceiptFromImage } from '../lib/groq.js';
+import { sendTelegramMessage, forwardTelegramMessage, answerCallbackQuery, editTelegramMessage, sendChatAction } from '../lib/telegram.js';
+import { recordExpense, sendMonthlyReport, sendWeeklyReport, sendDataExport, sendExpenseSearch, deleteExpenseById, getMostRecentExpense, getRecentExpensesSummaryText } from '../lib/expenses.js';
+import { recordDebt, sendDebtsReport, sendPersonDebtDetail, settleDebtWithPerson, deleteDebtById, getMostRecentDebt, getDebtsSummaryText } from '../lib/debts.js';
+import { createGoal, contributeToGoal, sendGoalStatus, cancelActiveGoal } from '../lib/goals.js';
+import { sendMonthlyWrapped } from '../lib/wrapped.js';
 import { upsertUser, hasActiveSubscription, getSubscriptionExpiry, activateSubscription, getChatIdByUserId, isInTrial, getTrialDaysLeft } from '../lib/users.js';
 import { createLinkCode } from '../lib/linking.js';
-import { resolveAmountConfidence } from '../lib/numberExtraction.js';
-import { normalizeEgyptianText } from '../lib/egyptianNormalize.js';
-import { createPendingConfirmation, getPendingConfirmation, deletePendingConfirmation } from '../lib/confirmations.js';
-import { CATEGORY_EMOJI, GUIDE_URL, ADMIN_TELEGRAM_ID, SUBSCRIPTION_DAYS, SUBSCRIPTION_PRICE_EGP, INSTAPAY_LINK, ADMIN_CONTACT_USERNAME, TELEGRAM_WEBHOOK_SECRET } from '../lib/config.js';
+import { GUIDE_URL, ADMIN_TELEGRAM_ID, SUBSCRIPTION_DAYS, SUBSCRIPTION_PRICE_EGP, INSTAPAY_LINK, ADMIN_CONTACT_USERNAME } from '../lib/config.js';
 
 // ============ نص دليل الأوامر — بيتبعت مع /start وبرضو متاح في أي وقت عن طريق "مساعدة" ============
 function buildCommandsGuide() {
@@ -20,12 +15,18 @@ function buildCommandsGuide() {
     '💸 <b>مصروف</b> — "صرفت 50 جنيه أكل"\n' +
     '🤝 <b>دين جديد</b> — "عطيت محمد 200 جنيه" أو "استلفت من سارة 100 جنيه"\n' +
     '↩️ <b>مرتجع (سداد دين قديم)</b> — "مرتجع من محمد 100 جنيه" أو "رجّعت لسارة 50 جنيه"\n\n' +
+    '🎯 <b>هدفي [مبلغ] [اسم]</b> — تحدد هدف ماليّ، مثلاً "هدفي 20000 لابتوب خلال 60 يوم"\n' +
+    '💰 <b>وفرت [مبلغ]</b> — تضيف مبلغ موفّر على هدفك الحالي (يتابعك بيه على طول)\n\n' +
+    '🔥 <b>حلل الشهر</b> — ملخص Wrapped: أكبر تسريب وفرصة توفير ومقارنة بالشهر اللي فات\n' +
+    '📸 <b>ابعت صورة فاتورة</b> — يقرا المبلغ والفئة لوحده ويسجله (مش محتاج تكتب حاجة)\n\n' +
     '📊 <b>تقرير</b> — ملخص شهري بالرسم البياني\n' +
     '📅 <b>تقرير الأسبوع</b> — ملخص آخر 7 أيام\n' +
     '💳 <b>ديون</b> — ملخص كل الديون\n' +
     '👤 <b>ديون محمد</b> — تفاصيل الديون مع شخص معيّن\n' +
     '✅ <b>خلصت مع محمد</b> — تسوية وتصفير الرصيد مع شخص\n' +
     '🔍 <b>دور على قهوة</b> — بحث في مصاريفك بأي كلمة\n' +
+    '❓ <b>اسألني أي سؤال عن مصاريفك</b> — زي "صرفت كام على الأكل الشهر ده؟"\n' +
+    '🗑 <b>حذف عملية</b> — دوس زرار "🗑 حذف" تحت أي رسالة تسجيل (هيطلب تأكيد قبل ما يمسح)، أو ابعت "امسح آخر مصروف/دين"\n' +
     '📁 <b>صدّر البيانات</b> — ملف بكل بياناتك (CSV و TXT)\n' +
     '💰 <b>اشتراكي</b> — تعرف حالة اشتراكك وتاريخ انتهائه\n' +
     '🔗 <b>/link</b> — كود لربط حسابك بالداشبورد على الموقع\n' +
@@ -57,7 +58,7 @@ function buildSubscriptionPrompt(isExpired, trialEnded = false) {
 async function tryHandleAdminActivation(text, fromUserId, adminChatId) {
   if (!ADMIN_TELEGRAM_ID || fromUserId !== ADMIN_TELEGRAM_ID) return false;
 
-  const match = text.match(/^فعّ?ل\s+(-?\d+)(?:\s+(\d+))?$/);
+  const match = text.match(/^فعّ?ل\s+(\d+)(?:\s+(\d+))?$/);
   if (!match) return false;
 
   const targetUserId = Number(match[1]);
@@ -83,29 +84,119 @@ async function tryHandleAdminActivation(text, fromUserId, adminChatId) {
   return true;
 }
 
+// ============ حذف عملية (مصروف أو دين) عن طريق زرار "🗑 حذف" تحت رسالة التسجيل ============
+// ملحوظة مهمة: تليجرام مبيبعتش أي إشعار للبوت لو المستخدم مسح رسالته من الشات (مفيش "message_deleted"
+// في الـ Bot API خالص، سواء في شات خاص أو جروب) — فمفيش طريقة نخلي "مسح الرسالة من تليجرام" يمسح
+// العملية من قاعدة البيانات تلقائيًا. البديل العملي اللي بيدّي نفس الإحساس: زرار 🗑 تحت كل رسالة تسجيل،
+// بيفضل شغال لأي وقت (مش بيتقفل بعد شوية زي أزرار تانية)، فتقدر تمسح أي عملية قديمة برضو لو رجعت للرسالة.
+//
+// الحذف على خطوتين دايمًا (تأكيد إجباري)، عشان محدش يمسح حاجة بالغلط بضغطة واحدة:
+// 1) دوس "🗑 حذف" -> الرسالة بتتغيّر لسؤال تأكيد ("متأكد؟ 🗑 اتأكيد / إلغاء").
+// 2) دوس "🗑 اتأكيد" -> ساعتها بس بيتم المسح الفعلي من قاعدة البيانات.
+// "إلغاء" أو تجاهل الرسالة بيرجّع زرار "🗑 حذف" العادي زي ما كان، من غير أي حذف.
+function buildConfirmMarkup(action, id) {
+  return {
+    inline_keyboard: [[
+      { text: '🗑 اتأكيد الحذف', callback_data: `${action}_yes:${id}` },
+      { text: '↩️ إلغاء', callback_data: `${action}_no:${id}` },
+    ]],
+  };
+}
+
+function buildDeleteMarkup(action, id) {
+  return { inline_keyboard: [[{ text: '🗑 حذف العملية دي', callback_data: `${action}:${id}` }]] };
+}
+
+async function handleDeleteCallback(callbackQuery) {
+  const data = callbackQuery.data || '';
+  const chatId = callbackQuery.message?.chat?.id;
+  const messageId = callbackQuery.message?.message_id;
+  const userId = callbackQuery.from?.id;
+  const originalText = callbackQuery.message?.text || '';
+
+  const [rawAction, rawId] = data.split(':');
+  const id = Number(rawId);
+
+  if (!id || !chatId || !userId) {
+    await answerCallbackQuery(callbackQuery.id, 'حصل خطأ، جرب تاني.');
+    return;
+  }
+
+  // --- الضغطة الأولى على "🗑 حذف": نستبدل الزرار بسؤال تأكيد، من غير أي مسح فعلي لسه ---
+  if (rawAction === 'delexp' || rawAction === 'deldebt') {
+    await answerCallbackQuery(callbackQuery.id);
+    await editTelegramMessage(chatId, messageId, `${originalText}\n\n⚠️ متأكد إنك عايز تمسح العملية دي؟`, 'HTML', buildConfirmMarkup(rawAction, id));
+    return;
+  }
+
+  // --- إلغاء: رجّع الرسالة والزرار الأصليين زي ما كانوا، من غير أي حذف ---
+  if (rawAction === 'delexp_no' || rawAction === 'deldebt_no') {
+    const baseAction = rawAction.replace('_no', '');
+    const cleanText = originalText.replace(/\n\n⚠️ متأكد إنك عايز تمسح العملية دي؟$/, '');
+    await answerCallbackQuery(callbackQuery.id, 'اتلغى، العملية لسه موجودة');
+    await editTelegramMessage(chatId, messageId, cleanText, 'HTML', buildDeleteMarkup(baseAction, id));
+    return;
+  }
+
+  // --- تأكيد فعلي: هنا بس بيتم المسح من قاعدة البيانات ---
+  if (rawAction === 'delexp_yes') {
+    const deleted = await deleteExpenseById(id, userId);
+    if (!deleted) {
+      await answerCallbackQuery(callbackQuery.id, '❌ العملية دي اتمسحت قبل كده أو مش لاقيها.', true);
+      return;
+    }
+    await answerCallbackQuery(callbackQuery.id, '🗑 اتمسح');
+    await editTelegramMessage(chatId, messageId, `🗑 <s>اتمسح مصروف ${deleted.category} · ${deleted.amount} جنيه</s>`, 'HTML');
+    return;
+  }
+
+  if (rawAction === 'deldebt_yes') {
+    const deleted = await deleteDebtById(id, userId);
+    if (!deleted) {
+      await answerCallbackQuery(callbackQuery.id, '❌ العملية دي اتمسحت قبل كده أو مش لاقيها.', true);
+      return;
+    }
+    await answerCallbackQuery(callbackQuery.id, '🗑 اتمسح');
+    await editTelegramMessage(chatId, messageId, `🗑 <s>اتمسحت عملية ${deleted.person_name} · ${deleted.amount} جنيه</s>`, 'HTML');
+    return;
+  }
+
+  await answerCallbackQuery(callbackQuery.id);
+}
+
+// ============ ميزة "امسح فاتورة" — بتاخد أعلى دقة متاحة من الصورة وتبعتها لـ Groq Vision، وتسجل النتيجة كمصروف عادي ============
+async function handleReceiptPhoto(message, userId, chatId) {
+  await sendChatAction(chatId, 'typing');
+  await sendTelegramMessage(chatId, '📸 بقرا الفاتورة...');
+
+  // تليجرام بيبعت الصورة بأكتر من دقة — بناخد آخر عنصر (أعلى دقة)
+  const bestPhoto = message.photo[message.photo.length - 1];
+  const receipt = await extractReceiptFromImage(bestPhoto.file_id);
+
+  if (!receipt) {
+    await sendTelegramMessage(
+      chatId,
+      '😕 مقدرتش أقرا الفاتورة دي كويس (الصورة مش واضحة أو المبلغ الإجمالي مش ظاهر).\nجرب تصورها تاني بإضاءة أحسن، أو ابعت المصروف كنص عادي زي "صرفت 150 جنيه سوبر ماركت".'
+    );
+    return;
+  }
+
+  const note = receipt.merchant ? `فاتورة ${receipt.merchant}` : 'فاتورة ممسوحة';
+  await recordExpense({ amount: receipt.amount, category: receipt.category, note }, note, userId, chatId);
+}
+
 // ============ نقطة الدخول - Vercel بينادي الدالة دي لكل ريكوست ============
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(200).send('Bot is running');
   }
 
-  // ---- تأمين الويب هوك: نتأكد إن الطلب جاي فعليًا من تليجرام مش من أي حد عارف الرابط ----
-  // من غير الفحص ده، أي حد يعرف رابط الويب هوك يقدر يبعت POST مباشر ويتظاهر إنه ADMIN_TELEGRAM_ID
-  // (بمجرد ما يحط نفس الرقم في message.from.id بالطلب المزيّف)، ويفعّل اشتراكات ببلاش لنفسه أو
-  // لأي حد. تليجرام بيبعت الهيدر ده تلقائيًا مع كل ريكوست حقيقي لو ضبطناه وقت setWebhook (شوف README).
-  if (TELEGRAM_WEBHOOK_SECRET) {
-    const incomingSecret = req.headers['x-telegram-bot-api-secret-token'];
-    if (incomingSecret !== TELEGRAM_WEBHOOK_SECRET) {
-      return res.status(401).json({ error: 'Unauthorized' });
-    }
-  }
-
   try {
     const update = req.body;
 
-    // --- ضغطة على زرار تأكيد المبلغ (⬅️ من رسالة "تقصد X ولا Y؟") — مسار منفصل تمامًا عن الرسايل العادية ---
+    // --- ضغطة على زرار "🗑 حذف" تحت رسالة تسجيل مصروف/دين ---
     if (update.callback_query) {
-      await handleConfirmationCallback(update.callback_query);
+      await handleDeleteCallback(update.callback_query);
       return res.status(200).json({ ok: true });
     }
 
@@ -129,8 +220,22 @@ export default async function handler(req, res) {
     // ده عشان اليوزر يقدر يبعت إيصال الدفع أول ما يشترك، من غير ما يتقفل عليه بالبوابة تحت.
     // بنطلب من اليوزر يكتب اسمه في نفس رسالة الصورة (caption)، عشان الأدمن يقدر يتأكد من التحويل
     // بسرعة (يقارن الاسم بالاسم اللي ظهر في إنستا باي) من غير ما يحتاج يسأله تاني.
+    // --- صورة: إما فاتورة/إيصال (ميزة "امسح فاتورة" لمشترك فعّال أو في التجربة) أو سكرين شوت تحويل اشتراك ---
+    // بنفرّق بينهم بالحالة: لو عنده اشتراك فعّال أو لسه في التجربة، وما كتبش كلمة بتدل على نية دفع
+    // في الكابشن (زي "اشتراك"/"دفعت"/"انستاباي")، بنعتبرها فاتورة عايز يسجلها. غير كده تعتبر إيصال دفع.
     if (message.photo) {
-      const senderName = message.caption ? message.caption.trim() : '';
+      const caption = message.caption ? message.caption.trim() : '';
+      const looksLikePaymentProof = /اشتراك|دفعت|فيزا|انستاباي|إنستاباي|instapay/i.test(caption);
+
+      const activeNow = await hasActiveSubscription(userId);
+      const trialNow = activeNow ? false : await isInTrial(userId);
+
+      if ((activeNow || trialNow) && !looksLikePaymentProof) {
+        await handleReceiptPhoto(message, userId, chatId);
+        return res.status(200).json({ ok: true });
+      }
+
+      const senderName = caption;
 
       if (ADMIN_TELEGRAM_ID && userId !== ADMIN_TELEGRAM_ID) {
         await forwardTelegramMessage(ADMIN_TELEGRAM_ID, chatId, message.message_id);
@@ -239,21 +344,6 @@ export default async function handler(req, res) {
     // (قبل كده كانت بتتفرّغ وتروح على طول للتصنيف الذكي (مصروف/دين) من غير ما تعدّي على أوامر
     // زي "تقرير" أو "ديون" أو "دور على" — يعني الأوامر دي كانت مش شغالة بالصوت. اتصلحت دلوقتي.)
     if (message.voice) {
-      // ---- نفس الحد اليومي المطبّق في الداشبورد، عشان مفيش ثغرة لو حد استخدم تليجرام بدل الموقع ----
-      const allowed = await tryUseVoiceQuota(userId);
-      if (!allowed) {
-        await sendTelegramMessage(chatId, '🎙️ خد راحة من التسجيلات الصوتية النهاردة (استخدمتها كتير، تسلم إيدك 💪). ابعتها كتابةً دلوقتي وهتتسجل عادي، وترجعلك الميزة الصوتية تاني بكرة.');
-        return res.status(200).json({ ok: true });
-      }
-      // ---- نفس حد الـ45 ثانية المطبّق على تسجيل الداشبورد (شوف dabbar-dashboard-full.html)،
-      // عشان تليجرام كان بيسمح بفويس نوت بأي طول من غير حماية، وده بيكلّف فلوس Groq زيادة
-      // (تكلفة Whisper بتتحسب على مدة الصوت). تليجرام بيبعتلنا مدة التسجيل جاهزة في الرسالة
-      // نفسها (duration بالثواني)، فمحتاجين نتأكد منها بس قبل ما ننزّل الملف ونكلّم Groq أصلًا.
-      const MAX_TELEGRAM_VOICE_SECONDS = 45;
-      if (Number(message.voice.duration) > MAX_TELEGRAM_VOICE_SECONDS) {
-        await sendTelegramMessage(chatId, `🎙️ التسجيل طويل أوي، جرب تختصره في ${MAX_TELEGRAM_VOICE_SECONDS} ثانية (كفاية تقول فيها كذا مصروف براحتك).`);
-        return res.status(200).json({ ok: true });
-      }
       const text = await transcribeVoice(message.voice.file_id);
       await routeUserMessage(text, userId, chatId);
       return res.status(200).json({ ok: true });
@@ -298,6 +388,17 @@ export default async function handler(req, res) {
   }
 }
 
+// ============ تحويل الأرقام العربية/الهندية والفارسية (٠١٢٣٤٥٦٧٨٩ / ۰۱۲۳۴۵۶۷۸۹) لأرقام إنجليزية عادية ============
+// من غير ده، لو المستخدم كتب "٨٠٠٠٠" بدل "80000"، النص بيروح للـ AI (Groq) زي ما هو والموديل
+// أحيانًا بيقرأ العدد أو الأصفار غلط (بيزوّد أو ينقّص صفر). التحويل ده بيتم أول حاجة قبل أي
+// معالجة تانية للنص، عشان كل حاجة بعد كده (تصنيف، أوامر، أسماء) تشتغل على أرقام إنجليزية مضمونة.
+function normalizeDigits(text) {
+  const arabicIndic = '٠١٢٣٤٥٦٧٨٩';
+  const persian = '۰۱۲۳۴۵۶۷۸۹';
+  return text.replace(/[٠-٩]/g, (d) => String(arabicIndic.indexOf(d)))
+             .replace(/[۰-۹]/g, (d) => String(persian.indexOf(d)));
+}
+
 // ============ نقطة توجيه موحّدة لأي نص جاي من المستخدم (سواء مكتوب أو مفرّغ من فويس نوت) ============
 // بتفحص الأوامر الثابتة الأول (تقرير/ديون/دور على/صدّر البيانات)، ولو مفيش أمر معروف تعتبرها
 // مصروف أو دين أو تسوية وتبعتها للتصنيف الذكي. المسار ده واحد لكل من الكتابة والصوت، عشان
@@ -308,7 +409,7 @@ async function routeUserMessage(text, userId, chatId) {
     return;
   }
 
-  text = normalizeEgyptianText(text);
+  text = normalizeDigits(text);
 
   // أمر التقرير الشهري
   if (['تقرير', 'التقرير', '/report'].includes(text)) {
@@ -319,6 +420,12 @@ async function routeUserMessage(text, userId, chatId) {
   // أمر التقرير الأسبوعي
   if (['تقرير الاسبوع', 'تقرير الأسبوع', 'تقرير أسبوعي', 'الاسبوع', '/weekly'].includes(text)) {
     await sendWeeklyReport(userId, chatId);
+    return;
+  }
+
+  // أمر "فين فلوسي راحت؟" — ملخص الشهر بأسلوب Wrapped (أكبر تسريب + فرصة توفير + مقارنة)
+  if (['حلل الشهر', 'فين فلوسي راحت', 'فين فلوسي راحت؟', 'wrapped', 'Wrapped', '/wrapped'].includes(text)) {
+    await sendMonthlyWrapped(userId, chatId);
     return;
   }
 
@@ -342,6 +449,56 @@ async function routeUserMessage(text, userId, chatId) {
     return;
   }
 
+  // أمر "امسح آخر مصروف/عملية" — بديل سريع لزرار 🗑 لو مش قدامك رسالة التسجيل الأصلية أو مسحتها من الشات
+  if (['امسح آخر مصروف', 'امسح اخر مصروف', 'امسح آخر عملية', 'امسح اخر عملية'].includes(text)) {
+    await deleteLastExpense(userId, chatId);
+    return;
+  }
+  if (['امسح آخر دين', 'امسح اخر دين'].includes(text)) {
+    await deleteLastDebt(userId, chatId);
+    return;
+  }
+
+  // ============ أوامر الأهداف المالية (Goals) ============
+  // "هدفي 20000 لابتوب" أو "هدفي 20000 لابتوب خلال 60 يوم" → إنشاء هدف جديد
+  const goalCreateMatch = text.match(/^هدفي\s+(\d+(?:\.\d+)?)\s*(?:جنيه|ج)?\s*(.*)$/);
+  if (goalCreateMatch) {
+    const targetAmount = parseFloat(goalCreateMatch[1]);
+    let rest = goalCreateMatch[2].trim();
+    let targetDate = null;
+
+    const daysMatch = rest.match(/خلال\s+(\d+)\s*(?:يوم|أيام)/);
+    if (daysMatch) {
+      const days = parseInt(daysMatch[1], 10);
+      const d = new Date();
+      d.setDate(d.getDate() + days);
+      targetDate = d.toISOString().slice(0, 10);
+      rest = rest.replace(daysMatch[0], '').trim();
+    }
+
+    await createGoal({ title: rest || 'هدفك', targetAmount, targetDate }, userId, chatId);
+    return;
+  }
+
+  // "هدفي" لوحدها → عرض حالة الهدف الحالي
+  if (['هدفي', 'هدف', 'اهدافي', 'أهدافي', '/goal'].includes(text)) {
+    await sendGoalStatus(userId, chatId);
+    return;
+  }
+
+  // "وفرت 500" أو "ضيف على هدفي 500" → إضافة مبلغ موفّر على الهدف الحالي
+  const contributeMatch = text.match(/^(?:وفرت|ضيف على هدفي|زود هدفي)\s+(\d+(?:\.\d+)?)/);
+  if (contributeMatch) {
+    await contributeToGoal(parseFloat(contributeMatch[1]), userId, chatId);
+    return;
+  }
+
+  // إلغاء الهدف الحالي
+  if (['احذف هدفي', 'الغاء هدفي', 'إلغاء هدفي', 'امسح هدفي'].includes(text)) {
+    await cancelActiveGoal(userId, chatId);
+    return;
+  }
+
   // بحث في المصاريف: "دور على قهوة" / "ابحث عن قهوة" / "فين صرفت على قهوة" / "بحث قهوة"
   const searchMatch = text.match(/^(?:دور على|ابحث عن|فين صرفت على|بحث)\s+(.+)$/);
   if (searchMatch) {
@@ -354,174 +511,90 @@ async function routeUserMessage(text, userId, chatId) {
   await handleIncomingText(text, userId, chatId);
 }
 
-// ============ رد على ضغطة زرار تأكيد/رفض مبلغ معلّق ============
-// callback_data شكله "cy:<id>" (أيوه، سجّل زي ما هو) أو "cn:<id>" (لأ، إلغاء). الـ id بيرجّع
-// لنا المعاملة الكاملة من جدول pending_confirmations (شوف lib/confirmations.js).
-async function handleConfirmationCallback(cq) {
-  const callbackId = cq.id;
-  const data = String(cq.data || '');
-  const chatId = cq.message?.chat?.id;
-  const match = data.match(/^(cy|cn):(.+)$/);
-
-  if (!match) {
-    await answerCallbackQuery(callbackId);
-    return;
-  }
-
-  const [, action, id] = match;
-  const pending = await getPendingConfirmation(id);
-
-  if (!pending) {
-    await answerCallbackQuery(callbackId, '⏰ انتهت صلاحية التأكيد ده');
-    if (chatId) {
-      await sendTelegramMessage(chatId, '⏰ التأكيد ده اتلغى أو خلصت صلاحيته (أكتر من يوم). لو لسه محتاج تسجلها، ابعتها تاني.');
-    }
-    return;
-  }
-
-  await deletePendingConfirmation(id);
-
-  if (action === 'cn') {
-    await answerCallbackQuery(callbackId, 'اتلغت ❌');
-    await sendTelegramMessage(pending.chat_id, '❌ اتلغت المعاملة دي. ابعتها تاني بشكل أوضح (خصوصًا المبلغ) لو حابب تسجلها.');
-    return;
-  }
-
-  // action === 'cy' — المستخدم أكّد إن المبلغ اللي فهمناه صح، ننفّذ فعليًا دلوقتي بس
-  await answerCallbackQuery(callbackId, 'تمام ✅');
-  if (pending.kind === 'expense') {
-    await recordExpense(pending.payload, pending.raw_text || '', pending.telegram_user_id, pending.chat_id);
-  } else if (pending.kind === 'debt') {
-    await recordDebt(pending.payload, pending.telegram_user_id, pending.chat_id);
-  }
-}
-
-// ============ بناء نص السؤال عن المبلغ ============
-// لو فيه تعارض حجم واضح (10x/100x — أخطر أنواع غلط الـ ASR)، بنعرض الاختيار صراحةً بين رقم
-// الموديل والرقم الحتمي البديل بدل سؤال عمومي، عشان المستخدم يرد بضغطة واحدة بدل ما يعيد الكتابة.
-function buildAmountQuestion(modelAmount, deterministicAmounts, magnitudeConflict) {
-  if (magnitudeConflict && deterministicAmounts.length > 0) {
-    const alt = deterministicAmounts.find((n) => n !== modelAmount) ?? deterministicAmounts[0];
-    return `تقصد ${modelAmount} جنيه ولا ${alt} جنيه؟`;
-  }
-  return `تقصد ${modelAmount} جنيه؟`;
-}
-
-function confirmationKeyboard(id, modelAmount) {
-  return {
-    inline_keyboard: [[
-      { text: `✅ أيوه، ${modelAmount} جنيه`, callback_data: `cy:${id}` },
-      { text: '❌ لأ، إلغاء', callback_data: `cn:${id}` },
-    ]],
-  };
-}
-
-// ============ طلب تأكيد مصروف — مبلغه محتاج مراجعة قبل ما يتسجّل فعليًا ============
-async function askExpenseConfirmation(result, text, userId, chatId, conf) {
-  const id = await createPendingConfirmation(
-    userId, chatId, 'expense',
-    { amount: Number(result.amount), category: result.category, note: result.note || '' },
-    text
-  );
-  if (!id) {
-    await sendTelegramMessage(chatId, '⚠️ حصل خطأ وأنا بحاول أتأكد من المبلغ، جرب تبعتها تاني.');
-    return;
-  }
-  const emoji = CATEGORY_EMOJI[result.category] || '📌';
-  const detail = result.note && result.note.trim() ? ` (${result.note.trim()})` : '';
-  const question = buildAmountQuestion(Number(result.amount), conf.deterministicAmounts, conf.magnitudeConflict);
-  await sendTelegramMessage(
-    chatId,
-    `🤔 <b>مش متأكد من المبلغ</b>\n${emoji} ${result.category}${detail}\n${question}`,
-    'HTML',
-    confirmationKeyboard(id, Number(result.amount))
-  );
-}
-
-// ============ طلب تأكيد دين/سلفة — نفس فكرة المصروف بالظبط ============
-async function askDebtConfirmation(result, text, userId, chatId, conf) {
-  const id = await createPendingConfirmation(
-    userId, chatId, 'debt',
-    {
-      person: result.person, amount: Number(result.amount),
-      direction: result.direction === 'borrowed' ? 'borrowed' : 'lent',
-      is_repayment: Boolean(result.is_repayment), note: result.note || '',
-    },
-    text
-  );
-  if (!id) {
-    await sendTelegramMessage(chatId, '⚠️ حصل خطأ وأنا بحاول أتأكد من المبلغ، جرب تبعتها تاني.');
-    return;
-  }
-  const question = buildAmountQuestion(Number(result.amount), conf.deterministicAmounts, conf.magnitudeConflict);
-  await sendTelegramMessage(
-    chatId,
-    `🤔 <b>مش متأكد من المبلغ</b>\n👤 ${result.person}\n${question}`,
-    'HTML',
-    confirmationKeyboard(id, Number(result.amount))
-  );
-}
-
 // ============ التصنيف الذكي لأي رسالة (مصروف / دين / تسوية) — بيتنادى بس لو الرسالة مش أمر معروف ============
-// ملحوظة أساسية: المبلغ في أي معاملة مش بيتنفّذ (يتسجّل في الداتابيز) غير لو الثقة فيه عالية
-// (شوف lib/numberExtraction.js -> resolveAmountConfidence). لو محتاج تأكيد، بنطلبه من المستخدم
-// بزرار بدل ما نخمّن — وده بيتم لكل معاملة على حدة (مش الرسالة كلها) عشان لو فيه 3 عمليات
-// واضحة وواحدة بس غامضة، الـ3 بيتسجلوا فورًا وبنسأل بس عن اللي محتاجة تأكيد.
 async function handleIncomingText(text, userId, chatId) {
   if (!text) {
     await sendTelegramMessage(chatId, 'معرفتش أفهم الرسالة، ممكن تعيدها؟');
     return;
   }
 
-  // ---- الحد اليومي لعدد رسايل النص اللي بتتصنّف بالـ AI: نفس فكرة تسجيلات الصوت بالظبط ----
-  const allowed = await tryUseTextQuota(userId);
-  if (!allowed) {
-    await sendTelegramMessage(
-      chatId,
-      '📝 خد راحة شوية (استخدمت رسايلك النهاردة، تسلم إيدك 💪). هترجعلك الميزة تاني بكرة.'
-    );
-    return;
-  }
-
-  // ---- تطبيع (أرقام + تصحيحات إملائية شائعة) قبل التصنيف والاستخراج الحتمي، عشان الاتنين
-  // يشتغلوا على نفس النسخة بالظبط من النص ----
-  const normalizedText = normalizeEgyptianText(text);
-  const transactions = await classifyMessage(normalizedText);
+  const transactions = await classifyMessage(text);
   let successCount = 0;
-  let pendingCount = 0;
 
   for (const result of transactions) {
     if (result.type === 'expense' && result.amount) {
-      const conf = resolveAmountConfidence(Number(result.amount), result.confidence, normalizedText);
-      if (conf.requiresConfirmation) {
-        await askExpenseConfirmation(result, normalizedText, userId, chatId, conf);
-        pendingCount++;
-      } else {
-        await recordExpense(result, normalizedText, userId, chatId);
-        successCount++;
-      }
+      await recordExpense(result, text, userId, chatId);
+      successCount++;
     } else if (result.type === 'debt' && result.amount && result.person) {
-      const conf = resolveAmountConfidence(Number(result.amount), result.confidence, normalizedText);
-      if (conf.requiresConfirmation) {
-        await askDebtConfirmation(result, normalizedText, userId, chatId, conf);
-        pendingCount++;
-      } else {
-        await recordDebt(result, userId, chatId);
-        successCount++;
-      }
+      await recordDebt(result, userId, chatId);
+      successCount++;
     } else if (result.type === 'settlement' && result.person) {
       await settleDebtWithPerson(result.person, userId, chatId);
       successCount++;
     }
   }
 
-  if (successCount === 0 && pendingCount === 0) {
-    await sendTelegramMessage(
-      chatId,
-      'مش قادر أحدد المعاملات من رسالتك 🤔\nجرب تبعت زي كده: "صرفت 50 جنيه أكل" أو "عطيت محمد 200 جنيه" أو "خلصت مع محمد"'
-    );
+  if (successCount === 0) {
+    // --- قبل ما نقول "معرفتش أفهم"، نجرب نشوف لو الرسالة سؤال عن بياناته (زي "صرفت كام على الأكل؟") ---
+    const answered = await tryAnswerAsDataQuestion(text, userId, chatId);
+    if (!answered) {
+      await sendTelegramMessage(
+        chatId,
+        'مش قادر أحدد المعاملات من رسالتك 🤔\nجرب تبعت زي كده: "صرفت 50 جنيه أكل" أو "عطيت محمد 200 جنيه" أو "خلصت مع محمد"'
+      );
+    }
   } else if (transactions.length > 1 && successCount > 0) {
-    const pendingNote = pendingCount > 0 ? ` (وفيه ${pendingCount} محتاجة تأكيد المبلغ فوق ⬆️)` : '';
-    await sendTelegramMessage(chatId, `✅ تم تسجيل ${successCount} معاملة بنجاح${pendingNote}.`);
+    await sendTelegramMessage(chatId, `✅ تم تسجيل ${successCount} معاملة بنجاح.`);
+  }
+}
+
+// ============ حذف آخر مصروف/دين عن طريق أمر نصي (بديل سريع لزرار 🗑 تحت رسالة التسجيل) ============
+// برضو بيطلب تأكيد قبل ما يمسح فعليًا — نفس مبدأ زرار 🗑، بس بيبدأ من رسالة تأكيد على طول
+// (من غير الحاجة لخطوة "دوس حذف" الأولى، لأن الأمر النصي نفسه أصلاً نية واضحة للحذف).
+async function deleteLastExpense(userId, chatId) {
+  const latest = await getMostRecentExpense(userId);
+  if (!latest) {
+    await sendTelegramMessage(chatId, 'معندكش أي مصاريف مسجلة أصلاً عشان نمسحها 🤔');
+    return;
+  }
+  await sendTelegramMessage(
+    chatId,
+    `⚠️ متأكد إنك عايز تمسح آخر مصروف: ${latest.category} · ${latest.amount} جنيه؟`,
+    'HTML',
+    buildConfirmMarkup('delexp', latest.id)
+  );
+}
+
+async function deleteLastDebt(userId, chatId) {
+  const latest = await getMostRecentDebt(userId);
+  if (!latest) {
+    await sendTelegramMessage(chatId, 'معندكش أي ديون مسجلة أصلاً عشان نمسحها 🤔');
+    return;
+  }
+  await sendTelegramMessage(
+    chatId,
+    `⚠️ متأكد إنك عايز تمسح آخر عملية دين: ${latest.person_name} · ${latest.amount} جنيه؟`,
+    'HTML',
+    buildConfirmMarkup('deldebt', latest.id)
+  );
+}
+
+// ============ لو الرسالة مش مصروف/دين واضح، نجرب نجاوب عليها كسؤال حر عن بيانات المستخدم ============
+// (مثلاً: "صرفت كام على الأكل الشهر ده؟"، "مديون لمين؟"، "هل صرفي زاد؟"). لو Groq حس إنها مالهاش
+// علاقة بالبيانات، بيرجع null وساعتها بنرجع لرسالة "معرفتش أفهم" العادية.
+async function tryAnswerAsDataQuestion(text, userId, chatId) {
+  try {
+    const [expensesSummary, debtsSummary] = await Promise.all([
+      getRecentExpensesSummaryText(userId),
+      getDebtsSummaryText(userId),
+    ]);
+    const context = `${expensesSummary}\n\n${debtsSummary}`;
+    const answer = await answerDataQuestion(text, context);
+    if (!answer) return false;
+    await sendTelegramMessage(chatId, `💬 <b>دَبّر:</b>\n${answer}`, 'HTML');
+    return true;
+  } catch (err) {
+    console.error('tryAnswerAsDataQuestion failed:', err);
+    return false;
   }
 }

@@ -14,11 +14,7 @@
       "memory": 1536,
       "maxDuration": 60
     },
-    "api/monthly-report-pdf.js": {
-      "memory": 1536,
-      "maxDuration": 60
-    },
-    "api/debts-report-pdf.js": {
+    "api/reports.js": {
       "memory": 1536,
       "maxDuration": 60
     }

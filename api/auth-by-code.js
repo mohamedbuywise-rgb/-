@@ -89,11 +89,16 @@ export default async function handler(req, res) {
       authUserId = created.user.id;
 
       // بيتسجل صف في جدول profiles (شغّل sql/profiles.sql على Supabase عشان الجدول ده يتعمل)
-      await supabase.from('profiles').upsert({
+      const { error: profileError } = await supabase.from('profiles').upsert({
         id: authUserId,
         full_name: firstName || 'مستخدم دبّر',
         email: syntheticEmail,
       });
+      if (profileError) {
+        // بنطبعها في اللوج عشان تبان في Vercel Logs، لكن منوقفش العملية —
+        // فيه fallback في الداشبورد بيعمل upsert تاني لو لقى profile فاضي.
+        console.error('auth-by-code profile upsert error:', profileError);
+      }
     }
 
     // ---- 4) نربط (أو نأكد ربط) حساب الموقع بحساب تليجرام ----

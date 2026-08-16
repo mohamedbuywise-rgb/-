@@ -6,7 +6,8 @@ import { createGoal, contributeToGoal, sendGoalStatus, cancelActiveGoal } from '
 import { sendMonthlyWrapped } from '../lib/wrapped.js';
 import { upsertUser, hasActiveSubscription, getSubscriptionExpiry, activateSubscription, getChatIdByUserId, isInTrial, getTrialDaysLeft } from '../lib/users.js';
 import { createLinkCode } from '../lib/linking.js';
-import { GUIDE_URL, ADMIN_TELEGRAM_ID, SUBSCRIPTION_DAYS, SUBSCRIPTION_PRICE_EGP, INSTAPAY_LINK, ADMIN_CONTACT_USERNAME } from '../lib/config.js';
+import { checkVoiceUsage, checkOcrUsage, checkChatUsage } from '../lib/rateLimits.js';
+import { GUIDE_URL, ADMIN_TELEGRAM_ID, SUBSCRIPTION_DAYS, SUBSCRIPTION_PRICE_EGP, INSTAPAY_LINK, ADMIN_CONTACT_USERNAME, VOICE_MAX_DURATION_SECONDS } from '../lib/config.js';
 
 // ============ نص دليل الأوامر — بيتبعت مع /start وبرضو متاح في أي وقت عن طريق "مساعدة" ============
 function buildCommandsGuide() {
@@ -165,7 +166,9 @@ async function handleDeleteCallback(callbackQuery) {
 }
 
 // ============ ميزة "امسح فاتورة" — بتاخد أعلى دقة متاحة من الصورة وتبعتها لـ Groq Vision، وتسجل النتيجة كمصروف عادي ============
-async function handleReceiptPhoto(message, userId, chatId) {
+// usage: نتيجة checkOcrUsage الجاهزة (اتفحصت واتزادت قبل النداء على الدالة دي) — بتستخدم بس عشان نعرض
+// عداد صغير "المتبقي: x/y" في نهاية رسالة التأكيد للمشترك (مش للتجربة المجانية، عشان تحس إنها Unlimited).
+async function handleReceiptPhoto(message, userId, chatId, usage) {
   await sendChatAction(chatId, 'typing');
   await sendTelegramMessage(chatId, '📸 بقرا الفاتورة...');
 
@@ -173,16 +176,22 @@ async function handleReceiptPhoto(message, userId, chatId) {
   const bestPhoto = message.photo[message.photo.length - 1];
   const receipt = await extractReceiptFromImage(bestPhoto.file_id);
 
-  if (!receipt) {
+  if (!receipt.success) {
+    const hintLine = receipt.hint
+      ? `\n\n🔍 اللي واخد بالي منه: ${receipt.hint}. جرب تصورها تاني بحيث الجزء ده يبقى واضح.`
+      : '';
     await sendTelegramMessage(
       chatId,
-      '😕 مقدرتش أقرا الفاتورة دي كويس (الصورة مش واضحة أو المبلغ الإجمالي مش ظاهر).\nجرب تصورها تاني بإضاءة أحسن، أو ابعت المصروف كنص عادي زي "صرفت 150 جنيه سوبر ماركت".'
+      `😕 مقدرتش أقرا الفاتورة دي كويس حتى بعد ما حاولت أكتر من مرة.${hintLine}\nجرب تصورها تاني بإضاءة أحسن وبدون قص لأي جزء، أو ابعت المصروف كنص عادي زي "صرفت 150 جنيه سوبر ماركت".`
     );
     return;
   }
 
   const note = receipt.merchant ? `فاتورة ${receipt.merchant}` : 'فاتورة ممسوحة';
-  await recordExpense({ amount: receipt.amount, category: receipt.category, note }, note, userId, chatId);
+  const footer = usage && !usage.isTrial && usage.remaining !== null
+    ? `📎 <i>المتبقي: ${usage.remaining}/${usage.limit} فاتورة الشهر ده</i>`
+    : '';
+  await recordExpense({ amount: receipt.amount, category: receipt.category, note }, note, userId, chatId, footer);
 }
 
 // ============ نقطة الدخول - Vercel بينادي الدالة دي لكل ريكوست ============
@@ -231,7 +240,20 @@ export default async function handler(req, res) {
       const trialNow = activeNow ? false : await isInTrial(userId);
 
       if ((activeNow || trialNow) && !looksLikePaymentProof) {
-        await handleReceiptPhoto(message, userId, chatId);
+        const usage = await checkOcrUsage(userId);
+        if (!usage.allowed) {
+          if (usage.isTrial) {
+            // خلّص حدود التجربة المجانية للفواتير — بنعامله زي ما لو التجربة خلصت (بيوجّهه للاشتراك)
+            await sendTelegramMessage(chatId, buildSubscriptionPrompt(false, true), 'HTML');
+          } else {
+            await sendTelegramMessage(
+              chatId,
+              '📸 وصلت للحد الأقصى من "امسح فاتورة" الشهر ده.\nتقدر تسجل المصروف بنص عادي زي "صرفت 150 جنيه سوبر ماركت" لحد ما العداد يرجع تاني بداية الشهر الجاي.'
+            );
+          }
+          return res.status(200).json({ ok: true });
+        }
+        await handleReceiptPhoto(message, userId, chatId, usage);
         return res.status(200).json({ ok: true });
       }
 
@@ -344,6 +366,27 @@ export default async function handler(req, res) {
     // (قبل كده كانت بتتفرّغ وتروح على طول للتصنيف الذكي (مصروف/دين) من غير ما تعدّي على أوامر
     // زي "تقرير" أو "ديون" أو "دور على" — يعني الأوامر دي كانت مش شغالة بالصوت. اتصلحت دلوقتي.)
     if (message.voice) {
+      // مدة الفويس محدودة (تكلفة التفريغ عند Groq بتتحسب على المدة) — بنرفض بلطف من غير ما نستهلك عداد
+      if ((message.voice.duration || 0) > VOICE_MAX_DURATION_SECONDS) {
+        await sendTelegramMessage(
+          chatId,
+          `🎙️ الفويس أطول من ${VOICE_MAX_DURATION_SECONDS} ثانية. ابعته أقصر أو قسّمه لأكتر من فويس، أو اكتب رسالة نصية عادي.`
+        );
+        return res.status(200).json({ ok: true });
+      }
+
+      // الفويس بيظهر للمستخدم زي "Unlimited" دايمًا (مفيش عداد ظاهر خالص)، الحد بيتفحص خفي في الباك إند بس
+      const usage = await checkVoiceUsage(userId);
+      if (!usage.allowed) {
+        if (usage.isTrial) {
+          await sendTelegramMessage(chatId, buildSubscriptionPrompt(false, true), 'HTML');
+        } else {
+          // رسالة عامة من غير أي أرقام أو تلميح لحد شهري، عشان الميزة تفضل حاسة إنها Unlimited
+          await sendTelegramMessage(chatId, '🎙️ الخدمة الصوتية مشغولة عليك دلوقتي. اكتب رسالتك نصيًا وهسجلها لك زي المعتاد 🙏');
+        }
+        return res.status(200).json({ ok: true });
+      }
+
       const text = await transcribeVoice(message.voice.file_id);
       await routeUserMessage(text, userId, chatId);
       return res.status(200).json({ ok: true });
@@ -520,10 +563,16 @@ async function handleIncomingText(text, userId, chatId) {
 
   const transactions = await classifyMessage(text);
   let successCount = 0;
+  const expenseCount = transactions.filter((t) => t.type === 'expense' && t.amount).length;
 
   for (const result of transactions) {
     if (result.type === 'expense' && result.amount) {
-      await recordExpense(result, text, userId, chatId);
+      // لو الرسالة/الفويس فيها أكتر من مصروف مع بعض، منستخدمش النص الأصلي الكامل كـ fallback لوصف
+      // كل مصروف على حدة — كان ده بالظبط سبب إن كل المصاريف في الرسالة الواحدة بتظهر في الداشبورد
+      // بنفس الوصف الطويل (نص الرسالة كله) بدل ما كل مصروف يوصف بنفسه. لو مصروف واحد بس، لسه بنستخدم
+      // النص الأصلي كـ fallback عادي (مفيد لو الموديل ما رجعش note).
+      const fallbackText = expenseCount > 1 ? '' : text;
+      await recordExpense(result, fallbackText, userId, chatId);
       successCount++;
     } else if (result.type === 'debt' && result.amount && result.person) {
       await recordDebt(result, userId, chatId);
@@ -584,6 +633,21 @@ async function deleteLastDebt(userId, chatId) {
 // علاقة بالبيانات، بيرجع null وساعتها بنرجع لرسالة "معرفتش أفهم" العادية.
 async function tryAnswerAsDataQuestion(text, userId, chatId) {
   try {
+    // "المساعد الذكي" (الأسئلة الحرة عن البيانات) له حد شهري مستقل عن تسجيل المصاريف/الديون العادي
+    const usage = await checkChatUsage(userId);
+    if (!usage.allowed) {
+      if (usage.isTrial) {
+        await sendTelegramMessage(chatId, buildSubscriptionPrompt(false, true), 'HTML');
+      } else {
+        await sendTelegramMessage(
+          chatId,
+          '💬 وصلت للحد الأقصى من أسئلة "دبّر" الذكي الشهر ده.\nتقدر لسه تستخدم الأوامر الجاهزة زي "تقرير" أو "ديون" عادي، والعداد هيرجع تاني بداية الشهر الجاي.'
+        );
+      }
+      // اتعاملت الرسالة (برسالة حد/اشتراك)، فمنرجعش لرسالة "معرفتش أفهم" العادية
+      return true;
+    }
+
     const [expensesSummary, debtsSummary] = await Promise.all([
       getRecentExpensesSummaryText(userId),
       getDebtsSummaryText(userId),
@@ -591,7 +655,11 @@ async function tryAnswerAsDataQuestion(text, userId, chatId) {
     const context = `${expensesSummary}\n\n${debtsSummary}`;
     const answer = await answerDataQuestion(text, context);
     if (!answer) return false;
-    await sendTelegramMessage(chatId, `💬 <b>دَبّر:</b>\n${answer}`, 'HTML');
+
+    const footer = !usage.isTrial && usage.remaining !== null
+      ? `\n\n<i>💬 المتبقي: ${usage.remaining}/${usage.limit}</i>`
+      : '';
+    await sendTelegramMessage(chatId, `💬 <b>دَبّر:</b>\n${answer}${footer}`, 'HTML');
     return true;
   } catch (err) {
     console.error('tryAnswerAsDataQuestion failed:', err);

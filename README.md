@@ -6,6 +6,8 @@
 - لو عندك مشروع قديم شغّال بالفعل، السكريبت آمن يتشغّل تاني (`create table if not exists`) وهيضيف بس الجداول الجديدة: `debt_settlements` و `users`
 - **جديد — ميزة الأهداف المالية:** روح SQL Editor تاني وشغّل `sql/goals.sql` (منفصل عن `schema.sql`، بيعمل جدول `goals` بس)
 - **جديد — ميزة "امسح فاتورة" (Scan Anything):** بتستخدم موديل Vision من Groq. الافتراضي متظبط في `lib/config.js` (`GROQ_VISION_MODEL`)، بس لو حصل خطأ من Groq بيقول الموديل مش موجود، ادخل console.groq.com/docs/models ودوّر على أحدث موديل بيدعم الصور، وحطه في `GROQ_VISION_MODEL` في Environment Variables على Vercel.
+- **جديد — حدود الاستهلاك (Rate Limiting):** روح SQL Editor تاني وشغّل `sql/usage.sql` (بيعمل جدول `usage_counters` ودالة `increment_usage_counter` المستخدمين في `lib/rateLimits.js`). من غيره، ميزات الفويس/OCR/الشات هتشتغل عادي بس من غير أي حد استهلاك — يعني ميزانيتك الشهرية مش محمية.
+- الحدود نفسها متظبطة في `lib/config.js` (`USAGE_LIMITS` و `VOICE_MAX_DURATION_SECONDS`) — عدّلها هناك لو حبيت تغيّرها من غير ما تلمس أي كود تاني.
 
 ## 2) رفع الكود
 - ارفع الفولدر ده كامل على GitHub repo جديد

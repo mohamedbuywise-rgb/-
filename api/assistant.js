@@ -3,6 +3,8 @@ import { getRecentExpensesSummaryText } from '../lib/expenses.js';
 import { getDebtsSummaryText } from '../lib/debts.js';
 import { extractReceiptFromImageBase64, askDabbarChat } from '../lib/groq.js';
 import { CATEGORIES } from '../lib/config.js';
+import { hasActiveSubscription, isInTrial } from '../lib/users.js';
+import { checkOcrUsage, checkChatUsage } from '../lib/rateLimits.js';
 
 // ============ Router: POST /api/assistant  { action: ... } ============
 // كل ميزات "دبّر الذكي" الجديدة (الأهداف، امسح فاتورة، اسأل دبّر) اتلمّت هنا في endpoint واحد،
@@ -38,6 +40,18 @@ async function requireLink(req, res) {
   if (!link) {
     res.status(400).json({ error: 'لازم تربط حسابك بالبوت الأول.' });
     return null;
+  }
+
+  // نفس بوابة الاشتراك بتاعة بوت تليجرام (مشترك فعّال أو لسه في التجربة المجانية) — لازم تتطبّق هنا
+  // كمان، وإلا حد يقدر يستخدم ميزات "دبّر الذكي" (فاتورة/شات) من الداشبورد من غير أي حد استهلاك
+  // أو حتى من غير ما يكون مشترك أصلاً، وده بيكسر كل حساب الميزانية الشهرية.
+  const subscribed = await hasActiveSubscription(link.telegram_user_id);
+  if (!subscribed) {
+    const trial = await isInTrial(link.telegram_user_id);
+    if (!trial) {
+      res.status(403).json({ error: 'محتاج تشترك الأول عشان تستخدم دبّر الذكي.', subscriptionRequired: true });
+      return null;
+    }
   }
 
   return link.telegram_user_id;
@@ -146,12 +160,22 @@ async function handleReceiptScan(userId, body, res) {
   const { imageBase64, mimeType } = body;
   if (!imageBase64) return res.status(400).json({ error: 'مفيش صورة اتبعتت.' });
 
+  // فحص حد "امسح فاتورة" الشهري (أو حد التجربة) قبل ما نستدعي Groq Vision خالص
+  const usage = await checkOcrUsage(userId);
+  if (!usage.allowed) {
+    if (usage.isTrial) {
+      return res.status(403).json({ error: 'خلصت حدود مسح الفواتير في التجربة المجانية. اشترك عشان تكمل.', trialEnded: true });
+    }
+    return res.status(429).json({ error: 'وصلت للحد الأقصى من مسح الفواتير الشهر ده. هيرجع تاني بداية الشهر الجاي.', limitReached: true });
+  }
+
   // بنشيل data:...;base64, لو المتصفح بعتها كاملة، Groq محتاج الـ base64 الخام بس
   const cleanBase64 = String(imageBase64).replace(/^data:[^;]+;base64,/, '');
 
   const receipt = await extractReceiptFromImageBase64(cleanBase64, mimeType || 'image/jpeg');
-  if (!receipt) {
-    return res.status(422).json({ error: 'معرفتش أقرا الصورة دي. جرب صورة أوضح للإيصال أو الفاتورة.' });
+  if (!receipt.success) {
+    const hintSuffix = receipt.hint ? ` (${receipt.hint})` : '';
+    return res.status(422).json({ error: `معرفتش أقرا الصورة دي حتى بعد أكتر من محاولة${hintSuffix}. جرب صورة أوضح للإيصال أو الفاتورة.` });
   }
 
   const category = CATEGORIES.includes(receipt.category) ? receipt.category : CATEGORIES[0];
@@ -168,13 +192,26 @@ async function handleReceiptScan(userId, body, res) {
     return res.status(500).json({ error: 'قريت الفاتورة بس حصل خطأ وإحنا بنسجلها، جرب تاني.' });
   }
 
-  return res.status(200).json({ expense: inserted, merchant: receipt.merchant || null });
+  return res.status(200).json({
+    expense: inserted,
+    merchant: receipt.merchant || null,
+    usage: !usage.isTrial && usage.remaining !== null ? { remaining: usage.remaining, limit: usage.limit } : null,
+  });
 }
 
 async function handleAsk(userId, body, res) {
   const question = (body.question || '').trim();
   if (!question) return res.status(400).json({ error: 'اكتب سؤالك الأول.' });
   if (question.length > 500) return res.status(400).json({ error: 'السؤال طويل أوي، اختصره شوية.' });
+
+  // فحص حد "اسأل دبّر" الشهري (أو حد التجربة) قبل ما نستدعي Groq خالص
+  const usage = await checkChatUsage(userId);
+  if (!usage.allowed) {
+    if (usage.isTrial) {
+      return res.status(403).json({ error: 'خلصت حدود الأسئلة في التجربة المجانية. اشترك عشان تكمل.', trialEnded: true });
+    }
+    return res.status(429).json({ error: 'وصلت للحد الأقصى من الأسئلة الشهر ده. هيرجع تاني بداية الشهر الجاي.', limitReached: true });
+  }
 
   const [expensesText, debtsText] = await Promise.all([
     getRecentExpensesSummaryText(userId),
@@ -195,7 +232,10 @@ async function handleAsk(userId, body, res) {
   const dataContext = `${expensesText}\n\n${debtsText}\n\n${goalText}`;
 
   const answer = await askDabbarChat(question, dataContext);
-  return res.status(200).json({ answer });
+  return res.status(200).json({
+    answer,
+    usage: !usage.isTrial && usage.remaining !== null ? { remaining: usage.remaining, limit: usage.limit } : null,
+  });
 }
 
 export default async function handler(req, res) {

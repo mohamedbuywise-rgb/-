@@ -377,12 +377,21 @@
 
             <!-- Smart Receipt Scanner -->
             <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-2.5">
-                <h4 class="text-xs font-bold text-slate-300 flex items-center gap-1.5">📸 امسح فاتورة</h4>
+                <h4 class="text-xs font-bold text-slate-300 flex items-center gap-1.5 justify-between">
+                    <span class="flex items-center gap-1.5">📸 امسح فاتورة</span>
+                    <span id="asst-receipt-usage" class="hidden text-[9.5px] font-semibold text-slate-500 bg-slate-900 border border-slate-800 rounded-full px-2 py-0.5"></span>
+                </h4>
                 <p class="text-[11px] text-slate-500">صوّر فاتورة أو إيصال، ودبّر هيقرأ المبلغ والفئة ويسجله تلقائي.</p>
-                <input type="file" id="asst-receipt-input" accept="image/*" capture="environment" class="hidden">
-                <button id="asst-receipt-btn" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-3 rounded-2xl text-xs transition border border-slate-700 flex items-center justify-center gap-2">
-                    <span id="asst-receipt-icon">📎</span> <span id="asst-receipt-label">اختار صورة الفاتورة</span>
-                </button>
+                <input type="file" id="asst-receipt-camera-input" accept="image/*" capture="environment" class="hidden">
+                <input type="file" id="asst-receipt-gallery-input" accept="image/*" class="hidden">
+                <div class="grid grid-cols-2 gap-2">
+                    <button id="asst-receipt-camera-btn" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-3 rounded-2xl text-xs transition border border-slate-700 flex items-center justify-center gap-2">
+                        <span id="asst-receipt-camera-icon">📷</span> <span>صوّر الفاتورة</span>
+                    </button>
+                    <button id="asst-receipt-gallery-btn" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-3 rounded-2xl text-xs transition border border-slate-700 flex items-center justify-center gap-2">
+                        <span id="asst-receipt-gallery-icon">🖼️</span> <span>ارفع من المعرض</span>
+                    </button>
+                </div>
                 <div id="asst-receipt-result" class="hidden text-[11px] rounded-xl p-3 leading-relaxed"></div>
             </div>
 
@@ -398,7 +407,10 @@
 
             <!-- اسأل دبّر -->
             <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3">
-                <h4 class="text-xs font-bold text-slate-300 flex items-center gap-1.5">💬 اسأل دبّر</h4>
+                <h4 class="text-xs font-bold text-slate-300 flex items-center gap-1.5 justify-between">
+                    <span class="flex items-center gap-1.5">💬 اسأل دبّر</span>
+                    <span id="asst-chat-usage" class="hidden text-[9.5px] font-semibold text-slate-500 bg-slate-900 border border-slate-800 rounded-full px-2 py-0.5"></span>
+                </h4>
                 <div id="asst-chat-log" class="space-y-2.5 max-h-72 overflow-y-auto">
                     <div class="flex items-start gap-2">
                         <span class="w-7 h-7 rounded-full bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-xs shrink-0">✨</span>
@@ -1349,6 +1361,14 @@
             return data;
         }
 
+        // ============ عداد صغير وأنيق للمشترك بس (OCR/شات) — مفيش عداد خالص في التجربة المجانية ============
+        function updateUsageBadge(elId, usage) {
+            const el = document.getElementById(elId);
+            if (!usage) { el.classList.add('hidden'); return; }
+            el.textContent = `المتبقي: ${usage.remaining}/${usage.limit}`;
+            el.classList.remove('hidden');
+        }
+
         // ---- إنشاء هدف ----
         document.getElementById('asst-goal-create-btn').addEventListener('click', async () => {
             const btn = document.getElementById('asst-goal-create-btn');
@@ -1405,24 +1425,25 @@
             }
         });
 
-        // ============ Smart Receipt Scanner ============
-        const asstReceiptInput = document.getElementById('asst-receipt-input');
-        document.getElementById('asst-receipt-btn').addEventListener('click', () => asstReceiptInput.click());
-        asstReceiptInput.addEventListener('change', async () => {
-            const file = asstReceiptInput.files[0];
-            asstReceiptInput.value = '';
+        // ============ Smart Receipt Scanner (كاميرا + معرض منفصلين) ============
+        const asstReceiptCameraInput = document.getElementById('asst-receipt-camera-input');
+        const asstReceiptGalleryInput = document.getElementById('asst-receipt-gallery-input');
+        document.getElementById('asst-receipt-camera-btn').addEventListener('click', () => asstReceiptCameraInput.click());
+        document.getElementById('asst-receipt-gallery-btn').addEventListener('click', () => asstReceiptGalleryInput.click());
+
+        async function handleReceiptFile(file, triggerBtnId, triggerIconId, defaultIcon) {
             if (!file) return;
             if (!file.type.startsWith('image/')) { alert('من فضلك اختار ملف صورة.'); return; }
             if (file.size > 8 * 1024 * 1024) { alert('الصورة كبيرة أوي، اختار صورة أصغر من 8 ميجابايت.'); return; }
 
-            const icon = document.getElementById('asst-receipt-icon');
-            const label = document.getElementById('asst-receipt-label');
-            const btn = document.getElementById('asst-receipt-btn');
+            const cameraBtn = document.getElementById('asst-receipt-camera-btn');
+            const galleryBtn = document.getElementById('asst-receipt-gallery-btn');
+            const triggerIcon = document.getElementById(triggerIconId);
             const resultEl = document.getElementById('asst-receipt-result');
             resultEl.classList.add('hidden');
-            btn.disabled = true;
-            icon.textContent = '⏳';
-            label.textContent = 'دبّر بيقرا الفاتورة...';
+            cameraBtn.disabled = true;
+            galleryBtn.disabled = true;
+            triggerIcon.textContent = '⏳';
 
             try {
                 const base64 = await new Promise((resolve, reject) => {
@@ -1436,16 +1457,28 @@
                 resultEl.className = 'text-[11px] rounded-xl p-3 leading-relaxed bg-emerald-500/10 border border-emerald-500/25 text-emerald-300';
                 resultEl.textContent = `✅ اتسجل: ${fmt(result.expense.amount)} — ${CATEGORY_EMOJI[result.expense.category] || ''} ${result.expense.category}${result.merchant ? ` (${result.merchant})` : ''}`;
                 resultEl.classList.remove('hidden');
+                updateUsageBadge('asst-receipt-usage', result.usage);
                 await loadDashboard();
             } catch (e) {
                 resultEl.className = 'text-[11px] rounded-xl p-3 leading-relaxed bg-rose-500/10 border border-rose-500/25 text-rose-300';
                 resultEl.textContent = `⚠️ ${e.message}`;
                 resultEl.classList.remove('hidden');
             } finally {
-                btn.disabled = false;
-                icon.textContent = '📎';
-                label.textContent = 'اختار صورة الفاتورة';
+                cameraBtn.disabled = false;
+                galleryBtn.disabled = false;
+                triggerIcon.textContent = defaultIcon;
             }
+        }
+
+        asstReceiptCameraInput.addEventListener('change', () => {
+            const file = asstReceiptCameraInput.files[0];
+            asstReceiptCameraInput.value = '';
+            handleReceiptFile(file, 'asst-receipt-camera-btn', 'asst-receipt-camera-icon', '📷');
+        });
+        asstReceiptGalleryInput.addEventListener('change', () => {
+            const file = asstReceiptGalleryInput.files[0];
+            asstReceiptGalleryInput.value = '';
+            handleReceiptFile(file, 'asst-receipt-gallery-btn', 'asst-receipt-gallery-icon', '🖼️');
         });
 
         // ============ Financial Wrapped modal ============
@@ -1520,6 +1553,7 @@
             try {
                 const result = await asstApi('ask', { question });
                 typingBubble.lastElementChild.textContent = result.answer;
+                updateUsageBadge('asst-chat-usage', result.usage);
             } catch (e) {
                 typingBubble.lastElementChild.textContent = `⚠️ ${e.message}`;
             } finally {

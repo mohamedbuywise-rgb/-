@@ -96,6 +96,14 @@
         html[data-theme="light"] .bg-rose-500\/15 { background-color: rgba(244,63,94,0.12) !important; }
         html[data-theme="light"] .bg-rose-500\/20 { background-color: rgba(244,63,94,0.14) !important; }
         html[data-theme="light"] .border-rose-500\/30 { border-color: rgba(244,63,94,0.3) !important; }
+
+        /* حركة ترحيب بسيطة على الماسكوت الحقيقي (تحريك الصورة نفسها، مش رسمها من جديد) */
+        @keyframes mascot-wave { 0%, 100% { transform: rotate(0deg) scale(1); } 25% { transform: rotate(-6deg) scale(1.05); } 50% { transform: rotate(4deg) scale(1.05); } 75% { transform: rotate(-3deg) scale(1.02); } }
+        .mascot-wave { animation: mascot-wave 0.7s ease-in-out 1; }
+
+        /* حركة "تنفّس" مستمرة للماسكوت في كارت البريميوم — مش فريم ثابت */
+        @keyframes mascot-float { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-6px) rotate(-1.5deg); } }
+        .mascot-float { animation: mascot-float 2.6s ease-in-out infinite; }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
@@ -393,6 +401,13 @@
                     </button>
                 </div>
                 <div id="asst-receipt-result" class="hidden text-[11px] rounded-xl p-3 leading-relaxed"></div>
+                <button id="invoices-open" class="w-full flex items-center justify-between bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-2xl px-3 py-2.5 transition">
+                    <span class="flex items-center gap-1.5 text-xs font-bold text-slate-300">🧾 كل الفواتير</span>
+                    <span class="flex items-center gap-1 text-[11px] text-slate-500">
+                        <span id="invoices-count">—</span> فاتورة
+                        <span class="text-slate-600">‹</span>
+                    </span>
+                </button>
             </div>
 
             <!-- Financial Wrapped -->
@@ -487,6 +502,35 @@
                 </div>
                 <button id="pwa-install-btn" class="w-full mt-3 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold py-2.5 rounded-xl text-xs transition hover:bg-emerald-500/20">
                     تثبيت دلوقتي
+                </button>
+            </div>
+
+            <!-- كارت البريميوم — الماسكوت الحقيقي بحركة مستمرة (مش ثابت) عشان يشجّع على الاشتراك -->
+            <div id="premium-hero-card" class="hidden bg-gradient-to-b from-[#052e22] to-[#031a14] border border-amber-500/25 rounded-3xl p-5 text-center overflow-hidden relative">
+                <img src="branding/dabbar-mascot.png" alt="دبّر بريميوم" class="w-36 h-auto mx-auto mb-2 mascot-float">
+                <p class="text-[10px] tracking-widest text-amber-400 font-black mb-1">DABBAR PREMIUM</p>
+                <h3 class="text-lg font-black text-white mb-1">افتح كل قوة دبّر</h3>
+                <p class="text-[11px] text-slate-400 mb-4 leading-relaxed">تتبع ذكي، تقارير مفصلة، وأمان بنكي لبياناتك — من غير حدود شهرية.</p>
+                <div class="grid grid-cols-2 gap-2 text-right mb-4">
+                    <div class="bg-white/5 border border-white/10 rounded-xl p-2.5">
+                        <span class="block text-[10px] text-amber-300 font-bold mb-0.5">📊 تتبع ذكي</span>
+                        <span class="block text-[10px] text-slate-400">كل مصروف بوضوح</span>
+                    </div>
+                    <div class="bg-white/5 border border-white/10 rounded-xl p-2.5">
+                        <span class="block text-[10px] text-amber-300 font-bold mb-0.5">📈 تقارير</span>
+                        <span class="block text-[10px] text-slate-400">فهم أعمق لفلوسك</span>
+                    </div>
+                    <div class="bg-white/5 border border-white/10 rounded-xl p-2.5">
+                        <span class="block text-[10px] text-amber-300 font-bold mb-0.5">🔒 أمان بنكي</span>
+                        <span class="block text-[10px] text-slate-400">بياناتك مشفّرة</span>
+                    </div>
+                    <div class="bg-white/5 border border-white/10 rounded-xl p-2.5">
+                        <span class="block text-[10px] text-amber-300 font-bold mb-0.5">♾️ من غير حدود</span>
+                        <span class="block text-[10px] text-slate-400">كل الميزات مفتوحة</span>
+                    </div>
+                </div>
+                <button type="button" id="premium-hero-cta" class="w-full bg-amber-400 hover:bg-amber-300 text-[#052e22] font-black py-3 rounded-2xl text-xs transition">
+                    اشترك دلوقتي — أقل من سعر فنجان قهوة يوميًا ☕
                 </button>
             </div>
 
@@ -698,7 +742,7 @@
                 <div class="grid grid-cols-2 gap-2.5 text-right">
                     <div class="bg-white/5 border border-white/10 rounded-2xl p-3">
                         <span class="text-[10px] text-slate-400 block mb-1">أكبر بند</span>
-                        <span class="text-xs font-bold text-slate-100" id="wrapped-top-cat">—</span>
+                        <span class="text-xs font-bold text-white" id="wrapped-top-cat">—</span>
                     </div>
                     <div class="bg-white/5 border border-white/10 rounded-2xl p-3">
                         <span class="text-[10px] text-slate-400 block mb-1">وفرت تقريبًا</span>
@@ -706,7 +750,7 @@
                     </div>
                     <div class="bg-white/5 border border-white/10 rounded-2xl p-3 col-span-2">
                         <span class="text-[10px] text-slate-400 block mb-1">أحسن شهر ماليًا</span>
-                        <span class="text-xs font-bold text-slate-100" id="wrapped-best-month">—</span>
+                        <span class="text-xs font-bold text-white" id="wrapped-best-month">—</span>
                     </div>
                 </div>
 
@@ -720,6 +764,55 @@
         </div>
     </div>
 
+    <!-- كل الفواتير -->
+    <div id="invoices-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="max-w-sm w-full max-h-[85vh] flex flex-col gap-3">
+            <div class="flex items-center justify-between px-1">
+                <h2 class="font-bold text-sm text-slate-100">كل الفواتير</h2>
+                <button id="invoices-close" class="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-sm">✕</button>
+            </div>
+            <div id="invoices-list" class="bg-slate-950/60 border border-slate-800 rounded-3xl p-2 overflow-y-auto flex-1 space-y-1"></div>
+            <p id="invoices-empty" class="hidden text-[11px] text-slate-400 text-center bg-slate-900 border border-slate-800 rounded-xl p-4">لسه معندكش فواتير متسجلة. صوّر فاتورة عشان تبدأ.</p>
+        </div>
+    </div>
+
+    <!-- تفاصيل فاتورة واحدة -->
+    <div id="invoice-detail-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="max-w-sm w-full max-h-[85vh] flex flex-col gap-3">
+            <div class="flex items-center justify-between px-1">
+                <button id="invoice-detail-back" class="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-sm">›</button>
+                <h2 class="font-bold text-sm text-slate-100">تفاصيل الفاتورة</h2>
+                <button id="invoice-detail-close" class="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-sm">✕</button>
+            </div>
+
+            <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 overflow-y-auto flex-1">
+                <div class="flex items-center gap-2.5 mb-3">
+                    <div id="invd-icon" class="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center text-lg shrink-0">🛒</div>
+                    <div class="flex-1 min-w-0">
+                        <p id="invd-merchant" class="text-sm font-bold text-slate-100 truncate">—</p>
+                        <span id="invd-meta" class="text-[11px] text-slate-500">—</span>
+                    </div>
+                </div>
+
+                <div id="invd-items" class="border-t border-slate-800 pt-2 space-y-0.5"></div>
+
+                <div class="flex items-center justify-between pt-3 mt-1">
+                    <span class="text-xs text-slate-400" id="invd-count-label">الإجمالي</span>
+                    <span class="text-base font-black text-slate-100" id="invd-total">—</span>
+                </div>
+                <div id="invd-payment-row" class="flex items-center justify-between pt-1.5 text-[11px] text-slate-500">
+                    <span>طريقة الدفع</span>
+                    <span id="invd-payment">—</span>
+                </div>
+                <div id="invd-debt-note" class="hidden mt-2 text-[11px] text-amber-300 bg-amber-500/10 border border-amber-500/25 rounded-xl p-2.5"></div>
+            </div>
+
+            <button id="invd-delete-btn" class="w-full bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/25 text-rose-300 font-bold py-3 rounded-2xl text-xs transition flex items-center justify-center gap-2">
+                <span>🗑</span> حذف الفاتورة دي
+            </button>
+        </div>
+    </div>
+
     <script>
         /* ===== Supabase auth guard + logout =====
            لازم يتحطوا نفس القيم اللي في dabbar-onboarding.html */
@@ -729,6 +822,7 @@
         const ONBOARDING_URL = 'dabbar-onboarding.html';
 
         const CATEGORY_EMOJI = { 'أكل':'🍔', 'مواصلات':'🚕', 'فواتير':'🧾', 'تسوق':'🛍️', 'ترفيه':'🎬', 'صحة':'💊', 'تعليم':'📚', 'منزل وأثاث':'🏠', 'ملابس':'👕', 'اشتراكات':'🔁', 'هدايا وتبرعات':'🎁', 'شخصي وعناية':'🧴' };
+        const MONTH_NAMES = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
         const CATEGORY_BAR_COLOR = { 'أكل':'bg-rose-400', 'مواصلات':'bg-teal-400', 'فواتير':'bg-amber-400', 'تسوق':'bg-violet-400', 'ترفيه':'bg-pink-400', 'صحة':'bg-emerald-400', 'تعليم':'bg-blue-400', 'منزل وأثاث':'bg-orange-400', 'ملابس':'bg-fuchsia-400', 'اشتراكات':'bg-indigo-400', 'هدايا وتبرعات':'bg-amber-500', 'شخصي وعناية':'bg-cyan-400' };
         const fmt = (n) => `${Number(n).toLocaleString('ar-EG')} ج.م`;
 
@@ -794,6 +888,7 @@
                 currentUser = session.user;
                 await loadDashboard();
                 await loadAccountTab();
+                loadInvoicesCount();
                 setupAutoRefresh();
             } catch (e) {
                 /* supabase not configured يعني، بيسيب الصفحة مفتوحة عشان المعاينة بس */
@@ -1453,12 +1548,26 @@
                     reader.readAsDataURL(file);
                 });
 
-                const result = await asstApi('receipt_scan', { imageBase64: base64, mimeType: file.type });
-                resultEl.className = 'text-[11px] rounded-xl p-3 leading-relaxed bg-emerald-500/10 border border-emerald-500/25 text-emerald-300';
-                resultEl.textContent = `✅ اتسجل: ${fmt(result.expense.amount)} — ${CATEGORY_EMOJI[result.expense.category] || ''} ${result.expense.category}${result.merchant ? ` (${result.merchant})` : ''}`;
+                const result = await asstApi('receipt_scan', { imageBase64: base64 });
+                resultEl.className = 'text-[11px] rounded-xl p-3 leading-relaxed bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 space-y-1';
+                const itemsHtml = result.items.map(it =>
+                    `<div class="flex items-center justify-between gap-2"><span>${CATEGORY_EMOJI[it.category] || '📌'} ${it.name}</span><span class="shrink-0">${fmt(it.amount)}</span></div>`
+                ).join('');
+                const debtHtml = result.isDebt && result.debtPerson
+                    ? `<div class="pt-1 text-amber-300">📥 اتسجلت كمان كدين عليك لـ ${result.debtPerson}</div>` : '';
+                resultEl.innerHTML = `
+                    <div class="flex items-center gap-2 font-bold">
+                        <img src="branding/dabbar-mascot-avatar.png" alt="دبّر" class="w-9 h-9 rounded-full object-cover shrink-0 mascot-wave">
+                        <span>${result.merchant ? `فاتورة ${result.merchant}` : 'الفاتورة'} — اتسجلت (${result.items.length} صنف)</span>
+                    </div>
+                    ${itemsHtml}
+                    <div class="flex items-center justify-between font-bold pt-1 border-t border-emerald-500/20 mt-1"><span>الإجمالي</span><span>${fmt(result.totalAmount)}</span></div>
+                    ${debtHtml}
+                `;
                 resultEl.classList.remove('hidden');
                 updateUsageBadge('asst-receipt-usage', result.usage);
                 await loadDashboard();
+                await loadInvoicesCount();
             } catch (e) {
                 resultEl.className = 'text-[11px] rounded-xl p-3 leading-relaxed bg-rose-500/10 border border-rose-500/25 text-rose-300';
                 resultEl.textContent = `⚠️ ${e.message}`;
@@ -1479,6 +1588,164 @@
             const file = asstReceiptGalleryInput.files[0];
             asstReceiptGalleryInput.value = '';
             handleReceiptFile(file, 'asst-receipt-gallery-btn', 'asst-receipt-gallery-icon', '🖼️');
+        });
+
+        // ============ كل الفواتير: ليستة + تفاصيل ============
+        const MERCHANT_ICONS = [
+            { keywords: ['صيدلي', 'دواء', 'فارما'], icon: '💊', bg: 'bg-blue-500/15 border-blue-500/25' },
+            { keywords: ['دين', 'قسط', 'مؤجل'], icon: '📥', bg: 'bg-amber-500/15 border-amber-500/25' },
+        ];
+        function invoiceIcon(inv) {
+            if (inv.is_debt) return { icon: '📥', bg: 'bg-amber-500/15 border-amber-500/25' };
+            const name = (inv.merchant || '').trim();
+            for (const rule of MERCHANT_ICONS) {
+                if (rule.keywords.some(k => name.includes(k))) return { icon: rule.icon, bg: rule.bg };
+            }
+            return { icon: '🛒', bg: 'bg-emerald-500/15 border-emerald-500/25' };
+        }
+        function formatInvoiceDate(iso) {
+            const d = new Date(iso);
+            return `${MONTH_NAMES[d.getMonth()]} ${d.getDate()}`;
+        }
+
+        const invoicesModal = document.getElementById('invoices-modal');
+        const invoiceDetailModal = document.getElementById('invoice-detail-modal');
+        const invoicesListEl = document.getElementById('invoices-list');
+        const invoicesEmptyEl = document.getElementById('invoices-empty');
+
+        async function loadInvoicesCount() {
+            try {
+                const res = await fetch(`/api/dashboard-data?invoices=1`, { headers: { Authorization: `Bearer ${accessToken}` } });
+                const data = await res.json();
+                window.__invoicesCache = data.invoices || [];
+                document.getElementById('invoices-count').textContent = window.__invoicesCache.length;
+            } catch (e) { /* صامت — مش حرج لو فشل عداد بس */ }
+        }
+
+        function renderInvoicesList() {
+            const invoices = window.__invoicesCache || [];
+            invoicesListEl.innerHTML = '';
+            if (invoices.length === 0) {
+                invoicesEmptyEl.classList.remove('hidden');
+                return;
+            }
+            invoicesEmptyEl.classList.add('hidden');
+            for (const inv of invoices) {
+                const { icon, bg } = invoiceIcon(inv);
+                const row = document.createElement('button');
+                row.className = 'w-full flex items-center gap-2.5 p-2.5 rounded-2xl hover:bg-slate-900/70 transition text-right';
+                row.innerHTML = `
+                    <div class="w-9 h-9 rounded-xl border ${bg} flex items-center justify-center text-base shrink-0">${icon}</div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs font-bold text-slate-100 truncate">${inv.merchant || (inv.is_debt ? (inv.debt_person || 'دين') : 'فاتورة')}</p>
+                        <span class="text-[10.5px] text-slate-500">${formatInvoiceDate(inv.created_at)} — ${inv.is_debt ? 'دين مسجل' : `${inv.item_count} أصناف`}</span>
+                    </div>
+                    <span class="text-xs font-bold ${inv.is_debt ? 'text-amber-300' : 'text-slate-100'} shrink-0">${fmt(inv.total_amount)}</span>
+                `;
+                row.addEventListener('click', () => openInvoiceDetail(inv.id));
+                invoicesListEl.appendChild(row);
+            }
+        }
+
+        document.getElementById('invoices-open').addEventListener('click', async () => {
+            invoicesModal.classList.remove('hidden');
+            invoicesModal.classList.add('flex');
+            invoicesListEl.innerHTML = '<p class="text-[11px] text-slate-500 text-center p-4">بنجيب الفواتير...</p>';
+            invoicesEmptyEl.classList.add('hidden');
+            await loadInvoicesCount();
+            renderInvoicesList();
+        });
+        document.getElementById('invoices-close').addEventListener('click', () => {
+            invoicesModal.classList.add('hidden');
+            invoicesModal.classList.remove('flex');
+        });
+
+        async function openInvoiceDetail(invoiceId) {
+            invoicesModal.classList.add('hidden');
+            invoicesModal.classList.remove('flex');
+            invoiceDetailModal.classList.remove('hidden');
+            invoiceDetailModal.classList.add('flex');
+            invoiceDetailModal.dataset.invoiceId = invoiceId;
+
+            document.getElementById('invd-merchant').textContent = 'بنفتح الفاتورة...';
+            document.getElementById('invd-items').innerHTML = '';
+            document.getElementById('invd-debt-note').classList.add('hidden');
+
+            try {
+                const res = await fetch(`/api/dashboard-data?invoiceId=${invoiceId}`, { headers: { Authorization: `Bearer ${accessToken}` } });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error || 'حصل خطأ.');
+                renderInvoiceDetail(data.invoice);
+            } catch (e) {
+                document.getElementById('invd-merchant').textContent = '⚠️ ' + e.message;
+            }
+        }
+
+        function renderInvoiceDetail(inv) {
+            const { icon, bg } = invoiceIcon(inv);
+            document.getElementById('invd-icon').className = `w-10 h-10 rounded-xl border ${bg} flex items-center justify-center text-lg shrink-0`;
+            document.getElementById('invd-icon').textContent = icon;
+            document.getElementById('invd-merchant').textContent = inv.merchant || (inv.is_debt ? (inv.debt_person || 'دين') : 'فاتورة');
+            const dateStr = new Date(inv.created_at).toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' });
+            document.getElementById('invd-meta').textContent = `${dateStr}${inv.invoice_number ? ` — فاتورة #${inv.invoice_number}` : ''}`;
+
+            const itemsEl = document.getElementById('invd-items');
+            itemsEl.innerHTML = (inv.items || []).map(it => `
+                <div class="flex items-center gap-2.5 py-2 border-b border-slate-800/60 last:border-0">
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs text-slate-100 truncate">${it.name}</p>
+                        <span class="text-[10.5px] text-slate-500">${it.category}</span>
+                    </div>
+                    <span class="text-xs font-bold text-slate-200 shrink-0">${fmt(it.amount)}</span>
+                </div>
+            `).join('') || '<p class="text-[11px] text-slate-500 py-2">مفيش أصناف مسجلة لفاتورة دي.</p>';
+
+            document.getElementById('invd-count-label').textContent = `الإجمالي — ${(inv.items || []).length} صنف`;
+            document.getElementById('invd-total').textContent = fmt(inv.total_amount);
+
+            const paymentRow = document.getElementById('invd-payment-row');
+            if (inv.payment_method) {
+                paymentRow.classList.remove('hidden');
+                document.getElementById('invd-payment').textContent = inv.payment_method;
+            } else {
+                paymentRow.classList.add('hidden');
+            }
+
+            const debtNote = document.getElementById('invd-debt-note');
+            if (inv.is_debt && inv.debt_person) {
+                debtNote.textContent = `📥 الفاتورة دي اتسجلت كمان كدين عليك لـ ${inv.debt_person}`;
+                debtNote.classList.remove('hidden');
+            } else {
+                debtNote.classList.add('hidden');
+            }
+        }
+
+        document.getElementById('invoice-detail-back').addEventListener('click', () => {
+            invoiceDetailModal.classList.add('hidden');
+            invoiceDetailModal.classList.remove('flex');
+            invoicesModal.classList.remove('hidden');
+            invoicesModal.classList.add('flex');
+        });
+        document.getElementById('invoice-detail-close').addEventListener('click', () => {
+            invoiceDetailModal.classList.add('hidden');
+            invoiceDetailModal.classList.remove('flex');
+        });
+
+        document.getElementById('invd-delete-btn').addEventListener('click', async () => {
+            const invoiceId = Number(invoiceDetailModal.dataset.invoiceId);
+            if (!invoiceId) return;
+            if (!confirm('متأكد إنك عايز تمسح الفاتورة دي؟ هتتمسح كل الأصناف والمصاريف المرتبطة بيها.')) return;
+
+            try {
+                await asstApi('invoice_delete', { invoiceId });
+                invoiceDetailModal.classList.add('hidden');
+                invoiceDetailModal.classList.remove('flex');
+                await loadInvoicesCount();
+                renderInvoicesList();
+                await loadDashboard();
+            } catch (e) {
+                alert(e.message);
+            }
         });
 
         // ============ Financial Wrapped modal ============
@@ -1657,20 +1924,32 @@
         });
 
         // ============ تاب "حسابي": بيانات البروفايل + حالة ربط تليجرام ============
+        document.getElementById('premium-hero-cta')?.addEventListener('click', () => {
+            document.getElementById('account-sub-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+
         // ============ بطاقة الاشتراك في تاب "حسابي" ============
         // بتظهر بس لو مفيش اشتراك فعّال دلوقتي (يعني التجربة خلصت أو الاشتراك انتهى)
         // نفس الرقم والسعر اللي البوت بيبعتهم على تليجرام، جايين من نفس الـ config عن طريق الـ API
         const SUB_BOT_USERNAME = 'Masaaref_bot';
         function renderSubscription(subscription) {
             const card = document.getElementById('account-subscription-card');
+            const hero = document.getElementById('premium-hero-card');
             if (!card || !subscription) return;
 
             if (subscription.active) {
                 card.classList.add('hidden');
+                if (hero) hero.classList.add('hidden');
                 return;
             }
 
             card.classList.remove('hidden');
+            if (hero) {
+                hero.classList.remove('hidden');
+                const perDay = Math.round(Number(subscription.priceEgp) / 30);
+                const ctaBtn = document.getElementById('premium-hero-cta');
+                if (ctaBtn) ctaBtn.textContent = `اشترك دلوقتي — يعني ${perDay} ج.م بس في اليوم`;
+            }
             document.getElementById('account-sub-price').textContent = `${subscription.priceEgp} ج.م`;
             document.getElementById('account-sub-instapay').textContent = subscription.instapayNumber || '—';
             document.getElementById('account-sub-open-bot').href = `https://t.me/${SUB_BOT_USERNAME}`;

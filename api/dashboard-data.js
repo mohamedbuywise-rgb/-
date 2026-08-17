@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabaseClient.js';
 import { getMonthRange, getExpensesBetween, buildCategoryBreakdown } from '../lib/expenses.js';
 import { computeNetByPerson } from '../lib/debts.js';
+import { getInvoicesList, getInvoiceDetail } from '../lib/invoices.js';
 import { MONTH_NAMES, CATEGORY_EMOJI, SUBSCRIPTION_PRICE_EGP, INSTAPAY_LINK } from '../lib/config.js';
 import { hasActiveSubscription, getSubscriptionExpiry, isInTrial, getTrialDaysLeft } from '../lib/users.js';
 
@@ -53,6 +54,20 @@ export default async function handler(req, res) {
     console.log('dashboard-data: linked to telegram_user_id:', link.telegram_user_id);
 
     const telegramUserId = link.telegram_user_id;
+
+    // ---- كل الفواتير / تفاصيل فاتورة واحدة (GET /api/dashboard-data?invoices=1 أو ?invoiceId=123) ----
+    // اتحطوا هنا بدل ملف API منفصل عشان نفضل تحت حد Vercel Hobby (12 function كحد أقصى)،
+    // بنفس فكرة تجميع الميزات في api/assistant.js.
+    if (req.query.invoiceId) {
+      const invoice = await getInvoiceDetail(telegramUserId, Number(req.query.invoiceId));
+      if (!invoice) return res.status(404).json({ error: 'الفاتورة دي مش موجودة.' });
+      return res.status(200).json({ linked: true, invoice });
+    }
+    if (req.query.invoices) {
+      const invoices = await getInvoicesList(telegramUserId);
+      return res.status(200).json({ linked: true, invoices });
+    }
+
 
     // ---- مصاريف النهاردة ----
     const startOfDay = new Date();

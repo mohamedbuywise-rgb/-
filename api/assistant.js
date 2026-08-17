@@ -1,8 +1,8 @@
 import { supabase } from '../lib/supabaseClient.js';
 import { getRecentExpensesSummaryText } from '../lib/expenses.js';
 import { getDebtsSummaryText } from '../lib/debts.js';
-import { extractReceiptFromImageBase64, askDabbarChat } from '../lib/groq.js';
-import { CATEGORIES } from '../lib/config.js';
+import { extractItemizedReceiptFromImageBase64, askDabbarChat } from '../lib/groq.js';
+import { saveInvoiceRecord, deleteInvoiceById } from '../lib/invoices.js';
 import { hasActiveSubscription, isInTrial } from '../lib/users.js';
 import { checkOcrUsage, checkChatUsage } from '../lib/rateLimits.js';
 
@@ -14,7 +14,8 @@ import { checkOcrUsage, checkChatUsage } from '../lib/rateLimits.js';
 // action = "goal_create"      { title, targetAmount, targetDate? }
 // action = "goal_contribute"  { amount }
 // action = "goal_cancel"      {}
-// action = "receipt_scan"     { imageBase64, mimeType }
+// action = "receipt_scan"     { imageBase64 }
+// action = "invoice_delete"   { invoiceId }
 // action = "ask"              { question }
 
 async function requireLink(req, res) {
@@ -172,29 +173,24 @@ async function handleReceiptScan(userId, body, res) {
   // بنشيل data:...;base64, لو المتصفح بعتها كاملة، Groq محتاج الـ base64 الخام بس
   const cleanBase64 = String(imageBase64).replace(/^data:[^;]+;base64,/, '');
 
-  const receipt = await extractReceiptFromImageBase64(cleanBase64, mimeType || 'image/jpeg');
+  const receipt = await extractItemizedReceiptFromImageBase64(cleanBase64);
   if (!receipt.success) {
     const hintSuffix = receipt.hint ? ` (${receipt.hint})` : '';
     return res.status(422).json({ error: `معرفتش أقرا الصورة دي حتى بعد أكتر من محاولة${hintSuffix}. جرب صورة أوضح للإيصال أو الفاتورة.` });
   }
 
-  const category = CATEGORIES.includes(receipt.category) ? receipt.category : CATEGORIES[0];
-  const note = receipt.merchant ? `فاتورة ${receipt.merchant}` : 'فاتورة ممسوحة (من الداشبورد)';
-
-  const { data: inserted, error } = await supabase
-    .from('expenses')
-    .insert({ telegram_user_id: userId, amount: receipt.amount, category, description: note })
-    .select('id, amount, category, description, created_at')
-    .single();
-
-  if (error) {
-    console.error('receipt_scan insert error:', JSON.stringify(error));
+  const saved = await saveInvoiceRecord(receipt, userId);
+  if (!saved) {
     return res.status(500).json({ error: 'قريت الفاتورة بس حصل خطأ وإحنا بنسجلها، جرب تاني.' });
   }
 
   return res.status(200).json({
-    expense: inserted,
+    invoiceId: saved.invoiceId,
     merchant: receipt.merchant || null,
+    items: receipt.items,
+    totalAmount: receipt.totalAmount,
+    isDebt: receipt.isDebt,
+    debtPerson: receipt.debtPerson || null,
     usage: !usage.isTrial && usage.remaining !== null ? { remaining: usage.remaining, limit: usage.limit } : null,
   });
 }
@@ -238,6 +234,16 @@ async function handleAsk(userId, body, res) {
   });
 }
 
+async function handleInvoiceDelete(userId, body, res) {
+  const invoiceId = Number(body.invoiceId);
+  if (!invoiceId) return res.status(400).json({ error: 'مفيش رقم فاتورة اتبعت.' });
+
+  const deleted = await deleteInvoiceById(invoiceId, userId);
+  if (!deleted) return res.status(404).json({ error: 'الفاتورة دي مش موجودة أو اتمسحت قبل كده.' });
+
+  return res.status(200).json({ ok: true });
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -259,6 +265,8 @@ export default async function handler(req, res) {
         return await handleGoalCancel(userId, res);
       case 'receipt_scan':
         return await handleReceiptScan(userId, body, res);
+      case 'invoice_delete':
+        return await handleInvoiceDelete(userId, body, res);
       case 'ask':
         return await handleAsk(userId, body, res);
       default:

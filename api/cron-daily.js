@@ -5,7 +5,7 @@ import { getOldUnsettledDebtsSummary, recordDebtReminders } from '../lib/debts.j
 import { generateFriendlyReminderIntro } from '../lib/groq.js';
 import { getAllUsers } from '../lib/users.js';
 import { claimCronSlot } from '../lib/cronRuns.js';
-import { CRON_SECRET } from '../lib/config.js';
+import { CRON_SECRET, ADMIN_TELEGRAM_ID, isModelsCheckOverdue } from '../lib/config.js';
 
 // عدد المستخدمين اللي بيتعالجوا بالتوازي في نفس الوقت، بدل ما نلف عليهم واحد واحد.
 // بيوازن بين السرعة (منعديش الـ maxDuration بتاعة الفنكشن) وبين إننا منضربش Telegram/Supabase بـ rate limit.
@@ -160,6 +160,22 @@ export default async function handler(req, res) {
 
   const processed = results.filter((r) => r && r.ok).length;
   const failed = results.length - processed;
+
+  // ⚠️ تنبيه يومي واحد للأدمن (لو فعّل ADMIN_TELEGRAM_ID) لو عدّى 60 يوم من غير ما حد يتأكد
+  // إن موديلات Groq (النص والفيجن) لسه شغالة ومفيش deprecation جديدة عليها. الكرون ده بيشتغل
+  // مرة واحدة يوميًا بعد نص الليل، فده كافي عشان الرسالة توصل بدون ما تتكرر مع كل طلب زي console.warn.
+  if (ADMIN_TELEGRAM_ID && isModelsCheckOverdue()) {
+    const periodKey = today.toISOString().slice(0, 10);
+    const claimed = await claimCronSlot(ADMIN_TELEGRAM_ID, 'models-check-reminder', periodKey);
+    if (claimed) {
+      await sendTelegramMessage(
+        ADMIN_TELEGRAM_ID,
+        '⚠️ فاتت 60 يوم من غير ما تتأكد إن موديلات Groq (النص/الفيجن) لسه شغالة.\n' +
+        'راجع: https://console.groq.com/docs/deprecations\n' +
+        'وحدّث MODELS_LAST_VERIFIED في lib/config.js.'
+      );
+    }
+  }
 
   return res.status(200).json({ ok: true, total: users.length, processed, failed, isFriday, isLastDayOfMonth });
 }

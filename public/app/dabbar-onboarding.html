@@ -63,6 +63,39 @@
   .link-card > p.sub{ text-align:center; color:var(--muted); font-size:13px; line-height:1.9; margin-bottom:20px; }
 
   .steps{ display:flex; flex-direction:column; gap:10px; margin-bottom:20px; }
+
+  /* ===== بار التقدم بالماسكوت (الحساب → الربط → التثبيت → تم) ===== */
+  .progress-wrap{ width:100%; max-width:420px; margin:18px auto 0; padding:0 24px; }
+  .progress-card{ background:var(--paper); border:1px solid var(--line); border-radius:18px; padding:16px 18px 14px; }
+  .progress-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+  .progress-title{ font-family:'Cairo',sans-serif; font-weight:900; font-size:14px; color:var(--green-deep); }
+  .progress-pct-wrap{ display:flex; align-items:center; gap:5px; background:linear-gradient(135deg,#fff7ed,#ffedd5); border:1px solid #fed7aa; border-radius:20px; padding:3px 10px 3px 8px; }
+  .progress-pct{ font-family:'Cairo',sans-serif; font-weight:900; font-size:13px; color:#c2410c; }
+  .progress-fire{ display:inline-block; font-size:14px; line-height:1; transform-origin:center bottom; animation:fire-flicker 1.1s ease-in-out infinite; transition:font-size .4s cubic-bezier(.34,1.56,.64,1); }
+  @keyframes fire-flicker{
+    0%, 100% { transform:scale(1) rotate(0deg); filter:brightness(1); }
+    20% { transform:scale(1.08,0.94) rotate(-4deg); filter:brightness(1.15); }
+    45% { transform:scale(0.95,1.06) rotate(3deg); filter:brightness(0.95); }
+    70% { transform:scale(1.05,0.97) rotate(-2deg); filter:brightness(1.1); }
+  }
+  @keyframes fire-pop{ 0%{ transform:scale(0.7); } 55%{ transform:scale(1.3); } 100%{ transform:scale(1); } }
+  .progress-fire.fire-pop{ animation:fire-pop .5s cubic-bezier(.34,1.56,.64,1), fire-flicker 1.1s ease-in-out infinite .5s; }
+  .progress-track{ height:6px; border-radius:4px; background:var(--green-tint); overflow:hidden; margin-bottom:14px; position:relative; }
+  .progress-fill{ height:100%; background:linear-gradient(90deg,var(--green),#34d399); border-radius:4px; width:0%; transition:width .5s ease; position:relative; overflow:hidden; }
+  .progress-fill::after{ content:''; position:absolute; inset:0; background:linear-gradient(90deg, transparent, rgba(255,255,255,.6), transparent); animation:progress-shimmer 1.6s linear infinite; }
+  @keyframes progress-shimmer{ from{ transform:translateX(-100%); } to{ transform:translateX(100%); } }
+  .progress-stages{ display:flex; justify-content:space-between; }
+  .stage{ display:flex; flex-direction:column; align-items:center; gap:6px; flex:1; }
+  .stage-dot{ width:34px; height:34px; border-radius:50%; background:var(--green-tint-2); border:1.5px solid var(--line); display:flex; align-items:center; justify-content:center; overflow:hidden; transition:.25s; }
+  .stage.done .stage-dot{ background:var(--green); border-color:var(--green); }
+  .stage.current .stage-dot{ background:var(--green-tint); border-color:var(--green); box-shadow:0 0 0 3px var(--green-tint-2); }
+  .stage img.stage-mascot{ width:100%; height:100%; object-fit:contain; }
+  .stage-label{ font-family:'Cairo',sans-serif; font-weight:800; font-size:10.5px; color:var(--muted); }
+  .stage.current .stage-label, .stage.done .stage-label{ color:var(--green-deep); }
+  @keyframes mascot-blink{ 0%,100%{ transform:scaleY(1); } 50%{ transform:scaleY(0.85); } }
+  @keyframes mascot-bounce{ 0%,100%{ transform:translateY(0) scale(1); } 40%{ transform:translateY(-4px) scale(1.06); } 70%{ transform:translateY(1px) scale(0.98); } }
+  .mascot-blink{ animation:mascot-blink 1.8s ease-in-out infinite; }
+  .mascot-bounce-once{ animation:mascot-bounce .6s ease; }
   .step{ display:flex; gap:12px; align-items:flex-start; background:var(--green-tint); border-radius:14px; padding:12px 14px; }
   .step .num{ width:24px; height:24px; border-radius:50%; background:var(--green); color:#fff; font-family:'Cairo',sans-serif; font-weight:900; font-size:12px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
   .step .txt{ font-size:12.5px; line-height:1.8; color:var(--ink); padding-top:2px; }
@@ -132,6 +165,38 @@
   <div class="webview-banner-txt" id="webviewBannerTxt">إنت فاتح الرابط جوه التطبيق، وده بيمنع خاصية التثبيت. اضغط الزرار وهيتفتحلك في المتصفح.</div>
   <button type="button" class="webview-open-btn" id="webviewOpenBtn" style="display:none;">🌐 افتح في المتصفح</button>
   <ol class="webview-steps" id="webviewSteps" style="display:none;"></ol>
+</div>
+
+<!-- ============== بار التقدم بالماسكوت — ظاهر فوق شاشتي الحساب والربط ============== -->
+<div class="progress-wrap" id="progressWrap">
+  <div class="progress-card">
+    <div class="progress-head">
+      <span class="progress-title">تقدّمك</span>
+      <div class="progress-pct-wrap">
+        <span class="progress-fire" id="progressFire">🔥</span>
+        <span class="progress-pct" id="progressPct">0%</span>
+      </div>
+    </div>
+    <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+    <div class="progress-stages">
+      <div class="stage current" id="stage-account">
+        <div class="stage-dot"><img src="branding/dabbar-mascot-avatar.png" alt="دبّر" class="stage-mascot mascot-blink"></div>
+        <span class="stage-label">بياناتك</span>
+      </div>
+      <div class="stage" id="stage-link">
+        <div class="stage-dot"><img src="branding/dabbar-mascot-avatar.png" alt="دبّر" class="stage-mascot"></div>
+        <span class="stage-label">اربط تليجرام</span>
+      </div>
+      <div class="stage" id="stage-install">
+        <div class="stage-dot"><img src="branding/dabbar-mascot-avatar.png" alt="دبّر" class="stage-mascot"></div>
+        <span class="stage-label">التثبيت</span>
+      </div>
+      <div class="stage" id="stage-done">
+        <div class="stage-dot"><img src="branding/dabbar-mascot-avatar.png" alt="دبّر" class="stage-mascot"></div>
+        <span class="stage-label">تم</span>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- ============== 1) تسجيل الدخول / إنشاء حساب بالإيميل والباسورد ============== -->
@@ -313,10 +378,47 @@
   const authScreen = document.getElementById('authScreen');
   const linkScreen = document.getElementById('linkScreen');
 
+  // ---- بار التقدم بالماسكوت: 4 مراحل (بياناتك → اربط تليجرام → التثبيت → تم) ----
+  const PROGRESS_STAGES = ['account', 'link', 'install', 'done'];
+  const progressFill = document.getElementById('progressFill');
+  const progressPct = document.getElementById('progressPct');
+  const progressFire = document.getElementById('progressFire');
+  const FIRE_SIZES = [14, 18, 22, 26]; // النار بتكبر مع كل مرحلة تتخلص
+  function setProgressStage(stageKey) {
+    const idx = PROGRESS_STAGES.indexOf(stageKey);
+    if (idx === -1) return;
+    const pct = Math.round(((idx + 1) / PROGRESS_STAGES.length) * 100);
+    progressFill.style.width = pct + '%';
+    progressPct.textContent = pct + '%';
+    if (progressFire) {
+      progressFire.style.fontSize = FIRE_SIZES[idx] + 'px';
+      progressFire.classList.remove('fire-pop');
+      void progressFire.offsetWidth; // reflow عشان الحركة تتكرر
+      progressFire.classList.add('fire-pop');
+    }
+    PROGRESS_STAGES.forEach((key, i) => {
+      const el = document.getElementById('stage-' + key);
+      if (!el) return;
+      el.classList.remove('current', 'done');
+      const mascotImg = el.querySelector('.stage-mascot');
+      mascotImg.classList.remove('mascot-blink');
+      if (i < idx) el.classList.add('done');
+      else if (i === idx) {
+        el.classList.add('current');
+        mascotImg.classList.add('mascot-blink');
+        mascotImg.classList.remove('mascot-bounce-once');
+        void mascotImg.offsetWidth; // بنعمل reflow عشان الحركة تتكرر لو نفس المرحلة اتفعّلت تاني
+        mascotImg.classList.add('mascot-bounce-once');
+      }
+    });
+  }
+
   function showLinkScreen() {
     authScreen.style.display = 'none';
     linkScreen.classList.add('active');
+    setProgressStage('link');
   }
+  setProgressStage('account');
 
   const tabLogin = document.getElementById('tabLogin');
   const tabSignup = document.getElementById('tabSignup');
@@ -485,6 +587,7 @@
       // ننتقل لحالة النجاح جوه نفس الكارت، وبعدها نحوّل تلقائي للداشبورد
       linkFormState.style.display = 'none';
       successState.classList.add('show');
+      setProgressStage('done');
       setTimeout(() => { window.location.href = DASHBOARD_URL; }, 1100);
     } catch (err) {
       showError('مقدرناش نتواصل مع السيرفر دلوقتي. جرب تاني.');
@@ -530,6 +633,7 @@
       if (choice && choice.outcome === 'accepted') {
         installBtn.textContent = '✅ اتثبّت — دلوقتي افتح دبّر من الأيقونة على شاشتك';
         installBtn.classList.add('done');
+        setProgressStage('install');
         refreshSubmitState();
         return;
       }

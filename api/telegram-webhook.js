@@ -1,4 +1,5 @@
-import { transcribeVoice, classifyMessage, answerDataQuestion, extractReceiptFromImage } from '../lib/groq.js';
+import { transcribeVoice, classifyMessage, answerDataQuestion, extractItemizedReceiptFromImage } from '../lib/groq.js';
+import { recordInvoice, deleteInvoiceById } from '../lib/invoices.js';
 import { sendTelegramMessage, forwardTelegramMessage, answerCallbackQuery, editTelegramMessage, sendChatAction } from '../lib/telegram.js';
 import { recordExpense, sendMonthlyReport, sendWeeklyReport, sendDataExport, sendExpenseSearch, deleteExpenseById, getMostRecentExpense, getRecentExpensesSummaryText } from '../lib/expenses.js';
 import { recordDebt, sendDebtsReport, sendPersonDebtDetail, settleDebtWithPerson, deleteDebtById, getMostRecentDebt, getDebtsSummaryText } from '../lib/debts.js';
@@ -124,14 +125,14 @@ async function handleDeleteCallback(callbackQuery) {
   }
 
   // --- الضغطة الأولى على "🗑 حذف": نستبدل الزرار بسؤال تأكيد، من غير أي مسح فعلي لسه ---
-  if (rawAction === 'delexp' || rawAction === 'deldebt') {
+  if (rawAction === 'delexp' || rawAction === 'deldebt' || rawAction === 'delinv') {
     await answerCallbackQuery(callbackQuery.id);
     await editTelegramMessage(chatId, messageId, `${originalText}\n\n⚠️ متأكد إنك عايز تمسح العملية دي؟`, 'HTML', buildConfirmMarkup(rawAction, id));
     return;
   }
 
   // --- إلغاء: رجّع الرسالة والزرار الأصليين زي ما كانوا، من غير أي حذف ---
-  if (rawAction === 'delexp_no' || rawAction === 'deldebt_no') {
+  if (rawAction === 'delexp_no' || rawAction === 'deldebt_no' || rawAction === 'delinv_no') {
     const baseAction = rawAction.replace('_no', '');
     const cleanText = originalText.replace(/\n\n⚠️ متأكد إنك عايز تمسح العملية دي؟$/, '');
     await answerCallbackQuery(callbackQuery.id, 'اتلغى، العملية لسه موجودة');
@@ -162,6 +163,17 @@ async function handleDeleteCallback(callbackQuery) {
     return;
   }
 
+  if (rawAction === 'delinv_yes') {
+    const deleted = await deleteInvoiceById(id, userId);
+    if (!deleted) {
+      await answerCallbackQuery(callbackQuery.id, '❌ الفاتورة دي اتمسحت قبل كده أو مش لاقيها.', true);
+      return;
+    }
+    await answerCallbackQuery(callbackQuery.id, '🗑 اتمسحت');
+    await editTelegramMessage(chatId, messageId, `🗑 <s>اتمسحت فاتورة ${deleted.merchant || ''} · ${deleted.total_amount} جنيه</s>`, 'HTML');
+    return;
+  }
+
   await answerCallbackQuery(callbackQuery.id);
 }
 
@@ -170,11 +182,11 @@ async function handleDeleteCallback(callbackQuery) {
 // عداد صغير "المتبقي: x/y" في نهاية رسالة التأكيد للمشترك (مش للتجربة المجانية، عشان تحس إنها Unlimited).
 async function handleReceiptPhoto(message, userId, chatId, usage) {
   await sendChatAction(chatId, 'typing');
-  await sendTelegramMessage(chatId, '📸 بقرا الفاتورة...');
+  await sendTelegramMessage(chatId, '📸 بقرا الفاتورة وبفصّل كل صنف فيها...');
 
   // تليجرام بيبعت الصورة بأكتر من دقة — بناخد آخر عنصر (أعلى دقة)
   const bestPhoto = message.photo[message.photo.length - 1];
-  const receipt = await extractReceiptFromImage(bestPhoto.file_id);
+  const receipt = await extractItemizedReceiptFromImage(bestPhoto.file_id);
 
   if (!receipt.success) {
     const hintLine = receipt.hint
@@ -187,11 +199,10 @@ async function handleReceiptPhoto(message, userId, chatId, usage) {
     return;
   }
 
-  const note = receipt.merchant ? `فاتورة ${receipt.merchant}` : 'فاتورة ممسوحة';
   const footer = usage && !usage.isTrial && usage.remaining !== null
     ? `📎 <i>المتبقي: ${usage.remaining}/${usage.limit} فاتورة الشهر ده</i>`
     : '';
-  await recordExpense({ amount: receipt.amount, category: receipt.category, note }, note, userId, chatId, footer);
+  await recordInvoice(receipt, userId, chatId, footer);
 }
 
 // ============ نقطة الدخول - Vercel بينادي الدالة دي لكل ريكوست ============

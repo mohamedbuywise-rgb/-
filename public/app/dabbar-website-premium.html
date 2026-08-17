@@ -1,0 +1,622 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>دبّر — فلوسك، من غير صداع</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Tajawal:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<style>
+  :root{
+    --ink:#12201B;
+    --ink-2:#1A2B23;
+    --ink-3:#213329;
+    --paper:#F5F1E1;
+    --paper-dark:#EAE2C6;
+    --paper-edge:#DCD2AC;
+    --gold:#D2A44A;
+    --gold-deep:#8C6620;
+    --stamp:#C1543F;
+    --money:#2F6B4F;
+    --money-bright:#4CAE80;
+    --money-deep:#1F4E38;
+    --text:#241C12;
+    --onDark:#F3EFDD;
+    --muted:#726B57;
+    --muted-onDark:#9CAA9E;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  html{scroll-behavior:smooth;}
+  body{ font-family:'Tajawal',sans-serif; background:var(--paper); color:var(--text); overflow-x:hidden; }
+  a{color:inherit; text-decoration:none;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  .disp{font-family:'Cairo',sans-serif;}
+  img{max-width:100%; display:block;}
+  .wrap{max-width:1080px; margin:0 auto; padding:0 20px;}
+  ::selection{ background:var(--gold); color:var(--ink); }
+
+  /* ===== reveal on scroll ===== */
+  .reveal{ opacity:0; transform:translateY(18px); transition:opacity .7s ease, transform .7s ease; }
+  .reveal.in{ opacity:1; transform:translateY(0); }
+
+  /* ===== preview ribbon ===== */
+  .ribbon{ background:var(--stamp); color:#FBE9E4; text-align:center; font-family:'Cairo',sans-serif; font-weight:800; font-size:12.5px; padding:8px 12px; position:sticky; top:0; z-index:60; }
+  .ribbon span{ opacity:.85; font-weight:500; }
+
+  /* ===== nav ===== */
+  nav{ position:sticky; top:33px; z-index:55; backdrop-filter:blur(10px); background:rgba(18,32,27,0.85); border-bottom:1px solid rgba(210,164,74,0.15); }
+  .nav-inner{ max-width:1080px; margin:0 auto; padding:14px 20px; display:flex; align-items:center; justify-content:space-between; }
+  .brand{ font-family:'Cairo',sans-serif; font-weight:900; font-size:19px; color:var(--onDark); display:flex; align-items:center; gap:8px; }
+  .brand-dot{ width:8px; height:8px; border-radius:50%; background:var(--gold); }
+  .nav-links{ display:none; gap:26px; font-size:13.5px; color:var(--muted-onDark); font-weight:500; }
+  .nav-links a:hover{ color:var(--gold); }
+  .nav-cta{ background:var(--money-bright); color:#0E1D16; font-family:'Cairo',sans-serif; font-weight:800; font-size:13px; padding:9px 18px; border-radius:100px; }
+  @media(min-width:760px){ .nav-links{ display:flex; } }
+
+  /* ===== HERO ===== */
+  .hero{ background:var(--ink); background-image:
+      radial-gradient(circle at 12% 0%, rgba(210,164,74,0.14), transparent 45%),
+      radial-gradient(circle at 90% 100%, rgba(76,174,128,0.14), transparent 45%);
+    padding:64px 0 0; color:var(--onDark); position:relative; }
+  .hero-grid{ display:grid; grid-template-columns:1fr; gap:40px; align-items:center; padding-bottom:50px; }
+  @media(min-width:860px){ .hero-grid{ grid-template-columns:1.05fr 0.95fr; } }
+  .hero-eyebrow{ font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:2px; color:var(--gold); text-transform:uppercase; margin-bottom:16px; display:inline-flex; align-items:center; gap:8px; }
+  .hero-eyebrow::before{ content:""; width:18px; height:1px; background:var(--gold); }
+  h1.hero-title{ font-size:38px; line-height:1.28; font-weight:900; margin-bottom:18px; }
+  @media(min-width:860px){ h1.hero-title{ font-size:47px; } }
+  h1.hero-title em{ font-style:normal; color:var(--money-bright); }
+  .hero-sub{ font-size:16px; line-height:1.85; color:var(--muted-onDark); max-width:460px; margin-bottom:30px; }
+  .cta-row{ display:flex; flex-wrap:wrap; gap:12px; }
+  .btn{ font-family:'Cairo',sans-serif; font-weight:800; font-size:14.5px; padding:14px 26px; border-radius:10px; display:inline-flex; align-items:center; gap:8px; }
+  .btn-primary{ background:var(--money-bright); color:#0E1D16; box-shadow:0 14px 30px -10px rgba(76,174,128,0.45); }
+  .btn-primary:hover{ filter:brightness(1.06); }
+  .btn-outline{ border:1.5px solid rgba(243,239,221,0.25); color:var(--onDark); }
+  .hero-stats{ display:flex; gap:28px; margin-top:38px; padding-top:26px; border-top:1px dashed rgba(243,239,221,0.15); }
+  .hstat b{ display:block; font-family:'Cairo',sans-serif; font-weight:900; font-size:21px; color:var(--onDark); }
+  .hstat span{ font-size:12px; color:var(--muted-onDark); }
+
+  /* ===== phone mock in hero ===== */
+  .phone{ background:#0E1B16; border:1px solid rgba(210,164,74,0.25); border-radius:26px; padding:14px; box-shadow:0 40px 90px -30px rgba(0,0,0,0.7); max-width:340px; margin:0 auto; }
+  .phone-screen{ background:var(--paper); border-radius:18px; padding:18px 16px 20px; }
+  .phone-head{ display:flex; align-items:center; gap:8px; padding-bottom:12px; border-bottom:1px dashed var(--paper-edge); margin-bottom:14px; }
+  .phone-head .av{ width:30px; height:30px; border-radius:50%; background:var(--money); color:#fff; display:flex; align-items:center; justify-content:center; font-family:'Cairo',sans-serif; font-weight:800; font-size:13px; }
+  .phone-head b{ font-family:'Cairo',sans-serif; font-size:13.5px; }
+  .phone-head small{ display:block; color:var(--muted); font-size:10.5px; }
+  .bubble{ max-width:85%; padding:10px 13px; border-radius:14px; margin-bottom:8px; font-size:13px; line-height:1.6; }
+  .bubble-out{ background:#DDF2C6; margin-inline-start:auto; border-bottom-left-radius:4px; }
+  .bubble-in{ background:#fff; border:1px solid var(--paper-edge); border-bottom-right-radius:4px; }
+  .bubble .line{ display:flex; justify-content:space-between; gap:10px; font-family:'JetBrains Mono',monospace; font-size:12.5px; }
+  .bubble small{ display:block; color:var(--muted); font-size:10.5px; margin-top:4px; }
+  .typing{ display:inline-flex; gap:3px; padding:9px 12px; background:#fff; border-radius:14px; border:1px solid var(--paper-edge); }
+  .typing i{ width:5px; height:5px; border-radius:50%; background:var(--muted); opacity:.5; animation:blink 1.2s infinite; }
+  .typing i:nth-child(2){ animation-delay:.2s; } .typing i:nth-child(3){ animation-delay:.4s; }
+  @keyframes blink{ 0%,80%,100%{opacity:.3} 40%{opacity:1} }
+
+  /* ===== flow / signature section ===== */
+  .flow{ background:var(--paper); padding:70px 0 40px; text-align:center; }
+  .flow-eyebrow{ font-family:'JetBrains Mono',monospace; font-size:11.5px; letter-spacing:1.5px; color:var(--gold-deep); margin-bottom:10px; }
+  .flow h2{ font-family:'Cairo',sans-serif; font-weight:800; font-size:23px; color:var(--money-deep); margin-bottom:44px; }
+  .flow-row{ display:flex; align-items:center; justify-content:center; gap:14px; flex-wrap:wrap; }
+  .chip{ background:#fff; border:1px solid var(--paper-edge); border-radius:100px; padding:9px 16px; font-size:12.5px; color:var(--text); display:flex; align-items:center; gap:6px; box-shadow:0 6px 14px -8px rgba(0,0,0,0.15); }
+  .flow-arrow{ font-size:20px; color:var(--gold-deep); }
+  .flow-result{ background:var(--money); color:#fff; font-family:'Cairo',sans-serif; font-weight:800; border-radius:100px; padding:11px 22px; font-size:13.5px; box-shadow:0 14px 26px -10px rgba(47,107,79,0.5); }
+
+  /* ===== report showcase ===== */
+  .showcase{ background:var(--paper); padding:20px 0 80px; }
+  .sc-head{ text-align:center; margin-bottom:36px; }
+  .sc-eyebrow{ font-family:'JetBrains Mono',monospace; font-size:11.5px; letter-spacing:1.5px; color:var(--gold-deep); margin-bottom:10px; }
+  .sc-head h2{ font-family:'Cairo',sans-serif; font-weight:800; font-size:25px; color:var(--money-deep); margin-bottom:10px; }
+  .sc-head p{ color:var(--muted); font-size:14.5px; max-width:480px; margin:0 auto; }
+
+  .tabs{ display:flex; justify-content:center; gap:8px; margin:26px 0 30px; }
+  .tab-btn{ font-family:'Cairo',sans-serif; font-weight:800; font-size:13px; padding:10px 20px; border-radius:100px; border:1.5px solid var(--paper-edge); background:transparent; color:var(--muted); cursor:pointer; transition:.2s; }
+  .tab-btn.active{ background:var(--money); border-color:var(--money); color:#fff; }
+
+  .report-card{ max-width:520px; margin:0 auto; background:#fff; border-radius:16px; box-shadow:0 40px 80px -30px rgba(0,0,0,0.35), 0 0 0 1px rgba(0,0,0,0.04); overflow:hidden; }
+  .rc-header{ text-align:center; padding:26px 20px 20px; border-bottom:2px dashed var(--paper-edge); }
+  .rc-brand{ font-family:'Cairo',sans-serif; font-weight:900; font-size:19px; color:var(--ink); }
+  .rc-brand span{ color:var(--money); }
+  .rc-title{ font-family:'Cairo',sans-serif; font-weight:800; font-size:12px; color:var(--gold-deep); margin-top:8px; letter-spacing:1px; }
+  .rc-period{ color:var(--muted); font-size:11.5px; margin-top:3px; }
+  .rc-body{ padding:20px; }
+  .rc-summary{ display:flex; justify-content:space-between; background:var(--paper-dark); border:1px solid var(--paper-edge); border-radius:10px; padding:14px 16px; margin-bottom:16px; }
+  .rc-si{ text-align:center; flex:1; }
+  .rc-slabel{ font-size:10.5px; color:var(--muted); margin-bottom:3px; }
+  .rc-svalue{ font-family:'Cairo',sans-serif; font-weight:800; font-size:15.5px; color:var(--ink); }
+  .rc-compare{ font-size:12px; color:var(--gold-deep); background:#F0EFE6; border:1px dashed var(--paper-edge); border-radius:8px; padding:9px 13px; margin-bottom:18px; }
+  .rc-chart{ text-align:center; margin-bottom:16px; }
+  .rc-chart img{ width:210px; margin:0 auto; }
+  .cat-block{ padding:11px 0; border-bottom:1px dashed var(--paper-edge); }
+  .cat-block:last-child{ border-bottom:none; }
+  .cat-head{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px; }
+  .cat-name{ font-family:'Cairo',sans-serif; font-weight:800; font-size:13px; }
+  .cat-amount{ font-family:'Cairo',sans-serif; font-weight:800; font-size:12.5px; }
+  .cat-percent{ color:var(--muted); font-weight:500; font-size:11px; }
+  .bar-track{ height:5px; background:var(--paper-dark); border-radius:6px; overflow:hidden; }
+  .bar-fill{ height:100%; border-radius:6px; width:0; transition:width 1.1s cubic-bezier(.2,.8,.2,1); }
+  .rc-foot{ text-align:center; padding:14px; border-top:2px dashed var(--paper-edge); font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--muted); letter-spacing:.5px; }
+
+  /* compare view */
+  .cmp-wrap{ display:none; }
+  .cmp-wrap.active{ display:block; }
+  .cmp-bars{ display:flex; align-items:flex-end; justify-content:center; gap:34px; height:180px; margin:24px 0 14px; }
+  .cmp-col{ text-align:center; width:70px; }
+  .cmp-bar{ width:100%; border-radius:8px 8px 0 0; margin:0 auto; transition:height 1.2s cubic-bezier(.2,.8,.2,1); height:0; }
+  .cmp-bar.old{ background:var(--paper-edge); }
+  .cmp-bar.new{ background:var(--money); }
+  .cmp-val{ font-family:'JetBrains Mono',monospace; font-weight:700; font-size:12.5px; margin-top:8px; }
+  .cmp-label{ font-size:11px; color:var(--muted); margin-top:2px; }
+  .cmp-badge{ text-align:center; background:#EAF6EE; color:var(--money-deep); border:1px dashed #BFE3CC; border-radius:8px; padding:12px; font-size:13px; font-family:'Cairo',sans-serif; font-weight:700; margin-top:6px; }
+
+  /* ===== features ===== */
+  .section-dark{ background:var(--ink); color:var(--onDark); padding:80px 0; }
+  .sec-head{ text-align:center; margin-bottom:44px; }
+  .sec-eyebrow{ font-family:'JetBrains Mono',monospace; font-size:11.5px; letter-spacing:1.5px; color:var(--gold); margin-bottom:10px; }
+  .sec-head h2{ font-family:'Cairo',sans-serif; font-weight:800; font-size:25px; }
+  .feat-grid{ display:grid; grid-template-columns:1fr; gap:16px; }
+  @media(min-width:640px){ .feat-grid{ grid-template-columns:1fr 1fr; } }
+  @media(min-width:960px){ .feat-grid{ grid-template-columns:1fr 1fr 1fr; } }
+  .feat-card{ background:var(--ink-2); border:1px solid rgba(210,164,74,0.14); border-radius:14px; padding:22px; transition:.25s; }
+  .feat-card:hover{ transform:translateY(-4px); border-color:rgba(210,164,74,0.4); }
+  .feat-icon{ font-size:24px; margin-bottom:12px; }
+  .feat-title{ font-family:'Cairo',sans-serif; font-weight:800; font-size:15px; margin-bottom:6px; }
+  .feat-desc{ font-size:13px; color:var(--muted-onDark); line-height:1.75; }
+
+  /* ===== how it works ===== */
+  .how{ background:var(--paper); padding:80px 0; }
+  .how-grid{ display:grid; grid-template-columns:1fr; gap:22px; max-width:640px; margin:0 auto; }
+  .step{ display:flex; gap:16px; align-items:flex-start; }
+  .step-num{ font-family:'JetBrains Mono',monospace; font-weight:700; font-size:13px; color:var(--gold-deep); border:1.5px solid var(--gold-deep); border-radius:50%; width:30px; height:30px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .step strong{ font-family:'Cairo',sans-serif; display:block; font-size:14.5px; margin-bottom:2px; }
+  .step span{ color:var(--muted); font-size:13.5px; }
+
+  /* ===== pricing ===== */
+  .pricing{ background:var(--ink); color:var(--onDark); padding:80px 0; }
+  .price-box{ max-width:400px; margin:0 auto; background:var(--ink-2); border:1.5px solid rgba(210,164,74,0.3); border-radius:18px; padding:34px 28px; text-align:center; }
+  .price-tag{ font-family:'Cairo',sans-serif; font-weight:900; font-size:52px; color:var(--onDark); margin:14px 0 2px; }
+  .price-tag sup{ font-size:18px; color:var(--gold); }
+  .price-per{ color:var(--muted-onDark); font-size:13px; margin-bottom:24px; }
+  .price-feats{ text-align:right; margin-bottom:26px; }
+  .price-feats div{ font-size:13.5px; padding:8px 0; border-top:1px dashed rgba(243,239,221,0.12); display:flex; gap:8px; }
+  .price-feats div:first-child{ border-top:none; }
+
+  .instapay-steps{ text-align:right; max-width:460px; margin:36px auto 0; }
+  .ip-box{ background:var(--ink-2); border:1.5px dashed var(--gold); border-radius:10px; padding:14px; margin:14px 0; text-align:center; font-family:'JetBrains Mono',monospace; font-size:14px; color:var(--gold); }
+  .tag-note{ display:inline-block; font-family:'JetBrains Mono',monospace; font-size:10px; background:var(--stamp); color:#fff; padding:2px 7px; border-radius:5px; margin-inline-start:6px; }
+
+  /* ===== faq ===== */
+  .faq{ background:var(--paper); padding:70px 0 90px; }
+  .faq-list{ max-width:640px; margin:0 auto; }
+  details{ border-top:1px dashed var(--paper-edge); padding:15px 0; }
+  details:first-of-type{ border-top:none; }
+  summary{ font-family:'Cairo',sans-serif; font-weight:700; font-size:14.5px; cursor:pointer; list-style:none; display:flex; justify-content:space-between; }
+  summary::-webkit-details-marker{ display:none; }
+  summary::after{ content:"+"; color:var(--gold-deep); font-size:19px; }
+  details[open] summary::after{ content:"–"; }
+  details p{ font-size:13.5px; color:var(--muted); margin-top:10px; line-height:1.8; }
+
+  /* ===== footer ===== */
+  footer{ background:var(--ink); color:var(--muted-onDark); text-align:center; padding:34px 0 100px; font-size:12px; }
+  .fab{ position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--money-bright); color:#0E1D16; font-family:'Cairo',sans-serif; font-weight:800; font-size:14px; padding:13px 28px; border-radius:100px; z-index:50; box-shadow:0 14px 34px -10px rgba(0,0,0,0.5); display:flex; align-items:center; gap:7px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="brand"><span class="brand-dot"></span>دبّر</div>
+    <div class="nav-links">
+      <a href="#report">شكل التقرير</a>
+      <a href="#features">المميزات</a>
+      <a href="#pricing">الاشتراك</a>
+    </div>
+    <a class="nav-cta" href="dabbar-onboarding.html">🔐 دخول</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="hero-eyebrow">تليجرام بوت لتتبع فلوسك</div>
+      <h1 class="hero-title">تقولّي بالصوت،<br>وهو يطلعلك <em>تقرير كامل</em></h1>
+      <p class="hero-sub">مصاريفك وديونك بيتسجلوا لوحدهم من رسالة صوت عادية، وفي آخر الشهر تلاقي تقرير PDF جاهز فيه كل التفاصيل ومقارنة بالشهر اللي فات — من غير ما تفتح جدول ولا تكتب رقم بإيدك.</p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="https://t.me/Masaaref_bot">🚀 افتح البوت دلوقتي</a>
+        <a class="btn btn-outline" href="#report">📄 شوف شكل التقرير</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hstat"><b>150 ج.م</b><span>اشتراك شهري</span></div>
+        <div class="hstat"><b>24/7</b><span>متاح على طول</span></div>
+        <div class="hstat"><b>3</b><span>تقارير تلقائية</span></div>
+      </div>
+    </div>
+
+    <div class="phone reveal">
+      <div class="phone-screen">
+        <div class="phone-head">
+          <div class="av">ف</div>
+          <div><b>دبّر</b><small>online</small></div>
+        </div>
+        <div class="bubble bubble-out">🎤 "صرفت 180 جنيه عشا في مطعم كرنك"</div>
+        <div class="bubble bubble-in">
+          <div class="line"><span>🍔 أكل — مطعم كرنك</span><span>-180 ج.م</span></div>
+          <small>اتسجل. إجمالي النهاردة: 180 ج.م</small>
+        </div>
+        <div class="bubble bubble-out">"تقرير"</div>
+        <div class="typing"><i></i><i></i><i></i></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FLOW / SIGNATURE -->
+<section class="flow">
+  <div class="wrap reveal">
+    <div class="flow-eyebrow">إزاي بيتحول الكلام لأرقام</div>
+    <h2>من رسالة صوت لتقرير مرتّب</h2>
+    <div class="flow-row">
+      <div class="chip">🎤 "صرفت 50 جنيه أكل"</div>
+      <div class="chip">"عطيت محمد 200"</div>
+      <div class="chip">"دفعت فاتورة 450"</div>
+      <span class="flow-arrow">←</span>
+      <div class="flow-result">📄 تقرير شهري كامل</div>
+    </div>
+  </div>
+</section>
+
+<!-- REPORT SHOWCASE -->
+<section class="showcase" id="report">
+  <div class="wrap">
+    <div class="sc-head reveal">
+      <div class="sc-eyebrow">EP.001 — التقرير الحقيقي</div>
+      <h2>ده بالظبط شكل التقرير اللي هيوصلك</h2>
+      <p>نفس التصميم اللي بيتولّد فعليًا كملف PDF على تليجرام — مش رسمة تجريبية.</p>
+    </div>
+
+    <div class="tabs reveal">
+      <button class="tab-btn active" data-tab="month">📊 التقرير الشهري</button>
+      <button class="tab-btn" data-tab="compare">📈 مقارنة الشهور</button>
+    </div>
+
+    <div class="report-card reveal" id="reportCard">
+      <div class="rc-header">
+        <div class="rc-brand">تقرير <span>دبّر</span></div>
+        <div class="rc-title">التقرير الشهري</div>
+        <div class="rc-period">أغسطس 2026</div>
+      </div>
+      <div class="rc-body">
+
+        <!-- month view -->
+        <div class="cmp-wrap active" id="monthView">
+          <div class="rc-summary">
+            <div class="rc-si"><div class="rc-slabel">الإجمالي</div><div class="rc-svalue">3,600 ج</div></div>
+            <div class="rc-si"><div class="rc-slabel">عدد العمليات</div><div class="rc-svalue">42</div></div>
+            <div class="rc-si"><div class="rc-slabel">أكتر فئة</div><div class="rc-svalue">أكل</div></div>
+          </div>
+          <div class="rc-compare">↓ أقل من الشهر اللي فات بـ 550 جنيه (13%)</div>
+          <div class="rc-chart">
+            <img loading="lazy" src="https://quickchart.io/chart?width=480&height=380&backgroundColor=%23F3EFDD&c=%7B%22type%22%3A%20%22doughnut%22%2C%20%22data%22%3A%20%7B%22labels%22%3A%20%5B%22%D8%A3%D9%83%D9%84%22%2C%20%22%D9%81%D9%88%D8%A7%D8%AA%D9%8A%D8%B1%22%2C%20%22%D9%85%D9%88%D8%A7%D8%B5%D9%84%D8%A7%D8%AA%22%2C%20%22%D8%AA%D8%B3%D9%88%D9%82%22%2C%20%22%D8%AA%D8%B1%D9%81%D9%8A%D9%87%22%5D%2C%20%22datasets%22%3A%20%5B%7B%22data%22%3A%20%5B1250%2C%20900%2C%20680%2C%20450%2C%20320%5D%2C%20%22backgroundColor%22%3A%20%5B%22%23FF6B6B%22%2C%20%22%23FFD166%22%2C%20%22%234ECDC4%22%2C%20%22%23A78BFA%22%2C%20%22%23F472B6%22%5D%2C%20%22borderColor%22%3A%20%22%23F3EFDD%22%2C%20%22borderWidth%22%3A%204%7D%5D%7D%2C%20%22options%22%3A%20%7B%22cutout%22%3A%20%2260%25%22%2C%20%22layout%22%3A%20%7B%22padding%22%3A%208%7D%2C%20%22plugins%22%3A%20%7B%22legend%22%3A%20%7B%22position%22%3A%20%22bottom%22%2C%20%22labels%22%3A%20%7B%22color%22%3A%20%22%23241C12%22%2C%20%22font%22%3A%20%7B%22size%22%3A%2015%7D%2C%20%22padding%22%3A%2012%2C%20%22boxWidth%22%3A%2014%7D%7D%7D%7D%7D" alt="رسم بياني لتوزيع المصاريف">
+          </div>
+
+          <div class="cat-block">
+            <div class="cat-head"><span class="cat-name">🍔 أكل</span><span class="cat-amount">1,250 ج.م <span class="cat-percent">(35%)</span></span></div>
+            <div class="bar-track"><div class="bar-fill" data-w="35" style="background:#FF6B6B;"></div></div>
+          </div>
+          <div class="cat-block">
+            <div class="cat-head"><span class="cat-name">🧾 فواتير</span><span class="cat-amount">900 ج.م <span class="cat-percent">(25%)</span></span></div>
+            <div class="bar-track"><div class="bar-fill" data-w="25" style="background:#FFD166;"></div></div>
+          </div>
+          <div class="cat-block">
+            <div class="cat-head"><span class="cat-name">🚕 مواصلات</span><span class="cat-amount">680 ج.م <span class="cat-percent">(19%)</span></span></div>
+            <div class="bar-track"><div class="bar-fill" data-w="19" style="background:#4ECDC4;"></div></div>
+          </div>
+          <div class="cat-block">
+            <div class="cat-head"><span class="cat-name">🛍️ تسوق</span><span class="cat-amount">450 ج.م <span class="cat-percent">(13%)</span></span></div>
+            <div class="bar-track"><div class="bar-fill" data-w="13" style="background:#A78BFA;"></div></div>
+          </div>
+          <div class="cat-block">
+            <div class="cat-head"><span class="cat-name">🎬 ترفيه</span><span class="cat-amount">320 ج.م <span class="cat-percent">(8%)</span></span></div>
+            <div class="bar-track"><div class="bar-fill" data-w="8" style="background:#F472B6;"></div></div>
+          </div>
+        </div>
+
+        <!-- compare view -->
+        <div class="cmp-wrap" id="compareView">
+          <div class="cmp-bars">
+            <div class="cmp-col">
+              <div class="cmp-bar old" data-h="140"></div>
+              <div class="cmp-val">4,150 ج</div>
+              <div class="cmp-label">يوليو</div>
+            </div>
+            <div class="cmp-col">
+              <div class="cmp-bar new" data-h="122"></div>
+              <div class="cmp-val">3,600 ج</div>
+              <div class="cmp-label">أغسطس</div>
+            </div>
+          </div>
+          <div class="cmp-badge">🎉 وفّرت 550 جنيه الشهر ده مقارنة بيوليو</div>
+        </div>
+
+      </div>
+      <div class="rc-foot">DABBAR — اتولّد أوتوماتيك بتاريخ 31 أغسطس 2026</div>
+    </div>
+  </div>
+</section>
+
+<!-- PRO DASHBOARD VIEW -->
+<section style="background:var(--ink); padding:20px 0 90px;">
+  <div class="wrap">
+    <div class="sc-head reveal" style="color:var(--onDark);">
+      <div class="sc-eyebrow" style="color:var(--gold);">EP.001.B — لوحة أداءك</div>
+      <h2 style="color:var(--onDark);">نفس البيانات، في شكل لوحة تحكم</h2>
+      <p style="color:var(--muted-onDark);">مش تصميم بديل عن الـ PDF — دي نفس الأرقام اللي البوت بيحسبها، معروضة بشكل تاني يومي وشهري.</p>
+    </div>
+
+    <div class="tabs reveal">
+      <button class="tab-btn dash-tab active" data-dash="today">☀️ اليوم</button>
+      <button class="tab-btn dash-tab" data-dash="month">📊 الشهر</button>
+      <button class="tab-btn dash-tab" data-dash="compare">📈 مقارنة</button>
+    </div>
+
+    <div class="reveal font-['Cairo'] max-w-md w-full mx-auto bg-slate-900 border border-slate-800 rounded-[2rem] shadow-2xl overflow-hidden" dir="rtl">
+
+      <!-- header bar -->
+      <div class="bg-slate-900/90 border-b border-slate-800/80 p-5 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-slate-950 font-black text-xl shadow-lg shadow-emerald-500/20">📊</div>
+          <div>
+            <h2 class="font-bold text-base text-slate-100 leading-tight">تقرير أداءك</h2>
+            <span class="text-xs text-emerald-400 font-medium">● بيانات حقيقية من حسابك</span>
+          </div>
+        </div>
+        <div id="dashBadge" class="bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-full text-xs font-bold text-emerald-400 whitespace-nowrap">
+          🏆 أقل من الشهر اللي فات
+        </div>
+      </div>
+
+      <!-- TODAY -->
+      <div class="dash-view p-5 space-y-4" id="dash-today">
+        <div class="bg-gradient-to-br from-emerald-950/60 to-slate-900 border border-emerald-500/30 rounded-3xl p-4 text-center space-y-2 shadow-lg">
+          <span class="text-xs text-emerald-400 font-semibold block">مصروفك النهاردة</span>
+          <h3 class="text-3xl font-black text-emerald-300">180 ج.م</h3>
+          <p class="text-[11px] text-slate-400">عملية واحدة بس لحد دلوقتي — 🍔 عشا في مطعم كرنك</p>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl">
+            <span class="text-[11px] text-slate-400 block mb-1">عدد العمليات</span>
+            <span class="text-lg font-bold text-slate-200">1</span>
+          </div>
+          <div class="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl">
+            <span class="text-[11px] text-slate-400 block mb-1">أكتر فئة</span>
+            <span class="text-lg font-bold text-slate-200">🍔 أكل</span>
+          </div>
+        </div>
+        <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-3.5 flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold shrink-0 border border-emerald-500/30">💬</div>
+          <div class="text-xs text-slate-300 leading-relaxed">النهاردة لسه بادئ — كل عملية جديدة بتتحدث هنا لحظة ما تبعتها للبوت.</div>
+        </div>
+      </div>
+
+      <!-- MONTH -->
+      <div class="dash-view p-5 space-y-4 hidden" id="dash-month">
+        <div class="bg-gradient-to-br from-emerald-950/60 to-slate-900 border border-emerald-500/30 rounded-3xl p-4 text-center space-y-2 shadow-lg">
+          <span class="text-xs text-emerald-400 font-semibold block">إجمالي مصاريف أغسطس</span>
+          <h3 class="text-3xl font-black text-emerald-300">3,600 ج.م</h3>
+          <p class="text-[11px] text-slate-400">42 عملية، أقل من يوليو بـ 550 جنيه (13%↓)</p>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl">
+            <span class="text-[11px] text-slate-400 block mb-1">عدد العمليات</span>
+            <span class="text-lg font-bold text-slate-200">42</span>
+          </div>
+          <div class="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl">
+            <span class="text-[11px] text-slate-400 block mb-1">أكتر فئة</span>
+            <span class="text-lg font-bold text-slate-200">🍔 أكل</span>
+          </div>
+        </div>
+        <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3">
+          <h4 class="text-xs font-bold text-slate-300">توزيع المصاريف حسب الفئة:</h4>
+          <div class="space-y-2.5 text-xs">
+            <div>
+              <div class="flex justify-between mb-1 text-slate-300"><span>🍔 أكل</span><span class="font-bold text-slate-200">1,250 ج.م (35%)</span></div>
+              <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden"><div class="h-full rounded-full" style="width:35%; background:#FF6B6B;"></div></div>
+            </div>
+            <div>
+              <div class="flex justify-between mb-1 text-slate-300"><span>🧾 فواتير</span><span class="font-bold text-slate-200">900 ج.م (25%)</span></div>
+              <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden"><div class="h-full rounded-full" style="width:25%; background:#FFD166;"></div></div>
+            </div>
+            <div>
+              <div class="flex justify-between mb-1 text-slate-300"><span>🚕 مواصلات</span><span class="font-bold text-slate-200">680 ج.م (19%)</span></div>
+              <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden"><div class="h-full rounded-full" style="width:19%; background:#4ECDC4;"></div></div>
+            </div>
+            <div>
+              <div class="flex justify-between mb-1 text-slate-300"><span>🛍️ تسوق</span><span class="font-bold text-slate-200">450 ج.م (13%)</span></div>
+              <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden"><div class="h-full rounded-full" style="width:13%; background:#A78BFA;"></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-3.5 flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold shrink-0 border border-emerald-500/30">💡</div>
+          <div class="text-xs text-slate-300 leading-relaxed"><strong class="text-emerald-400 block mb-0.5">ملاحظة الشهر:</strong>الأكل بيمثل 35% من مصاريفك — أكبر فئة عندك بفرق واضح عن الباقي.</div>
+        </div>
+      </div>
+
+      <!-- COMPARE -->
+      <div class="dash-view p-5 space-y-4 hidden" id="dash-compare">
+        <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-5">
+          <div class="flex items-end justify-center gap-8 h-40 mb-4">
+            <div class="text-center w-16">
+              <div class="mx-auto rounded-t-lg bg-slate-700" style="height:120px; width:100%;"></div>
+              <div class="text-xs font-bold text-slate-300 mt-2">4,150 ج</div>
+              <div class="text-[11px] text-slate-500">يوليو</div>
+            </div>
+            <div class="text-center w-16">
+              <div class="mx-auto rounded-t-lg bg-emerald-500" style="height:104px; width:100%;"></div>
+              <div class="text-xs font-bold text-emerald-300 mt-2">3,600 ج</div>
+              <div class="text-[11px] text-slate-500">أغسطس</div>
+            </div>
+          </div>
+          <div class="bg-emerald-500/10 border border-emerald-500/25 rounded-2xl p-3 text-center text-emerald-300 text-sm font-bold">🎉 وفّرت 550 جنيه الشهر ده مقارنة بيوليو</div>
+        </div>
+      </div>
+
+      <!-- footer action -->
+      <div class="p-4 bg-slate-900 border-t border-slate-800/80">
+        <a href="https://t.me/Masaaref_bot" class="block w-full text-center bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-3 rounded-2xl text-sm transition shadow-lg shadow-emerald-500/20">
+          افتح البوت وشوف تقريرك إنت 🚀
+        </a>
+      </div>
+    </div>
+
+    <p class="reveal" style="text-align:center; color:var(--muted-onDark); font-size:12px; margin-top:18px; max-width:420px; margin-left:auto; margin-right:auto;">
+      ملحوظة: البوت حاليًا بيتتبع المصاريف والديون بس (مفيش تتبع دخل شهري)، فكل رقم فوق ده من نفس بياناتك الحقيقية.
+    </p>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section-dark" id="features">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="sec-eyebrow">EP.002 — إيه اللي جوه</div>
+      <h2>كل حاجة بتحتاجها لفلوسك</h2>
+    </div>
+    <div class="feat-grid reveal">
+      <div class="feat-card"><div class="feat-icon">🎙️</div><div class="feat-title">تسجيل بالصوت أو النص</div><div class="feat-desc">"صرفت 50 جنيه أكل" — يتسجل فورًا بالفئة الصح، من غير كتابة.</div></div>
+      <div class="feat-card"><div class="feat-icon">🤝</div><div class="feat-title">متابعة الديون</div><div class="feat-desc">مين ليه عند مين وصافي كل شخص، مع "خلصت مع فلان" للتسوية.</div></div>
+      <div class="feat-card"><div class="feat-icon">📄</div><div class="feat-title">تقارير PDF كاملة</div><div class="feat-desc">يومي، أسبوعي، وشهري — برسم بياني ومقارنة بالشهر اللي فات.</div></div>
+      <div class="feat-card"><div class="feat-icon">🔍</div><div class="feat-title">دور في مصاريفك</div><div class="feat-desc">"فين صرفت على قهوة" — يطلعلك كل النتايج والإجمالي فورًا.</div></div>
+      <div class="feat-card"><div class="feat-icon">📊</div><div class="feat-title">تصدير CSV</div><div class="feat-desc">كل بياناتك في ملف واحد يفتح كويس على Excel وقت ما تحتاجه.</div></div>
+      <div class="feat-card"><div class="feat-icon">⏰</div><div class="feat-title">تذكيرات تلقائية</div><div class="feat-desc">بتوقيت القاهرة، وبتنبهك لو عندك دين قديم من غير تسوية.</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- HOW -->
+<section class="how">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="flow-eyebrow">EP.003 — إزاي بيشتغل</div>
+      <h2 style="color:var(--money-deep); font-family:'Cairo',sans-serif; font-weight:800; font-size:23px;">3 خطوات بس</h2>
+    </div>
+    <div class="how-grid reveal">
+      <div class="step"><div class="step-num">1</div><div><strong>ابعت فويس أو رسالة</strong><span>"صرفت 50 جنيه أكل" أو "استلفت من سارة 100 جنيه"</span></div></div>
+      <div class="step"><div class="step-num">2</div><div><strong>البوت يفهم ويصنّف</strong><span>بيفرّق لوحده بين مصروف، دين، أو تسوية دين</span></div></div>
+      <div class="step"><div class="step-num">3</div><div><strong>يتسجل ويتحسب أوتوماتيك</strong><span>وهيوصلك تقرير وتذكير من غير ما تطلبه</span></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing" id="pricing">
+  <div class="wrap">
+    <div class="sec-head reveal">
+      <div class="sec-eyebrow">EP.004 — الاشتراك</div>
+      <h2>اشتراك شهري واحد، كل المميزات</h2>
+    </div>
+
+    <div class="price-box reveal">
+      <div class="price-per">دبّر — شهري</div>
+      <div class="price-tag">150<sup>ج.م</sup></div>
+      <div class="price-per">بدون تجديد أوتوماتيك — بتحول بنفسك كل شهر</div>
+      <div class="price-feats">
+        <div>✅ تسجيل صوتي غير محدود</div>
+        <div>✅ متابعة ديون كاملة</div>
+        <div>✅ تقارير PDF يومية/أسبوعية/شهرية</div>
+        <div>✅ تصدير CSV وقت ما تحتاج</div>
+      </div>
+      <a class="btn btn-primary" style="width:100%; justify-content:center;" href="https://t.me/Masaaref_bot">💳 اشترك دلوقتي</a>
+    </div>
+
+    <div class="instapay-steps reveal">
+      <div class="step"><div class="step-num">1</div><div><strong>حوّل قيمة الاشتراك</strong><span>عن طريق إنستا باي على رقم دبّر</span></div></div>
+      <div class="ip-box" id="ipBox" style="cursor:pointer; display:flex; align-items:center; justify-content:space-between; gap:10px;">
+        <span id="ipNumber" style="filter:blur(6px); user-select:none; transition:filter .2s;">01025204455</span>
+        <span id="ipToggle" style="font-family:'Cairo',sans-serif; font-weight:800; font-size:12px; color:var(--gold); white-space:nowrap;">👁️ إظهار الرقم</span>
+      </div>
+      <div class="step"><div class="step-num">2</div><div><strong>صوّر الإيصال</strong><span>سكرين شوت واضح فيه اسمك وقيمة التحويل</span></div></div>
+      <div class="step"><div class="step-num">3</div><div><strong>ابعت الصورة على البوت نفسه</strong><span>هيسألك على اسمك عشان نتأكد من التحويل بسرعة</span></div></div>
+      <div class="step"><div class="step-num">4</div><div><strong>يتفعّل اشتراكك</strong><span>غالبًا خلال دقائق بعد التأكد</span></div></div>
+    </div>
+  </div>
+</section>
+
+<script>
+  (() => {
+    const box = document.getElementById('ipBox');
+    const num = document.getElementById('ipNumber');
+    const toggle = document.getElementById('ipToggle');
+    if (!box) return;
+    let shown = false;
+    box.addEventListener('click', () => {
+      shown = !shown;
+      num.style.filter = shown ? 'none' : 'blur(6px)';
+      toggle.textContent = shown ? '🙈 إخفاء الرقم' : '👁️ إظهار الرقم';
+    });
+  })();
+</script>
+
+<!-- FAQ -->
+<section class="faq">
+  <div class="wrap">
+    <div class="sc-head reveal">
+      <div class="sc-eyebrow">EP.005 — أسئلة شائعة</div>
+      <h2>محتاج تعرف إيه كمان</h2>
+    </div>
+    <div class="faq-list reveal">
+      <details open><summary>البوت شغال بالمصري ولا لازم أكتب فصحى؟</summary><p>بالعامية المصرية عادي جدًا — "صرفت"، "عطيت"، "استلفت" كلها بيفهمها صح.</p></details>
+      <details><summary>لو دفعت وماتفعّلش، أعمل إيه؟</summary><p>تأكد إنك بعتت اسمك مع صورة الإيصال في نفس المحادثة، واستنى شوية — لو اتأخر عن المتوقع، ابعت للبوت "مساعدة" وهتلاقي وسيلة تواصل تانية.</p></details>
+      <details><summary>التقرير في الصورة ده حقيقي؟</summary><p>أيوه، ده نفس تصميم الـ PDF اللي بيتولّد فعليًا من بياناتك — مش موك أب بعيد عن الواقع.</p></details>
+      <details><summary>فين دليل الاستخدام الكامل؟</summary><p>ابعت /start للبوت وهتلاقي زرار "📖 دليل الاستخدام الكامل" بيفتح جوه تليجرام نفسه.</p></details>
+    </div>
+  </div>
+</section>
+
+<footer>
+  دبّر — تتبع مصاريفك وديونك من غير ما تفكر
+</footer>
+
+<a class="fab" href="https://t.me/Masaaref_bot">💬 فتح البوت</a>
+
+<script>
+  // reveal on scroll
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); });
+  }, { threshold: 0.15 });
+  document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+  // animate bars once report card is visible
+  let barsAnimated = false;
+  const reportIo = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting && !barsAnimated) {
+        barsAnimated = true;
+        document.querySelectorAll('.bar-fill').forEach(b => { b.style.width = b.dataset.w + '%'; });
+        document.querySelectorAll('.cmp-bar').forEach(b => { b.style.height = b.dataset.h + 'px'; });
+      }
+    });
+  }, { threshold: 0.3 });
+  const rc = document.getElementById('reportCard');
+  if (rc) reportIo.observe(rc);
+
+  // tabs
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const target = btn.dataset.tab;
+      document.getElementById('monthView').classList.toggle('active', target === 'month');
+      document.getElementById('compareView').classList.toggle('active', target === 'compare');
+      if (target === 'compare') {
+        setTimeout(() => {
+          document.querySelectorAll('.cmp-bar').forEach(b => { b.style.height = b.dataset.h + 'px'; });
+        }, 30);
+      }
+    });
+  });
+</script>
+
+</body>
+</html>

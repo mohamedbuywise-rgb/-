@@ -96,84 +96,6 @@
         html[data-theme="light"] .bg-rose-500\/15 { background-color: rgba(244,63,94,0.12) !important; }
         html[data-theme="light"] .bg-rose-500\/20 { background-color: rgba(244,63,94,0.14) !important; }
         html[data-theme="light"] .border-rose-500\/30 { border-color: rgba(244,63,94,0.3) !important; }
-
-        /* حركة ترحيب بسيطة على الماسكوت الحقيقي (تحريك الصورة نفسها، مش رسمها من جديد) */
-        @keyframes mascot-wave { 0%, 100% { transform: rotate(0deg) scale(1); } 25% { transform: rotate(-6deg) scale(1.05); } 50% { transform: rotate(4deg) scale(1.05); } 75% { transform: rotate(-3deg) scale(1.02); } }
-        .mascot-wave { animation: mascot-wave 0.7s ease-in-out 1; }
-
-        /* حركة "تنفّس" مستمرة للماسكوت في كارت البريميوم — مش فريم ثابت */
-        @keyframes mascot-float { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-6px) rotate(-1.5deg); } }
-        .mascot-float { animation: mascot-float 2.6s ease-in-out infinite; }
-
-        /* ============ Streak badge ============ */
-        @keyframes flame-flicker { 0%, 100% { transform: scale(1) rotate(0deg); } 50% { transform: scale(1.12) rotate(-4deg); } }
-        #streak-flame { display: inline-block; animation: flame-flicker 1.4s ease-in-out infinite; }
-        html[data-theme="light"] #streak-badge { background-color: rgba(249,115,22,0.08) !important; }
-
-        /* ============ Weekly nudge banner ============ */
-        @keyframes slide-down { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
-        .weekly-banner { animation: slide-down .4s ease both; }
-
-        /* ============ حركة السيولة اليومية — إبراز بصري ============ */
-        @keyframes flow-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(52,211,153,0.0); } 50% { box-shadow: 0 0 0 6px rgba(52,211,153,0.06); } }
-        .flow-highlight { animation: flow-pulse 2.8s ease-in-out infinite; }
-        @keyframes count-tick { from { opacity: .4; transform: translateY(2px); } to { opacity: 1; transform: translateY(0); } }
-        .flow-value-updated { animation: count-tick .35s ease; }
-
-        /* ============ Goal card glow (تبويب المساعد) ============ */
-        @keyframes goal-glow-pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(52,211,153,.0); } 50% { box-shadow: 0 0 24px 2px rgba(52,211,153,.08); } }
-        .goal-glow { animation: goal-glow-pulse 3.2s ease-in-out infinite; }
-
-        /* ============ Weekday spending chart (تبويب النصايح) ============ */
-        #weekday-chart-card { position: relative; overflow: hidden; }
-        #weekday-chart-card::before {
-            content: ''; position: absolute; top: -60px; right: -60px; width: 180px; height: 180px;
-            background: radial-gradient(circle, rgba(16,185,129,.16), transparent 70%); pointer-events: none;
-        }
-        .wd-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 8px; height: 100%; justify-content: flex-end; cursor: pointer; user-select: none; }
-        .wd-bar-col { width: 100%; height: 100%; display: flex; align-items: flex-end; justify-content: center; position: relative; }
-        .wd-bar-value {
-            position: absolute; top: -22px; left: 50%; transform: translateX(-50%) translateY(4px) scale(.85);
-            font-size: 10px; font-weight: 800; color: #6ee7b7; background: rgba(6,78,59,.9);
-            border: 1px solid rgba(52,211,153,.35); padding: 2px 7px; border-radius: 10px; white-space: nowrap;
-            opacity: 0; transition: opacity .2s ease, transform .25s cubic-bezier(.34,1.56,.64,1); pointer-events: none;
-        }
-        .wd-bar-wrap.active .wd-bar-value { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
-        .wd-bar {
-            width: 62%; border-radius: 9px 9px 5px 5px; background: #1e293b; position: relative; overflow: hidden;
-            transition: height .45s cubic-bezier(.34,1.56,.64,1), background .3s ease, box-shadow .3s ease, transform .15s ease;
-            transform-origin: bottom;
-        }
-        .wd-bar-wrap.active .wd-bar { background: linear-gradient(180deg, #6ee7b7, #10b981 65%, #059669); box-shadow: 0 0 18px rgba(16,185,129,.45), 0 0 3px rgba(110,231,183,.6); }
-        .wd-bar-wrap.pop .wd-bar { transform: scaleY(1.04); }
-        .wd-bar::after {
-            content: ''; position: absolute; top: 0; left: -70%; width: 45%; height: 100%;
-            background: linear-gradient(120deg, transparent, rgba(255,255,255,.75), transparent); transform: skewX(-20deg);
-        }
-        .wd-bar-wrap.shine .wd-bar::after { animation: wd-shine-sweep .55s ease; }
-        @keyframes wd-shine-sweep { from { left: -70%; } to { left: 140%; } }
-        .wd-bar-wrap.active .wd-bar-col::before {
-            content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
-            width: 34px; height: 34px; border-radius: 50%; background: rgba(16,185,129,.35);
-            animation: wd-ring-pulse .6s ease-out;
-        }
-        @keyframes wd-ring-pulse { 0% { opacity: .55; width: 10px; height: 10px; } 100% { opacity: 0; width: 50px; height: 50px; } }
-        .wd-bar-day { font-size: 10.5px; color: #475569; font-weight: 700; transition: color .25s ease, transform .25s ease; }
-        .wd-bar-wrap.active .wd-bar-day { color: #34d399; transform: scale(1.08); }
-        .wd-peak-dot { font-size: 9px; opacity: 0; color: #fbbf24; margin-bottom: -2px; transition: opacity .2s ease; }
-        .wd-bar-wrap.is-peak .wd-peak-dot { opacity: 1; }
-        #weekday-chart-insight {
-            background: linear-gradient(135deg, rgba(16,185,129,.12), rgba(15,23,42,.4));
-            border: 1px solid rgba(52,211,153,.22); border-radius: 16px; padding: 0 13px;
-            font-size: 11.5px; color: #d1fae5; line-height: 1.65; max-height: 0; opacity: 0; overflow: hidden;
-            transition: max-height .35s cubic-bezier(.34,1.56,.64,1), opacity .3s ease, padding .3s ease;
-        }
-        #weekday-chart-insight.show { max-height: 90px; opacity: 1; padding: 12px 13px; }
-        #weekday-chart-insight b { color: #6ee7b7; }
-        #weekday-chart-insight .wd-tag {
-            display: inline-block; font-size: 9px; font-weight: 800; color: #052018;
-            background: #34d399; border-radius: 20px; padding: 1.5px 7px; margin-inline-start: 4px;
-        }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
@@ -188,12 +110,7 @@
                 <img src="./icons/icon-192.png" alt="دبّر" class="w-8 h-8 rounded-xl">
                 <span class="text-2xl font-black" style="font-family:'Cairo',sans-serif; letter-spacing:-0.5px; background:linear-gradient(90deg,#34d399,#2dd4bf); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;">دبّر</span>
             </div>
-            <div class="flex items-center gap-2">
-                <button id="streak-badge" class="hidden items-center gap-1 bg-orange-500/10 border border-orange-500/25 rounded-full px-2.5 py-1 text-[11px] font-black text-orange-400" title="أيام تسجيل متتالية">
-                    <span id="streak-flame">🔥</span><span id="streak-count">0</span>
-                </button>
-                <button id="brandbar-theme-btn" title="تبديل المظهر" class="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-xs hover:bg-slate-700 transition">🌙</button>
-            </div>
+            <button id="brandbar-theme-btn" title="تبديل المظهر" class="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-xs hover:bg-slate-700 transition">🌙</button>
         </div>
 
         <!-- Header Bar -->
@@ -222,23 +139,10 @@
         <!-- ===================== TAB: MONTHLY (default) ===================== -->
         <div class="tab-content active fade-up p-5 space-y-4" id="tab-monthly">
 
-            <!-- تنويه أسبوعي بسيط — بيظهر مرة واحدة بس كل أسبوع، وبيتقفل بضغطة -->
-            <div id="weekly-banner" class="weekly-banner hidden items-center gap-2.5 bg-slate-950/60 border border-emerald-500/20 rounded-2xl px-3.5 py-2.5">
-                <span class="text-base">📬</span>
-                <p class="text-[11px] text-slate-300 flex-1 leading-relaxed" id="weekly-banner-text"></p>
-                <button id="weekly-banner-close" class="text-slate-500 text-xs px-1">✕</button>
-            </div>
-
             <div class="bg-gradient-to-br from-emerald-950/60 to-slate-900 border border-emerald-500/30 rounded-3xl p-4 text-center space-y-2 shadow-lg">
                 <span class="text-xs text-emerald-400 font-semibold block" id="monthly-total-label">إجمالي صرفك الشهر ده</span>
                 <h3 class="text-3xl font-black text-emerald-300" id="monthly-total">—</h3>
                 <p class="text-[11px] text-slate-400" id="monthly-compare">لسه معندناش بيانات كفاية عشان نقارن بالشهر اللي فات.</p>
-            </div>
-
-            <!-- مقارنة بصرية بآخر 4 شهور -->
-            <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3" id="monthly-chart-card" style="display:none;">
-                <h4 class="text-xs font-bold text-slate-300">صرفك آخر الشهور</h4>
-                <div class="flex items-end justify-between gap-2.5 h-24" id="monthly-chart-bars"></div>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
@@ -278,10 +182,12 @@
                 <p class="text-[10px] text-slate-400" id="daily-note">لسه معندكش مصاريف مسجلة النهاردة.</p>
             </div>
 
-            <div class="flex items-center gap-2 bg-slate-950/40 border border-slate-800/70 rounded-2xl px-3 py-2">
-                <span class="text-xs leading-none">ℹ️</span>
-                <p class="text-[10px] text-slate-400 leading-relaxed">
-                    مصاريف <b class="text-slate-300">النهاردة بس</b> — بتتحفظ تلقائي في تبويب <b class="text-emerald-400">"شهري"</b> كل يوم.
+            <div class="flex items-start gap-2 bg-slate-950/40 border border-slate-800/70 rounded-2xl p-3">
+                <span class="text-sm leading-none mt-0.5">ℹ️</span>
+                <p class="text-[11px] text-slate-400 leading-relaxed">
+                    الصفحة دي بتوريك مصاريف <b class="text-slate-300">النهاردة بس</b>، وبتتصفّر تلقائي مع كل يوم جديد.
+                    كل عمليتك بردو محفوظة ومش بتتمسح — هتلاقيها كلها مجمّعة بالتفصيل في تبويب
+                    <b class="text-emerald-400">"شهري"</b>، وفي تقرير الـ PDF من أول يوم في الشهر لحد آخر يوم.
                 </p>
             </div>
 
@@ -296,27 +202,27 @@
                 </div>
             </div>
 
-            <!-- حركة السيولة اليومية (واصل من / واصل لـ) — كارت مُبرز بصريًا -->
-            <div class="flow-highlight bg-gradient-to-br from-emerald-950/50 via-slate-900 to-slate-950 border border-emerald-500/25 rounded-3xl p-4 space-y-3 shadow-lg relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none"></div>
-                <h4 class="text-xs font-bold text-slate-200 flex items-center justify-between relative">
-                    <span class="flex items-center gap-1.5"><span class="text-sm">💧</span> حركة السيولة النهاردة</span>
-                    <span class="text-[9px] text-slate-500 font-normal">تتصفّر الساعة 12م</span>
+            <!-- حركة السيولة اليومية (واصل من / واصل لـ) -->
+            <div class="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-4 space-y-3 shadow-lg">
+                <h4 class="text-xs font-bold text-slate-300 flex items-center justify-between">
+                    <span>حركة السيولة (النهاردة):</span>
+                    <span class="text-[9px] text-slate-500 font-normal">تتصفّر يومياً الساعة 12م</span>
                 </h4>
-                <div class="grid grid-cols-3 gap-2 relative">
-                    <div class="bg-slate-950/50 p-2.5 rounded-xl border border-emerald-500/20 text-center">
-                        <span class="text-[9px] text-slate-500 block mb-0.5">⬇️ داخل</span>
-                        <span class="text-sm font-black text-emerald-400" id="flow-in">0</span>
+                <div class="grid grid-cols-3 gap-2">
+                    <div class="bg-slate-950/40 p-2 rounded-xl border border-emerald-500/10 text-center">
+                        <span class="text-[9px] text-slate-500 block">داخل (واصل من)</span>
+                        <span class="text-xs font-bold text-emerald-400" id="flow-in">0</span>
                     </div>
-                    <div class="bg-slate-950/50 p-2.5 rounded-xl border border-rose-500/20 text-center">
-                        <span class="text-[9px] text-slate-500 block mb-0.5">⬆️ خارج</span>
-                        <span class="text-sm font-black text-rose-400" id="flow-out">0</span>
+                    <div class="bg-slate-950/40 p-2 rounded-xl border border-rose-500/10 text-center">
+                        <span class="text-[9px] text-slate-500 block">خارج (واصل لـ)</span>
+                        <span class="text-xs font-bold text-rose-400" id="flow-out">0</span>
                     </div>
-                    <div class="bg-emerald-500/10 p-2.5 rounded-xl border border-emerald-500/30 text-center">
-                        <span class="text-[9px] text-emerald-400/80 block mb-0.5">⚖️ الصافي</span>
-                        <span class="text-sm font-black text-slate-100" id="flow-net">0</span>
+                    <div class="bg-slate-950/40 p-2 rounded-xl border border-slate-700 text-center">
+                        <span class="text-[9px] text-slate-500 block">صافي الحركة</span>
+                        <span class="text-xs font-bold text-slate-200" id="flow-net">0</span>
                     </div>
                 </div>
+                <p class="text-[9px] text-slate-500 text-center italic">⚠️ الصافي اليومي = (إجمالي الداخل) - (إجمالي الخارج) خلال النهاردة بس.</p>
             </div>
 
             <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3">
@@ -356,19 +262,6 @@
 
             <div id="tips-list" class="space-y-3">
                 <p class="text-xs text-slate-500 text-center p-4">لسه معندكش بيانات كفاية عشان نديك نصايح مبنية على صرفك الفعلي.</p>
-            </div>
-
-            <!-- ============ أكتر أيام الصرف (تفاعلي، بيتحدّث أسبوعيًا) ============ -->
-            <div id="weekday-chart-card" class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4">
-                <div class="flex items-center justify-between mb-0.5">
-                    <h4 class="text-xs font-bold text-slate-200 flex items-center gap-1.5">📊 أكتر أيام الصرف</h4>
-                    <span class="text-[9px] font-semibold text-slate-500 bg-slate-900 border border-slate-800 rounded-full px-2 py-0.5">آخر 7 أيام</span>
-                </div>
-                <p class="text-[10px] text-slate-500 mb-4">دوس على أي يوم تشوف تفاصيله <span class="text-slate-600">— البيانات دي بتتحدّث كل أسبوع</span></p>
-
-                <div class="flex items-end justify-between gap-1.5" style="height:118px" id="weekday-chart"></div>
-
-                <div id="weekday-chart-insight" class="mt-4"></div>
             </div>
 
         </div>
@@ -429,24 +322,24 @@
                 <p class="text-[11px] text-slate-400">اقتراحات وتوقعات وشات مبني على بياناتك الحقيقية بس</p>
             </div>
 
-            <!-- اقتراح ذكي تلقائي — بانر خفيف -->
-            <div id="asst-suggestion-card" class="hidden flex items-start gap-2.5 bg-emerald-500/8 border border-emerald-500/20 rounded-2xl px-3.5 py-3">
-                <span class="text-base shrink-0">💡</span>
-                <div class="flex-1">
-                    <p class="text-[11px] text-slate-200 leading-relaxed mb-1.5" id="asst-suggestion-text"></p>
-                    <button id="asst-suggestion-action" class="text-[10.5px] font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-900 py-1.5 px-3 rounded-lg transition"></button>
+            <!-- اقتراح ذكي تلقائي -->
+            <div id="asst-suggestion-card" class="hidden bg-gradient-to-br from-emerald-500/15 to-slate-900 border border-emerald-500/30 rounded-2xl p-4 flex items-start gap-3">
+                <div class="w-9 h-9 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm shrink-0 border border-emerald-500/30">💡</div>
+                <div class="flex-1 space-y-2">
+                    <p class="text-xs text-slate-200 leading-relaxed" id="asst-suggestion-text"></p>
+                    <button id="asst-suggestion-action" class="text-[11px] font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-900 py-2 px-3 rounded-xl transition"></button>
                 </div>
             </div>
 
-            <!-- توقّع نهاية الشهر — سطر واحد -->
-            <div class="flex items-center gap-3 px-1">
-                <div class="w-10 h-10 rounded-2xl bg-slate-800/70 border border-slate-700 flex items-center justify-center text-base shrink-0">📈</div>
-                <p class="text-xs text-slate-300 leading-relaxed flex-1" id="asst-projection-text">جاري حساب التوقع...</p>
+            <!-- توقّع نهاية الشهر -->
+            <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-4 flex items-center gap-3">
+                <div class="w-9 h-9 rounded-full bg-slate-800 text-slate-300 flex items-center justify-center text-sm shrink-0 border border-slate-700">📈</div>
+                <p class="text-xs text-slate-300 leading-relaxed" id="asst-projection-text">جاري حساب التوقع...</p>
             </div>
 
-            <!-- الهدف المالي — الأهم، منطقة مستقلة بخلفية خضرا وglow -->
-            <div class="goal-glow rounded-3xl p-4 space-y-3" style="background:linear-gradient(150deg,#052018 0%,#0b3b2e 60%,#08281f 100%); border:1px solid rgba(52,211,153,.28);">
-                <h4 class="text-xs font-bold text-emerald-300 flex items-center gap-1.5">🎯 هدفك المالي</h4>
+            <!-- الهدف المالي -->
+            <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3">
+                <h4 class="text-xs font-bold text-slate-300 flex items-center gap-1.5">🎯 هدفك المالي</h4>
 
                 <!-- مفيش هدف حاليًا -->
                 <div id="asst-goal-empty" class="space-y-2.5">
@@ -485,10 +378,7 @@
             <!-- Smart Receipt Scanner -->
             <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-2.5">
                 <h4 class="text-xs font-bold text-slate-300 flex items-center gap-1.5 justify-between">
-                    <span class="flex items-center gap-1.5">
-                        <span class="w-8 h-8 rounded-xl bg-sky-500/12 border border-sky-500/25 flex items-center justify-center text-sm shrink-0">📸</span>
-                        امسح فاتورة
-                    </span>
+                    <span class="flex items-center gap-1.5">📸 امسح فاتورة</span>
                     <span id="asst-receipt-usage" class="hidden text-[9.5px] font-semibold text-slate-500 bg-slate-900 border border-slate-800 rounded-full px-2 py-0.5"></span>
                 </h4>
                 <p class="text-[11px] text-slate-500">صوّر فاتورة أو إيصال، ودبّر هيقرأ المبلغ والفئة ويسجله تلقائي.</p>
@@ -503,25 +393,16 @@
                     </button>
                 </div>
                 <div id="asst-receipt-result" class="hidden text-[11px] rounded-xl p-3 leading-relaxed"></div>
-                <button id="invoices-open" class="w-full flex items-center justify-between bg-slate-900 hover:bg-slate-800 border border-slate-800 rounded-2xl px-3 py-2.5 transition">
-                    <span class="flex items-center gap-1.5 text-xs font-bold text-slate-300">🧾 كل الفواتير</span>
-                    <span class="flex items-center gap-1 text-[11px] text-slate-500">
-                        <span id="invoices-count">—</span> فاتورة
-                        <span class="text-slate-600">‹</span>
-                    </span>
-                </button>
             </div>
 
             <!-- Financial Wrapped -->
-            <button id="asst-wrapped-open" class="w-full flex items-center justify-between bg-slate-950/60 border border-slate-800 rounded-2xl px-3.5 py-3 hover:border-slate-700 transition">
-                <div class="flex items-center gap-2.5">
-                    <div class="w-8 h-8 rounded-xl bg-amber-500/12 border border-amber-500/25 flex items-center justify-center text-sm shrink-0">🎁</div>
-                    <div class="text-right">
-                        <span class="text-xs font-bold text-slate-200 block">Wrapped سنة <span id="asst-wrapped-year">—</span></span>
-                        <span class="text-[10px] text-slate-500">ملخص سنتك المالية بالكامل — جاهز للمشاركة</span>
-                    </div>
+            <button id="asst-wrapped-open" class="w-full bg-gradient-to-br from-slate-900 to-slate-950 border border-emerald-500/25 rounded-3xl p-4 flex items-center gap-3 text-right transition hover:border-emerald-500/40">
+                <div class="w-11 h-11 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-lg shrink-0">🎁</div>
+                <div class="flex-1">
+                    <h4 class="text-sm font-bold text-slate-100">Wrapped سنة <span id="asst-wrapped-year">—</span></h4>
+                    <p class="text-[11px] text-slate-400">ملخص سنتك المالية بالكامل — جاهز للمشاركة</p>
                 </div>
-                <span class="text-slate-600 text-xs">‹</span>
+                <span class="text-slate-500 text-xs">‹</span>
             </button>
 
             <!-- اسأل دبّر -->
@@ -606,35 +487,6 @@
                 </div>
                 <button id="pwa-install-btn" class="w-full mt-3 bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-bold py-2.5 rounded-xl text-xs transition hover:bg-emerald-500/20">
                     تثبيت دلوقتي
-                </button>
-            </div>
-
-            <!-- كارت البريميوم — الماسكوت الحقيقي بحركة مستمرة (مش ثابت) عشان يشجّع على الاشتراك -->
-            <div id="premium-hero-card" class="hidden bg-gradient-to-b from-[#052e22] to-[#031a14] border border-amber-500/25 rounded-3xl p-5 text-center overflow-hidden relative">
-                <img src="branding/dabbar-mascot.png" alt="دبّر بريميوم" class="w-36 h-auto mx-auto mb-2 mascot-float">
-                <p class="text-[10px] tracking-widest text-amber-400 font-black mb-1">DABBAR PREMIUM</p>
-                <h3 class="text-lg font-black text-white mb-1">افتح كل قوة دبّر</h3>
-                <p class="text-[11px] text-slate-400 mb-4 leading-relaxed">تتبع ذكي، تقارير مفصلة، وأمان بنكي لبياناتك — من غير حدود شهرية.</p>
-                <div class="grid grid-cols-2 gap-2 text-right mb-4">
-                    <div class="bg-white/5 border border-white/10 rounded-xl p-2.5">
-                        <span class="block text-[10px] text-amber-300 font-bold mb-0.5">📊 تتبع ذكي</span>
-                        <span class="block text-[10px] text-slate-400">كل مصروف بوضوح</span>
-                    </div>
-                    <div class="bg-white/5 border border-white/10 rounded-xl p-2.5">
-                        <span class="block text-[10px] text-amber-300 font-bold mb-0.5">📈 تقارير</span>
-                        <span class="block text-[10px] text-slate-400">فهم أعمق لفلوسك</span>
-                    </div>
-                    <div class="bg-white/5 border border-white/10 rounded-xl p-2.5">
-                        <span class="block text-[10px] text-amber-300 font-bold mb-0.5">🔒 أمان بنكي</span>
-                        <span class="block text-[10px] text-slate-400">بياناتك مشفّرة</span>
-                    </div>
-                    <div class="bg-white/5 border border-white/10 rounded-xl p-2.5">
-                        <span class="block text-[10px] text-amber-300 font-bold mb-0.5">♾️ من غير حدود</span>
-                        <span class="block text-[10px] text-slate-400">كل الميزات مفتوحة</span>
-                    </div>
-                </div>
-                <button type="button" id="premium-hero-cta" class="w-full bg-amber-400 hover:bg-amber-300 text-[#052e22] font-black py-3 rounded-2xl text-xs transition">
-                    اشترك دلوقتي — أقل من سعر فنجان قهوة يوميًا ☕
                 </button>
             </div>
 
@@ -846,7 +698,7 @@
                 <div class="grid grid-cols-2 gap-2.5 text-right">
                     <div class="bg-white/5 border border-white/10 rounded-2xl p-3">
                         <span class="text-[10px] text-slate-400 block mb-1">أكبر بند</span>
-                        <span class="text-xs font-bold text-white" id="wrapped-top-cat">—</span>
+                        <span class="text-xs font-bold text-slate-100" id="wrapped-top-cat">—</span>
                     </div>
                     <div class="bg-white/5 border border-white/10 rounded-2xl p-3">
                         <span class="text-[10px] text-slate-400 block mb-1">وفرت تقريبًا</span>
@@ -854,7 +706,7 @@
                     </div>
                     <div class="bg-white/5 border border-white/10 rounded-2xl p-3 col-span-2">
                         <span class="text-[10px] text-slate-400 block mb-1">أحسن شهر ماليًا</span>
-                        <span class="text-xs font-bold text-white" id="wrapped-best-month">—</span>
+                        <span class="text-xs font-bold text-slate-100" id="wrapped-best-month">—</span>
                     </div>
                 </div>
 
@@ -868,55 +720,6 @@
         </div>
     </div>
 
-    <!-- كل الفواتير -->
-    <div id="invoices-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
-        <div class="max-w-sm w-full max-h-[85vh] flex flex-col gap-3">
-            <div class="flex items-center justify-between px-1">
-                <h2 class="font-bold text-sm text-slate-100">كل الفواتير</h2>
-                <button id="invoices-close" class="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-sm">✕</button>
-            </div>
-            <div id="invoices-list" class="bg-slate-950/60 border border-slate-800 rounded-3xl p-2 overflow-y-auto flex-1 space-y-1"></div>
-            <p id="invoices-empty" class="hidden text-[11px] text-slate-400 text-center bg-slate-900 border border-slate-800 rounded-xl p-4">لسه معندكش فواتير متسجلة. صوّر فاتورة عشان تبدأ.</p>
-        </div>
-    </div>
-
-    <!-- تفاصيل فاتورة واحدة -->
-    <div id="invoice-detail-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
-        <div class="max-w-sm w-full max-h-[85vh] flex flex-col gap-3">
-            <div class="flex items-center justify-between px-1">
-                <button id="invoice-detail-back" class="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-sm">›</button>
-                <h2 class="font-bold text-sm text-slate-100">تفاصيل الفاتورة</h2>
-                <button id="invoice-detail-close" class="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-sm">✕</button>
-            </div>
-
-            <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 overflow-y-auto flex-1">
-                <div class="flex items-center gap-2.5 mb-3">
-                    <div id="invd-icon" class="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center text-lg shrink-0">🛒</div>
-                    <div class="flex-1 min-w-0">
-                        <p id="invd-merchant" class="text-sm font-bold text-slate-100 truncate">—</p>
-                        <span id="invd-meta" class="text-[11px] text-slate-500">—</span>
-                    </div>
-                </div>
-
-                <div id="invd-items" class="border-t border-slate-800 pt-2 space-y-0.5"></div>
-
-                <div class="flex items-center justify-between pt-3 mt-1">
-                    <span class="text-xs text-slate-400" id="invd-count-label">الإجمالي</span>
-                    <span class="text-base font-black text-slate-100" id="invd-total">—</span>
-                </div>
-                <div id="invd-payment-row" class="flex items-center justify-between pt-1.5 text-[11px] text-slate-500">
-                    <span>طريقة الدفع</span>
-                    <span id="invd-payment">—</span>
-                </div>
-                <div id="invd-debt-note" class="hidden mt-2 text-[11px] text-amber-300 bg-amber-500/10 border border-amber-500/25 rounded-xl p-2.5"></div>
-            </div>
-
-            <button id="invd-delete-btn" class="w-full bg-rose-500/10 hover:bg-rose-500/20 border border-rose-500/25 text-rose-300 font-bold py-3 rounded-2xl text-xs transition flex items-center justify-center gap-2">
-                <span>🗑</span> حذف الفاتورة دي
-            </button>
-        </div>
-    </div>
-
     <script>
         /* ===== Supabase auth guard + logout =====
            لازم يتحطوا نفس القيم اللي في dabbar-onboarding.html */
@@ -926,7 +729,6 @@
         const ONBOARDING_URL = 'dabbar-onboarding.html';
 
         const CATEGORY_EMOJI = { 'أكل':'🍔', 'مواصلات':'🚕', 'فواتير':'🧾', 'تسوق':'🛍️', 'ترفيه':'🎬', 'صحة':'💊', 'تعليم':'📚', 'منزل وأثاث':'🏠', 'ملابس':'👕', 'اشتراكات':'🔁', 'هدايا وتبرعات':'🎁', 'شخصي وعناية':'🧴' };
-        const MONTH_NAMES = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
         const CATEGORY_BAR_COLOR = { 'أكل':'bg-rose-400', 'مواصلات':'bg-teal-400', 'فواتير':'bg-amber-400', 'تسوق':'bg-violet-400', 'ترفيه':'bg-pink-400', 'صحة':'bg-emerald-400', 'تعليم':'bg-blue-400', 'منزل وأثاث':'bg-orange-400', 'ملابس':'bg-fuchsia-400', 'اشتراكات':'bg-indigo-400', 'هدايا وتبرعات':'bg-amber-500', 'شخصي وعناية':'bg-cyan-400' };
         const fmt = (n) => `${Number(n).toLocaleString('ar-EG')} ج.م`;
 
@@ -992,7 +794,6 @@
                 currentUser = session.user;
                 await loadDashboard();
                 await loadAccountTab();
-                loadInvoicesCount();
                 setupAutoRefresh();
             } catch (e) {
                 /* supabase not configured يعني، بيسيب الصفحة مفتوحة عشان المعاينة بس */
@@ -1161,17 +962,13 @@
             window.__dashboardData = data;
 
             renderMonthly(data.month);
-            renderMonthlyChart(data.history, data.month);
             renderDaily(data.today, data.flow);
             renderCategories(data.month);
             renderTips(data.month);
-            renderWeekdayChart(data.byWeekday);
             renderDebts(data.debts);
             renderArchive(data.history);
             renderSubscription(data.subscription);
             renderAssistant(data);
-            renderStreak(data.streak);
-            renderWeeklyBanner(data.week);
             updateHeaderForTab(document.querySelector('.tab-btn.active-tab').dataset.tab, data);
 
             const label = document.getElementById('last-updated-label');
@@ -1179,73 +976,6 @@
                 const now = new Date();
                 label.textContent = `آخر تحديث ${now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}`;
             }
-        }
-
-        // ============ Streak (أيام تسجيل متتالية) ============
-        function renderStreak(streak) {
-            const badge = document.getElementById('streak-badge');
-            if (!badge) return;
-            if (!streak || streak.current <= 0) {
-                badge.classList.add('hidden');
-                badge.classList.remove('flex');
-                return;
-            }
-            document.getElementById('streak-count').textContent = `${streak.current} يوم`;
-            badge.classList.remove('hidden');
-            badge.classList.add('flex');
-        }
-
-        // ============ تنويه أسبوعي بسيط — مرة واحدة كل أسبوع ============
-        function renderWeeklyBanner(week) {
-            const banner = document.getElementById('weekly-banner');
-            if (!banner || !week) return;
-            const seenKey = 'dabbar-weekly-banner-seen';
-            if (localStorage.getItem(seenKey) === week.key) return; // اتشاف الأسبوع ده قبل كده
-
-            let text = `صرفت الأسبوع ده ${fmt(week.total)} ج.م في ${week.count} عملية.`;
-            if (week.prevTotal > 0) {
-                const diffPct = Math.round(((week.total - week.prevTotal) / week.prevTotal) * 100);
-                if (diffPct > 5) text += ` ده أعلى من الأسبوع اللي فات بـ${diffPct}%.`;
-                else if (diffPct < -5) text += ` أقل من الأسبوع اللي فات بـ${Math.abs(diffPct)}% 👏`;
-            }
-            document.getElementById('weekly-banner-text').textContent = text;
-            banner.classList.remove('hidden');
-            banner.classList.add('flex');
-
-            document.getElementById('weekly-banner-close').addEventListener('click', () => {
-                localStorage.setItem(seenKey, week.key);
-                banner.classList.add('hidden');
-                banner.classList.remove('flex');
-            }, { once: true });
-        }
-
-        // ============ مقارنة بصرية بآخر 4 شهور ============
-        function renderMonthlyChart(history, month) {
-            const card = document.getElementById('monthly-chart-card');
-            const wrap = document.getElementById('monthly-chart-bars');
-            if (!card || !wrap) return;
-
-            const bars = [...(history || [])].reverse().map(h => ({ label: h.label, total: h.total, current: false }));
-            bars.push({ label: month.label, total: month.total, current: true });
-
-            const usable = bars.filter(b => b.total > 0);
-            if (usable.length < 2) { card.style.display = 'none'; return; }
-
-            const max = Math.max(...bars.map(b => b.total), 1);
-            wrap.innerHTML = bars.map(b => {
-                const heightPct = Math.max(6, Math.round((b.total / max) * 100));
-                const barClass = b.current
-                    ? 'bg-gradient-to-t from-emerald-500 to-teal-400'
-                    : 'bg-slate-700';
-                const labelClass = b.current ? 'text-emerald-400 font-bold' : 'text-slate-500';
-                return `
-                    <div class="flex-1 flex flex-col items-center justify-end gap-1.5 h-full">
-                        <div class="w-full ${barClass} rounded-t-lg transition-all duration-700" style="height:${heightPct}%"></div>
-                        <span class="text-[9px] ${labelClass}">${b.label}</span>
-                    </div>
-                `;
-            }).join('');
-            card.style.display = 'block';
         }
 
         function renderMonthly(month) {
@@ -1303,13 +1033,8 @@
             if (flow) {
                 document.getElementById('flow-in').textContent = fmt(flow.in);
                 document.getElementById('flow-out').textContent = fmt(flow.out);
-                const flowNetEl = document.getElementById('flow-net');
-                flowNetEl.textContent = fmt(flow.net);
-                flowNetEl.className = `text-sm font-black flow-value-updated ${flow.net >= 0 ? 'text-slate-100' : 'text-rose-400'}`;
-                const flowInEl = document.getElementById('flow-in');
-                const flowOutEl = document.getElementById('flow-out');
-                flowInEl.classList.add('flow-value-updated');
-                flowOutEl.classList.add('flow-value-updated');
+                document.getElementById('flow-net').textContent = fmt(flow.net);
+                document.getElementById('flow-net').className = `text-xs font-bold ${flow.net >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
             }
 
             const listEl = document.getElementById('daily-items-list');
@@ -1407,83 +1132,7 @@
             `).join('');
         }
 
-        // ============ أكتر أيام الصرف — تفاعلي، بيتحدّث أسبوعيًا ============
-        const WEEKDAY_NAMES = ['حد', 'اتنين', 'تلات', 'أربع', 'خميس', 'جمعة', 'سبت'];
-
-        function renderWeekdayChart(byWeekday) {
-            const chartEl = document.getElementById('weekday-chart');
-            const insightEl = document.getElementById('weekday-chart-insight');
-            if (!chartEl) return;
-
-            const data = (byWeekday && byWeekday.length === 7) ? byWeekday : null;
-
-            if (!data || data.every(d => d.value === 0)) {
-                chartEl.innerHTML = '<p class="text-xs text-slate-500 text-center w-full self-center">لسه معندكش مصاريف كفاية الأسبوع ده عشان نوريك الرسم البياني.</p>';
-                insightEl.classList.remove('show');
-                insightEl.innerHTML = '';
-                return;
-            }
-
-            const max = Math.max(...data.map(d => d.value), 1);
-            const peakIndex = data.reduce((best, d, i, arr) => (d.value > arr[best].value ? i : best), 0);
-
-
-            chartEl.innerHTML = '';
-            insightEl.classList.remove('show');
-            insightEl.innerHTML = '';
-
-            data.forEach((d, i) => {
-                const wrap = document.createElement('div');
-                wrap.className = 'wd-bar-wrap';
-                if (i === peakIndex) wrap.classList.add('is-peak');
-
-                const peakDot = document.createElement('div');
-                peakDot.className = 'wd-peak-dot';
-                peakDot.textContent = '👑';
-
-                const col = document.createElement('div');
-                col.className = 'wd-bar-col';
-
-                const valueBubble = document.createElement('div');
-                valueBubble.className = 'wd-bar-value';
-                valueBubble.textContent = fmt(d.value);
-
-                const bar = document.createElement('div');
-                bar.className = 'wd-bar';
-                bar.style.height = '0%';
-
-                const label = document.createElement('div');
-                label.className = 'wd-bar-day';
-                label.textContent = d.day;
-
-                col.appendChild(bar);
-                col.appendChild(valueBubble);
-                wrap.appendChild(peakDot);
-                wrap.appendChild(col);
-                wrap.appendChild(label);
-
-                wrap.addEventListener('click', () => {
-                    document.querySelectorAll('.wd-bar-wrap').forEach(w => w.classList.remove('active', 'shine', 'pop'));
-                    wrap.classList.add('active', 'shine', 'pop');
-                    setTimeout(() => wrap.classList.remove('shine'), 600);
-                    setTimeout(() => wrap.classList.remove('pop'), 200);
-
-                    const isPeak = i === peakIndex;
-                    insightEl.innerHTML = `<b>${d.day}:</b> صرفت ${fmt(d.value)} في ${d.count} عملية.` +
-                        (isPeak ? `<span class="wd-tag">أعلى يوم 👑</span>` : '');
-                    insightEl.classList.add('show');
-                });
-
-                chartEl.appendChild(wrap);
-
-                setTimeout(() => {
-                    const heightPct = Math.max(16, (d.value / max) * 100);
-                    bar.style.height = heightPct + '%';
-                }, 120 + i * 70);
-            });
-        }
-
-
+        function renderDebts(debts) {
             const netEl = document.getElementById('debts-net');
             const noteEl = document.getElementById('debts-net-note');
             netEl.textContent = `${debts.net >= 0 ? '+' : ''}${fmt(debts.net)}`;
@@ -1804,26 +1453,12 @@
                     reader.readAsDataURL(file);
                 });
 
-                const result = await asstApi('receipt_scan', { imageBase64: base64 });
-                resultEl.className = 'text-[11px] rounded-xl p-3 leading-relaxed bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 space-y-1';
-                const itemsHtml = result.items.map(it =>
-                    `<div class="flex items-center justify-between gap-2"><span>${CATEGORY_EMOJI[it.category] || '📌'} ${it.name}</span><span class="shrink-0">${fmt(it.amount)}</span></div>`
-                ).join('');
-                const debtHtml = result.isDebt && result.debtPerson
-                    ? `<div class="pt-1 text-amber-300">📥 اتسجلت كمان كدين عليك لـ ${result.debtPerson}</div>` : '';
-                resultEl.innerHTML = `
-                    <div class="flex items-center gap-2 font-bold">
-                        <img src="branding/dabbar-mascot-avatar.png" alt="دبّر" class="w-9 h-9 rounded-full object-cover shrink-0 mascot-wave">
-                        <span>${result.merchant ? `فاتورة ${result.merchant}` : 'الفاتورة'} — اتسجلت (${result.items.length} صنف)</span>
-                    </div>
-                    ${itemsHtml}
-                    <div class="flex items-center justify-between font-bold pt-1 border-t border-emerald-500/20 mt-1"><span>الإجمالي</span><span>${fmt(result.totalAmount)}</span></div>
-                    ${debtHtml}
-                `;
+                const result = await asstApi('receipt_scan', { imageBase64: base64, mimeType: file.type });
+                resultEl.className = 'text-[11px] rounded-xl p-3 leading-relaxed bg-emerald-500/10 border border-emerald-500/25 text-emerald-300';
+                resultEl.textContent = `✅ اتسجل: ${fmt(result.expense.amount)} — ${CATEGORY_EMOJI[result.expense.category] || ''} ${result.expense.category}${result.merchant ? ` (${result.merchant})` : ''}`;
                 resultEl.classList.remove('hidden');
                 updateUsageBadge('asst-receipt-usage', result.usage);
                 await loadDashboard();
-                await loadInvoicesCount();
             } catch (e) {
                 resultEl.className = 'text-[11px] rounded-xl p-3 leading-relaxed bg-rose-500/10 border border-rose-500/25 text-rose-300';
                 resultEl.textContent = `⚠️ ${e.message}`;
@@ -1844,164 +1479,6 @@
             const file = asstReceiptGalleryInput.files[0];
             asstReceiptGalleryInput.value = '';
             handleReceiptFile(file, 'asst-receipt-gallery-btn', 'asst-receipt-gallery-icon', '🖼️');
-        });
-
-        // ============ كل الفواتير: ليستة + تفاصيل ============
-        const MERCHANT_ICONS = [
-            { keywords: ['صيدلي', 'دواء', 'فارما'], icon: '💊', bg: 'bg-blue-500/15 border-blue-500/25' },
-            { keywords: ['دين', 'قسط', 'مؤجل'], icon: '📥', bg: 'bg-amber-500/15 border-amber-500/25' },
-        ];
-        function invoiceIcon(inv) {
-            if (inv.is_debt) return { icon: '📥', bg: 'bg-amber-500/15 border-amber-500/25' };
-            const name = (inv.merchant || '').trim();
-            for (const rule of MERCHANT_ICONS) {
-                if (rule.keywords.some(k => name.includes(k))) return { icon: rule.icon, bg: rule.bg };
-            }
-            return { icon: '🛒', bg: 'bg-emerald-500/15 border-emerald-500/25' };
-        }
-        function formatInvoiceDate(iso) {
-            const d = new Date(iso);
-            return `${MONTH_NAMES[d.getMonth()]} ${d.getDate()}`;
-        }
-
-        const invoicesModal = document.getElementById('invoices-modal');
-        const invoiceDetailModal = document.getElementById('invoice-detail-modal');
-        const invoicesListEl = document.getElementById('invoices-list');
-        const invoicesEmptyEl = document.getElementById('invoices-empty');
-
-        async function loadInvoicesCount() {
-            try {
-                const res = await fetch(`/api/dashboard-data?invoices=1`, { headers: { Authorization: `Bearer ${accessToken}` } });
-                const data = await res.json();
-                window.__invoicesCache = data.invoices || [];
-                document.getElementById('invoices-count').textContent = window.__invoicesCache.length;
-            } catch (e) { /* صامت — مش حرج لو فشل عداد بس */ }
-        }
-
-        function renderInvoicesList() {
-            const invoices = window.__invoicesCache || [];
-            invoicesListEl.innerHTML = '';
-            if (invoices.length === 0) {
-                invoicesEmptyEl.classList.remove('hidden');
-                return;
-            }
-            invoicesEmptyEl.classList.add('hidden');
-            for (const inv of invoices) {
-                const { icon, bg } = invoiceIcon(inv);
-                const row = document.createElement('button');
-                row.className = 'w-full flex items-center gap-2.5 p-2.5 rounded-2xl hover:bg-slate-900/70 transition text-right';
-                row.innerHTML = `
-                    <div class="w-9 h-9 rounded-xl border ${bg} flex items-center justify-center text-base shrink-0">${icon}</div>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-xs font-bold text-slate-100 truncate">${inv.merchant || (inv.is_debt ? (inv.debt_person || 'دين') : 'فاتورة')}</p>
-                        <span class="text-[10.5px] text-slate-500">${formatInvoiceDate(inv.created_at)} — ${inv.is_debt ? 'دين مسجل' : `${inv.item_count} أصناف`}</span>
-                    </div>
-                    <span class="text-xs font-bold ${inv.is_debt ? 'text-amber-300' : 'text-slate-100'} shrink-0">${fmt(inv.total_amount)}</span>
-                `;
-                row.addEventListener('click', () => openInvoiceDetail(inv.id));
-                invoicesListEl.appendChild(row);
-            }
-        }
-
-        document.getElementById('invoices-open').addEventListener('click', async () => {
-            invoicesModal.classList.remove('hidden');
-            invoicesModal.classList.add('flex');
-            invoicesListEl.innerHTML = '<p class="text-[11px] text-slate-500 text-center p-4">بنجيب الفواتير...</p>';
-            invoicesEmptyEl.classList.add('hidden');
-            await loadInvoicesCount();
-            renderInvoicesList();
-        });
-        document.getElementById('invoices-close').addEventListener('click', () => {
-            invoicesModal.classList.add('hidden');
-            invoicesModal.classList.remove('flex');
-        });
-
-        async function openInvoiceDetail(invoiceId) {
-            invoicesModal.classList.add('hidden');
-            invoicesModal.classList.remove('flex');
-            invoiceDetailModal.classList.remove('hidden');
-            invoiceDetailModal.classList.add('flex');
-            invoiceDetailModal.dataset.invoiceId = invoiceId;
-
-            document.getElementById('invd-merchant').textContent = 'بنفتح الفاتورة...';
-            document.getElementById('invd-items').innerHTML = '';
-            document.getElementById('invd-debt-note').classList.add('hidden');
-
-            try {
-                const res = await fetch(`/api/dashboard-data?invoiceId=${invoiceId}`, { headers: { Authorization: `Bearer ${accessToken}` } });
-                const data = await res.json();
-                if (!res.ok) throw new Error(data.error || 'حصل خطأ.');
-                renderInvoiceDetail(data.invoice);
-            } catch (e) {
-                document.getElementById('invd-merchant').textContent = '⚠️ ' + e.message;
-            }
-        }
-
-        function renderInvoiceDetail(inv) {
-            const { icon, bg } = invoiceIcon(inv);
-            document.getElementById('invd-icon').className = `w-10 h-10 rounded-xl border ${bg} flex items-center justify-center text-lg shrink-0`;
-            document.getElementById('invd-icon').textContent = icon;
-            document.getElementById('invd-merchant').textContent = inv.merchant || (inv.is_debt ? (inv.debt_person || 'دين') : 'فاتورة');
-            const dateStr = new Date(inv.created_at).toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' });
-            document.getElementById('invd-meta').textContent = `${dateStr}${inv.invoice_number ? ` — فاتورة #${inv.invoice_number}` : ''}`;
-
-            const itemsEl = document.getElementById('invd-items');
-            itemsEl.innerHTML = (inv.items || []).map(it => `
-                <div class="flex items-center gap-2.5 py-2 border-b border-slate-800/60 last:border-0">
-                    <div class="flex-1 min-w-0">
-                        <p class="text-xs text-slate-100 truncate">${it.name}</p>
-                        <span class="text-[10.5px] text-slate-500">${it.category}</span>
-                    </div>
-                    <span class="text-xs font-bold text-slate-200 shrink-0">${fmt(it.amount)}</span>
-                </div>
-            `).join('') || '<p class="text-[11px] text-slate-500 py-2">مفيش أصناف مسجلة لفاتورة دي.</p>';
-
-            document.getElementById('invd-count-label').textContent = `الإجمالي — ${(inv.items || []).length} صنف`;
-            document.getElementById('invd-total').textContent = fmt(inv.total_amount);
-
-            const paymentRow = document.getElementById('invd-payment-row');
-            if (inv.payment_method) {
-                paymentRow.classList.remove('hidden');
-                document.getElementById('invd-payment').textContent = inv.payment_method;
-            } else {
-                paymentRow.classList.add('hidden');
-            }
-
-            const debtNote = document.getElementById('invd-debt-note');
-            if (inv.is_debt && inv.debt_person) {
-                debtNote.textContent = `📥 الفاتورة دي اتسجلت كمان كدين عليك لـ ${inv.debt_person}`;
-                debtNote.classList.remove('hidden');
-            } else {
-                debtNote.classList.add('hidden');
-            }
-        }
-
-        document.getElementById('invoice-detail-back').addEventListener('click', () => {
-            invoiceDetailModal.classList.add('hidden');
-            invoiceDetailModal.classList.remove('flex');
-            invoicesModal.classList.remove('hidden');
-            invoicesModal.classList.add('flex');
-        });
-        document.getElementById('invoice-detail-close').addEventListener('click', () => {
-            invoiceDetailModal.classList.add('hidden');
-            invoiceDetailModal.classList.remove('flex');
-        });
-
-        document.getElementById('invd-delete-btn').addEventListener('click', async () => {
-            const invoiceId = Number(invoiceDetailModal.dataset.invoiceId);
-            if (!invoiceId) return;
-            if (!confirm('متأكد إنك عايز تمسح الفاتورة دي؟ هتتمسح كل الأصناف والمصاريف المرتبطة بيها.')) return;
-
-            try {
-                await asstApi('invoice_delete', { invoiceId });
-                invoiceDetailModal.classList.add('hidden');
-                invoiceDetailModal.classList.remove('flex');
-                await loadInvoicesCount();
-                renderInvoicesList();
-                await loadDashboard();
-            } catch (e) {
-                alert(e.message);
-            }
         });
 
         // ============ Financial Wrapped modal ============
@@ -2180,32 +1657,20 @@
         });
 
         // ============ تاب "حسابي": بيانات البروفايل + حالة ربط تليجرام ============
-        document.getElementById('premium-hero-cta')?.addEventListener('click', () => {
-            document.getElementById('account-sub-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        });
-
         // ============ بطاقة الاشتراك في تاب "حسابي" ============
         // بتظهر بس لو مفيش اشتراك فعّال دلوقتي (يعني التجربة خلصت أو الاشتراك انتهى)
         // نفس الرقم والسعر اللي البوت بيبعتهم على تليجرام، جايين من نفس الـ config عن طريق الـ API
         const SUB_BOT_USERNAME = 'Masaaref_bot';
         function renderSubscription(subscription) {
             const card = document.getElementById('account-subscription-card');
-            const hero = document.getElementById('premium-hero-card');
             if (!card || !subscription) return;
 
             if (subscription.active) {
                 card.classList.add('hidden');
-                if (hero) hero.classList.add('hidden');
                 return;
             }
 
             card.classList.remove('hidden');
-            if (hero) {
-                hero.classList.remove('hidden');
-                const perDay = Math.round(Number(subscription.priceEgp) / 30);
-                const ctaBtn = document.getElementById('premium-hero-cta');
-                if (ctaBtn) ctaBtn.textContent = `اشترك دلوقتي — يعني ${perDay} ج.م بس في اليوم`;
-            }
             document.getElementById('account-sub-price').textContent = `${subscription.priceEgp} ج.م`;
             document.getElementById('account-sub-instapay').textContent = subscription.instapayNumber || '—';
             document.getElementById('account-sub-open-bot').href = `https://t.me/${SUB_BOT_USERNAME}`;

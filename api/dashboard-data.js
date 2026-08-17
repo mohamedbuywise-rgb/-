@@ -1,7 +1,6 @@
 import { supabase } from '../lib/supabaseClient.js';
 import { getMonthRange, getExpensesBetween, buildCategoryBreakdown } from '../lib/expenses.js';
 import { computeNetByPerson } from '../lib/debts.js';
-import { getInvoicesList, getInvoiceDetail } from '../lib/invoices.js';
 import { MONTH_NAMES, CATEGORY_EMOJI, SUBSCRIPTION_PRICE_EGP, INSTAPAY_LINK } from '../lib/config.js';
 import { hasActiveSubscription, getSubscriptionExpiry, isInTrial, getTrialDaysLeft } from '../lib/users.js';
 
@@ -55,20 +54,6 @@ export default async function handler(req, res) {
 
     const telegramUserId = link.telegram_user_id;
 
-    // ---- كل الفواتير / تفاصيل فاتورة واحدة (GET /api/dashboard-data?invoices=1 أو ?invoiceId=123) ----
-    // اتحطوا هنا بدل ملف API منفصل عشان نفضل تحت حد Vercel Hobby (12 function كحد أقصى)،
-    // بنفس فكرة تجميع الميزات في api/assistant.js.
-    if (req.query.invoiceId) {
-      const invoice = await getInvoiceDetail(telegramUserId, Number(req.query.invoiceId));
-      if (!invoice) return res.status(404).json({ error: 'الفاتورة دي مش موجودة.' });
-      return res.status(200).json({ linked: true, invoice });
-    }
-    if (req.query.invoices) {
-      const invoices = await getInvoicesList(telegramUserId);
-      return res.status(200).json({ linked: true, invoices });
-    }
-
-
     // ---- مصاريف النهاردة ----
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);
@@ -93,69 +78,6 @@ export default async function handler(req, res) {
     const prevRange = getMonthRange(-1);
     const prevExpenses = await getExpensesBetween(telegramUserId, prevRange.start, prevRange.end);
     const prevTotal = prevExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
-
-    // ---- ملخص آخر 7 أيام (تنويه أسبوعي بسيط في الداشبورد) ----
-    const weekEnd = new Date(startOfDay);
-    weekEnd.setDate(weekEnd.getDate() + 1); // شامل النهاردة
-    const weekStart = new Date(startOfDay);
-    weekStart.setDate(weekStart.getDate() - 6); // آخر 7 أيام شاملة النهاردة
-    const weekExpenses = await getExpensesBetween(telegramUserId, weekStart, weekEnd);
-    const weekTotal = weekExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
-    const weekBreakdown = buildCategoryBreakdown(weekExpenses);
-
-    const prevWeekEnd = new Date(weekStart);
-    const prevWeekStart = new Date(weekStart);
-    prevWeekStart.setDate(prevWeekStart.getDate() - 7);
-    const prevWeekExpenses = await getExpensesBetween(telegramUserId, prevWeekStart, prevWeekEnd);
-    const prevWeekTotal = prevWeekExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
-
-    // مفتاح الأسبوع (رقم الأسبوع في السنة) عشان الفرونت يعرف يعرض التنويه مرة واحدة بس كل أسبوع
-    const weekKeyDate = new Date(startOfDay);
-    const weekOnejan = new Date(weekKeyDate.getFullYear(), 0, 1);
-    const weekNumber = Math.ceil((((weekKeyDate - weekOnejan) / 86400000) + weekOnejan.getDay() + 1) / 7);
-    const weekKey = `${weekKeyDate.getFullYear()}-W${weekNumber}`;
-
-    const week = weekExpenses.length > 0 ? {
-      key: weekKey,
-      total: weekTotal,
-      count: weekExpenses.length,
-      prevTotal: prevWeekTotal,
-      topCategoryName: weekBreakdown[0]?.name || null,
-    } : null;
-
-    // ---- توزيع مصاريف آخر 7 أيام على أيام الأسبوع (لكارت "أكتر أيام الصرف" في تبويب النصايح) ----
-    // بنستخدم نفس weekExpenses (آخر 7 أيام) اللي فاتت، فمفيش استعلام إضافي للداتابيز.
-    const WEEKDAY_NAMES_AR = ['حد', 'اتنين', 'تلات', 'أربع', 'خميس', 'جمعة', 'سبت']; // getDay(): 0=حد ... 6=سبت
-    const weekdayTotals = Array.from({ length: 7 }, () => ({ value: 0, count: 0 }));
-    for (const e of weekExpenses) {
-      const idx = new Date(e.created_at).getDay();
-      weekdayTotals[idx].value += Number(e.amount);
-      weekdayTotals[idx].count += 1;
-    }
-    const byWeekday = WEEKDAY_NAMES_AR.map((day, i) => ({
-      day,
-      value: Math.round(weekdayTotals[i].value),
-      count: weekdayTotals[i].count,
-    }));
-
-    // ---- Streak: عدد الأيام المتتالية اللي فيها تسجيل مصروف (زي Duolingo) ----
-    // بنجيب مصاريف آخر 60 يوم بس، وبنحسب الأيام المتتالية رجوعًا من النهاردة (أو من امبارح
-    // لو النهاردة لسه معندهاش تسجيل، عشان الاستمرارية متتقطعش لمجرد إن المستخدم لسه ما فتحش دلوقتي).
-    const streakWindowStart = new Date(startOfDay);
-    streakWindowStart.setDate(streakWindowStart.getDate() - 60);
-    const streakExpenses = await getExpensesBetween(telegramUserId, streakWindowStart, endOfDay);
-    const daysWithExpense = new Set(
-      streakExpenses.map((e) => new Date(e.created_at).toDateString())
-    );
-    let streakCount = 0;
-    let cursor = new Date(startOfDay);
-    const hasToday = daysWithExpense.has(cursor.toDateString());
-    if (!hasToday) cursor.setDate(cursor.getDate() - 1); // ابدأ من امبارح لو النهاردة لسه فاضية
-    while (daysWithExpense.has(cursor.toDateString())) {
-      streakCount += 1;
-      cursor.setDate(cursor.getDate() - 1);
-    }
-    const streak = { current: streakCount, activeToday: hasToday };
 
     // ---- أرشيف آخر 4 شهور فاتت (بيانات حقيقية من جدول expenses، مش تلخيص محفوظ منفصل) ----
     const history = [];
@@ -327,9 +249,6 @@ export default async function handler(req, res) {
       goal,
       smart,
       wrapped,
-      week,
-      byWeekday,
-      streak,
     });
   } catch (err) {
     console.error('dashboard-data error:', err);

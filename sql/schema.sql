@@ -64,14 +64,6 @@ create table if not exists users (
 alter table users add column if not exists subscription_expires_at timestamptz;
 alter table users add column if not exists is_active boolean not null default true;
 
--- عمود بداية التجربة المجانية — ده كان لازم يتضاف من الأول (lib/users.js بيعتمد عليه في isInTrial
--- و getTrialDaysLeft) بس ملفش migration خالص، يعني في أي مشروع Supabase جديد العمود ده كان
--- مش موجود أصلاً. النتيجة: أي SELECT عليه كان بيرجع error (متجاهل في الكود)، فـ startedAt كانت
--- دايمًا null، وده كان بيخلي isInTrial() ترجع true للأبد — يعني محدش كان بيوصله طلب اشتراك
--- أو بوابة دفع خالص، والتجربة المجانية "3 أيام" ماكانتش بتخلص عمليًا. الـ default now() هنا
--- بيضمن إن أي مستخدم جديد ياخد trial_started_at تلقائي من أول upsert (أول رسالة يبعتها).
-alter table users add column if not exists trial_started_at timestamptz not null default now();
-
 -- جدول تتبع آخر تذكير اتبعت عن ديون قديمة لكل شخص، عشان منزنقش المستخدم بنفس التذكير كل يوم
 create table if not exists debt_reminders (
   id bigint generated always as identity primary key,

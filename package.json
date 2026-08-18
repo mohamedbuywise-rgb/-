@@ -11,5 +11,13 @@
     "@sparticuz/chromium": "^131.0.1",
     "playwright-core": "^1.49.1",
     "sharp": "^0.33.5"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.0.0",
+    "tailwindcss": "^4.0.0"
+  },
+  "scripts": {
+    "build:css": "tailwindcss -i ./public/app/src/tailwind-input.css -o ./public/app/dist/tailwind.css --minify",
+    "vercel-build": "npm run build:css"
   }
 }

@@ -13,7 +13,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="دبّر">
 
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="./dist/tailwind.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <!-- بنحدد الوضع (فاتح/غامق) بدري قبل ما الصفحة تترسم. الافتراضي دلوقتي "فاتح" -->
@@ -87,6 +87,7 @@
         html[data-theme="light"] .bg-slate-700\/50 { background-color: rgba(203,213,225,0.6) !important; }
         html[data-theme="light"] .hover\:bg-slate-800:hover { background-color: #e2e8f0 !important; }
         html[data-theme="light"] .hover\:bg-slate-700:hover { background-color: #cbd5e1 !important; }
+        html[data-theme="light"] .weekday-bar.is-active { background-color: #34d399 !important; }
 
         /* تدرجات */
         html[data-theme="light"] .from-slate-900 { --tw-gradient-from: #ffffff var(--tw-gradient-from-position); }
@@ -121,6 +122,11 @@
         html[data-theme="light"] .bg-rose-500\/15 { background-color: rgba(244,63,94,0.12) !important; }
         html[data-theme="light"] .bg-rose-500\/20 { background-color: rgba(244,63,94,0.14) !important; }
         html[data-theme="light"] .border-rose-500\/30 { border-color: rgba(244,63,94,0.3) !important; }
+
+        /* بادچ الستريك (كارت الالتزام اليومي) في الوضع الفاتح */
+        html[data-theme="light"] .bg-orange-950\/40 { background-color: rgba(255,247,237,0.9) !important; }
+        html[data-theme="light"] .border-orange-500\/30 { border-color: rgba(249,115,22,0.35) !important; }
+        html[data-theme="light"] .text-orange-400 { color: #c2410c !important; }
 
         /* حركة ترحيب بسيطة على الماسكوت الحقيقي (تحريك الصورة نفسها، مش رسمها من جديد) */
         @keyframes mascot-wave { 0%, 100% { transform: rotate(0deg) scale(1); } 25% { transform: rotate(-6deg) scale(1.05); } 50% { transform: rotate(4deg) scale(1.05); } 75% { transform: rotate(-3deg) scale(1.02); } }
@@ -164,6 +170,18 @@
         </div>
         <div class="px-5 -mt-1 pb-1 text-left">
             <span class="text-[9px] text-slate-600" id="last-updated-label"></span>
+        </div>
+
+        <!-- بطاقة الـ Streak اليومي — بيانات حقيقية من /api/dashboard-data (user.name / user.streakDays) -->
+        <div class="mx-5 mb-1 flex items-center justify-between bg-slate-950/60 border border-slate-800 rounded-2xl px-4 py-2.5" id="streakCard">
+            <div>
+                <span class="text-[10px] font-bold text-slate-500 block">التزامك اليومي</span>
+                <h3 class="text-xs font-black text-slate-100" id="userNameDisplay">—</h3>
+            </div>
+            <div class="flex items-center gap-1.5 bg-orange-950/40 border border-orange-500/30 rounded-full px-3 py-1.5">
+                <span class="text-sm">🔥</span>
+                <span class="font-black text-orange-400 text-[11px]" id="streakCountText">—</span>
+            </div>
         </div>
 
         <!-- Scrollable Dashboard Content -->
@@ -1174,6 +1192,7 @@
 
             window.__dashboardData = data;
 
+            renderStreak(data.user);
             renderMonthly(data.month);
             renderDaily(data.today, data.flow);
             renderCategories(data.month);
@@ -1189,6 +1208,18 @@
                 const now = new Date();
                 label.textContent = `آخر تحديث ${now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}`;
             }
+        }
+
+        // بيانات حقيقية بس (اسم من جدول profiles، والـ streak محسوب من أيام expenses المتتالية في السيرفر)
+        function renderStreak(user) {
+            const nameEl = document.getElementById('userNameDisplay');
+            const streakEl = document.getElementById('streakCountText');
+            if (!nameEl || !streakEl || !user) return;
+
+            nameEl.textContent = `أهلاً بك يا ${user.name}`;
+            streakEl.textContent = user.streakDays > 0
+                ? `${user.streakDays} يوم متتالي`
+                : 'ابدأ الستريك النهاردة';
         }
 
         function renderMonthly(month) {
@@ -2206,7 +2237,7 @@
                 subline.textContent = 'خلال الـ3 أيام دي هتشوف بنفسك إزاي دبّر بيوفّرلك وقت وبيخليك متابع كل جنيه بيتصرف — من غير ما تفتح جدول ولا تكتب رقم بإيدك. اشترك دلوقتي عشان الخدمة متتقطعش.';
             } else {
                 headline.textContent = '⏳ خلصت أيام التجربة المجانية';
-                subline.textContent = 'جربت 3 أيام وشفت إزاي دبّر بيتابعلك مصاريفك وديونك أول بأول — دلوقتي كمّل معاك عشان متفوّتش أي تفصيلة من حساباتك، ب150 جنيه بس في الشهر.';
+                subline.textContent = 'جربت 3 أيام وشفت إزاي دبّر بيتابعلك مصاريفك وديونك أول بأول — دلوقتي كمّل معاك عشان متفوّتش أي تفصيلة من حساباتك، ب99 جنيه بس في الشهر.';
             }
         }
 

@@ -1,9 +1,11 @@
-// v2: لازم نغيّر الاسم عشان أي جهاز عنده الكاش القديم (اللي كان بيحفظ ردود الـ API غلط)
-// يمسحه فورًا ويبدأ من كاش جديد فاضي — خطوة activate تحت بتمسح أي CACHE_NAME قديم تلقائي.
-const CACHE_NAME = 'dabbar-cache-v2';
+// v3: ضفنا ./dist/tailwind.css (بديل @tailwindcss/browser@4 اللي كان بيتحمّل من
+// الـ CDN ويعمل compile للـ CSS live في المتصفح كل فتحة). لازم نغيّر الاسم عشان
+// كل جهاز ياخد الكاش الجديد بالملف ده جوّاه — خطوة activate تحت بتمسح القديم تلقائي.
+const CACHE_NAME = 'dabbar-cache-v3';
 const PRECACHE_URLS = [
   './dabbar-onboarding.html',
   './dabbar-dashboard-full.html',
+  './dist/tailwind.css',
   './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png'

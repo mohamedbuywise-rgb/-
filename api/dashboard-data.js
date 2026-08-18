@@ -262,6 +262,46 @@ export default async function handler(req, res) {
       };
     }
 
+    // ---- بروفايل المستخدم + الـ Streak اليومي (بيانات حقيقية 100%، مفيش أرقام مختلقة) ----
+    // الاسم: من جدول profiles (لو المستخدم عدّله من صفحة "حسابي")، وإلا من بيانات التسجيل
+    // (user_metadata.full_name)، وإلا اسم عام محايد بدل أي اسم وهمي.
+    const { data: profileRow, error: profileError } = await supabase
+      .from('profiles')
+      .select('full_name')
+      .eq('id', userData.user.id)
+      .maybeSingle();
+    if (profileError) console.error('dashboard-data profile lookup error:', JSON.stringify(profileError));
+
+    const displayName =
+      profileRow?.full_name ||
+      userData.user.user_metadata?.full_name ||
+      'صديقنا';
+
+    // الـ Streak: عدد الأيام المتتالية اللي المستخدم سجّل فيها مصروف واحد على الأقل، وصولاً للنهاردة.
+    // بنجيب تواريخ آخر 60 يوم بس من جدول expenses الحقيقي ونحسب منها التتابع (مفيش جدول streak منفصل).
+    const streakWindowStart = new Date(startOfDay);
+    streakWindowStart.setDate(streakWindowStart.getDate() - 60);
+    const { data: streakRows, error: streakError } = await supabase
+      .from('expenses')
+      .select('created_at')
+      .eq('telegram_user_id', telegramUserId)
+      .gte('created_at', streakWindowStart.toISOString());
+    if (streakError) console.error('dashboard-data streak lookup error:', JSON.stringify(streakError));
+
+    const loggedDays = new Set(
+      (streakRows || []).map((r) => new Date(r.created_at).toDateString())
+    );
+    // لو النهاردة لسه ما سجّلش، بنبدأ العد من إمبارح (عشان ميقولوش "الستريك اتقطع" وهو لسه له وقت النهاردة)
+    let streakCursor = new Date(startOfDay);
+    if (!loggedDays.has(streakCursor.toDateString())) {
+      streakCursor.setDate(streakCursor.getDate() - 1);
+    }
+    let streakDays = 0;
+    while (loggedDays.has(streakCursor.toDateString())) {
+      streakDays += 1;
+      streakCursor.setDate(streakCursor.getDate() - 1);
+    }
+
     // ---- حالة الاشتراك/التجربة ----
     const subActive = await hasActiveSubscription(telegramUserId);
     const subExpiresAt = await getSubscriptionExpiry(telegramUserId);
@@ -272,6 +312,10 @@ export default async function handler(req, res) {
       linked: true,
       telegramUserId,
       generatedAt: new Date().toISOString(),
+      user: {
+        name: displayName,
+        streakDays,
+      },
       subscription: {
         active: subActive,
         expiresAt: subExpiresAt ? subExpiresAt.toISOString() : null,

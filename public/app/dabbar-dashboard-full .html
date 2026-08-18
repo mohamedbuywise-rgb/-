@@ -111,6 +111,50 @@
         html[data-theme="light"] .text-slate-500 { color: #94a3b8 !important; }
         html[data-theme="light"] .text-slate-600 { color: #94a3b8 !important; }
 
+        /* مخطط أيام الأسبوع في الوضع الفاتح: تباين هادئ، حدود واضحة، ولمعة منضبطة */
+        html[data-theme="light"] #weekday-chart-container {
+            border-bottom-color: #cbd5e1 !important;
+        }
+        html[data-theme="light"] .weekday-bar {
+            background-color: #cbd5e1 !important;
+            border: 1px solid #b8c6d6;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.72);
+        }
+        html[data-theme="light"] .weekday-bar:hover {
+            background-color: #34d399 !important;
+            border-color: #10b981;
+            box-shadow: 0 0 10px 1px rgba(16,185,129,0.22), inset 0 1px 0 rgba(255,255,255,0.45);
+        }
+        html[data-theme="light"] .weekday-bar.is-active {
+            background-color: #10b981 !important;
+            border-color: #059669 !important;
+            box-shadow: 0 0 0 2px rgba(16,185,129,0.16), 0 5px 16px rgba(16,185,129,0.28), inset 0 1px 0 rgba(255,255,255,0.42) !important;
+        }
+        html[data-theme="light"] .weekday-bar::after {
+            background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.76) 50%, transparent 70%);
+        }
+        html[data-theme="light"] #weekday-labels-row {
+            color: #475569 !important;
+        }
+        html[data-theme="light"] #weekday-labels-row .weekday-date {
+            color: #94a3b8 !important;
+        }
+        html[data-theme="light"] #weekday-labels-row > span.weekday-label--active {
+            color: #047857 !important;
+            font-weight: 800;
+        }
+        html[data-theme="light"] #weekday-labels-row > span.weekday-label--active .weekday-date {
+            color: #059669 !important;
+        }
+        html[data-theme="light"] #weekday-detail-panel {
+            background: linear-gradient(135deg, #ecfdf5 0%, #ffffff 72%) !important;
+            border-color: rgba(16,185,129,0.32) !important;
+            box-shadow: 0 8px 20px rgba(15,23,42,0.08);
+        }
+        html[data-theme="light"] #weekday-detail-panel .border-slate-700\\/60 {
+            border-color: rgba(148,163,184,0.42) !important;
+        }
+
         /* لون الأرقام والتفاصيل الكبيرة يبقى أغمق شوية في الفاتح عشان يبان واضح */
         html[data-theme="light"] .text-emerald-300 { color: #059669 !important; }
         html[data-theme="light"] .text-emerald-400 { color: #059669 !important; }
@@ -1394,16 +1438,19 @@
 
                 if (!isFuture) {
                     barEl.addEventListener('click', () => {
+                        const wasActive = activeIndex === i;
                         container.querySelectorAll('.weekday-bar.is-active').forEach((b) => b.classList.remove('is-active'));
-                        barEl.classList.remove('is-active');
-                        void barEl.offsetWidth;
-                        barEl.classList.add('is-active');
+                        document.querySelectorAll('#weekday-labels-row > span.weekday-label--active').forEach((label) => label.classList.remove('weekday-label--active'));
 
-                        if (activeIndex === i) {
+                        if (wasActive) {
                             detailWrap.classList.remove('is-open');
                             activeIndex = null;
                             return;
                         }
+
+                        void barEl.offsetWidth;
+                        barEl.classList.add('is-active');
+                        dateEls[i]?.parentElement?.classList.add('weekday-label--active');
                         activeIndex = i;
 
                         detailDay.textContent = `${WEEKDAY_NAMES[i]} (${(weekDates && weekDates[i]) || ''})`;

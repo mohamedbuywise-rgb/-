@@ -266,8 +266,8 @@
           </div>
         </div>
 
-        <button type="submit" class="btn btn-primary" id="linkSubmitBtn" disabled>
-          <span id="linkSubmitLabel">🔒 لازم تفتح دبّر من الأيقونة الأول</span>
+        <button type="submit" class="btn btn-primary" id="linkSubmitBtn">
+          <span id="linkSubmitLabel">✅ تأكيد الربط</span>
         </button>
       </form>
     </div>
@@ -551,12 +551,6 @@
     isSubmitting = true;
     hideMessages();
 
-    // لا نطلب أو نرسل كلمات مرور أو أكواد دخول Telegram من هذه الصفحة.
-    showError('ربط Telegram متوقف مؤقتًا. استخدم Telegram Login الرسمي بدل إدخال كود داخل الموقع.');
-    isSubmitting = false;
-    refreshSubmitState();
-    return;
-
     const code = linkCodeInput.value.trim();
 
     linkSubmitBtn.disabled = true;
@@ -617,9 +611,8 @@
   }
 
   function refreshSubmitState() {
-    const ok = isStandalone();
-    linkSubmitBtn.disabled = !ok;
-    linkSubmitLabel.textContent = ok ? '✅ تأكيد الربط' : '🔒 لازم تفتح دبّر من الأيقونة الأول';
+    // الزرار بقى شغال دايمًا — مبقاش مربوط بشرط التثبيت (standalone)
+    linkSubmitLabel.textContent = '✅ تأكيد الربط';
   }
 
   window.addEventListener('beforeinstallprompt', (e) => {

@@ -460,25 +460,40 @@
         const { data, error } = await sb.auth.signUp({
           email,
           password,
-          options: { data: { full_name: fullName } },
+          options: {
+            data: { full_name: fullName },
+            emailRedirectTo: `${window.location.origin}/app/dabbar-onboarding.html`
+          }
         });
+
         if (error) {
-          showAuthError(error.message === 'User already registered'
-            ? 'الإيميل ده متسجل قبل كده، سجّل دخول بدل ما تعمل حساب جديد.'
-            : 'حصل خطأ في إنشاء الحساب، جرب تاني.');
+          console.error('Supabase signup error:', error);
+          showAuthError(error.message || 'فشل إنشاء الحساب.');
           return;
         }
-        // نسجّل صف في profiles بأول فرصة (RLS بتسمح بس لصاحب الحساب يعمل insert لنفسه)
-        if (data?.user) {
-          await sb.from('profiles').upsert({ id: data.user.id, full_name: fullName, email }).catch(() => {});
+
+        if (!data?.user) {
+          showAuthError('لم يرجع Supabase مستخدمًا. راجع إعدادات المشروع.');
+          return;
         }
+
+        const { error: profileError } = await sb
+          .from('profiles')
+          .upsert({ id: data.user.id, full_name: fullName, email });
+
+        if (profileError) {
+          console.error('Profiles error:', profileError);
+          // لا نوقف إنشاء الحساب بسبب فشل تسجيل ملف المستخدم.
+        }
+
         if (!data.session) {
-          // فيه إعدادات Supabase بتطلب تأكيد الإيميل قبل ما تدّي session — لو كده، نوضح للمستخدم
-          showAuthNotice('اتعمل حسابك! تحقق من إيميلك وأكّده، وبعدين ارجع سجّل دخول من هنا.');
+          showAuthNotice('الحساب اتعمل. افتح رسالة التأكيد في بريدك، ثم سجّل الدخول.');
           setAuthMode('login');
           emailInput.value = email;
+          passwordInput.value = '';
           return;
         }
+
         showLinkScreen();
       } else {
         const { data, error } = await sb.auth.signInWithPassword({ email, password });
@@ -535,6 +550,13 @@
     if (isSubmitting) return;
     isSubmitting = true;
     hideMessages();
+
+    // لا نطلب أو نرسل كلمات مرور أو أكواد دخول Telegram من هذه الصفحة.
+    showError('ربط Telegram متوقف مؤقتًا. استخدم Telegram Login الرسمي بدل إدخال كود داخل الموقع.');
+    isSubmitting = false;
+    refreshSubmitState();
+    return;
+
     const code = linkCodeInput.value.trim();
 
     linkSubmitBtn.disabled = true;

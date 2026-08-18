@@ -147,6 +147,9 @@
             <div class="flex items-center gap-2">
                 <img src="./icons/icon-192.png" alt="دبّر" class="w-8 h-8 rounded-xl">
                 <span class="text-2xl font-black" style="font-family:'Cairo',sans-serif; letter-spacing:-0.5px; background:linear-gradient(90deg,#34d399,#2dd4bf); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;">دبّر</span>
+                <span id="streak-badge" class="hidden items-center gap-1 bg-amber-500/10 border border-amber-500/25 text-amber-400 text-xs font-black px-2 py-1 rounded-full">
+                    <span>🔥</span><span id="streak-count">0</span>
+                </span>
             </div>
             <button id="brandbar-theme-btn" title="تبديل المظهر" class="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-xs hover:bg-slate-700 transition">🌙</button>
         </div>
@@ -987,6 +990,17 @@
         // الثيم نفسه بيتطبق بدري في <head> (عشان منشوفش فلاش)، هنا بس بنظبط شكل السويتش والنص يتوافق معاه
         applyThemeToggleUI(getTheme());
 
+        // ============ Streak 🔥 — بيتحسب في السيرفر (جدول users) وبيوصل جاهز مع رد /api/dashboard-data ============
+        // بيفضل ثابت مع أي جهاز يدخل بيه المستخدم لأنه مش متخزن محليًا. applyStreak بتتنادى من loadDashboard.
+        function applyStreak(streak) {
+            const badge = document.getElementById('streak-badge');
+            const count = document.getElementById('streak-count');
+            if (!badge || !count || !streak || streak < 1) return;
+            count.textContent = streak;
+            badge.classList.remove('hidden');
+            badge.classList.add('flex');
+        }
+
         document.getElementById('account-theme-toggle').addEventListener('click', () => {
             setTheme(getTheme() === 'light' ? 'dark' : 'light');
         });
@@ -1187,6 +1201,7 @@
             renderArchive(data.history);
             renderSubscription(data.subscription);
             renderAssistant(data);
+            applyStreak(data.streak);
             updateHeaderForTab(document.querySelector('.tab-btn.active-tab').dataset.tab, data);
 
             const label = document.getElementById('last-updated-label');
@@ -1606,7 +1621,7 @@
         function renderAsstProjection(smart, month) {
             const el = document.getElementById('asst-projection-text');
             if (!smart) { el.textContent = 'لسه معندناش بيانات كفاية عشان نتوقع نهاية الشهر.'; return; }
-            let text = `على المعدل الحالي، متوقع صرفك يوصل لحوالي <b class="text-slate-100">${fmt(smart.projectedTotal)}</b> بنهاية ${smart.projectedLabel} (اتصرف ${smart.daysPassed} من ${smart.daysInMonth} يوم).`;
+            let text = `على المعدل الحالي، متوقع صرفك يوصل لحوالي <b class="text-amber-300 text-sm">${fmt(smart.projectedTotal)}</b> بنهاية ${smart.projectedLabel} (اتصرف ${smart.daysPassed} من ${smart.daysInMonth} يوم).`;
             if (month && month.prevTotal > 0) {
                 text += smart.projectedTotal > month.prevTotal
                     ? ` ده أكتر من ${month.prevLabel} (${fmt(month.prevTotal)}).`
@@ -1806,13 +1821,16 @@
                 resultEl.innerHTML = `
                     <div class="flex items-center gap-2 font-bold">
                         <img src="branding/dabbar-mascot-avatar.png" alt="دبّر" class="w-9 h-9 rounded-full object-cover shrink-0 mascot-wave">
-                        <span>${result.merchant ? `فاتورة ${result.merchant}` : 'الفاتورة'} — اتسجلت (${result.items.length} صنف)</span>
+                        <span class="flex-1">${result.merchant ? `فاتورة ${result.merchant}` : 'الفاتورة'} — اتسجلت (${result.items.length} صنف)</span>
+                        <button type="button" id="asst-receipt-result-close" aria-label="اقفل" class="shrink-0 w-6 h-6 flex items-center justify-center rounded-full text-emerald-300 hover:bg-emerald-500/20 transition text-sm font-bold">✕</button>
                     </div>
                     ${itemsHtml}
                     <div class="flex items-center justify-between font-bold pt-1 border-t border-emerald-500/20 mt-1"><span>الإجمالي</span><span>${fmt(result.totalAmount)}</span></div>
                     ${debtHtml}
                 `;
                 resultEl.classList.remove('hidden');
+                const closeBtn = document.getElementById('asst-receipt-result-close');
+                if (closeBtn) closeBtn.addEventListener('click', () => resultEl.classList.add('hidden'));
                 updateUsageBadge('asst-receipt-usage', result.usage);
                 await loadDashboard();
                 await loadInvoicesCount();

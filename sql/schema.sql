@@ -68,6 +68,12 @@ alter table users add column if not exists is_active boolean not null default tr
 -- وأي مستخدم جديد بعد كده هياخد الوقت الحقيقي بتاع أول upsert (Supabase بيحط القيمة تلقائي وقت الـ insert).
 alter table users add column if not exists trial_started_at timestamptz not null default now();
 
+-- Streak 🔥: عدد الأيام المتتالية اللي المستخدم فتح فيها الداشبورد.
+-- last_streak_date: آخر يوم (بتاريخ بس، من غير وقت) اتحسبله فيه زيارة. لو يوم النهاردة يفرق عن ده بيوم واحد، الستريك بيزيد.
+-- لو فرق أكتر من يوم، الستريك بيرجع لـ1. القيمة بتتخزن وتتحسب من السيرفر عشان تفضل ثابتة مع أي جهاز يدخل بيه المستخدم.
+alter table users add column if not exists streak_count integer not null default 0;
+alter table users add column if not exists last_streak_date date;
+
 -- جدول تتبع آخر تذكير اتبعت عن ديون قديمة لكل شخص، عشان منزنقش المستخدم بنفس التذكير كل يوم
 create table if not exists debt_reminders (
   id bigint generated always as identity primary key,

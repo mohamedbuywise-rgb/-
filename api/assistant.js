@@ -4,7 +4,7 @@ import { getDebtsSummaryText } from '../lib/debts.js';
 import { extractItemizedReceiptFromImageBase64, askDabbarChat } from '../lib/groq.js';
 import { saveInvoiceRecord, deleteInvoiceById } from '../lib/invoices.js';
 import { hasActiveSubscription, isInTrial } from '../lib/users.js';
-import { checkOcrUsage, checkChatUsage, refundOcrUsage } from '../lib/rateLimits.js';
+import { checkOcrUsage, checkChatUsage, refundOcrUsage, refundUsage } from '../lib/rateLimits.js';
 
 // ============ Router: POST /api/assistant  { action: ... } ============
 // كل ميزات "دبّر الذكي" الجديدة (الأهداف، امسح فاتورة، اسأل دبّر) اتلمّت هنا في endpoint واحد،
@@ -211,25 +211,36 @@ async function handleAsk(userId, body, res) {
     return res.status(429).json({ error: 'وصلت للحد الأقصى من الأسئلة الشهر ده. هيرجع تاني بداية الشهر الجاي.', limitReached: true });
   }
 
-  const [expensesText, debtsText] = await Promise.all([
+  // كل مصدر بيانات مستقل؛ لو مصدر واحد فشل لا نمنع المساعد من الرد على السؤال.
+  const [expensesResult, debtsResult, goalResult] = await Promise.allSettled([
     getRecentExpensesSummaryText(userId),
     getDebtsSummaryText(userId),
+    supabase
+      .from('goals')
+      .select('title, target_amount, saved_amount')
+      .eq('telegram_user_id', userId)
+      .eq('is_active', true)
+      .maybeSingle(),
   ]);
 
-  const { data: goalRow } = await supabase
-    .from('goals')
-    .select('title, target_amount, saved_amount')
-    .eq('telegram_user_id', userId)
-    .eq('is_active', true)
-    .maybeSingle();
-
+  const expensesText = expensesResult.status === 'fulfilled'
+    ? expensesResult.value
+    : 'تعذر تحميل ملخص المصاريف مؤقتًا.';
+  const debtsText = debtsResult.status === 'fulfilled'
+    ? debtsResult.value
+    : 'تعذر تحميل ملخص الديون مؤقتًا.';
+  const goalRow = goalResult.status === 'fulfilled' ? goalResult.value.data : null;
   const goalText = goalRow
     ? `هدفه المالي الحالي: ${goalRow.title} — وفّر ${Number(goalRow.saved_amount)} من ${Number(goalRow.target_amount)} جنيه.`
     : 'مفيش هدف مالي مسجل دلوقتي.';
 
   const dataContext = `${expensesText}\n\n${debtsText}\n\n${goalText}`;
-
   const answer = await askDabbarChat(question, dataContext);
+
+  // askDabbarChat يرجع نصًا بديلًا عند الفشل؛ لا نردّ العداد إذا وصل رد حقيقي.
+  if (!answer || answer.startsWith('معلش، حصل خطأ بسيط')) {
+    await refundUsage(userId, 'chat');
+  }
   return res.status(200).json({
     answer,
     usage: !usage.isTrial && usage.remaining !== null ? { remaining: usage.remaining, limit: usage.limit } : null,

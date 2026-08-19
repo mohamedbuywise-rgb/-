@@ -58,7 +58,15 @@ export default async function handler(req, res) {
       .maybeSingle();
     if (existingTelegramError) throw existingTelegramError;
     if (existingTelegramLink && existingTelegramLink.auth_user_id !== authUserId) {
-      return res.status(409).json({ ok: false, error: 'حساب تليجرام ده مربوط بحساب موقع تاني بالفعل.' });
+      // امتلاك كود /link من Telegram يثبت أن المستخدم يملك الحساب؛ لذلك نسمح
+      // بنقل الربط إلى حساب الموقع الحالي. بيانات المصاريف/الديون مرتبطة بـTelegram
+      // وستظل محفوظة، بينما الحساب القديم يفقد الوصول للوحة حتى لا يبقى الربط مزدوجًا.
+      const { error: transferError } = await supabase
+        .from('user_links')
+        .delete()
+        .eq('auth_user_id', existingTelegramLink.auth_user_id)
+        .eq('telegram_user_id', telegramUserId);
+      if (transferError) throw transferError;
     }
 
     const { error: linkError } = await supabase
@@ -85,7 +93,7 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true, alreadyLinked: true });
     }
 
-    return res.status(200).json({ ok: true });
+    return res.status(200).json({ ok: true, relinked: Boolean(existingTelegramLink && existingTelegramLink.auth_user_id !== authUserId) });
   } catch (err) {
     console.error('auth-by-code error:', err);
     return res.status(500).json({ ok: false, error: 'حصل خطأ في السيرفر. جرب تاني.' });

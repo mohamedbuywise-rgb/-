@@ -663,14 +663,19 @@
           headers: { Authorization: `Bearer ${data.session.access_token}` },
         });
         const result = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          throw new Error(result.error || 'حصل خطأ وإحنا بنتحقق من الحساب.');
+        }
         if (result && result.linked === false) {
           showLinkScreen();
-        } else {
+        } else if (result && result.linked === true) {
           window.location.href = DASHBOARD_URL;
+        } else {
+          throw new Error('السيرفر رجّع استجابة غير مفهومة. جرّب تحديث الصفحة.');
         }
       }
     } catch (err) {
-      showAuthError('مقدرناش نتواصل مع السيرفر دلوقتي. جرب تاني.');
+      showAuthError(err.message || 'مقدرناش نتواصل مع السيرفر دلوقتي. جرب تاني.');
     } finally {
       authSubmitting = false;
       authSubmitBtn.disabled = false;
@@ -726,7 +731,7 @@
         },
         body: JSON.stringify({ code, standalone: isStandalone() }),
       });
-      const result = await res.json();
+      const result = await res.json().catch(() => ({}));
 
       if (!res.ok || !result.ok) {
         showError(result.error || 'حصل خطأ، جرب تاني.');
@@ -735,6 +740,7 @@
 
       // ننتقل لحالة النجاح جوه نفس الكارت، وبعدها نحوّل تلقائي للداشبورد
       linkFormState.style.display = 'none';
+      if (result.relinked) showNotice('تم نقل ربط Telegram للحساب الجديد، وبياناتك القديمة محفوظة.');
       successState.classList.add('show');
       setProgressStage('done');
       setTimeout(() => { window.location.href = DASHBOARD_URL; }, 1100);

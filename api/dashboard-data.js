@@ -4,6 +4,7 @@ import { computeNetByPerson } from '../lib/debts.js';
 import { getInvoicesList, getInvoiceDetail } from '../lib/invoices.js';
 import { MONTH_NAMES, CATEGORY_EMOJI, SUBSCRIPTION_PRICE_EGP, INSTAPAY_LINK } from '../lib/config.js';
 import { hasActiveSubscription, getSubscriptionExpiry, isInTrial, getTrialDaysLeft } from '../lib/users.js';
+import { getActiveDays } from '../lib/activeDays.js';
 
 // ============ GET /api/dashboard-data ============
 // بيرجّع بيانات حقيقية بس (صفر mock data): مصاريف النهاردة، مصاريف الشهر بالتصنيفات، والديون.
@@ -54,6 +55,9 @@ export default async function handler(req, res) {
     console.log('dashboard-data: linked to telegram_user_id:', link.telegram_user_id);
 
     const telegramUserId = link.telegram_user_id;
+
+    // ---- الأيام النشطة: طلب واحد من RPC، والـ fallback لا يعطل الداشبورد ----
+    const activeDays = await getActiveDays(telegramUserId);
 
     // ---- كل الفواتير / تفاصيل فاتورة واحدة (GET /api/dashboard-data?invoices=1 أو ?invoiceId=123) ----
     // اتحطوا هنا بدل ملف API منفصل عشان نفضل تحت حد Vercel Hobby (12 function كحد أقصى)،
@@ -280,6 +284,7 @@ export default async function handler(req, res) {
         priceEgp: SUBSCRIPTION_PRICE_EGP,
         instapayNumber: INSTAPAY_LINK,
       },
+      activeDays,
       today: {
         total: todayTotal,
         count: todayExpenses.length,

@@ -134,7 +134,41 @@
         /* حركة "تنفّس" مستمرة للماسكوت في كارت البريميوم — مش فريم ثابت */
         @keyframes mascot-float { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-6px) rotate(-1.5deg); } }
         .mascot-float { animation: mascot-float 2.6s ease-in-out infinite; }
-    </style>
+        /* ============ Active Days compact strip ============ */
+        .active-days-card {
+            direction: rtl;
+            background: linear-gradient(135deg, #f7faf8 0%, #eff6f1 100%);
+            border: 1px solid #e1eae3;
+            border-radius: 1.25rem;
+            padding: .7rem .85rem .8rem;
+            color: #123126;
+            overflow: hidden;
+        }
+        .active-days-top { display:flex; align-items:center; justify-content:space-between; gap:.5rem; margin-bottom:.55rem; }
+        .active-days-title { font: 800 .68rem/1.2 'Cairo', sans-serif; color:#245342; white-space:nowrap; }
+        .active-days-badge { font: 800 .58rem/1 'Cairo', sans-serif; color:#167044; background:#eaf7ef; border:1px solid #ccebd8; padding:.32rem .55rem; border-radius:999px; white-space:nowrap; }
+        .active-days-strip { display:flex; align-items:center; gap:.65rem; min-width:0; }
+        .active-days-flame-wrap { position:relative; width:2rem; height:2rem; flex:0 0 2rem; display:grid; place-items:center; }
+        .active-days-flame-wrap::before { content:''; position:absolute; inset:1px; border-radius:50%; background:radial-gradient(circle, rgba(255,122,24,.28), transparent 68%); animation:activeDaysGlow 2.8s ease-in-out infinite; }
+        .active-days-flame { position:relative; width:1.55rem; height:1.75rem; z-index:1; animation:activeDaysFlicker 3.2s ease-in-out infinite; }
+        .active-days-flame svg { width:100%; height:100%; display:block; }
+        .active-days-number { font:900 1.15rem/1 'Cairo', sans-serif; white-space:nowrap; background:linear-gradient(135deg,#d6321f,#ff7a18 55%,#ffd54b); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+        .active-days-dots { display:flex; align-items:flex-end; justify-content:space-between; gap:.28rem; flex:1; min-width:0; }
+        .active-days-dot { display:flex; flex-direction:column; align-items:center; gap:.12rem; min-width:1.15rem; color:#93a39a; font:700 .55rem/1 'Cairo', sans-serif; }
+        .active-days-dot-mark { width:.52rem; height:.52rem; border-radius:50%; background:#e2e8e4; border:1px solid #d2ddd6; }
+        .active-days-dot.is-active .active-days-dot-mark { background:linear-gradient(135deg,#ffd54b,#ff7a18 55%,#d6321f); border-color:#ff9b31; box-shadow:0 0 7px rgba(255,122,24,.35); }
+        .active-days-dot.is-active { color:#38805f; }
+        html:not([data-theme="light"]) .active-days-card { background:linear-gradient(135deg,#12181a 0%,#0d1112 100%); border-color:#1e2528; color:#e5f4ea; }
+        html:not([data-theme="light"]) .active-days-title { color:#bde8ca; }
+        html:not([data-theme="light"]) .active-days-badge { color:#4ade80; background:rgba(74,222,128,.15); border-color:rgba(74,222,128,.25); }
+        html:not([data-theme="light"]) .active-days-dot-mark { background:#252d2f; border-color:#374144; }
+        html:not([data-theme="light"]) .active-days-dot { color:#6e7d78; }
+        html:not([data-theme="light"]) .active-days-dot.is-active { color:#4ade80; }
+        @keyframes activeDaysGlow { 0%,100% { opacity:.55; transform:scale(.9); } 50% { opacity:1; transform:scale(1.12); } }
+        @keyframes activeDaysFlicker { 0%,100% { transform:rotate(-2deg) scale(1); } 50% { transform:rotate(2deg) scale(1.035); } }
+        @media (max-width:360px) { .active-days-strip { gap:.42rem; } .active-days-dots { gap:.12rem; } .active-days-dot { min-width:.92rem; } .active-days-title { font-size:.61rem; } .active-days-badge { font-size:.52rem; padding:.28rem .42rem; } }
+
+        </style>
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
 
@@ -180,6 +214,26 @@
 
         <!-- ===================== TAB: MONTHLY (default) ===================== -->
         <div class="tab-content active fade-up p-5 space-y-4" id="tab-monthly">
+
+            <section class="active-days-card" id="active-days-card" aria-label="الأيام النشطة">
+                <div class="active-days-top">
+                    <span class="active-days-title">إجمالي أيامك النشطة — رقم بيكبر بس</span>
+                    <span class="active-days-badge">مستمر معاك 🎯</span>
+                </div>
+                <div class="active-days-strip">
+                    <div class="active-days-flame-wrap" aria-hidden="true">
+                        <div class="active-days-flame">
+                            <svg viewBox="0 0 48 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <defs><linearGradient id="activeDaysFlameGradient" x1="8" y1="4" x2="40" y2="52" gradientUnits="userSpaceOnUse"><stop stop-color="#FFD54B"/><stop offset=".55" stop-color="#FF7A18"/><stop offset="1" stop-color="#D6321F"/></linearGradient></defs>
+                                <path d="M27.2 2.5C29.2 12.4 20.6 15.2 24.4 23.7C26.1 27.5 30.2 27.8 31.4 23.1C38.6 30.4 41.2 37.1 38.6 43.3C36 49.5 30 53.5 23.5 53.5C14.1 53.5 6.5 46.2 6.5 37.1C6.5 29 11.3 23.3 17.8 18.1C16.6 26.8 20.1 29.7 23 29.1C27.4 28.2 24.5 20.8 27.2 2.5Z" fill="url(#activeDaysFlameGradient)"/>
+                                <path d="M23.9 32.2C28.1 36.2 30.1 39.2 30.1 42.1C30.1 46 27.2 48.9 23.6 48.9C19.9 48.9 17 46 17 42.3C17 39.4 19.2 36.2 23.9 32.2Z" fill="#FFD54B" opacity=".88"/>
+                            </svg>
+                        </div>
+                    </div>
+                    <span class="active-days-number" id="active-days-total">0 يوم</span>
+                    <div class="active-days-dots" id="active-days-dots" aria-label="نشاط آخر 7 أيام"></div>
+                </div>
+            </section>
 
             <div class="bg-gradient-to-br from-emerald-950/60 to-slate-900 border border-emerald-500/30 rounded-3xl p-4 text-center space-y-2 shadow-lg">
                 <span class="text-xs text-emerald-400 font-semibold block" id="monthly-total-label">إجمالي صرفك الشهر ده</span>
@@ -1204,6 +1258,7 @@
 
             window.__dashboardData = data;
 
+            renderActiveDays(data.activeDays);
             renderMonthly(data.month);
             renderDaily(data.today, data.flow);
             renderCategories(data.month);
@@ -1220,6 +1275,24 @@
                 const now = new Date();
                 label.textContent = `آخر تحديث ${now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}`;
             }
+        }
+
+        function renderActiveDays(activeDays) {
+            const totalEl = document.getElementById('active-days-total');
+            const dotsEl = document.getElementById('active-days-dots');
+            if (!totalEl || !dotsEl) return;
+            const total = Math.max(0, Number(activeDays?.totalActiveDays || 0));
+            totalEl.textContent = `${total.toLocaleString('ar-EG')} يوم`;
+            const days = Array.isArray(activeDays?.lastSevenDays) ? activeDays.lastSevenDays : [];
+            const fallbackLabels = ['ن', 'ث', 'ر', 'خ', 'ج', 'س', 'ح'];
+            dotsEl.innerHTML = Array.from({ length: 7 }, (_, index) => {
+                const day = days[index] || { active: false, label: fallbackLabels[index] };
+                const isActive = Boolean(day.active);
+                return `<span class="active-days-dot${isActive ? ' is-active' : ''}" title="${day.date || ''}">
+                    <span class="active-days-dot-mark" aria-hidden="true">${isActive ? '🔥' : ''}</span>
+                    <span>${day.label || fallbackLabels[index]}</span>
+                </span>`;
+            }).join('');
         }
 
         function renderMonthly(month) {

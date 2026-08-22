@@ -1,7 +1,7 @@
 import { supabase } from '../lib/supabaseClient.js';
 import { getRecentExpensesSummaryText } from '../lib/expenses.js';
 import { getDebtsSummaryText } from '../lib/debts.js';
-import { extractItemizedReceiptFromImageBase64, askDabbarChat } from '../lib/groq.js';
+import { extractItemizedReceiptFromImageBase64, askDabbarChat, classifyMessage, transcribeAudioBase64 } from '../lib/groq.js';
 import { saveInvoiceRecord, deleteInvoiceById } from '../lib/invoices.js';
 import { hasActiveSubscription, isInTrial } from '../lib/users.js';
 import { checkOcrUsage, checkChatUsage, refundOcrUsage, refundUsage } from '../lib/rateLimits.js';
@@ -247,6 +247,47 @@ async function handleAsk(userId, body, res) {
   });
 }
 
+async function handleEntryDraft(userId, body, res) {
+  let text = String(body.text || '').trim();
+  if (body.audioBase64) {
+    if (String(body.audioBase64).length > 8 * 1024 * 1024) return res.status(413).json({ error: 'التسجيل طويل أوي. الحد الأقصى 30 ثانية.' });
+    const transcript = await transcribeAudioBase64(body.audioBase64, body.mimeType || 'audio/webm');
+    if (!transcript.success) return res.status(422).json({ error: transcript.error });
+    text = transcript.text;
+  }
+  if (!text || text.length > 1200) return res.status(400).json({ error: 'اكتب أو سجّل وصفًا واضحًا للمصروف.' });
+  const parsed = await classifyMessage(text);
+  const tx = Array.isArray(parsed?.transactions) ? parsed.transactions.find((item) => item?.type === 'expense' || item?.type === 'debt') : null;
+  if (!tx || !Number(tx.amount) || Number(tx.amount) <= 0) return res.status(422).json({ error: 'محتاج مبلغ واضح عشان أفهم العملية.' });
+  return res.status(200).json({ transcript: text, draft: { ...tx, amount: Number(tx.amount), sourceText: text, needsConfirmation: true, confidence: 0.85 } });
+}
+
+async function handleEntryInvoiceDraft(userId, body, res) {
+  const imageBase64 = String(body.imageBase64 || '').replace(/^data:[^;]+;base64,/, '');
+  if (!imageBase64) return res.status(400).json({ error: 'الصورة فاضية.' });
+  const receipt = await extractItemizedReceiptFromImageBase64(imageBase64);
+  if (!receipt.success) return res.status(422).json({ error: receipt.hint || 'معرفتش أقرا الفاتورة. جرّب صورة أوضح.' });
+  return res.status(200).json({ draft: { type: 'invoice', amount: Number(receipt.totalAmount), merchant: receipt.merchant || '', items: receipt.items || [], category: receipt.items?.[0]?.category || 'مصروف عام', note: receipt.merchant || 'فاتورة', sourceText: 'فاتورة مصوّرة', needsConfirmation: true, confidence: 0.9 } });
+}
+
+async function handleEntryConfirm(userId, body, res) {
+  const draft = body.draft || {};
+  const amount = Number(draft.amount);
+  if (!Number.isFinite(amount) || amount <= 0 || amount > 100000000) return res.status(400).json({ error: 'المبلغ غير صحيح.' });
+  if (draft.type === 'expense') {
+    const { data, error } = await supabase.from('expenses').insert({ telegram_user_id: userId, amount, category: String(draft.category || 'مصروف عام').slice(0, 80), description: String(draft.note || draft.sourceText || '').slice(0, 500) }).select('id, amount, category, description, created_at').single();
+    if (error) { console.error('entry_confirm expense error:', JSON.stringify(error)); return res.status(500).json({ error: 'تعذر حفظ المصروف.' }); }
+    return res.status(200).json({ ok: true, type: 'expense', record: data, message: `تم تسجيل مصروف ${data.amount} جنيه في ${data.category}.` });
+  }
+  if (draft.type === 'invoice') {
+    const items = Array.isArray(draft.items) ? draft.items.filter((item) => item && item.name && Number(item.amount) > 0).map((item) => ({ name: String(item.name).slice(0, 160), amount: Number(item.amount), category: String(item.category || 'مصروف عام').slice(0, 80) })) : [];
+    const saved = await saveInvoiceRecord({ merchant: String(draft.merchant || '').slice(0, 160), totalAmount: amount, paymentMethod: '', invoiceNumber: '', isDebt: false, debtPerson: '', items: items.length ? items : [{ name: String(draft.note || 'فاتورة').slice(0, 160), amount, category: String(draft.category || 'مصروف عام').slice(0, 80) }] }, userId);
+    if (!saved) return res.status(500).json({ error: 'تعذر حفظ الفاتورة.' });
+    return res.status(200).json({ ok: true, type: 'invoice', invoiceId: saved.invoiceId, message: `تم تسجيل الفاتورة بإجمالي ${amount} جنيه.` });
+  }
+  return res.status(400).json({ error: 'نوع العملية غير مدعوم.' });
+}
+
 async function handleInvoiceDelete(userId, body, res) {
   const invoiceId = Number(body.invoiceId);
   if (!invoiceId) return res.status(400).json({ error: 'مفيش رقم فاتورة اتبعت.' });
@@ -280,6 +321,12 @@ export default async function handler(req, res) {
         return await handleReceiptScan(userId, body, res);
       case 'invoice_delete':
         return await handleInvoiceDelete(userId, body, res);
+      case 'entry_draft':
+        return await handleEntryDraft(userId, body, res);
+      case 'entry_invoice_draft':
+        return await handleEntryInvoiceDraft(userId, body, res);
+      case 'entry_confirm':
+        return await handleEntryConfirm(userId, body, res);
       case 'ask':
         return await handleAsk(userId, body, res);
       default:

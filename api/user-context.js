@@ -29,7 +29,7 @@ export default async function handler(req, res) {
     .maybeSingle();
   if (linkError) console.error('user-context user_links lookup error:', JSON.stringify(linkError));
   const dataUserId = link?.telegram_user_id || await resolveDataUserId(authData.user);
-  if (!dataUserId) return res.status(500).json({ error: 'تعذر تجهيز إعدادات الحساب حاليًا.' });
+  if (!dataUserId) return res.status(503).json({ error: 'قاعدة البيانات غير مهيأة للحسابات بدون Telegram. شغّل ملف src/sql/global-onboarding.sql في Supabase ثم أعد النشر.', migrationRequired: true });
 
   try {
     if (req.method === 'GET') {
@@ -45,6 +45,7 @@ export default async function handler(req, res) {
     return res.status(200).json({ globalContext: context });
   } catch (error) {
     console.error('user-context update error:', error?.message || error);
-    return res.status(500).json({ error: 'تعذر حفظ الإعدادات حاليًا.' });
+    const missingSchema = /column|relation|auth_user_id|country_code|currency_code/i.test(error?.message || '');
+    return res.status(missingSchema ? 503 : 500).json({ error: missingSchema ? 'شغّل ملف src/sql/global-onboarding.sql في Supabase أولًا ثم أعد المحاولة.' : 'تعذر حفظ الإعدادات حاليًا.', migrationRequired: missingSchema });
   }
 }

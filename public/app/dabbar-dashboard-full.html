@@ -163,6 +163,24 @@
         html:not([data-theme="light"]) .active-days-badge { color:#4ade80; background:rgba(74,222,128,.15); border-color:rgba(74,222,128,.25); }
         html:not([data-theme="light"]) .active-days-dot-mark { background:#252d2f; border-color:#374144; }
         html:not([data-theme="light"]) .active-days-dot { color:#6e7d78; }
+
+        .daily-reminder-card {
+            direction: rtl;
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+            background: linear-gradient(90deg, #eaf7ef, #f7faf8);
+            border: 1.5px dashed #22c07e;
+            border-radius: 1rem;
+            padding: .65rem .75rem;
+        }
+        .daily-reminder-card.hidden { display: none; }
+        .daily-reminder-icon { width: 2rem; height: 2rem; border-radius: .6rem; background: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+        .daily-reminder-text { flex: 1; font: 700 .78rem/1.3 'Cairo', sans-serif; color: #123126; }
+        .daily-reminder-btn { background: #22c07e; color: #04150c; border: none; border-radius: 999px; padding: .45rem .75rem; font: 800 .68rem/1 'Cairo', sans-serif; white-space: nowrap; cursor: pointer; }
+        html:not([data-theme="light"]) .daily-reminder-card { background: linear-gradient(90deg, rgba(34,192,126,.1), rgba(34,192,126,.03)); border-color: rgba(34,192,126,.5); }
+        html:not([data-theme="light"]) .daily-reminder-icon { background: #0f172a; }
+        html:not([data-theme="light"]) .daily-reminder-text { color: #e5f4ea; }
         html:not([data-theme="light"]) .active-days-dot.is-active { color:#4ade80; }
         @keyframes activeDaysGlow { 0%,100% { opacity:.55; transform:scale(.9); } 50% { opacity:1; transform:scale(1.12); } }
         @keyframes activeDaysFlicker { 0%,100% { transform:rotate(-2deg) scale(1); } 50% { transform:rotate(2deg) scale(1.035); } }
@@ -170,7 +188,7 @@
 
         </style>
 </head>
-<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col">
+<body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col overflow-hidden">
 
     <div id="dashboard-load-error" class="hidden mx-auto mt-4 w-[min(92%,56rem)] rounded-2xl border border-red-300/40 bg-red-50 px-4 py-3 text-center text-sm font-bold text-red-700" role="alert"></div>
 
@@ -214,6 +232,12 @@
 
         <!-- ===================== TAB: MONTHLY (default) ===================== -->
         <div class="tab-content active fade-up p-5 space-y-4" id="tab-monthly">
+
+            <section class="daily-reminder-card hidden" id="daily-reminder-card" aria-label="تذكير تسجيل النهاردة">
+                <div class="daily-reminder-icon">🗓️</div>
+                <div class="daily-reminder-text">لسه ما سجّلتش مصروف النهاردة</div>
+                <button type="button" class="daily-reminder-btn" id="daily-reminder-btn">سجّل دلوقتي</button>
+            </section>
 
             <section class="active-days-card" id="active-days-card" aria-label="الأيام النشطة">
                 <div class="active-days-top">
@@ -1300,6 +1324,7 @@
             renderActiveDays(data.activeDays);
             renderMonthly(data.month);
             renderDaily(data.today, data.flow);
+            renderDailyReminder(data.today);
             renderCategories(data.month);
             renderTips(data.month);
             renderDebts(data.debts);
@@ -1315,6 +1340,17 @@
                 label.textContent = `آخر تحديث ${now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}`;
             }
         }
+
+        function renderDailyReminder(today) {
+            const card = document.getElementById('daily-reminder-card');
+            if (!card) return;
+            const hasLoggedToday = Number(today?.count || 0) > 0;
+            card.classList.toggle('hidden', hasLoggedToday);
+        }
+
+        document.getElementById('daily-reminder-btn')?.addEventListener('click', () => {
+            document.getElementById('quick-entry-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        });
 
         function renderActiveDays(activeDays) {
             const totalEl = document.getElementById('active-days-total');

@@ -33,6 +33,9 @@
     --money:#1FAA6E;
     --money-bright:#22C07E;
     --money-deep:#0E8C57;
+    --blue:#2E6BE6;
+    --blue-deep:#1E4FBE;
+    --blue-soft:#EAF0FE;
     --text:#16241D;
     --onDark:#F4FAF6;
     --muted:#6B7B72;
@@ -134,9 +137,16 @@
   .sc-head h2{ font-family:'Cairo',sans-serif; font-weight:800; font-size:25px; color:var(--money-deep); margin-bottom:10px; }
   .sc-head p{ color:var(--muted); font-size:14.5px; max-width:480px; margin:0 auto; }
 
-  .tabs{ display:flex; justify-content:center; gap:8px; margin:26px 0 30px; }
-  .tab-btn{ font-family:'Cairo',sans-serif; font-weight:800; font-size:13px; padding:10px 20px; border-radius:100px; border:1.5px solid var(--paper-edge); background:transparent; color:var(--muted); cursor:pointer; transition:.2s; }
-  .tab-btn.active{ background:var(--money); border-color:var(--money); color:#fff; }
+  .tabs{ display:flex; justify-content:center; gap:10px; margin:26px 0 30px; flex-wrap:wrap; }
+  .tab-btn{ font-family:'Cairo',sans-serif; font-weight:800; font-size:13px; padding:10px 20px; border-radius:100px; border:1.5px solid var(--paper-edge); background:transparent; color:var(--muted); cursor:pointer; transition:.25s cubic-bezier(.4,0,.2,1); }
+  .tab-btn:hover{ border-color:var(--money); color:var(--money-deep); transform:translateY(-1px); }
+  .tab-btn.active{ background:var(--money); border-color:var(--money); color:#fff; box-shadow:0 10px 24px -8px rgba(31,170,110,0.55); }
+  .tab-btn.active[data-tab="compare"]{ background:var(--blue); border-color:var(--blue); box-shadow:0 10px 24px -8px rgba(46,107,230,0.5); }
+
+  /* dark-background variant (used inside .ink sections) */
+  .tab-btn.on-dark{ border-color:rgba(255,255,255,0.14); color:var(--muted-onDark); background:rgba(255,255,255,0.03); backdrop-filter:blur(6px); }
+  .tab-btn.on-dark:hover{ border-color:var(--money-bright); color:var(--onDark); }
+  .tab-btn.on-dark.active{ background:linear-gradient(135deg,var(--money-bright),var(--money-deep)); border-color:transparent; color:#04150C; box-shadow:0 12px 30px -8px rgba(34,192,126,0.5), 0 0 0 1px rgba(34,192,126,0.3); }
 
   .report-card{ max-width:520px; margin:0 auto; background:#fff; border-radius:16px; box-shadow:0 40px 80px -30px rgba(0,0,0,0.35), 0 0 0 1px rgba(0,0,0,0.04); overflow:hidden; }
   .rc-header{ text-align:center; padding:26px 20px 20px; border-bottom:2px dashed var(--paper-edge); }
@@ -168,7 +178,7 @@
   .cmp-bars{ display:flex; align-items:flex-end; justify-content:center; gap:34px; height:180px; margin:24px 0 14px; }
   .cmp-col{ text-align:center; width:70px; }
   .cmp-bar{ width:100%; border-radius:8px 8px 0 0; margin:0 auto; transition:height 1.2s cubic-bezier(.2,.8,.2,1); height:0; }
-  .cmp-bar.old{ background:var(--paper-edge); }
+  .cmp-bar.old{ background:var(--blue); opacity:0.75; }
   .cmp-bar.new{ background:var(--money); }
   .cmp-val{ font-family:'JetBrains Mono',monospace; font-weight:700; font-size:12.5px; margin-top:8px; }
   .cmp-label{ font-size:11px; color:var(--muted); margin-top:2px; }
@@ -246,7 +256,7 @@
 <section class="hero">
   <div class="wrap hero-grid">
     <div>
-      <div class="hero-eyebrow">دبّر — يتابعلك فلوسك على تليجرام</div>
+      <div class="hero-eyebrow">دبّر — محاسبك الشخصي اللي بيتابعلك أول بأول</div>
       <h1 class="hero-title">تقولّي بالصوت،<br>وهو يطلعلك <em>تقرير كامل</em></h1>
       <p class="hero-sub">مصاريفك وديونك بيتسجلوا لوحدهم من رسالة صوت عادية، وفي آخر الشهر تلاقي تقرير PDF جاهز فيه كل التفاصيل ومقارنة بالشهر اللي فات — من غير ما تفتح جدول ولا تكتب رقم بإيدك.</p>
       <div class="cta-row">
@@ -315,7 +325,7 @@
     <div class="sc-head reveal">
       <div class="sc-eyebrow">EP.001 — التقرير الحقيقي</div>
       <h2>ده بالظبط شكل التقرير اللي هيوصلك</h2>
-      <p>نفس التصميم اللي بيتولّد فعليًا كملف PDF على تليجرام — مش رسمة تجريبية.</p>
+      <p>نفس التصميم اللي بيتولّد فعليًا من بياناتك الحقيقية — مش رسمة تجريبية.</p>
     </div>
 
     <div class="tabs reveal">
@@ -388,137 +398,6 @@
   </div>
 </section>
 
-<!-- PRO DASHBOARD VIEW -->
-<section style="background:var(--ink); padding:20px 0 90px;">
-  <div class="wrap">
-    <div class="sc-head reveal" style="color:var(--onDark);">
-      <div class="sc-eyebrow" style="color:var(--gold);">EP.001.B — لوحة أداءك</div>
-      <h2 style="color:var(--onDark);">نفس البيانات، في شكل لوحة تحكم</h2>
-      <p style="color:var(--muted-onDark);">مش تصميم بديل عن الـ PDF — دي نفس الأرقام اللي دبّر بيحسبها، معروضة بشكل تاني يومي وشهري.</p>
-    </div>
-
-    <div class="tabs reveal">
-      <button class="tab-btn dash-tab active" data-dash="today">☀️ اليوم</button>
-      <button class="tab-btn dash-tab" data-dash="month">📊 الشهر</button>
-      <button class="tab-btn dash-tab" data-dash="compare">📈 مقارنة</button>
-    </div>
-
-    <div class="reveal font-['Cairo'] max-w-md w-full mx-auto bg-slate-900 border border-slate-800 rounded-[2rem] shadow-2xl overflow-hidden" dir="rtl">
-
-      <!-- header bar -->
-      <div class="bg-slate-900/90 border-b border-slate-800/80 p-5 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-slate-950 font-black text-xl shadow-lg shadow-emerald-500/20">📊</div>
-          <div>
-            <h2 class="font-bold text-base text-slate-100 leading-tight">تقرير أداءك</h2>
-            <span class="text-xs text-emerald-400 font-medium">● بيانات حقيقية من حسابك</span>
-          </div>
-        </div>
-        <div id="dashBadge" class="bg-emerald-500/10 border border-emerald-500/20 px-3 py-1.5 rounded-full text-xs font-bold text-emerald-400 whitespace-nowrap">
-          🏆 أقل من الشهر اللي فات
-        </div>
-      </div>
-
-      <!-- TODAY -->
-      <div class="dash-view p-5 space-y-4" id="dash-today">
-        <div class="bg-gradient-to-br from-emerald-950/60 to-slate-900 border border-emerald-500/30 rounded-3xl p-4 text-center space-y-2 shadow-lg">
-          <span class="text-xs text-emerald-400 font-semibold block">مصروفك النهاردة</span>
-          <h3 class="text-3xl font-black text-emerald-300">180 ج.م</h3>
-          <p class="text-[11px] text-slate-400">عملية واحدة بس لحد دلوقتي — 🍔 عشا في مطعم كرنك</p>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div class="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl">
-            <span class="text-[11px] text-slate-400 block mb-1">عدد العمليات</span>
-            <span class="text-lg font-bold text-slate-200">1</span>
-          </div>
-          <div class="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl">
-            <span class="text-[11px] text-slate-400 block mb-1">أكتر فئة</span>
-            <span class="text-lg font-bold text-slate-200">🍔 أكل</span>
-          </div>
-        </div>
-        <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-3.5 flex items-start gap-3">
-          <div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold shrink-0 border border-emerald-500/30">💬</div>
-          <div class="text-xs text-slate-300 leading-relaxed">النهاردة لسه بادئ — كل عملية جديدة بتتحدث هنا لحظة ما تبعتها للبوت.</div>
-        </div>
-      </div>
-
-      <!-- MONTH -->
-      <div class="dash-view p-5 space-y-4 hidden" id="dash-month">
-        <div class="bg-gradient-to-br from-emerald-950/60 to-slate-900 border border-emerald-500/30 rounded-3xl p-4 text-center space-y-2 shadow-lg">
-          <span class="text-xs text-emerald-400 font-semibold block">إجمالي مصاريف أغسطس</span>
-          <h3 class="text-3xl font-black text-emerald-300">3,600 ج.م</h3>
-          <p class="text-[11px] text-slate-400">42 عملية، أقل من يوليو بـ 550 جنيه (13%↓)</p>
-        </div>
-        <div class="grid grid-cols-2 gap-3">
-          <div class="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl">
-            <span class="text-[11px] text-slate-400 block mb-1">عدد العمليات</span>
-            <span class="text-lg font-bold text-slate-200">42</span>
-          </div>
-          <div class="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl">
-            <span class="text-[11px] text-slate-400 block mb-1">أكتر فئة</span>
-            <span class="text-lg font-bold text-slate-200">🍔 أكل</span>
-          </div>
-        </div>
-        <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3">
-          <h4 class="text-xs font-bold text-slate-300">توزيع المصاريف حسب الفئة:</h4>
-          <div class="space-y-2.5 text-xs">
-            <div>
-              <div class="flex justify-between mb-1 text-slate-300"><span>🍔 أكل</span><span class="font-bold text-slate-200">1,250 ج.م (35%)</span></div>
-              <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden"><div class="h-full rounded-full" style="width:35%; background:#FF6B6B;"></div></div>
-            </div>
-            <div>
-              <div class="flex justify-between mb-1 text-slate-300"><span>🧾 فواتير</span><span class="font-bold text-slate-200">900 ج.م (25%)</span></div>
-              <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden"><div class="h-full rounded-full" style="width:25%; background:#FFD166;"></div></div>
-            </div>
-            <div>
-              <div class="flex justify-between mb-1 text-slate-300"><span>🚕 مواصلات</span><span class="font-bold text-slate-200">680 ج.م (19%)</span></div>
-              <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden"><div class="h-full rounded-full" style="width:19%; background:#4ECDC4;"></div></div>
-            </div>
-            <div>
-              <div class="flex justify-between mb-1 text-slate-300"><span>🛍️ تسوق</span><span class="font-bold text-slate-200">450 ج.م (13%)</span></div>
-              <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden"><div class="h-full rounded-full" style="width:13%; background:#A78BFA;"></div></div>
-            </div>
-          </div>
-        </div>
-        <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-3.5 flex items-start gap-3">
-          <div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold shrink-0 border border-emerald-500/30">💡</div>
-          <div class="text-xs text-slate-300 leading-relaxed"><strong class="text-emerald-400 block mb-0.5">ملاحظة الشهر:</strong>الأكل بيمثل 35% من مصاريفك — أكبر فئة عندك بفرق واضح عن الباقي.</div>
-        </div>
-      </div>
-
-      <!-- COMPARE -->
-      <div class="dash-view p-5 space-y-4 hidden" id="dash-compare">
-        <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-5">
-          <div class="flex items-end justify-center gap-8 h-40 mb-4">
-            <div class="text-center w-16">
-              <div class="mx-auto rounded-t-lg bg-slate-700" style="height:120px; width:100%;"></div>
-              <div class="text-xs font-bold text-slate-300 mt-2">4,150 ج</div>
-              <div class="text-[11px] text-slate-500">يوليو</div>
-            </div>
-            <div class="text-center w-16">
-              <div class="mx-auto rounded-t-lg bg-emerald-500" style="height:104px; width:100%;"></div>
-              <div class="text-xs font-bold text-emerald-300 mt-2">3,600 ج</div>
-              <div class="text-[11px] text-slate-500">أغسطس</div>
-            </div>
-          </div>
-          <div class="bg-emerald-500/10 border border-emerald-500/25 rounded-2xl p-3 text-center text-emerald-300 text-sm font-bold">🎉 وفّرت 550 جنيه الشهر ده مقارنة بيوليو</div>
-        </div>
-      </div>
-
-      <!-- footer action -->
-      <div class="p-4 bg-slate-900 border-t border-slate-800/80">
-        <a href="https://t.me/YourDabbarBotUsername" data-tg-link class="block w-full text-center bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold py-3 rounded-2xl text-sm transition shadow-lg shadow-emerald-500/20">
-          افتح دبّر وشوف تقريرك إنت 🚀
-        </a>
-      </div>
-    </div>
-
-    <p class="reveal" style="text-align:center; color:var(--muted-onDark); font-size:12px; margin-top:18px; max-width:420px; margin-left:auto; margin-right:auto;">
-      ملحوظة: دبّر حاليًا بيتتبع المصاريف والديون بس (مفيش تتبع دخل شهري)، فكل رقم فوق ده من نفس بياناتك الحقيقية.
-    </p>
-  </div>
-</section>
-
 <!-- FEATURES -->
 <section class="section-dark" id="features">
   <div class="wrap">
@@ -581,7 +460,7 @@
         <span id="ipToggle" style="font-family:'Cairo',sans-serif; font-weight:800; font-size:12px; color:var(--gold); white-space:nowrap;">👁️ إظهار الرقم</span>
       </div>
       <div class="step"><div class="step-num">2</div><div><strong>صوّر الإيصال</strong><span>سكرين شوت واضح فيه اسمك وقيمة التحويل</span></div></div>
-      <div class="step"><div class="step-num">3</div><div><strong>ابعت الصورة على دبّر في تليجرام</strong><span>هيسألك على اسمك عشان نتأكد من التحويل بسرعة</span></div></div>
+      <div class="step"><div class="step-num">3</div><div><strong>ابعت الصورة لينا للتأكيد</strong><span>هنسألك على اسمك عشان نتأكد من التحويل بسرعة</span></div></div>
       <div class="step"><div class="step-num">4</div><div><strong>يتفعّل اشتراكك</strong><span>غالبًا خلال دقائق بعد التأكد</span></div></div>
     </div>
   </div>
@@ -611,9 +490,9 @@
     </div>
     <div class="faq-list reveal">
       <details open><summary>دبّر شغال بالمصري ولا لازم أكتب فصحى؟</summary><p>بالعامية المصرية عادي جدًا — "صرفت"، "عطيت"، "استلفت" كلها بيفهمها صح.</p></details>
-      <details><summary>لو دفعت وماتفعّلش، أعمل إيه؟</summary><p>تأكد إنك بعتت اسمك مع صورة الإيصال في نفس المحادثة، واستنى شوية — لو اتأخر عن المتوقع، ابعت للبوت "مساعدة" وهتلاقي وسيلة تواصل تانية.</p></details>
+      <details><summary>لو دفعت وماتفعّلش، أعمل إيه؟</summary><p>تأكد إنك بعتت اسمك مع صورة الإيصال، واستنى شوية — لو اتأخر عن المتوقع، هتلاقي وسيلة تواصل تانية جوه حسابك.</p></details>
       <details><summary>التقرير في الصورة ده حقيقي؟</summary><p>أيوه، ده نفس تصميم الـ PDF اللي بيتولّد فعليًا من بياناتك — مش موك أب بعيد عن الواقع.</p></details>
-      <details><summary>فين دليل الاستخدام الكامل؟</summary><p>ابعت /start لـ دبّر وهتلاقي زرار "📖 دليل الاستخدام الكامل" بيفتح جوه تليجرام نفسه.</p></details>
+      <details><summary>فين دليل الاستخدام الكامل؟</summary><p>هتلاقي دليل الاستخدام الكامل جوه تاب "حسابي" في الداشبورد بعد ما تسجّل دخول.</p></details>
     </div>
   </div>
 </section>
@@ -646,9 +525,10 @@
   if (rc) reportIo.observe(rc);
 
   // tabs
-  document.querySelectorAll('.tab-btn').forEach(btn => {
+  // report tabs (month / compare)
+  document.querySelectorAll('.tab-btn[data-tab]').forEach(btn => {
     btn.addEventListener('click', () => {
-      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-btn[data-tab]').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       const target = btn.dataset.tab;
       document.getElementById('monthView').classList.toggle('active', target === 'month');
@@ -660,18 +540,17 @@
       }
     });
   });
+
+  // dashboard preview tabs (today / month / compare) — visual only, no separate view yet
+  document.querySelectorAll('.tab-btn[data-dash]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn[data-dash]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
 </script>
 
 <script>
-  /* ========================================================
-     تليجرام بوت — عدّل اليوزرنيم هنا مرة واحدة بس، وهيتحدث
-     في كل الأزرار اللي في الصفحة أوتوماتيك (data-tg-link)
-  ========================================================= */
-  const BOT_USERNAME = 'Masaaref_bot';
-  document.querySelectorAll('[data-tg-link]').forEach((a) => {
-    a.href = `https://t.me/${BOT_USERNAME}`;
-  });
-
   /* ========================================================
      SUPABASE SETUP — نفس القيم اللي في app/dabbar-onboarding.html
      و app/dabbar-dashboard-full.html بالظبط، عشان الجلسة تتعرف
@@ -681,7 +560,7 @@
   const SUPABASE_ANON_KEY = 'sb_publishable_yHiX1cnEMCVEcjQxiIrqig_DRBiuveQ';
 
   // ---- لو المستخدم مسجل دخول قبل كده (سيشن موجودة)، منعرضلوش صفحة التسويق تاني —
-  // بنوديه على طول للداشبورد بتاعه (أو لشاشة الربط لو لسه ماربطش حسابه بتليجرام).
+  // بنوديه على طول للداشبورد بتاعه.
   // أول مرة (مفيش سيشن) بيفضل شايف صفحة الهبوط دي عادي عشان يعمل حساب/يسجل دخول.
   (async () => {
     try {

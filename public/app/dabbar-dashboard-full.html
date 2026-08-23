@@ -657,7 +657,7 @@
                 </div>
             </div>
 
-            <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 flex items-center justify-between gap-3" id="account-telegram-card">
+            <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 flex items-center justify-between gap-3 cursor-pointer active:opacity-70 transition" id="account-telegram-card">
                 <div class="flex items-center gap-3">
                     <span class="w-9 h-9 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-base">💬</span>
                     <div>
@@ -859,6 +859,34 @@
 
             <div class="flex-1 overflow-y-auto p-5 space-y-3" id="archive-list">
                 <p class="text-xs text-slate-500 text-center p-4">جاري التحميل...</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Telegram Link Overlay -->
+    <div id="telegram-link-overlay" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden">
+            <div class="p-5 flex items-center justify-between border-b border-slate-800/80">
+                <h2 class="font-bold text-base text-slate-100">اربط حسابك بتليجرام</h2>
+                <button id="telegram-link-close" class="w-9 h-9 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-sm">✕</button>
+            </div>
+            <div class="p-5 space-y-4">
+                <p class="text-xs text-slate-400 leading-relaxed">خطوة اختيارية — لو ربطت حسابك، أي حاجة تسجّلها في تليجرام هتظهر في الداشبورد على طول، والعكس صحيح.</p>
+                <div class="space-y-2.5">
+                    <div class="flex items-start gap-2.5"><span class="w-6 h-6 shrink-0 rounded-full bg-emerald-500 text-slate-950 text-[11px] font-black flex items-center justify-center">1</span><p class="text-xs text-slate-300 pt-0.5">افتح <b class="text-slate-100">دبّر على تليجرام</b> بضغطة واحدة</p></div>
+                    <div class="flex items-start gap-2.5"><span class="w-6 h-6 shrink-0 rounded-full bg-emerald-500 text-slate-950 text-[11px] font-black flex items-center justify-center">2</span><p class="text-xs text-slate-300 pt-0.5">هيبعتلك <b class="text-slate-100">كود من 6 أرقام</b> تلقائي</p></div>
+                    <div class="flex items-start gap-2.5"><span class="w-6 h-6 shrink-0 rounded-full bg-emerald-500 text-slate-950 text-[11px] font-black flex items-center justify-center">3</span><p class="text-xs text-slate-300 pt-0.5">اكتبه هنا — و<b class="text-slate-100">يترابط حسابك على طول</b></p></div>
+                </div>
+                <a href="https://t.me/Masaaref_bot?start=link" target="_blank" rel="noopener" class="w-full bg-slate-950/60 border border-slate-800 text-slate-200 font-bold py-3 rounded-2xl text-xs flex items-center justify-center gap-2">💬 افتح دبّر وهيبعتلي الكود</a>
+                <p id="telegram-link-error" class="hidden text-rose-400 text-[11px] font-bold"></p>
+                <p id="telegram-link-notice" class="hidden text-emerald-400 text-[11px] font-bold"></p>
+                <form id="telegram-link-form" class="space-y-3">
+                    <input type="text" id="telegram-link-code-input" placeholder="123456" inputmode="numeric" maxlength="6" required class="w-full bg-slate-950/60 border border-slate-800 rounded-xl px-3 py-2.5 text-sm text-slate-100 outline-none focus:border-emerald-500/50 text-center tracking-[0.3em] font-black">
+                    <div class="flex gap-2">
+                        <button type="submit" id="telegram-link-submit" class="flex-1 bg-emerald-500 text-slate-950 font-black py-3 rounded-xl text-xs">✅ تأكيد الربط</button>
+                        <button type="button" id="telegram-link-skip" class="rounded-xl border border-slate-700 px-4 py-3 text-xs text-slate-400">لاحقًا</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -1782,7 +1810,16 @@
 
         // ============ Unified Expense Entry: v5-safe ============
         let quickEntryDrafts = [], quickEntrySourceText = '', quickEntryRecorder = null, quickEntryChunks = [], quickEntryTimer = null, quickEntrySeconds = 0, quickEntryVoiceBlob = null;
-        function quickStatus(message, kind = 'normal') { const el = document.getElementById('quick-entry-status'); if (el) { el.textContent = message || ''; el.className = `min-h-4 text-center text-[11px] ${kind === 'error' ? 'text-rose-500' : kind === 'success' ? 'text-emerald-600' : 'text-slate-500'}`; } }
+        let quickStatusTimer = null;
+        function quickStatus(message, kind = 'normal') {
+            const el = document.getElementById('quick-entry-status');
+            if (!el) return;
+            el.textContent = message || '';
+            el.className = `min-h-4 text-center text-[11px] ${kind === 'error' ? 'text-rose-500' : kind === 'success' ? 'text-emerald-600' : 'text-slate-500'}`;
+            clearTimeout(quickStatusTimer);
+            // ============ رسالة النجاح مش المفروض تفضل ظاهرة على طول — تختفي لوحدها بعد 10 ثواني ============
+            if (kind === 'success' && message) quickStatusTimer = setTimeout(() => { if (el.textContent === message) el.textContent = ''; }, 10000);
+        }
         function quickShow(id, show) { document.getElementById(id)?.classList.toggle('hidden', !show); }
         function quickDraftLabel(type) { return type === 'invoice' ? 'فاتورة' : type === 'debt' ? 'دين' : 'مصروف'; }
         // ============ زي رسالة تليجرام بالظبط لما رسالة واحدة فيها أكتر من معاملة — كل معاملة بتتعرض لوحدها هنا ============
@@ -2580,11 +2617,56 @@
                 badgeEl.textContent = '✅ متصل';
                 badgeEl.className = 'text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-400';
             } else {
-                statusEl.textContent = 'حسابك لسه مش مربوط بتليجرام';
+                statusEl.textContent = 'حسابك لسه مش مربوط بتليجرام — دوس هنا تربطه';
                 badgeEl.textContent = '⚠️ مش متصل';
                 badgeEl.className = 'text-[10px] font-bold px-2.5 py-1 rounded-full bg-rose-500/15 text-rose-400';
             }
         }
+
+        // ============ ربط تليجرام من "حسابي" — نفس خطوات onboarding بالظبط، بس اختياري ودلوقتي ============
+        const telegramLinkOverlay = document.getElementById('telegram-link-overlay');
+        function openTelegramLinkOverlay() {
+            if (window.__dashboardData?.telegramUserId) return; // مربوط أصلاً، مفيش داعي نفتح الفورم
+            document.getElementById('telegram-link-error').classList.add('hidden');
+            document.getElementById('telegram-link-notice').classList.add('hidden');
+            document.getElementById('telegram-link-code-input').value = '';
+            telegramLinkOverlay.classList.remove('hidden');
+            telegramLinkOverlay.classList.add('flex');
+        }
+        function closeTelegramLinkOverlay() { telegramLinkOverlay.classList.add('hidden'); telegramLinkOverlay.classList.remove('flex'); }
+        document.getElementById('account-telegram-card')?.addEventListener('click', openTelegramLinkOverlay);
+        document.getElementById('telegram-link-close')?.addEventListener('click', closeTelegramLinkOverlay);
+        document.getElementById('telegram-link-skip')?.addEventListener('click', closeTelegramLinkOverlay);
+        let telegramLinkSubmitting = false;
+        document.getElementById('telegram-link-form')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (telegramLinkSubmitting) return;
+            telegramLinkSubmitting = true;
+            const errEl = document.getElementById('telegram-link-error');
+            const noticeEl = document.getElementById('telegram-link-notice');
+            const btn = document.getElementById('telegram-link-submit');
+            errEl.classList.add('hidden');
+            noticeEl.classList.add('hidden');
+            btn.disabled = true;
+            btn.textContent = 'بنربط حسابك...';
+            try {
+                const code = document.getElementById('telegram-link-code-input').value.trim();
+                const { data: { session } } = await sb.auth.getSession();
+                const res = await fetch('/api/auth-by-code', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` }, body: JSON.stringify({ code, standalone: window.matchMedia('(display-mode: standalone)').matches }) });
+                const result = await res.json().catch(() => ({}));
+                if (!res.ok || !result.ok) { errEl.textContent = result.error || 'حصل خطأ، جرب تاني.'; errEl.classList.remove('hidden'); return; }
+                noticeEl.textContent = result.relinked ? 'تم نقل ربط تليجرام للحساب ده، وبياناتك القديمة محفوظة.' : 'اترابط بنجاح ✅';
+                noticeEl.classList.remove('hidden');
+                setTimeout(async () => { closeTelegramLinkOverlay(); await loadDashboard(); await loadAccountTab(); }, 900);
+            } catch (err) {
+                errEl.textContent = 'مقدرناش نتواصل مع السيرفر دلوقتي. جرب تاني.';
+                errEl.classList.remove('hidden');
+            } finally {
+                telegramLinkSubmitting = false;
+                btn.disabled = false;
+                btn.textContent = '✅ تأكيد الربط';
+            }
+        });
 
         // زرار تسجيل الخروج جوه تاب "حسابي" — المكان الوحيد اللي فيه دلوقتي
         document.getElementById('account-logout-btn').addEventListener('click', doLogout);

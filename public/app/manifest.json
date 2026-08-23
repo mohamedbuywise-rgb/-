@@ -2,7 +2,7 @@
   "name": "دبّر — تتبع مصاريفك وديونك",
   "short_name": "دبّر",
   "description": "تتبع مصاريفك وديونك بالصوت، وشوف تقاريرك أول بأول",
-  "start_url": "./dabbar-onboarding.html",
+  "start_url": "./dabbar-dashboard-full.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",

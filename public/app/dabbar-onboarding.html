@@ -298,10 +298,6 @@
         <div class="stage-dot"><span class="stage-mascot">🔥</span></div>
         <span class="stage-label">تثبيت دبّر</span>
       </div>
-      <div class="stage" id="stage-link">
-        <div class="stage-dot"><span class="stage-mascot">🔥</span></div>
-        <span class="stage-label">ربط تليجرام</span>
-      </div>
       <div class="stage" id="stage-done">
         <div class="stage-dot"><span class="stage-mascot">🔥</span></div>
         <span class="stage-label">تم</span>
@@ -347,59 +343,33 @@
   </div>
 </div>
 
-<!-- ============== 2) اربط حسابك بـ دبّر (مدمجة: افتح البوت + الكود + إنشاء الحساب تلقائي) ============== -->
+<!-- ============== 2) تثبيت دبّر (خطوة إجبارية، بدون أي ربط بتليجرام هنا) ============== -->
 <div class="screen" id="linkScreen">
   <div class="link-card">
 
-    <!-- حالة الإدخال -->
     <div id="linkFormState">
       <div class="top-brand" style="padding-top:0; margin-bottom:8px;"><span class="brand-dot"></span>دبّر</div>
-      <div class="slide-icon" style="margin:0 auto 18px;">🔗</div>
-      <h2>اربط حسابك بتليجرام</h2>
-      <p class="sub">خطوة أخيرة عشان أي حاجة تسجّلها في تليجرام تظهر في الداشبورد على طول:</p>
+      <div class="slide-icon" style="margin:0 auto 18px;">📲</div>
+      <h2>ثبّت دبّر على شاشتك</h2>
+      <p class="sub">خطوة أخيرة وإجبارية عشان تقدر تستخدم دبّر بسهولة زي أي تطبيق تاني:</p>
 
-      <div class="steps">
-        <div class="step"><div class="num">1</div><div class="txt">افتح <b>دبّر على تليجرام</b> بضغطة واحدة</div></div>
-        <div class="step"><div class="num">2</div><div class="txt">هيبعتلك <b>كود من 6 أرقام</b> تلقائي</div></div>
-        <div class="step"><div class="num">3</div><div class="txt">اكتبه هنا — و<b>يترابط حسابك على طول</b></div></div>
+      <div class="install-notice">
+        <div class="install-icon">🔒</div>
+        <div class="install-notice-title">خطوة إجبارية قبل الدخول</div>
+        <div class="install-notice-txt">لازم تثبّت <b>"دبّر"</b> على شاشتك الرئيسية وتفتحه منها — الخطوة دي أساسية ومفيش غنى عنها عشان نقدر نكمل.</div>
+        <button type="button" class="install-btn" id="installBtn">➕ تثبّت "دبّر" دلوقتي</button>
+        <div class="manual-install" id="manualInstall">
+          <div class="manual-install-title" id="manualInstallTitle">إزاي تثبّته يدوي:</div>
+          <ol id="manualInstallSteps"></ol>
+        </div>
       </div>
-
-      <a href="https://t.me/Masaaref_bot?start=link" target="_blank" rel="noopener" class="btn btn-ghost" style="margin-bottom:18px;">
-        💬 افتح دبّر وهيبعتلي الكود
-      </a>
-
-      <div id="linkError"></div>
-      <div id="linkNotice"></div>
-
-      <form id="linkForm">
-        <div class="field">
-          <label>كود الربط</label>
-          <input type="text" id="linkCodeInput" placeholder="123456" inputmode="numeric" maxlength="6" required>
-        </div>
-
-        <!-- ===== تنويه إجباري: تثبيت دبّر على الشاشة الرئيسية ===== -->
-        <div class="install-notice">
-          <div class="install-icon">🔒</div>
-          <div class="install-notice-title">خطوة إجبارية قبل الدخول</div>
-          <div class="install-notice-txt">عشان نظامنا يقدر يربط حسابك ويعرض بياناتك بأمان، لازم تثبّت <b>"دبّر"</b> على شاشتك الرئيسية وتفتحه منها — الخطوة دي أساسية ومفيش غنى عنها عشان نقدر نكمل.</div>
-          <button type="button" class="install-btn" id="installBtn">➕ تثبّت "دبّر" دلوقتي</button>
-          <div class="manual-install" id="manualInstall">
-            <div class="manual-install-title" id="manualInstallTitle">إزاي تثبّته يدوي:</div>
-            <ol id="manualInstallSteps"></ol>
-          </div>
-        </div>
-
-        <button type="submit" class="btn btn-primary" id="linkSubmitBtn">
-          <span id="linkSubmitLabel">✅ تأكيد الربط</span>
-        </button>
-      </form>
     </div>
 
-    <!-- حالة النجاح (مش شاشة منفصلة، بس تبديل جوه نفس الكارت لحد ما التحويل يحصل) -->
+    <!-- حالة النجاح -->
     <div class="success-state" id="successState">
       <div class="top-brand" style="padding-top:0; margin-bottom:18px; justify-content:center;"><span class="brand-dot"></span>دبّر</div>
       <div class="success-icon">✅</div>
-      <h2>اتربط بنجاح!</h2>
+      <h2>اتثبّت بنجاح!</h2>
       <p class="sub">بنودّيك دلوقتي على الداشبورد بتاعك...</p>
       <div style="display:flex; justify-content:center; margin-top:6px;"><div class="spinner spinner-dark"></div></div>
     </div>
@@ -449,21 +419,17 @@
   })();
 
   // ---- لو المستخدم عنده جلسة شغالة أصلاً (رجع تاني على onboarding بالغلط) ----
-  // لو حسابه مربوط بتليجرام خلاص → نوديه على طول للداشبورد.
-  // لو مسجل دخول بس لسه مربوطش تليجرام → نوريله شاشة الربط بالكود مباشرة (من غير ما نطلب منه يسجل دخول تاني).
+  // لو شغال كـ standalone (يعني اتثبّت خلاص) → نوديه على طول للداشبورد، بغض النظر عن ربط تليجرام
+  // (الربط بقى اختياري من صفحة "حسابي" مش جزء من onboarding). لو لسه مش standalone → خطوة التثبيت الإجبارية.
   (async () => {
     try {
       const { data: { session } } = await sb.auth.getSession();
       if (!session) { hideBootSplash(); return; } // مفيش جلسة، يفضل على شاشة تسجيل الدخول
-      const res = await fetch('/api/dashboard-data', {
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      });
-      const result = await res.json().catch(() => ({}));
-      if (result && result.linked === false) {
+      if (isStandalone()) {
+        window.location.href = DASHBOARD_URL; // هيتم التنقل فعليًا، مفيش داعي نخفي الـ splash هنا
+      } else {
         showLinkScreen();
         hideBootSplash();
-      } else {
-        window.location.href = DASHBOARD_URL; // هيتم التنقل فعليًا، مفيش داعي نخفي الـ splash هنا
       }
     } catch (e) {
       hideBootSplash(); // مفيش جلسة أو حصل خطأ، نكمل عادي على شاشة الدخول
@@ -519,8 +485,8 @@
   const authScreen = document.getElementById('authScreen');
   const linkScreen = document.getElementById('linkScreen');
 
-  // ---- بار التقدم بالنار (Streak): 4 مراحل (بياناتك → اربط تليجرام → التثبيت → تم) ----
-  const PROGRESS_STAGES = ['account', 'install', 'link', 'done'];
+  // ---- بار التقدم بالنار (Streak): 3 مراحل (بياناتك → التثبيت → تم) ----
+  const PROGRESS_STAGES = ['account', 'install', 'done'];
   const progressFill = document.getElementById('progressFill');
   const progressPct = document.getElementById('progressPct');
   function setProgressStage(stageKey) {
@@ -658,20 +624,11 @@
           showAuthError('حصل خطأ في تسجيل الدخول، جرب تاني.');
           return;
         }
-        // نتأكد هو مربوط بتليجرام قبل كده ولا لأ — لو مربوط، نروح على طول للداشبورد
-        const res = await fetch('/api/dashboard-data', {
-          headers: { Authorization: `Bearer ${data.session.access_token}` },
-        });
-        const result = await res.json().catch(() => ({}));
-        if (!res.ok) {
-          throw new Error(result.error || 'حصل خطأ وإحنا بنتحقق من الحساب.');
-        }
-        if (result && result.linked === false) {
-          showLinkScreen();
-        } else if (result && result.linked === true) {
+        // لو شغال أصلاً كـ standalone (يعني اتثبّت خلاص من قبل) → دبّر مباشرة، غير كده خطوة التثبيت الإجبارية
+        if (isStandalone()) {
           window.location.href = DASHBOARD_URL;
         } else {
-          throw new Error('السيرفر رجّع استجابة غير مفهومة. جرّب تحديث الصفحة.');
+          showLinkScreen();
         }
       }
     } catch (err) {
@@ -683,80 +640,12 @@
     }
   });
 
-  // ---- link + auto account creation ----
-  const linkForm = document.getElementById('linkForm');
-  const linkCodeInput = document.getElementById('linkCodeInput');
-  const linkSubmitBtn = document.getElementById('linkSubmitBtn');
-  const linkSubmitLabel = document.getElementById('linkSubmitLabel');
-  const linkError = document.getElementById('linkError');
-  const linkNotice = document.getElementById('linkNotice');
-  const linkFormState = document.getElementById('linkFormState');
+  // ---- حالة النجاح (بتتفعّل من فلو التثبيت تحت) ----
   const successState = document.getElementById('successState');
-
-  function showError(msg) { linkError.textContent = msg; linkError.classList.add('show'); linkNotice.classList.remove('show'); }
-  function showNotice(msg) { linkNotice.textContent = msg; linkNotice.classList.add('show'); linkError.classList.remove('show'); }
-  function hideMessages() { linkError.classList.remove('show'); linkNotice.classList.remove('show'); }
-
-  // ---- قفل ضد الإرسال المزدوج ----
-  // تعطيل الزرار (disabled = true) وحده مش سريع كفاية أحيانًا: تاتش مزدوج سريع على الموبايل
-  // ممكن يطلق حدثين "submit" قبل ما الـ disabled يمنع الحدث التاني فعليًا. الـ flag ده بيتفحص
-  // كأول سطر في الـ handler، فبيوقف أي محاولة تانية فورًا وهو لسه شغال، مهما كان توقيت الأحداث.
-  let isSubmitting = false;
-
-  linkForm.addEventListener('submit', async (e) => {
-    e.preventDefault();
-    if (isSubmitting) return;
-    isSubmitting = true;
-    hideMessages();
-
-    const code = linkCodeInput.value.trim();
-
-    linkSubmitBtn.disabled = true;
-    linkSubmitLabel.innerHTML = '<span class="spinner"></span> بنربط حسابك...';
-
-    try {
-      const { data: { session } } = await sb.auth.getSession();
-      if (!session) {
-        showError('لازم تسجل دخول الأول.');
-        authScreen.style.display = 'flex';
-        linkScreen.classList.remove('active');
-        return;
-      }
-
-      const res = await fetch('/api/auth-by-code', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${session.access_token}`,
-        },
-        body: JSON.stringify({ code, standalone: isStandalone() }),
-      });
-      const result = await res.json().catch(() => ({}));
-
-      if (!res.ok || !result.ok) {
-        showError(result.error || 'حصل خطأ، جرب تاني.');
-        return;
-      }
-
-      // ننتقل لحالة النجاح جوه نفس الكارت، وبعدها نحوّل تلقائي للداشبورد
-      linkFormState.style.display = 'none';
-      if (result.relinked) showNotice('تم نقل ربط Telegram للحساب الجديد، وبياناتك القديمة محفوظة.');
-      successState.classList.add('show');
-      setProgressStage('done');
-      setTimeout(() => { window.location.href = DASHBOARD_URL; }, 1100);
-    } catch (err) {
-      showError('مقدرناش نتواصل مع السيرفر دلوقتي. جرب تاني.');
-    } finally {
-      if (!successState.classList.contains('show')) {
-        isSubmitting = false;
-        refreshSubmitState();
-      }
-    }
-  });
+  const linkFormState = document.getElementById('linkFormState');
 
   // ---- PWA install ----
-  // بنعرض تنويه بيشجع المستخدم يثبّت "دبّر" على شاشته الرئيسية (تجربة استخدام أفضل)،
-  // لكن التثبيت مش شرط لإتمام ربط الكود — الزرار شغال دايمًا (شوف refreshSubmitState تحت).
+  // خطوة إجبارية: لازم يثبّت التطبيق قبل ما يدخل الداشبورد.
   const ua = navigator.userAgent || '';
   const isIOS = /iPhone|iPad|iPod/.test(ua);
 
@@ -767,9 +656,12 @@
     return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
   }
 
-  function refreshSubmitState() {
-    // الزرار بقى شغال دايمًا — مبقاش مربوط بشرط التثبيت (standalone)
-    linkSubmitLabel.textContent = '✅ تأكيد الربط';
+  // ============ خلاص التثبيت — بتظهر حالة النجاح وتودّي على طول للداشبورد ============
+  function finishInstallStep() {
+    linkFormState.style.display = 'none';
+    successState.classList.add('show');
+    setProgressStage('done');
+    setTimeout(() => { window.location.href = DASHBOARD_URL; }, 1100);
   }
 
   window.addEventListener('beforeinstallprompt', (e) => {
@@ -783,15 +675,12 @@
       const choice = await deferredPrompt.userChoice;
       deferredPrompt = null;
       if (choice && choice.outcome === 'accepted') {
-        installBtn.textContent = '✅ اتثبّت — دلوقتي افتح دبّر من الأيقونة على شاشتك';
-        installBtn.classList.add('done');
-        setProgressStage('link');
-        refreshSubmitState();
+        finishInstallStep();
         return;
       }
     }
     // لو المتصفح (زي Safari على iOS) مش بيدعم التثبيت الأوتوماتيك، نوريله خطوات يدوية واضحة
-    // حسب نوع جهازه.
+    // حسب نوع جهازه. في الحالة دي، هيتأكد التثبيت لما يرجع يفتح الصفحة من الأيقونة (شوف الفحص فوق).
     showManualInstallSteps();
   });
 
@@ -825,19 +714,14 @@
   }
 
   window.addEventListener('appinstalled', () => {
-    installBtn.textContent = '✅ اتثبّت — دلوقتي افتح دبّر من الأيقونة على شاشتك';
-    installBtn.classList.add('done');
-    refreshSubmitState();
+    if (!successState.classList.contains('show')) finishInstallStep();
   });
 
-  // لو المستخدم رجع للتبويب/فتح الصفحة تاني بعد ما ثبّت (standalone بقى true)، نفكّ القفل تلقائي
+  // لو المستخدم رجع للتبويب/فتح الصفحة تاني وهو standalone خلاص (ثبّته يدوي مثلًا)، نكمّل تلقائي
   document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible') refreshSubmitState();
+    if (document.visibilityState === 'visible' && isStandalone() && !successState.classList.contains('show')) finishInstallStep();
   });
-  window.addEventListener('focus', refreshSubmitState);
-
-  // لو أصلاً مفتوح كـ standalone (يعني متثبّت أصلاً)، منعرضش التنويه كعقبة
-  refreshSubmitState();
+  window.addEventListener('focus', () => { if (isStandalone() && !successState.classList.contains('show')) finishInstallStep(); });
 
   // ---- service worker ----
   if ('serviceWorker' in navigator) {

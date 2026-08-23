@@ -1868,11 +1868,28 @@
             document.getElementById('quick-entry-draft-actions')?.classList.remove('hidden');
             const list = document.getElementById('quick-entry-draft-list');
             if (list) {
+                // ============ عنوان كل كارت: التفصيلة الحقيقية (note) لو موجودة، وإلا الفئة/الشخص بدل ما نكرر النص الكامل الأصلي في كل كارت ============
                 list.innerHTML = quickEntryDrafts.map((draft) => {
-                    const label = quickDraftLabel(draft.type);
-                    const who = draft.type === 'debt' ? ` · ${draft.person}` : (draft.category ? ` · ${draft.category}` : '');
-                    const desc = draft.note || draft.sourceText || transcript || 'تم فهم العملية';
-                    return `<div class="rounded-xl bg-emerald-50 dark:bg-slate-800 px-3 py-2"><p class="text-sm font-bold text-slate-800 dark:text-slate-100">${desc}</p><p class="mt-0.5 text-xs text-emerald-600 dark:text-emerald-300">${label} · ${draft.amount} جنيه${who}</p></div>`;
+                    const isDebt = draft.type === 'debt';
+                    const emoji = isDebt ? (draft.direction === 'lent' ? '📤' : '📥') : (CATEGORY_EMOJI[draft.category] || '📌');
+                    const title = (draft.note && draft.note.trim()) || (isDebt ? draft.person : draft.category) || quickDraftLabel(draft.type);
+                    const metaBits = [];
+                    if (isDebt) {
+                        metaBits.push(draft.person);
+                        metaBits.push(draft.is_repayment ? 'تسوية' : (draft.direction === 'lent' ? 'مديون لك' : 'إنت مديون'));
+                    } else if (draft.category) {
+                        metaBits.push(draft.category);
+                    }
+                    const meta = metaBits.filter(Boolean).join(' · ');
+                    return `
+                        <div class="flex items-center gap-2.5 rounded-xl bg-emerald-50 dark:bg-slate-800 px-3 py-2.5">
+                            <span class="shrink-0 w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-sm">${emoji}</span>
+                            <div class="min-w-0 flex-1">
+                                <p class="truncate text-sm font-bold text-slate-800 dark:text-slate-100">${title}</p>
+                                ${meta ? `<p class="mt-0.5 truncate text-[11px] text-slate-500 dark:text-slate-400">${meta}</p>` : ''}
+                            </div>
+                            <span class="shrink-0 text-sm font-black text-emerald-600 dark:text-emerald-300">${fmt(draft.amount)} ج.م</span>
+                        </div>`;
                 }).join('');
             }
             quickStatus(quickEntryDrafts.length > 1 ? `فهمنا ${quickEntryDrafts.length} معاملة — راجعهم ثم أكد التسجيل.` : 'راجع المبلغ والفئة ثم أكد التسجيل.');

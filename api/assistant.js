@@ -172,7 +172,7 @@ async function handleReceiptScan(userId, body, res) {
   }
 
   // بنشيل data:...;base64, لو المتصفح بعتها كاملة، Groq محتاج الـ base64 الخام بس
-  const cleanBase64 = String(imageBase64).replace(/^data:[^;]+;base64,/, '');
+  const cleanBase64 = String(imageBase64).replace(/^data:[^,]+,/, '');
 
   const receipt = await extractItemizedReceiptFromImageBase64(cleanBase64);
   if (!receipt.success) {
@@ -282,7 +282,7 @@ async function handleEntryDraft(userId, body, res) {
 }
 
 async function handleEntryInvoiceDraft(userId, body, res) {
-  const imageBase64 = String(body.imageBase64 || '').replace(/^data:[^;]+;base64,/, '');
+  const imageBase64 = String(body.imageBase64 || '').replace(/^data:[^,]+,/, '');
   if (!imageBase64) return res.status(400).json({ error: 'الصورة فاضية.' });
   const receipt = await extractItemizedReceiptFromImageBase64(imageBase64);
   if (!receipt.success) return res.status(422).json({ error: receipt.hint || 'معرفتش أقرا الفاتورة. جرّب صورة أوضح.' });

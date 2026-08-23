@@ -1819,12 +1819,16 @@
             if (file.size > 8 * 1024 * 1024) return quickStatus('الصورة كبيرة أوي، اختار صورة أصغر من 8 ميجابايت.', 'error');
             quickShow('quick-entry-form', false);
             quickShow('quick-entry-draft', false);
-            quickStatus('دبّر بيقرا الفاتورة...');
-            startReceiptScanAnimation();
+            // ============ أنيميشن بسيط وسريع مكانه جوه كارت "أضف مصروفك بسرعة" نفسه (مش أنيميشن "امسح فاتورة" التفصيلي) ============
+            const list = document.getElementById('quick-entry-draft-list');
+            document.getElementById('quick-entry-draft-title').textContent = 'بيقرا الفاتورة...';
+            document.getElementById('quick-entry-draft-actions')?.classList.add('hidden');
+            list.innerHTML = '<div class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 py-1"><span class="w-4 h-4 rounded-full border-2 border-emerald-400 border-t-transparent animate-spin shrink-0"></span><span>دبّر بيقرا الفاتورة...</span></div>';
+            quickShow('quick-entry-draft', true);
+            quickStatus('');
             try {
                 const base64 = await new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = reject; reader.readAsDataURL(file); });
                 const result = await asstApi('receipt_scan', { imageBase64: base64 });
-                const list = document.getElementById('quick-entry-draft-list');
                 const itemsHtml = (result.items || []).map((it) => `<div class="flex items-center justify-between gap-2 text-sm text-slate-700 dark:text-slate-200"><span>${CATEGORY_EMOJI[it.category] || '📌'} ${it.name}</span><span class="shrink-0 font-bold">${fmt(it.amount)}</span></div>`).join('');
                 const debtHtml = result.isDebt && result.debtPerson ? `<div class="pt-1 text-xs text-amber-600 dark:text-amber-400">📥 اتسجلت كمان كدين عليك لـ ${result.debtPerson}</div>` : '';
                 document.getElementById('quick-entry-draft-title').textContent = `${result.merchant ? `فاتورة ${result.merchant}` : 'الفاتورة'} — اتسجلت (${(result.items || []).length} صنف)`;
@@ -1836,8 +1840,7 @@
                 await loadInvoicesCount?.();
             } catch (e) {
                 quickStatus(e.message || 'معرفتش أقرا الفاتورة. جرب صورة أوضح.', 'error');
-            } finally {
-                stopReceiptScanAnimation();
+                quickShow('quick-entry-draft', false);
             }
         }
         document.getElementById('quick-entry-invoice-input')?.addEventListener('change', (event) => { const file = event.target.files?.[0]; analyzeQuickInvoice(file); event.target.value = ''; });

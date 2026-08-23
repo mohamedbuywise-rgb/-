@@ -7,6 +7,7 @@ import { createGoal, contributeToGoal, sendGoalStatus, cancelActiveGoal } from '
 import { sendMonthlyWrapped } from '../lib/wrapped.js';
 import { upsertUser, hasActiveSubscription, getSubscriptionExpiry, activateSubscription, getChatIdByUserId, isInTrial, getTrialDaysLeft } from '../lib/users.js';
 import { createLinkCode } from '../lib/linking.js';
+import { normalizeDigits } from '../lib/textNormalize.js';
 import { checkVoiceUsage, checkOcrUsage, checkChatUsage, refundOcrUsage } from '../lib/rateLimits.js';
 import { GUIDE_URL, TRIAL_SUMMARY_BASE_URL, ADMIN_TELEGRAM_ID, SUBSCRIPTION_DAYS, SUBSCRIPTION_PRICE_EGP, INSTAPAY_LINK, ADMIN_CONTACT_USERNAME, VOICE_MAX_DURATION_SECONDS, TELEGRAM_WEBHOOK_SECRET } from '../lib/config.js';
 import { createTrialSummaryToken } from '../lib/trialToken.js';
@@ -486,17 +487,6 @@ export default async function handler(req, res) {
     console.error('Webhook error:', err);
     return res.status(200).json({ ok: true }); // نرجع 200 دايمًا عشان تليجرام متعملش retry مزعج
   }
-}
-
-// ============ تحويل الأرقام العربية/الهندية والفارسية (٠١٢٣٤٥٦٧٨٩ / ۰۱۲۳۴۵۶۷۸۹) لأرقام إنجليزية عادية ============
-// من غير ده، لو المستخدم كتب "٨٠٠٠٠" بدل "80000"، النص بيروح للـ AI (Groq) زي ما هو والموديل
-// أحيانًا بيقرأ العدد أو الأصفار غلط (بيزوّد أو ينقّص صفر). التحويل ده بيتم أول حاجة قبل أي
-// معالجة تانية للنص، عشان كل حاجة بعد كده (تصنيف، أوامر، أسماء) تشتغل على أرقام إنجليزية مضمونة.
-function normalizeDigits(text) {
-  const arabicIndic = '٠١٢٣٤٥٦٧٨٩';
-  const persian = '۰۱۲۳۴۵۶۷۸۹';
-  return text.replace(/[٠-٩]/g, (d) => String(arabicIndic.indexOf(d)))
-             .replace(/[۰-۹]/g, (d) => String(persian.indexOf(d)));
 }
 
 // ============ نقطة توجيه موحّدة لأي نص جاي من المستخدم (سواء مكتوب أو مفرّغ من فويس نوت) ============

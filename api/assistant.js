@@ -5,6 +5,7 @@ import { extractItemizedReceiptFromImageBase64, askDabbarChat, classifyMessage, 
 import { saveInvoiceRecord, deleteInvoiceById } from '../lib/invoices.js';
 import { hasActiveSubscription, isInTrial } from '../lib/users.js';
 import { checkOcrUsage, checkChatUsage, refundOcrUsage, refundUsage } from '../lib/rateLimits.js';
+import { normalizeDigits } from '../lib/textNormalize.js';
 
 // ============ Router: POST /api/assistant  { action: ... } ============
 // كل ميزات "دبّر الذكي" الجديدة (الأهداف، امسح فاتورة، اسأل دبّر) اتلمّت هنا في endpoint واحد،
@@ -255,11 +256,29 @@ async function handleEntryDraft(userId, body, res) {
     if (!transcript.success) return res.status(422).json({ error: transcript.error });
     text = transcript.text;
   }
+  text = normalizeDigits(text);
   if (!text || text.length > 1200) return res.status(400).json({ error: 'اكتب أو سجّل وصفًا واضحًا للمصروف.' });
+
+  // ============ نفس منطق تليجرام بالظبط: الرسالة الواحدة ممكن يكون فيها أكتر من معاملة مع بعض ============
+  // (مثلاً "صرفت 50 جنيه أكل و100 مواصلات") — بنرجّعهم كلهم كمسودات عشان المستخدم يراجعهم ويأكدهم مرة واحدة،
+  // بدل ما نلقط أول معاملة بس ونسيب الباقي بلا تسجيل زي ما كان الموقع بيعمل قبل كده.
   const parsed = await classifyMessage(text);
-  const tx = Array.isArray(parsed?.transactions) ? parsed.transactions.find((item) => item?.type === 'expense' || item?.type === 'debt') : null;
-  if (!tx || !Number(tx.amount) || Number(tx.amount) <= 0) return res.status(422).json({ error: 'محتاج مبلغ واضح عشان أفهم العملية.' });
-  return res.status(200).json({ transcript: text, draft: { ...tx, amount: Number(tx.amount), sourceText: text, needsConfirmation: true, confidence: 0.85 } });
+  const transactions = Array.isArray(parsed) ? parsed : [];
+  const validTx = transactions.filter((item) => (item?.type === 'expense' || item?.type === 'debt') && Number(item.amount) > 0 && (item.type !== 'debt' || item.person));
+  if (!validTx.length) return res.status(422).json({ error: 'محتاج مبلغ واضح عشان أفهم العملية.' });
+
+  // لو معاملة واحدة بس، برضو بنستخدم النص الأصلي كوصف احتياطي (fallback) لو الموديل ما رجعش note —
+  // بالظبط زي ما تليجرام بيعمل. لو أكتر من معاملة، مش بنكرر نفس النص الطويل في كل واحدة فيهم.
+  const useFallback = validTx.length === 1;
+  const drafts = validTx.map((tx) => ({
+    ...tx,
+    amount: Number(tx.amount),
+    note: tx.note || (useFallback ? '' : tx.note || ''),
+    sourceText: useFallback ? text : (tx.note || ''),
+    needsConfirmation: true,
+    confidence: 0.85,
+  }));
+  return res.status(200).json({ transcript: text, drafts });
 }
 
 async function handleEntryInvoiceDraft(userId, body, res) {
@@ -267,25 +286,72 @@ async function handleEntryInvoiceDraft(userId, body, res) {
   if (!imageBase64) return res.status(400).json({ error: 'الصورة فاضية.' });
   const receipt = await extractItemizedReceiptFromImageBase64(imageBase64);
   if (!receipt.success) return res.status(422).json({ error: receipt.hint || 'معرفتش أقرا الفاتورة. جرّب صورة أوضح.' });
-  return res.status(200).json({ draft: { type: 'invoice', amount: Number(receipt.totalAmount), merchant: receipt.merchant || '', items: receipt.items || [], category: receipt.items?.[0]?.category || 'مصروف عام', note: receipt.merchant || 'فاتورة', sourceText: 'فاتورة مصوّرة', needsConfirmation: true, confidence: 0.9 } });
+  return res.status(200).json({ drafts: [{ type: 'invoice', amount: Number(receipt.totalAmount), merchant: receipt.merchant || '', items: receipt.items || [], category: receipt.items?.[0]?.category || 'مصروف عام', note: receipt.merchant || 'فاتورة', sourceText: 'فاتورة مصوّرة', needsConfirmation: true, confidence: 0.9 }] });
 }
 
-async function handleEntryConfirm(userId, body, res) {
-  const draft = body.draft || {};
+// ============ حفظ معاملة واحدة (مصروف / دين / فاتورة) — القلب المشترك اللي بيستخدمه handleEntryConfirm ============
+// نفس أنواع المعاملات اللي بوت تليجرام بيسجلها بالظبط (expense/debt)، بالإضافة لنوع "invoice" الخاص بالداشبورد.
+async function saveOneDraft(userId, draft) {
   const amount = Number(draft.amount);
-  if (!Number.isFinite(amount) || amount <= 0 || amount > 100000000) return res.status(400).json({ error: 'المبلغ غير صحيح.' });
+  if (!Number.isFinite(amount) || amount <= 0 || amount > 100000000) return { ok: false, error: 'المبلغ غير صحيح.' };
+
   if (draft.type === 'expense') {
     const { data, error } = await supabase.from('expenses').insert({ telegram_user_id: userId, amount, category: String(draft.category || 'مصروف عام').slice(0, 80), description: String(draft.note || draft.sourceText || '').slice(0, 500) }).select('id, amount, category, description, created_at').single();
-    if (error) { console.error('entry_confirm expense error:', JSON.stringify(error)); return res.status(500).json({ error: 'تعذر حفظ المصروف.' }); }
-    return res.status(200).json({ ok: true, type: 'expense', record: data, message: `تم تسجيل مصروف ${data.amount} جنيه في ${data.category}.` });
+    if (error) { console.error('entry_confirm expense error:', JSON.stringify(error)); return { ok: false, error: 'تعذر حفظ المصروف.' }; }
+    return { ok: true, type: 'expense', record: data, message: `تم تسجيل مصروف ${data.amount} جنيه في ${data.category}.` };
   }
+
+  // ============ الديون/السلف — نفس بالظبط منطق recordDebt بتاع تليجرام (lib/debts.js)، بس من غير إرسال رسالة تليجرام ============
+  if (draft.type === 'debt') {
+    if (!draft.person) return { ok: false, error: 'اسم الشخص مطلوب لتسجيل الدين.' };
+    const isRepayment = Boolean(draft.is_repayment || draft.isRepayment);
+    const { data, error } = await supabase.from('debts').insert({
+      telegram_user_id: userId,
+      person_name: String(draft.person).slice(0, 160),
+      amount,
+      direction: draft.direction === 'borrowed' ? 'borrowed' : 'lent',
+      is_repayment: isRepayment,
+      note: String(draft.note || '').slice(0, 500),
+    }).select('id, person_name, amount, direction, is_repayment').single();
+    if (error) { console.error('entry_confirm debt error:', JSON.stringify(error)); return { ok: false, error: 'تعذر حفظ الدين.' }; }
+    const isLent = data.direction !== 'borrowed';
+    const message = isRepayment
+      ? (isLent ? `تم تسجيل: رجّعت لـ ${data.person_name} ${data.amount} جنيه.` : `تم تسجيل: ${data.person_name} رجّعلك ${data.amount} جنيه.`)
+      : (isLent ? `تم تسجيل: بقى ليك عند ${data.person_name} ${data.amount} جنيه.` : `تم تسجيل: بقى عليك لـ ${data.person_name} ${data.amount} جنيه.`);
+    return { ok: true, type: 'debt', record: data, message };
+  }
+
   if (draft.type === 'invoice') {
     const items = Array.isArray(draft.items) ? draft.items.filter((item) => item && item.name && Number(item.amount) > 0).map((item) => ({ name: String(item.name).slice(0, 160), amount: Number(item.amount), category: String(item.category || 'مصروف عام').slice(0, 80) })) : [];
     const saved = await saveInvoiceRecord({ merchant: String(draft.merchant || '').slice(0, 160), totalAmount: amount, paymentMethod: '', invoiceNumber: '', isDebt: false, debtPerson: '', items: items.length ? items : [{ name: String(draft.note || 'فاتورة').slice(0, 160), amount, category: String(draft.category || 'مصروف عام').slice(0, 80) }] }, userId);
-    if (!saved) return res.status(500).json({ error: 'تعذر حفظ الفاتورة.' });
-    return res.status(200).json({ ok: true, type: 'invoice', invoiceId: saved.invoiceId, message: `تم تسجيل الفاتورة بإجمالي ${amount} جنيه.` });
+    if (!saved) return { ok: false, error: 'تعذر حفظ الفاتورة.' };
+    return { ok: true, type: 'invoice', invoiceId: saved.invoiceId, message: `تم تسجيل الفاتورة بإجمالي ${amount} جنيه.` };
   }
-  return res.status(400).json({ error: 'نوع العملية غير مدعوم.' });
+
+  return { ok: false, error: 'نوع العملية غير مدعوم.' };
+}
+
+async function handleEntryConfirm(userId, body, res) {
+  // بيقبل معاملة واحدة (body.draft، للتوافق مع أي نداء قديم) أو أكتر من معاملة مع بعض (body.drafts)،
+  // بالظبط زي تليجرام لما رسالة واحدة فيها أكتر من مصروف/دين مع بعض.
+  const drafts = Array.isArray(body.drafts) && body.drafts.length ? body.drafts : (body.draft ? [body.draft] : []);
+  if (!drafts.length) return res.status(400).json({ error: 'مفيش عملية للتسجيل.' });
+
+  const results = [];
+  for (const draft of drafts) {
+    results.push(await saveOneDraft(userId, draft));
+  }
+
+  const succeeded = results.filter((r) => r.ok);
+  if (!succeeded.length) {
+    return res.status(500).json({ error: results[0]?.error || 'تعذر الحفظ.' });
+  }
+
+  const message = succeeded.length === 1
+    ? succeeded[0].message
+    : `✅ تم تسجيل ${succeeded.length} معاملة بنجاح.`;
+
+  return res.status(200).json({ ok: true, results, message });
 }
 
 async function handleInvoiceDelete(userId, body, res) {

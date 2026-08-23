@@ -806,7 +806,46 @@
         .tip-empty-state span {
             font-size: 1.15rem;
         }
-        </style>
+            /* تحسين وضوح الوضع النهاري: نفس الهوية الفاتحة، لكن بتباين مقروء وواضح */
+        html[data-theme="light"] { color-scheme: light; }
+        html[data-theme="light"] body { background: #edf4f0 !important; color: #10251d !important; }
+        html[data-theme="light"] .flex-1.overflow-y-auto { background: #edf4f0 !important; }
+        html[data-theme="light"] .flex-1.overflow-y-auto .tab-content > section,
+        html[data-theme="light"] .flex-1.overflow-y-auto .tab-content > div { background: rgba(255,255,255,.93) !important; box-shadow: 0 10px 26px rgba(30,70,50,.09) !important; }
+        html[data-theme="light"] .flex-1.overflow-y-auto .tab-content > section.bg-slate-950\/50,
+        html[data-theme="light"] .flex-1.overflow-y-auto .tab-content > section.bg-slate-950\/40 { background: #ffffff !important; }
+        html[data-theme="light"] .flex-1.overflow-y-auto input,
+        html[data-theme="light"] .flex-1.overflow-y-auto textarea,
+        html[data-theme="light"] .flex-1.overflow-y-auto select { color: #18352a !important; background: #ffffff !important; border: 1px solid #c7d8cf !important; box-shadow: inset 0 1px 2px rgba(20,60,40,.04), 0 3px 10px rgba(20,60,40,.05) !important; }
+        html[data-theme="light"] .flex-1.overflow-y-auto input::placeholder,
+        html[data-theme="light"] .flex-1.overflow-y-auto textarea::placeholder { color: #60766b !important; opacity: 1 !important; }
+        html[data-theme="light"] .flex-1.overflow-y-auto label { color: #405a4d !important; }
+        html[data-theme="light"] .text-slate-300 { color: #29483a !important; }
+        html[data-theme="light"] .text-slate-400 { color: #4d665a !important; }
+        html[data-theme="light"] .text-slate-500,
+        html[data-theme="light"] .text-slate-600 { color: #60766b !important; }
+        html[data-theme="light"] .text-slate-700 { color: #405a4d !important; }
+        html[data-theme="light"] .border-slate-700 { border-color: #b8cec2 !important; }
+        html[data-theme="light"] .border-slate-800 { border-color: #d3e1da !important; }
+        /* النهاري هنا Canvas واحدة؛ التمييز بالمسافات والضوء وليس بكروت متجاورة */
+        html[data-theme="light"] #tab-monthly { background: #edf4f0 !important; }
+        html[data-theme="light"] #tab-monthly > section,
+        html[data-theme="light"] #tab-monthly > div { background: transparent !important; border: 0 !important; box-shadow: none !important; border-radius: 0 !important; }
+        html[data-theme="light"] #tab-monthly > #quick-entry-card { background: linear-gradient(135deg,#ffffff,#f0faf5) !important; border-radius: 1.5rem !important; box-shadow: 0 10px 26px rgba(30,70,50,.07) !important; }
+        html[data-theme="light"] #planning-card,
+        html[data-theme="light"] #expense-ledger-card { background: transparent !important; border: 0 !important; box-shadow: none !important; }
+        html[data-theme="light"] #planning-summary { background: #dff5e9 !important; color: #145c3c !important; border-radius: 1rem !important; }
+        html[data-theme="light"] #category-budgets-list > label,
+        html[data-theme="light"] #recurring-list > div { background: #f1f7f4 !important; color: #315445 !important; }
+        html[data-theme="light"] #planning-save { background: #08b878 !important; color: #06271a !important; box-shadow: 0 7px 16px rgba(8,184,120,.2) !important; }
+        html[data-theme="light"] #planning-reset { background: #eef4f1 !important; color: #446256 !important; border: 1px solid #c7d8cf !important; }
+        html[data-theme="light"] #quick-entry-card { background: linear-gradient(135deg,#ffffff,#f0faf5) !important; }
+        html[data-theme="light"] #quick-entry-card > .grid > button { background: #ffffff !important; border: 1px solid #d3e2da !important; color: #24483a !important; box-shadow: 0 7px 18px rgba(23,74,50,.1) !important; }
+        html[data-theme="light"] button { color: #25483a; }
+        html[data-theme="light"] .tab-btn { color: #4f685c !important; }
+        html[data-theme="light"] .tab-btn.active-tab { color: #087d55 !important; }
+        html[data-theme="light"] #footer-cta { color: #4d665a !important; }
+    </style>
 </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col overflow-hidden">
 
@@ -2016,7 +2055,7 @@
                 <div id="planning-summary" class="rounded-2xl bg-emerald-500/10 px-3 py-2 text-[11px] text-emerald-200"></div>
                 <div><div class="mb-1 flex items-center justify-between"><span class="text-[10px] font-bold text-slate-400">حدود أهم الفئات</span><span class="text-[9px] text-slate-600">اختياري</span></div><div id="category-budgets-list" class="space-y-1.5"></div></div>
                 <div class="flex gap-2"><button id="planning-save" type="button" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950">حفظ خطتي</button><button id="planning-reset" type="button" class="rounded-xl border border-slate-700 px-3 py-2.5 text-xs text-slate-400">مسح</button></div>
-                <div class="border-t border-slate-800 pt-3"><div class="flex items-center justify-between"><h4 class="text-xs font-bold text-slate-300">مصاريف متكررة</h4><span class="text-[10px] text-slate-500">تظهر في خطتك</span></div><div class="mt-2 grid grid-cols-[1fr_5rem_2.5rem] gap-2"><input id="recurring-name" placeholder="إيجار / اشتراك" class="rounded-xl border border-slate-700 bg-slate-900 px-2.5 py-2 text-[10px] text-slate-100 outline-none"><input id="recurring-amount" type="number" min="0" placeholder="المبلغ" class="rounded-xl border border-slate-700 bg-slate-900 px-2.5 py-2 text-[10px] text-slate-100 outline-none"><button id="recurring-add" type="button" class="rounded-xl bg-slate-800 text-lg text-emerald-400">+</button></div><div id="recurring-list" class="mt-2 space-y-1.5"></div></div>`;
+                <div class="border-t border-slate-800 pt-3"><div class="flex items-center justify-between"><div><h4 class="text-xs font-bold text-slate-300">التزامات شهرية متوقعة</h4><p class="mt-0.5 text-[9px] text-slate-500">للتخطيط فقط — لا تُضاف للصرف الفعلي إلا عند تسجيلها</p></div><span class="text-[10px] text-slate-500">إيجار / اشتراكات</span></div><div class="mt-2 grid grid-cols-[1fr_5rem_2.5rem] gap-2"><input id="recurring-name" placeholder="إيجار / اشتراك" class="rounded-xl border border-slate-700 bg-slate-900 px-2.5 py-2 text-[10px] text-slate-100 outline-none"><input id="recurring-amount" type="number" min="0" placeholder="المبلغ" class="rounded-xl border border-slate-700 bg-slate-900 px-2.5 py-2 text-[10px] text-slate-100 outline-none"><button id="recurring-add" type="button" class="rounded-xl bg-slate-800 text-lg text-emerald-400">+</button></div><div id="recurring-list" class="mt-2 space-y-1.5"></div></div>`;
             monthly.insertBefore(wrap, quick.nextSibling);
             const ledger = document.createElement('section');
             ledger.id = 'expense-ledger-card';
@@ -2040,7 +2079,9 @@
             if (incomeEl && document.activeElement !== incomeEl) incomeEl.value = income || '';
             if (budgetEl && document.activeElement !== budgetEl) budgetEl.value = budget || '';
             const summary = document.getElementById('planning-summary');
-            if (summary) summary.innerHTML = incomeOrBudget ? `المتاح بعد مصاريف الشهر: <strong>${fmt(remaining)}</strong>${income && budget ? ` · الميزانية مستهلكة ${Math.min(100, Math.round((total / budget) * 100))}%` : ''}` : 'أدخل دخلك أو ميزانيتك عشان دبّر يحسبلك المتاح بدل ما يعرض إجمالي الصرف بس.';
+            const recurringTotal = (settings.recurringExpenses || []).reduce((sum, item) => sum + Number(item.amount || 0), 0);
+            const afterExpected = Math.max(0, remaining - recurringTotal);
+            if (summary) summary.innerHTML = incomeOrBudget ? `المتاح بعد الصرف الفعلي: <strong>${fmt(remaining)}</strong>${recurringTotal ? ` · بعد الالتزامات المتوقعة: <strong>${fmt(afterExpected)}</strong>` : ''}${income && budget ? ` · الميزانية مستهلكة ${Math.min(100, Math.round((total / budget) * 100))}%` : ''}` : 'أدخل دخلك أو حد مصروفاتك عشان دبّر يحسبلك المتاح. الالتزامات المتكررة للعرض والتخطيط فقط، ولا تُخصم تلقائيًا.';
             const categoryBudgetList = document.getElementById('category-budgets-list');
             const topCategories = Array.isArray(data?.month?.byCategory) ? data.month.byCategory.slice(0, 3) : [];
             if (categoryBudgetList) categoryBudgetList.innerHTML = topCategories.length ? topCategories.map((item) => `<label class="flex items-center gap-2 rounded-xl bg-slate-900/60 px-2.5 py-1.5 text-[10px] text-slate-400"><span class="flex-1">${CATEGORY_EMOJI[item.name] || '📌'} ${item.name}</span><input data-category-budget="${item.name}" type="number" min="0" placeholder="حد الفئة" value="${settings.categoryBudgets?.[item.name] || ''}" class="w-20 rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-left text-[10px] text-slate-100 outline-none"></label>`).join('') : '<p class="text-[10px] text-slate-500">سجّل مصاريف عشان نعرضلك حدود الفئات.</p>';

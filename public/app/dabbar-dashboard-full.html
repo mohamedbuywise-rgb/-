@@ -602,6 +602,210 @@
         #tab-account .text-slate-500 {
             opacity: .92;
         }
+        /* تجربة التسجيل السريع: يبقى أول عنصر عملي وظاهر في تبويب شهري */
+        #tab-monthly.active {
+            display: flex !important;
+            flex-direction: column;
+        }
+
+        #tab-monthly:not(.active) {
+            display: none !important;
+        }
+
+        #tab-monthly.active > #quick-entry-card { order: 1; }
+        #tab-monthly.active > #daily-reminder-card { order: 2; }
+        #tab-monthly.active > #active-days-card { order: 3; }
+        #tab-monthly.active > #planning-card { order: 4; }
+        #tab-monthly.active > #expense-ledger-card { order: 5; }
+        #tab-monthly.active > #monthly-categories-card { order: 6; }
+        #tab-monthly.active > #monthly-tip-card { order: 7; }
+        #tab-monthly.active > #footer-cta { order: 8; }
+
+        #tab-monthly.active > div:not(#quick-entry-card):not(#monthly-categories-card):not(#monthly-tip-card):not(#footer-cta) {
+            order: 4;
+        }
+
+        #quick-entry-card {
+            position: relative;
+            overflow: hidden;
+            min-height: 10.25rem;
+            padding: 1.25rem !important;
+            isolation: isolate;
+        }
+
+        #quick-entry-card::before {
+            content: '';
+            position: absolute;
+            inset: 0 auto auto 0;
+            width: 42%;
+            height: 100%;
+            background: radial-gradient(circle at 0 0, rgba(52,211,153,.18), transparent 70%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .quick-entry-eyebrow {
+            display: block;
+            margin-bottom: .2rem;
+            color: var(--db-accent) !important;
+            font: 900 .62rem/1 'Cairo', sans-serif;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+        }
+
+        #quick-entry-card > div:first-child h3 {
+            font-size: 1rem !important;
+            letter-spacing: -.03em;
+        }
+
+        #quick-entry-card > .grid {
+            margin-top: .25rem;
+            gap: .6rem !important;
+        }
+
+        #quick-entry-card > .grid > button {
+            min-height: 4.35rem;
+            padding-block: .72rem !important;
+        }
+
+        #quick-entry-card > .grid > button span:first-child {
+            transition: transform .18s ease;
+        }
+
+        #quick-entry-card > .grid > button:hover span:first-child {
+            transform: scale(1.08) translateY(-1px);
+        }
+
+        #quick-entry-recording,
+        #quick-entry-voice-preview {
+            position: relative;
+            background: var(--db-surface-soft) !important;
+            border: 0 !important;
+            box-shadow: inset 0 0 0 1px rgba(244,63,94,.08), 0 8px 18px rgba(17,55,35,.04) !important;
+        }
+
+        #quick-entry-voice-preview {
+            box-shadow: inset 0 0 0 1px rgba(22,168,120,.1), 0 8px 18px rgba(17,55,35,.04) !important;
+        }
+
+        #quick-entry-recording-cancel,
+        #quick-entry-voice-cancel {
+            cursor: pointer;
+        }
+
+        #quick-entry-recording-cancel:hover,
+        #quick-entry-voice-cancel:hover,
+        #quick-entry-recording-cancel-bottom:hover,
+        #quick-entry-voice-cancel-bottom:hover {
+            transform: scale(1.04);
+        }
+
+        #quick-entry-voice-audio {
+            height: 2.75rem;
+            accent-color: var(--db-accent);
+        }
+
+        @media (max-width: 420px) {
+            #quick-entry-card {
+                padding: 1rem !important;
+            }
+            #quick-entry-card > .grid > button {
+                min-height: 4.1rem;
+            }
+            #quick-entry-voice-preview .flex.gap-2 {
+                flex-wrap: wrap;
+            }
+            #quick-entry-voice-preview #quick-entry-voice-send {
+                flex-basis: 100%;
+            }
+        }
+        /* توصيات مالية رقمية: كل بطاقة توضح السبب ثم مبلغ التوفير المحتمل */
+        #tips-list {
+            display: grid;
+            gap: .7rem;
+        }
+
+        .tip-card {
+            display: flex;
+            align-items: flex-start;
+            gap: .75rem;
+            padding: .9rem;
+            border-radius: 1.15rem;
+            background: var(--db-surface-soft);
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,.18);
+        }
+
+        html:not([data-theme="light"]) .tip-card {
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,.035);
+        }
+
+        .tip-card-icon {
+            display: grid;
+            place-items: center;
+            width: 2.25rem;
+            height: 2.25rem;
+            flex: 0 0 2.25rem;
+            border-radius: .8rem;
+            background: var(--db-accent-soft);
+            font-size: 1.05rem;
+        }
+
+        .tip-card-body {
+            min-width: 0;
+            color: var(--db-muted);
+            font-size: .72rem;
+            line-height: 1.8;
+        }
+
+        .tip-card-body strong {
+            display: block;
+            margin-bottom: .12rem;
+            color: var(--db-ink);
+            font-size: .76rem;
+            line-height: 1.5;
+        }
+
+        .tip-card-body p {
+            margin: 0;
+        }
+
+        .tip-saving {
+            display: inline-flex;
+            margin-top: .45rem;
+            padding: .26rem .55rem;
+            border-radius: 999px;
+            background: rgba(22,168,120,.12);
+            color: var(--db-accent);
+            font-size: .64rem;
+            font-weight: 900;
+            line-height: 1.3;
+        }
+
+        .tip-card-rose .tip-saving {
+            background: rgba(244,63,94,.1);
+            color: #e11d48;
+        }
+
+        .tip-card-amber .tip-saving {
+            background: rgba(245,158,11,.12);
+            color: #b7791f;
+        }
+
+        .tip-empty-state {
+            display: flex;
+            align-items: center;
+            gap: .65rem;
+            padding: .9rem;
+            border-radius: 1rem;
+            background: var(--db-surface-soft);
+            color: var(--db-muted);
+            font-size: .72rem;
+            line-height: 1.7;
+        }
+
+        .tip-empty-state span {
+            font-size: 1.15rem;
+        }
         </style>
 </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col overflow-hidden">
@@ -676,13 +880,13 @@
             </section>
 
             <section id="quick-entry-card" class="bg-gradient-to-br from-emerald-50 via-white to-teal-50 border border-emerald-200 rounded-[28px] p-4 space-y-3 shadow-[0_12px_35px_rgba(16,185,129,.14)] dark:bg-slate-950/60 dark:from-slate-950/60 dark:via-slate-950/60 dark:to-slate-900 dark:border-slate-800" aria-label="إضافة مصروف">
-                <div class="flex items-center justify-between"><div><h3 class="text-sm font-black text-slate-900 dark:text-slate-100">أضف مصروفك بسرعة</h3><p class="text-[11px] text-slate-500 dark:text-slate-400">صوت أو كتابة أو فاتورة — راجع قبل الحفظ</p></div><span class="text-xl">✨</span></div>
+                <div class="flex items-center justify-between"><div><span class="quick-entry-eyebrow">التسجيل الأساسي</span><h3 class="text-sm font-black text-slate-900 dark:text-slate-100">سجّل مصروفك بسرعة</h3><p class="text-[11px] text-slate-500 dark:text-slate-400">اختار الطريقة اللي تريحك — صوت أو كتابة أو فاتورة</p></div><span class="text-2xl" aria-hidden="true">✨</span></div>
                 <div class="grid grid-cols-3 gap-2"><button id="quick-entry-voice" class="rounded-2xl border border-emerald-200 bg-white/80 px-2 py-3 text-center shadow-sm transition hover:-translate-y-0.5 dark:bg-slate-900" type="button"><span class="mx-auto mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/15 text-xl">🎙</span><span class="block text-[11px] font-bold text-slate-700 dark:text-slate-200">صوت</span></button><button id="quick-entry-text" class="rounded-2xl border border-emerald-200 bg-white/80 px-2 py-3 text-center shadow-sm transition hover:-translate-y-0.5 dark:bg-slate-900" type="button"><span class="mx-auto mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/15 text-xl">✍️</span><span class="block text-[11px] font-bold text-slate-700 dark:text-slate-200">كتابة</span></button><button id="quick-entry-invoice" class="rounded-2xl border border-emerald-200 bg-white/80 px-2 py-3 text-center shadow-sm transition hover:-translate-y-0.5 dark:bg-slate-900" type="button"><span class="mx-auto mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/15 text-xl">📸</span><span class="block text-[11px] font-bold text-slate-700 dark:text-slate-200">فاتورة</span></button></div>
                 <input type="file" id="quick-entry-invoice-input" accept="image/*" class="hidden">
                 <div id="quick-entry-scanning" class="hidden rounded-2xl border border-blue-200 bg-blue-50 p-3 text-center dark:border-blue-500/30 dark:bg-blue-500/10"><div class="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-white text-xl shadow-sm dark:bg-slate-900"><span style="display:inline-block;animation:dabbar-scan-spin 1s linear infinite">⟳</span></div><p class="text-xs font-bold text-blue-700 dark:text-blue-200">بنقرأ الفاتورة...</p><p class="mt-1 text-[10px] text-blue-600/70 dark:text-blue-200/70">دبّر بيستخرج المبلغ والأصناف</p></div>
                 <div id="quick-entry-form" class="hidden space-y-2"><textarea id="quick-entry-input" rows="2" maxlength="1200" placeholder="مثال: صرفت 75 جنيه أكل" class="w-full resize-none rounded-2xl border border-emerald-200 bg-white px-3 py-2.5 text-xs outline-none dark:bg-slate-900 dark:text-slate-100"></textarea><div class="flex gap-2"><button id="quick-entry-analyze" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950" type="button">فهم وتجهيز</button><button id="quick-entry-cancel" class="rounded-xl border border-slate-300 px-3 py-2.5 text-xs text-slate-500 dark:border-slate-700" type="button">إلغاء</button></div></div>
-                <div id="quick-entry-recording" class="hidden rounded-2xl border border-rose-200 bg-rose-50 p-3 text-center text-xs text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200"><div>جاري التسجيل...</div><div id="quick-entry-recording-time" class="mt-1 font-black">00:00</div><button id="quick-entry-stop" class="mt-2 rounded-xl bg-rose-500 px-4 py-2 font-bold text-white" type="button">إيقاف وتحليل</button></div>
-                <div id="quick-entry-voice-preview" class="hidden rounded-2xl border border-emerald-200 bg-white p-3 dark:bg-slate-900 dark:border-slate-700 space-y-2"><p class="text-[11px] text-slate-500">سمّع تسجيلك للتأكد إنه واضح قبل ما نبعته</p><audio id="quick-entry-voice-audio" controls class="w-full"></audio><div class="flex gap-2"><button id="quick-entry-voice-send" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950" type="button">ابعت للتحليل</button><button id="quick-entry-voice-retry" class="rounded-xl border border-slate-300 px-3 py-2.5 text-xs text-slate-500 dark:border-slate-700" type="button">سجّل تاني</button></div></div>
+                <div id="quick-entry-recording" class="hidden rounded-2xl border border-rose-200 bg-rose-50 p-3 text-center text-xs text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200"><div class="flex items-center justify-between gap-2"><span class="font-black">جاري التسجيل...</span><button id="quick-entry-recording-cancel" class="flex h-7 w-7 items-center justify-center rounded-full bg-white/70 text-sm font-black text-rose-500 transition hover:bg-white" type="button" aria-label="إلغاء التسجيل">✕</button></div><div id="quick-entry-recording-time" class="mt-1 font-black">00:00</div><div class="mt-2 flex gap-2"><button id="quick-entry-stop" class="flex-1 rounded-xl bg-rose-500 px-4 py-2 font-bold text-white" type="button">إيقاف وتحليل</button><button id="quick-entry-recording-cancel-bottom" class="rounded-xl bg-white/70 px-3 py-2 font-bold text-rose-500 transition hover:bg-white" type="button">إلغاء</button></div></div>
+                <div id="quick-entry-voice-preview" class="hidden rounded-2xl border border-emerald-200 bg-white p-3 dark:bg-slate-900 dark:border-slate-700 space-y-2"><div class="flex items-center justify-between gap-2"><p class="text-[11px] text-slate-500">سمّع تسجيلك للتأكد إنه واضح قبل ما نبعته</p><button id="quick-entry-voice-cancel" class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-black text-slate-500 transition hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700" type="button" aria-label="إلغاء التسجيل">✕</button></div><audio id="quick-entry-voice-audio" controls class="w-full"></audio><div class="flex gap-2"><button id="quick-entry-voice-send" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950" type="button">ابعت للتحليل</button><button id="quick-entry-voice-retry" class="rounded-xl border border-slate-300 px-3 py-2.5 text-xs text-slate-500 dark:border-slate-700" type="button">سجّل تاني</button><button id="quick-entry-voice-cancel-bottom" class="rounded-xl border border-rose-200 px-3 py-2.5 text-xs font-bold text-rose-500 dark:border-rose-500/30" type="button">إلغاء</button></div></div>
                 <div id="quick-entry-draft" class="hidden rounded-2xl border border-emerald-200 bg-white p-3 dark:bg-slate-900"><div class="flex items-center justify-between gap-2"><p id="quick-entry-draft-title" class="text-[11px] text-slate-500">راجع قبل الحفظ</p><button id="quick-entry-draft-close" type="button" aria-label="اقفل" class="shrink-0 w-6 h-6 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition text-sm font-bold">✕</button></div><div id="quick-entry-draft-list" class="mt-1 space-y-2"></div><div id="quick-entry-draft-actions" class="mt-3 flex gap-2"><button id="quick-entry-confirm" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950" type="button">تأكيد التسجيل</button><button id="quick-entry-edit" class="rounded-xl border border-slate-300 px-3 py-2.5 text-xs text-slate-500 dark:border-slate-700" type="button">تعديل</button></div></div><p id="quick-entry-status" class="min-h-4 text-center text-[11px] text-slate-500"></p>
             </section>
 
@@ -1242,6 +1446,12 @@
                 </a>
             </div>
 
+            <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3">
+                <div class="flex items-center justify-between"><div><p class="text-xs font-bold text-slate-200">الخصوصية والتحكم</p><p class="text-[11px] text-slate-500">بياناتك تحت سيطرتك في أي وقت</p></div><span class="text-lg">🔐</span></div>
+                <div class="grid grid-cols-2 gap-2"><button id="account-export-data" type="button" class="rounded-xl bg-slate-800 py-2.5 text-[11px] font-bold text-slate-200">تصدير بياناتي</button><button id="account-clear-local" type="button" class="rounded-xl border border-slate-700 py-2.5 text-[11px] font-bold text-slate-400">مسح إعدادات الجهاز</button></div>
+                <p class="text-[10px] leading-relaxed text-slate-500">تسجيلات الصوت المؤقتة لا تُرسل للتحليل إلا بعد ضغط «ابعت للتحليل». يمكنك حذف إعدادات الخطة المحفوظة على هذا الجهاز.</p>
+            </div>
+
             <button id="account-logout-btn" class="w-full bg-slate-950/60 border border-rose-500/20 text-rose-400 font-bold py-3.5 rounded-2xl text-sm transition flex items-center justify-center gap-2 hover:bg-rose-500/10">
                 🚪 تسجيل خروج
             </button>
@@ -1559,6 +1769,7 @@
                 accessToken = session.access_token;
                 currentUser = session.user;
                 await loadDashboard();
+                await loadPlanningSettings();
                 await loadAccountTab();
                 loadInvoicesCount();
                 setupAutoRefresh();
@@ -1740,6 +1951,7 @@
 
             renderActiveDays(data.activeDays);
             renderMonthly(data.month);
+            renderPlanning(data);
             renderDaily(data.today, data.flow);
             renderDailyReminder(data.today);
             renderCategories(data.month);
@@ -1787,6 +1999,85 @@
             }).join('');
         }
 
+        function planningSettingsKey() { return `dabbar-financial-settings-${window.__dashboardData?.telegramUserId || currentUser?.id || 'guest'}`; }
+        function defaultPlanningSettings() { return { monthlyIncome: 0, monthlyBudget: 0, categoryBudgets: {}, recurringExpenses: [] }; }
+        function planningSettings() { return window.__financialSettings || defaultPlanningSettings(); }
+        function formatPlanningNumber(value) { return Number(value || 0).toLocaleString('ar-EG'); }
+        function ensurePlanningUI() {
+            if (document.getElementById('planning-card')) return;
+            const monthly = document.getElementById('tab-monthly');
+            const quick = document.getElementById('quick-entry-card');
+            if (!monthly || !quick) return;
+            const wrap = document.createElement('section');
+            wrap.id = 'planning-card';
+            wrap.className = 'bg-slate-950/50 border border-emerald-500/15 rounded-3xl p-4 space-y-3';
+            wrap.innerHTML = `<div class="flex items-center justify-between gap-2"><div><span class="text-[10px] text-emerald-400 font-bold">وضعك المالي</span><h3 class="text-sm font-black text-slate-100">الدخل والميزانية</h3></div><span class="text-lg">🎯</span></div>
+                <div class="grid grid-cols-2 gap-2"><label class="text-[10px] text-slate-400">دخلك الشهري<input id="planning-income" type="number" min="0" inputmode="numeric" placeholder="مثال: 12000" class="mt-1 w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-100 outline-none focus:border-emerald-400"></label><label class="text-[10px] text-slate-400">ميزانيتك الشهرية<input id="planning-budget" type="number" min="0" inputmode="numeric" placeholder="مثال: 9000" class="mt-1 w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-100 outline-none focus:border-emerald-400"></label></div>
+                <div id="planning-summary" class="rounded-2xl bg-emerald-500/10 px-3 py-2 text-[11px] text-emerald-200"></div>
+                <div><div class="mb-1 flex items-center justify-between"><span class="text-[10px] font-bold text-slate-400">حدود أهم الفئات</span><span class="text-[9px] text-slate-600">اختياري</span></div><div id="category-budgets-list" class="space-y-1.5"></div></div>
+                <div class="flex gap-2"><button id="planning-save" type="button" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950">حفظ خطتي</button><button id="planning-reset" type="button" class="rounded-xl border border-slate-700 px-3 py-2.5 text-xs text-slate-400">مسح</button></div>
+                <div class="border-t border-slate-800 pt-3"><div class="flex items-center justify-between"><h4 class="text-xs font-bold text-slate-300">مصاريف متكررة</h4><span class="text-[10px] text-slate-500">تظهر في خطتك</span></div><div class="mt-2 grid grid-cols-[1fr_5rem_2.5rem] gap-2"><input id="recurring-name" placeholder="إيجار / اشتراك" class="rounded-xl border border-slate-700 bg-slate-900 px-2.5 py-2 text-[10px] text-slate-100 outline-none"><input id="recurring-amount" type="number" min="0" placeholder="المبلغ" class="rounded-xl border border-slate-700 bg-slate-900 px-2.5 py-2 text-[10px] text-slate-100 outline-none"><button id="recurring-add" type="button" class="rounded-xl bg-slate-800 text-lg text-emerald-400">+</button></div><div id="recurring-list" class="mt-2 space-y-1.5"></div></div>`;
+            monthly.insertBefore(wrap, quick.nextSibling);
+            const ledger = document.createElement('section');
+            ledger.id = 'expense-ledger-card';
+            ledger.className = 'bg-slate-950/40 border border-slate-800 rounded-3xl p-4 space-y-2';
+            ledger.innerHTML = `<div class="flex items-center justify-between"><div><span class="text-[10px] text-slate-500">مراجعة سريعة</span><h3 class="text-sm font-black text-slate-200">آخر عملياتك</h3></div><span class="text-lg">🧾</span></div><div id="expense-ledger-list"></div>`;
+            monthly.insertBefore(ledger, document.getElementById('monthly-categories-card'));
+            document.getElementById('planning-save').addEventListener('click', savePlanningSettings);
+            document.getElementById('planning-reset').addEventListener('click', () => { window.__financialSettings = defaultPlanningSettings(); renderPlanning(window.__dashboardData || {}); });
+            document.getElementById('recurring-add').addEventListener('click', addRecurringExpense);
+        }
+        function renderPlanning(data) {
+            ensurePlanningUI();
+            const settings = planningSettings();
+            const income = Number(settings.monthlyIncome || 0);
+            const budget = Number(settings.monthlyBudget || 0);
+            const total = Number(data?.month?.total || 0);
+            const incomeOrBudget = income || budget;
+            const remaining = incomeOrBudget ? Math.max(0, incomeOrBudget - total) : 0;
+            const incomeEl = document.getElementById('planning-income');
+            const budgetEl = document.getElementById('planning-budget');
+            if (incomeEl && document.activeElement !== incomeEl) incomeEl.value = income || '';
+            if (budgetEl && document.activeElement !== budgetEl) budgetEl.value = budget || '';
+            const summary = document.getElementById('planning-summary');
+            if (summary) summary.innerHTML = incomeOrBudget ? `المتاح بعد مصاريف الشهر: <strong>${fmt(remaining)}</strong>${income && budget ? ` · الميزانية مستهلكة ${Math.min(100, Math.round((total / budget) * 100))}%` : ''}` : 'أدخل دخلك أو ميزانيتك عشان دبّر يحسبلك المتاح بدل ما يعرض إجمالي الصرف بس.';
+            const categoryBudgetList = document.getElementById('category-budgets-list');
+            const topCategories = Array.isArray(data?.month?.byCategory) ? data.month.byCategory.slice(0, 3) : [];
+            if (categoryBudgetList) categoryBudgetList.innerHTML = topCategories.length ? topCategories.map((item) => `<label class="flex items-center gap-2 rounded-xl bg-slate-900/60 px-2.5 py-1.5 text-[10px] text-slate-400"><span class="flex-1">${CATEGORY_EMOJI[item.name] || '📌'} ${item.name}</span><input data-category-budget="${item.name}" type="number" min="0" placeholder="حد الفئة" value="${settings.categoryBudgets?.[item.name] || ''}" class="w-20 rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-left text-[10px] text-slate-100 outline-none"></label>`).join('') : '<p class="text-[10px] text-slate-500">سجّل مصاريف عشان نعرضلك حدود الفئات.</p>';
+            const recurringList = document.getElementById('recurring-list');
+            if (recurringList) recurringList.innerHTML = (settings.recurringExpenses || []).length ? settings.recurringExpenses.map((item, i) => `<div class="flex items-center justify-between rounded-xl bg-slate-900/70 px-2.5 py-2 text-[10px]"><span>${item.name}</span><span class="text-emerald-300">${fmt(item.amount)} <button type="button" data-recurring-remove="${i}" class="mr-1 text-rose-400">✕</button></span></div>`).join('') : '<p class="text-[10px] text-slate-500">أضف الإيجار أو الاشتراكات عشان تشوف التزاماتك الشهرية قدامك.</p>';
+            recurringList?.querySelectorAll('[data-recurring-remove]').forEach((btn) => btn.addEventListener('click', () => { settings.recurringExpenses.splice(Number(btn.dataset.recurringRemove), 1); savePlanningSettings(); }));
+            const list = document.getElementById('expense-ledger-list');
+            const items = data?.today?.items || [];
+            if (list) list.innerHTML = items.length ? items.slice(0, 5).map((item) => `<div class="flex items-center gap-2 border-b border-slate-800/50 py-2 last:border-0"><span class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10">${CATEGORY_EMOJI[item.category] || '📌'}</span><div class="min-w-0 flex-1"><p class="truncate text-[11px] font-bold text-slate-200">${(item.description || item.category || 'مصروف').replace(/[<>]/g, '')}</p><p class="text-[9px] text-slate-500">${item.category || 'أخرى'}</p></div><span class="text-[11px] font-bold text-rose-400">-${fmt(item.amount)}</span><button type="button" data-expense-edit="${item.id}" data-expense-amount="${item.amount}" data-expense-description="${(item.description || '').replace(/"/g, '&quot;')}" class="text-[11px] text-slate-500 hover:text-emerald-400" aria-label="تعديل العملية">✎</button><button type="button" data-expense-delete="${item.id}" class="text-[11px] text-slate-500 hover:text-rose-400" aria-label="حذف العملية">✕</button></div>`).join('') : '<p class="py-2 text-[10px] text-slate-500">سجّل أول مصروف عشان يظهر هنا للمراجعة.</p>';
+            list?.querySelectorAll('[data-expense-edit]').forEach((btn) => btn.addEventListener('click', () => editExpense(btn.dataset.expenseEdit, btn.dataset.expenseAmount, btn.dataset.expenseDescription)));
+            list?.querySelectorAll('[data-expense-delete]').forEach((btn) => btn.addEventListener('click', () => deleteExpense(btn.dataset.expenseDelete)));
+        }
+        async function editExpense(id, oldAmount, oldDescription) {
+            const amount = Number(prompt('المبلغ الجديد؟', oldAmount));
+            if (!amount || amount <= 0) return;
+            const description = prompt('الوصف الجديد؟', oldDescription || '') ?? oldDescription;
+            try { const res = await fetch(`/api/financial-actions?id=${encodeURIComponent(id)}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({ amount, description }) }); if (!res.ok) throw new Error(); await loadDashboard(); quickStatus('اتعدلت العملية.', 'success'); } catch { quickStatus('معرفناش نعدّل العملية دلوقتي.', 'error'); }
+        }
+        async function loadPlanningSettings() {
+            let settings = null;
+            try { const res = await fetch('/api/financial-actions', { headers: { Authorization: `Bearer ${accessToken}` }, cache: 'no-store' }); if (res.ok) settings = (await res.json()).settings; } catch {}
+            if (!settings) { try { settings = JSON.parse(localStorage.getItem(planningSettingsKey()) || 'null'); } catch {} }
+            window.__financialSettings = settings || defaultPlanningSettings();
+            renderPlanning(window.__dashboardData || {});
+        }
+        async function savePlanningSettings() {
+            const current = planningSettings();
+            const categoryBudgets = { ...(current.categoryBudgets || {}) };
+            document.querySelectorAll('[data-category-budget]').forEach((input) => { const value = Number(input.value || 0); if (value > 0) categoryBudgets[input.dataset.categoryBudget] = value; else delete categoryBudgets[input.dataset.categoryBudget]; });
+            const settings = { ...current, monthlyIncome: Math.max(0, Number(document.getElementById('planning-income')?.value || 0)), monthlyBudget: Math.max(0, Number(document.getElementById('planning-budget')?.value || 0)), categoryBudgets };
+            window.__financialSettings = settings;
+            localStorage.setItem(planningSettingsKey(), JSON.stringify(settings));
+            try { const res = await fetch('/api/financial-actions', { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` }, body: JSON.stringify(settings) }); if (res.ok) window.__financialSettings = (await res.json()).settings; } catch {}
+            renderPlanning(window.__dashboardData || {}); quickStatus('اتحفظت خطتك المالية.', 'success');
+        }
+        function addRecurringExpense() { const name = document.getElementById('recurring-name')?.value.trim(); const amount = Number(document.getElementById('recurring-amount')?.value || 0); if (!name || amount <= 0) return quickStatus('اكتب اسم ومبلغ المصروف المتكرر.', 'error'); const settings = planningSettings(); settings.recurringExpenses = [...(settings.recurringExpenses || []), { id: crypto.randomUUID(), name, amount, day: 1, category: 'أخرى', active: true }]; document.getElementById('recurring-name').value = ''; document.getElementById('recurring-amount').value = ''; savePlanningSettings(); }
+        async function deleteExpense(id) { if (!id || !confirm('تحذف العملية دي؟')) return; try { const res = await fetch(`/api/financial-actions?id=${encodeURIComponent(id)}`, { method: 'DELETE', headers: { Authorization: `Bearer ${accessToken}` } }); if (!res.ok) throw new Error(); await loadDashboard(); quickStatus('اتحذفت العملية.', 'success'); } catch { quickStatus('معرفناش نحذف العملية دلوقتي.', 'error'); } }
         function renderMonthly(month) {
             document.getElementById('monthly-total').textContent = fmt(month.total);
             document.getElementById('monthly-count').textContent = `${month.count} عملية`;
@@ -1892,54 +2183,88 @@
             }
         }
 
-        // نصايح مبنية على أرقام حقيقية بس — مفيش أي رقم متوقع أو متخيّل
+        // نصايح محاسوبة من أرقام العميل نفسها — كل مبلغ ظاهر هنا له أساس في بيانات الشهر
         function renderTips(month) {
             const headline = document.getElementById('tips-headline');
             const listEl = document.getElementById('tips-list');
+            const categories = Array.isArray(month?.byCategory) ? month.byCategory : [];
+            const total = Number(month?.total || 0);
+            const count = Number(month?.count || 0);
 
-            renderWeekdayChart(month.byWeekday || [null, null, null, null, null, null, null], month.weekTotal || 0, month.byWeekdayCount || [], month.byWeekdayTopCategory || [], month.weekDates || []);
+            renderWeekdayChart(month?.byWeekday || [null, null, null, null, null, null, null], month?.weekTotal || 0, month?.byWeekdayCount || [], month?.byWeekdayTopCategory || [], month?.weekDates || []);
 
-            if (month.byCategory.length === 0) {
-                headline.textContent = 'لسه معندكش بيانات';
+            if (!categories.length || total <= 0) {
+                headline.textContent = 'لسه معندكش بيانات كفاية';
+                listEl.innerHTML = '<div class="tip-empty-state"><span>💡</span><p>لما تسجل شوية مصاريف، هتظهرلك اقتراحات بأرقام حقيقية من صرفك.</p></div>';
                 return;
             }
 
-            headline.textContent = `صرفت ${fmt(month.total)} في ${month.count} عملية الشهر ده`;
+            headline.textContent = `صرفت ${fmt(total)} في ${count} عملية الشهر ده`;
 
             const tips = [];
-            const top = month.topCategory;
+            const top = categories[0];
+            const topSaving10 = Math.max(0, Math.round((Number(top.amount) * 0.10) / 10) * 10);
+            const topSaving20 = Math.max(0, Math.round((Number(top.amount) * 0.20) / 10) * 10);
+
             tips.push({
                 icon: CATEGORY_EMOJI[top.name] || '📌',
                 color: 'emerald',
-                title: `أكتر فئة صرفت فيها: ${top.name}`,
-                text: `${fmt(top.amount)} من إجمالي صرفك (${top.percent}%). لو قللت فيها شوية هتحس بفرق واضح في إجمالي الشهر.`,
+                title: `ابدأ من ${top.name} — أكبر فرصة توفير`,
+                text: `أنت صرفت ${fmt(top.amount)} فيها، يعني ${top.percent}% من إجمالي الشهر. لو قللتها 10% بس، هتوفر تقريبًا ${fmt(topSaving10)}.`,
+                saving: topSaving10,
             });
 
-            if (month.prevTotal > 0) {
-                const diff = Math.round(((month.total - month.prevTotal) / month.prevTotal) * 100);
+            if (topSaving20 > 0) {
+                tips.push({
+                    icon: '🎯',
+                    color: 'teal',
+                    title: 'هدف صغير بنتيجة واضحة',
+                    text: `جرّب تقلل نفس الفئة 20% الشهر الجاي. على أرقامك الحالية ده يساوي توفيرًا محتملًا حوالي ${fmt(topSaving20)}.`,
+                    saving: topSaving20,
+                });
+            }
+
+            if (categories.length > 1) {
+                const second = categories[1];
+                const secondSaving = Math.max(0, Math.round((Number(second.amount) * 0.10) / 10) * 10);
+                tips.push({
+                    icon: CATEGORY_EMOJI[second.name] || '📌',
+                    color: 'amber',
+                    title: `راجع ${second.name} كمان`,
+                    text: `الفئة دي أخذت ${fmt(second.amount)} (${second.percent}%). تقليلها 10% يديك مساحة إضافية حوالي ${fmt(secondSaving)}.`,
+                    saving: secondSaving,
+                });
+            }
+
+            if (Number(month?.prevTotal || 0) > 0) {
+                const prevTotal = Number(month.prevTotal);
+                const diff = Math.round(((total - prevTotal) / prevTotal) * 100);
                 if (diff > 0) {
+                    const resetSaving = Math.max(0, Math.round((total * 0.10) / 10) * 10);
                     tips.push({
                         icon: '📈', color: 'rose',
                         title: `صرفك زاد ${diff}% عن ${month.prevLabel}`,
-                        text: `صرفت ${fmt(month.prevTotal)} في ${month.prevLabel} مقابل ${fmt(month.total)} الشهر ده.`,
+                        text: `رجوعك لمستوى أقل 10% من صرف الشهر ده يحتاج تقليل حوالي ${fmt(resetSaving)}. ابدأ بالفئة الأكبر بدل ما تقلل كل حاجة مرة واحدة.`,
+                        saving: resetSaving,
                     });
                 } else if (diff < 0) {
                     tips.push({
                         icon: '📉', color: 'emerald',
-                        title: `صرفك قل ${Math.abs(diff)}% عن ${month.prevLabel}`,
-                        text: `عاش! صرفك الشهر ده أقل من ${month.prevLabel}.`,
+                        title: `أداؤك أحسن من ${month.prevLabel}`,
+                        text: `صرفك قل ${Math.abs(diff)}% مقارنة بـ ${month.prevLabel}. حافظ على نفس العادة وحدد للفئة الأكبر سقفًا قريبًا من ${fmt(top.amount)}.`,
                     });
                 }
             }
 
-            listEl.innerHTML = tips.map((t) => `
-                <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-3.5 flex items-start gap-3">
-                    <div class="w-8 h-8 rounded-full bg-${t.color}-500/20 text-${t.color}-400 flex items-center justify-center text-xs font-bold shrink-0 border border-${t.color}-500/30">${t.icon}</div>
-                    <div class="text-xs text-slate-300 leading-relaxed">
-                        <strong class="text-${t.color}-400 block mb-0.5">${t.title}</strong>
-                        ${t.text}
+            listEl.innerHTML = tips.slice(0, 4).map((t) => `
+                <article class="tip-card tip-card-${t.color}">
+                    <div class="tip-card-icon">${t.icon}</div>
+                    <div class="tip-card-body">
+                        <strong>${t.title}</strong>
+                        <p>${t.text}</p>
+                        ${t.saving ? `<span class="tip-saving">توفير محتمل عند التجربة: ${fmt(t.saving)}</span>` : ''}
                     </div>
-                </div>
+                </article>
             `).join('');
         }
 
@@ -2262,7 +2587,7 @@
         }
 
         // ============ Unified Expense Entry: v5-safe ============
-        let quickEntryDrafts = [], quickEntrySourceText = '', quickEntryRecorder = null, quickEntryChunks = [], quickEntryTimer = null, quickEntrySeconds = 0, quickEntryVoiceBlob = null;
+        let quickEntryDrafts = [], quickEntrySourceText = '', quickEntryRecorder = null, quickEntryChunks = [], quickEntryTimer = null, quickEntrySeconds = 0, quickEntryVoiceBlob = null, quickEntryVoiceCancelled = false;
         let quickStatusTimer = null;
         function quickStatus(message, kind = 'normal') {
             const el = document.getElementById('quick-entry-status');
@@ -2274,6 +2599,26 @@
             if (kind === 'success' && message) quickStatusTimer = setTimeout(() => { if (el.textContent === message) el.textContent = ''; }, 10000);
         }
         function quickShow(id, show) { document.getElementById(id)?.classList.toggle('hidden', !show); }
+        function clearQuickVoicePreview() {
+            const audioEl = document.getElementById('quick-entry-voice-audio');
+            if (!audioEl) return;
+            if (audioEl.src && audioEl.src.startsWith('blob:')) URL.revokeObjectURL(audioEl.src);
+            audioEl.pause();
+            audioEl.removeAttribute('src');
+            audioEl.load();
+        }
+        function cancelQuickVoice() {
+            quickEntryVoiceCancelled = true;
+            quickEntryVoiceBlob = null;
+            clearQuickVoicePreview();
+            if (quickEntryRecorder?.state === 'recording') {
+                quickEntryRecorder.stop();
+                return;
+            }
+            quickShow('quick-entry-recording', false);
+            quickShow('quick-entry-voice-preview', false);
+            quickStatus('');
+        }
         function quickDraftLabel(type) { return type === 'invoice' ? 'فاتورة' : type === 'debt' ? 'دين' : 'مصروف'; }
         // ============ زي رسالة تليجرام بالظبط لما رسالة واحدة فيها أكتر من معاملة — كل معاملة بتتعرض لوحدها هنا ============
         function quickDraft(drafts, transcript) {
@@ -2364,6 +2709,7 @@
                 const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 quickEntryChunks = [];
                 quickEntrySeconds = 0;
+                quickEntryVoiceCancelled = false;
                 const mimeType = pickVoiceMimeType();
                 quickEntryRecorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
                 quickEntryRecorder.ondataavailable = (e) => { if (e.data && e.data.size) quickEntryChunks.push(e.data); };
@@ -2371,6 +2717,14 @@
                     stream.getTracks().forEach((t) => t.stop());
                     clearInterval(quickEntryTimer);
                     quickShow('quick-entry-recording', false);
+                    const wasCancelled = quickEntryVoiceCancelled;
+                    quickEntryVoiceCancelled = false;
+                    if (wasCancelled) {
+                        quickEntryVoiceBlob = null;
+                        quickShow('quick-entry-voice-preview', false);
+                        quickStatus('');
+                        return;
+                    }
                     const blob = new Blob(quickEntryChunks, { type: quickEntryRecorder.mimeType || mimeType || 'audio/webm' });
                     console.warn('DABBAR_VOICE_DEBUG', { size: blob.size, chunks: quickEntryChunks.length, mime: blob.type, seconds: quickEntrySeconds });
                     if (!blob.size) { quickStatus('مسجلناش أي صوت خالص — جرّب تسمح للمتصفح بالميكروفون من إعدادات الموقع وحاول تاني.', 'error'); return; }
@@ -2395,7 +2749,11 @@
             } catch { quickStatus('لازم تسمح للموقع باستخدام الميكروفون.', 'error'); }
         });
         document.getElementById('quick-entry-stop')?.addEventListener('click', () => { if (quickEntryRecorder?.state === 'recording') quickEntryRecorder.stop(); });
-        document.getElementById('quick-entry-voice-retry')?.addEventListener('click', () => { quickShow('quick-entry-voice-preview', false); quickEntryVoiceBlob = null; quickStatus(''); document.getElementById('quick-entry-voice')?.click(); });
+        document.getElementById('quick-entry-recording-cancel')?.addEventListener('click', cancelQuickVoice);
+        document.getElementById('quick-entry-recording-cancel-bottom')?.addEventListener('click', cancelQuickVoice);
+        document.getElementById('quick-entry-voice-cancel')?.addEventListener('click', cancelQuickVoice);
+        document.getElementById('quick-entry-voice-cancel-bottom')?.addEventListener('click', cancelQuickVoice);
+        document.getElementById('quick-entry-voice-retry')?.addEventListener('click', () => { quickEntryVoiceCancelled = false; clearQuickVoicePreview(); quickShow('quick-entry-voice-preview', false); quickEntryVoiceBlob = null; quickStatus(''); document.getElementById('quick-entry-voice')?.click(); });
         document.getElementById('quick-entry-voice-send')?.addEventListener('click', () => {
             if (!quickEntryVoiceBlob) return;
             quickShow('quick-entry-voice-preview', false);
@@ -3140,6 +3498,8 @@
 
         // زرار تسجيل الخروج جوه تاب "حسابي" — المكان الوحيد اللي فيه دلوقتي
         document.getElementById('account-logout-btn').addEventListener('click', doLogout);
+        document.getElementById('account-clear-local')?.addEventListener('click', () => { localStorage.removeItem(planningSettingsKey()); window.__financialSettings = defaultPlanningSettings(); renderPlanning(window.__dashboardData || {}); quickStatus('اتمسحت إعدادات الخطة من الجهاز.', 'success'); });
+        document.getElementById('account-export-data')?.addEventListener('click', () => { const payload = { exportedAt: new Date().toISOString(), dashboard: window.__dashboardData || {}, financialSettings: planningSettings() }; const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'dabbar-my-data.json'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); });
 
         // ============ رفع وقص صورة البروفايل (canvas بسيط، بدون أي مكتبة خارجية) ============
         const avatarBtn = document.getElementById('avatar-btn');

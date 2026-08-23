@@ -290,6 +290,7 @@ export default async function handler(req, res) {
         count: todayExpenses.length,
         avgPerDayThisMonth,
         items: todayExpenses.map((e) => ({
+          id: e.id,
           amount: Number(e.amount),
           category: e.category,
           description: e.description,

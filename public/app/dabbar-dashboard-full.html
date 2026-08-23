@@ -370,6 +370,13 @@
             transform: translateY(-2px);
             box-shadow: 0 12px 24px rgba(16,185,129,.12) !important;
         }
+        #quick-entry-card.is-subscription-locked > .grid { opacity: .42; filter: grayscale(.35); pointer-events: none; }
+        #quick-entry-subscription-lock { display:none; }
+        #quick-entry-subscription-lock:not(.hidden) { display:flex; }
+        #quick-entry-subscription-lock button { background:#08b878; color:#06271a; }
+        html:not([data-theme="light"]) #quick-entry-subscription-lock { background:rgba(251,191,36,.08); border-color:rgba(251,191,36,.28); color:#fde68a; }
+        html[data-theme="light"] #quick-entry-subscription-lock { background:#fff8e1; border-color:#f1d48a; color:#735514; }
+        html[data-theme="light"] #quick-entry-subscription-lock button { background:#08b878; color:#06271a; }
 
         #monthly-total-label + h3 {
             text-shadow: 0 7px 24px rgba(16,185,129,.14);
@@ -920,6 +927,7 @@
 
             <section id="quick-entry-card" class="bg-gradient-to-br from-emerald-50 via-white to-teal-50 border border-emerald-200 rounded-[28px] p-4 space-y-3 shadow-[0_12px_35px_rgba(16,185,129,.14)] dark:bg-slate-950/60 dark:from-slate-950/60 dark:via-slate-950/60 dark:to-slate-900 dark:border-slate-800" aria-label="إضافة مصروف">
                 <div class="flex items-center justify-between"><div><span class="quick-entry-eyebrow">التسجيل الأساسي</span><h3 class="text-sm font-black text-slate-900 dark:text-slate-100">سجّل مصروفك بسرعة</h3><p class="text-[11px] text-slate-500 dark:text-slate-400">اختار الطريقة اللي تريحك — صوت أو كتابة أو فاتورة</p></div><span class="text-2xl" aria-hidden="true">✨</span></div>
+                <div id="quick-entry-subscription-lock" class="hidden items-center justify-between gap-3 rounded-2xl border px-3 py-2.5 text-[11px]"><div><strong class="block">انتهت تجربتك المجانية</strong><span>اشترك عشان تقدر تسجّل مصروفاتك تاني.</span></div><button id="quick-entry-open-subscription" type="button" class="shrink-0 rounded-xl px-3 py-2 text-[10px] font-black">شوف الاشتراك</button></div>
                 <div class="grid grid-cols-3 gap-2"><button id="quick-entry-voice" class="rounded-2xl border border-emerald-200 bg-white/80 px-2 py-3 text-center shadow-sm transition hover:-translate-y-0.5 dark:bg-slate-900" type="button"><span class="mx-auto mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/15 text-xl">🎙</span><span class="block text-[11px] font-bold text-slate-700 dark:text-slate-200">صوت</span></button><button id="quick-entry-text" class="rounded-2xl border border-emerald-200 bg-white/80 px-2 py-3 text-center shadow-sm transition hover:-translate-y-0.5 dark:bg-slate-900" type="button"><span class="mx-auto mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/15 text-xl">✍️</span><span class="block text-[11px] font-bold text-slate-700 dark:text-slate-200">كتابة</span></button><button id="quick-entry-invoice" class="rounded-2xl border border-emerald-200 bg-white/80 px-2 py-3 text-center shadow-sm transition hover:-translate-y-0.5 dark:bg-slate-900" type="button"><span class="mx-auto mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/15 text-xl">📸</span><span class="block text-[11px] font-bold text-slate-700 dark:text-slate-200">فاتورة</span></button></div>
                 <input type="file" id="quick-entry-invoice-input" accept="image/*" class="hidden">
                 <div id="quick-entry-scanning" class="hidden rounded-2xl border border-blue-200 bg-blue-50 p-3 text-center dark:border-blue-500/30 dark:bg-blue-500/10"><div class="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-white text-xl shadow-sm dark:bg-slate-900"><span style="display:inline-block;animation:dabbar-scan-spin 1s linear infinite">⟳</span></div><p class="text-xs font-bold text-blue-700 dark:text-blue-200">بنقرأ الفاتورة...</p><p class="mt-1 text-[10px] text-blue-600/70 dark:text-blue-200/70">دبّر بيستخرج المبلغ والأصناف</p></div>
@@ -2607,6 +2615,8 @@
 
         // ============ نداء عام لـ /api/assistant ============
         async function asstApi(action, payload) {
+            const gatedActions = ['entry_draft', 'entry_invoice_draft', 'entry_confirm', 'receipt_scan', 'voice'];
+            if (gatedActions.includes(action) && !requireQuickEntryAccess()) throw new Error('انتهت التجربة المجانية — اشترك أولًا عشان تسجّل مصروف.');
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), 30000);
             try {
@@ -2628,6 +2638,21 @@
         }
 
         // ============ Unified Expense Entry: v5-safe ============
+        let quickEntrySubscription = { active: true, inTrial: true };
+        function setQuickEntrySubscription(subscription) {
+            quickEntrySubscription = subscription || { active: true, inTrial: true };
+            const locked = !quickEntrySubscription.active && !quickEntrySubscription.inTrial;
+            const card = document.getElementById('quick-entry-card');
+            const lock = document.getElementById('quick-entry-subscription-lock');
+            card?.classList.toggle('is-subscription-locked', locked);
+            lock?.classList.toggle('hidden', !locked);
+        }
+        function requireQuickEntryAccess() {
+            if (quickEntrySubscription.active || quickEntrySubscription.inTrial) return true;
+            quickStatus('انتهت التجربة المجانية — اشترك أولًا عشان تسجّل مصروف.', 'error');
+            document.querySelector('.tab-btn[data-tab="account"]')?.click();
+            return false;
+        }
         let quickEntryDrafts = [], quickEntrySourceText = '', quickEntryRecorder = null, quickEntryChunks = [], quickEntryTimer = null, quickEntrySeconds = 0, quickEntryVoiceBlob = null, quickEntryVoiceCancelled = false;
         let quickStatusTimer = null;
         function quickStatus(message, kind = 'normal') {
@@ -2697,17 +2722,17 @@
             }
             quickStatus(quickEntryDrafts.length > 1 ? `فهمنا ${quickEntryDrafts.length} معاملة — راجعهم ثم أكد التسجيل.` : 'راجع المبلغ والفئة ثم أكد التسجيل.');
         }
-        async function analyzeQuickEntry(payload) { quickStatus('دبّر بيفهم العملية...'); try { const result = await asstApi(payload.imageBase64 ? 'entry_invoice_draft' : 'entry_draft', payload); quickDraft(result.drafts, result.transcript); } catch (e) { quickStatus(e.message || 'تعذر فهم العملية.', 'error'); } }
-        document.getElementById('quick-entry-text')?.addEventListener('click', () => { quickShow('quick-entry-form', true); document.getElementById('quick-entry-input')?.focus(); });
+        async function analyzeQuickEntry(payload) { if (!requireQuickEntryAccess()) return; quickStatus('دبّر بيفهم العملية...'); try { const result = await asstApi(payload.imageBase64 ? 'entry_invoice_draft' : 'entry_draft', payload); quickDraft(result.drafts, result.transcript); } catch (e) { quickStatus(e.message || 'تعذر فهم العملية.', 'error'); } }
+        document.getElementById('quick-entry-text')?.addEventListener('click', () => { if (!requireQuickEntryAccess()) return; quickShow('quick-entry-form', true); document.getElementById('quick-entry-input')?.focus(); });
         document.getElementById('quick-entry-cancel')?.addEventListener('click', () => { quickShow('quick-entry-form', false); quickShow('quick-entry-draft', false); quickStatus(''); });
         document.getElementById('quick-entry-edit')?.addEventListener('click', () => { quickShow('quick-entry-draft', false); quickShow('quick-entry-form', true); document.getElementById('quick-entry-input').value = quickEntrySourceText || ''; });
         document.getElementById('quick-entry-analyze')?.addEventListener('click', () => { const text = document.getElementById('quick-entry-input')?.value.trim(); if (!text) return quickStatus('اكتب العملية الأول.', 'error'); analyzeQuickEntry({ text }); });
-        document.getElementById('quick-entry-confirm')?.addEventListener('click', async () => { if (!quickEntryDrafts.length) return; const btn = document.getElementById('quick-entry-confirm'); btn.disabled = true; quickStatus('جاري حفظ العملية...'); try { const result = await asstApi('entry_confirm', { drafts: quickEntryDrafts }); quickShow('quick-entry-draft', false); quickStatus(result.message || 'تم التسجيل بنجاح.', 'success'); await loadDashboard(); } catch (e) { quickStatus(e.message || 'تعذر الحفظ.', 'error'); } finally { btn.disabled = false; } });
-        document.getElementById('quick-entry-invoice')?.addEventListener('click', () => document.getElementById('quick-entry-invoice-input')?.click());
+        document.getElementById('quick-entry-confirm')?.addEventListener('click', async () => { if (!requireQuickEntryAccess() || !quickEntryDrafts.length) return; const btn = document.getElementById('quick-entry-confirm'); btn.disabled = true; quickStatus('جاري حفظ العملية...'); try { const result = await asstApi('entry_confirm', { drafts: quickEntryDrafts }); quickShow('quick-entry-draft', false); quickStatus(result.message || 'تم التسجيل بنجاح.', 'success'); await loadDashboard(); } catch (e) { quickStatus(e.message || 'تعذر الحفظ.', 'error'); } finally { btn.disabled = false; } });
+        document.getElementById('quick-entry-invoice')?.addEventListener('click', () => { if (!requireQuickEntryAccess()) return; document.getElementById('quick-entry-invoice-input')?.click(); });
         document.getElementById('quick-entry-draft-close')?.addEventListener('click', () => { quickShow('quick-entry-draft', false); quickStatus(''); });
         // ============ فاتورة سريعة: نفس بالظبط سلوك "امسح فاتورة" — بتستخرج كل صنف بسعره وتتسجل أوتوماتيك من غير خطوة تأكيد إضافية ============
         async function analyzeQuickInvoice(file) {
-            if (!file) return;
+            if (!requireQuickEntryAccess() || !file) return;
             if (!file.type.startsWith('image/')) return quickStatus('من فضلك اختار ملف صورة.', 'error');
             if (file.size > 8 * 1024 * 1024) return quickStatus('الصورة كبيرة أوي، اختار صورة أصغر من 8 ميجابايت.', 'error');
             quickShow('quick-entry-form', false);
@@ -2744,6 +2769,7 @@
             return '';
         }
         document.getElementById('quick-entry-voice')?.addEventListener('click', async () => {
+            if (!requireQuickEntryAccess()) return;
             if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) return quickStatus('المتصفح لا يدعم التسجيل الصوتي.', 'error');
             if (quickEntryRecorder?.state === 'recording') return;
             try {
@@ -2794,6 +2820,7 @@
         document.getElementById('quick-entry-recording-cancel-bottom')?.addEventListener('click', cancelQuickVoice);
         document.getElementById('quick-entry-voice-cancel')?.addEventListener('click', cancelQuickVoice);
         document.getElementById('quick-entry-voice-cancel-bottom')?.addEventListener('click', cancelQuickVoice);
+        document.getElementById('quick-entry-open-subscription')?.addEventListener('click', () => document.querySelector('.tab-btn[data-tab="account"]')?.click());
         document.getElementById('quick-entry-voice-retry')?.addEventListener('click', () => { quickEntryVoiceCancelled = false; clearQuickVoicePreview(); quickShow('quick-entry-voice-preview', false); quickEntryVoiceBlob = null; quickStatus(''); document.getElementById('quick-entry-voice')?.click(); });
         document.getElementById('quick-entry-voice-send')?.addEventListener('click', () => {
             if (!quickEntryVoiceBlob) return;
@@ -3331,8 +3358,10 @@
             const card = document.getElementById('account-subscription-card');
             const hero = document.getElementById('premium-hero-card');
             if (!card || !subscription) return;
+            setQuickEntrySubscription(subscription);
 
             if (subscription.active) {
+                setQuickEntrySubscription(subscription);
                 card.classList.add('hidden');
                 if (hero) hero.classList.add('hidden');
                 return;

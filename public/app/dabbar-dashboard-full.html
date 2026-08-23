@@ -186,6 +186,422 @@
         @keyframes activeDaysFlicker { 0%,100% { transform:rotate(-2deg) scale(1); } 50% { transform:rotate(2deg) scale(1.035); } }
         @media (max-width:360px) { .active-days-strip { gap:.42rem; } .active-days-dots { gap:.12rem; } .active-days-dot { min-width:.92rem; } .active-days-title { font-size:.61rem; } .active-days-badge { font-size:.52rem; padding:.28rem .42rem; } }
 
+        /* ============================================================
+           Premium single-canvas skin
+           تصميم بصري فقط: نفس الترتيب والمحتوى والمنطق، لكن كسطح واحد
+           من غير حدود أو فواصل صريحة بين الأقسام.
+           ============================================================ */
+        :root {
+            --db-canvas: #f4f8f5;
+            --db-surface: rgba(255,255,255,.82);
+            --db-surface-strong: #ffffff;
+            --db-surface-soft: #edf5ef;
+            --db-ink: #143126;
+            --db-muted: #718078;
+            --db-shadow: 0 18px 45px rgba(17, 55, 35, .07);
+            --db-shadow-soft: 0 8px 24px rgba(17, 55, 35, .045);
+            --db-accent: #16a878;
+            --db-accent-soft: rgba(22,168,120,.11);
+        }
+
+        html:not([data-theme="light"]) {
+            --db-canvas: #08100e;
+            --db-surface: rgba(17, 29, 24, .88);
+            --db-surface-strong: #121c18;
+            --db-surface-soft: rgba(30, 48, 39, .72);
+            --db-ink: #eef8f1;
+            --db-muted: #9aac9f;
+            --db-shadow: 0 20px 48px rgba(0, 0, 0, .24);
+            --db-shadow-soft: 0 9px 25px rgba(0, 0, 0, .18);
+            --db-accent: #34d399;
+            --db-accent-soft: rgba(52,211,153,.12);
+        }
+
+        html[data-theme="light"] body,
+        html:not([data-theme="light"]) body {
+            background: var(--db-canvas) !important;
+            color: var(--db-ink);
+        }
+
+        body {
+            letter-spacing: -.01em;
+            transition: background-color .25s ease, color .25s ease;
+        }
+
+        /* الحاوية الرئيسية تتحول إلى لوحة واحدة ممتدة */
+        body > .max-w-4xl.mx-auto.bg-slate-900.flex-1 {
+            width: 100% !important;
+            max-width: 56rem !important;
+            margin: 0 auto !important;
+            border: 0 !important;
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            background: var(--db-canvas) !important;
+        }
+
+        body > .max-w-4xl.mx-auto.bg-slate-900.flex-1 > .bg-slate-900\/90,
+        body > .max-w-4xl.mx-auto.bg-slate-900.flex-1 > .bg-slate-900 {
+            background: transparent !important;
+        }
+
+        /* Brand + report header: طبقتان هادئتان بدون خط فاصل */
+        body > .max-w-4xl.mx-auto.bg-slate-900.flex-1 > div:first-child {
+            padding: 1.2rem 1.5rem .35rem !important;
+        }
+
+        body > .max-w-4xl.mx-auto.bg-slate-900.flex-1 > div:nth-child(2) {
+            border: 0 !important;
+            padding: .65rem 1.5rem 1rem !important;
+            background: linear-gradient(180deg, var(--db-canvas) 0%, transparent 100%) !important;
+        }
+
+        #brandbar-theme-btn,
+        #refresh-btn {
+            border: 0 !important;
+            background: var(--db-surface-soft) !important;
+            box-shadow: var(--db-shadow-soft) !important;
+            color: var(--db-muted) !important;
+        }
+
+        #header-icon {
+            box-shadow: 0 10px 24px rgba(16,185,129,.16) !important;
+        }
+
+        #header-badge,
+        #streak-badge {
+            border: 0 !important;
+            background: var(--db-accent-soft) !important;
+        }
+
+        #last-updated-label {
+            color: var(--db-muted) !important;
+            opacity: .8;
+        }
+
+        /* المحتوى كله على نفس الخلفية؛ البطاقات تميّز بالعمق لا بالإطار */
+        body > .max-w-4xl.mx-auto.bg-slate-900.flex-1 > .flex-1.overflow-y-auto {
+            background: transparent !important;
+            scrollbar-color: rgba(120,145,130,.35) transparent;
+        }
+
+        .flex-1.overflow-y-auto .tab-content {
+            padding: 1.05rem 1.5rem 1.25rem !important;
+            gap: 1rem;
+        }
+
+        .flex-1.overflow-y-auto .tab-content > section,
+        .flex-1.overflow-y-auto .tab-content > div {
+            border-color: transparent !important;
+            box-shadow: var(--db-shadow-soft);
+        }
+
+        /* منع كل الخطوط الداخلية والفواصل الموروثة من الـ utility classes */
+        .flex-1.overflow-y-auto .border,
+        .flex-1.overflow-y-auto .border-t,
+        .flex-1.overflow-y-auto .border-b,
+        .flex-1.overflow-y-auto .border-l,
+        .flex-1.overflow-y-auto .border-r,
+        .flex-1.overflow-y-auto [class*="divide-"] > :not([hidden]) ~ :not([hidden]) {
+            border-color: transparent !important;
+        }
+
+        .flex-1.overflow-y-auto .border-t,
+        .flex-1.overflow-y-auto .border-b,
+        .flex-1.overflow-y-auto .border-l,
+        .flex-1.overflow-y-auto .border-r,
+        .flex-1.overflow-y-auto [class*="divide-"] > :not([hidden]) ~ :not([hidden]) {
+            border-width: 0 !important;
+        }
+
+        /* السطح الأساسي للأقسام الثابتة والديناميكية */
+        #tab-monthly > section:not(#daily-reminder-card),
+        #tab-monthly > div,
+        #tab-daily > div,
+        #tab-categories > div,
+        #tab-tips > div,
+        #tab-debts > div,
+        #tab-assistant > div,
+        #tab-account > div {
+            background: var(--db-surface) !important;
+            box-shadow: var(--db-shadow-soft) !important;
+        }
+
+        #tab-monthly > section:not(#daily-reminder-card),
+        #tab-monthly > div,
+        #tab-daily > div,
+        #tab-categories > div,
+        #tab-tips > div,
+        #tab-debts > div,
+        #tab-assistant > div,
+        #tab-account > div {
+            border-radius: 1.4rem !important;
+        }
+
+        /* بطاقات التركيز: أخضر ناعم ومندمج بدل border + shadow ثقيل */
+        #quick-entry-card,
+        #monthly-total-label + h3,
+        #tab-tips > div:first-child,
+        #tab-assistant > div:first-child {
+            box-shadow: 0 15px 38px rgba(16,185,129,.09) !important;
+        }
+
+        #quick-entry-card {
+            background: linear-gradient(135deg, rgba(236,253,245,.96), rgba(255,255,255,.86) 60%, rgba(240,253,250,.9)) !important;
+            padding: 1.15rem !important;
+        }
+
+        html:not([data-theme="light"]) #quick-entry-card {
+            background: linear-gradient(135deg, rgba(20,42,32,.96), rgba(16,28,23,.92) 60%, rgba(13,34,29,.96)) !important;
+        }
+
+        #quick-entry-card > .grid > button {
+            border: 0 !important;
+            border-radius: 1.05rem !important;
+            background: rgba(255,255,255,.7) !important;
+            box-shadow: 0 7px 18px rgba(17,55,35,.06) !important;
+        }
+
+        html:not([data-theme="light"]) #quick-entry-card > .grid > button {
+            background: rgba(255,255,255,.055) !important;
+            box-shadow: none !important;
+        }
+
+        #quick-entry-card > .grid > button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px rgba(16,185,129,.12) !important;
+        }
+
+        #monthly-total-label + h3 {
+            text-shadow: 0 7px 24px rgba(16,185,129,.14);
+        }
+
+        #monthly-categories-card,
+        #daily-items-list,
+        #all-categories-list,
+        #tips-list,
+        #debts-owed-to-you-list,
+        #debts-you-owe-list {
+            min-height: 2.6rem;
+        }
+
+        /* صفوف الإحصائيات تصبح كتلًا هادئة داخل نفس السطح */
+        #tab-daily .grid.grid-cols-2 > div,
+        #tab-debts .grid.grid-cols-2 > div,
+        #tab-daily [class*="grid-cols-2"] > div {
+            border: 0 !important;
+            background: var(--db-surface-soft) !important;
+            box-shadow: none !important;
+            border-radius: 1rem !important;
+        }
+
+        #tab-daily [class*="grid-cols-2"] > div > span:last-child,
+        #tab-debts [class*="grid-cols-2"] > div > span:last-child {
+            text-shadow: 0 5px 16px rgba(16,185,129,.1);
+        }
+
+        /* الرسم البياني: أرضية نظيفة من غير خط baseline */
+        #weekday-chart-container {
+            border-bottom: 0 !important;
+            padding-top: 1.2rem !important;
+        }
+
+        #weekday-detail-panel {
+            border: 0 !important;
+            box-shadow: none !important;
+            background: var(--db-surface-soft) !important;
+        }
+
+        #weekday-detail-panel > div:first-child {
+            border-bottom: 0 !important;
+        }
+
+        /* الحقول والأزرار تعتمد على contrast والمساحة بدل الإطارات */
+        .flex-1.overflow-y-auto input,
+        .flex-1.overflow-y-auto textarea,
+        .flex-1.overflow-y-auto select {
+            border-color: transparent !important;
+            background: var(--db-surface-soft) !important;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.18), 0 4px 12px rgba(17,55,35,.035) !important;
+        }
+
+        html:not([data-theme="light"]) .flex-1.overflow-y-auto input,
+        html:not([data-theme="light"]) .flex-1.overflow-y-auto textarea,
+        html:not([data-theme="light"]) .flex-1.overflow-y-auto select {
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.04) !important;
+        }
+
+        .flex-1.overflow-y-auto button {
+            transition: transform .18s ease, box-shadow .18s ease, background-color .18s ease, color .18s ease !important;
+        }
+
+        .flex-1.overflow-y-auto button:active {
+            transform: scale(.975);
+        }
+
+        /* navigation + footer جزء من نفس اللوحة، وليس بطاقة أخيرة */
+        body > .max-w-4xl.mx-auto.bg-slate-900.flex-1 > div:last-child,
+        #footer-cta {
+            border: 0 !important;
+            background: var(--db-canvas) !important;
+        }
+
+        body > .max-w-4xl.mx-auto.bg-slate-900.flex-1 > div:last-child {
+            padding: .7rem 1.1rem .55rem !important;
+        }
+
+        .tab-btn {
+            color: var(--db-muted) !important;
+            gap: .35rem !important;
+            padding: .15rem .45rem !important;
+        }
+
+        .tab-btn .tab-icon-wrap {
+            border: 0 !important;
+            background: transparent !important;
+            opacity: .78;
+            transition: background-color .18s ease, opacity .18s ease, transform .18s ease !important;
+        }
+
+        .tab-btn:hover .tab-icon-wrap {
+            background: var(--db-accent-soft) !important;
+            opacity: 1;
+        }
+
+        .tab-btn.active-tab .tab-icon-wrap {
+            background: var(--db-accent-soft) !important;
+            opacity: 1;
+            transform: translateY(-1px);
+        }
+
+        .tab-btn.active-tab {
+            color: var(--db-accent) !important;
+        }
+
+        #footer-cta {
+            width: 100%;
+            padding: .25rem 0 .35rem !important;
+            background: transparent !important;
+        }
+
+        #footer-cta button {
+            border: 0 !important;
+            border-radius: .95rem !important;
+            box-shadow: 0 8px 18px rgba(17,55,35,.06) !important;
+        }
+
+        #footer-cta button:last-child {
+            background: var(--db-surface-soft) !important;
+            color: var(--db-ink) !important;
+            box-shadow: none !important;
+        }
+
+        #footer-cta p {
+            color: var(--db-muted) !important;
+            opacity: .82;
+        }
+
+        /* responsive: الحواف تختفي تمامًا على الهاتف، مع تنفّس أفضل على سطح المكتب */
+        @media (min-width: 768px) {
+            body > .max-w-4xl.mx-auto.bg-slate-900.flex-1 {
+                min-height: 100dvh;
+            }
+            .flex-1.overflow-y-auto .tab-content {
+                padding-inline: 2rem !important;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .flex-1.overflow-y-auto .tab-content {
+                padding-inline: 1rem !important;
+                padding-top: .85rem !important;
+            }
+            body > .max-w-4xl.mx-auto.bg-slate-900.flex-1 > div:first-child,
+            body > .max-w-4xl.mx-auto.bg-slate-900.flex-1 > div:nth-child(2) {
+                padding-inline: 1rem !important;
+            }
+            #footer-cta {
+                padding-inline: 1rem !important;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: .01ms !important;
+                animation-iteration-count: 1 !important;
+                scroll-behavior: auto !important;
+            }
+        }
+        /* Final blend: تقليل فصل الكتل البيضاء داخل الـ canvas */
+        .flex-1.overflow-y-auto .tab-content > * + * {
+            margin-top: .7rem !important;
+        }
+
+        .flex-1.overflow-y-auto .tab-content > section,
+        .flex-1.overflow-y-auto .tab-content > div {
+            box-shadow: none !important;
+        }
+
+        #tab-monthly > section:not(#daily-reminder-card),
+        #tab-monthly > div,
+        #tab-daily > div,
+        #tab-categories > div,
+        #tab-tips > div,
+        #tab-debts > div,
+        #tab-assistant > div,
+        #tab-account > div {
+            background: transparent !important;
+        }
+
+        #active-days-card {
+            background: var(--db-surface-soft) !important;
+        }
+
+        #quick-entry-card {
+            background: linear-gradient(135deg, rgba(236,253,245,.96), rgba(255,255,255,.72) 62%, rgba(240,253,250,.84)) !important;
+            box-shadow: 0 15px 38px rgba(16,185,129,.08) !important;
+        }
+
+        html:not([data-theme="light"]) #quick-entry-card {
+            background: linear-gradient(135deg, rgba(20,42,32,.94), rgba(16,28,23,.74) 62%, rgba(13,34,29,.86)) !important;
+        }
+
+        #tab-monthly > div:nth-of-type(2) {
+            background: linear-gradient(135deg, var(--db-surface-soft), transparent 82%) !important;
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.28) !important;
+        }
+
+        html:not([data-theme="light"]) #tab-monthly > div:nth-of-type(2) {
+            box-shadow: inset 0 1px 0 rgba(255,255,255,.045) !important;
+        }
+
+        #monthly-categories-card,
+        #monthly-tip-card {
+            background: transparent !important;
+        }
+
+        #tab-daily > div:first-child,
+        #tab-categories > div:first-child,
+        #tab-tips > div:first-child,
+        #tab-debts > div:first-child,
+        #tab-assistant > div:first-child,
+        #tab-account > div:first-child {
+            background: linear-gradient(135deg, var(--db-surface-soft), transparent 84%) !important;
+        }
+
+        #tab-daily .grid.grid-cols-2 > div,
+        #tab-debts .grid.grid-cols-2 > div {
+            background: var(--db-surface-soft) !important;
+        }
+
+        #tab-monthly .text-slate-500,
+        #tab-daily .text-slate-500,
+        #tab-categories .text-slate-500,
+        #tab-tips .text-slate-500,
+        #tab-debts .text-slate-500,
+        #tab-assistant .text-slate-500,
+        #tab-account .text-slate-500 {
+            opacity: .92;
+        }
         </style>
 </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col overflow-hidden">
@@ -270,20 +686,21 @@
                 <div id="quick-entry-draft" class="hidden rounded-2xl border border-emerald-200 bg-white p-3 dark:bg-slate-900"><div class="flex items-center justify-between gap-2"><p id="quick-entry-draft-title" class="text-[11px] text-slate-500">راجع قبل الحفظ</p><button id="quick-entry-draft-close" type="button" aria-label="اقفل" class="shrink-0 w-6 h-6 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition text-sm font-bold">✕</button></div><div id="quick-entry-draft-list" class="mt-1 space-y-2"></div><div id="quick-entry-draft-actions" class="mt-3 flex gap-2"><button id="quick-entry-confirm" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950" type="button">تأكيد التسجيل</button><button id="quick-entry-edit" class="rounded-xl border border-slate-300 px-3 py-2.5 text-xs text-slate-500 dark:border-slate-700" type="button">تعديل</button></div></div><p id="quick-entry-status" class="min-h-4 text-center text-[11px] text-slate-500"></p>
             </section>
 
-            <div class="bg-gradient-to-br from-emerald-950/60 to-slate-900 border border-emerald-500/30 rounded-3xl p-4 text-center space-y-2 shadow-lg">
-                <span class="text-xs text-emerald-400 font-semibold block" id="monthly-total-label">إجمالي صرفك الشهر ده</span>
-                <h3 class="text-3xl font-black text-emerald-300" id="monthly-total">—</h3>
-                <p class="text-[11px] text-slate-400" id="monthly-compare">لسه معندناش بيانات كفاية عشان نقارن بالشهر اللي فات.</p>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3">
-                <div class="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl">
-                    <span class="text-[11px] text-slate-400 block mb-1">عدد العمليات الشهر ده</span>
-                    <span class="text-lg font-bold text-slate-200" id="monthly-count">—</span>
+            <div class="bg-gradient-to-br from-emerald-950/60 to-slate-900 border border-emerald-500/30 rounded-3xl p-4 shadow-lg">
+                <div class="text-center space-y-1 pb-3">
+                    <span class="text-xs text-emerald-400 font-semibold block" id="monthly-total-label">إجمالي صرفك الشهر ده</span>
+                    <h3 class="text-3xl font-black text-emerald-300" id="monthly-total">—</h3>
+                    <p class="text-[11px] text-slate-400" id="monthly-compare">لسه معندناش بيانات كفاية عشان نقارن بالشهر اللي فات.</p>
                 </div>
-                <div class="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl">
-                    <span class="text-[11px] text-slate-400 block mb-1">متوسط اليوم</span>
-                    <span class="text-lg font-bold text-rose-400" id="monthly-avg">—</span>
+                <div class="grid grid-cols-2 divide-x divide-x-reverse divide-emerald-500/20 border-t border-emerald-500/20 pt-3">
+                    <div class="text-center">
+                        <span class="block text-[10px] text-slate-400 mb-0.5">عدد العمليات الشهر ده</span>
+                        <span class="block text-base font-black text-slate-100" id="monthly-count">—</span>
+                    </div>
+                    <div class="text-center">
+                        <span class="block text-[10px] text-slate-400 mb-0.5">متوسط اليوم</span>
+                        <span class="block text-base font-black text-rose-400" id="monthly-avg">—</span>
+                    </div>
                 </div>
             </div>
 
@@ -297,6 +714,19 @@
             <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-3.5 flex items-start gap-3" id="monthly-tip-card" style="display:none;">
                 <div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold shrink-0 border border-emerald-500/30">💡</div>
                 <div class="text-xs text-slate-300 leading-relaxed" id="monthly-tip-text"></div>
+            </div>
+
+            <!-- أزرار الشهر داخل محتوى تبويب شهري -->
+            <div class="monthly-inline-actions" id="footer-cta">
+                <div class="flex gap-2 mb-1">
+                    <button id="download-monthly-pdf" class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold py-2 rounded-xl text-xs transition flex items-center justify-center gap-2">
+                        <span id="download-pdf-icon">📄</span> <span id="download-pdf-label">تقرير PDF</span>
+                    </button>
+                    <button id="open-archive" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-2 rounded-xl text-xs transition border border-slate-700 flex items-center justify-center gap-2">
+                        <span>🗂️</span> الأرشيف
+                    </button>
+                </div>
+                <p class="text-[9px] text-slate-500 text-center mt-1">تقدر تطلب التقرير في أي وقت خلال الشهر، مش لازم تستنى آخره.</p>
             </div>
 
         </div>
@@ -850,19 +1280,6 @@
                 <span class="tab-icon-wrap w-9 h-9 rounded-xl border border-transparent flex items-center justify-center text-base overflow-hidden" id="nav-avatar-wrap">👤</span>
                 حسابي
             </button>
-        </div>
-
-        <!-- Footer Action (only visible on monthly tab) -->
-        <div class="p-4 bg-slate-900 border-t border-slate-800/80" id="footer-cta">
-            <div class="flex gap-2 mb-1">
-                <button id="download-monthly-pdf" class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold py-2 rounded-xl text-xs transition flex items-center justify-center gap-2">
-                    <span id="download-pdf-icon">📄</span> <span id="download-pdf-label">تقرير PDF</span>
-                </button>
-                <button id="open-archive" class="flex-1 bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-2 rounded-xl text-xs transition border border-slate-700 flex items-center justify-center gap-2">
-                    <span>🗂️</span> الأرشيف
-                </button>
-            </div>
-            <p class="text-[9px] text-slate-500 text-center mt-1">تقدر تطلب التقرير في أي وقت خلال الشهر، مش لازم تستنى آخره.</p>
         </div>
 
     </div>
@@ -1888,7 +2305,7 @@
                                 <p class="truncate text-sm font-bold text-slate-800 dark:text-slate-100">${title}</p>
                                 ${meta ? `<p class="mt-0.5 truncate text-[11px] text-slate-500 dark:text-slate-400">${meta}</p>` : ''}
                             </div>
-                            <span class="shrink-0 text-sm font-black text-emerald-600 dark:text-emerald-300">${fmt(draft.amount)} ج.م</span>
+                            <span class="shrink-0 text-sm font-black text-emerald-600 dark:text-emerald-300">${fmt(draft.amount)}</span>
                         </div>`;
                 }).join('');
             }

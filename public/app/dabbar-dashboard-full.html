@@ -242,7 +242,7 @@
                 <div id="quick-entry-scanning" class="hidden rounded-2xl border border-blue-200 bg-blue-50 p-3 text-center dark:border-blue-500/30 dark:bg-blue-500/10"><div class="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-white text-xl shadow-sm dark:bg-slate-900"><span style="display:inline-block;animation:dabbar-scan-spin 1s linear infinite">⟳</span></div><p class="text-xs font-bold text-blue-700 dark:text-blue-200">بنقرأ الفاتورة...</p><p class="mt-1 text-[10px] text-blue-600/70 dark:text-blue-200/70">دبّر بيستخرج المبلغ والأصناف</p></div>
                 <div id="quick-entry-form" class="hidden space-y-2"><textarea id="quick-entry-input" rows="2" maxlength="1200" placeholder="مثال: صرفت 75 جنيه أكل" class="w-full resize-none rounded-2xl border border-emerald-200 bg-white px-3 py-2.5 text-xs outline-none dark:bg-slate-900 dark:text-slate-100"></textarea><div class="flex gap-2"><button id="quick-entry-analyze" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950" type="button">فهم وتجهيز</button><button id="quick-entry-cancel" class="rounded-xl border border-slate-300 px-3 py-2.5 text-xs text-slate-500 dark:border-slate-700" type="button">إلغاء</button></div></div>
                 <div id="quick-entry-recording" class="hidden rounded-2xl border border-rose-200 bg-rose-50 p-3 text-center text-xs text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200"><div>جاري التسجيل...</div><div id="quick-entry-recording-time" class="mt-1 font-black">00:00</div><button id="quick-entry-stop" class="mt-2 rounded-xl bg-rose-500 px-4 py-2 font-bold text-white" type="button">إيقاف وتحليل</button></div>
-                <div id="quick-entry-draft" class="hidden rounded-2xl border border-emerald-200 bg-white p-3 dark:bg-slate-900"><p class="text-[11px] text-slate-500">راجع قبل الحفظ</p><div id="quick-entry-draft-list" class="mt-1 space-y-2"></div><div class="mt-3 flex gap-2"><button id="quick-entry-confirm" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950" type="button">تأكيد التسجيل</button><button id="quick-entry-edit" class="rounded-xl border border-slate-300 px-3 py-2.5 text-xs text-slate-500 dark:border-slate-700" type="button">تعديل</button></div></div><p id="quick-entry-status" class="min-h-4 text-center text-[11px] text-slate-500"></p>
+                <div id="quick-entry-draft" class="hidden rounded-2xl border border-emerald-200 bg-white p-3 dark:bg-slate-900"><p id="quick-entry-draft-title" class="text-[11px] text-slate-500">راجع قبل الحفظ</p><div id="quick-entry-draft-list" class="mt-1 space-y-2"></div><div id="quick-entry-draft-actions" class="mt-3 flex gap-2"><button id="quick-entry-confirm" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950" type="button">تأكيد التسجيل</button><button id="quick-entry-edit" class="rounded-xl border border-slate-300 px-3 py-2.5 text-xs text-slate-500 dark:border-slate-700" type="button">تعديل</button></div></div><p id="quick-entry-status" class="min-h-4 text-center text-[11px] text-slate-500"></p>
             </section>
 
             <div class="bg-gradient-to-br from-emerald-950/60 to-slate-900 border border-emerald-500/30 rounded-3xl p-4 text-center space-y-2 shadow-lg">
@@ -1790,6 +1790,8 @@
             quickEntrySourceText = transcript || quickEntryDrafts[0]?.sourceText || '';
             quickShow('quick-entry-draft', true);
             quickShow('quick-entry-form', false);
+            document.getElementById('quick-entry-draft-title').textContent = 'راجع قبل الحفظ';
+            document.getElementById('quick-entry-draft-actions')?.classList.remove('hidden');
             const list = document.getElementById('quick-entry-draft-list');
             if (list) {
                 list.innerHTML = quickEntryDrafts.map((draft) => {
@@ -1808,8 +1810,70 @@
         document.getElementById('quick-entry-analyze')?.addEventListener('click', () => { const text = document.getElementById('quick-entry-input')?.value.trim(); if (!text) return quickStatus('اكتب العملية الأول.', 'error'); analyzeQuickEntry({ text }); });
         document.getElementById('quick-entry-confirm')?.addEventListener('click', async () => { if (!quickEntryDrafts.length) return; const btn = document.getElementById('quick-entry-confirm'); btn.disabled = true; quickStatus('جاري حفظ العملية...'); try { const result = await asstApi('entry_confirm', { drafts: quickEntryDrafts }); quickShow('quick-entry-draft', false); quickStatus(result.message || 'تم التسجيل بنجاح.', 'success'); await loadDashboard(); } catch (e) { quickStatus(e.message || 'تعذر الحفظ.', 'error'); } finally { btn.disabled = false; } });
         document.getElementById('quick-entry-invoice')?.addEventListener('click', () => document.getElementById('quick-entry-invoice-input')?.click());
-        document.getElementById('quick-entry-invoice-input')?.addEventListener('change', (event) => { const file = event.target.files?.[0]; if (!file) return; const reader = new FileReader(); reader.onload = () => analyzeQuickEntry({ imageBase64: reader.result }); reader.readAsDataURL(file); event.target.value = ''; });
-        document.getElementById('quick-entry-voice')?.addEventListener('click', async () => { if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) return quickStatus('المتصفح لا يدعم التسجيل الصوتي.', 'error'); try { const stream = await navigator.mediaDevices.getUserMedia({ audio: true }); quickEntryChunks = []; quickEntrySeconds = 0; quickEntryRecorder = new MediaRecorder(stream); quickEntryRecorder.ondataavailable = (e) => e.data.size && quickEntryChunks.push(e.data); quickEntryRecorder.onstop = () => { stream.getTracks().forEach((t) => t.stop()); clearInterval(quickEntryTimer); const blob = new Blob(quickEntryChunks, { type: quickEntryRecorder.mimeType || 'audio/webm' }); const reader = new FileReader(); reader.onloadend = () => analyzeQuickEntry({ audioBase64: reader.result, mimeType: blob.type }); reader.readAsDataURL(blob); quickShow('quick-entry-recording', false); }; quickEntryRecorder.start(); quickShow('quick-entry-recording', true); quickStatus('اتكلم بوضوح: المبلغ ثم الفئة.'); quickEntryTimer = setInterval(() => { quickEntrySeconds++; const el = document.getElementById('quick-entry-recording-time'); if (el) el.textContent = `00:${String(quickEntrySeconds).padStart(2, '0')}`; if (quickEntrySeconds >= 30) quickEntryRecorder.stop(); }, 1000); } catch { quickStatus('لازم تسمح للموقع باستخدام الميكروفون.', 'error'); } });
+        // ============ فاتورة سريعة: نفس بالظبط سلوك "امسح فاتورة" — بتستخرج كل صنف بسعره وتتسجل أوتوماتيك من غير خطوة تأكيد إضافية ============
+        async function analyzeQuickInvoice(file) {
+            if (!file) return;
+            if (!file.type.startsWith('image/')) return quickStatus('من فضلك اختار ملف صورة.', 'error');
+            if (file.size > 8 * 1024 * 1024) return quickStatus('الصورة كبيرة أوي، اختار صورة أصغر من 8 ميجابايت.', 'error');
+            quickShow('quick-entry-form', false);
+            quickShow('quick-entry-draft', false);
+            quickStatus('دبّر بيقرا الفاتورة...');
+            try {
+                const base64 = await new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = reject; reader.readAsDataURL(file); });
+                const result = await asstApi('receipt_scan', { imageBase64: base64 });
+                const list = document.getElementById('quick-entry-draft-list');
+                const itemsHtml = (result.items || []).map((it) => `<div class="flex items-center justify-between gap-2 text-sm"><span>${CATEGORY_EMOJI[it.category] || '📌'} ${it.name}</span><span class="shrink-0 font-bold">${fmt(it.amount)}</span></div>`).join('');
+                const debtHtml = result.isDebt && result.debtPerson ? `<div class="pt-1 text-xs text-amber-600">📥 اتسجلت كمان كدين عليك لـ ${result.debtPerson}</div>` : '';
+                document.getElementById('quick-entry-draft-title').textContent = `${result.merchant ? `فاتورة ${result.merchant}` : 'الفاتورة'} — اتسجلت (${(result.items || []).length} صنف)`;
+                list.innerHTML = `${itemsHtml}<div class="flex items-center justify-between text-sm font-black pt-1 border-t border-emerald-200 dark:border-slate-700 mt-1"><span>الإجمالي</span><span>${fmt(result.totalAmount)}</span></div>${debtHtml}`;
+                document.getElementById('quick-entry-draft-actions').classList.add('hidden');
+                quickShow('quick-entry-draft', true);
+                quickStatus('تم الحفظ في كل الفواتير ✅', 'success');
+                await loadDashboard();
+                await loadInvoicesCount?.();
+            } catch (e) {
+                quickStatus(e.message || 'معرفتش أقرا الفاتورة. جرب صورة أوضح.', 'error');
+            }
+        }
+        document.getElementById('quick-entry-invoice-input')?.addEventListener('change', (event) => { const file = event.target.files?.[0]; analyzeQuickInvoice(file); event.target.value = ''; });
+        // ============ اختيار كودك مدعوم صراحةً بدل الاعتماد على الافتراضي (بعض المتصفحات بترجع بيانات ناقصة/فاضية مع الافتراضي) ============
+        function pickVoiceMimeType() {
+            const candidates = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus', 'audio/ogg'];
+            for (const type of candidates) { if (window.MediaRecorder?.isTypeSupported?.(type)) return type; }
+            return '';
+        }
+        document.getElementById('quick-entry-voice')?.addEventListener('click', async () => {
+            if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) return quickStatus('المتصفح لا يدعم التسجيل الصوتي.', 'error');
+            if (quickEntryRecorder?.state === 'recording') return;
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                quickEntryChunks = [];
+                quickEntrySeconds = 0;
+                const mimeType = pickVoiceMimeType();
+                quickEntryRecorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+                quickEntryRecorder.ondataavailable = (e) => { if (e.data && e.data.size) quickEntryChunks.push(e.data); };
+                quickEntryRecorder.onstop = () => {
+                    stream.getTracks().forEach((t) => t.stop());
+                    clearInterval(quickEntryTimer);
+                    quickShow('quick-entry-recording', false);
+                    const blob = new Blob(quickEntryChunks, { type: quickEntryRecorder.mimeType || mimeType || 'audio/webm' });
+                    if (blob.size < 800) { quickStatus('التسجيل قصير جدًا، جرّب تاني وسيبه شوية أطول.', 'error'); return; }
+                    const reader = new FileReader();
+                    reader.onloadend = () => analyzeQuickEntry({ audioBase64: reader.result, mimeType: blob.type });
+                    reader.readAsDataURL(blob);
+                };
+                // ============ بنجمع الصوت كل ثانية بدل ما ننتظر chunk واحد آخر التسجيل — أضمن ومتوافق مع أجهزة أكتر ============
+                quickEntryRecorder.start(1000);
+                quickShow('quick-entry-recording', true);
+                quickStatus('اتكلم بوضوح: المبلغ ثم الفئة.');
+                quickEntryTimer = setInterval(() => {
+                    quickEntrySeconds++;
+                    const el = document.getElementById('quick-entry-recording-time');
+                    if (el) el.textContent = `00:${String(quickEntrySeconds).padStart(2, '0')}`;
+                    if (quickEntrySeconds >= 30) quickEntryRecorder.stop();
+                }, 1000);
+            } catch { quickStatus('لازم تسمح للموقع باستخدام الميكروفون.', 'error'); }
+        });
         document.getElementById('quick-entry-stop')?.addEventListener('click', () => { if (quickEntryRecorder?.state === 'recording') quickEntryRecorder.stop(); });
 
         // ============ عداد صغير وأنيق للمشترك بس (OCR/شات) — مفيش عداد خالص في التجربة المجانية ============

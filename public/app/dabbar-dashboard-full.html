@@ -1822,10 +1822,10 @@
                 const base64 = await new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = reject; reader.readAsDataURL(file); });
                 const result = await asstApi('receipt_scan', { imageBase64: base64 });
                 const list = document.getElementById('quick-entry-draft-list');
-                const itemsHtml = (result.items || []).map((it) => `<div class="flex items-center justify-between gap-2 text-sm"><span>${CATEGORY_EMOJI[it.category] || '📌'} ${it.name}</span><span class="shrink-0 font-bold">${fmt(it.amount)}</span></div>`).join('');
-                const debtHtml = result.isDebt && result.debtPerson ? `<div class="pt-1 text-xs text-amber-600">📥 اتسجلت كمان كدين عليك لـ ${result.debtPerson}</div>` : '';
+                const itemsHtml = (result.items || []).map((it) => `<div class="flex items-center justify-between gap-2 text-sm text-slate-700 dark:text-slate-200"><span>${CATEGORY_EMOJI[it.category] || '📌'} ${it.name}</span><span class="shrink-0 font-bold">${fmt(it.amount)}</span></div>`).join('');
+                const debtHtml = result.isDebt && result.debtPerson ? `<div class="pt-1 text-xs text-amber-600 dark:text-amber-400">📥 اتسجلت كمان كدين عليك لـ ${result.debtPerson}</div>` : '';
                 document.getElementById('quick-entry-draft-title').textContent = `${result.merchant ? `فاتورة ${result.merchant}` : 'الفاتورة'} — اتسجلت (${(result.items || []).length} صنف)`;
-                list.innerHTML = `${itemsHtml}<div class="flex items-center justify-between text-sm font-black pt-1 border-t border-emerald-200 dark:border-slate-700 mt-1"><span>الإجمالي</span><span>${fmt(result.totalAmount)}</span></div>${debtHtml}`;
+                list.innerHTML = `${itemsHtml}<div class="flex items-center justify-between text-sm font-black pt-1 border-t border-emerald-200 dark:border-slate-700 mt-1 text-slate-800 dark:text-slate-100"><span>الإجمالي</span><span>${fmt(result.totalAmount)}</span></div>${debtHtml}`;
                 document.getElementById('quick-entry-draft-actions').classList.add('hidden');
                 quickShow('quick-entry-draft', true);
                 quickStatus('تم الحفظ في كل الفواتير ✅', 'success');
@@ -1857,7 +1857,7 @@
                     clearInterval(quickEntryTimer);
                     quickShow('quick-entry-recording', false);
                     const blob = new Blob(quickEntryChunks, { type: quickEntryRecorder.mimeType || mimeType || 'audio/webm' });
-                    if (blob.size < 800) { quickStatus('التسجيل قصير جدًا، جرّب تاني وسيبه شوية أطول.', 'error'); return; }
+                    if (blob.size < 800) { quickStatus(`التسجيل قصير جدًا (${blob.size} بايت، ${quickEntryChunks.length} جزء) — جرّب تاني وسيبه شوية أطول.`, 'error'); console.warn('DABBAR_VOICE_DEBUG', { size: blob.size, chunks: quickEntryChunks.length, mime: blob.type, seconds: quickEntrySeconds }); return; }
                     const reader = new FileReader();
                     reader.onloadend = () => analyzeQuickEntry({ audioBase64: reader.result, mimeType: blob.type });
                     reader.readAsDataURL(blob);

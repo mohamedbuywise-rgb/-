@@ -7,7 +7,7 @@
 
     <!-- PWA -->
     <link rel="manifest" href="./manifest.json">
-    <meta name="theme-color" content="#020617">
+    <meta name="theme-color" content="#08090a">
     <link rel="apple-touch-icon" href="./icons/icon-192.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -872,44 +872,46 @@
            من غير ما نلمس أي HTML أو منطق JS.
            ============================================================ */
         :root {
-            --pm-canvas: #0c1712;
-            --pm-canvas-2: #0a140f;
-            --pm-surface: #132420;
-            --pm-surface-hi: #182b25;
-            --pm-surface-soft: #0f1e19;
-            --pm-hairline: rgba(201,162,75,.16);
-            --pm-hairline-soft: rgba(233,229,214,.08);
-            --pm-ink: #f2ede0;
-            --pm-ink-dim: #c9d1c8;
-            --pm-muted: #8ea395;
-            --pm-muted-2: #5f7469;
+            /* Night A — true Onyx with a restrained premium gold accent */
+            --pm-canvas: #08090a;
+            --pm-canvas-2: #0d0f10;
+            --pm-surface: #121416;
+            --pm-surface-hi: #181a1c;
+            --pm-surface-soft: #101214;
+            --pm-hairline: rgba(201,162,75,.22);
+            --pm-hairline-soft: rgba(239,230,202,.10);
+            --pm-ink: #f6f1e5;
+            --pm-ink-dim: #d7d0c3;
+            --pm-muted: #aaa39b;
+            --pm-muted-2: #7f827f;
             --pm-gold: #c9a24b;
-            --pm-gold-bright: #f0cd7c;
-            --pm-gold-dim: #8a713a;
-            --pm-mint: #6fe3ab;
-            --pm-mint-dim: #3f8f6e;
-            --pm-clay: #c1553f;
-            --pm-clay-dim: #7a3a2c;
+            --pm-gold-bright: #f1d37f;
+            --pm-gold-dim: #8b6a2b;
+            --pm-mint: #56aaa0;
+            --pm-mint-dim: #2d706a;
+            --pm-clay: #d36a56;
+            --pm-clay-dim: #8f4033;
         }
         html[data-theme="light"] {
-            --pm-canvas: #f5f1e6;
-            --pm-canvas-2: #efe8d6;
-            --pm-surface: #fffdf9;
-            --pm-surface-hi: #f4ecda;
-            --pm-surface-soft: #f8f2e4;
-            --pm-hairline: rgba(90,66,20,.16);
-            --pm-hairline-soft: rgba(27,46,36,.08);
-            --pm-ink: #1c2b22;
-            --pm-ink-dim: #3c4f43;
-            --pm-muted: #66796d;
-            --pm-muted-2: #8c9a90;
-            --pm-gold: #9c7326;
-            --pm-gold-bright: #7c5a1c;
-            --pm-gold-dim: #c9a24b;
-            --pm-mint: #1c8a5f;
-            --pm-mint-dim: #0f6647;
-            --pm-clay: #a6402a;
-            --pm-clay-dim: #c1553f;
+            /* Day C — warm cream and deep petrol for calm, legible hierarchy */
+            --pm-canvas: #f6f1e7;
+            --pm-canvas-2: #efe7d8;
+            --pm-surface: #fffdf8;
+            --pm-surface-hi: #ffffff;
+            --pm-surface-soft: #f2ece0;
+            --pm-hairline: rgba(14,90,82,.22);
+            --pm-hairline-soft: rgba(26,43,39,.11);
+            --pm-ink: #17322e;
+            --pm-ink-dim: #31514a;
+            --pm-muted: #5d716a;
+            --pm-muted-2: #7d8e87;
+            --pm-gold: #0e655b;
+            --pm-gold-bright: #0a4b45;
+            --pm-gold-dim: #4c9387;
+            --pm-mint: #0e655b;
+            --pm-mint-dim: #083e3a;
+            --pm-clay: #a94c3a;
+            --pm-clay-dim: #7e352a;
         }
 
         body, html[data-theme="light"] body { font-family: 'Cairo', sans-serif; }
@@ -1083,6 +1085,170 @@
         #premium-hero-card { border-color: rgba(201,162,75,.3) !important; background: linear-gradient(180deg, var(--pm-surface-hi), var(--pm-canvas-2)) !important; }
         #premium-hero-card .text-amber-400 { color: var(--pm-gold-bright) !important; }
         #premium-hero-cta { background: linear-gradient(135deg, var(--pm-gold-bright), var(--pm-gold)) !important; color: #1c1406 !important; }
+        /* ============================================================
+           PALETTE LOCK — Day C / Night A
+           Day: warm cream + deep petrol. Night: true Onyx + premium gold.
+           ============================================================ */
+        html { color-scheme: dark; }
+        html[data-theme="light"] { color-scheme: light; }
+
+        html[data-theme="light"] body,
+        html[data-theme="light"] .flex-1.overflow-y-auto,
+        html[data-theme="light"] .max-w-4xl.mx-auto.bg-slate-900.flex-1 {
+            background: var(--pm-canvas) !important;
+            color: var(--pm-ink) !important;
+        }
+
+        /* Surface system: Onyx at night, clean white/cream in daylight */
+        .bg-slate-950, .bg-slate-950\/40, .bg-slate-950\/50, .bg-slate-950\/60,
+        .bg-slate-950\/80, .bg-slate-900, .bg-slate-900\/60, .bg-slate-900\/70,
+        .bg-slate-900\/90, html[data-theme="light"] .bg-slate-950,
+        html[data-theme="light"] .bg-slate-950\/40, html[data-theme="light"] .bg-slate-950\/50,
+        html[data-theme="light"] .bg-slate-950\/60, html[data-theme="light"] .bg-slate-950\/80,
+        html[data-theme="light"] .bg-slate-900, html[data-theme="light"] .bg-slate-900\/60,
+        html[data-theme="light"] .bg-slate-900\/70, html[data-theme="light"] .bg-slate-900\/90 {
+            background: var(--pm-surface-hi) !important;
+        }
+        .bg-slate-800, .bg-slate-700, .bg-slate-700\/50, .bg-slate-800\/30,
+        html[data-theme="light"] .bg-slate-800, html[data-theme="light"] .bg-slate-700,
+        html[data-theme="light"] .bg-slate-700\/50, html[data-theme="light"] .bg-slate-800\/30 {
+            background: var(--pm-surface-soft) !important;
+        }
+        .hover\:bg-slate-800:hover, .hover\:bg-slate-700:hover,
+        .hover\:bg-slate-900\/70:hover, html[data-theme="light"] .hover\:bg-slate-800:hover,
+        html[data-theme="light"] .hover\:bg-slate-700:hover {
+            background: var(--pm-surface-soft) !important;
+        }
+        .from-slate-900, .from-slate-950 { --tw-gradient-from: var(--pm-surface-hi) var(--tw-gradient-from-position) !important; }
+        .to-slate-950, .to-slate-900 { --tw-gradient-to: var(--pm-surface-soft) var(--tw-gradient-to-position) !important; }
+
+        /* Petrol in Day C, gold in Night A: all legacy emerald/amber roles converge here */
+        .text-emerald-200, .text-emerald-300, .text-emerald-300\/80, .text-emerald-400,
+        .text-emerald-500, .text-emerald-600, .text-amber-300, .text-amber-400,
+        .text-amber-400\/80, .text-amber-600, html[data-theme="light"] .text-emerald-200,
+        html[data-theme="light"] .text-emerald-300, html[data-theme="light"] .text-emerald-400,
+        html[data-theme="light"] .text-amber-300, html[data-theme="light"] .text-amber-400,
+        html[data-theme="light"] .text-amber-600 {
+            color: var(--pm-gold-bright) !important;
+        }
+        .bg-emerald-50, .bg-emerald-500, .bg-emerald-500\/10, .bg-emerald-500\/15,
+        .bg-emerald-500\/20, .bg-amber-400, .bg-amber-500\/10, .bg-amber-500\/15,
+        html[data-theme="light"] .bg-emerald-50, html[data-theme="light"] .bg-emerald-500\/10,
+        html[data-theme="light"] .bg-emerald-500\/15 {
+            background: color-mix(in srgb, var(--pm-gold) 13%, var(--pm-surface-hi)) !important;
+        }
+        .border-emerald-200, .border-emerald-400, .border-emerald-500\/15,
+        .border-emerald-500\/20, .border-emerald-500\/25, .border-emerald-500\/30,
+        .border-emerald-500\/40, .border-amber-500\/20, .border-amber-500\/25,
+        .divide-emerald-500\/20, html[data-theme="light"] .border-emerald-200 {
+            border-color: var(--pm-hairline) !important;
+        }
+        .from-emerald-50, .from-emerald-400, .from-emerald-500, .from-emerald-500\/10,
+        .from-emerald-500\/15, .from-emerald-950\/40 {
+            --tw-gradient-from: color-mix(in srgb, var(--pm-gold) 14%, var(--pm-surface-hi)) var(--tw-gradient-from-position) !important;
+        }
+        .to-emerald-500, .to-emerald-500\/0, .to-teal-400, .to-teal-50, .to-teal-500\/5 {
+            --tw-gradient-to: color-mix(in srgb, var(--pm-gold) 7%, var(--pm-surface-hi)) var(--tw-gradient-to-position) !important;
+        }
+        button.bg-emerald-500, #quick-entry-analyze, #quick-entry-confirm,
+        #quick-entry-voice-send, #asst-goal-create-btn, #asst-goal-contribute-btn,
+        #asst-chat-send, #download-monthly-pdf, #planning-save, #planning-save,
+        #premium-hero-cta, .daily-reminder-btn, #quick-entry-open-subscription {
+            background: linear-gradient(135deg, var(--pm-gold-bright), var(--pm-gold)) !important;
+            color: #17120a !important;
+            border-color: transparent !important;
+        }
+        html[data-theme="light"] button.bg-emerald-500, html[data-theme="light"] #quick-entry-analyze,
+        html[data-theme="light"] #quick-entry-confirm, html[data-theme="light"] #quick-entry-voice-send,
+        html[data-theme="light"] #asst-goal-create-btn, html[data-theme="light"] #asst-goal-contribute-btn,
+        html[data-theme="light"] #asst-chat-send, html[data-theme="light"] #download-monthly-pdf,
+        html[data-theme="light"] #planning-save, html[data-theme="light"] #premium-hero-cta,
+        html[data-theme="light"] .daily-reminder-btn, html[data-theme="light"] #quick-entry-open-subscription {
+            color: #fffdf7 !important;
+        }
+        .hover\:bg-emerald-400:hover, .hover\:bg-emerald-500:hover,
+        .hover\:bg-amber-300:hover { filter: brightness(1.08); }
+
+        /* Semantic negative state stays warm and readable */
+        .text-rose-300, .text-rose-300\/80, .text-rose-400, .text-rose-500,
+        .text-rose-700, .text-red-700 { color: var(--pm-clay) !important; }
+        .bg-rose-50, .bg-rose-500, .bg-rose-500\/10, .bg-rose-500\/15,
+        .bg-rose-500\/20, .bg-red-50 { background: color-mix(in srgb, var(--pm-clay) 12%, var(--pm-surface-hi)) !important; }
+        .border-rose-200, .border-rose-500\/20, .border-rose-500\/25,
+        .border-rose-500\/30, .border-red-300\/40 { border-color: color-mix(in srgb, var(--pm-clay) 38%, transparent) !important; }
+
+        /* Neutral text hierarchy */
+        .text-slate-50, .text-slate-100, .text-slate-200, .text-slate-800,
+        .text-slate-900, .text-slate-950, html[data-theme="light"] .text-slate-50,
+        html[data-theme="light"] .text-slate-100, html[data-theme="light"] .text-slate-200,
+        html[data-theme="light"] .text-slate-800, html[data-theme="light"] .text-slate-900 {
+            color: var(--pm-ink) !important;
+        }
+        .text-slate-300, .text-slate-700, html[data-theme="light"] .text-slate-300,
+        html[data-theme="light"] .text-slate-700 { color: var(--pm-ink-dim) !important; }
+        .text-slate-400, .text-slate-500, html[data-theme="light"] .text-slate-400,
+        html[data-theme="light"] .text-slate-500 { color: var(--pm-muted) !important; }
+        .text-slate-600, html[data-theme="light"] .text-slate-600 { color: var(--pm-muted-2) !important; }
+        .placeholder-slate-500::placeholder { color: var(--pm-muted) !important; opacity: 1; }
+
+        /* Supporting info surfaces keep a cool petrol-compatible tone */
+        .bg-blue-50, .bg-sky-500\/10, html[data-theme="light"] .bg-blue-50 {
+            background: color-mix(in srgb, var(--pm-mint) 11%, var(--pm-surface-hi)) !important;
+        }
+        .text-blue-300, .text-blue-600\/70, .text-blue-700 { color: var(--pm-mint) !important; }
+        .border-blue-200, .border-blue-500, .border-blue-500\/25,
+        .border-r-blue-500, .border-t-blue-500 { border-color: var(--pm-mint) !important; }
+
+        /* High-salience cards and streak elements */
+        #quick-entry-card {
+            background: linear-gradient(135deg, color-mix(in srgb, var(--pm-gold) 9%, var(--pm-surface-hi)), var(--pm-surface-hi) 62%, color-mix(in srgb, var(--pm-gold) 6%, var(--pm-surface-hi))) !important;
+            border-color: var(--pm-hairline) !important;
+        }
+        #planning-summary { background: color-mix(in srgb, var(--pm-gold) 13%, var(--pm-surface-hi)) !important; color: var(--pm-ink) !important; }
+        #planning-reset { background: var(--pm-surface-soft) !important; color: var(--pm-ink-dim) !important; border-color: var(--pm-hairline-soft) !important; }
+        #quick-entry-subscription-lock { background: color-mix(in srgb, var(--pm-gold) 11%, var(--pm-surface-hi)) !important; border-color: var(--pm-hairline) !important; color: var(--pm-ink) !important; }
+        .active-days-card { background: linear-gradient(135deg, color-mix(in srgb, var(--pm-gold) 10%, var(--pm-surface-hi)), var(--pm-surface-soft)) !important; border-color: var(--pm-hairline) !important; color: var(--pm-ink) !important; }
+        .active-days-title, .active-days-badge, .active-days-dot.is-active { color: var(--pm-gold-bright) !important; }
+        .active-days-badge { background: color-mix(in srgb, var(--pm-gold) 14%, var(--pm-surface-hi)) !important; border-color: var(--pm-hairline) !important; }
+        .active-days-dot-mark { background: color-mix(in srgb, var(--pm-ink) 11%, var(--pm-surface-hi)) !important; border-color: var(--pm-hairline-soft) !important; }
+        .active-days-dot.is-active .active-days-dot-mark { background: linear-gradient(135deg, var(--pm-gold-bright), var(--pm-gold)) !important; border-color: var(--pm-gold) !important; }
+        .active-days-flame-wrap::before { background: radial-gradient(circle, color-mix(in srgb, var(--pm-gold) 30%, transparent), transparent 68%) !important; }
+        .active-days-number { background: linear-gradient(135deg, var(--pm-gold-dim), var(--pm-gold-bright) 55%, var(--pm-gold)) !important; -webkit-background-clip: text !important; background-clip: text !important; -webkit-text-fill-color: transparent !important; }
+        .weekday-bar.is-active { background-color: var(--pm-gold) !important; box-shadow: 0 0 14px 2px color-mix(in srgb, var(--pm-gold) 48%, transparent) !important; }
+        .daily-reminder-card { background: linear-gradient(90deg, color-mix(in srgb, var(--pm-gold) 12%, var(--pm-surface-hi)), color-mix(in srgb, var(--pm-gold) 4%, var(--pm-surface-hi))) !important; border-color: var(--pm-gold) !important; }
+        .daily-reminder-icon { background: var(--pm-surface-hi) !important; }
+        .daily-reminder-text { color: var(--pm-ink) !important; }
+
+        /* Navigation, premium card, modal surfaces, and focused controls */
+        .tab-btn.active-tab { color: var(--pm-gold-bright) !important; }
+        .tab-btn.active-tab .tab-icon-wrap { background: conic-gradient(from 220deg, var(--pm-gold-bright), var(--pm-gold), var(--pm-gold-dim), var(--pm-gold-bright)) !important; color: #17120a !important; border-color: transparent !important; box-shadow: 0 6px 14px color-mix(in srgb, var(--pm-gold) 35%, transparent) !important; }
+        #premium-hero-card { border-color: var(--pm-hairline) !important; background: linear-gradient(180deg, var(--pm-surface-hi), var(--pm-canvas-2)) !important; }
+        #wrapped-card { background: linear-gradient(155deg, var(--pm-surface-hi) 0%, var(--pm-canvas) 55%, var(--pm-canvas) 100%) !important; border-color: var(--pm-hairline) !important; }
+        #brandbar-theme-btn, #refresh-btn, .seal-like { border-color: var(--pm-hairline-soft) !important; }
+        .bg-slate-900.border-t, nav.bg-slate-900 { background: var(--pm-surface) !important; border-color: var(--pm-hairline-soft) !important; }
+        input, textarea, select { accent-color: var(--pm-gold); }
+        #theme-toggle-track.bg-amber-400 { background: var(--pm-gold) !important; }
+        #theme-toggle-track.bg-slate-700 { background: var(--pm-surface-soft) !important; }
+
+        /* High-specificity day/night locks override the legacy light skin above. */
+        html[data-theme="light"] body.bg-slate-950,
+        html:not([data-theme="light"]) body.bg-slate-950,
+        html[data-theme="light"] .flex-1.overflow-y-auto,
+        html[data-theme="light"] #tab-monthly { background: var(--pm-canvas) !important; }
+        html[data-theme="light"] #quick-entry-card,
+        html[data-theme="light"] #tab-monthly.active > #quick-entry-card { background: linear-gradient(135deg, #fffdf8 0%, #ffffff 62%, #f1e9db 100%) !important; border-color: var(--pm-hairline) !important; }
+        html:not([data-theme="light"]) #quick-entry-card,
+        html:not([data-theme="light"]) #tab-monthly.active > #quick-entry-card { background: linear-gradient(135deg, #17191a 0%, #101214 62%, #0d0f10 100%) !important; border-color: var(--pm-hairline) !important; }
+        html[data-theme="light"] #planning-summary { background: #e8f0ec !important; color: #17322e !important; }
+        html:not([data-theme="light"]) #planning-summary { background: color-mix(in srgb, var(--pm-gold) 12%, var(--pm-surface-hi)) !important; color: var(--pm-ink) !important; }
+        html[data-theme="light"] .active-days-card { background: linear-gradient(135deg, #fffdf8 0%, #f2ece0 100%) !important; border-color: var(--pm-hairline) !important; }
+        html:not([data-theme="light"]) .active-days-card { background: linear-gradient(135deg, #151718 0%, #0d0f10 100%) !important; border-color: var(--pm-hairline) !important; }
+        html[data-theme="light"] .daily-reminder-card { background: linear-gradient(90deg, #eef5f0, #fffdf8) !important; border-color: var(--pm-gold) !important; }
+        html:not([data-theme="light"]) .daily-reminder-card { background: linear-gradient(90deg, rgba(201,162,75,.12), rgba(201,162,75,.04)) !important; border-color: var(--pm-gold) !important; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .fade-up, .mascot-float, .active-days-flame, .active-days-flame-wrap::before { animation: none !important; }
+        }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col overflow-hidden">
@@ -1096,7 +1262,7 @@
         <div class="bg-slate-900/90 px-5 pt-4 pb-1 flex items-center justify-between">
             <div class="flex items-center gap-2">
                 <img src="./icons/icon-192.png" alt="دبّر" class="w-8 h-8 rounded-xl">
-                <span class="text-2xl font-black" style="font-family:'Cairo',sans-serif; letter-spacing:-0.5px; background:linear-gradient(90deg,#34d399,#2dd4bf); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;">دبّر</span>
+                <span class="text-2xl font-black" style="font-family:'Cairo',sans-serif; letter-spacing:-0.5px; background:linear-gradient(90deg,var(--pm-gold-bright),var(--pm-gold)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;">دبّر</span>
                 <span id="streak-badge" class="hidden items-center gap-1 bg-amber-500/10 border border-amber-500/25 text-amber-400 text-xs font-black px-2 py-1 rounded-full">
                     <span>🔥</span><span id="streak-count">0</span>
                 </span>
@@ -1145,9 +1311,9 @@
                     <div class="active-days-flame-wrap" aria-hidden="true">
                         <div class="active-days-flame">
                             <svg viewBox="0 0 48 56" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                <defs><linearGradient id="activeDaysFlameGradient" x1="8" y1="4" x2="40" y2="52" gradientUnits="userSpaceOnUse"><stop stop-color="#FFD54B"/><stop offset=".55" stop-color="#FF7A18"/><stop offset="1" stop-color="#D6321F"/></linearGradient></defs>
+                                <defs><linearGradient id="activeDaysFlameGradient" x1="8" y1="4" x2="40" y2="52" gradientUnits="userSpaceOnUse"><stop stop-color="var(--pm-gold-bright)"/><stop offset=".55" stop-color="var(--pm-gold)"/><stop offset="1" stop-color="var(--pm-gold-dim)"/></linearGradient></defs>
                                 <path d="M27.2 2.5C29.2 12.4 20.6 15.2 24.4 23.7C26.1 27.5 30.2 27.8 31.4 23.1C38.6 30.4 41.2 37.1 38.6 43.3C36 49.5 30 53.5 23.5 53.5C14.1 53.5 6.5 46.2 6.5 37.1C6.5 29 11.3 23.3 17.8 18.1C16.6 26.8 20.1 29.7 23 29.1C27.4 28.2 24.5 20.8 27.2 2.5Z" fill="url(#activeDaysFlameGradient)"/>
-                                <path d="M23.9 32.2C28.1 36.2 30.1 39.2 30.1 42.1C30.1 46 27.2 48.9 23.6 48.9C19.9 48.9 17 46 17 42.3C17 39.4 19.2 36.2 23.9 32.2Z" fill="#FFD54B" opacity=".88"/>
+                                <path d="M23.9 32.2C28.1 36.2 30.1 39.2 30.1 42.1C30.1 46 27.2 48.9 23.6 48.9C19.9 48.9 17 46 17 42.3C17 39.4 19.2 36.2 23.9 32.2Z" fill="var(--pm-gold-bright)" opacity=".88"/>
                             </svg>
                         </div>
                     </div>
@@ -1983,6 +2149,8 @@
         }
 
         function applyThemeToggleUI(theme) {
+            const themeMeta = document.querySelector('meta[name="theme-color"]');
+            if (themeMeta) themeMeta.setAttribute('content', theme === 'light' ? '#f6f1e7' : '#08090a');
             const icon = document.getElementById('theme-toggle-icon');
             const label = document.getElementById('theme-toggle-label');
             const track = document.getElementById('theme-toggle-track');

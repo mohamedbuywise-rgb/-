@@ -15,7 +15,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
     <!-- بنحدد الوضع (فاتح/غامق) بدري قبل ما الصفحة تترسم. الافتراضي دلوقتي "فاتح" -->
     <script>
         (function () {
@@ -864,6 +864,225 @@
         html[data-theme="light"] .tab-btn { color: #4f685c !important; }
         html[data-theme="light"] .tab-btn.active-tab { color: #087d55 !important; }
         html[data-theme="light"] #footer-cta { color: #4d665a !important; }
+
+        /* ============================================================
+           PREMIUM SKIN — دهبي + أخضر غامق فاخر بدل التركواز العادي
+           بيغطي كل تلوينات Tailwind المستخدمة في الصفحة (emerald / rose /
+           amber / slate) عشان الشكل الجديد يتطبق على كل التابات السبعة
+           من غير ما نلمس أي HTML أو منطق JS.
+           ============================================================ */
+        :root {
+            --pm-canvas: #0c1712;
+            --pm-canvas-2: #0a140f;
+            --pm-surface: #132420;
+            --pm-surface-hi: #182b25;
+            --pm-surface-soft: #0f1e19;
+            --pm-hairline: rgba(201,162,75,.16);
+            --pm-hairline-soft: rgba(233,229,214,.08);
+            --pm-ink: #f2ede0;
+            --pm-ink-dim: #c9d1c8;
+            --pm-muted: #8ea395;
+            --pm-muted-2: #5f7469;
+            --pm-gold: #c9a24b;
+            --pm-gold-bright: #f0cd7c;
+            --pm-gold-dim: #8a713a;
+            --pm-mint: #6fe3ab;
+            --pm-mint-dim: #3f8f6e;
+            --pm-clay: #c1553f;
+            --pm-clay-dim: #7a3a2c;
+        }
+        html[data-theme="light"] {
+            --pm-canvas: #f5f1e6;
+            --pm-canvas-2: #efe8d6;
+            --pm-surface: #fffdf9;
+            --pm-surface-hi: #f4ecda;
+            --pm-surface-soft: #f8f2e4;
+            --pm-hairline: rgba(90,66,20,.16);
+            --pm-hairline-soft: rgba(27,46,36,.08);
+            --pm-ink: #1c2b22;
+            --pm-ink-dim: #3c4f43;
+            --pm-muted: #66796d;
+            --pm-muted-2: #8c9a90;
+            --pm-gold: #9c7326;
+            --pm-gold-bright: #7c5a1c;
+            --pm-gold-dim: #c9a24b;
+            --pm-mint: #1c8a5f;
+            --pm-mint-dim: #0f6647;
+            --pm-clay: #a6402a;
+            --pm-clay-dim: #c1553f;
+        }
+
+        body, html[data-theme="light"] body { font-family: 'Cairo', sans-serif; }
+
+        /* الكانفاس العام */
+        html:not([data-theme="light"]) body,
+        html[data-theme="light"] body { background: var(--pm-canvas) !important; color: var(--pm-ink) !important; }
+        body > .max-w-4xl.mx-auto.bg-slate-900.flex-1 { background: var(--pm-canvas) !important; }
+
+        /* سطوح البطاقات — من الأغمق للأفتح */
+        .bg-slate-950, .bg-slate-950\/40, .bg-slate-950\/60, .bg-slate-950\/80,
+        .bg-slate-900, .bg-slate-900\/90, .bg-slate-900\/60,
+        html[data-theme="light"] .bg-slate-950, html[data-theme="light"] .bg-slate-950\/40,
+        html[data-theme="light"] .bg-slate-950\/60, html[data-theme="light"] .bg-slate-950\/80,
+        html[data-theme="light"] .bg-slate-900, html[data-theme="light"] .bg-slate-900\/90 {
+            background: var(--pm-surface-hi) !important;
+        }
+        .bg-slate-800, .bg-slate-700, .bg-slate-700\/50,
+        html[data-theme="light"] .bg-slate-800, html[data-theme="light"] .bg-slate-700 {
+            background: var(--pm-surface-soft) !important;
+        }
+        .hover\:bg-slate-800:hover, .hover\:bg-slate-700:hover,
+        html[data-theme="light"] .hover\:bg-slate-800:hover { background: var(--pm-surface-soft) !important; }
+
+        /* تدرجات الأساس */
+        .from-slate-900, .from-slate-950, html[data-theme="light"] .from-slate-900 { --tw-gradient-from: var(--pm-surface-hi) var(--tw-gradient-from-position) !important; }
+        .to-slate-950, .to-slate-900, html[data-theme="light"] .to-slate-950, html[data-theme="light"] .to-slate-900 { --tw-gradient-to: var(--pm-surface-soft) var(--tw-gradient-to-position) !important; }
+        .from-emerald-950\/60, html[data-theme="light"] .from-emerald-950\/60 { --tw-gradient-from: color-mix(in srgb, var(--pm-gold) 14%, var(--pm-surface-hi)) var(--tw-gradient-from-position) !important; }
+        .from-slate-700 { --tw-gradient-from: var(--pm-surface-soft) var(--tw-gradient-from-position) !important; }
+        .to-slate-600 { --tw-gradient-to: var(--pm-muted-2) var(--tw-gradient-to-position) !important; }
+
+        /* حدود */
+        .border-slate-800, .border-slate-800\/60, .border-slate-800\/70, .border-slate-800\/80, .border-slate-700,
+        html[data-theme="light"] .border-slate-800, html[data-theme="light"] .border-slate-700 {
+            border-color: var(--pm-hairline-soft) !important;
+        }
+
+        /* نصوص رمادية */
+        .text-slate-100, .text-slate-200, html[data-theme="light"] .text-slate-100, html[data-theme="light"] .text-slate-200 { color: var(--pm-ink) !important; }
+        .text-slate-300, html[data-theme="light"] .text-slate-300 { color: var(--pm-ink-dim) !important; }
+        .text-slate-400, .text-slate-500, html[data-theme="light"] .text-slate-400, html[data-theme="light"] .text-slate-500 { color: var(--pm-muted) !important; }
+        .text-slate-600, html[data-theme="light"] .text-slate-600 { color: var(--pm-muted-2) !important; }
+
+        /* الأخضر (إيموريلد) بيبقى دهبي — اللون الرئيسي للعلامة */
+        .text-emerald-300, .text-emerald-400, .text-emerald-500,
+        html[data-theme="light"] .text-emerald-300, html[data-theme="light"] .text-emerald-400 {
+            color: var(--pm-gold-bright) !important;
+        }
+        .bg-emerald-500, .bg-emerald-500\/10, .bg-emerald-500\/15, .bg-emerald-500\/20,
+        html[data-theme="light"] .bg-emerald-500\/15, html[data-theme="light"] .bg-emerald-500\/10 {
+            background: color-mix(in srgb, var(--pm-gold) 16%, transparent) !important;
+        }
+        button.bg-emerald-500, .bg-emerald-500.hover\:bg-emerald-400, #quick-entry-analyze, #quick-entry-confirm,
+        #quick-entry-voice-send, #asst-goal-create-btn, #asst-goal-contribute-btn, #asst-chat-send,
+        #download-monthly-pdf, #planning-save {
+            background: linear-gradient(135deg, var(--pm-gold-bright), var(--pm-gold)) !important;
+            color: #1c1406 !important;
+        }
+        .hover\:bg-emerald-400:hover { filter: brightness(1.05); }
+        .border-emerald-500\/20, .border-emerald-500\/25, .border-emerald-500\/30, .border-emerald-200,
+        html[data-theme="light"] .border-emerald-500\/20, html[data-theme="light"] .border-emerald-200 {
+            border-color: var(--pm-hairline) !important;
+        }
+        .from-emerald-500, .to-teal-400, .from-teal-400, .to-emerald-500 {
+            --tw-gradient-from: var(--pm-gold-bright) !important; --tw-gradient-to: var(--pm-gold) !important;
+        }
+
+        /* الأحمر (روز) بيبقى طيني دافئ */
+        .text-rose-400, html[data-theme="light"] .text-rose-400 { color: var(--pm-clay) !important; }
+        .bg-rose-500\/15, .bg-rose-500\/20, .bg-rose-500\/10, html[data-theme="light"] .bg-rose-500\/15 { background: color-mix(in srgb, var(--pm-clay) 14%, transparent) !important; }
+        .border-rose-500\/30, .border-rose-200, html[data-theme="light"] .border-rose-500\/30 { border-color: color-mix(in srgb, var(--pm-clay) 35%, transparent) !important; }
+        .text-rose-500, .hover\:text-rose-300:hover { color: var(--pm-clay) !important; }
+        .bg-rose-500 { background: var(--pm-clay) !important; }
+
+        /* الكهرماني (أمبر) بيفضل قريب من الدهبي أصلاً — بس بنوحّد الدرجة */
+        .text-amber-400, .text-amber-300 { color: var(--pm-gold-bright) !important; }
+        .bg-amber-500\/10, .bg-amber-500\/15 { background: color-mix(in srgb, var(--pm-gold) 14%, transparent) !important; }
+        .border-amber-500\/25, .border-amber-500\/20 { border-color: var(--pm-hairline) !important; }
+        .bg-amber-400, .hover\:bg-amber-300:hover { background: var(--pm-gold-bright) !important; }
+
+        /* الأزرق (سكانر الفواتير) — نسيّبه بارد شوية بس متناسق مع الجو العام */
+        .text-blue-700, .text-blue-600\/70, .border-blue-200, .bg-blue-50,
+        html[data-theme="light"] .bg-blue-50 { color: var(--pm-mint) !important; }
+
+        /* الخط السيريف للأرقام والمبالغ الكبيرة فقط — بيرجع لـ Cairo تلقائي مع أي حرف عربي */
+        #monthly-total, #daily-total, #debts-net, #streak-count, #active-days-total,
+        #debts-owed-to-you-total, #debts-you-owe-total, #flow-in, #flow-out, #flow-net,
+        #top-category-name, #weekday-chart-total, #weekday-detail-amount,
+        #account-sub-price, .cat-amt, #monthly-count, #monthly-avg, #daily-count, #daily-avg,
+        #asst-goal-saved, #asst-goal-target, #wrapped-year {
+            font-family: 'Fraunces', 'Cairo', sans-serif !important;
+            font-weight: 600 !important;
+            letter-spacing: 0;
+        }
+
+        /* توقيع بصري: ميدالية دائرية دهبية بدل نقطة الإيموريلد في التاب النشط */
+        .tab-btn.active-tab .tab-icon-wrap {
+            background: conic-gradient(from 220deg, var(--pm-gold-bright), var(--pm-gold), var(--pm-gold-dim), var(--pm-gold-bright)) !important;
+            border-color: transparent !important;
+            box-shadow: 0 6px 14px rgba(201,162,75,.35);
+            color: #1c1406 !important;
+        }
+        .tab-btn.active-tab { color: var(--pm-gold-bright) !important; }
+        html[data-theme="light"] .tab-btn.active-tab { color: var(--pm-gold-bright) !important; }
+
+        /* أزرار وحدود عامة */
+        #brandbar-theme-btn, #refresh-btn, .seal-like { border-color: var(--pm-hairline-soft) !important; }
+
+        /* ---- شوط التحسين التاني: عمق بالظل بدل الحدود، ميدالية حقيقية، أزرار موحّدة ---- */
+
+        /* 1) هالة ذهبية حقيقية خلف رقم الإجمالي الشهري — نفس فكرة الكوين في إيد الماسكوت */
+        .from-emerald-950\/60.to-slate-900:has(#monthly-total) {
+            position: relative;
+            isolation: isolate;
+            overflow: hidden;
+        }
+        .from-emerald-950\/60.to-slate-900:has(#monthly-total)::before {
+            content: '';
+            position: absolute;
+            top: -70px; left: 50%; transform: translateX(-50%);
+            width: 220px; height: 220px; border-radius: 50%;
+            background: radial-gradient(circle, color-mix(in srgb, var(--pm-gold) 22%, transparent) 0%, transparent 70%);
+            z-index: 0;
+            pointer-events: none;
+        }
+        .from-emerald-950\/60.to-slate-900:has(#monthly-total) > * { position: relative; z-index: 1; }
+        #monthly-total { text-shadow: 0 8px 26px color-mix(in srgb, var(--pm-gold) 35%, transparent); }
+
+        /* 2) عمق بالظل بدل الحدود الصريحة على كل الكروت الرئيسية — سطح واحد متصل */
+        [class*="rounded-3xl"], [class*="rounded-2xl"] {
+            border-color: transparent !important;
+            box-shadow: 0 10px 26px rgba(0,0,0,.16) !important;
+        }
+        html[data-theme="light"] [class*="rounded-3xl"], html[data-theme="light"] [class*="rounded-2xl"] {
+            box-shadow: 0 10px 26px rgba(60,45,10,.06) !important;
+        }
+        /* استثناءات: عناصر لازم تفضل بحد واضح (مدخلات، تنبيهات، أزرار محاطة بخط) */
+        input[class*="border"], textarea[class*="border"],
+        #quick-entry-recording, .border-dashed, [class*="border-dashed"] {
+            box-shadow: none !important;
+            border-color: var(--pm-hairline) !important;
+        }
+        #daily-reminder-card.daily-reminder-card { box-shadow: none !important; }
+
+        /* توحيد نصف قطر الزوايا لإحساس أكثر اتساقًا */
+        [class*="rounded-3xl"] { border-radius: 1.65rem !important; }
+        [class*="rounded-2xl"] { border-radius: 1.25rem !important; }
+
+        /* 3) توحيد الأزرار الدائرية الصغيرة (الثيم، تحديث، إقفال المودالات) */
+        #brandbar-theme-btn, #refresh-btn,
+        #avatar-crop-close, #wrapped-close, #invoices-close, #invoice-detail-back, #invoice-detail-close,
+        #quick-entry-recording-cancel, #quick-entry-voice-cancel, #quick-entry-draft-close {
+            background: var(--pm-surface-hi) !important;
+            border: 1px solid var(--pm-hairline-soft) !important;
+            color: var(--pm-muted) !important;
+            box-shadow: 0 4px 12px rgba(0,0,0,.12) !important;
+            transition: transform .2s ease, box-shadow .2s ease;
+        }
+        #brandbar-theme-btn:hover, #refresh-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px color-mix(in srgb, var(--pm-gold) 20%, transparent) !important; }
+
+        /* 4) شارة الأيام النشطة — ميدالية دهبية بدل الخلفية العادية */
+        .active-days-flame-wrap::before { background: radial-gradient(circle, color-mix(in srgb, var(--pm-gold) 30%, transparent), transparent 68%) !important; }
+        .active-days-number { background: linear-gradient(135deg, var(--pm-gold-dim), var(--pm-gold-bright) 55%, var(--pm-gold)) !important; -webkit-background-clip: text !important; background-clip: text !important; -webkit-text-fill-color: transparent !important; font-family:'Fraunces','Cairo',sans-serif !important; }
+        .active-days-dot.is-active .active-days-dot-mark { background: linear-gradient(135deg,var(--pm-gold-bright),var(--pm-gold)) !important; border-color: var(--pm-gold) !important; box-shadow: 0 0 7px color-mix(in srgb, var(--pm-gold) 45%, transparent) !important; }
+        input, textarea, select { font-family: 'Cairo', sans-serif !important; }
+
+        /* شريط التبويبات السفلي */
+        .bg-slate-900.border-t, nav.bg-slate-900 { background: var(--pm-surface) !important; border-color: var(--pm-hairline-soft) !important; }
+
+        /* كارت البريميوم في تاب الحساب يفضل بنفس روح الدهب/الأخضر بدل الأصفر العادي */
+        #premium-hero-card { border-color: rgba(201,162,75,.3) !important; background: linear-gradient(180deg, var(--pm-surface-hi), var(--pm-canvas-2)) !important; }
+        #premium-hero-card .text-amber-400 { color: var(--pm-gold-bright) !important; }
+        #premium-hero-cta { background: linear-gradient(135deg, var(--pm-gold-bright), var(--pm-gold)) !important; color: #1c1406 !important; }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col overflow-hidden">

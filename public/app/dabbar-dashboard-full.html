@@ -1250,6 +1250,98 @@
         html[data-theme="light"] .daily-reminder-card { background: linear-gradient(90deg, #eef5f0, #fffdf8) !important; border-color: var(--pm-gold) !important; }
         html:not([data-theme="light"]) .daily-reminder-card { background: linear-gradient(90deg, rgba(201,162,75,.12), rgba(201,162,75,.04)) !important; border-color: var(--pm-gold) !important; }
 
+        /* ============================================================
+           LIGHT PREMIUM PARITY — نفس وضوح الوضع الليلي من غير لمس قواعده
+           ============================================================ */
+        html[data-theme="light"] {
+            --day-canvas: #f2efe7;
+            --day-surface: #fffdf8;
+            --day-card: #ffffff;
+            --day-card-soft: #f8f5ee;
+            --day-line: #d8d2c5;
+            --day-line-strong: #c7beb0;
+            --day-ink: #173127;
+            --day-muted: #5e7066;
+            --day-shadow: 0 12px 28px rgba(39, 57, 48, .09), 0 2px 7px rgba(39, 57, 48, .05);
+        }
+
+        /* canvas واضح + سطح التطبيق منفصل، بدل الأبيض المسطّح أو خلطه بالبطاقات */
+        html[data-theme="light"] body.bg-slate-950,
+        html[data-theme="light"] .flex-1.overflow-y-auto,
+        html[data-theme="light"] #tab-monthly {
+            background: var(--day-canvas) !important;
+        }
+        html[data-theme="light"] .w-full.max-w-4xl.mx-auto.bg-slate-900 {
+            background: var(--day-surface) !important;
+            box-shadow: 0 18px 42px rgba(39, 57, 48, .12) !important;
+        }
+        html[data-theme="light"] .bg-slate-900\/90 {
+            background: rgba(255, 253, 248, .96) !important;
+        }
+        html[data-theme="light"] nav.bg-slate-900 {
+            background: var(--day-surface) !important;
+            border-color: var(--day-line) !important;
+            box-shadow: 0 -8px 22px rgba(39, 57, 48, .06) !important;
+        }
+
+        /* كل بطاقة رئيسية لها سطح وحدّ وظل ثابت؛ نستثني البطاقات ذات الهوية الخاصة */
+        html[data-theme="light"] .tab-content > div[class*="border"]:not(#footer-cta),
+        html[data-theme="light"] .tab-content > section[class*="border"]:not(#quick-entry-card),
+        html[data-theme="light"] #planning-card,
+        html[data-theme="light"] #expense-ledger-card {
+            background: var(--day-card) !important;
+            border-color: var(--day-line) !important;
+            box-shadow: var(--day-shadow) !important;
+        }
+        html[data-theme="light"] #tab-monthly > div:not(#footer-cta),
+        html[data-theme="light"] #tab-monthly > section:not(#daily-reminder-card):not(#active-days-card):not(#quick-entry-card) {
+            background: var(--day-card) !important;
+            border: 1px solid var(--day-line) !important;
+            border-radius: 1.5rem !important;
+            box-shadow: var(--day-shadow) !important;
+        }
+        html[data-theme="light"] #monthly-total-card,
+        html[data-theme="light"] #monthly-categories-card,
+        html[data-theme="light"] #monthly-tip-card {
+            border-color: var(--day-line) !important;
+        }
+        html[data-theme="light"] #planning-card,
+        html[data-theme="light"] #expense-ledger-card {
+            background: var(--day-card) !important;
+            border: 1px solid var(--day-line) !important;
+            border-radius: 1.5rem !important;
+            padding: 1rem !important;
+        }
+
+        /* الحقول لها حدود داخلية واضحة بدل أن تذوب في سطح البطاقة */
+        html[data-theme="light"] .tab-content input:not([type="file"]),
+        html[data-theme="light"] .tab-content textarea,
+        html[data-theme="light"] .tab-content select {
+            background: #fffefa !important;
+            color: var(--day-ink) !important;
+            border-color: var(--day-line-strong) !important;
+            box-shadow: inset 0 1px 2px rgba(39, 57, 48, .04), 0 3px 10px rgba(39, 57, 48, .05) !important;
+        }
+        html[data-theme="light"] .tab-content input:not([type="file"]):focus,
+        html[data-theme="light"] .tab-content textarea:focus,
+        html[data-theme="light"] .tab-content select:focus {
+            border-color: #9a7428 !important;
+            box-shadow: 0 0 0 3px rgba(154, 116, 40, .13) !important;
+        }
+        html[data-theme="light"] .tab-content input::placeholder,
+        html[data-theme="light"] .tab-content textarea::placeholder {
+            color: #6c7d73 !important;
+            opacity: 1 !important;
+        }
+
+        /* عناوين البطاقات والتفاصيل الرمادية تبقى مقروءة فوق الأبيض */
+        html[data-theme="light"] .tab-content .text-slate-300 { color: #2e4a3c !important; }
+        html[data-theme="light"] .tab-content .text-slate-400 { color: #536a5e !important; }
+        html[data-theme="light"] .tab-content .text-slate-500,
+        html[data-theme="light"] .tab-content .text-slate-600 { color: #6b7b72 !important; }
+        html[data-theme="light"] .tab-content .border-slate-700 { border-color: #bdb5a8 !important; }
+        html[data-theme="light"] .tab-content .border-slate-800 { border-color: var(--day-line) !important; }
+
         @media (prefers-reduced-motion: reduce) {
             .fade-up, .mascot-float, .active-days-flame, .active-days-flame-wrap::before { animation: none !important; }
         }

@@ -2418,7 +2418,7 @@
                 accessToken = session.access_token;
                 currentUser = session.user;
                 await refreshPushUI();
-                await loadDashboard();
+                await loadDashboard(true); // أول تحميل — لو مش مربوط فعلاً، نودّيه لشاشة الربط على طول
                 await loadPlanningSettings();
                 await loadAccountTab();
                 loadInvoicesCount();
@@ -2567,7 +2567,16 @@
         });
 
         // ============ جلب البيانات الحقيقية من /api/dashboard-data وملء الشاشة بيها ============
-        async function loadDashboard() {
+        // ملحوظة مهمة (فيكس): الدالة دي بتتنادى مش بس أول ما تفتح الصفحة، لكن كمان كل 20
+        // ثانية (polling) وكل ما ترجع تفتح التاب (focus/visibilitychange). لو أي طلب من دول
+        // رجع linked:false بشكل عابر (تأخر شبكة، cold start، أو أي حاجة مؤقتة)، كنا بنعمل
+        // redirect فوري لصفحة onboarding.html من فوق الداشبورد اللي شغالة أصلاً — وده اللي
+        // كان بيظهر كأن شاشة "بنجهزلك حسابك..." بتفلاش فجأة والمستخدم مسجّل دخول بالفعل.
+        // الحل: نتأكد إن ده مش false-positive عابر قبل ما نعمل أي تنقّل:
+        //   1) مش بنعمل redirect إلا لو الطلب ده هو أول تحميل للصفحة (initialLoad)، أو
+        //   2) وصلنا linked:false مرتين على التوالي في نفس الجلسة (يبعد أي حالة عابرة/سباق).
+        let __consecutiveUnlinked = 0;
+        async function loadDashboard(isInitialLoad = false) {
             let data;
             try {
                 const controller = new AbortController();
@@ -2585,6 +2594,8 @@
                 }
             } catch (e) {
                 console.error('dashboard-data fetch failed:', e);
+                // خطأ شبكة/تايم آوت عابر: منسيبش ده يودّي المستخدم لصفحة onboarding خالص،
+                // بس نوريله رسالة خطأ بسيطة جوه نفس الداشبورد.
                 const message = e.name === 'AbortError' ? 'تحميل البيانات أخد وقت أطول من اللازم. حدّث الصفحة وجرب تاني.' : (e.message || 'مقدرناش نجيب بياناتك دلوقتي.');
                 const errorEl = document.getElementById('dashboard-load-error');
                 if (errorEl) { errorEl.textContent = message; errorEl.classList.remove('hidden'); }
@@ -2592,10 +2603,16 @@
             }
 
             if (data.linked === false) {
-                // الحساب لسه مش مربوط بتليجرام — رجّعه لشاشة الربط
-                window.location.href = ONBOARDING_URL;
+                __consecutiveUnlinked += 1;
+                // لو أول تحميل للصفحة: نصدّق الرد على طول ونودّيه لشاشة الربط (زي ما كان بالظبط).
+                // لو تحديث في الخلفية (polling/focus): نستنى تأكيد ثاني متتالي قبل أي تنقّل،
+                // عشان أي false-positive عابر ميقفلش الداشبورد اللي المستخدم شغال عليه فعلاً.
+                if (isInitialLoad || __consecutiveUnlinked >= 2) {
+                    window.location.href = ONBOARDING_URL;
+                }
                 return;
             }
+            __consecutiveUnlinked = 0;
 
             window.__dashboardData = data;
 

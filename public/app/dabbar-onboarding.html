@@ -15,6 +15,12 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<!-- شبكة إنقاذ مبكرة: تعمل حتى لو تأخر CDN أو فشل تحميل مكتبة Supabase -->
+<script>
+  window.__dabbarBootFailsafe = setTimeout(() => {
+    document.getElementById('bootSplash')?.classList.add('hide');
+  }, 6000);
+</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <style>
@@ -100,6 +106,12 @@
   /* حقول الإيميل/الباسورد/الاسم بتاعة شاشة الدخول — نص عادي من غير letter-spacing بتاع الكود */
   .field input.text-input{ letter-spacing:normal; font-weight:500; text-align:right; }
   .field input.text-input::placeholder{ text-align:right; }
+  .forgot-link{ display:block; margin:13px auto 0; border:none; background:none; color:var(--green-deep); font-family:'Cairo',sans-serif; font-size:12.5px; font-weight:800; cursor:pointer; text-decoration:underline; text-underline-offset:3px; }
+  .recovery-card{ margin-top:18px; padding-top:18px; border-top:1px solid var(--line); }
+  .recovery-card h3{ font-family:'Cairo',sans-serif; font-weight:900; font-size:17px; text-align:center; color:var(--ink); margin-bottom:6px; }
+  .recovery-card > p{ text-align:center; color:var(--muted); font-size:12.5px; line-height:1.8; margin-bottom:14px; }
+  .recovery-back{ margin-top:9px; background:var(--green-tint); color:var(--green-deep); }
+
 
   /* ===== تابس تسجيل الدخول / حساب جديد ===== */
   .auth-tabs{ display:flex; background:var(--green-tint); border-radius:12px; padding:4px; margin-bottom:20px; gap:4px; }
@@ -340,6 +352,33 @@
         <span id="authSubmitLabel">تسجيل الدخول</span>
       </button>
     </form>
+
+    <button type="button" class="forgot-link" id="forgotPasswordBtn">نسيت كلمة المرور؟</button>
+
+    <form id="forgotPasswordForm" class="recovery-card" style="display:none;">
+      <h3>استرجاع كلمة المرور</h3>
+      <p>اكتب الإيميل المرتبط بحسابك، وهيوصلك رابط آمن لإعادة التعيين.</p>
+      <div class="field">
+        <label for="recoveryEmailInput">الإيميل</label>
+        <input type="email" id="recoveryEmailInput" class="text-input" placeholder="you@example.com" required>
+      </div>
+      <button type="submit" class="btn btn-primary" id="recoverySubmitBtn"><span id="recoverySubmitLabel">إرسال رابط الاستعادة</span></button>
+      <button type="button" class="btn btn-ghost recovery-back" id="recoveryBackBtn">رجوع لتسجيل الدخول</button>
+    </form>
+
+    <form id="updatePasswordForm" class="recovery-card" style="display:none;">
+      <h3>اختار كلمة مرور جديدة</h3>
+      <p>اكتب كلمة مرور جديدة لا تقل عن 6 أحرف.</p>
+      <div class="field">
+        <label for="newPasswordInput">كلمة المرور الجديدة</label>
+        <input type="password" id="newPasswordInput" class="text-input" minlength="6" required>
+      </div>
+      <div class="field">
+        <label for="confirmPasswordInput">تأكيد كلمة المرور</label>
+        <input type="password" id="confirmPasswordInput" class="text-input" minlength="6" required>
+      </div>
+      <button type="submit" class="btn btn-primary" id="updatePasswordBtn"><span id="updatePasswordLabel">حفظ كلمة المرور</span></button>
+    </form>
   </div>
 </div>
 
@@ -385,13 +424,25 @@
   ========================================================= */
   const SUPABASE_URL = 'https://devywtyfzybnahdsqdkd.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_yHiX1cnEMCVEcjQxiIrqig_DRBiuveQ';
-  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  let sb = null;
+  try {
+    if (window.supabase?.createClient) {
+      sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+  } catch (e) {
+    console.error('Supabase initialization failed:', e);
+  }
+  if (!sb) {
+    document.getElementById('authError').textContent = 'تعذر تحميل خدمة الدخول. افتح الصفحة في Chrome وتأكد من اتصال الإنترنت ثم أعد المحاولة.';
+    document.getElementById('authError').classList.add('show');
+  }
 
   // بما إن الصفحة دي والـ API endpoints شغالين على نفس الدومين (نفس مشروع Vercel بتاع دبّر)،
   // مفيش داعي لأي رابط كامل — مسارات نسبية كفاية.
   const DASHBOARD_URL = 'dabbar-dashboard-full.html';
 
   // شبكة أمان: لو لأي سبب الفحص فوق اتعلّق أو اتأخر جدًا، منسيبش المستخدم واقف على شاشة التحميل للأبد
+  clearTimeout(window.__dabbarBootFailsafe);
   setTimeout(hideBootSplash, 6000);
 
   // ---- شاشة التحميل (Splash): بتفضل ظاهرة لحد ما نعرف نوجّه المستخدم فين، وبعدين تختفي بسلاسة ----
@@ -424,6 +475,8 @@
   (async () => {
     try {
       const { data: { session } } = await sb.auth.getSession();
+      const recoveryMode = new URLSearchParams(window.location.search).get('mode') === 'recovery' || window.location.hash.includes('type=recovery');
+      if (recoveryMode) { hideBootSplash(); return; }
       if (!session) { hideBootSplash(); return; } // مفيش جلسة، يفضل على شاشة تسجيل الدخول
       if (isStandalone()) {
         window.location.href = DASHBOARD_URL; // هيتم التنقل فعليًا، مفيش داعي نخفي الـ splash هنا
@@ -532,6 +585,17 @@
   const authNotice = document.getElementById('authNotice');
   const authTitle = document.getElementById('authTitle');
   const authSub = document.getElementById('authSub');
+  const forgotPasswordBtn = document.getElementById('forgotPasswordBtn');
+  const forgotPasswordForm = document.getElementById('forgotPasswordForm');
+  const recoveryEmailInput = document.getElementById('recoveryEmailInput');
+  const recoverySubmitBtn = document.getElementById('recoverySubmitBtn');
+  const recoverySubmitLabel = document.getElementById('recoverySubmitLabel');
+  const recoveryBackBtn = document.getElementById('recoveryBackBtn');
+  const updatePasswordForm = document.getElementById('updatePasswordForm');
+  const newPasswordInput = document.getElementById('newPasswordInput');
+  const confirmPasswordInput = document.getElementById('confirmPasswordInput');
+  const updatePasswordBtn = document.getElementById('updatePasswordBtn');
+  const updatePasswordLabel = document.getElementById('updatePasswordLabel');
 
   let authMode = 'login';
 
@@ -541,6 +605,10 @@
 
   function setAuthMode(mode) {
     authMode = mode;
+    forgotPasswordForm.style.display = 'none';
+    updatePasswordForm.style.display = 'none';
+    authForm.style.display = 'block';
+    forgotPasswordBtn.style.display = mode === 'login' ? 'block' : 'none';
     hideAuthMessages();
     const isSignup = mode === 'signup';
     tabSignup.classList.toggle('active', isSignup);
@@ -554,6 +622,106 @@
 
   tabLogin.addEventListener('click', () => setAuthMode('login'));
   tabSignup.addEventListener('click', () => setAuthMode('signup'));
+
+  function showForgotPasswordForm() {
+    hideAuthMessages();
+    authForm.style.display = 'none';
+    forgotPasswordBtn.style.display = 'none';
+    updatePasswordForm.style.display = 'none';
+    forgotPasswordForm.style.display = 'block';
+    recoveryEmailInput.value = emailInput.value.trim();
+    recoveryEmailInput.focus();
+  }
+
+  function showUpdatePasswordForm() {
+    hideAuthMessages();
+    authForm.style.display = 'none';
+    forgotPasswordBtn.style.display = 'none';
+    forgotPasswordForm.style.display = 'none';
+    updatePasswordForm.style.display = 'block';
+    authTitle.textContent = 'غيّر كلمة المرور';
+    authSub.textContent = 'اكتب كلمة مرور جديدة لحسابك.';
+    newPasswordInput.focus();
+  }
+
+  forgotPasswordBtn.addEventListener('click', showForgotPasswordForm);
+  recoveryBackBtn.addEventListener('click', () => {
+    authForm.style.display = 'block';
+    forgotPasswordForm.style.display = 'none';
+    updatePasswordForm.style.display = 'none';
+    forgotPasswordBtn.style.display = 'block';
+    setAuthMode('login');
+  });
+
+  forgotPasswordForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!sb) return showAuthError('خدمة الدخول غير متاحة حاليًا.');
+    const email = recoveryEmailInput.value.trim();
+    if (!email) return showAuthError('اكتب الإيميل الأول.');
+    recoverySubmitBtn.disabled = true;
+    recoverySubmitLabel.innerHTML = '<span class="spinner"></span> بنبعت الرابط...';
+    hideAuthMessages();
+    try {
+      const { error } = await sb.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/app/dabbar-onboarding.html?mode=recovery`,
+      });
+      if (error) throw error;
+      showAuthNotice('لو الإيميل مسجل عندنا، هتوصلك رسالة فيها رابط تغيير كلمة المرور. راجع Inbox وSpam.');
+    } catch (error) {
+      showAuthError(error.message || 'مقدرناش نبعت رابط الاستعادة دلوقتي.');
+    } finally {
+      recoverySubmitBtn.disabled = false;
+      recoverySubmitLabel.textContent = 'إرسال رابط الاستعادة';
+    }
+  });
+
+  updatePasswordForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!sb) return showAuthError('خدمة الدخول غير متاحة حاليًا.');
+    const password = newPasswordInput.value;
+    if (password.length < 6) return showAuthError('كلمة المرور لازم تكون 6 أحرف على الأقل.');
+    if (password !== confirmPasswordInput.value) return showAuthError('كلمتا المرور غير متطابقتين.');
+    updatePasswordBtn.disabled = true;
+    updatePasswordLabel.innerHTML = '<span class="spinner"></span> بنحفظ...';
+    hideAuthMessages();
+    try {
+      const { error } = await sb.auth.updateUser({ password });
+      if (error) throw error;
+      showAuthNotice('تم تغيير كلمة المرور بنجاح. تقدر تسجل دخولك دلوقتي.');
+      newPasswordInput.value = '';
+      confirmPasswordInput.value = '';
+      await sb.auth.signOut();
+      setTimeout(() => {
+        authForm.style.display = 'block';
+        updatePasswordForm.style.display = 'none';
+        forgotPasswordBtn.style.display = 'block';
+        setAuthMode('login');
+      }, 900);
+    } catch (error) {
+      showAuthError(error.message || 'مقدرناش نغيّر كلمة المرور دلوقتي.');
+    } finally {
+      updatePasswordBtn.disabled = false;
+      updatePasswordLabel.textContent = 'حفظ كلمة المرور';
+    }
+  });
+
+  if (sb?.auth?.onAuthStateChange) {
+    sb.auth.onAuthStateChange((event) => {
+      if (event === 'PASSWORD_RECOVERY') showUpdatePasswordForm();
+    });
+  }
+  if (new URLSearchParams(window.location.search).get('mode') === 'recovery' || window.location.hash.includes('type=recovery')) {
+    setTimeout(async () => {
+      hideBootSplash();
+      try {
+        const { data: { session } } = await sb?.auth?.getSession();
+        if (session) showUpdatePasswordForm();
+        else showAuthError('رابط الاستعادة منتهي أو غير صالح. اطلب رابطًا جديدًا.');
+      } catch (error) {
+        showAuthError('رابط الاستعادة منتهي أو غير صالح. اطلب رابطًا جديدًا.');
+      }
+    }, 0);
+  }
 
   let authSubmitting = false;
 

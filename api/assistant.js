@@ -5,7 +5,7 @@ import { extractItemizedReceiptFromImageBase64, askDabbarChat, classifyMessage, 
 import { saveInvoiceRecord, deleteInvoiceById } from '../lib/invoices.js';
 import { hasActiveSubscription, isInTrial } from '../lib/users.js';
 import { checkOcrUsage, checkChatUsage, refundOcrUsage, refundUsage } from '../lib/rateLimits.js';
-import { normalizeDigits, extractDeterministicExpense } from '../lib/textNormalize.js';
+import { normalizeDigits, extractDeterministicExpense, correctDebtDirections } from '../lib/textNormalize.js';
 import { maybeSendBudgetAlert } from '../lib/webPush.js';
 import { getDashboardUserFromRequest } from '../lib/dashboardAuth.js';
 
@@ -246,7 +246,7 @@ async function handleEntryDraft(userId, body, res) {
   // (مثلاً "صرفت 50 جنيه أكل و100 مواصلات") — بنرجّعهم كلهم كمسودات عشان المستخدم يراجعهم ويأكدهم مرة واحدة،
   // بدل ما نلقط أول معاملة بس ونسيب الباقي بلا تسجيل زي ما كان الموقع بيعمل قبل كده.
   const parsed = await classifyMessage(text);
-  const transactions = Array.isArray(parsed) ? parsed : [];
+  const transactions = correctDebtDirections(text, Array.isArray(parsed) ? parsed : []);
   let validTx = transactions.filter((item) => (item?.type === 'expense' || item?.type === 'debt') && Number(item.amount) > 0 && (item.type !== 'debt' || item.person));
   // لو التصنيف الذكي لم يلتقط جملة قصيرة مثل "غدا 100 جنيه"، نستخدم استخراجًا حتميًا
   // مقيدًا بعلامات المصروف، فلا نخلط جمل الديون أو الأسئلة مع مصروفات وهمية.

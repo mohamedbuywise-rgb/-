@@ -1,14 +1,11 @@
 import { supabase } from '../lib/supabaseClient.js';
 import { maybeSendBudgetAlert } from '../lib/webPush.js';
+import { getDashboardUserFromRequest } from '../lib/dashboardAuth.js';
 
 async function requireUser(req, res) {
-  const token = (req.headers.authorization || '').replace('Bearer ', '').trim();
-  if (!token) { res.status(401).json({ error: 'لازم تسجل دخول الأول.' }); return null; }
-  const { data, error } = await supabase.auth.getUser(token);
-  if (error || !data?.user) { res.status(401).json({ error: 'انتهت صلاحية الجلسة.' }); return null; }
-  const { data: link } = await supabase.from('user_links').select('telegram_user_id').eq('auth_user_id', data.user.id).maybeSingle();
-  if (!link) { res.status(400).json({ error: 'لازم تربط حسابك بالبوت الأول.' }); return null; }
-  return link.telegram_user_id;
+  const user = await getDashboardUserFromRequest(req);
+  if (!user) { res.status(401).json({ error: 'انتهت صلاحية الجلسة.' }); return null; }
+  return user.dataUserId;
 }
 
 const cleanSettings = (row) => ({

@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabaseClient.js';
+import { getDashboardUserFromRequest } from '../lib/dashboardAuth.js';
 import { getMonthRange, getExpensesBetween, buildCategoryBreakdown } from '../lib/expenses.js';
 import { computeNetByPerson } from '../lib/debts.js';
 import { getInvoicesList, getInvoiceDetail } from '../lib/invoices.js';
@@ -27,55 +28,31 @@ export default async function handler(req, res) {
   res.setHeader('Expires', '0');
 
   try {
-    const token = (req.headers.authorization || '').replace('Bearer ', '').trim();
-    if (!token) {
-      return res.status(401).json({ error: 'لازم تسجل دخول الأول.' });
-    }
-
-    const { data: userData, error: authError } = await supabase.auth.getUser(token);
-    if (authError || !userData?.user) {
+    const dashboardUser = await getDashboardUserFromRequest(req);
+    if (!dashboardUser) {
       return res.status(401).json({ error: 'انتهت صلاحية الجلسة، سجل دخول تاني.' });
     }
 
-    const { data: link, error: linkError } = await supabase
-      .from('user_links')
-      .select('telegram_user_id')
-      .eq('auth_user_id', userData.user.id)
-      .maybeSingle();
-
-    if (linkError) {
-      console.error('dashboard-data user_links lookup error:', JSON.stringify(linkError), 'auth_user_id:', userData.user.id);
-    }
-
-    if (linkError) {
-      // خطأ قاعدة البيانات ليس معناه أن الحساب غير مربوط. إرجاع linked:false هنا
-      // كان يحوّل عطلًا عابرًا إلى إعادة توجيه onboarding loop.
-      return res.status(503).json({ error: 'تعذر التحقق من ربط الحساب مؤقتًا. جرّب تحديث الصفحة.' });
-    }
-
-    if (!link) {
-      console.log('dashboard-data: no link found for auth_user_id:', userData.user.id);
-      return res.status(200).json({ linked: false });
-    }
-
-    console.log('dashboard-data: linked to telegram_user_id:', link.telegram_user_id);
-
-    const telegramUserId = link.telegram_user_id;
+    const { dataUserId, telegramUserId, linked } = dashboardUser;
+    console.log(
+      `dashboard-data: ${linked ? 'linked to telegram_user_id' : 'standalone auth user'}:`,
+      linked ? telegramUserId : dashboardUser.authUserId
+    );
 
     // ---- الأيام النشطة: طلب واحد من RPC، والـ fallback لا يعطل الداشبورد ----
-    const activeDays = await getActiveDays(telegramUserId);
+    const activeDays = await getActiveDays(dataUserId);
 
     // ---- كل الفواتير / تفاصيل فاتورة واحدة (GET /api/dashboard-data?invoices=1 أو ?invoiceId=123) ----
     // اتحطوا هنا بدل ملف API منفصل عشان نفضل تحت حد Vercel Hobby (12 function كحد أقصى)،
     // بنفس فكرة تجميع الميزات في api/assistant.js.
     if (req.query.invoiceId) {
-      const invoice = await getInvoiceDetail(telegramUserId, Number(req.query.invoiceId));
+      const invoice = await getInvoiceDetail(dataUserId, Number(req.query.invoiceId));
       if (!invoice) return res.status(404).json({ error: 'الفاتورة دي مش موجودة.' });
-      return res.status(200).json({ linked: true, invoice });
+      return res.status(200).json({ linked, telegramUserId: linked ? telegramUserId : null, invoice });
     }
     if (req.query.invoices) {
-      const invoices = await getInvoicesList(telegramUserId);
-      return res.status(200).json({ linked: true, invoices });
+      const invoices = await getInvoicesList(dataUserId);
+      return res.status(200).json({ linked, telegramUserId: linked ? telegramUserId : null, invoices });
     }
 
 
@@ -84,7 +61,7 @@ export default async function handler(req, res) {
     startOfDay.setHours(0, 0, 0, 0);
     const endOfDay = new Date(startOfDay);
     endOfDay.setDate(endOfDay.getDate() + 1);
-    const todayExpenses = await getExpensesBetween(telegramUserId, startOfDay, endOfDay);
+    const todayExpenses = await getExpensesBetween(dataUserId, startOfDay, endOfDay);
     const todayTotal = todayExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
 
     // ---- توزيع صرف "الأسبوع الحالي" حسب الأيام (سبت -> جمعة)، مش الشهر كله ----
@@ -101,7 +78,7 @@ export default async function handler(req, res) {
     const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekEnd.getDate() + 7);
 
-    const weekExpenses = await getExpensesBetween(telegramUserId, weekStart, weekEnd);
+    const weekExpenses = await getExpensesBetween(dataUserId, weekStart, weekEnd);
 
     const weekdayTotals = [0, 0, 0, 0, 0, 0, 0];
     const weekdayCounts = [0, 0, 0, 0, 0, 0, 0];
@@ -139,7 +116,7 @@ export default async function handler(req, res) {
 
     // ---- مصاريف الشهر الحالي ----
     const { start, end, label } = getMonthRange(0);
-    const monthExpenses = await getExpensesBetween(telegramUserId, start, end);
+    const monthExpenses = await getExpensesBetween(dataUserId, start, end);
     const monthTotal = monthExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
     const breakdown = buildCategoryBreakdown(monthExpenses); // [{name, amount, percent, items}]
 
@@ -153,14 +130,14 @@ export default async function handler(req, res) {
 
     // ---- الشهر اللي فات (للمقارنة) ----
     const prevRange = getMonthRange(-1);
-    const prevExpenses = await getExpensesBetween(telegramUserId, prevRange.start, prevRange.end);
+    const prevExpenses = await getExpensesBetween(dataUserId, prevRange.start, prevRange.end);
     const prevTotal = prevExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
 
     // ---- أرشيف آخر 4 شهور فاتت (بيانات حقيقية من جدول expenses، مش تلخيص محفوظ منفصل) ----
     const history = [];
     for (let offset = -1; offset >= -4; offset--) {
       const range = getMonthRange(offset);
-      const rangeExpenses = await getExpensesBetween(telegramUserId, range.start, range.end);
+      const rangeExpenses = await getExpensesBetween(dataUserId, range.start, range.end);
       if (rangeExpenses.length === 0) continue;
       const rangeTotal = rangeExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
       const rangeBreakdown = buildCategoryBreakdown(rangeExpenses);
@@ -177,7 +154,7 @@ export default async function handler(req, res) {
     const { data: goalRow, error: goalError } = await supabase
       .from('goals')
       .select('*')
-      .eq('telegram_user_id', telegramUserId)
+      .eq('telegram_user_id', dataUserId)
       .eq('is_active', true)
       .limit(1)
       .maybeSingle();
@@ -213,7 +190,7 @@ export default async function handler(req, res) {
     };
 
     // ---- الديون ----
-    const netByPerson = await computeNetByPerson(telegramUserId);
+    const netByPerson = await computeNetByPerson(dataUserId);
     const entries = Object.values(netByPerson).filter((v) => v.net !== 0);
     const owedToYou = entries.filter((v) => v.net > 0).sort((a, b) => b.net - a.net);
     const youOwe = entries.filter((v) => v.net < 0).sort((a, b) => a.net - b.net);
@@ -224,7 +201,7 @@ export default async function handler(req, res) {
     const { data: todayFlowData } = await supabase
       .from('debts')
       .select('amount, direction')
-      .eq('telegram_user_id', telegramUserId)
+      .eq('telegram_user_id', dataUserId)
       .gte('created_at', startOfDay.toISOString())
       .lt('created_at', endOfDay.toISOString());
 
@@ -239,7 +216,7 @@ export default async function handler(req, res) {
     const DISCRETIONARY_CATEGORIES = ['تسوق', 'ترفيه', 'اشتراكات', 'هدايا وتبرعات', 'شخصي وعناية'];
     const yearStart = new Date(start.getFullYear(), 0, 1);
     const yearEnd = new Date(start.getFullYear() + 1, 0, 1);
-    const yearExpenses = await getExpensesBetween(telegramUserId, yearStart, yearEnd);
+    const yearExpenses = await getExpensesBetween(dataUserId, yearStart, yearEnd);
 
     let wrapped = null;
     if (yearExpenses.length > 0) {
@@ -273,14 +250,14 @@ export default async function handler(req, res) {
     }
 
     // ---- حالة الاشتراك/التجربة ----
-    const subActive = await hasActiveSubscription(telegramUserId);
-    const subExpiresAt = await getSubscriptionExpiry(telegramUserId);
-    const subInTrial = !subActive && (await isInTrial(telegramUserId));
-    const subTrialDaysLeft = subInTrial ? await getTrialDaysLeft(telegramUserId) : 0;
+    const subActive = await hasActiveSubscription(dataUserId);
+    const subExpiresAt = await getSubscriptionExpiry(dataUserId);
+    const subInTrial = !subActive && (await isInTrial(dataUserId));
+    const subTrialDaysLeft = subInTrial ? await getTrialDaysLeft(dataUserId) : 0;
 
     return res.status(200).json({
-      linked: true,
-      telegramUserId,
+      linked,
+      telegramUserId: linked ? telegramUserId : null,
       generatedAt: new Date().toISOString(),
       subscription: {
         active: subActive,

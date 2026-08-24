@@ -2,6 +2,7 @@ import { supabase } from '../lib/supabaseClient.js';
 import { sendTelegramMessage, sendTelegramPhoto } from '../lib/telegram.js';
 import { getChatIdByUserId } from '../lib/users.js';
 import { ADMIN_TELEGRAM_ID, ADMIN_PASSWORD, SUBSCRIPTION_PRICE_EGP } from '../lib/config.js';
+import { getDashboardUserFromRequest } from '../lib/dashboardAuth.js';
 
 // ============ GET /api/admin  (كان /api/admin-stats) ============
 // صفحة إحصائيات خاصة بالأدمن بس (مالك المشروع). مفيش حساب Supabase/تليجرام هنا خالص —
@@ -94,27 +95,13 @@ async function handleStats(req, res) {
 const MAX_IMAGE_BYTES = 4 * 1024 * 1024; // 4MB - حد معقول لصورة سكرين شوت
 
 async function handleSubscriptionProof(req, res) {
-  const token = (req.headers.authorization || '').replace('Bearer ', '').trim();
-  if (!token) {
-    return res.status(401).json({ error: 'لازم تسجل دخول الأول.' });
-  }
-
-  const { data: userData, error: authError } = await supabase.auth.getUser(token);
-  if (authError || !userData?.user) {
+  const user = await getDashboardUserFromRequest(req);
+  if (!user) {
     return res.status(401).json({ error: 'انتهت صلاحية الجلسة، سجل دخول تاني.' });
   }
-  const authUserId = userData.user.id;
-
-  const { data: link } = await supabase
-    .from('user_links')
-    .select('telegram_user_id')
-    .eq('auth_user_id', authUserId)
-    .maybeSingle();
-
-  if (!link) {
-    return res.status(400).json({ error: 'لازم تربط حسابك بتليجرام الأول (من تاب حسابي).' });
-  }
-  const telegramUserId = link.telegram_user_id;
+  const authUserId = user.authUserId;
+  const telegramUserId = user.dataUserId;
+  const isTelegramLinked = user.linked;
 
   const imageBase64 = String(req.body?.imageBase64 || '');
   const senderName = String(req.body?.senderName || '').trim().slice(0, 100);
@@ -155,9 +142,10 @@ async function handleSubscriptionProof(req, res) {
 
   // ---- إبلاغ الأدمن على تليجرام، بنفس صيغة سكرين شوت البوت العادي (أمر "فعل" جاهز) ----
   if (ADMIN_TELEGRAM_ID && imageUrl) {
+    const sourceLabel = isTelegramLinked ? 'الحساب مربوط بتيليجرام' : 'حساب مستقل — غير مربوط بتيليجرام';
     const caption = senderName
-      ? `👆 إيصال تحويل من الداشبورد (مش تليجرام).\n👤 الاسم اللي بعته: <b>${senderName}</b>\n\nقارن الاسم ده باللي ظهرلك في إنستا باي، ولو تمام ابعت:\n<code>فعل ${telegramUserId}</code>`
-      : `👆 إيصال تحويل من الداشبورد (مش تليجرام) — من غير اسم.\nلو اتأكدت، فعّله بـ:\n<code>فعل ${telegramUserId}</code>`;
+      ? `👆 إيصال تحويل من الداشبورد (مش تليجرام).\n🔗 ${sourceLabel}\n👤 الاسم اللي بعته: <b>${senderName}</b>\n\nقارن الاسم ده باللي ظهرلك في إنستا باي، ولو تمام ابعت:\n<code>فعل ${telegramUserId}</code>`
+      : `👆 إيصال تحويل من الداشبورد (مش تليجرام) — من غير اسم.\n🔗 ${sourceLabel}\nلو اتأكدت، فعّله بـ:\n<code>فعل ${telegramUserId}</code>`;
 
     try {
       await sendTelegramPhoto(ADMIN_TELEGRAM_ID, imageUrl, caption, 'HTML');
@@ -166,13 +154,15 @@ async function handleSubscriptionProof(req, res) {
     }
   }
 
-  // ---- تأكيد للمستخدم نفسه على تليجرام (لو عندنا chat_id بتاعه) ----
-  const chatId = await getChatIdByUserId(telegramUserId);
-  if (chatId) {
-    await sendTelegramMessage(
-      chatId,
-      '✅ وصلنا إيصال تحويلك من الداشبورد، هنتأكد ونفعّل اشتراكك خلال دقايق قليلة.'
-    );
+  // ---- تأكيد للمستخدم نفسه على تيليجرام فقط لو الحساب مربوط فعلًا ----
+  if (isTelegramLinked) {
+    const chatId = await getChatIdByUserId(telegramUserId);
+    if (chatId) {
+      await sendTelegramMessage(
+        chatId,
+        '✅ وصلنا إيصال تحويلك من الداشبورد، هنتأكد ونفعّل اشتراكك خلال دقايق قليلة.'
+      );
+    }
   }
 
   return res.status(200).json({ ok: true });

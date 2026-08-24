@@ -26,10 +26,10 @@ export default async function handler(req, res) {
 
   try {
     const user = await getDashboardUserFromToken(tokenFromRequest(req));
-    if (!user) return res.status(401).json({ error: 'لازم تسجل دخول وتربط حساب تليجرام الأول.' });
+    if (!user) return res.status(401).json({ error: 'لازم تسجل دخول الأول.' });
 
     if (req.method === 'GET') {
-      const preferences = await getNotificationPreferences(user.telegramUserId);
+      const preferences = await getNotificationPreferences(user.dataUserId);
       return res.status(200).json({
         configured: isPushConfigured(),
         publicKey: process.env.VAPID_PUBLIC_KEY || '',
@@ -41,7 +41,7 @@ export default async function handler(req, res) {
       const subscription = req.body?.subscription;
       const saved = await savePushSubscription({
         authUserId: user.authUserId,
-        telegramUserId: user.telegramUserId,
+        telegramUserId: user.dataUserId,
         subscription,
         userAgent: req.headers['user-agent'] || '',
       });
@@ -51,7 +51,7 @@ export default async function handler(req, res) {
     if (req.method === 'PUT') {
       const preferences = await saveNotificationPreferences({
         authUserId: user.authUserId,
-        telegramUserId: user.telegramUserId,
+        telegramUserId: user.dataUserId,
         preferences: { ...DEFAULT_PREFERENCES, ...(req.body?.preferences || {}) },
       });
       return res.status(200).json({ ok: true, preferences });

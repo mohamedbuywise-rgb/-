@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabaseClient.js';
+import { migrateStandaloneData } from '../lib/dashboardAuth.js';
 
 // POST /api/auth-by-code { code, standalone? }
 // يربط جلسة Supabase Auth الحالية بحساب Telegram صاحب كود /link.
@@ -75,10 +76,14 @@ export default async function handler(req, res) {
         { auth_user_id: authUserId, telegram_user_id: telegramUserId, linked_at: new Date().toISOString() },
         { onConflict: 'auth_user_id' }
       );
-    if (linkError) {
+        if (linkError) {
       console.error('auth-by-code link insert error:', JSON.stringify(linkError));
       return res.status(500).json({ ok: false, error: 'حصل خطأ وإحنا بنربط الحساب. جرب تاني.' });
     }
+
+    // لو الحساب استخدم الداش قبل الربط، ننقل سجلاته القديمة للمعرف الجديد
+    // حتى يفضل كل شيء ظاهرًا بعد الربط بدل ما يبدأ العميل من شاشة فاضية.
+    await migrateStandaloneData(authUserId, telegramUserId);
 
     // تحديث مشروط يمنع استخدام نفس الكود مرتين في سباق طلبين متزامنين.
     const { data: markedRows, error: markError } = await supabase

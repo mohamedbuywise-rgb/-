@@ -5,6 +5,7 @@ import { getMonthRange, getExpensesBetween, buildCategoryBreakdown } from '../li
 import { buildReportHtml } from '../lib/reportTemplate.js';
 import { renderPdfFromHtml } from '../lib/pdf.js';
 import { MONTH_NAMES } from '../lib/config.js';
+import { getDashboardUserFromRequest } from '../lib/dashboardAuth.js';
 
 // ============ Router: /api/reports?type=... ============
 // كل الـ endpoints بتاعة التقارير اتلمّت هنا عشان نوفر عدد الـ Serverless Functions
@@ -15,31 +16,12 @@ import { MONTH_NAMES } from '../lib/config.js';
 // GET /api/reports?type=monthly&offset=0          (كان /api/monthly-report-pdf)
 
 async function requireLink(req, res) {
-  const token = (req.headers.authorization || '').replace('Bearer ', '').trim();
-  if (!token) {
-    res.status(401).json({ error: 'لازم تسجل دخول الأول.' });
-    return null;
-  }
-
-  const { data: userData, error: authError } = await supabase.auth.getUser(token);
-  if (authError || !userData?.user) {
+  const user = await getDashboardUserFromRequest(req);
+  if (!user) {
     res.status(401).json({ error: 'انتهت صلاحية الجلسة، سجل دخول تاني.' });
     return null;
   }
-
-  const { data: link, error: linkError } = await supabase
-    .from('user_links')
-    .select('telegram_user_id')
-    .eq('auth_user_id', userData.user.id)
-    .maybeSingle();
-  if (linkError) console.error('reports user_links error:', JSON.stringify(linkError));
-
-  if (!link) {
-    res.status(400).json({ error: 'لازم تربط حسابك بالبوت الأول.' });
-    return null;
-  }
-
-  return { userData, link };
+  return user;
 }
 
 // ---- type=person: تفاصيل ديون شخص معيّن ----
@@ -170,15 +152,15 @@ export default async function handler(req, res) {
     const auth = await requireLink(req, res);
     if (!auth) return; // requireLink already sent the response
 
-    const telegramUserId = auth.link.telegram_user_id;
+    const dataUserId = auth.dataUserId;
 
     switch (type) {
       case 'person':
-        return await handlePersonDetail(req, res, telegramUserId);
+        return await handlePersonDetail(req, res, dataUserId);
       case 'debts':
-        return await handleDebtsPdf(req, res, telegramUserId, auth.userData.user.email);
+        return await handleDebtsPdf(req, res, dataUserId, auth.user.email);
       case 'monthly':
-        return await handleMonthlyPdf(req, res, telegramUserId);
+        return await handleMonthlyPdf(req, res, dataUserId);
       default:
         return res.status(400).json({ error: 'type غير معروف. استخدم person أو debts أو monthly.' });
     }

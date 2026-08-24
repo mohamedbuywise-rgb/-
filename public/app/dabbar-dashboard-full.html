@@ -1768,7 +1768,7 @@
                     <span class="w-9 h-9 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-base">💬</span>
                     <div>
                         <p class="text-xs font-bold text-slate-200">حساب تليجرام</p>
-                        <p class="text-[11px] text-slate-500" id="account-telegram-status">جاري التحقق...</p>
+                        <p class="text-[11px] text-slate-500" id="account-telegram-status">جاري التحقق من حالة الربط...</p>
                     </div>
                 </div>
                 <span id="account-telegram-badge" class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-slate-800 text-slate-400">—</span>
@@ -2418,7 +2418,7 @@
                 accessToken = session.access_token;
                 currentUser = session.user;
                 await refreshPushUI();
-                await loadDashboard(true); // أول تحميل — لو مش مربوط فعلاً، نودّيه لشاشة الربط على طول
+                await loadDashboard(true); // أول تحميل — الربط اختياري والداش تفتح للحساب المستقل عادي
                 await loadPlanningSettings();
                 await loadAccountTab();
                 loadInvoicesCount();
@@ -2567,14 +2567,8 @@
         });
 
         // ============ جلب البيانات الحقيقية من /api/dashboard-data وملء الشاشة بيها ============
-        // ملحوظة مهمة (فيكس): الدالة دي بتتنادى مش بس أول ما تفتح الصفحة، لكن كمان كل 20
-        // ثانية (polling) وكل ما ترجع تفتح التاب (focus/visibilitychange). لو أي طلب من دول
-        // رجع linked:false بشكل عابر (تأخر شبكة، cold start، أو أي حاجة مؤقتة)، كنا بنعمل
-        // redirect فوري لصفحة onboarding.html من فوق الداشبورد اللي شغالة أصلاً — وده اللي
-        // كان بيظهر كأن شاشة "بنجهزلك حسابك..." بتفلاش فجأة والمستخدم مسجّل دخول بالفعل.
-        // الحل: نتأكد إن ده مش false-positive عابر قبل ما نعمل أي تنقّل:
-        //   1) مش بنعمل redirect إلا لو الطلب ده هو أول تحميل للصفحة (initialLoad)، أو
-        //   2) وصلنا linked:false مرتين على التوالي في نفس الجلسة (يبعد أي حالة عابرة/سباق).
+        // linked:false حالة صحيحة للحساب المستقل وليست خطأ أو سببًا لإعادة onboarding.
+        // كل وظائف الداش تعتمد على dataUserId الداخلي الذي يرجعه السيرفر.
         let __consecutiveUnlinked = 0;
         async function loadDashboard(isInitialLoad = false) {
             let data;
@@ -2602,19 +2596,11 @@
                 return;
             }
 
-            if (data.linked === false) {
-                // لا نعملش redirect تلقائي هنا: linked:false قد تعني أن الربط لم يكتمل،
-                // أو أن الحساب جديد. إعادة التوجيه كانت بتعمل onboarding loop وتفقد المستخدم
-                // إحساسه أن تسجيل الدخول نجح. نحافظ على الجلسة ونوضح الخطوة المطلوبة داخل الصفحة.
-                __consecutiveUnlinked += 1;
-                const errorEl = document.getElementById('dashboard-load-error');
-                if (errorEl) {
-                    errorEl.innerHTML = `الحساب اتسجل بنجاح، لكن لسه محتاج تربطه بتليجرام عشان تظهر بياناتك. <a href="${ONBOARDING_URL}" style="display:inline-block;margin-inline-start:8px;color:#0E8C57;text-decoration:underline;font-weight:900">فتح شاشة الربط</a>`;
-                    errorEl.classList.remove('hidden');
-                }
-                return;
-            }
+            // linked=false معناها أن الحساب مستقل فقط؛ البيانات تُعرض بشكل طبيعي،
+            // والربط يظل خيارًا من تاب "حسابي" ولا يوقف أي وظيفة في الداش.
             __consecutiveUnlinked = 0;
+            const dashboardError = document.getElementById('dashboard-load-error');
+            if (dashboardError) dashboardError.classList.add('hidden');
 
             window.__dashboardData = data;
 
@@ -4128,7 +4114,8 @@
                 navAvatarWrap.textContent = '👤';
             }
 
-            // حالة ربط تليجرام — بتيجي من نفس استجابة /api/dashboard-data
+            // حالة ربط تليجرام — بتيجي من نفس استجابة /api/dashboard-data.
+            // غياب الربط لا يمنع الداش أو التسجيل أو الفواتير أو الإشعارات.
             const statusEl = document.getElementById('account-telegram-status');
             const badgeEl = document.getElementById('account-telegram-badge');
             const tgId = window.__dashboardData?.telegramUserId;
@@ -4137,9 +4124,9 @@
                 badgeEl.textContent = '✅ متصل';
                 badgeEl.className = 'text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-500/15 text-emerald-400';
             } else {
-                statusEl.textContent = 'حسابك لسه مش مربوط بتليجرام — دوس هنا تربطه';
-                badgeEl.textContent = '⚠️ مش متصل';
-                badgeEl.className = 'text-[10px] font-bold px-2.5 py-1 rounded-full bg-rose-500/15 text-rose-400';
+                statusEl.textContent = 'الربط اختياري — الداش شغالة معاك عادي. اضغط لو حابب تربطه';
+                badgeEl.textContent = 'اختياري';
+                badgeEl.className = 'text-[10px] font-bold px-2.5 py-1 rounded-full bg-slate-800 text-slate-400';
             }
         }
 

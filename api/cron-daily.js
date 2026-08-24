@@ -198,6 +198,11 @@ async function processUser(user, { isFriday, isLastDayOfMonth, monthKey }) {
     await sendPushDailySummary(userId, pushPreferences, now).catch((error) => console.error(`Daily summary push failed for user ${userId}:`, error));
     await sendPushWeeklySummary(userId, pushPreferences, isFriday, now).catch((error) => console.error(`Weekly push failed for user ${userId}:`, error));
 
+    // الحساب المستقل يستفيد من كل إشعارات المتصفح، لكن لا نرسل له أي رسالة
+    // عبر Telegram لأن chat_id هنا placeholder سالب وليس Chat حقيقيًا.
+    const telegramLinked = Number(userId) > 0 && Number(chatId) > 0;
+    if (!telegramLinked) return { ok: true, pushOnly: true };
+
     // تذكير قبل انتهاء الاشتراك بـ 3 أيام أو أقل (مرة واحدة يوميًا لحد ما يجدد)
     const daysLeft = Math.ceil((expiresAt.getTime() - Date.now()) / (24 * 60 * 60 * 1000));
     if (daysLeft <= 3) {

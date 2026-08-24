@@ -7,6 +7,7 @@ import { hasActiveSubscription, isInTrial } from '../lib/users.js';
 import { checkOcrUsage, checkChatUsage, refundOcrUsage, refundUsage } from '../lib/rateLimits.js';
 import { normalizeDigits } from '../lib/textNormalize.js';
 import { maybeSendBudgetAlert } from '../lib/webPush.js';
+import { getDashboardUserFromRequest } from '../lib/dashboardAuth.js';
 
 // ============ Router: POST /api/assistant  { action: ... } ============
 // كل ميزات "دبّر الذكي" الجديدة (الأهداف، امسح فاتورة، اسأل دبّر) اتلمّت هنا في endpoint واحد،
@@ -21,43 +22,24 @@ import { maybeSendBudgetAlert } from '../lib/webPush.js';
 // action = "ask"              { question }
 
 async function requireLink(req, res) {
-  const token = (req.headers.authorization || '').replace('Bearer ', '').trim();
-  if (!token) {
-    res.status(401).json({ error: 'لازم تسجل دخول الأول.' });
-    return null;
-  }
-
-  const { data: userData, error: authError } = await supabase.auth.getUser(token);
-  if (authError || !userData?.user) {
+  const user = await getDashboardUserFromRequest(req);
+  if (!user) {
     res.status(401).json({ error: 'انتهت صلاحية الجلسة، سجل دخول تاني.' });
     return null;
   }
 
-  const { data: link, error: linkError } = await supabase
-    .from('user_links')
-    .select('telegram_user_id')
-    .eq('auth_user_id', userData.user.id)
-    .maybeSingle();
-  if (linkError) console.error('assistant user_links error:', JSON.stringify(linkError));
-
-  if (!link) {
-    res.status(400).json({ error: 'لازم تربط حسابك بالبوت الأول.' });
-    return null;
-  }
-
-  // نفس بوابة الاشتراك بتاعة بوت تليجرام (مشترك فعّال أو لسه في التجربة المجانية) — لازم تتطبّق هنا
-  // كمان، وإلا حد يقدر يستخدم ميزات "دبّر الذكي" (فاتورة/شات) من الداشبورد من غير أي حد استهلاك
-  // أو حتى من غير ما يكون مشترك أصلاً، وده بيكسر كل حساب الميزانية الشهرية.
-  const subscribed = await hasActiveSubscription(link.telegram_user_id);
+  // الربط بتيليجرام ليس شرطًا. الحساب المستقل يستخدم dataUserId السالب
+  // بنفس جداول المصروفات/الديون، بينما تظل بوابة الاشتراك والتجربة فعّالة.
+  const subscribed = await hasActiveSubscription(user.dataUserId);
   if (!subscribed) {
-    const trial = await isInTrial(link.telegram_user_id);
+    const trial = await isInTrial(user.dataUserId);
     if (!trial) {
       res.status(403).json({ error: 'محتاج تشترك الأول عشان تستخدم دبّر الذكي.', subscriptionRequired: true });
       return null;
     }
   }
 
-  return link.telegram_user_id;
+  return user.dataUserId;
 }
 
 function formatGoal(row) {

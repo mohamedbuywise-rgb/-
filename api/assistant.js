@@ -8,6 +8,7 @@ import { checkOcrUsage, checkChatUsage, refundOcrUsage, refundUsage } from '../l
 import { normalizeDigits, extractDeterministicExpense, correctDebtDirections } from '../lib/textNormalize.js';
 import { maybeSendBudgetAlert } from '../lib/webPush.js';
 import { getDashboardUserFromRequest } from '../lib/dashboardAuth.js';
+import { isFinancialEventType, recordFinancialEvent } from '../lib/financialEvents.js';
 
 // ============ Router: POST /api/assistant  { action: ... } ============
 // كل ميزات "دبّر الذكي" الجديدة (الأهداف، امسح فاتورة، اسأل دبّر) اتلمّت هنا في endpoint واحد،
@@ -247,7 +248,7 @@ async function handleEntryDraft(userId, body, res) {
   // بدل ما نلقط أول معاملة بس ونسيب الباقي بلا تسجيل زي ما كان الموقع بيعمل قبل كده.
   const parsed = await classifyMessage(text);
   const transactions = correctDebtDirections(text, Array.isArray(parsed) ? parsed : []);
-  let validTx = transactions.filter((item) => (item?.type === 'expense' || item?.type === 'debt') && Number(item.amount) > 0 && (item.type !== 'debt' || item.person));
+  let validTx = transactions.filter((item) => ((isFinancialEventType(item?.type) || item?.type === 'expense') || item?.type === 'debt') && Number(item.amount) > 0 && (item.type !== 'debt' || item.person));
   // لو التصنيف الذكي لم يلتقط جملة قصيرة مثل "غدا 100 جنيه"، نستخدم استخراجًا حتميًا
   // مقيدًا بعلامات المصروف، فلا نخلط جمل الديون أو الأسئلة مع مصروفات وهمية.
   if (!validTx.length) {
@@ -263,6 +264,7 @@ async function handleEntryDraft(userId, body, res) {
     ...tx,
     amount: Number(tx.amount),
     note: tx.note || (useFallback ? '' : tx.note || ''),
+    raw_text: tx.raw_text || text,
     sourceText: useFallback ? text : (tx.note || ''),
     needsConfirmation: true,
     confidence: 0.85,
@@ -278,7 +280,7 @@ async function handleEntryInvoiceDraft(userId, body, res) {
   return res.status(200).json({ drafts: [{ type: 'invoice', amount: Number(receipt.totalAmount), merchant: receipt.merchant || '', items: receipt.items || [], category: receipt.items?.[0]?.category || 'مصروف عام', note: receipt.merchant || 'فاتورة', sourceText: 'فاتورة مصوّرة', needsConfirmation: true, confidence: 0.9 }] });
 }
 
-// ============ حفظ معاملة واحدة (مصروف / دين / فاتورة) — القلب المشترك اللي بيستخدمه handleEntryConfirm ============
+// ============ حفظ معاملة واحدة (مصروف / دخل / شراء / أصل / تحويل / دين / فاتورة) — القلب المشترك ============
 // نفس أنواع المعاملات اللي بوت تليجرام بيسجلها بالظبط (expense/debt)، بالإضافة لنوع "invoice" الخاص بالداشبورد.
 async function saveOneDraft(userId, draft) {
   const amount = Number(draft.amount);
@@ -289,6 +291,13 @@ async function saveOneDraft(userId, draft) {
     if (error) { console.error('entry_confirm expense error:', JSON.stringify(error)); return { ok: false, error: 'تعذر حفظ المصروف.' }; }
     await maybeSendBudgetAlert(userId).catch((pushError) => console.error('entry_confirm budget push failed:', pushError));
     return { ok: true, type: 'expense', record: data, message: `تم تسجيل مصروف ${data.amount} جنيه في ${data.category}.` };
+  }
+
+  // ============ العمليات المالية العامة — تحفظ العبارة الطبيعية كاملة مع النوع والتفاصيل ============
+  if (isFinancialEventType(draft.type)) {
+    const savedEvent = await recordFinancialEvent(draft, userId);
+    if (!savedEvent.ok) return savedEvent;
+    return { ...savedEvent, message: `تم تسجيل ${savedEvent.label} بقيمة ${savedEvent.record.amount} جنيه.` };
   }
 
   // ============ الديون/السلف — نفس بالظبط منطق recordDebt بتاع تليجرام (lib/debts.js)، بس من غير إرسال رسالة تليجرام ============

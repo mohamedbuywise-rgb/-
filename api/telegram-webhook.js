@@ -7,6 +7,7 @@ import { createGoal, contributeToGoal, sendGoalStatus, cancelActiveGoal } from '
 import { sendMonthlyWrapped } from '../lib/wrapped.js';
 import { upsertUser, hasActiveSubscription, getSubscriptionExpiry, activateSubscription, getChatIdByUserId, isInTrial, getTrialDaysLeft } from '../lib/users.js';
 import { createLinkCode } from '../lib/linking.js';
+import { isFinancialEventType, recordFinancialEvent } from '../lib/financialEvents.js';
 import { normalizeDigits, extractDeterministicExpense, correctDebtDirections } from '../lib/textNormalize.js';
 import { checkVoiceUsage, checkOcrUsage, checkChatUsage, refundOcrUsage } from '../lib/rateLimits.js';
 import { GUIDE_URL, TRIAL_SUMMARY_BASE_URL, ADMIN_TELEGRAM_ID, SUBSCRIPTION_DAYS, SUBSCRIPTION_PRICE_EGP, INSTAPAY_LINK, ADMIN_CONTACT_USERNAME, VOICE_MAX_DURATION_SECONDS, TELEGRAM_WEBHOOK_SECRET } from '../lib/config.js';
@@ -632,6 +633,12 @@ async function handleIncomingText(text, userId, chatId) {
     } else if (result.type === 'settlement' && result.person) {
       await settleDebtWithPerson(result.person, userId, chatId);
       successCount++;
+    } else if (isFinancialEventType(result.type) && result.amount) {
+      const savedEvent = await recordFinancialEvent({ ...result, sourceText: text }, userId);
+      if (savedEvent.ok) {
+        await sendTelegramMessage(chatId, `✅ سجلت ${savedEvent.label} بقيمة ${savedEvent.record.amount} جنيه${result.item ? ` — ${result.item}` : ''}.`);
+        successCount++;
+      }
     }
   }
 

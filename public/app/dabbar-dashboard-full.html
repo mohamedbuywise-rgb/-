@@ -2603,12 +2603,14 @@
             }
 
             if (data.linked === false) {
+                // لا نعملش redirect تلقائي هنا: linked:false قد تعني أن الربط لم يكتمل،
+                // أو أن الحساب جديد. إعادة التوجيه كانت بتعمل onboarding loop وتفقد المستخدم
+                // إحساسه أن تسجيل الدخول نجح. نحافظ على الجلسة ونوضح الخطوة المطلوبة داخل الصفحة.
                 __consecutiveUnlinked += 1;
-                // لو أول تحميل للصفحة: نصدّق الرد على طول ونودّيه لشاشة الربط (زي ما كان بالظبط).
-                // لو تحديث في الخلفية (polling/focus): نستنى تأكيد ثاني متتالي قبل أي تنقّل،
-                // عشان أي false-positive عابر ميقفلش الداشبورد اللي المستخدم شغال عليه فعلاً.
-                if (isInitialLoad || __consecutiveUnlinked >= 2) {
-                    window.location.href = ONBOARDING_URL;
+                const errorEl = document.getElementById('dashboard-load-error');
+                if (errorEl) {
+                    errorEl.innerHTML = `الحساب اتسجل بنجاح، لكن لسه محتاج تربطه بتليجرام عشان تظهر بياناتك. <a href="${ONBOARDING_URL}" style="display:inline-block;margin-inline-start:8px;color:#0E8C57;text-decoration:underline;font-weight:900">فتح شاشة الربط</a>`;
+                    errorEl.classList.remove('hidden');
                 }
                 return;
             }

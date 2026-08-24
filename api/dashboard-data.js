@@ -47,6 +47,12 @@ export default async function handler(req, res) {
       console.error('dashboard-data user_links lookup error:', JSON.stringify(linkError), 'auth_user_id:', userData.user.id);
     }
 
+    if (linkError) {
+      // خطأ قاعدة البيانات ليس معناه أن الحساب غير مربوط. إرجاع linked:false هنا
+      // كان يحوّل عطلًا عابرًا إلى إعادة توجيه onboarding loop.
+      return res.status(503).json({ error: 'تعذر التحقق من ربط الحساب مؤقتًا. جرّب تحديث الصفحة.' });
+    }
+
     if (!link) {
       console.log('dashboard-data: no link found for auth_user_id:', userData.user.id);
       return res.status(200).json({ linked: false });

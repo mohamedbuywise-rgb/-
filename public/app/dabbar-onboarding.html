@@ -474,29 +474,9 @@
     }
   })();
 
-  // ---- فحص فعلي (مش افتراض) إن الحساب الحالي مربوط بتليجرام ----
-  // ده اللي كان ناقص وسبب لفة "دخول → داشبورد → رجوع لـ onboarding": كنا بنفترض إن
-  // standalone = مربوط، من غير ما نتأكد فعليًا. لو الحساب مش مربوط فعلاً (حساب جديد،
-  // أو حساب مكرر اتعمل بنفس الإيميل)، الداشبورد كان بيكتشف ده ويرجّعنا هنا تاني، ولما
-  // كنا بنرجع هنا وإحنا standalone كنا بنودّيه تاني للداشبورد → لفة لا نهائية.
-  async function checkLinkedToTelegram(accessToken) {
-    try {
-      const res = await fetch('/api/dashboard-data', {
-        headers: { Authorization: `Bearer ${accessToken}` },
-        cache: 'no-store',
-      });
-      if (!res.ok) return null; // مقدرناش نتأكد (خطأ سيرفر/شبكة)، منفترضش حاجة
-      const data = await res.json().catch(() => null);
-      if (!data) return null;
-      return data.linked === true;
-    } catch (e) {
-      return null; // مقدرناش نتأكد، منفترضش حاجة
-    }
-  }
-
   // ---- لو المستخدم عنده جلسة شغالة أصلاً (رجع تاني على onboarding بالغلط) ----
-  // لو شغال كـ standalone (يعني اتثبّت خلاص) وبالفعل مربوط بتليجرام → نوديه على طول للداشبورد.
-  // لو لسه مش مربوط → نوريله شاشة الربط بدل ما نرجّعه للداشبورد وهو مش هيقدر يفتحها أصلاً.
+  // لو شغال كـ standalone (يعني اتثبّت خلاص) → نوديه على طول للداشبورد. ربط تليجرام
+  // بقى اختياري بالكامل ومكانه في صفحة الحساب داخل الداشبورد، مش هنا.
   (async () => {
     try {
       if (!sb) { hideBootSplash(); return; }
@@ -505,15 +485,7 @@
       if (recoveryMode) { hideBootSplash(); return; }
       if (!session) { hideBootSplash(); return; } // مفيش جلسة، يفضل على شاشة تسجيل الدخول
       if (isStandalone()) {
-        const linked = await checkLinkedToTelegram(session.access_token);
-        if (linked === false) {
-          showLinkScreen();
-          hideBootSplash();
-        } else {
-          // linked === true أو null (مقدرناش نتأكد بسبب خطأ عابر): نودّيه للداشبورد
-          // زي ما كان، بدل ما نحبسه هنا لو الخطأ عابر بس.
-          window.location.href = DASHBOARD_URL;
-        }
+        window.location.href = DASHBOARD_URL;
       } else {
         showLinkScreen();
         hideBootSplash();
@@ -602,6 +574,8 @@
   function showLinkScreen() {
     authScreen.style.display = 'none';
     linkScreen.classList.add('active');
+    document.getElementById('linkFormState').style.display = '';
+    document.getElementById('successState').classList.remove('show');
     setProgressStage('install');
   }
   setProgressStage('account');
@@ -826,16 +800,10 @@
           showAuthError('حصل خطأ في تسجيل الدخول، جرب تاني.');
           return;
         }
-        // لو شغال أصلاً كـ standalone (يعني اتثبّت خلاص من قبل) وبالفعل مربوط بتليجرام → دبّر مباشرة.
-        // لو مش مربوط، منورّيهوش الداشبورد عشان مش هيقدر يفتحها أصلاً (هترجّعه هنا تاني) —
-        // نوريله شاشة الربط على طول.
+        // لو شغال أصلاً كـ standalone (يعني اتثبّت خلاص من قبل) → دبّر مباشرة.
+        // لو لسه مش متثبّت، نوريله شاشة التثبيت.
         if (isStandalone()) {
-          const linked = await checkLinkedToTelegram(data.session.access_token);
-          if (linked === false) {
-            showLinkScreen();
-          } else {
-            window.location.href = DASHBOARD_URL;
-          }
+          window.location.href = DASHBOARD_URL;
         } else {
           showLinkScreen();
         }
@@ -865,7 +833,9 @@
     return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
   }
 
-  // ============ خلاص التثبيت — بتظهر حالة النجاح وتودّي على طول للداشبورد ============
+  // ============ خلاص التثبيت ============
+  // بعد التثبيت، بنودّي المستخدم على طول للداشبورد. ربط تليجرام بقى اختياري بالكامل
+  // ومكانه في صفحة الحساب جوه الداشبورد، مش جزء من الأونبوردينج.
   function finishInstallStep() {
     linkFormState.style.display = 'none';
     successState.classList.add('show');

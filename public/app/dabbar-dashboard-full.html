@@ -1229,6 +1229,10 @@
         input, textarea, select { accent-color: var(--pm-gold); }
         #theme-toggle-track.bg-amber-400 { background: var(--pm-gold) !important; }
         #theme-toggle-track.bg-slate-700 { background: var(--pm-surface-soft) !important; }
+        #push-notifications-card { background: var(--pm-surface-hi) !important; border-color: var(--pm-hairline) !important; }
+        #push-notifications-toggle { background: var(--pm-gold) !important; color: #ffffff !important; border-color: transparent !important; }
+        #push-notifications-toggle:hover { filter: brightness(1.06); }
+        #push-notifications-save { background: var(--pm-surface-soft) !important; border-color: var(--pm-hairline-soft) !important; color: var(--pm-ink) !important; }
 
         /* High-specificity day/night locks override the legacy light skin above. */
         html[data-theme="light"] body.bg-slate-950,
@@ -1783,6 +1787,48 @@
                 </span>
             </button>
 
+            <section id="push-notifications-card" class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3">
+                <div class="flex items-start gap-3">
+                    <span class="w-9 h-9 shrink-0 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-base">🔔</span>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs font-bold text-slate-200">إشعارات دبّر</p>
+                        <p id="push-notifications-status" class="text-[11px] text-slate-500 leading-relaxed">فعّلها عشان نفتكرك بمصاريفك وننبهك قبل ما تعدّي ميزانيتك. ملخص نهاية اليوم الساعة 12:00 صباحًا.</p>
+                    </div>
+                    <button type="button" id="push-notifications-toggle" class="shrink-0 bg-amber-400 text-slate-950 font-black text-[10px] px-3 py-2 rounded-xl transition hover:bg-amber-300 disabled:opacity-50">تفعيل</button>
+                </div>
+                <div id="push-notifications-settings" class="hidden border-t border-slate-800 pt-3 space-y-2.5">
+                    <label class="flex items-center justify-between gap-3 text-[11px] text-slate-300">
+                        <span>تذكير يومي لو مفيش مصروفات</span>
+                        <input id="push-daily-reminder" type="checkbox" class="accent-amber-400 w-4 h-4">
+                    </label>
+                    <label class="flex items-center justify-between gap-3 text-[11px] text-slate-300">
+                        <span>ملخص نهاية اليوم — 12:00 صباحًا</span>
+                        <input id="push-daily-summary" type="checkbox" class="accent-amber-400 w-4 h-4">
+                    </label>
+                    <label class="flex items-center justify-between gap-3 text-[11px] text-slate-300">
+                        <span>ملخص أسبوعي</span>
+                        <input id="push-weekly-summary" type="checkbox" class="accent-amber-400 w-4 h-4">
+                    </label>
+                    <label class="flex items-center justify-between gap-3 text-[11px] text-slate-300">
+                        <span>تنبيه الاقتراب من الميزانية</span>
+                        <input id="push-budget-alert" type="checkbox" class="accent-amber-400 w-4 h-4">
+                    </label>
+                    <div class="grid grid-cols-2 gap-2 pt-1">
+                        <label class="text-[10px] text-slate-500">وقت التذكير
+                            <select id="push-daily-hour" class="mt-1 w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-2 text-[11px] text-slate-200">
+                                <option value="8" selected>8 صباحًا</option>
+                            </select>
+                        </label>
+                        <label class="text-[10px] text-slate-500">نسبة التنبيه
+                            <select id="push-budget-threshold" class="mt-1 w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-2 text-[11px] text-slate-200">
+                                <option value="0.8" selected>80%</option><option value="0.9">90%</option><option value="1">100%</option>
+                            </select>
+                        </label>
+                    </div>
+                    <button type="button" id="push-notifications-save" class="w-full bg-slate-800 border border-slate-700 text-slate-200 font-bold text-[11px] py-2.5 rounded-xl transition hover:bg-slate-700">حفظ إعدادات الإشعارات</button>
+                </div>
+            </section>
+
             <!-- تنويه تثبيت صغير — بيظهر بس لو مش مثبّت بعد ولسه ما اتقفلش قبل كده، مش حاجز ولا بيمنع حاجة -->
             <div id="install-notice" class="hidden bg-slate-950/60 border border-slate-800 rounded-3xl p-4 mb-3">
                 <div class="flex items-start gap-3">
@@ -2207,6 +2253,163 @@
 
         let accessToken = null;
         let currentUser = null;
+        let pushPreferences = null;
+        let pushPublicKey = '';
+        let pushRegistrationPromise = null;
+
+        function pushStatus(message, tone = 'muted') {
+            const el = document.getElementById('push-notifications-status');
+            if (!el) return;
+            el.textContent = message;
+            el.className = `text-[11px] leading-relaxed ${tone === 'success' ? 'text-emerald-400' : tone === 'error' ? 'text-rose-400' : 'text-slate-500'}`;
+        }
+
+        function urlBase64ToUint8Array(base64String) {
+            const padding = '='.repeat((4 - (base64String.length % 4)) % 4);
+            const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+            const rawData = atob(base64);
+            return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
+        }
+
+        function renderPushPreferences(preferences) {
+            pushPreferences = preferences || { dailyReminderEnabled: true, dailySummaryEnabled: true, weeklySummaryEnabled: true, budgetAlertEnabled: true, dailyReminderHour: 8, budgetAlertThreshold: 0.8 };
+            const daily = document.getElementById('push-daily-reminder');
+            const dailySummary = document.getElementById('push-daily-summary');
+            const weekly = document.getElementById('push-weekly-summary');
+            const budget = document.getElementById('push-budget-alert');
+            const hour = document.getElementById('push-daily-hour');
+            const threshold = document.getElementById('push-budget-threshold');
+            if (daily) daily.checked = pushPreferences.dailyReminderEnabled !== false;
+            if (dailySummary) dailySummary.checked = pushPreferences.dailySummaryEnabled !== false;
+            if (weekly) weekly.checked = pushPreferences.weeklySummaryEnabled !== false;
+            if (budget) budget.checked = pushPreferences.budgetAlertEnabled !== false;
+            if (hour) hour.value = String(pushPreferences.dailyReminderHour ?? 8);
+            if (threshold) threshold.value = String(pushPreferences.budgetAlertThreshold ?? 0.8);
+        }
+
+        async function pushApi(method = 'GET', body) {
+            const res = await fetch('/api/push', {
+                method,
+                headers: { Authorization: `Bearer ${accessToken}`, ...(body ? { 'Content-Type': 'application/json' } : {}) },
+                body: body ? JSON.stringify(body) : undefined,
+                cache: 'no-store',
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(data.error || 'تعذر الاتصال بخدمة الإشعارات.');
+            return data;
+        }
+
+        async function getPushRegistration() {
+            if (pushRegistrationPromise) return pushRegistrationPromise;
+            if (!('serviceWorker' in navigator)) return null;
+            pushRegistrationPromise = navigator.serviceWorker.ready;
+            return pushRegistrationPromise;
+        }
+
+        async function refreshPushUI() {
+            const toggle = document.getElementById('push-notifications-toggle');
+            const settings = document.getElementById('push-notifications-settings');
+            try {
+                const data = await pushApi('GET');
+                pushPublicKey = data.publicKey || '';
+                renderPushPreferences(data.preferences);
+                if (!data.configured) {
+                    if (toggle) toggle.disabled = true;
+                    pushStatus('الإشعارات هتتوفر بعد ضبط مفاتيح VAPID على الخادم.');
+                    return;
+                }
+                if (!('Notification' in window) || !('PushManager' in window) || !('serviceWorker' in navigator)) {
+                    if (toggle) toggle.disabled = true;
+                    pushStatus('المتصفح ده لا يدعم الإشعارات الفورية. جرّب Chrome أو Edge على HTTPS.');
+                    return;
+                }
+                const registration = await getPushRegistration();
+                const subscription = await registration?.pushManager.getSubscription();
+                if (subscription) {
+                    if (toggle) { toggle.disabled = false; toggle.textContent = 'إيقاف'; toggle.classList.remove('bg-amber-400', 'text-slate-950'); toggle.classList.add('bg-slate-800', 'text-slate-200', 'border', 'border-slate-700'); }
+                    if (settings) settings.classList.remove('hidden');
+                    pushStatus('الإشعارات مفعّلة على الجهاز ده.', 'success');
+                } else {
+                    if (toggle) { toggle.disabled = false; toggle.textContent = 'تفعيل'; toggle.classList.add('bg-amber-400', 'text-slate-950'); toggle.classList.remove('bg-slate-800', 'text-slate-200', 'border', 'border-slate-700'); }
+                    if (settings) settings.classList.add('hidden');
+                    pushStatus(Notification.permission === 'denied' ? 'الإشعارات مرفوضة من إعدادات المتصفح. افتح إعدادات الموقع واسمح بها.' : 'فعّلها عشان نفتكرك بمصاريفك وننبهك قبل ما تعدّي ميزانيتك.');
+                }
+            } catch (error) {
+                if (toggle) toggle.disabled = true;
+                pushStatus(error.message || 'تعذر تحميل إعدادات الإشعارات.', 'error');
+            }
+        }
+
+        async function enablePushNotifications() {
+            const toggle = document.getElementById('push-notifications-toggle');
+            if (!pushPublicKey) return refreshPushUI();
+            try {
+                toggle.disabled = true;
+                const permission = await Notification.requestPermission();
+                if (permission !== 'granted') {
+                    pushStatus(permission === 'denied' ? 'الإشعارات مرفوضة من المتصفح. اسمح بها من إعدادات الموقع.' : 'لم يتم تفعيل الإشعارات.', 'error');
+                    return;
+                }
+                const registration = await getPushRegistration();
+                const subscription = await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(pushPublicKey) });
+                await pushApi('POST', { subscription: subscription.toJSON() });
+                await refreshPushUI();
+                pushStatus('تم تفعيل الإشعارات بنجاح.', 'success');
+            } catch (error) {
+                pushStatus(error.message || 'مقدرناش نفعّل الإشعارات دلوقتي.', 'error');
+            } finally {
+                if (toggle) toggle.disabled = false;
+            }
+        }
+
+        async function disablePushNotifications() {
+            const toggle = document.getElementById('push-notifications-toggle');
+            try {
+                toggle.disabled = true;
+                const registration = await getPushRegistration();
+                const subscription = await registration?.pushManager.getSubscription();
+                if (subscription) {
+                    await pushApi('DELETE', { endpoint: subscription.endpoint });
+                    await subscription.unsubscribe();
+                }
+                await refreshPushUI();
+                pushStatus('اتقفلت الإشعارات على الجهاز ده.', 'success');
+            } catch (error) {
+                pushStatus(error.message || 'مقدرناش نقفل الإشعارات دلوقتي.', 'error');
+            } finally {
+                if (toggle) toggle.disabled = false;
+            }
+        }
+
+        async function savePushPreferencesFromUI() {
+            try {
+                const preferences = {
+                    dailyReminderEnabled: document.getElementById('push-daily-reminder')?.checked !== false,
+                    dailySummaryEnabled: document.getElementById('push-daily-summary')?.checked !== false,
+                    weeklySummaryEnabled: document.getElementById('push-weekly-summary')?.checked !== false,
+                    budgetAlertEnabled: document.getElementById('push-budget-alert')?.checked !== false,
+                    dailyReminderHour: Number(document.getElementById('push-daily-hour')?.value || 8),
+                    budgetAlertThreshold: Number(document.getElementById('push-budget-threshold')?.value || 0.8),
+                };
+                const data = await pushApi('PUT', { preferences });
+                renderPushPreferences(data.preferences);
+                pushStatus('اتحفظت إعدادات الإشعارات.', 'success');
+            } catch (error) {
+                pushStatus(error.message || 'مقدرناش نحفظ إعدادات الإشعارات.', 'error');
+            }
+        }
+
+        function setupPushUI() {
+            document.getElementById('push-notifications-toggle')?.addEventListener('click', async () => {
+                const registration = await getPushRegistration();
+                const subscription = await registration?.pushManager.getSubscription();
+                if (subscription) await disablePushNotifications();
+                else await enablePushNotifications();
+            });
+            document.getElementById('push-notifications-save')?.addEventListener('click', savePushPreferencesFromUI);
+        }
+
+        setupPushUI();
 
         (async () => {
             try {
@@ -2214,6 +2417,7 @@
                 if (!session) { window.location.href = ONBOARDING_URL; return; }
                 accessToken = session.access_token;
                 currentUser = session.user;
+                await refreshPushUI();
                 await loadDashboard();
                 await loadPlanningSettings();
                 await loadAccountTab();
@@ -2253,7 +2457,7 @@
         }
 
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js').catch(() => {});
+            pushRegistrationPromise = navigator.serviceWorker.register('./sw.js').catch(() => null);
         }
 
         // ============ تنويه التثبيت (جوه تاب "حسابي" بس) ============

@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabaseClient.js';
+import { maybeSendBudgetAlert } from '../lib/webPush.js';
 
 async function requireUser(req, res) {
   const token = (req.headers.authorization || '').replace('Bearer ', '').trim();
@@ -56,6 +57,7 @@ export default async function handler(req, res) {
       if (!Object.keys(patch).length) return res.status(400).json({ error: 'مفيش بيانات للتعديل.' });
       const { data, error } = await supabase.from('expenses').update(patch).eq('id', id).eq('telegram_user_id', userId).select('id, amount, category, description, created_at').single();
       if (error) throw error;
+      await maybeSendBudgetAlert(userId).catch((pushError) => console.error('financial-actions budget push failed:', pushError));
       return res.status(200).json({ expense: data });
     }
 

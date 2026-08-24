@@ -6,6 +6,7 @@ import { saveInvoiceRecord, deleteInvoiceById } from '../lib/invoices.js';
 import { hasActiveSubscription, isInTrial } from '../lib/users.js';
 import { checkOcrUsage, checkChatUsage, refundOcrUsage, refundUsage } from '../lib/rateLimits.js';
 import { normalizeDigits } from '../lib/textNormalize.js';
+import { maybeSendBudgetAlert } from '../lib/webPush.js';
 
 // ============ Router: POST /api/assistant  { action: ... } ============
 // كل ميزات "دبّر الذكي" الجديدة (الأهداف، امسح فاتورة، اسأل دبّر) اتلمّت هنا في endpoint واحد،
@@ -298,6 +299,7 @@ async function saveOneDraft(userId, draft) {
   if (draft.type === 'expense') {
     const { data, error } = await supabase.from('expenses').insert({ telegram_user_id: userId, amount, category: String(draft.category || 'مصروف عام').slice(0, 80), description: String(draft.note || draft.sourceText || '').slice(0, 500) }).select('id, amount, category, description, created_at').single();
     if (error) { console.error('entry_confirm expense error:', JSON.stringify(error)); return { ok: false, error: 'تعذر حفظ المصروف.' }; }
+    await maybeSendBudgetAlert(userId).catch((pushError) => console.error('entry_confirm budget push failed:', pushError));
     return { ok: true, type: 'expense', record: data, message: `تم تسجيل مصروف ${data.amount} جنيه في ${data.category}.` };
   }
 

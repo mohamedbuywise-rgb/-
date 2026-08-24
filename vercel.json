@@ -10,7 +10,11 @@
   "crons": [
     {
       "path": "/api/cron-daily",
-      "schedule": "5 22 * * *"
+      "schedule": "5 5 * * *"
+    },
+    {
+      "path": "/api/cron-daily",
+      "schedule": "0 21 * * *"
     }
   ],
   "functions": {

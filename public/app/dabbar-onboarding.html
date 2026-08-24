@@ -163,6 +163,8 @@
   #bootSplash{
     position:fixed; inset:0; z-index:9999;
     display:flex; align-items:center; justify-content:center; flex-direction:column;
+    /* حل أخير مستقل عن JavaScript: لا نترك المستخدم عالقًا على شاشة التحميل */
+    animation: bootFailsafeCss .01s linear 8s forwards;
     background:
       radial-gradient(1200px 600px at 20% -10%, rgba(52,211,153,.22), transparent 60%),
       radial-gradient(900px 500px at 100% 110%, rgba(16,185,129,.18), transparent 55%),
@@ -170,6 +172,9 @@
     transition: opacity .35s ease, visibility .35s ease;
   }
   #bootSplash.hide{ opacity:0; visibility:hidden; pointer-events:none; }
+  @keyframes bootFailsafeCss{
+    to{ opacity:0; visibility:hidden; pointer-events:none; }
+  }
   #bootSplash .grid-overlay{
     position:absolute; inset:0; opacity:.35;
     background-image: radial-gradient(rgba(255,255,255,.05) 1px, transparent 1px);
@@ -474,6 +479,7 @@
   // (الربط بقى اختياري من صفحة "حسابي" مش جزء من onboarding). لو لسه مش standalone → خطوة التثبيت الإجبارية.
   (async () => {
     try {
+      if (!sb) { hideBootSplash(); return; }
       const { data: { session } } = await sb.auth.getSession();
       const recoveryMode = new URLSearchParams(window.location.search).get('mode') === 'recovery' || window.location.hash.includes('type=recovery');
       if (recoveryMode) { hideBootSplash(); return; }

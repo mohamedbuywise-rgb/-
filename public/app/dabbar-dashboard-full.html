@@ -841,7 +841,19 @@
         html[data-theme="light"] #tab-monthly > #quick-entry-card { background: linear-gradient(135deg,#ffffff,#f0faf5) !important; border-radius: 1.5rem !important; box-shadow: 0 10px 26px rgba(30,70,50,.07) !important; }
         html[data-theme="light"] #planning-card,
         html[data-theme="light"] #expense-ledger-card { background: transparent !important; border: 0 !important; box-shadow: none !important; }
-        html[data-theme="light"] #planning-summary { background: #dff5e9 !important; color: #145c3c !important; border-radius: 1rem !important; }
+        html[data-theme="light"] #planning-summary { background: #e7f7ef !important; color: #123f2d !important; border-radius: 1.25rem !important; padding: .8rem 1rem !important; box-shadow: inset 0 0 0 1px #c5ead6 !important; }
+        .planning-summary-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.55rem; direction:rtl; }
+        .planning-summary-grid > div { display:flex; flex-direction:column; gap:.2rem; min-width:0; padding:.35rem .25rem; text-align:center; }
+        .planning-summary-grid > div + div { border-right:1px solid rgba(20,92,60,.16); }
+        .planning-summary-grid span { font-size:.62rem; line-height:1.35; opacity:.72; }
+        .planning-summary-grid strong { font-size:.9rem; line-height:1.25; font-weight:900; white-space:nowrap; }
+        .planning-summary-note { margin-top:.6rem; font-size:.62rem; line-height:1.55; text-align:center; opacity:.7; }
+        .planning-empty-note { font-size:.72rem; font-weight:800; text-align:center; }
+        html[data-theme="light"] #quick-entry-card { border-color:#a8dec4 !important; box-shadow:0 12px 28px rgba(22,128,82,.12) !important; }
+        html[data-theme="light"] #quick-entry-card .quick-entry-eyebrow { color:#087b50 !important; font-weight:900; }
+        html[data-theme="light"] #quick-entry-card h3 { color:#092d20 !important; font-size:1.05rem !important; }
+        html[data-theme="light"] #quick-entry-card > .grid > button { border-color:#b5dfcc !important; background:#fff !important; box-shadow:0 5px 12px rgba(10,86,55,.08) !important; }
+        @media (max-width:420px) { .planning-summary-grid { grid-template-columns:1fr; gap:.3rem; } .planning-summary-grid > div + div { border-right:0; border-top:1px solid rgba(20,92,60,.16); padding-top:.5rem; } }
         html[data-theme="light"] #category-budgets-list > label,
         html[data-theme="light"] #recurring-list > div { background: #f1f7f4 !important; color: #315445 !important; }
         html[data-theme="light"] #planning-save { background: #08b878 !important; color: #06271a !important; box-shadow: 0 7px 16px rgba(8,184,120,.2) !important; }
@@ -926,7 +938,7 @@
             </section>
 
             <section id="quick-entry-card" class="bg-gradient-to-br from-emerald-50 via-white to-teal-50 border border-emerald-200 rounded-[28px] p-4 space-y-3 shadow-[0_12px_35px_rgba(16,185,129,.14)] dark:bg-slate-950/60 dark:from-slate-950/60 dark:via-slate-950/60 dark:to-slate-900 dark:border-slate-800" aria-label="إضافة مصروف">
-                <div class="flex items-center justify-between"><div><span class="quick-entry-eyebrow">التسجيل الأساسي</span><h3 class="text-sm font-black text-slate-900 dark:text-slate-100">سجّل مصروفك بسرعة</h3><p class="text-[11px] text-slate-500 dark:text-slate-400">اختار الطريقة اللي تريحك — صوت أو كتابة أو فاتورة</p></div><span class="text-2xl" aria-hidden="true">✨</span></div>
+                <div class="flex items-center justify-between"><div><span class="quick-entry-eyebrow">ابدأ من هنا</span><h3 class="text-base font-black text-slate-900 dark:text-slate-100">سجّل مصروفك الآن</h3><p class="text-[11px] text-slate-600 dark:text-slate-400">صوت أو كتابة أو صوّر الفاتورة — في ثواني</p></div><span class="text-2xl" aria-hidden="true">✨</span></div>
                 <div id="quick-entry-subscription-lock" class="hidden items-center justify-between gap-3 rounded-2xl border px-3 py-2.5 text-[11px]"><div><strong class="block">انتهت تجربتك المجانية</strong><span>اشترك عشان تقدر تسجّل مصروفاتك تاني.</span></div><button id="quick-entry-open-subscription" type="button" class="shrink-0 rounded-xl px-3 py-2 text-[10px] font-black">شوف الاشتراك</button></div>
                 <div class="grid grid-cols-3 gap-2"><button id="quick-entry-voice" class="rounded-2xl border border-emerald-200 bg-white/80 px-2 py-3 text-center shadow-sm transition hover:-translate-y-0.5 dark:bg-slate-900" type="button"><span class="mx-auto mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/15 text-xl">🎙</span><span class="block text-[11px] font-bold text-slate-700 dark:text-slate-200">صوت</span></button><button id="quick-entry-text" class="rounded-2xl border border-emerald-200 bg-white/80 px-2 py-3 text-center shadow-sm transition hover:-translate-y-0.5 dark:bg-slate-900" type="button"><span class="mx-auto mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/15 text-xl">✍️</span><span class="block text-[11px] font-bold text-slate-700 dark:text-slate-200">كتابة</span></button><button id="quick-entry-invoice" class="rounded-2xl border border-emerald-200 bg-white/80 px-2 py-3 text-center shadow-sm transition hover:-translate-y-0.5 dark:bg-slate-900" type="button"><span class="mx-auto mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/15 text-xl">📸</span><span class="block text-[11px] font-bold text-slate-700 dark:text-slate-200">فاتورة</span></button></div>
                 <input type="file" id="quick-entry-invoice-input" accept="image/*" class="hidden">
@@ -2089,7 +2101,7 @@
             const summary = document.getElementById('planning-summary');
             const recurringTotal = (settings.recurringExpenses || []).reduce((sum, item) => sum + Number(item.amount || 0), 0);
             const afterExpected = Math.max(0, remaining - recurringTotal);
-            if (summary) summary.innerHTML = incomeOrBudget ? `المتاح بعد الصرف الفعلي: <strong>${fmt(remaining)}</strong>${recurringTotal ? ` · بعد الالتزامات المتوقعة: <strong>${fmt(afterExpected)}</strong>` : ''}${income && budget ? ` · الميزانية مستهلكة ${Math.min(100, Math.round((total / budget) * 100))}%` : ''}` : 'أدخل دخلك أو حد مصروفاتك عشان دبّر يحسبلك المتاح. الالتزامات المتكررة للعرض والتخطيط فقط، ولا تُخصم تلقائيًا.';
+            if (summary) summary.innerHTML = incomeOrBudget ? `<div class="planning-summary-grid"><div><span>المتاح بعد الصرف الفعلي</span><strong>${fmt(remaining)}</strong></div>${recurringTotal ? `<div><span>بعد الالتزامات المتوقعة</span><strong>${fmt(afterExpected)}</strong></div>` : ''}${income && budget ? `<div><span>استهلاك الميزانية</span><strong>${Math.min(100, Math.round((total / budget) * 100))}%</strong></div>` : ''}</div><p class="planning-summary-note">الأول للصرف الذي سجّلته فعلًا، والثاني بعد حساب الالتزامات التي أضفتها للتخطيط.</p>` : '<p class="planning-empty-note">أدخل دخلك أو حد مصروفاتك عشان دبّر يحسبلك المتاح.</p><p class="planning-summary-note">الالتزامات المتكررة للتخطيط فقط، ولا تُخصم تلقائيًا.</p>';
             const categoryBudgetList = document.getElementById('category-budgets-list');
             const topCategories = Array.isArray(data?.month?.byCategory) ? data.month.byCategory.slice(0, 3) : [];
             if (categoryBudgetList) categoryBudgetList.innerHTML = topCategories.length ? topCategories.map((item) => `<label class="flex items-center gap-2 rounded-xl bg-slate-900/60 px-2.5 py-1.5 text-[10px] text-slate-400"><span class="flex-1">${CATEGORY_EMOJI[item.name] || '📌'} ${item.name}</span><input data-category-budget="${item.name}" type="number" min="0" placeholder="حد الفئة" value="${settings.categoryBudgets?.[item.name] || ''}" class="w-20 rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-left text-[10px] text-slate-100 outline-none"></label>`).join('') : '<p class="text-[10px] text-slate-500">سجّل مصاريف عشان نعرضلك حدود الفئات.</p>';
@@ -2571,7 +2583,7 @@
         function renderAsstProjection(smart, month) {
             const el = document.getElementById('asst-projection-text');
             if (!smart) { el.textContent = 'لسه معندناش بيانات كفاية عشان نتوقع نهاية الشهر.'; return; }
-            let text = `على المعدل الحالي، متوقع صرفك يوصل لحوالي <b class="text-amber-300 text-sm">${fmt(smart.projectedTotal)}</b> بنهاية ${smart.projectedLabel} (اتصرف ${smart.daysPassed} من ${smart.daysInMonth} يوم).`;
+            let text = `على المعدل الحالي، متوقع صرفك يوصل لحوالي <b class="text-emerald-600 dark:text-emerald-300 text-sm font-black">${fmt(smart.projectedTotal)}</b> بنهاية ${smart.projectedLabel} (اتصرف ${smart.daysPassed} من ${smart.daysInMonth} يوم).`;
             if (month && month.prevTotal > 0) {
                 text += smart.projectedTotal > month.prevTotal
                     ? ` ده أكتر من ${month.prevLabel} (${fmt(month.prevTotal)}).`

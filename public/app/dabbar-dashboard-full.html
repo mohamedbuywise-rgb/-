@@ -1907,6 +1907,9 @@
                     </div>
                     <button type="button" id="push-notifications-toggle" class="shrink-0 bg-amber-400 text-slate-950 font-black text-[10px] px-3 py-2 rounded-xl transition hover:bg-amber-300 disabled:opacity-50">تفعيل</button>
                 </div>
+                <div id="push-notifications-help" class="hidden rounded-2xl border border-rose-500/20 bg-rose-500/5 p-3 text-[11px] text-slate-400 leading-relaxed">
+                    Chrome حاجب الإشعارات تلقائيًا للموقع. من Chrome اضغط ⋮ ثم <b class="text-slate-200">الإعدادات ← إعدادات الموقع ← الإشعارات</b>، افتح موقع Dabbar وغيّر الحالة إلى <b class="text-emerald-300">السماح</b>، ثم ارجع واضغط «تفعيل» مرة ثانية.
+                </div>
                 <div id="push-notifications-settings" class="hidden border-t border-slate-800 pt-3 space-y-2.5">
                     <label class="flex items-center justify-between gap-3 text-[11px] text-slate-300">
                         <span>تذكير يومي لو مفيش مصروفات</span>
@@ -2417,9 +2420,15 @@
             return pushRegistrationPromise;
         }
 
+        function showPushHelp(show = true) {
+            const help = document.getElementById('push-notifications-help');
+            if (help) help.classList.toggle('hidden', !show);
+        }
+
         async function refreshPushUI() {
             const toggle = document.getElementById('push-notifications-toggle');
             const settings = document.getElementById('push-notifications-settings');
+            showPushHelp(false);
             try {
                 const data = await pushApi('GET');
                 pushPublicKey = data.publicKey || '';
@@ -2443,7 +2452,9 @@
                 } else {
                     if (toggle) { toggle.disabled = false; toggle.textContent = 'تفعيل'; toggle.classList.add('bg-amber-400', 'text-slate-950'); toggle.classList.remove('bg-slate-800', 'text-slate-200', 'border', 'border-slate-700'); }
                     if (settings) settings.classList.add('hidden');
-                    pushStatus(Notification.permission === 'denied' ? 'الإشعارات مرفوضة من إعدادات المتصفح. افتح إعدادات الموقع واسمح بها.' : 'فعّلها عشان نفتكرك بمصاريفك وننبهك قبل ما تعدّي ميزانيتك.');
+                    const blocked = Notification.permission === 'denied';
+                    showPushHelp(blocked);
+                    pushStatus(blocked ? 'Chrome حاجب الإشعارات للموقع. اسمح بها من إعدادات الموقع ثم جرّب التفعيل مرة أخرى.' : 'فعّلها عشان نفتكرك بمصاريفك وننبهك قبل ما تعدّي ميزانيتك.');
                 }
             } catch (error) {
                 if (toggle) toggle.disabled = true;
@@ -2458,9 +2469,12 @@
                 toggle.disabled = true;
                 const permission = await Notification.requestPermission();
                 if (permission !== 'granted') {
-                    pushStatus(permission === 'denied' ? 'الإشعارات مرفوضة من المتصفح. اسمح بها من إعدادات الموقع.' : 'لم يتم تفعيل الإشعارات.', 'error');
+                    const blocked = permission === 'denied';
+                    showPushHelp(blocked);
+                    pushStatus(blocked ? 'Chrome حاجب الإشعارات للموقع. افتح إعدادات الموقع وغيّرها إلى السماح.' : 'لم يتم تفعيل الإشعارات.', 'error');
                     return;
                 }
+                showPushHelp(false);
                 const registration = await getPushRegistration();
                 const subscription = await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(pushPublicKey) });
                 await pushApi('POST', { subscription: subscription.toJSON() });
@@ -2518,6 +2532,7 @@
                 else await enablePushNotifications();
             });
             document.getElementById('push-notifications-save')?.addEventListener('click', savePushPreferencesFromUI);
+            document.getElementById('push-notifications-help')?.addEventListener('click', () => pushStatus('من Chrome: ⋮ ← الإعدادات ← إعدادات الموقع ← الإشعارات ← Dabbar ← السماح، ثم ارجع واضغط تفعيل.', 'error'));
         }
 
         setupPushUI();
@@ -2563,6 +2578,7 @@
 
         // تسجيل الخروج بقى موجود بس جوه تاب "حسابي" (مش زرار عائم فوق الصفحة زي الأول)
         async function doLogout() {
+            if (!confirm('تسجيل الخروج من دبّر على هذا الجهاز؟')) return;
             try { await sb.auth.signOut(); } catch (e) {}
             window.location.href = ONBOARDING_URL;
         }
@@ -2781,7 +2797,7 @@
                 <div class="grid grid-cols-2 gap-2"><label class="text-[10px] text-slate-400">دخلك الشهري<input id="planning-income" type="number" min="0" inputmode="numeric" placeholder="مثال: 12000" class="mt-1 w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-100 outline-none focus:border-emerald-400"></label><label class="text-[10px] text-slate-400">ميزانيتك الشهرية<input id="planning-budget" type="number" min="0" inputmode="numeric" placeholder="مثال: 9000" class="mt-1 w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-100 outline-none focus:border-emerald-400"></label></div>
                 <div id="planning-summary" class="rounded-2xl bg-emerald-500/10 px-3 py-2 text-[11px] text-emerald-200"></div>
                 <div><div class="mb-1 flex items-center justify-between"><span class="text-[10px] font-bold text-slate-400">حدود أهم الفئات</span><span class="text-[9px] text-slate-600">اختياري</span></div><div id="category-budgets-list" class="space-y-1.5"></div></div>
-                <div class="flex gap-2"><button id="planning-save" type="button" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950">حفظ خطتي</button><button id="planning-reset" type="button" class="rounded-xl border border-slate-700 px-3 py-2.5 text-xs text-slate-400">مسح</button></div>
+                <div class="flex gap-2"><button id="planning-save" type="button" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950">حفظ خطتي</button><button id="planning-reset" type="button" title="إدارة ومسح خطة الدخل والميزانية" class="rounded-xl border border-slate-700/60 px-3 py-2.5 text-xs text-slate-500">إدارة</button></div>
                 <div class="border-t border-slate-800 pt-3"><div class="flex items-center justify-between"><div><h4 class="text-xs font-bold text-slate-300">التزامات شهرية متوقعة</h4><p class="mt-0.5 text-[9px] text-slate-500">للتخطيط فقط — لا تُضاف للصرف الفعلي إلا عند تسجيلها</p></div><span class="text-[10px] text-slate-500">إيجار / اشتراكات</span></div><div class="mt-2 grid grid-cols-[1fr_5rem_2.5rem] gap-2"><input id="recurring-name" placeholder="إيجار / اشتراك" class="rounded-xl border border-slate-700 bg-slate-900 px-2.5 py-2 text-[10px] text-slate-100 outline-none"><input id="recurring-amount" type="number" min="0" placeholder="المبلغ" class="rounded-xl border border-slate-700 bg-slate-900 px-2.5 py-2 text-[10px] text-slate-100 outline-none"><button id="recurring-add" type="button" class="rounded-xl bg-slate-800 text-lg text-emerald-400">+</button></div><div id="recurring-list" class="mt-2 space-y-1.5"></div></div>`;
             monthly.insertBefore(wrap, quick.nextSibling);
             const ledger = document.createElement('section');
@@ -2790,7 +2806,13 @@
             ledger.innerHTML = `<div class="flex items-center justify-between"><div><span class="text-[10px] text-slate-500">مراجعة سريعة</span><h3 class="text-sm font-black text-slate-200">آخر عملياتك</h3></div><span class="text-lg">🧾</span></div><div id="expense-ledger-list"></div>`;
             monthly.insertBefore(ledger, document.getElementById('monthly-categories-card'));
             document.getElementById('planning-save').addEventListener('click', savePlanningSettings);
-            document.getElementById('planning-reset').addEventListener('click', () => { window.__financialSettings = defaultPlanningSettings(); renderPlanning(window.__dashboardData || {}); });
+            document.getElementById('planning-reset').addEventListener('click', () => {
+                if (!confirm('مسح خطة الدخل والميزانية والالتزامات المتوقعة من هذا الحساب؟ لا يمكن التراجع عن المسح.')) return;
+                window.__financialSettings = defaultPlanningSettings();
+                renderPlanning(window.__dashboardData || {});
+                savePlanningSettings();
+                quickStatus('اتمسحت خطة الدخل والميزانية بعد التأكيد.', 'success');
+            });
             document.getElementById('recurring-add').addEventListener('click', addRecurringExpense);
         }
         function renderPlanning(data) {
@@ -2813,8 +2835,13 @@
             const topCategories = Array.isArray(data?.month?.byCategory) ? data.month.byCategory.slice(0, 3) : [];
             if (categoryBudgetList) categoryBudgetList.innerHTML = topCategories.length ? topCategories.map((item) => `<label class="flex items-center gap-2 rounded-xl bg-slate-900/60 px-2.5 py-1.5 text-[10px] text-slate-400"><span class="flex-1">${CATEGORY_EMOJI[item.name] || '📌'} ${item.name}</span><input data-category-budget="${item.name}" type="number" min="0" placeholder="حد الفئة" value="${settings.categoryBudgets?.[item.name] || ''}" class="w-20 rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-left text-[10px] text-slate-100 outline-none"></label>`).join('') : '<p class="text-[10px] text-slate-500">سجّل مصاريف عشان نعرضلك حدود الفئات.</p>';
             const recurringList = document.getElementById('recurring-list');
-            if (recurringList) recurringList.innerHTML = (settings.recurringExpenses || []).length ? settings.recurringExpenses.map((item, i) => `<div class="flex items-center justify-between rounded-xl bg-slate-900/70 px-2.5 py-2 text-[10px]"><span>${item.name}</span><span class="text-emerald-300">${fmt(item.amount)} <button type="button" data-recurring-remove="${i}" class="mr-1 text-rose-400">✕</button></span></div>`).join('') : '<p class="text-[10px] text-slate-500">أضف الإيجار أو الاشتراكات عشان تشوف التزاماتك الشهرية قدامك.</p>';
-            recurringList?.querySelectorAll('[data-recurring-remove]').forEach((btn) => btn.addEventListener('click', () => { settings.recurringExpenses.splice(Number(btn.dataset.recurringRemove), 1); savePlanningSettings(); }));
+            if (recurringList) recurringList.innerHTML = (settings.recurringExpenses || []).length ? settings.recurringExpenses.map((item, i) => `<div class="flex items-center justify-between rounded-xl bg-slate-900/70 px-2.5 py-2 text-[10px]"><span>${item.name}</span><span class="text-emerald-300">${fmt(item.amount)} <button type="button" data-recurring-remove="${i}" aria-label="حذف الالتزام" class="mr-1 text-slate-600 hover:text-rose-400 transition">✕</button></span></div>`).join('') : '<p class="text-[10px] text-slate-500">أضف الإيجار أو الاشتراكات عشان تشوف التزاماتك الشهرية قدامك.</p>';
+            recurringList?.querySelectorAll('[data-recurring-remove]').forEach((btn) => btn.addEventListener('click', () => {
+                const item = settings.recurringExpenses[Number(btn.dataset.recurringRemove)];
+                if (!item || !confirm(`تحذف الالتزام «${item.name}» من خطة الشهر؟`)) return;
+                settings.recurringExpenses.splice(Number(btn.dataset.recurringRemove), 1);
+                savePlanningSettings();
+            }));
             const list = document.getElementById('expense-ledger-list');
             const items = data?.today?.items || [];
             if (list) list.innerHTML = items.length ? items.slice(0, 5).map((item) => `<div class="flex items-center gap-2 border-b border-slate-800/50 py-2 last:border-0"><span class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10">${CATEGORY_EMOJI[item.category] || '📌'}</span><div class="min-w-0 flex-1"><p class="truncate text-[11px] font-bold text-slate-200">${(item.description || item.category || 'مصروف').replace(/[<>]/g, '')}</p><p class="text-[9px] text-slate-500">${item.category || 'أخرى'}</p></div><span class="text-[11px] font-bold text-rose-400">-${fmt(item.amount)}</span><button type="button" data-expense-edit="${item.id}" data-expense-amount="${item.amount}" data-expense-description="${(item.description || '').replace(/"/g, '&quot;')}" class="text-[11px] text-slate-500 hover:text-emerald-400" aria-label="تعديل العملية">✎</button><button type="button" data-expense-delete="${item.id}" class="text-[11px] text-slate-500 hover:text-rose-400" aria-label="حذف العملية">✕</button></div>`).join('') : '<p class="py-2 text-[10px] text-slate-500">سجّل أول مصروف عشان يظهر هنا للمراجعة.</p>';
@@ -4288,7 +4315,13 @@
 
         // زرار تسجيل الخروج جوه تاب "حسابي" — المكان الوحيد اللي فيه دلوقتي
         document.getElementById('account-logout-btn').addEventListener('click', doLogout);
-        document.getElementById('account-clear-local')?.addEventListener('click', () => { localStorage.removeItem(planningSettingsKey()); window.__financialSettings = defaultPlanningSettings(); renderPlanning(window.__dashboardData || {}); quickStatus('اتمسحت إعدادات الخطة من الجهاز.', 'success'); });
+        document.getElementById('account-clear-local')?.addEventListener('click', () => {
+            if (!confirm('مسح إعدادات الخطة المحفوظة على هذا الجهاز؟ بيانات حسابك على السحابة لن تُحذف.')) return;
+            localStorage.removeItem(planningSettingsKey());
+            window.__financialSettings = defaultPlanningSettings();
+            renderPlanning(window.__dashboardData || {});
+            quickStatus('اتمسحت إعدادات الخطة من الجهاز بعد التأكيد.', 'success');
+        });
         document.getElementById('account-export-data')?.addEventListener('click', () => { const payload = { exportedAt: new Date().toISOString(), dashboard: window.__dashboardData || {}, financialSettings: planningSettings() }; const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' }); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = 'dabbar-my-data.json'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000); });
 
         // ============ رفع وقص صورة البروفايل (canvas بسيط، بدون أي مكتبة خارجية) ============

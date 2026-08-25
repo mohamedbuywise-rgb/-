@@ -1229,7 +1229,7 @@
         input, textarea, select { accent-color: var(--pm-gold); }
         #theme-toggle-track.bg-amber-400 { background: var(--pm-gold) !important; }
         #theme-toggle-track.bg-slate-700 { background: var(--pm-surface-soft) !important; }
-        #push-notifications-card { background: var(--pm-surface-hi) !important; border-color: var(--pm-hairline) !important; }
+        #push-notifications-card { background: var(--pm-surface-hi) !important; border-color: var(--pm-hairline) !important; display: none !important; }
         #push-notifications-toggle { background: var(--pm-gold) !important; color: #ffffff !important; border-color: transparent !important; }
         #push-notifications-toggle:hover { filter: brightness(1.06); }
         #push-notifications-save { background: var(--pm-surface-soft) !important; border-color: var(--pm-hairline-soft) !important; color: var(--pm-ink) !important; }
@@ -1440,7 +1440,7 @@
             <section id="quick-entry-card" class="bg-gradient-to-br from-emerald-50 via-white to-teal-50 border border-emerald-200 rounded-[28px] p-4 space-y-3 shadow-[0_12px_35px_rgba(16,185,129,.14)] dark:bg-slate-950/60 dark:from-slate-950/60 dark:via-slate-950/60 dark:to-slate-900 dark:border-slate-800" aria-label="إضافة مصروف">
                 <div class="flex items-center justify-between"><div><span class="quick-entry-eyebrow">ابدأ من هنا</span><h3 class="text-base font-black text-slate-900 dark:text-slate-100">سجّل مصروفك الآن</h3><p class="text-[11px] text-slate-600 dark:text-slate-400">صوت أو كتابة أو صوّر الفاتورة — في ثواني</p></div><span class="text-2xl" aria-hidden="true">✨</span></div>
                 <div id="quick-entry-subscription-lock" class="hidden items-center justify-between gap-3 rounded-2xl border px-3 py-2.5 text-[11px]"><div><strong class="block">انتهت تجربتك المجانية</strong><span>اشترك عشان تقدر تسجّل مصروفاتك تاني.</span></div><button id="quick-entry-open-subscription" type="button" class="shrink-0 rounded-xl px-3 py-2 text-[10px] font-black">شوف الاشتراك</button></div>
-                <div class="grid grid-cols-3 gap-2"><button id="quick-entry-voice" class="rounded-2xl border border-emerald-200 bg-white/80 px-2 py-3 text-center shadow-sm transition hover:-translate-y-0.5 dark:bg-slate-900" type="button"><span class="mx-auto mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/15 text-xl">🎙</span><span class="block text-[11px] font-bold text-slate-700 dark:text-slate-200">صوت</span></button><button id="quick-entry-text" class="rounded-2xl border border-emerald-200 bg-white/80 px-2 py-3 text-center shadow-sm transition hover:-translate-y-0.5 dark:bg-slate-900" type="button"><span class="mx-auto mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/15 text-xl">✍️</span><span class="block text-[11px] font-bold text-slate-700 dark:text-slate-200">كتابة</span></button><button id="quick-entry-invoice" class="rounded-2xl border border-emerald-200 bg-white/80 px-2 py-3 text-center shadow-sm transition hover:-translate-y-0.5 dark:bg-slate-900" type="button"><span class="mx-auto mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/15 text-xl">📸</span><span class="block text-[11px] font-bold text-slate-700 dark:text-slate-200">فاتورة</span></button></div>
+                <div class="grid grid-cols-3 gap-2"><button id="quick-entry-voice" class="rounded-2xl border border-emerald-200 bg-white/80 px-2 py-3 text-center shadow-sm transition hover:-translate-y-0.5 dark:bg-slate-900" type="button"><span class="mx-auto mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/15 text-xl">🎙</span><span class="block text-[11px] font-bold text-slate-700 dark:text-slate-200">صوت</span></button><button id="quick-entry-text" class="rounded-2xl border border-emerald-200 bg-white/80 px-2 py-3 text-center shadow-sm transition hover:-translate-y-0.5 dark:bg-slate-900" type="button"><span class="mx-auto mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/15 text-xl">✍️</span><span class="block text-[11px] font-bold text-slate-700 dark:text-slate-200">كتابة</span></button><button id="quick-entry-invoice" class="rounded-2xl border border-emerald-200 bg-white/80 px-2 py-3 text-center shadow-sm transition hover:-translate-y-0.5 dark:bg-slate-900" type="button"><span class="mx-auto mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/15 text-xl">📸</span><span class="block text-[11px] font-bold text-slate-700 dark:text-slate-200">فاتورة</span></button></div><p class="text-center text-[10px] text-slate-500">ملاحظة: أقل مدة لتسجيل الصوت هي <b class="text-emerald-600 dark:text-emerald-300">5 ثواني</b> عشان دبّر يسمعه ويفهمه بدقة.</p>
                 <input type="file" id="quick-entry-invoice-input" accept="image/*" class="hidden">
                 <div id="quick-entry-scanning" class="hidden rounded-2xl border border-blue-200 bg-blue-50 p-3 text-center dark:border-blue-500/30 dark:bg-blue-500/10"><div class="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-white text-xl shadow-sm dark:bg-slate-900"><span style="display:inline-block;animation:dabbar-scan-spin 1s linear infinite">⟳</span></div><p class="text-xs font-bold text-blue-700 dark:text-blue-200">بنقرأ الفاتورة...</p><p class="mt-1 text-[10px] text-blue-600/70 dark:text-blue-200/70">دبّر بيستخرج المبلغ والأصناف</p></div>
                 <div id="quick-entry-form" class="hidden space-y-2"><textarea id="quick-entry-input" rows="2" maxlength="1200" placeholder="مثال: صرفت 75 جنيه أكل" class="w-full resize-none rounded-2xl border border-emerald-200 bg-white px-3 py-2.5 text-xs outline-none dark:bg-slate-900 dark:text-slate-100"></textarea><div class="flex gap-2"><button id="quick-entry-analyze" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950" type="button">فهم وتجهيز</button><button id="quick-entry-cancel" class="rounded-xl border border-slate-300 px-3 py-2.5 text-xs text-slate-500 dark:border-slate-700" type="button">إلغاء</button></div></div>
@@ -2408,13 +2408,13 @@
             const notifications = [];
             const budget = Number(settings.monthlyBudget || 0);
             const total = Number(month.total || 0);
-            if (budget > 0 && total >= budget * 0.8) notifications.push({ id: `budget-${new Date().toISOString().slice(0, 7)}`, icon: '⚠️', title: 'تنبيه الميزانية', body: `صرفك وصل لـ ${fmt(total)} من ${fmt(budget)} جنيه (${Math.round(total / budget * 100)}%).`, tone: 'amber' });
+            if (budget > 0 && total >= budget * 0.8) notifications.push({ id: `budget-${new Date().toISOString().slice(0, 7)}`, icon: '🎯', title: 'خطوة ذكية للحفاظ على خطتك', body: `أنت استخدمت ${Math.round(total / budget * 100)}% من ميزانيتك (${fmt(total)} من ${fmt(budget)} جنيه). عندك فرصة جميلة تكمّل الشهر بهدوء؛ جرّب تراجع أكبر فئة صرف عندك.`, tone: 'amber' });
             const latestEvent = (month.financialEvents || [])[0];
-            if (latestEvent) notifications.push({ id: `event-${latestEvent.id || latestEvent.created_at}`, icon: '✅', title: 'آخر عملية مسجلة', body: `${typeLabel(latestEvent.event_type)} · ${fmt(latestEvent.amount, latestEvent.currency_code)}`, tone: 'emerald' });
+            if (latestEvent) notifications.push({ id: `event-${latestEvent.id || latestEvent.created_at}`, icon: '✨', title: 'متابعة ممتازة', body: `آخر حركة عندك: ${typeLabel(latestEvent.event_type)} · ${fmt(latestEvent.amount, latestEvent.currency_code)}. الاستمرار في المتابعة هو أول خطوة للسيطرة على خطتك.`, tone: 'emerald' });
             let read = {};
             try { read = JSON.parse(localStorage.getItem(inAppNotificationsKey()) || '{}'); } catch {}
             if (!notifications.length) {
-                list.innerHTML = '<p class="rounded-2xl border border-slate-800 bg-slate-900/30 p-3 text-[11px] text-slate-500">مفيش تنبيهات جديدة دلوقتي. هنظهرها هنا حتى لو Chrome حاجب الإشعارات الخارجية.</p>';
+                list.innerHTML = '<p class="rounded-2xl border border-slate-800 bg-slate-900/30 p-3 text-[11px] text-slate-500">كل شيء هادئ دلوقتي. كمّل متابعتك، وهتلاقي هنا اقتراحات مفيدة وقت ما تحتاجها.</p>';
                 if (subtitle) subtitle.textContent = 'المركز ده شغال داخل التطبيق، ومش بيعتمد على سماح Chrome.';
                 return;
             }
@@ -2941,7 +2941,7 @@
             wrap.innerHTML = `<div class="flex items-center justify-between gap-2"><div><span class="text-[10px] text-emerald-400 font-bold">وضعك المالي</span><h3 class="text-sm font-black text-slate-100">الدخل والميزانية</h3></div><span class="text-lg">🎯</span></div>
                 <div class="grid grid-cols-2 gap-2"><label class="text-[10px] text-slate-400">دخلك الشهري<input id="planning-income" type="number" min="0" inputmode="numeric" placeholder="مثال: 12000" class="mt-1 w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-100 outline-none focus:border-emerald-400"></label><label class="text-[10px] text-slate-400">ميزانيتك الشهرية<input id="planning-budget" type="number" min="0" inputmode="numeric" placeholder="مثال: 9000" class="mt-1 w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-100 outline-none focus:border-emerald-400"></label></div>
                 <div id="planning-summary" class="rounded-2xl bg-emerald-500/10 px-3 py-2 text-[11px] text-emerald-200"></div>
-                <div><div class="mb-1 flex items-center justify-between"><span class="text-[10px] font-bold text-slate-400">حدود أهم الفئات</span><span class="text-[9px] text-slate-600">اختياري</span></div><div class="rounded-2xl border border-emerald-500/15 bg-emerald-500/5 px-3 py-2.5 text-[10px] leading-relaxed text-slate-400"><p class="font-bold text-emerald-300">إيه فايدة الرقم ده؟</p><p class="mt-1">ده حد تخطيطي للصرف، مش مصروف بيتسجل. دبّر يقارن مصروفاتك الفعلية بيه وينبهك داخل التطبيق عند وصولك لـ <b class="text-amber-300">80%</b> منه، ولو فعلت Push يوصلك التنبيه برّه التطبيق كمان.</p></div><div id="category-budgets-list" class="mt-2 space-y-1.5"></div><div class="mt-2 flex gap-2"><select id="category-budget-select" class="min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-900 px-2.5 py-2 text-[10px] text-slate-300"><option value="">اختار فئة لإضافة حد...</option></select><button id="category-budget-add" type="button" class="rounded-xl border border-emerald-500/25 px-3 py-2 text-[10px] font-bold text-emerald-300">إضافة</button></div><p class="mt-1 text-[9px] text-slate-600">دبّر يقترح الفئات التي تصرف عليها أكثر، وأنت تقدر تضيف أو تعدّل أو تسيب أي فئة بدون حد.</p></div>
+                <div><div class="mb-1 flex items-center justify-between"><span class="text-[10px] font-bold text-slate-400">حدود أهم الفئات</span><span class="text-[9px] text-slate-600">اختياري</span></div><div class="rounded-2xl border border-emerald-500/15 bg-emerald-500/5 px-3 py-2.5 text-[10px] leading-relaxed text-slate-400"><p class="font-bold text-emerald-300">إيه فايدة الرقم ده؟</p><p class="mt-1">ده حد تخطيطي للصرف، مش مصروف بيتسجل. دبّر يقارن مصروفاتك الفعلية بيه وينبهك داخل التطبيق عند وصولك لـ <b class="text-amber-300">80%</b> منه، ولو فعلت Push يوصلك التنبيه برّه التطبيق كمان.</p></div><div id="category-budgets-list" class="mt-2 space-y-1.5"></div><div class="mt-2 flex gap-2"><input id="category-budget-custom-name" type="text" maxlength="40" placeholder="اكتب أي فئة: قهوة، سفر، حيوانات..." class="min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-900 px-2.5 py-2 text-[10px] text-slate-300 outline-none focus:border-emerald-400"><button id="category-budget-add" type="button" class="rounded-xl border border-emerald-500/25 px-3 py-2 text-[10px] font-bold text-emerald-300">إضافة</button></div><p class="mt-1 text-[9px] text-slate-600">دبّر يقترح الفئات التي تصرف عليها أكثر، وأنت تقدر تكتب أي فئة من عندك وتعدّل أو تسيب أي فئة بدون حد.</p></div>
                 <div class="flex gap-2"><button id="planning-save" type="button" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950">حفظ خطتي</button><button id="planning-reset" type="button" title="إدارة ومسح خطة الدخل والميزانية" class="rounded-xl border border-slate-700/60 px-3 py-2.5 text-xs text-slate-500">إدارة</button></div>
                 <div class="border-t border-slate-800 pt-3"><div class="flex items-center justify-between"><div><h4 class="text-xs font-bold text-slate-300">التزامات شهرية متوقعة</h4><p class="mt-0.5 text-[9px] text-slate-500">للتخطيط فقط — لا تُضاف للصرف الفعلي إلا عند تسجيلها</p></div><span class="text-[10px] text-slate-500">إيجار / اشتراكات</span></div><div class="mt-2 grid grid-cols-[1fr_5rem_2.5rem] gap-2"><input id="recurring-name" placeholder="إيجار / اشتراك" class="rounded-xl border border-slate-700 bg-slate-900 px-2.5 py-2 text-[10px] text-slate-100 outline-none"><input id="recurring-amount" type="number" min="0" placeholder="المبلغ" class="rounded-xl border border-slate-700 bg-slate-900 px-2.5 py-2 text-[10px] text-slate-100 outline-none"><button id="recurring-add" type="button" class="rounded-xl bg-slate-800 text-lg text-emerald-400">+</button></div><div id="recurring-list" class="mt-2 space-y-1.5"></div></div>`;
             monthly.insertBefore(wrap, quick.nextSibling);
@@ -2962,14 +2962,14 @@
             document.getElementById('category-budget-add').addEventListener('click', addCategoryBudget);
         }
         function addCategoryBudget() {
-            const select = document.getElementById('category-budget-select');
-            const name = select?.value;
-            if (!name) return quickStatus('اختار فئة الأول عشان نضيفلها حد.', 'error');
+            const input = document.getElementById('category-budget-custom-name');
+            const name = input?.value.trim();
+            if (!name) return quickStatus('اكتب اسم الفئة الأول عشان نضيفلها حد.', 'error');
             const settings = planningSettings();
             settings.categoryBudgets = { ...(settings.categoryBudgets || {}), [name]: Number(settings.categoryBudgets?.[name] || 0) };
             window.__financialSettings = settings;
             renderPlanning(window.__dashboardData || {});
-            document.getElementById('category-budget-select').value = '';
+            if (input) input.value = '';
         }
 
         function removeCategoryBudget(name) {
@@ -2999,11 +2999,6 @@
             const categoryBudgetList = document.getElementById('category-budgets-list');
             const topCategories = Array.isArray(data?.month?.byCategory) ? data.month.byCategory.slice(0, 3).map((item) => item.name) : [];
             const selectedCategories = [...new Set([...topCategories, ...Object.keys(settings.categoryBudgets || {})])];
-            const categorySelect = document.getElementById('category-budget-select');
-            if (categorySelect) {
-                const available = Object.keys(CATEGORY_EMOJI).filter((name) => !selectedCategories.includes(name));
-                categorySelect.innerHTML = '<option value="">اختار فئة لإضافة حد...</option>' + available.map((name) => `<option value="${name}">${CATEGORY_EMOJI[name] || '📌'} ${name}</option>`).join('');
-            }
             if (categoryBudgetList) categoryBudgetList.innerHTML = selectedCategories.length ? selectedCategories.map((name) => `<label class="flex items-center gap-2 rounded-xl bg-slate-900/60 px-2.5 py-1.5 text-[10px] text-slate-400"><span class="flex-1">${CATEGORY_EMOJI[name] || '📌'} ${name}</span><input data-category-budget="${name}" type="number" min="0" placeholder="حد الفئة" value="${settings.categoryBudgets?.[name] || ''}" class="w-20 rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-left text-[10px] text-slate-100 outline-none"><button type="button" data-category-budget-remove="${name}" class="text-slate-600 hover:text-rose-400" aria-label="إزالة حد الفئة">×</button></label>`).join('') : '<p class="text-[10px] text-slate-500">مفيش فئات محددة؛ اختار فئة من القائمة لو عايز تتابعها.</p>';
             categoryBudgetList?.querySelectorAll('[data-category-budget-remove]').forEach((btn) => btn.addEventListener('click', () => removeCategoryBudget(btn.dataset.categoryBudgetRemove)));
             const recurringList = document.getElementById('recurring-list');
@@ -3166,12 +3161,12 @@
             renderWeekdayChart(month?.byWeekday || [null, null, null, null, null, null, null], month?.weekTotal || 0, month?.byWeekdayCount || [], month?.byWeekdayTopCategory || [], month?.weekDates || []);
 
             if (!categories.length || total <= 0) {
-                headline.textContent = 'لسه معندكش بيانات كفاية';
-                listEl.innerHTML = '<div class="tip-empty-state"><span>💡</span><p>لما تسجل شوية مصاريف، هتظهرلك اقتراحات بأرقام حقيقية من صرفك.</p></div>';
+                headline.textContent = 'ابدأ بخطوة صغيرة';
+                listEl.innerHTML = '<div class="tip-empty-state"><span>💡</span><p>سجّل مصاريفك براحتك، ومع أول شوية بيانات هتظهرلك اقتراحات شخصية بأرقام حقيقية تساعدك تدبّر أحسن.</p></div>';
                 return;
             }
 
-            headline.textContent = `صرفت ${fmt(total)} في ${count} عملية الشهر ده`;
+            headline.textContent = `تابعت ${fmt(total)} في ${count} عملية الشهر ده`;
 
             const tips = [];
             const top = categories[0];
@@ -3181,8 +3176,8 @@
             tips.push({
                 icon: CATEGORY_EMOJI[top.name] || '📌',
                 color: 'emerald',
-                title: `ابدأ من ${top.name} — أكبر فرصة توفير`,
-                text: `أنت صرفت ${fmt(top.amount)} فيها، يعني ${top.percent}% من إجمالي الشهر. لو قللتها 10% بس، هتوفر تقريبًا ${fmt(topSaving10)}.`,
+                title: `ابدأ بخطوة لطيفة في ${top.name}`,
+                text: `${top.name} تمثل ${top.percent}% من متابعتك هذا الشهر بإجمالي ${fmt(top.amount)}. لو جرّبت تخفّضها 10% بهدوء، ممكن تسيب لنفسك مساحة حوالي ${fmt(topSaving10)}.`,
                 saving: topSaving10,
             });
 
@@ -3190,8 +3185,8 @@
                 tips.push({
                     icon: '🎯',
                     color: 'teal',
-                    title: 'هدف صغير بنتيجة واضحة',
-                    text: `جرّب تقلل نفس الفئة 20% الشهر الجاي. على أرقامك الحالية ده يساوي توفيرًا محتملًا حوالي ${fmt(topSaving20)}.`,
+                    title: 'تحدّي صغير ليك',
+                    text: `جرّب تدي نفس الفئة اهتمامًا بسيطًا الشهر الجاي. خفضها 20% ممكن يديك مساحة إضافية حوالي ${fmt(topSaving20)}.`,
                     saving: topSaving20,
                 });
             }
@@ -3202,8 +3197,8 @@
                 tips.push({
                     icon: CATEGORY_EMOJI[second.name] || '📌',
                     color: 'amber',
-                    title: `راجع ${second.name} كمان`,
-                    text: `الفئة دي أخذت ${fmt(second.amount)} (${second.percent}%). تقليلها 10% يديك مساحة إضافية حوالي ${fmt(secondSaving)}.`,
+                    title: `فرصة إضافية في ${second.name}`,
+                    text: `تابعت ${fmt(second.amount)} فيها (${second.percent}%). خطوة بسيطة بتقليل 10% ممكن تديك مساحة إضافية حوالي ${fmt(secondSaving)}.`,
                     saving: secondSaving,
                 });
             }
@@ -3214,16 +3209,16 @@
                 if (diff > 0) {
                     const resetSaving = Math.max(0, Math.round((total * 0.10) / 10) * 10);
                     tips.push({
-                        icon: '📈', color: 'rose',
-                        title: `صرفك زاد ${diff}% عن ${month.prevLabel}`,
-                        text: `رجوعك لمستوى أقل 10% من صرف الشهر ده يحتاج تقليل حوالي ${fmt(resetSaving)}. ابدأ بالفئة الأكبر بدل ما تقلل كل حاجة مرة واحدة.`,
+                        icon: '📈', color: 'emerald',
+                        title: `فرصة جديدة للشهر ده`,
+                        text: `مقارنة بـ ${month.prevLabel}، عندك مساحة تحسّن لطيفة. خطوة هادئة بقيمة حوالي ${fmt(resetSaving)} من الفئة الأكبر قد تساعدك تبدأ بسهولة.`,
                         saving: resetSaving,
                     });
                 } else if (diff < 0) {
                     tips.push({
                         icon: '📉', color: 'emerald',
-                        title: `أداؤك أحسن من ${month.prevLabel}`,
-                        text: `صرفك قل ${Math.abs(diff)}% مقارنة بـ ${month.prevLabel}. حافظ على نفس العادة وحدد للفئة الأكبر سقفًا قريبًا من ${fmt(top.amount)}.`,
+                        title: `تقدّم جميل مقارنة بـ ${month.prevLabel}`,
+                        text: `متابعتك تحسّنت ${Math.abs(diff)}% مقارنة بـ ${month.prevLabel}. حافظ على العادة وحدد للفئة الأكبر سقفًا مريحًا قريبًا من ${fmt(top.amount)}.`,
                     });
                 }
             }
@@ -3715,6 +3710,12 @@
                         quickEntryVoiceBlob = null;
                         quickShow('quick-entry-voice-preview', false);
                         quickStatus('');
+                        return;
+                    }
+                    if (quickEntrySeconds < 5) {
+                        quickEntryVoiceBlob = null;
+                        quickShow('quick-entry-voice-preview', false);
+                        quickStatus('التسجيل قصير جدًا. أقل مدة لتسجيل الصوت هي 5 ثواني — اتكلم شوية كمان وسجّل من جديد.', 'error');
                         return;
                     }
                     const blob = new Blob(quickEntryChunks, { type: quickEntryRecorder.mimeType || mimeType || 'audio/webm' });

@@ -102,6 +102,10 @@
   .field label{ display:block; font-family:'Cairo',sans-serif; font-weight:700; font-size:12.5px; margin-bottom:6px; color:var(--ink); text-align:center; }
   .field input{ width:100%; background:#fff; border:1.5px solid var(--line); border-radius:10px; padding:13px 14px; font-family:'Tajawal',sans-serif; font-size:14px; color:var(--text); text-align:center; letter-spacing:6px; font-weight:800; }
   .field input:focus{ outline:none; border-color:var(--green); }
+  .field-hint{ color:var(--muted); font-size:11px; line-height:1.7; margin-top:6px; text-align:right; }
+  .field-hint::before{ content:'ⓘ'; color:var(--green-deep); margin-left:5px; }
+  /* Google OAuth محفوظ للتفعيل لاحقًا، لكنه مخفي مؤقتًا من الواجهة */
+  #google-auth-divider, #googleSignInBtn, #google-auth-hint{ display:none !important; }
   .field input::placeholder{ color:#B7C4BC; letter-spacing:normal; font-weight:400; }
   /* حقول الإيميل/الباسورد/الاسم بتاعة شاشة الدخول — نص عادي من غير letter-spacing بتاع الكود */
   .field input.text-input{ letter-spacing:normal; font-weight:500; text-align:right; }
@@ -347,6 +351,7 @@
       <div class="field">
         <label>الإيميل</label>
         <input type="email" id="emailInput" class="text-input" placeholder="you@example.com" required>
+        <p id="signupEmailHint" class="field-hint">استخدم بريدًا حقيقيًا تقدر أن تفتحه لأنه وسيلة لاسترجاع حسابك وبياناتك.</p>
       </div>
       <div class="field">
         <label>الباسورد</label>
@@ -358,15 +363,15 @@
       </button>
     </form>
 
-    <div style="display:flex; align-items:center; gap:10px; margin:16px 0; color:var(--muted); font-size:12px;"><span style="height:1px; flex:1; background:var(--line);"></span><span>أو</span><span style="height:1px; flex:1; background:var(--line);"></span></div>
+    <div id="google-auth-divider" style="display:flex; align-items:center; gap:10px; margin:16px 0; color:var(--muted); font-size:12px;"><span style="height:1px; flex:1; background:var(--line);"></span><span>أو</span><span style="height:1px; flex:1; background:var(--line);"></span></div>
     <button type="button" class="btn btn-ghost" id="googleSignInBtn" style="display:flex; align-items:center; justify-content:center; gap:8px; width:100%;"><b style="font-size:16px;">G</b><span>الدخول بحساب Google</span></button>
-    <p style="margin:9px 0 0; color:var(--muted); font-size:10px; text-align:center; line-height:1.6;">Google يدير كلمة المرور عنده؛ دبّر لا يخزن كلمات مرور البنوك أو أرقام البطاقات.</p>
+    <p id="google-auth-hint" style="margin:9px 0 0; color:var(--muted); font-size:10px; text-align:center; line-height:1.6;">Google يدير كلمة المرور عنده؛ دبّر لا يخزن كلمات مرور البنوك أو أرقام البطاقات.</p>
 
     <button type="button" class="forgot-link" id="forgotPasswordBtn">نسيت كلمة المرور؟</button>
 
     <form id="forgotPasswordForm" class="recovery-card" style="display:none;">
       <h3>استرجاع كلمة المرور</h3>
-      <p>اكتب الإيميل المرتبط بحسابك، وهيوصلك رابط آمن لإعادة التعيين.</p>
+      <p>اكتب الإيميل المرتبط بحسابك، وهيوصلك رابط آمن يفتح صفحة تغيير كلمة المرور مباشرة.</p>
       <div class="field">
         <label for="recoveryEmailInput">الإيميل</label>
         <input type="email" id="recoveryEmailInput" class="text-input" placeholder="you@example.com" required>
@@ -591,6 +596,7 @@
   const nameInput = document.getElementById('nameInput');
   const emailInput = document.getElementById('emailInput');
   const passwordInput = document.getElementById('passwordInput');
+  const signupEmailHint = document.getElementById('signupEmailHint');
   const authForm = document.getElementById('authForm');
   const authSubmitBtn = document.getElementById('authSubmitBtn');
   const authSubmitLabel = document.getElementById('authSubmitLabel');
@@ -629,6 +635,7 @@
     tabLogin.classList.toggle('active', !isSignup);
     nameField.style.display = isSignup ? 'block' : 'none';
     nameInput.required = isSignup;
+    if (signupEmailHint) signupEmailHint.style.display = isSignup ? 'block' : 'none';
     authTitle.textContent = isSignup ? 'اعمل حسابك في دبّر' : 'أهلاً بيك تاني في دبّر';
     authSub.textContent = isSignup ? 'اسمك وإيميلك وباسورد عشان تدخل الداشبورد.' : 'سجّل دخول بالإيميل والباسورد بتاعك.';
     authSubmitLabel.textContent = isSignup ? 'إنشاء الحساب' : 'تسجيل الدخول';

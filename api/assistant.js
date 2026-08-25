@@ -5,7 +5,7 @@ import { extractItemizedReceiptFromImageBase64, askDabbarChat, classifyMessage, 
 import { saveInvoiceRecord, deleteInvoiceById } from '../lib/invoices.js';
 import { hasActiveSubscription, isInTrial } from '../lib/users.js';
 import { checkOcrUsage, checkChatUsage, refundOcrUsage, refundUsage } from '../lib/rateLimits.js';
-import { normalizeDigits, extractDeterministicExpense, correctDebtDirections } from '../lib/textNormalize.js';
+import { normalizeDigits, extractDeterministicExpense, correctDebtDirections, detectCurrency, currencyLabel, normalizeFinancialTransaction, reconcileSingleTransaction } from '../lib/textNormalize.js';
 import { maybeSendBudgetAlert } from '../lib/webPush.js';
 import { getDashboardUserFromRequest } from '../lib/dashboardAuth.js';
 import { isFinancialEventType, recordFinancialEvent } from '../lib/financialEvents.js';
@@ -247,8 +247,9 @@ async function handleEntryDraft(userId, body, res) {
   // (مثلاً "صرفت 50 جنيه أكل و100 مواصلات") — بنرجّعهم كلهم كمسودات عشان المستخدم يراجعهم ويأكدهم مرة واحدة،
   // بدل ما نلقط أول معاملة بس ونسيب الباقي بلا تسجيل زي ما كان الموقع بيعمل قبل كده.
   const parsed = await classifyMessage(text);
-  const transactions = correctDebtDirections(text, Array.isArray(parsed) ? parsed : []);
-  let validTx = transactions.filter((item) => ((isFinancialEventType(item?.type) || item?.type === 'expense') || item?.type === 'debt') && Number(item.amount) > 0 && (item.type !== 'debt' || item.person));
+  const normalizedTransactions = (Array.isArray(parsed) ? parsed : []).map((item) => normalizeFinancialTransaction(item, text));
+  const transactions = reconcileSingleTransaction(correctDebtDirections(text, normalizedTransactions), text);
+  let validTx = transactions.filter((item) => ((isFinancialEventType(item?.type) || item?.type === 'expense') || item?.type === 'debt') && Number.isFinite(Number(item.amount)) && Number(item.amount) > 0 && (item.type !== 'debt' || item.person));
   // لو التصنيف الذكي لم يلتقط جملة قصيرة مثل "غدا 100 جنيه"، نستخدم استخراجًا حتميًا
   // مقيدًا بعلامات المصروف، فلا نخلط جمل الديون أو الأسئلة مع مصروفات وهمية.
   if (!validTx.length) {
@@ -263,6 +264,7 @@ async function handleEntryDraft(userId, body, res) {
   const drafts = validTx.map((tx) => ({
     ...tx,
     amount: Number(tx.amount),
+    currency_code: String(tx.currency_code || tx.currencyCode || detectCurrency(text)).toUpperCase(),
     note: tx.note || (useFallback ? '' : tx.note || ''),
     raw_text: tx.raw_text || text,
     sourceText: useFallback ? text : (tx.note || ''),
@@ -287,17 +289,18 @@ async function saveOneDraft(userId, draft) {
   if (!Number.isFinite(amount) || amount <= 0 || amount > 100000000) return { ok: false, error: 'المبلغ غير صحيح.' };
 
   if (draft.type === 'expense') {
-    const { data, error } = await supabase.from('expenses').insert({ telegram_user_id: userId, amount, category: String(draft.category || 'مصروف عام').slice(0, 80), description: String(draft.note || draft.sourceText || '').slice(0, 500) }).select('id, amount, category, description, created_at').single();
+    const currency_code = String(draft.currency_code || detectCurrency(draft.raw_text || draft.sourceText || '')).toUpperCase();
+    const { data, error } = await supabase.from('expenses').insert({ telegram_user_id: userId, amount, currency_code, category: String(draft.category || 'مصروف عام').slice(0, 80), description: String(draft.note || draft.sourceText || '').slice(0, 500) }).select('id, amount, currency_code, category, description, created_at').single();
     if (error) { console.error('entry_confirm expense error:', JSON.stringify(error)); return { ok: false, error: 'تعذر حفظ المصروف.' }; }
     await maybeSendBudgetAlert(userId).catch((pushError) => console.error('entry_confirm budget push failed:', pushError));
-    return { ok: true, type: 'expense', record: data, message: `تم تسجيل مصروف ${data.amount} جنيه في ${data.category}.` };
+    return { ok: true, type: 'expense', record: data, message: `تم تسجيل مصروف ${data.amount} ${currencyLabel(data.currency_code)} في ${data.category}.` };
   }
 
   // ============ العمليات المالية العامة — تحفظ العبارة الطبيعية كاملة مع النوع والتفاصيل ============
   if (isFinancialEventType(draft.type)) {
     const savedEvent = await recordFinancialEvent(draft, userId);
     if (!savedEvent.ok) return savedEvent;
-    return { ...savedEvent, message: `تم تسجيل ${savedEvent.label} بقيمة ${savedEvent.record.amount} جنيه.` };
+    return { ...savedEvent, message: `تم تسجيل ${savedEvent.label} بقيمة ${savedEvent.record.amount} ${currencyLabel(savedEvent.record.currency_code)}.` };
   }
 
   // ============ الديون/السلف — نفس بالظبط منطق recordDebt بتاع تليجرام (lib/debts.js)، بس من غير إرسال رسالة تليجرام ============
@@ -308,15 +311,17 @@ async function saveOneDraft(userId, draft) {
       telegram_user_id: userId,
       person_name: String(draft.person).slice(0, 160),
       amount,
+      currency_code: String(draft.currency_code || detectCurrency(draft.raw_text || draft.sourceText || '')).toUpperCase(),
       direction: draft.direction === 'borrowed' ? 'borrowed' : 'lent',
       is_repayment: isRepayment,
       note: String(draft.note || '').slice(0, 500),
-    }).select('id, person_name, amount, direction, is_repayment').single();
+    }).select('id, person_name, amount, currency_code, direction, is_repayment').single();
     if (error) { console.error('entry_confirm debt error:', JSON.stringify(error)); return { ok: false, error: 'تعذر حفظ الدين.' }; }
     const isLent = data.direction !== 'borrowed';
+    const money = `${data.amount} ${currencyLabel(data.currency_code)}`;
     const message = isRepayment
-      ? (isLent ? `تم تسجيل: رجّعت لـ ${data.person_name} ${data.amount} جنيه.` : `تم تسجيل: ${data.person_name} رجّعلك ${data.amount} جنيه.`)
-      : (isLent ? `تم تسجيل: بقى ليك عند ${data.person_name} ${data.amount} جنيه.` : `تم تسجيل: بقى عليك لـ ${data.person_name} ${data.amount} جنيه.`);
+      ? (isLent ? `تم تسجيل: رجّعت لـ ${data.person_name} ${money}.` : `تم تسجيل: ${data.person_name} رجّعلك ${money}.`)
+      : (isLent ? `تم تسجيل: بقى ليك عند ${data.person_name} ${money}.` : `تم تسجيل: بقى عليك لـ ${data.person_name} ${money}.`);
     return { ok: true, type: 'debt', record: data, message };
   }
 

@@ -5,6 +5,7 @@ create table if not exists financial_events (
   telegram_user_id bigint not null,
   event_type text not null check (event_type in ('income', 'purchase', 'asset', 'transfer', 'refund', 'subscription', 'other')),
   amount numeric not null check (amount > 0),
+  currency_code text not null default 'EGP' check (currency_code ~ '^[A-Z]{3}$'),
   category text,
   description text not null default '',
   raw_text text not null default '',
@@ -18,6 +19,9 @@ create index if not exists idx_financial_events_user_date
 
 create index if not exists idx_financial_events_user_type
   on financial_events (telegram_user_id, event_type);
+
+create index if not exists idx_financial_events_user_currency_date
+  on financial_events (telegram_user_id, currency_code, created_at desc);
 
 -- تفعيل RLS مع سياسات الخدمة الخلفية فقط؛ الـAPI يستخدم service role ولا يعرّض الجدول مباشرة للمتصفح.
 alter table financial_events enable row level security;

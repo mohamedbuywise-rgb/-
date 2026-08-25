@@ -51,8 +51,13 @@ export default async function handler(req, res) {
       if (body.amount !== undefined) patch.amount = Math.max(0.01, Number(body.amount));
       if (body.category !== undefined) patch.category = String(body.category).slice(0, 50);
       if (body.description !== undefined) patch.description = String(body.description).slice(0, 500);
+      if (body.currency_code !== undefined) {
+        const currency = String(body.currency_code).trim().toUpperCase();
+        if (!/^[A-Z]{3}$/.test(currency)) return res.status(400).json({ error: 'العملة غير صحيحة.' });
+        patch.currency_code = currency;
+      }
       if (!Object.keys(patch).length) return res.status(400).json({ error: 'مفيش بيانات للتعديل.' });
-      const { data, error } = await supabase.from('expenses').update(patch).eq('id', id).eq('telegram_user_id', userId).select('id, amount, category, description, created_at').single();
+      const { data, error } = await supabase.from('expenses').update(patch).eq('id', id).eq('telegram_user_id', userId).select('id, amount, currency_code, category, description, created_at').single();
       if (error) throw error;
       await maybeSendBudgetAlert(userId).catch((pushError) => console.error('financial-actions budget push failed:', pushError));
       return res.status(200).json({ expense: data });

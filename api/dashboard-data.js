@@ -7,6 +7,14 @@ import { MONTH_NAMES, CATEGORY_EMOJI, SUBSCRIPTION_PRICE_EGP, INSTAPAY_LINK } fr
 import { hasActiveSubscription, getSubscriptionExpiry, isInTrial, getTrialDaysLeft } from '../lib/users.js';
 import { getActiveDays } from '../lib/activeDays.js';
 
+function sumByCurrency(rows = []) {
+  return rows.reduce((acc, row) => {
+    const code = String(row.currency_code || 'EGP').toUpperCase();
+    acc[code] = (acc[code] || 0) + Number(row.amount || 0);
+    return acc;
+  }, {});
+}
+
 // ============ GET /api/dashboard-data ============
 // بيرجّع بيانات حقيقية بس (صفر mock data): مصاريف النهاردة، مصاريف الشهر بالتصنيفات، والديون.
 // Header: Authorization: Bearer <supabase access token>
@@ -62,7 +70,9 @@ export default async function handler(req, res) {
     const endOfDay = new Date(startOfDay);
     endOfDay.setDate(endOfDay.getDate() + 1);
     const todayExpenses = await getExpensesBetween(dataUserId, startOfDay, endOfDay);
-    const todayTotal = todayExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
+    const todayByCurrency = sumByCurrency(todayExpenses);
+    // يظل today.total متوافقًا مع الواجهة القديمة (جنيه مصري)، بينما تعرض today.byCurrency كل العملات بدقة.
+    const todayTotal = todayByCurrency.EGP || 0;
 
     // ---- توزيع صرف "الأسبوع الحالي" حسب الأيام (سبت -> جمعة)، مش الشهر كله ----
     // كل أسبوع بيتحدث لوحده (مش تراكمي)، والأيام اللي لسه ما جتش (بعد النهاردة) بترجع null
@@ -117,7 +127,19 @@ export default async function handler(req, res) {
     // ---- مصاريف الشهر الحالي ----
     const { start, end, label } = getMonthRange(0);
     const monthExpenses = await getExpensesBetween(dataUserId, start, end);
-    const monthTotal = monthExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
+    const monthByCurrency = sumByCurrency(monthExpenses);
+    const monthTotal = monthByCurrency.EGP || 0;
+    const { data: monthFinancialEvents, error: eventsError } = await supabase
+      .from('financial_events')
+      .select('id, event_type, amount, currency_code, category, description, raw_text, direction, created_at')
+      .eq('telegram_user_id', dataUserId)
+      .gte('created_at', start.toISOString())
+      .lt('created_at', end.toISOString())
+      .order('created_at', { ascending: false });
+    if (eventsError) console.error('dashboard-data financial_events lookup error:', JSON.stringify(eventsError));
+    const financialEvents = monthFinancialEvents || [];
+    const incomeEvents = financialEvents.filter((event) => event.event_type === 'income');
+    const incomeByCurrency = sumByCurrency(incomeEvents);
     const breakdown = buildCategoryBreakdown(monthExpenses); // [{name, amount, percent, items}]
 
     const daysPassedThisMonth = Math.max(
@@ -242,7 +264,7 @@ export default async function handler(req, res) {
         total: yearTotal,
         count: yearExpenses.length,
         topCategory: yearBreakdown[0] || null,
-        byCategory: yearBreakdown.slice(0, 5).map((b) => ({ name: b.name, amount: b.amount, percent: Number(b.percent) })),
+        byCategory: yearBreakdown.slice(0, 5).map((b) => ({ name: b.name, amount: b.amount, currency_code: b.currency_code || 'EGP', percent: Number(b.percent) })),
         savedEstimate,
         bestMonthLabel: bestMonth ? MONTH_NAMES[bestMonth.month] : null,
         bestMonthTotal: bestMonth ? bestMonth.total : null,
@@ -272,9 +294,11 @@ export default async function handler(req, res) {
         total: todayTotal,
         count: todayExpenses.length,
         avgPerDayThisMonth,
-        items: todayExpenses.map((e) => ({
+          byCurrency: todayByCurrency,
+          items: todayExpenses.map((e) => ({
           id: e.id,
           amount: Number(e.amount),
+          currency_code: e.currency_code || 'EGP',
           category: e.category,
           description: e.description,
           created_at: e.created_at,
@@ -283,10 +307,13 @@ export default async function handler(req, res) {
       month: {
         label,
         total: monthTotal,
+        byCurrency: monthByCurrency,
+        incomeByCurrency,
+        financialEvents: financialEvents.map((event) => ({ ...event, amount: Number(event.amount), currency_code: event.currency_code || 'EGP' })),
         count: monthExpenses.length,
         prevTotal,
         prevLabel: MONTH_NAMES[prevRange.start.getMonth()],
-        byCategory: breakdown.map((b) => ({ name: b.name, amount: b.amount, percent: Number(b.percent) })),
+        byCategory: breakdown.map((b) => ({ name: b.name, amount: b.amount, currency_code: b.currency_code || 'EGP', percent: Number(b.percent) })),
         topCategory: breakdown[0] || null,
         byWeekday,
         byWeekdayCount,

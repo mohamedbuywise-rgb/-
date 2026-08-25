@@ -358,6 +358,10 @@
       </button>
     </form>
 
+    <div style="display:flex; align-items:center; gap:10px; margin:16px 0; color:var(--muted); font-size:12px;"><span style="height:1px; flex:1; background:var(--line);"></span><span>أو</span><span style="height:1px; flex:1; background:var(--line);"></span></div>
+    <button type="button" class="btn btn-ghost" id="googleSignInBtn" style="display:flex; align-items:center; justify-content:center; gap:8px; width:100%;"><b style="font-size:16px;">G</b><span>الدخول بحساب Google</span></button>
+    <p style="margin:9px 0 0; color:var(--muted); font-size:10px; text-align:center; line-height:1.6;">Google يدير كلمة المرور عنده؛ دبّر لا يخزن كلمات مرور البنوك أو أرقام البطاقات.</p>
+
     <button type="button" class="forgot-link" id="forgotPasswordBtn">نسيت كلمة المرور؟</button>
 
     <form id="forgotPasswordForm" class="recovery-card" style="display:none;">
@@ -590,6 +594,7 @@
   const authForm = document.getElementById('authForm');
   const authSubmitBtn = document.getElementById('authSubmitBtn');
   const authSubmitLabel = document.getElementById('authSubmitLabel');
+  const googleSignInBtn = document.getElementById('googleSignInBtn');
   const authError = document.getElementById('authError');
   const authNotice = document.getElementById('authNotice');
   const authTitle = document.getElementById('authTitle');
@@ -733,6 +738,24 @@
   }
 
   let authSubmitting = false;
+
+  googleSignInBtn?.addEventListener('click', async () => {
+    if (!sb || authSubmitting) return;
+    authSubmitting = true;
+    hideAuthMessages();
+    googleSignInBtn.disabled = true;
+    googleSignInBtn.innerHTML = '<span class="spinner"></span> بنحوّلك لـ Google...';
+    try {
+      const { error } = await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: `${window.location.origin}/app/dabbar-onboarding.html` } });
+      if (error) showAuthError(error.message || 'تعذر تسجيل الدخول بحساب Google.');
+    } catch (error) {
+      showAuthError(error.message || 'تعذر تسجيل الدخول بحساب Google.');
+    } finally {
+      authSubmitting = false;
+      googleSignInBtn.disabled = false;
+      googleSignInBtn.innerHTML = '<b style="font-size:16px;">G</b><span>الدخول بحساب Google</span>';
+    }
+  });
 
   authForm.addEventListener('submit', async (e) => {
     e.preventDefault();

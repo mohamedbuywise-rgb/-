@@ -1943,6 +1943,17 @@
                 </div>
             </section>
 
+            <section id="in-app-notifications-card" class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3">
+                <div class="flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <span class="w-9 h-9 shrink-0 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-base">📣</span>
+                        <div class="min-w-0"><p class="text-xs font-bold text-slate-200">مركز الإشعارات داخل دبّر</p><p id="in-app-notifications-subtitle" class="text-[11px] text-slate-500">هتلاقي تنبيهات الميزانية والنشاط هنا حتى لو Chrome حاجب Push.</p></div>
+                    </div>
+                    <button type="button" id="in-app-notifications-read" class="shrink-0 text-[10px] text-emerald-400 hover:text-emerald-300">تحديد الكل كمقروء</button>
+                </div>
+                <div id="in-app-notifications-list" class="space-y-2"></div>
+            </section>
+
             <!-- تنويه تثبيت صغير — بيظهر بس لو مش مثبّت بعد ولسه ما اتقفلش قبل كده، مش حاجز ولا بيمنع حاجة -->
             <div id="install-notice" class="hidden bg-slate-950/60 border border-slate-800 rounded-3xl p-4 mb-3">
                 <div class="flex items-start gap-3">
@@ -2052,6 +2063,12 @@
 
             <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3">
                 <div class="flex items-center justify-between"><div><p class="text-xs font-bold text-slate-200">الخصوصية والتحكم</p><p class="text-[11px] text-slate-500">بياناتك تحت سيطرتك في أي وقت</p></div><span class="text-lg">🔐</span></div>
+                <div class="rounded-2xl border border-emerald-500/15 bg-emerald-500/5 p-3 space-y-2">
+                    <div class="flex items-center justify-between"><div><p class="text-[11px] font-black text-emerald-300">قفل دبّر على الجهاز</p><p id="local-security-status" class="text-[10px] text-slate-400">اختار بصمة الجهاز أو نمطًا محليًا قبل فتح بياناتك</p></div><span class="text-lg">🛡️</span></div>
+                    <div class="grid grid-cols-2 gap-2"><button id="security-biometric-btn" type="button" class="rounded-xl bg-emerald-500 py-2.5 text-[10px] font-black text-slate-950">تفعيل البصمة / Face ID</button><button id="security-pattern-btn" type="button" class="rounded-xl border border-emerald-500/30 py-2.5 text-[10px] font-black text-emerald-300">إنشاء نمط</button></div>
+                    <button id="security-disable-btn" type="button" class="hidden w-full rounded-xl border border-rose-500/20 py-2 text-[10px] font-bold text-rose-300">إيقاف القفل المحلي</button>
+                    <p class="text-[9px] leading-relaxed text-slate-500">القفل محفوظ على هذا الجهاز فقط. لا نرسل بصمتك أو وجهك أو النمط للسيرفر.</p>
+                </div>
                 <div class="grid grid-cols-2 gap-2"><button id="account-export-data" type="button" class="rounded-xl bg-slate-800 py-2.5 text-[11px] font-bold text-slate-200">تصدير بياناتي</button><button id="account-clear-local" type="button" class="rounded-xl border border-slate-700 py-2.5 text-[11px] font-bold text-slate-400">مسح إعدادات الجهاز</button></div>
                 <p class="text-[10px] leading-relaxed text-slate-500">تسجيلات الصوت المؤقتة لا تُرسل للتحليل إلا بعد ضغط «ابعت للتحليل». يمكنك حذف إعدادات الخطة المحفوظة على هذا الجهاز.</p>
             </div>
@@ -2299,7 +2316,10 @@
         const CATEGORY_EMOJI = { 'أكل':'🍔', 'مواصلات':'🚕', 'فواتير':'🧾', 'تسوق':'🛍️', 'ترفيه':'🎬', 'صحة':'💊', 'تعليم':'📚', 'منزل وأثاث':'🏠', 'ملابس':'👕', 'اشتراكات':'🔁', 'هدايا وتبرعات':'🎁', 'شخصي وعناية':'🧴' };
         const MONTH_NAMES = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
         const CATEGORY_BAR_COLOR = { 'أكل':'bg-rose-400', 'مواصلات':'bg-teal-400', 'فواتير':'bg-amber-400', 'تسوق':'bg-violet-400', 'ترفيه':'bg-pink-400', 'صحة':'bg-emerald-400', 'تعليم':'bg-blue-400', 'منزل وأثاث':'bg-orange-400', 'ملابس':'bg-fuchsia-400', 'اشتراكات':'bg-indigo-400', 'هدايا وتبرعات':'bg-amber-500', 'شخصي وعناية':'bg-cyan-400' };
-        const fmt = (n) => `${Number(n).toLocaleString('ar-EG')} ج.م`;
+        const CURRENCY_LABELS = { EGP: 'ج.م', USD: 'دولار', EUR: 'يورو', GBP: 'جنيه إسترليني', SAR: 'ريال سعودي', AED: 'درهم', KWD: 'دينار كويتي', QAR: 'ريال قطري' };
+        const currencyCode = (code) => String(code || 'EGP').toUpperCase();
+        const fmt = (n, code = 'EGP') => `${Number(n).toLocaleString('ar-EG')} ${CURRENCY_LABELS[currencyCode(code)] || currencyCode(code)}`;
+        const typeLabel = (type) => ({ expense: 'مصروف', income: 'دخل', purchase: 'شراء', asset: 'أصل', transfer: 'تحويل', refund: 'استرداد', debt: 'دين', invoice: 'فاتورة' }[type] || 'عملية مالية');
 
         // ============ الوضع الفاتح/الغامق — بيتخزن في localStorage على جهاز المستخدم ============
         const THEME_KEY = 'dabbar-theme';
@@ -2376,6 +2396,45 @@
             if (!el) return;
             el.textContent = message;
             el.className = `text-[11px] leading-relaxed ${tone === 'success' ? 'text-emerald-400' : tone === 'error' ? 'text-rose-400' : 'text-slate-500'}`;
+        }
+
+        function inAppNotificationsKey() { return `dabbar-in-app-notifications-${currentUser?.id || 'guest'}`; }
+        function renderInAppNotifications(data = {}) {
+            const list = document.getElementById('in-app-notifications-list');
+            const subtitle = document.getElementById('in-app-notifications-subtitle');
+            if (!list) return;
+            const month = data.month || {};
+            const settings = window.__financialSettings || {};
+            const notifications = [];
+            const budget = Number(settings.monthlyBudget || 0);
+            const total = Number(month.total || 0);
+            if (budget > 0 && total >= budget * 0.8) notifications.push({ id: `budget-${new Date().toISOString().slice(0, 7)}`, icon: '⚠️', title: 'تنبيه الميزانية', body: `صرفك وصل لـ ${fmt(total)} من ${fmt(budget)} جنيه (${Math.round(total / budget * 100)}%).`, tone: 'amber' });
+            const latestEvent = (month.financialEvents || [])[0];
+            if (latestEvent) notifications.push({ id: `event-${latestEvent.id || latestEvent.created_at}`, icon: '✅', title: 'آخر عملية مسجلة', body: `${typeLabel(latestEvent.event_type)} · ${fmt(latestEvent.amount, latestEvent.currency_code)}`, tone: 'emerald' });
+            let read = {};
+            try { read = JSON.parse(localStorage.getItem(inAppNotificationsKey()) || '{}'); } catch {}
+            if (!notifications.length) {
+                list.innerHTML = '<p class="rounded-2xl border border-slate-800 bg-slate-900/30 p-3 text-[11px] text-slate-500">مفيش تنبيهات جديدة دلوقتي. هنظهرها هنا حتى لو Chrome حاجب الإشعارات الخارجية.</p>';
+                if (subtitle) subtitle.textContent = 'المركز ده شغال داخل التطبيق، ومش بيعتمد على سماح Chrome.';
+                return;
+            }
+            const unread = notifications.filter((item) => !read[item.id]).length;
+            if (subtitle) subtitle.textContent = unread ? `${unread} تنبيه غير مقروء داخل التطبيق.` : 'كل التنبيهات الحالية اتقرت.';
+            list.innerHTML = notifications.map((item) => `<article class="flex items-start gap-3 rounded-2xl border ${read[item.id] ? 'border-slate-800 bg-slate-900/20 opacity-70' : 'border-emerald-500/20 bg-emerald-500/5'} p-3"><span class="text-base">${item.icon}</span><div class="min-w-0"><p class="text-[11px] font-bold text-slate-200">${item.title}</p><p class="mt-1 text-[10px] leading-relaxed text-slate-400">${item.body}</p></div></article>`).join('');
+        }
+
+        function markInAppNotificationsRead() {
+            const list = document.getElementById('in-app-notifications-list');
+            if (!list) return;
+            const current = list.querySelectorAll('article').length;
+            if (!current) return;
+            const notifications = {};
+            try { const existing = JSON.parse(localStorage.getItem(inAppNotificationsKey()) || '{}'); Object.assign(notifications, existing); } catch {}
+            (window.__dashboardData?.month?.financialEvents || []).slice(0, 1).forEach((event) => { notifications[`event-${event.id || event.created_at}`] = true; });
+            const budget = Number(window.__financialSettings?.monthlyBudget || 0);
+            if (budget > 0) notifications[`budget-${new Date().toISOString().slice(0, 7)}`] = true;
+            localStorage.setItem(inAppNotificationsKey(), JSON.stringify(notifications));
+            renderInAppNotifications(window.__dashboardData || {});
         }
 
         function urlBase64ToUint8Array(base64String) {
@@ -2524,6 +2583,87 @@
             }
         }
 
+        // ============ أمان محلي للجهاز: WebAuthn أو نمط 3×3 — لا يتم إرسال أي سر للسيرفر ============
+        const LOCAL_SECURITY_PREFIX = 'dabbar-local-security-';
+        let localSecurityOverlay;
+        function localSecurityKey() { return `${LOCAL_SECURITY_PREFIX}${currentUser?.id || 'guest'}`; }
+        function localSecurityConfig() { try { return JSON.parse(localStorage.getItem(localSecurityKey()) || '{}'); } catch { return {}; } }
+        function saveLocalSecurity(config) { localStorage.setItem(localSecurityKey(), JSON.stringify(config)); updateLocalSecurityUI(); }
+        function updateLocalSecurityUI() {
+            const config = localSecurityConfig();
+            const status = document.getElementById('local-security-status');
+            const disable = document.getElementById('security-disable-btn');
+            if (!status) return;
+            const methods = [config.biometricId ? 'بصمة الجهاز / Face ID' : '', config.patternHash ? 'نمط محلي' : ''].filter(Boolean);
+            status.textContent = methods.length ? `مفعّل: ${methods.join(' + ')}` : 'اختار بصمة الجهاز أو نمطًا محليًا قبل فتح بياناتك';
+            disable?.classList.toggle('hidden', !methods.length);
+        }
+        function ensureLocalSecurityOverlay() {
+            if (localSecurityOverlay) return localSecurityOverlay;
+            localSecurityOverlay = document.createElement('div');
+            localSecurityOverlay.id = 'local-security-overlay';
+            localSecurityOverlay.className = 'hidden fixed inset-0 z-[100] items-center justify-center bg-slate-950/95 px-5 backdrop-blur-xl';
+            localSecurityOverlay.innerHTML = '<div id="local-security-card" class="w-full max-w-sm rounded-3xl border border-emerald-500/20 bg-slate-900 p-6 text-center shadow-2xl"><div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-500/10 text-2xl">🔒</div><h2 class="text-lg font-black text-slate-100">دبّر مقفول</h2><p id="local-security-message" class="mt-2 text-xs leading-relaxed text-slate-400">افتح القفل المحلي للوصول لبياناتك المالية.</p><div id="local-security-actions" class="mt-5 grid gap-2"></div><p id="local-security-error" class="mt-3 hidden text-[11px] font-bold text-rose-300"></p></div>';
+            document.body.appendChild(localSecurityOverlay);
+            return localSecurityOverlay;
+        }
+        function showLocalSecurityOverlay(message = 'افتح القفل المحلي للوصول لبياناتك المالية.') {
+            const overlay = ensureLocalSecurityOverlay();
+            overlay.querySelector('#local-security-message').textContent = message;
+            overlay.querySelector('#local-security-error').classList.add('hidden');
+            overlay.classList.remove('hidden'); overlay.classList.add('flex');
+            return overlay;
+        }
+        function hideLocalSecurityOverlay() { localSecurityOverlay?.classList.add('hidden'); localSecurityOverlay?.classList.remove('flex'); }
+        function setLocalSecurityError(message) { const el = ensureLocalSecurityOverlay().querySelector('#local-security-error'); el.textContent = message; el.classList.remove('hidden'); }
+        function bytesToBase64url(bytes) { let binary = ''; bytes.forEach((b) => { binary += String.fromCharCode(b); }); return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
+        async function localSecurityHash(value) { const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value)); return bytesToBase64url(new Uint8Array(digest)); }
+        function patternDialog(existing = false) {
+            return new Promise((resolve) => {
+                const overlay = showLocalSecurityOverlay(existing ? 'ارسم النمط لفتح دبّر.' : 'اختار نمطًا من 4 نقاط على الأقل.');
+                const actions = overlay.querySelector('#local-security-actions');
+                actions.innerHTML = '<div id="pattern-dots" class="mb-3 min-h-5 text-sm font-black tracking-[0.35em] text-emerald-300"></div><div class="mx-auto grid w-48 grid-cols-3 gap-3">' + Array.from({ length: 9 }, (_, i) => `<button type="button" data-pattern-dot="${i + 1}" class="aspect-square rounded-2xl border border-slate-700 bg-slate-800 text-lg font-black text-slate-200 transition active:scale-95 hover:border-emerald-400">${i + 1}</button>`).join('') + '</div><button type="button" id="pattern-clear" class="mt-4 text-[11px] font-bold text-slate-400">مسح الاختيار</button>';
+                const selected = [];
+                const render = () => { overlay.querySelector('#pattern-dots').textContent = selected.map((n) => '●').join(' '); };
+                actions.querySelectorAll('[data-pattern-dot]').forEach((button) => button.addEventListener('click', () => { const n = Number(button.dataset.patternDot); if (!selected.includes(n)) selected.push(n); render(); if (selected.length >= 4) { overlay.querySelector('#pattern-clear').textContent = 'تأكيد النمط'; } }));
+                overlay.querySelector('#pattern-clear').addEventListener('click', async () => { if (selected.length >= 4) { hideLocalSecurityOverlay(); resolve(selected.join('-')); } else { selected.length = 0; render(); } });
+            });
+        }
+        async function enableLocalPattern() {
+            const first = await patternDialog(false);
+            const second = await patternDialog(false);
+            if (first !== second) { showLocalSecurityOverlay('النمطان غير متطابقين. ارسم النمطين نفسهما.'); setLocalSecurityError('النمطان غير متطابقين. جرّب إنشاء النمط مرة أخرى.'); return; }
+            const config = localSecurityConfig(); config.patternHash = await localSecurityHash(first); saveLocalSecurity(config); quickStatus('اتفعّل النمط المحلي على الجهاز.', 'success');
+        }
+        function arrayBufferFromBase64url(value) { const padded = value.replace(/-/g, '+').replace(/_/g, '/') + '==='.slice((value.length + 3) % 4); const binary = atob(padded); return Uint8Array.from(binary, (c) => c.charCodeAt(0)); }
+        async function enableLocalBiometric() {
+            if (!window.PublicKeyCredential || !navigator.credentials) { quickStatus('الجهاز أو المتصفح لا يدعم البصمة هنا. جرّب النمط المحلي.', 'error'); return; }
+            try {
+                const credential = await navigator.credentials.create({ publicKey: { challenge: crypto.getRandomValues(new Uint8Array(32)), rp: { name: 'Dabbar' }, user: { id: crypto.getRandomValues(new Uint8Array(16)), name: currentUser?.email || 'dabbar-user', displayName: 'Dabbar user' }, pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }], authenticatorSelection: { residentKey: 'preferred', userVerification: 'required' }, timeout: 60000, attestation: 'none' } });
+                if (!credential) throw new Error('no credential');
+                const config = localSecurityConfig(); config.biometricId = bytesToBase64url(new Uint8Array(credential.rawId)); saveLocalSecurity(config); quickStatus('اتفعّلت بصمة الجهاز / Face ID على هذا الجهاز.', 'success');
+            } catch (error) { console.error('local biometric setup failed:', error); quickStatus('مقدرناش نفعّل البصمة. تأكد من قفل الشاشة وجرّب النمط المحلي.', 'error'); }
+        }
+        async function unlockWithBiometric(config) {
+            try { await navigator.credentials.get({ publicKey: { challenge: crypto.getRandomValues(new Uint8Array(32)), allowCredentials: [{ type: 'public-key', id: arrayBufferFromBase64url(config.biometricId) }], userVerification: 'required', timeout: 60000 } }); return true; } catch (error) { console.warn('local biometric unlock cancelled/failed:', error); return false; }
+        }
+        async function unlockLocalSecurity() {
+            const config = localSecurityConfig();
+            const overlay = showLocalSecurityOverlay();
+            const actions = overlay.querySelector('#local-security-actions');
+            actions.innerHTML = '';
+            if (config.biometricId) { const button = document.createElement('button'); button.className = 'w-full rounded-xl bg-emerald-500 py-3 text-xs font-black text-slate-950'; button.textContent = 'فتح بالبصمة / Face ID'; button.onclick = async () => { if (await unlockWithBiometric(config)) hideLocalSecurityOverlay(); else setLocalSecurityError('لم يتم التحقق. جرّب مرة أخرى أو استخدم النمط.'); }; actions.appendChild(button); }
+            if (config.patternHash) { const button = document.createElement('button'); button.className = 'w-full rounded-xl border border-emerald-500/30 py-3 text-xs font-black text-emerald-300'; button.textContent = 'فتح بالنمط'; button.onclick = async () => { const pattern = await patternDialog(true); if (await localSecurityHash(pattern) === config.patternHash) hideLocalSecurityOverlay(); else { showLocalSecurityOverlay(); setLocalSecurityError('النمط غير صحيح.'); unlockLocalSecurity(); } }; actions.appendChild(button); }
+        }
+        async function gateLocalSecurity() { const config = localSecurityConfig(); if (config.biometricId || config.patternHash) { unlockLocalSecurity(); await new Promise((resolve) => { const check = () => localSecurityOverlay?.classList.contains('hidden') ? resolve() : setTimeout(check, 100); check(); }); } }
+        function setupLocalSecurityUI() {
+            document.getElementById('security-biometric-btn')?.addEventListener('click', enableLocalBiometric);
+            document.getElementById('security-pattern-btn')?.addEventListener('click', enableLocalPattern);
+            document.getElementById('security-disable-btn')?.addEventListener('click', () => { if (!confirm('إيقاف القفل المحلي على هذا الجهاز؟')) return; localStorage.removeItem(localSecurityKey()); updateLocalSecurityUI(); quickStatus('اتوقف القفل المحلي.', 'success'); });
+            updateLocalSecurityUI();
+            document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && (localSecurityConfig().biometricId || localSecurityConfig().patternHash)) showLocalSecurityOverlay('رجعت؟ افتح القفل المحلي للوصول لبياناتك المالية.'); });
+        }
+
         function setupPushUI() {
             document.getElementById('push-notifications-toggle')?.addEventListener('click', async () => {
                 const registration = await getPushRegistration();
@@ -2532,10 +2672,12 @@
                 else await enablePushNotifications();
             });
             document.getElementById('push-notifications-save')?.addEventListener('click', savePushPreferencesFromUI);
+            document.getElementById('in-app-notifications-read')?.addEventListener('click', markInAppNotificationsRead);
             document.getElementById('push-notifications-help')?.addEventListener('click', () => pushStatus('من Chrome: ⋮ ← الإعدادات ← إعدادات الموقع ← الإشعارات ← Dabbar ← السماح، ثم ارجع واضغط تفعيل.', 'error'));
         }
 
         setupPushUI();
+        setupLocalSecurityUI();
 
         (async () => {
             try {
@@ -2543,6 +2685,8 @@
                 if (!session) { window.location.href = ONBOARDING_URL; return; }
                 accessToken = session.access_token;
                 currentUser = session.user;
+                setupLocalSecurityUI();
+                await gateLocalSecurity();
                 await refreshPushUI();
                 await loadDashboard(true); // أول تحميل — الربط اختياري والداش تفتح للحساب المستقل عادي
                 await loadPlanningSettings();
@@ -2734,6 +2878,7 @@
             renderActiveDays(data.activeDays);
             renderMonthly(data.month);
             renderPlanning(data);
+            renderInAppNotifications(data);
             renderDaily(data.today, data.flow);
             renderDailyReminder(data.today);
             renderCategories(data.month);
@@ -2796,7 +2941,7 @@
             wrap.innerHTML = `<div class="flex items-center justify-between gap-2"><div><span class="text-[10px] text-emerald-400 font-bold">وضعك المالي</span><h3 class="text-sm font-black text-slate-100">الدخل والميزانية</h3></div><span class="text-lg">🎯</span></div>
                 <div class="grid grid-cols-2 gap-2"><label class="text-[10px] text-slate-400">دخلك الشهري<input id="planning-income" type="number" min="0" inputmode="numeric" placeholder="مثال: 12000" class="mt-1 w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-100 outline-none focus:border-emerald-400"></label><label class="text-[10px] text-slate-400">ميزانيتك الشهرية<input id="planning-budget" type="number" min="0" inputmode="numeric" placeholder="مثال: 9000" class="mt-1 w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-100 outline-none focus:border-emerald-400"></label></div>
                 <div id="planning-summary" class="rounded-2xl bg-emerald-500/10 px-3 py-2 text-[11px] text-emerald-200"></div>
-                <div><div class="mb-1 flex items-center justify-between"><span class="text-[10px] font-bold text-slate-400">حدود أهم الفئات</span><span class="text-[9px] text-slate-600">اختياري</span></div><div id="category-budgets-list" class="space-y-1.5"></div></div>
+                <div><div class="mb-1 flex items-center justify-between"><span class="text-[10px] font-bold text-slate-400">حدود أهم الفئات</span><span class="text-[9px] text-slate-600">اختياري</span></div><div class="rounded-2xl border border-emerald-500/15 bg-emerald-500/5 px-3 py-2.5 text-[10px] leading-relaxed text-slate-400"><p class="font-bold text-emerald-300">إيه فايدة الرقم ده؟</p><p class="mt-1">ده حد تخطيطي للصرف، مش مصروف بيتسجل. دبّر يقارن مصروفاتك الفعلية بيه وينبهك داخل التطبيق عند وصولك لـ <b class="text-amber-300">80%</b> منه، ولو فعلت Push يوصلك التنبيه برّه التطبيق كمان.</p></div><div id="category-budgets-list" class="mt-2 space-y-1.5"></div><div class="mt-2 flex gap-2"><select id="category-budget-select" class="min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-900 px-2.5 py-2 text-[10px] text-slate-300"><option value="">اختار فئة لإضافة حد...</option></select><button id="category-budget-add" type="button" class="rounded-xl border border-emerald-500/25 px-3 py-2 text-[10px] font-bold text-emerald-300">إضافة</button></div><p class="mt-1 text-[9px] text-slate-600">دبّر يقترح الفئات التي تصرف عليها أكثر، وأنت تقدر تضيف أو تعدّل أو تسيب أي فئة بدون حد.</p></div>
                 <div class="flex gap-2"><button id="planning-save" type="button" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950">حفظ خطتي</button><button id="planning-reset" type="button" title="إدارة ومسح خطة الدخل والميزانية" class="rounded-xl border border-slate-700/60 px-3 py-2.5 text-xs text-slate-500">إدارة</button></div>
                 <div class="border-t border-slate-800 pt-3"><div class="flex items-center justify-between"><div><h4 class="text-xs font-bold text-slate-300">التزامات شهرية متوقعة</h4><p class="mt-0.5 text-[9px] text-slate-500">للتخطيط فقط — لا تُضاف للصرف الفعلي إلا عند تسجيلها</p></div><span class="text-[10px] text-slate-500">إيجار / اشتراكات</span></div><div class="mt-2 grid grid-cols-[1fr_5rem_2.5rem] gap-2"><input id="recurring-name" placeholder="إيجار / اشتراك" class="rounded-xl border border-slate-700 bg-slate-900 px-2.5 py-2 text-[10px] text-slate-100 outline-none"><input id="recurring-amount" type="number" min="0" placeholder="المبلغ" class="rounded-xl border border-slate-700 bg-slate-900 px-2.5 py-2 text-[10px] text-slate-100 outline-none"><button id="recurring-add" type="button" class="rounded-xl bg-slate-800 text-lg text-emerald-400">+</button></div><div id="recurring-list" class="mt-2 space-y-1.5"></div></div>`;
             monthly.insertBefore(wrap, quick.nextSibling);
@@ -2814,7 +2959,27 @@
                 quickStatus('اتمسحت خطة الدخل والميزانية بعد التأكيد.', 'success');
             });
             document.getElementById('recurring-add').addEventListener('click', addRecurringExpense);
+            document.getElementById('category-budget-add').addEventListener('click', addCategoryBudget);
         }
+        function addCategoryBudget() {
+            const select = document.getElementById('category-budget-select');
+            const name = select?.value;
+            if (!name) return quickStatus('اختار فئة الأول عشان نضيفلها حد.', 'error');
+            const settings = planningSettings();
+            settings.categoryBudgets = { ...(settings.categoryBudgets || {}), [name]: Number(settings.categoryBudgets?.[name] || 0) };
+            window.__financialSettings = settings;
+            renderPlanning(window.__dashboardData || {});
+            document.getElementById('category-budget-select').value = '';
+        }
+
+        function removeCategoryBudget(name) {
+            const settings = planningSettings();
+            const next = { ...(settings.categoryBudgets || {}) };
+            delete next[name];
+            window.__financialSettings = { ...settings, categoryBudgets: next };
+            renderPlanning(window.__dashboardData || {});
+        }
+
         function renderPlanning(data) {
             ensurePlanningUI();
             const settings = planningSettings();
@@ -2832,8 +2997,15 @@
             const afterExpected = Math.max(0, remaining - recurringTotal);
             if (summary) summary.innerHTML = incomeOrBudget ? `<div class="planning-summary-grid"><div><span>المتاح بعد الصرف الفعلي</span><strong>${fmt(remaining)}</strong></div>${recurringTotal ? `<div><span>بعد الالتزامات المتوقعة</span><strong>${fmt(afterExpected)}</strong></div>` : ''}${income && budget ? `<div><span>استهلاك الميزانية</span><strong>${Math.min(100, Math.round((total / budget) * 100))}%</strong></div>` : ''}</div><p class="planning-summary-note">الأول للصرف الذي سجّلته فعلًا، والثاني بعد حساب الالتزامات التي أضفتها للتخطيط.</p>` : '<p class="planning-empty-note">أدخل دخلك أو حد مصروفاتك عشان دبّر يحسبلك المتاح.</p><p class="planning-summary-note">الالتزامات المتكررة للتخطيط فقط، ولا تُخصم تلقائيًا.</p>';
             const categoryBudgetList = document.getElementById('category-budgets-list');
-            const topCategories = Array.isArray(data?.month?.byCategory) ? data.month.byCategory.slice(0, 3) : [];
-            if (categoryBudgetList) categoryBudgetList.innerHTML = topCategories.length ? topCategories.map((item) => `<label class="flex items-center gap-2 rounded-xl bg-slate-900/60 px-2.5 py-1.5 text-[10px] text-slate-400"><span class="flex-1">${CATEGORY_EMOJI[item.name] || '📌'} ${item.name}</span><input data-category-budget="${item.name}" type="number" min="0" placeholder="حد الفئة" value="${settings.categoryBudgets?.[item.name] || ''}" class="w-20 rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-left text-[10px] text-slate-100 outline-none"></label>`).join('') : '<p class="text-[10px] text-slate-500">سجّل مصاريف عشان نعرضلك حدود الفئات.</p>';
+            const topCategories = Array.isArray(data?.month?.byCategory) ? data.month.byCategory.slice(0, 3).map((item) => item.name) : [];
+            const selectedCategories = [...new Set([...topCategories, ...Object.keys(settings.categoryBudgets || {})])];
+            const categorySelect = document.getElementById('category-budget-select');
+            if (categorySelect) {
+                const available = Object.keys(CATEGORY_EMOJI).filter((name) => !selectedCategories.includes(name));
+                categorySelect.innerHTML = '<option value="">اختار فئة لإضافة حد...</option>' + available.map((name) => `<option value="${name}">${CATEGORY_EMOJI[name] || '📌'} ${name}</option>`).join('');
+            }
+            if (categoryBudgetList) categoryBudgetList.innerHTML = selectedCategories.length ? selectedCategories.map((name) => `<label class="flex items-center gap-2 rounded-xl bg-slate-900/60 px-2.5 py-1.5 text-[10px] text-slate-400"><span class="flex-1">${CATEGORY_EMOJI[name] || '📌'} ${name}</span><input data-category-budget="${name}" type="number" min="0" placeholder="حد الفئة" value="${settings.categoryBudgets?.[name] || ''}" class="w-20 rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-left text-[10px] text-slate-100 outline-none"><button type="button" data-category-budget-remove="${name}" class="text-slate-600 hover:text-rose-400" aria-label="إزالة حد الفئة">×</button></label>`).join('') : '<p class="text-[10px] text-slate-500">مفيش فئات محددة؛ اختار فئة من القائمة لو عايز تتابعها.</p>';
+            categoryBudgetList?.querySelectorAll('[data-category-budget-remove]').forEach((btn) => btn.addEventListener('click', () => removeCategoryBudget(btn.dataset.categoryBudgetRemove)));
             const recurringList = document.getElementById('recurring-list');
             if (recurringList) recurringList.innerHTML = (settings.recurringExpenses || []).length ? settings.recurringExpenses.map((item, i) => `<div class="flex items-center justify-between rounded-xl bg-slate-900/70 px-2.5 py-2 text-[10px]"><span>${item.name}</span><span class="text-emerald-300">${fmt(item.amount)} <button type="button" data-recurring-remove="${i}" aria-label="حذف الالتزام" class="mr-1 text-slate-600 hover:text-rose-400 transition">✕</button></span></div>`).join('') : '<p class="text-[10px] text-slate-500">أضف الإيجار أو الاشتراكات عشان تشوف التزاماتك الشهرية قدامك.</p>';
             recurringList?.querySelectorAll('[data-recurring-remove]').forEach((btn) => btn.addEventListener('click', () => {
@@ -2844,7 +3016,10 @@
             }));
             const list = document.getElementById('expense-ledger-list');
             const items = data?.today?.items || [];
-            if (list) list.innerHTML = items.length ? items.slice(0, 5).map((item) => `<div class="flex items-center gap-2 border-b border-slate-800/50 py-2 last:border-0"><span class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10">${CATEGORY_EMOJI[item.category] || '📌'}</span><div class="min-w-0 flex-1"><p class="truncate text-[11px] font-bold text-slate-200">${(item.description || item.category || 'مصروف').replace(/[<>]/g, '')}</p><p class="text-[9px] text-slate-500">${item.category || 'أخرى'}</p></div><span class="text-[11px] font-bold text-rose-400">-${fmt(item.amount)}</span><button type="button" data-expense-edit="${item.id}" data-expense-amount="${item.amount}" data-expense-description="${(item.description || '').replace(/"/g, '&quot;')}" class="text-[11px] text-slate-500 hover:text-emerald-400" aria-label="تعديل العملية">✎</button><button type="button" data-expense-delete="${item.id}" class="text-[11px] text-slate-500 hover:text-rose-400" aria-label="حذف العملية">✕</button></div>`).join('') : '<p class="py-2 text-[10px] text-slate-500">سجّل أول مصروف عشان يظهر هنا للمراجعة.</p>';
+            const events = (data?.month?.financialEvents || []).filter((event) => new Date(event.created_at).toDateString() === new Date().toDateString());
+            const expenseRows = items.slice(0, 5).map((item) => `<div class="flex items-center gap-2 border-b border-slate-800/50 py-2 last:border-0"><span class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10">${CATEGORY_EMOJI[item.category] || '📌'}</span><div class="min-w-0 flex-1"><p class="truncate text-[11px] font-bold text-slate-200">${(item.description || item.category || 'مصروف').replace(/[<>]/g, '')}</p><p class="text-[9px] text-slate-500">مصروف · ${item.category || 'عام'}</p></div><span class="text-[11px] font-bold text-rose-400">-${fmt(item.amount, item.currency_code)}</span><button type="button" data-expense-edit="${item.id}" data-expense-amount="${item.amount}" data-expense-description="${(item.description || '').replace(/"/g, '&quot;')}" class="text-[11px] text-slate-500 hover:text-emerald-400" aria-label="تعديل العملية">✎</button><button type="button" data-expense-delete="${item.id}" class="text-[11px] text-slate-500 hover:text-rose-400" aria-label="حذف العملية">✕</button></div>`).join('');
+            const eventRows = events.slice(0, 5).map((event) => { const inflow = event.direction === 'inflow' || event.event_type === 'income'; const icon = event.event_type === 'income' ? '💰' : event.event_type === 'asset' ? '📦' : event.event_type === 'transfer' ? '↔️' : '🧾'; return `<div class="flex items-center gap-2 border-b border-slate-800/50 py-2 last:border-0"><span class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10">${icon}</span><div class="min-w-0 flex-1"><p class="truncate text-[11px] font-bold text-slate-200">${(event.description || event.category || typeLabel(event.event_type)).replace(/[<>]/g, '')}</p><p class="text-[9px] text-slate-500">${typeLabel(event.event_type)}${event.category ? ` · ${event.category}` : ''}</p></div><span class="text-[11px] font-bold ${inflow ? 'text-emerald-400' : 'text-amber-300'}">${inflow ? '+' : '-'}${fmt(event.amount, event.currency_code)}</span></div>`; }).join('');
+            if (list) list.innerHTML = expenseRows + eventRows || '<p class="py-2 text-[10px] text-slate-500">سجّل أول عملية عشان تظهر هنا للمراجعة.</p>';
             list?.querySelectorAll('[data-expense-edit]').forEach((btn) => btn.addEventListener('click', () => editExpense(btn.dataset.expenseEdit, btn.dataset.expenseAmount, btn.dataset.expenseDescription)));
             list?.querySelectorAll('[data-expense-delete]').forEach((btn) => btn.addEventListener('click', () => deleteExpense(btn.dataset.expenseDelete)));
         }
@@ -2855,11 +3030,13 @@
             try { const res = await fetch(`/api/financial-actions?id=${encodeURIComponent(id)}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({ amount, description }) }); if (!res.ok) throw new Error(); await loadDashboard(); quickStatus('اتعدلت العملية.', 'success'); } catch { quickStatus('معرفناش نعدّل العملية دلوقتي.', 'error'); }
         }
         async function loadPlanningSettings() {
+
             let settings = null;
             try { const res = await fetch('/api/financial-actions', { headers: { Authorization: `Bearer ${accessToken}` }, cache: 'no-store' }); if (res.ok) settings = (await res.json()).settings; } catch {}
             if (!settings) { try { settings = JSON.parse(localStorage.getItem(planningSettingsKey()) || 'null'); } catch {} }
             window.__financialSettings = settings || defaultPlanningSettings();
             renderPlanning(window.__dashboardData || {});
+            renderInAppNotifications(window.__dashboardData || {});
         }
         async function savePlanningSettings() {
             const current = planningSettings();
@@ -2869,7 +3046,7 @@
             window.__financialSettings = settings;
             localStorage.setItem(planningSettingsKey(), JSON.stringify(settings));
             try { const res = await fetch('/api/financial-actions', { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` }, body: JSON.stringify(settings) }); if (res.ok) window.__financialSettings = (await res.json()).settings; } catch {}
-            renderPlanning(window.__dashboardData || {}); quickStatus('اتحفظت خطتك المالية.', 'success');
+            renderPlanning(window.__dashboardData || {}); renderInAppNotifications(window.__dashboardData || {}); quickStatus('اتحفظت خطتك المالية.', 'success');
         }
         function addRecurringExpense() { const name = document.getElementById('recurring-name')?.value.trim(); const amount = Number(document.getElementById('recurring-amount')?.value || 0); if (!name || amount <= 0) return quickStatus('اكتب اسم ومبلغ المصروف المتكرر.', 'error'); const settings = planningSettings(); settings.recurringExpenses = [...(settings.recurringExpenses || []), { id: crypto.randomUUID(), name, amount, day: 1, category: 'أخرى', active: true }]; document.getElementById('recurring-name').value = ''; document.getElementById('recurring-amount').value = ''; savePlanningSettings(); }
         async function deleteExpense(id) { if (!id || !confirm('تحذف العملية دي؟')) return; try { const res = await fetch(`/api/financial-actions?id=${encodeURIComponent(id)}`, { method: 'DELETE', headers: { Authorization: `Bearer ${accessToken}` } }); if (!res.ok) throw new Error(); await loadDashboard(); quickStatus('اتحذفت العملية.', 'success'); } catch { quickStatus('معرفناش نحذف العملية دلوقتي.', 'error'); } }
@@ -3431,7 +3608,7 @@
             quickShow('quick-entry-voice-preview', false);
             quickStatus('');
         }
-        function quickDraftLabel(type) { return type === 'invoice' ? 'فاتورة' : type === 'debt' ? 'دين' : 'مصروف'; }
+        function quickDraftLabel(type) { return typeLabel(type); }
         // ============ زي رسالة تليجرام بالظبط لما رسالة واحدة فيها أكتر من معاملة — كل معاملة بتتعرض لوحدها هنا ============
         function quickDraft(drafts, transcript) {
             quickEntryDrafts = Array.isArray(drafts) ? drafts : [drafts];
@@ -3445,7 +3622,7 @@
                 // ============ عنوان كل كارت: التفصيلة الحقيقية (note) لو موجودة، وإلا الفئة/الشخص بدل ما نكرر النص الكامل الأصلي في كل كارت ============
                 list.innerHTML = quickEntryDrafts.map((draft) => {
                     const isDebt = draft.type === 'debt';
-                    const emoji = isDebt ? (draft.direction === 'lent' ? '📤' : '📥') : (CATEGORY_EMOJI[draft.category] || '📌');
+                    const emoji = isDebt ? (draft.direction === 'lent' ? '📤' : '📥') : (draft.type === 'income' ? '💰' : draft.type === 'asset' ? '📦' : (CATEGORY_EMOJI[draft.category] || '📌'));
                     const title = (draft.note && draft.note.trim()) || (isDebt ? draft.person : draft.category) || quickDraftLabel(draft.type);
                     const metaBits = [];
                     if (isDebt) {
@@ -3454,6 +3631,8 @@
                     } else if (draft.category) {
                         metaBits.push(draft.category);
                     }
+                    metaBits.unshift(typeLabel(draft.type));
+                    if (draft.currency_code && currencyCode(draft.currency_code) !== 'EGP') metaBits.push(currencyCode(draft.currency_code));
                     const meta = metaBits.filter(Boolean).join(' · ');
                     return `
                         <div class="flex items-center gap-2.5 rounded-xl bg-emerald-50 dark:bg-slate-800 px-3 py-2.5">
@@ -3462,7 +3641,7 @@
                                 <p class="truncate text-sm font-bold text-slate-800 dark:text-slate-100">${title}</p>
                                 ${meta ? `<p class="mt-0.5 truncate text-[11px] text-slate-500 dark:text-slate-400">${meta}</p>` : ''}
                             </div>
-                            <span class="shrink-0 text-sm font-black text-emerald-600 dark:text-emerald-300">${fmt(draft.amount)}</span>
+                            <span class="shrink-0 text-sm font-black text-emerald-600 dark:text-emerald-300">${fmt(draft.amount, draft.currency_code)}</span>
                         </div>`;
                 }).join('');
             }

@@ -42,9 +42,10 @@ export default async function handler(req, res) {
       const id = Number(req.query?.id || req.body?.id);
       if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'معرف العملية غير صحيح.' });
       if (req.method === 'DELETE') {
-        const { error } = await supabase.from('expenses').delete().eq('id', id).eq('telegram_user_id', userId);
+        const { data: deleted, error } = await supabase.from('expenses').delete().eq('id', id).eq('telegram_user_id', userId).select('id').maybeSingle();
         if (error) throw error;
-        return res.status(200).json({ ok: true });
+        if (!deleted) return res.status(404).json({ error: 'العملية غير موجودة أو تم حذفها بالفعل.' });
+        return res.status(200).json({ ok: true, deletedId: deleted.id });
       }
       const body = req.body || {};
       const patch = {};

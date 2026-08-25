@@ -732,6 +732,49 @@
             gap: .7rem;
         }
 
+        .account-notification-badge {
+            position: absolute;
+            top: -0.15rem;
+            inset-inline-start: -0.15rem;
+            min-width: 1.05rem;
+            height: 1.05rem;
+            padding: 0 .22rem;
+            display: none;
+            place-items: center;
+            border-radius: 999px;
+            background: var(--pm-gold-bright, #f5c451);
+            color: #201606;
+            border: 2px solid var(--pm-surface, #101615);
+            font-size: .58rem;
+            line-height: 1;
+            font-weight: 900;
+            box-shadow: 0 3px 10px rgba(245,196,81,.35);
+            z-index: 2;
+        }
+        html[data-theme="light"] .account-notification-badge {
+            border-color: #fffefa;
+            color: #173c2d;
+        }
+
+        .notification-empty {
+            background: rgba(16,185,129,.08);
+            border-color: rgba(16,185,129,.22);
+            color: var(--db-muted);
+        }
+        .notification-empty strong {
+            color: var(--db-ink);
+            display: inline-block;
+            margin-bottom: .2rem;
+        }
+        html[data-theme="light"] .notification-empty {
+            background: #f0faf5;
+            border-color: #cfe9dc;
+            color: #557066;
+        }
+        html[data-theme="light"] .notification-empty strong {
+            color: #173c2d;
+        }
+
         .tip-card {
             display: flex;
             align-items: flex-start;
@@ -1947,7 +1990,7 @@
                 <div class="flex items-center justify-between gap-3">
                     <div class="flex items-center gap-3 min-w-0">
                         <span class="w-9 h-9 shrink-0 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-base">📣</span>
-                        <div class="min-w-0"><p class="text-xs font-bold text-slate-200">مركز الإشعارات داخل دبّر</p><p id="in-app-notifications-subtitle" class="text-[11px] text-slate-500">هتلاقي تنبيهات الميزانية والنشاط هنا حتى لو Chrome حاجب Push.</p></div>
+                        <div class="min-w-0"><p class="text-xs font-bold text-slate-200">مركز الإشعارات</p><p id="in-app-notifications-subtitle" class="text-[11px] text-slate-500">هنا هتلاقي ملخص خطتك، وتنبيه قرب الحد، واقتراحًا صغيرًا يساعدك تدبّر أحسن.</p></div>
                     </div>
                     <button type="button" id="in-app-notifications-read" class="shrink-0 text-[10px] text-emerald-400 hover:text-emerald-300">تحديد الكل كمقروء</button>
                 </div>
@@ -2107,8 +2150,9 @@
                 <span class="tab-icon-wrap w-9 h-9 rounded-xl border border-transparent flex items-center justify-center text-base">✨</span>
                 مساعد
             </button>
-            <button class="tab-btn flex flex-col items-center gap-1 px-3 py-1 text-slate-500 text-[10px] font-semibold" data-tab="account" data-title="حسابي" data-sub="● بياناتك وإعداداتك" data-icon="👤" data-badge="حسابي">
+            <button class="tab-btn relative flex flex-col items-center gap-1 px-3 py-1 text-slate-500 text-[10px] font-semibold" data-tab="account" data-title="حسابي" data-sub="● بياناتك وإعداداتك" data-icon="👤" data-badge="حسابي">
                 <span class="tab-icon-wrap w-9 h-9 rounded-xl border border-transparent flex items-center justify-center text-base overflow-hidden" id="nav-avatar-wrap">👤</span>
+                <span id="account-notification-badge" class="account-notification-badge" aria-label="رسائل جديدة"></span>
                 حسابي
             </button>
         </div>
@@ -2314,6 +2358,30 @@
         const ONBOARDING_URL = 'dabbar-onboarding.html';
 
         const CATEGORY_EMOJI = { 'أكل':'🍔', 'مواصلات':'🚕', 'فواتير':'🧾', 'تسوق':'🛍️', 'ترفيه':'🎬', 'صحة':'💊', 'تعليم':'📚', 'منزل وأثاث':'🏠', 'ملابس':'👕', 'اشتراكات':'🔁', 'هدايا وتبرعات':'🎁', 'شخصي وعناية':'🧴' };
+        const CATEGORY_EMOJI_RULES = [
+            [/سفر|طيران|طيارة|رحلة|سياحة|مطار/, '✈️'],
+            [/قهوة|كافيه|مشروب|عصير/, '☕'],
+            [/حيوان|حيوانات|قطط|كلاب|بيطري/, '🐾'],
+            [/أكل|اكل|طعام|غذاء|مطعم|فطار|غداء|عشاء|وجبة/, '🍔'],
+            [/مواصلات|تاكسي|أوبر|اوبر|بنزين|مترو|موتوسيكل|عربية/, '🚕'],
+            [/فاتورة|فواتير|كهرباء|مياه|غاز|إنترنت|انترنت|موبايل|اتصال/, '🧾'],
+            [/تسوق|تسويق|بقالة|سوبرماركت|ماركت|شراء/, '🛍️'],
+            [/ترفيه|سينما|فيلم|ألعاب|العاب|خروجة|خروجات/, '🎬'],
+            [/صحة|دواء|أدوية|صيدلية|دكتور|كشف|جيم|رياضة|رياضه/, '💊'],
+            [/تعليم|دراسة|دراسه|كورس|مدرسة|مدرسه|جامعة|جامعه|كتب/, '📚'],
+            [/منزل|بيت|أثاث|اثاث|صيانة|صيانه|تنظيف/, '🏠'],
+            [/ملابس|لبس|جزمة|حذاء|إكسسوارات|اكسسوارات/, '👕'],
+            [/اشتراك|اشتراكات|عضوية|عضويه/, '🔁'],
+            [/هدية|هديه|هدايا|تبرع|تبرعات|صدقة|صدقه/, '🎁'],
+            [/شخصي|عناية|عنايه|تجميل|حلاقة|حلاقه/, '🧴'],
+            [/عمل|شغل|مشروع|بيزنس|أدوات|ادوات/, '💼']
+        ];
+        function getCategoryEmoji(name) {
+            const label = String(name || '').trim();
+            if (CATEGORY_EMOJI[label]) return CATEGORY_EMOJI[label];
+            const match = CATEGORY_EMOJI_RULES.find(([pattern]) => pattern.test(label));
+            return match ? match[1] : '🧩';
+        }
         const MONTH_NAMES = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
         const CATEGORY_BAR_COLOR = { 'أكل':'bg-rose-400', 'مواصلات':'bg-teal-400', 'فواتير':'bg-amber-400', 'تسوق':'bg-violet-400', 'ترفيه':'bg-pink-400', 'صحة':'bg-emerald-400', 'تعليم':'bg-blue-400', 'منزل وأثاث':'bg-orange-400', 'ملابس':'bg-fuchsia-400', 'اشتراكات':'bg-indigo-400', 'هدايا وتبرعات':'bg-amber-500', 'شخصي وعناية':'bg-cyan-400' };
         const CURRENCY_LABELS = { EGP: 'ج.م', USD: 'دولار', EUR: 'يورو', GBP: 'جنيه إسترليني', SAR: 'ريال سعودي', AED: 'درهم', KWD: 'دينار كويتي', QAR: 'ريال قطري' };
@@ -2399,6 +2467,13 @@
         }
 
         function inAppNotificationsKey() { return `dabbar-in-app-notifications-${currentUser?.id || 'guest'}`; }
+        function updateAccountNotificationBadge(count) {
+            const badge = document.getElementById('account-notification-badge');
+            if (!badge) return;
+            const unread = Math.max(0, Number(count) || 0);
+            badge.textContent = unread > 9 ? '9+' : String(unread);
+            badge.style.display = unread ? 'grid' : 'none';
+        }
         function renderInAppNotifications(data = {}) {
             const list = document.getElementById('in-app-notifications-list');
             const subtitle = document.getElementById('in-app-notifications-subtitle');
@@ -2414,12 +2489,14 @@
             let read = {};
             try { read = JSON.parse(localStorage.getItem(inAppNotificationsKey()) || '{}'); } catch {}
             if (!notifications.length) {
-                list.innerHTML = '<p class="rounded-2xl border border-slate-800 bg-slate-900/30 p-3 text-[11px] text-slate-500">كل شيء هادئ دلوقتي. كمّل متابعتك، وهتلاقي هنا اقتراحات مفيدة وقت ما تحتاجها.</p>';
-                if (subtitle) subtitle.textContent = 'المركز ده شغال داخل التطبيق، ومش بيعتمد على سماح Chrome.';
+                updateAccountNotificationBadge(0);
+                list.innerHTML = '<div class="notification-empty rounded-2xl border p-3 text-[11px] leading-relaxed"><strong>هنا هتظهر لك الفايدة أول بأول</strong><br>هتلاقي ملخصًا لمتابعتك، وتنبيهًا لطيفًا لما تقترب من حد فئة، واقتراحًا صغيرًا يساعدك تكمل خطتك براحة.</div>';
+                if (subtitle) subtitle.textContent = 'ملخصات واقتراحات بسيطة تساعدك تفضل قريب من خطتك.';
                 return;
             }
             const unread = notifications.filter((item) => !read[item.id]).length;
-            if (subtitle) subtitle.textContent = unread ? `${unread} تنبيه غير مقروء داخل التطبيق.` : 'كل التنبيهات الحالية اتقرت.';
+            updateAccountNotificationBadge(unread);
+            if (subtitle) subtitle.textContent = unread ? `${unread} رسالة مفيدة مستنياك.` : 'أنت متابع كل الرسائل الحالية.';
             list.innerHTML = notifications.map((item) => `<article class="flex items-start gap-3 rounded-2xl border ${read[item.id] ? 'border-slate-800 bg-slate-900/20 opacity-70' : 'border-emerald-500/20 bg-emerald-500/5'} p-3"><span class="text-base">${item.icon}</span><div class="min-w-0"><p class="text-[11px] font-bold text-slate-200">${item.title}</p><p class="mt-1 text-[10px] leading-relaxed text-slate-400">${item.body}</p></div></article>`).join('');
         }
 
@@ -2999,7 +3076,7 @@
             const categoryBudgetList = document.getElementById('category-budgets-list');
             const topCategories = Array.isArray(data?.month?.byCategory) ? data.month.byCategory.slice(0, 3).map((item) => item.name) : [];
             const selectedCategories = [...new Set([...topCategories, ...Object.keys(settings.categoryBudgets || {})])];
-            if (categoryBudgetList) categoryBudgetList.innerHTML = selectedCategories.length ? selectedCategories.map((name) => `<label class="flex items-center gap-2 rounded-xl bg-slate-900/60 px-2.5 py-1.5 text-[10px] text-slate-400"><span class="flex-1">${CATEGORY_EMOJI[name] || '📌'} ${name}</span><input data-category-budget="${name}" type="number" min="0" placeholder="حد الفئة" value="${settings.categoryBudgets?.[name] || ''}" class="w-20 rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-left text-[10px] text-slate-100 outline-none"><button type="button" data-category-budget-remove="${name}" class="text-slate-600 hover:text-rose-400" aria-label="إزالة حد الفئة">×</button></label>`).join('') : '<p class="text-[10px] text-slate-500">مفيش فئات محددة؛ اختار فئة من القائمة لو عايز تتابعها.</p>';
+            if (categoryBudgetList) categoryBudgetList.innerHTML = selectedCategories.length ? selectedCategories.map((name) => `<label class="flex items-center gap-2 rounded-xl bg-slate-900/60 px-2.5 py-1.5 text-[10px] text-slate-400"><span class="flex-1">${getCategoryEmoji(name)} ${name}</span><input data-category-budget="${name}" type="number" min="0" placeholder="حد الفئة" value="${settings.categoryBudgets?.[name] || ''}" class="w-20 rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-left text-[10px] text-slate-100 outline-none"><button type="button" data-category-budget-remove="${name}" class="text-slate-600 hover:text-rose-400" aria-label="إزالة حد الفئة">×</button></label>`).join('') : '<p class="text-[10px] text-slate-500">مفيش فئات محددة؛ اختار فئة من القائمة لو عايز تتابعها.</p>';
             categoryBudgetList?.querySelectorAll('[data-category-budget-remove]').forEach((btn) => btn.addEventListener('click', () => removeCategoryBudget(btn.dataset.categoryBudgetRemove)));
             const recurringList = document.getElementById('recurring-list');
             if (recurringList) recurringList.innerHTML = (settings.recurringExpenses || []).length ? settings.recurringExpenses.map((item, i) => `<div class="flex items-center justify-between rounded-xl bg-slate-900/70 px-2.5 py-2 text-[10px]"><span>${item.name}</span><span class="text-emerald-300">${fmt(item.amount)} <button type="button" data-recurring-remove="${i}" aria-label="حذف الالتزام" class="mr-1 text-slate-600 hover:text-rose-400 transition">✕</button></span></div>`).join('') : '<p class="text-[10px] text-slate-500">أضف الإيجار أو الاشتراكات عشان تشوف التزاماتك الشهرية قدامك.</p>';
@@ -3012,7 +3089,7 @@
             const list = document.getElementById('expense-ledger-list');
             const items = data?.today?.items || [];
             const events = (data?.month?.financialEvents || []).filter((event) => new Date(event.created_at).toDateString() === new Date().toDateString());
-            const expenseRows = items.slice(0, 5).map((item) => `<div class="flex items-center gap-2 border-b border-slate-800/50 py-2 last:border-0"><span class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10">${CATEGORY_EMOJI[item.category] || '📌'}</span><div class="min-w-0 flex-1"><p class="truncate text-[11px] font-bold text-slate-200">${(item.description || item.category || 'مصروف').replace(/[<>]/g, '')}</p><p class="text-[9px] text-slate-500">مصروف · ${item.category || 'عام'}</p></div><span class="text-[11px] font-bold text-rose-400">-${fmt(item.amount, item.currency_code)}</span><button type="button" data-expense-edit="${item.id}" data-expense-amount="${item.amount}" data-expense-description="${(item.description || '').replace(/"/g, '&quot;')}" class="text-[11px] text-slate-500 hover:text-emerald-400" aria-label="تعديل العملية">✎</button><button type="button" data-expense-delete="${item.id}" class="text-[11px] text-slate-500 hover:text-rose-400" aria-label="حذف العملية">✕</button></div>`).join('');
+            const expenseRows = items.slice(0, 5).map((item) => `<div class="flex items-center gap-2 border-b border-slate-800/50 py-2 last:border-0"><span class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10">${getCategoryEmoji(item.category)}</span><div class="min-w-0 flex-1"><p class="truncate text-[11px] font-bold text-slate-200">${(item.description || item.category || 'مصروف').replace(/[<>]/g, '')}</p><p class="text-[9px] text-slate-500">مصروف · ${item.category || 'عام'}</p></div><span class="text-[11px] font-bold text-rose-400">-${fmt(item.amount, item.currency_code)}</span><button type="button" data-expense-edit="${item.id}" data-expense-amount="${item.amount}" data-expense-description="${(item.description || '').replace(/"/g, '&quot;')}" class="text-[11px] text-slate-500 hover:text-emerald-400" aria-label="تعديل العملية">✎</button><button type="button" data-expense-delete="${item.id}" class="text-[11px] text-slate-500 hover:text-rose-400" aria-label="حذف العملية">✕</button></div>`).join('');
             const eventRows = events.slice(0, 5).map((event) => { const inflow = event.direction === 'inflow' || event.event_type === 'income'; const icon = event.event_type === 'income' ? '💰' : event.event_type === 'asset' ? '📦' : event.event_type === 'transfer' ? '↔️' : '🧾'; return `<div class="flex items-center gap-2 border-b border-slate-800/50 py-2 last:border-0"><span class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10">${icon}</span><div class="min-w-0 flex-1"><p class="truncate text-[11px] font-bold text-slate-200">${(event.description || event.category || typeLabel(event.event_type)).replace(/[<>]/g, '')}</p><p class="text-[9px] text-slate-500">${typeLabel(event.event_type)}${event.category ? ` · ${event.category}` : ''}</p></div><span class="text-[11px] font-bold ${inflow ? 'text-emerald-400' : 'text-amber-300'}">${inflow ? '+' : '-'}${fmt(event.amount, event.currency_code)}</span></div>`; }).join('');
             if (list) list.innerHTML = expenseRows + eventRows || '<p class="py-2 text-[10px] text-slate-500">سجّل أول عملية عشان تظهر هنا للمراجعة.</p>';
             list?.querySelectorAll('[data-expense-edit]').forEach((btn) => btn.addEventListener('click', () => editExpense(btn.dataset.expenseEdit, btn.dataset.expenseAmount, btn.dataset.expenseDescription)));
@@ -3067,7 +3144,7 @@
                 listEl.innerHTML = month.byCategory.slice(0, 3).map((c) => `
                     <div>
                         <div class="flex justify-between mb-1 text-slate-300">
-                            <span>${CATEGORY_EMOJI[c.name] || '📌'} ${c.name}</span>
+                            <span>${getCategoryEmoji(c.name)} ${c.name}</span>
                             <span class="font-bold text-slate-200">${fmt(c.amount)} (${c.percent}%)</span>
                         </div>
                         <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
@@ -3082,7 +3159,7 @@
                 tipCard.style.display = 'flex';
                 document.getElementById('monthly-tip-text').innerHTML =
                     `<strong class="text-emerald-400 block mb-0.5">أكتر فئة صرفت فيها:</strong>` +
-                    `${CATEGORY_EMOJI[month.topCategory.name] || ''} ${month.topCategory.name} — ${fmt(month.topCategory.amount)} (${month.topCategory.percent}% من صرف الشهر)`;
+                    `${getCategoryEmoji(month.topCategory.name)} ${month.topCategory.name} — ${fmt(month.topCategory.amount)} (${month.topCategory.percent}% من صرف الشهر)`;
             } else {
                 tipCard.style.display = 'none';
             }
@@ -3111,7 +3188,7 @@
                 listEl.innerHTML = today.items.map((it, i) => `
                     <div class="flex items-center justify-between py-2 ${i < today.items.length - 1 ? 'border-b border-slate-800/60' : ''}">
                         <div class="flex items-center gap-2.5">
-                            <span class="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-sm">${CATEGORY_EMOJI[it.category] || '📌'}</span>
+                            <span class="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-sm">${getCategoryEmoji(it.category)}</span>
                             <div>
                                 <p class="text-xs font-semibold text-slate-200">${(it.description && it.description.trim()) || it.category}</p>
                                 <p class="text-[10px] text-slate-500">${it.category} · ${new Date(it.created_at).toLocaleTimeString('ar-EG', { hour: 'numeric', minute: '2-digit' })}</p>
@@ -3125,7 +3202,7 @@
 
         function renderCategories(month) {
             if (month.topCategory) {
-                document.getElementById('top-category-name').textContent = `${CATEGORY_EMOJI[month.topCategory.name] || ''} ${month.topCategory.name}`;
+                document.getElementById('top-category-name').textContent = `${getCategoryEmoji(month.topCategory.name)} ${month.topCategory.name}`;
                 document.getElementById('top-category-detail').textContent = `${fmt(month.topCategory.amount)} من إجمالي ${fmt(month.total)}`;
             } else {
                 document.getElementById('top-category-name').textContent = 'لسه مفيش بيانات';
@@ -3139,7 +3216,7 @@
                 listEl.innerHTML = month.byCategory.map((c) => `
                     <div>
                         <div class="flex justify-between mb-1 text-slate-300">
-                            <span>${CATEGORY_EMOJI[c.name] || '📌'} ${c.name}</span>
+                            <span>${getCategoryEmoji(c.name)} ${c.name}</span>
                             <span class="font-bold text-slate-200">${fmt(c.amount)} (${c.percent}%)</span>
                         </div>
                         <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
@@ -3174,7 +3251,7 @@
             const topSaving20 = Math.max(0, Math.round((Number(top.amount) * 0.20) / 10) * 10);
 
             tips.push({
-                icon: CATEGORY_EMOJI[top.name] || '📌',
+                icon: getCategoryEmoji(top.name),
                 color: 'emerald',
                 title: `ابدأ بخطوة لطيفة في ${top.name}`,
                 text: `${top.name} تمثل ${top.percent}% من متابعتك هذا الشهر بإجمالي ${fmt(top.amount)}. لو جرّبت تخفّضها 10% بهدوء، ممكن تسيب لنفسك مساحة حوالي ${fmt(topSaving10)}.`,
@@ -3195,7 +3272,7 @@
                 const second = categories[1];
                 const secondSaving = Math.max(0, Math.round((Number(second.amount) * 0.10) / 10) * 10);
                 tips.push({
-                    icon: CATEGORY_EMOJI[second.name] || '📌',
+                    icon: getCategoryEmoji(second.name),
                     color: 'amber',
                     title: `فرصة إضافية في ${second.name}`,
                     text: `تابعت ${fmt(second.amount)} فيها (${second.percent}%). خطوة بسيطة بتقليل 10% ممكن تديك مساحة إضافية حوالي ${fmt(secondSaving)}.`,
@@ -3299,7 +3376,7 @@
                         detailCount.textContent = `${count} عملية`;
 
                         if (count > 0 && topCat) {
-                            detailCatIcon.textContent = CATEGORY_EMOJI[topCat.name] || '📌';
+                            detailCatIcon.textContent = getCategoryEmoji(topCat.name);
                             detailCat.textContent = `${topCat.name} (${fmt(topCat.amount)})`;
                         } else {
                             detailCatIcon.textContent = '—';
@@ -3446,7 +3523,7 @@
                         </div>
                         <span class="text-lg font-black text-slate-200">${fmt(h.total)}</span>
                     </div>
-                    ${h.topCategoryName ? `<p class="text-[11px] text-slate-400">أكتر فئة صرف: ${CATEGORY_EMOJI[h.topCategoryName] || ''} ${h.topCategoryName}</p>` : ''}
+                    ${h.topCategoryName ? `<p class="text-[11px] text-slate-400">أكتر فئة صرف: ${getCategoryEmoji(h.topCategoryName)} ${h.topCategoryName}</p>` : ''}
                 </div>
             `).join('');
         }
@@ -3617,7 +3694,7 @@
                 // ============ عنوان كل كارت: التفصيلة الحقيقية (note) لو موجودة، وإلا الفئة/الشخص بدل ما نكرر النص الكامل الأصلي في كل كارت ============
                 list.innerHTML = quickEntryDrafts.map((draft) => {
                     const isDebt = draft.type === 'debt';
-                    const emoji = isDebt ? (draft.direction === 'lent' ? '📤' : '📥') : (draft.type === 'income' ? '💰' : draft.type === 'asset' ? '📦' : (CATEGORY_EMOJI[draft.category] || '📌'));
+                    const emoji = isDebt ? (draft.direction === 'lent' ? '📤' : '📥') : (draft.type === 'income' ? '💰' : draft.type === 'asset' ? '📦' : (getCategoryEmoji(draft.category)));
                     const title = (draft.note && draft.note.trim()) || (isDebt ? draft.person : draft.category) || quickDraftLabel(draft.type);
                     const metaBits = [];
                     if (isDebt) {
@@ -3667,7 +3744,7 @@
             try {
                 const base64 = await new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = reject; reader.readAsDataURL(file); });
                 const result = await asstApi('receipt_scan', { imageBase64: base64 });
-                const itemsHtml = (result.items || []).map((it) => `<div class="flex items-center justify-between gap-2 text-sm text-slate-700 dark:text-slate-200"><span>${CATEGORY_EMOJI[it.category] || '📌'} ${it.name}</span><span class="shrink-0 font-bold">${fmt(it.amount)}</span></div>`).join('');
+                const itemsHtml = (result.items || []).map((it) => `<div class="flex items-center justify-between gap-2 text-sm text-slate-700 dark:text-slate-200"><span>${getCategoryEmoji(it.category)} ${it.name}</span><span class="shrink-0 font-bold">${fmt(it.amount)}</span></div>`).join('');
                 const debtHtml = result.isDebt && result.debtPerson ? `<div class="pt-1 text-xs text-amber-600 dark:text-amber-400">📥 اتسجلت كمان كدين عليك لـ ${result.debtPerson}</div>` : '';
                 document.getElementById('quick-entry-draft-title').textContent = `${result.merchant ? `فاتورة ${result.merchant}` : 'الفاتورة'} — اتسجلت (${(result.items || []).length} صنف)`;
                 list.innerHTML = `${itemsHtml}<div class="flex items-center justify-between text-sm font-black pt-1 border-t border-emerald-200 dark:border-slate-700 mt-1 text-slate-800 dark:text-slate-100"><span>الإجمالي</span><span>${fmt(result.totalAmount)}</span></div>${debtHtml}`;
@@ -3895,7 +3972,7 @@
                 const result = await asstApi('receipt_scan', { imageBase64: base64 });
                 resultEl.className = 'text-[11px] rounded-xl p-3 leading-relaxed bg-emerald-500/10 border border-emerald-500/25 text-emerald-300 space-y-1';
                 const itemsHtml = result.items.map(it =>
-                    `<div class="flex items-center justify-between gap-2"><span>${CATEGORY_EMOJI[it.category] || '📌'} ${it.name}</span><span class="shrink-0">${fmt(it.amount)}</span></div>`
+                    `<div class="flex items-center justify-between gap-2"><span>${getCategoryEmoji(it.category)} ${it.name}</span><span class="shrink-0">${fmt(it.amount)}</span></div>`
                 ).join('');
                 const debtHtml = result.isDebt && result.debtPerson
                     ? `<div class="pt-1 text-amber-300">📥 اتسجلت كمان كدين عليك لـ ${result.debtPerson}</div>` : '';
@@ -4112,7 +4189,7 @@
                 emptyNote.classList.add('hidden');
                 document.getElementById('wrapped-year').textContent = w.year;
                 document.getElementById('wrapped-total').textContent = fmt(w.total);
-                document.getElementById('wrapped-top-cat').textContent = w.topCategory ? `${CATEGORY_EMOJI[w.topCategory.name] || ''} ${w.topCategory.name}` : '—';
+                document.getElementById('wrapped-top-cat').textContent = w.topCategory ? `${getCategoryEmoji(w.topCategory.name)} ${w.topCategory.name}` : '—';
                 document.getElementById('wrapped-saved').textContent = w.savedEstimate > 0 ? fmt(w.savedEstimate) : '—';
                 document.getElementById('wrapped-best-month').textContent = w.bestMonthLabel ? `${w.bestMonthLabel} (${fmt(w.bestMonthTotal)})` : '—';
             }

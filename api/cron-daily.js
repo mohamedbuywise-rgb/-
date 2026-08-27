@@ -139,17 +139,12 @@ async function sendPushDailySummary(userId, preferences, now) {
   if (!(await claimPushRun(userId, 'daily-summary', dayKey))) return;
 
   const dateLabel = startOfYesterday.toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long' });
-  const operationLines = expenses.map((expense, index) => {
-    const emoji = CATEGORY_EMOJI[expense.category] || '💸';
-    const label = String(expense.description || expense.category || 'مصروف').trim().slice(0, 60);
-    return `${index + 1}. ${emoji} ${label} — ${formatPushAmount(expense.amount)} جنيه`;
-  });
   const body = expenses.length
-    ? [`${dateLabel}`, `عدد العمليات: ${expenses.length}`, `الإجمالي: ${formatPushAmount(total)} جنيه`, `أكثر فئة: ${topCategory[0]} — ${formatPushAmount(topCategory[1])} جنيه`, '', ...operationLines].join('\n')
+    ? [`${dateLabel}`, `عدد العمليات: ${expenses.length}`, `الإجمالي: ${formatPushAmount(total)} جنيه`, `أكثر فئة: ${topCategory[0]} — ${formatPushAmount(topCategory[1])} جنيه`, '', 'يومك جاهز بشكل حلو — افتح دبّر وشاركه مع صحابك.'].join('\n')
     : `${dateLabel}\nمفيش عمليات مسجلة امبارح. إجمالي الصرف: 0 جنيه.`;
 
   await sendPushToUser(userId, {
-    title: 'دبّر — ملخص نهاية اليوم',
+    title: 'دبّر — يومك جاهز 🎉',
     body,
     tag: 'daily-summary',
     url: './dabbar-dashboard-full.html',
@@ -184,19 +179,23 @@ async function sendPushWeeklySummary(userId, preferences, isFriday, now) {
 // ============ كل التقارير/التذكيرات المطلوبة لمستخدم واحد ============
 async function processUser(user, { isFriday, isLastDayOfMonth, monthKey }) {
   const { telegram_user_id: userId, chat_id: chatId, subscription_expires_at } = user;
-
-  // نتجاهل المستخدمين اللي اشتراكهم مش فعّال — من غير اشتراك، مفيش تقارير ولا تذكيرات تتبعت
   const expiresAt = subscription_expires_at ? new Date(subscription_expires_at) : null;
-  if (!expiresAt || expiresAt.getTime() <= Date.now()) {
-    return { ok: true, skipped: 'not subscribed' };
-  }
+  const isSubscribed = !!expiresAt && expiresAt.getTime() > Date.now();
 
   try {
+    // إشعارات الـ push (تذكير يومي، ملخص يومي/أسبوعي) بتتبعت لكل المستخدمين
+    // (تجربة أو مشتركين) — مش مربوطة باشتراك مدفوع، عشان دي أهم أداة نحافظ بيها
+    // على تفاعل المستخدم الجديد من أول يوم.
     const pushPreferences = await getNotificationPreferences(userId);
     const now = new Date();
     await sendPushDailyReminder(userId, pushPreferences, now).catch((error) => console.error(`Daily push failed for user ${userId}:`, error));
     await sendPushDailySummary(userId, pushPreferences, now).catch((error) => console.error(`Daily summary push failed for user ${userId}:`, error));
     await sendPushWeeklySummary(userId, pushPreferences, isFriday, now).catch((error) => console.error(`Weekly push failed for user ${userId}:`, error));
+
+    // من هنا تحت: تقارير وتذكيرات Telegram — دي مخصوصة للمشتركين فعليًا بس
+    if (!isSubscribed) {
+      return { ok: true, pushOnly: true, skipped: 'not subscribed' };
+    }
 
     // الحساب المستقل يستفيد من كل إشعارات المتصفح، لكن لا نرسل له أي رسالة
     // عبر Telegram لأن chat_id هنا placeholder سالب وليس Chat حقيقيًا.

@@ -15,6 +15,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
     <!-- بنحدد الوضع (فاتح/غامق) بدري قبل ما الصفحة تترسم. الافتراضي دلوقتي "فاتح" -->
     <script>
@@ -1404,6 +1405,25 @@
         }
         html[data-theme="light"] #wrapped-card [class~="border-white/10"] { border-color: #d8d0c3 !important; }
 
+        /* Daily Wrapped النهاري — نفس منطق الـ Wrapped السنوي بالظبط */
+        html[data-theme="light"] #daily-wrapped-card {
+            background: linear-gradient(155deg, #fffdf8 0%, #f8f3e9 58%, #efe7d8 100%) !important;
+            border-color: rgba(154, 116, 40, .32) !important;
+            color: #173127 !important;
+            box-shadow: 0 18px 38px rgba(39, 57, 48, .16) !important;
+        }
+        html[data-theme="light"] #daily-wrapped-card .text-slate-50,
+        html[data-theme="light"] #daily-wrapped-card .text-white { color: #173127 !important; }
+        html[data-theme="light"] #daily-wrapped-card .text-slate-400,
+        html[data-theme="light"] #daily-wrapped-card .text-slate-500 { color: #5e7066 !important; }
+        html[data-theme="light"] #daily-wrapped-card .text-emerald-300 { color: #087b50 !important; }
+        html[data-theme="light"] #daily-wrapped-card [class~="bg-white/5"] {
+            background: rgba(255, 255, 255, .56) !important;
+            border-color: #d8d0c3 !important;
+            box-shadow: 0 6px 16px rgba(39, 57, 48, .06) !important;
+        }
+        html[data-theme="light"] #daily-wrapped-card [class~="border-white/10"] { border-color: #d8d0c3 !important; }
+
         @media (prefers-reduced-motion: reduce) {
             .fade-up, .mascot-float, .active-days-flame, .active-days-flame-wrap::before { animation: none !important; }
         }
@@ -1496,7 +1516,7 @@
                 <div class="text-center space-y-1 pb-3">
                     <span class="text-xs text-emerald-400 font-semibold block" id="monthly-total-label">إجمالي صرفك الشهر ده</span>
                     <h3 class="text-3xl font-black text-emerald-300" id="monthly-total">—</h3>
-                    <p class="text-[11px] text-slate-400" id="monthly-compare">لسه معندناش بيانات كفاية عشان نقارن بالشهر اللي فات.</p>
+                    <p class="text-[11px] text-slate-400" id="monthly-compare">سجّل شوية عمليات كمان وهنقارنلك بالشهر اللي فات.</p>
                 </div>
                 <div class="grid grid-cols-2 divide-x divide-x-reverse divide-emerald-500/20 border-t border-emerald-500/20 pt-3">
                     <div class="text-center">
@@ -1513,7 +1533,7 @@
             <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3" id="monthly-categories-card">
                 <h4 class="text-xs font-bold text-slate-300">أكثر فئات تم الصرف فيها:</h4>
                 <div class="space-y-2.5 text-xs" id="monthly-categories-list">
-                    <p class="text-slate-500">لسه معندكش مصاريف مسجلة الشهر ده.</p>
+                    <p class="text-slate-500">سجّل أول عملية وهتلاقي هنا أكتر فئة بتصرف فيها.</p>
                 </div>
             </div>
 
@@ -1546,8 +1566,17 @@
                     <span class="text-[10px] text-slate-500" id="daily-date"></span>
                 </div>
                 <h3 class="text-xl font-black text-rose-400" id="daily-total">—</h3>
-                <p class="text-[10px] text-slate-400" id="daily-note">لسه معندكش مصاريف مسجلة النهاردة.</p>
+                <p class="text-[10px] text-slate-400" id="daily-note">سجّل أول عملية النهاردة وهتلاقيها هنا.</p>
             </div>
+
+            <button type="button" id="daily-wrapped-open" class="w-full flex items-center justify-between gap-2 bg-gradient-to-l from-emerald-500/15 to-emerald-500/5 border border-emerald-500/30 rounded-2xl p-3.5 text-right">
+                <span class="text-lg">🎉</span>
+                <div class="flex-1 min-w-0">
+                    <p class="text-xs font-bold text-emerald-300">شوف يومك بشكل حلو</p>
+                    <p class="text-[10px] text-slate-400">كارت جاهز تشاركه مع صحابك</p>
+                </div>
+                <span class="text-slate-500 text-xs">‹</span>
+            </button>
 
             <div class="flex items-start gap-2 bg-slate-950/40 border border-slate-800/70 rounded-2xl p-3">
                 <span class="text-sm leading-none mt-0.5">ℹ️</span>
@@ -1609,7 +1638,7 @@
             <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3">
                 <h4 class="text-xs font-bold text-slate-300">عمليات النهاردة:</h4>
                 <div class="space-y-1" id="daily-items-list">
-                    <p class="text-xs text-slate-500">لسه مفيش عمليات النهاردة.</p>
+                    <p class="text-xs text-slate-500">سجّل أول عملية النهاردة وهتظهر هنا.</p>
                 </div>
             </div>
 
@@ -1627,7 +1656,7 @@
             <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-4">
                 <h4 class="text-xs font-bold text-slate-300">كل الفئات بالتفصيل:</h4>
                 <div class="space-y-2.5 text-xs" id="all-categories-list">
-                    <p class="text-slate-500">لسه معندكش مصاريف مسجلة الشهر ده.</p>
+                    <p class="text-slate-500">سجّل أول عملية وهتلاقي هنا أكتر فئة بتصرف فيها.</p>
                 </div>
             </div>
 
@@ -1692,7 +1721,7 @@
             </div>
 
             <div id="tips-list" class="space-y-3">
-                <p class="text-xs text-slate-500 text-center p-4">لسه معندكش بيانات كفاية عشان نديك نصايح مبنية على صرفك الفعلي.</p>
+                <p class="text-xs text-slate-500 text-center p-4">سجّل شوية عمليات كمان وهنبدأ نديك نصايح مبنية على صرفك الفعلي.</p>
             </div>
 
         </div>
@@ -2296,7 +2325,53 @@
             <button id="wrapped-share-btn" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold py-3 rounded-2xl text-sm transition flex items-center justify-center gap-2">
                 <span>📤</span> شارك الكارت
             </button>
-            <p id="wrapped-empty-note" class="hidden text-[11px] text-slate-400 text-center bg-slate-900 border border-slate-800 rounded-xl p-3">لسه معندكش مصاريف كفاية السنة دي عشان نلخصلك Wrapped.</p>
+            <p id="wrapped-empty-note" class="hidden text-[11px] text-slate-400 text-center bg-slate-900 border border-slate-800 rounded-xl p-3">سجّل مصاريفك أول بأول السنة دي وهنجهزلك Wrapped في آخرها.</p>
+        </div>
+    </div>
+
+    <!-- Daily Wrapped — Shareable Card Overlay (نفس فكرة الـ Wrapped السنوي بس ليومك) -->
+    <div id="daily-wrapped-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="max-w-sm w-full flex flex-col gap-3">
+            <div class="flex items-center justify-between px-1">
+                <h2 class="font-bold text-sm text-slate-100">Wrapped يومك</h2>
+                <button id="daily-wrapped-close" class="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-sm">✕</button>
+            </div>
+
+            <!-- الكارت نفسه — ده اللي بيتصور/بيتشارك -->
+            <div id="daily-wrapped-card" class="rounded-[2rem] p-6 text-center space-y-4 shadow-2xl" style="background: linear-gradient(155deg, #022c22 0%, #020617 55%, #020617 100%); border: 1px solid rgba(52,211,153,0.35);">
+                <div class="space-y-1">
+                    <span class="text-[11px] tracking-widest text-emerald-400 font-bold">DABBAR DAILY</span>
+                    <h3 class="text-2xl font-black text-slate-50">يوم <span id="daily-wrapped-date">—</span></h3>
+                </div>
+
+                <div class="space-y-1 py-2">
+                    <span class="text-[11px] text-slate-400 block">صرفت النهاردة</span>
+                    <p class="text-4xl font-black text-emerald-300" id="daily-wrapped-total">—</p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2.5 text-right">
+                    <div class="bg-white/5 border border-white/10 rounded-2xl p-3">
+                        <span class="text-[10px] text-slate-400 block mb-1">أكتر فئة</span>
+                        <span class="text-xs font-bold text-white" id="daily-wrapped-top-cat">—</span>
+                    </div>
+                    <div class="bg-white/5 border border-white/10 rounded-2xl p-3">
+                        <span class="text-[10px] text-slate-400 block mb-1">عدد العمليات</span>
+                        <span class="text-xs font-bold text-emerald-300" id="daily-wrapped-count">—</span>
+                    </div>
+                </div>
+
+                <div class="bg-white/5 border border-white/10 rounded-2xl p-3 text-right space-y-2">
+                    <span class="text-[10px] text-slate-400 block mb-1">أبرز عملياتك النهاردة</span>
+                    <div class="space-y-1.5 text-[11px]" id="daily-wrapped-items">—</div>
+                </div>
+
+                <span class="text-[10px] text-slate-500 block">دبّر · محاسبك الشخصي</span>
+            </div>
+
+            <button id="daily-wrapped-share-btn" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold py-3 rounded-2xl text-sm transition flex items-center justify-center gap-2">
+                <span>📤</span> شارك يومك
+            </button>
+            <p id="daily-wrapped-empty-note" class="hidden text-[11px] text-slate-400 text-center bg-slate-900 border border-slate-800 rounded-xl p-3">سجّل أول عملية النهاردة وهنجهزلك الكارت فورًا.</p>
         </div>
     </div>
 
@@ -3134,12 +3209,12 @@
                 const dir = month.total >= month.prevTotal ? 'أكتر' : 'أقل';
                 compareEl.textContent = `صرفت ${diff}% ${dir} من ${month.prevLabel}`;
             } else {
-                compareEl.textContent = 'لسه معندناش بيانات كفاية عشان نقارن بالشهر اللي فات.';
+                compareEl.textContent = 'سجّل شوية عمليات كمان وهنقارنلك بالشهر اللي فات.';
             }
 
             const listEl = document.getElementById('monthly-categories-list');
             if (month.byCategory.length === 0) {
-                listEl.innerHTML = '<p class="text-slate-500">لسه معندكش مصاريف مسجلة الشهر ده.</p>';
+                listEl.innerHTML = '<p class="text-slate-500">سجّل أول عملية وهتلاقي هنا أكتر فئة بتصرف فيها.</p>';
             } else {
                 listEl.innerHTML = month.byCategory.slice(0, 3).map((c) => `
                     <div>
@@ -3166,13 +3241,14 @@
         }
 
         function renderDaily(today, flow) {
+            window.__todayData = today;
             document.getElementById('daily-date').textContent =
                 new Date().toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long' });
             document.getElementById('daily-total').textContent = fmt(today.total);
             document.getElementById('daily-count').textContent = `${today.count} عملية`;
             document.getElementById('daily-avg').textContent = fmt(today.avgPerDayThisMonth);
             document.getElementById('daily-note').textContent =
-                today.count > 0 ? `سجلت ${today.count} عملية النهاردة.` : 'لسه معندكش مصاريف مسجلة النهاردة.';
+                today.count > 0 ? `سجلت ${today.count} عملية النهاردة.` : 'سجّل أول عملية النهاردة وهتلاقيها هنا.';
 
             if (flow) {
                 document.getElementById('flow-in').textContent = fmt(flow.in);
@@ -3183,7 +3259,7 @@
 
             const listEl = document.getElementById('daily-items-list');
             if (today.items.length === 0) {
-                listEl.innerHTML = '<p class="text-xs text-slate-500">لسه مفيش عمليات النهاردة.</p>';
+                listEl.innerHTML = '<p class="text-xs text-slate-500">سجّل أول عملية النهاردة وهتظهر هنا.</p>';
             } else {
                 listEl.innerHTML = today.items.map((it, i) => `
                     <div class="flex items-center justify-between gap-2 py-2 ${i < today.items.length - 1 ? 'border-b border-slate-800/60' : ''}">
@@ -3213,7 +3289,7 @@
 
             const listEl = document.getElementById('all-categories-list');
             if (month.byCategory.length === 0) {
-                listEl.innerHTML = '<p class="text-slate-500">لسه معندكش مصاريف مسجلة الشهر ده.</p>';
+                listEl.innerHTML = '<p class="text-slate-500">سجّل أول عملية وهتلاقي هنا أكتر فئة بتصرف فيها.</p>';
             } else {
                 listEl.innerHTML = month.byCategory.map((c) => `
                     <div>
@@ -3567,7 +3643,7 @@
 
         function renderAsstProjection(smart, month) {
             const el = document.getElementById('asst-projection-text');
-            if (!smart) { el.textContent = 'لسه معندناش بيانات كفاية عشان نتوقع نهاية الشهر.'; return; }
+            if (!smart) { el.textContent = 'سجّل شوية عمليات كمان وهنقدر نتوقعلك نهاية الشهر.'; return; }
             let text = `على المعدل الحالي، متوقع صرفك يوصل لحوالي <b class="text-emerald-600 dark:text-emerald-300 text-sm font-black">${fmt(smart.projectedTotal)}</b> بنهاية ${smart.projectedLabel} (اتصرف ${smart.daysPassed} من ${smart.daysInMonth} يوم).`;
             if (month && month.prevTotal > 0) {
                 text += smart.projectedTotal > month.prevTotal
@@ -4207,12 +4283,112 @@
             const text = w
                 ? `في سنة ${w.year}:\n💰 صرفت ${fmt(w.total)}\n🔝 أكبر بند: ${w.topCategory ? w.topCategory.name : '—'}\n💡 وفرت تقريبًا ${fmt(w.savedEstimate)}\n🏆 أحسن شهر: ${w.bestMonthLabel || '—'}\n\nمع دبّر — محاسبك الشخصي`
                 : 'دبّر — محاسبك الشخصي';
+
+            // نحاول الأول نصوّر الكارت نفسه كصورة عشان المشاركة تبقى بصرية زي Spotify Wrapped
+            // بدل ما تكون نص بس. لو الميزة دي مش متاحة (مكتبة فشلت تحمّل أو المتصفح مش داعم
+            // مشاركة ملفات)، بنرجع لنفس سلوك مشاركة النص اللي كان شغال قبل كده.
+            try {
+                const cardEl = document.getElementById('wrapped-card');
+                if (window.html2canvas && cardEl) {
+                    const canvas = await html2canvas(cardEl, { backgroundColor: null, scale: 2 });
+                    const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png', 0.95));
+                    if (blob) {
+                        const file = new File([blob], 'dabbar-wrapped.png', { type: 'image/png' });
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            await navigator.share({ files: [file], text });
+                            return;
+                        }
+                    }
+                }
+            } catch (e) { /* نكمل على fallback النص تحت */ }
+
             if (navigator.share) {
                 try { await navigator.share({ text }); } catch (e) {}
             } else {
                 try {
                     await navigator.clipboard.writeText(text);
                     alert('تم نسخ ملخص Wrapped، تقدر تلزقه فين ما تحب.');
+                } catch (e) {
+                    alert(text);
+                }
+            }
+        });
+
+        // ============ Daily Wrapped modal (نفس فكرة الـ Wrapped السنوي بس ليومك) ============
+        const dailyWrappedModal = document.getElementById('daily-wrapped-modal');
+        function openDailyWrapped() {
+            const today = window.__todayData;
+            const shareBtn = document.getElementById('daily-wrapped-share-btn');
+            const emptyNote = document.getElementById('daily-wrapped-empty-note');
+            const cardEl = document.getElementById('daily-wrapped-card');
+            if (!today || !today.count) {
+                cardEl.classList.add('hidden');
+                shareBtn.classList.add('hidden');
+                emptyNote.classList.remove('hidden');
+            } else {
+                cardEl.classList.remove('hidden');
+                shareBtn.classList.remove('hidden');
+                emptyNote.classList.add('hidden');
+
+                document.getElementById('daily-wrapped-date').textContent =
+                    new Date().toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long' });
+                document.getElementById('daily-wrapped-total').textContent = fmt(today.total);
+                document.getElementById('daily-wrapped-count').textContent = `${today.count} عملية`;
+
+                const byCategory = new Map();
+                for (const it of today.items) {
+                    byCategory.set(it.category, (byCategory.get(it.category) || 0) + Number(it.amount || 0));
+                }
+                const topCat = [...byCategory.entries()].sort((a, b) => b[1] - a[1])[0];
+                document.getElementById('daily-wrapped-top-cat').textContent =
+                    topCat ? `${getCategoryEmoji(topCat[0])} ${topCat[0]} — ${fmt(topCat[1])}` : '—';
+
+                const topItems = [...today.items].sort((a, b) => Number(b.amount || 0) - Number(a.amount || 0)).slice(0, 4);
+                const itemsEl = document.getElementById('daily-wrapped-items');
+                itemsEl.innerHTML = topItems.map((it) => `
+                    <div class="flex justify-between items-center text-slate-200">
+                        <span class="font-bold text-emerald-300">${fmt(it.amount, it.currency_code)}</span>
+                        <span>${getCategoryEmoji(it.category)} ${(it.description && it.description.trim()) || it.category}</span>
+                    </div>
+                `).join('') + (today.items.length > topItems.length
+                    ? `<div class="text-center text-slate-500 text-[10px] pt-1">+ ${today.items.length - topItems.length} عمليات تانية</div>`
+                    : '');
+            }
+            dailyWrappedModal.classList.remove('hidden');
+            dailyWrappedModal.classList.add('flex');
+        }
+        document.getElementById('daily-wrapped-open').addEventListener('click', openDailyWrapped);
+        document.getElementById('daily-wrapped-close').addEventListener('click', () => {
+            dailyWrappedModal.classList.add('hidden');
+            dailyWrappedModal.classList.remove('flex');
+        });
+        document.getElementById('daily-wrapped-share-btn').addEventListener('click', async () => {
+            const today = window.__todayData;
+            const dateLabel = new Date().toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long' });
+            const text = today
+                ? `يوم ${dateLabel}:\n💰 صرفت ${fmt(today.total)}\n📊 ${today.count} عملية\n\nمع دبّر — محاسبك الشخصي`
+                : 'دبّر — محاسبك الشخصي';
+            try {
+                const cardEl = document.getElementById('daily-wrapped-card');
+                if (window.html2canvas && cardEl) {
+                    const canvas = await html2canvas(cardEl, { backgroundColor: null, scale: 2 });
+                    const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png', 0.95));
+                    if (blob) {
+                        const file = new File([blob], 'dabbar-daily-wrapped.png', { type: 'image/png' });
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            await navigator.share({ files: [file], text });
+                            return;
+                        }
+                    }
+                }
+            } catch (e) { /* نكمل على fallback النص تحت */ }
+
+            if (navigator.share) {
+                try { await navigator.share({ text }); } catch (e) {}
+            } else {
+                try {
+                    await navigator.clipboard.writeText(text);
+                    alert('تم نسخ ملخص يومك، تقدر تلزقه فين ما تحب.');
                 } catch (e) {
                     alert(text);
                 }

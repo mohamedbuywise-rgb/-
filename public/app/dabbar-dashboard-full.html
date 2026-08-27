@@ -15,7 +15,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/modern-screenshot@4/dist/index.umd.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
     <!-- بنحدد الوضع (فاتح/غامق) بدري قبل ما الصفحة تترسم. الافتراضي دلوقتي "فاتح" -->
     <script>
@@ -1957,6 +1957,20 @@
                 <span id="account-telegram-badge" class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-slate-800 text-slate-400">—</span>
             </div>
 
+            <div class="bg-gradient-to-br from-emerald-500/10 to-teal-500/5 border border-emerald-500/25 rounded-3xl p-4 space-y-3">
+                <div class="flex items-center gap-3">
+                    <span class="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center text-base">🎁</span>
+                    <div>
+                        <p class="text-xs font-bold text-slate-200">شارك دبّر مع صحابك</p>
+                        <p class="text-[11px] text-slate-400 leading-relaxed">فلوسك تستاهل ترتيب — وأصحابك كمان 🌱</p>
+                    </div>
+                </div>
+                <button type="button" id="account-referral-copy-btn" class="w-full flex items-center justify-between gap-2 bg-slate-950/60 border border-slate-800 rounded-xl px-3 py-2.5">
+                    <span class="font-mono text-xs text-slate-200 select-all truncate" dir="ltr">https://buypilot-team.vercel.app</span>
+                    <span id="account-referral-copy-label" class="text-[10px] font-bold text-emerald-400 shrink-0">نسخ 📋</span>
+                </button>
+            </div>
+
             <button id="account-theme-toggle" class="w-full bg-slate-950/60 border border-slate-800 rounded-3xl p-4 flex items-center justify-between gap-3">
                 <div class="flex items-center gap-3">
                     <span class="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-base" id="theme-toggle-icon">🌙</span>
@@ -2284,19 +2298,41 @@
         </div>
     </div>
 
-    <!-- Financial Wrapped — Shareable Card Overlay -->
+    <!-- Soft-ask قبل طلب إذن الإشعارات الفعلي من المتصفح — بيرفع نسبة القبول ويحمي الموقع من تصنيف "منخفض الثقة" عند Chrome -->
+    <div id="push-soft-ask-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="max-w-sm w-full bg-slate-950 border border-slate-800 rounded-3xl p-5 space-y-4 text-center">
+            <span class="w-14 h-14 mx-auto rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-2xl">🔔</span>
+            <div class="space-y-1.5">
+                <h3 class="text-sm font-bold text-slate-100">تفعّل إشعارات دبّر؟</h3>
+                <p class="text-[11px] text-slate-400 leading-relaxed">هنفتكرك بمصاريفك، وننبهك قبل ما تعدّي ميزانيتك، ونبعتلك ملخص يومك — كله من غير إزعاج.</p>
+            </div>
+            <div class="flex gap-2">
+                <button type="button" id="push-soft-ask-decline" class="flex-1 bg-slate-900 border border-slate-800 text-slate-300 font-bold text-xs py-2.5 rounded-xl">مش دلوقتي</button>
+                <button type="button" id="push-soft-ask-accept" class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black text-xs py-2.5 rounded-xl">تفعيل الإشعارات</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Financial Wrapped — Shareable Card Overlay (أسبوعي / شهري / سنوي بينهم تابس) -->
     <div id="wrapped-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
         <div class="max-w-sm w-full flex flex-col gap-3">
             <div class="flex items-center justify-between px-1">
-                <h2 class="font-bold text-sm text-slate-100">Wrapped سنتك المالية</h2>
+                <h2 class="font-bold text-sm text-slate-100">Wrapped مصاريفك</h2>
                 <button id="wrapped-close" class="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-sm">✕</button>
+            </div>
+
+            <!-- تابس التنقل بين الفترات -->
+            <div class="flex bg-slate-900 border border-slate-800 rounded-2xl p-1 gap-1" id="wrapped-period-tabs">
+                <button type="button" data-period="week" class="wrapped-period-tab flex-1 text-xs font-bold py-2 rounded-xl transition">أسبوعي</button>
+                <button type="button" data-period="month" class="wrapped-period-tab flex-1 text-xs font-bold py-2 rounded-xl transition">شهري</button>
+                <button type="button" data-period="year" class="wrapped-period-tab flex-1 text-xs font-bold py-2 rounded-xl transition">سنوي</button>
             </div>
 
             <!-- الكارت نفسه — ده اللي بيتصور/بيتشارك -->
             <div id="wrapped-card" class="rounded-[2rem] p-6 text-center space-y-4 shadow-2xl" style="background: linear-gradient(155deg, #022c22 0%, #020617 55%, #020617 100%); border: 1px solid rgba(52,211,153,0.35);">
                 <div class="space-y-1">
-                    <span class="text-[11px] tracking-widest text-emerald-400 font-bold">DABBAR WRAPPED</span>
-                    <h3 class="text-2xl font-black text-slate-50">في سنة <span id="wrapped-year">2026</span></h3>
+                    <span class="text-[11px] tracking-widest text-emerald-400 font-bold" id="wrapped-kicker">DABBAR WRAPPED</span>
+                    <h3 class="text-2xl font-black text-slate-50" id="wrapped-title">—</h3>
                 </div>
 
                 <div class="space-y-1 py-2">
@@ -2314,7 +2350,7 @@
                         <span class="text-xs font-bold text-emerald-300" id="wrapped-saved">—</span>
                     </div>
                     <div class="bg-white/5 border border-white/10 rounded-2xl p-3 col-span-2">
-                        <span class="text-[10px] text-slate-400 block mb-1">أحسن شهر ماليًا</span>
+                        <span class="text-[10px] text-slate-400 block mb-1" id="wrapped-best-month-label">أحسن شهر ماليًا</span>
                         <span class="text-xs font-bold text-white" id="wrapped-best-month">—</span>
                     </div>
                 </div>
@@ -2325,7 +2361,7 @@
             <button id="wrapped-share-btn" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold py-3 rounded-2xl text-sm transition flex items-center justify-center gap-2">
                 <span>📤</span> شارك الكارت
             </button>
-            <p id="wrapped-empty-note" class="hidden text-[11px] text-slate-400 text-center bg-slate-900 border border-slate-800 rounded-xl p-3">سجّل مصاريفك أول بأول السنة دي وهنجهزلك Wrapped في آخرها.</p>
+            <p id="wrapped-empty-note" class="hidden text-[11px] text-slate-400 text-center bg-slate-900 border border-slate-800 rounded-xl p-3">سجّل مصاريفك في الفترة دي وهنجهزلك Wrapped ليها.</p>
         </div>
     </div>
 
@@ -2558,9 +2594,61 @@
             const notifications = [];
             const budget = Number(settings.monthlyBudget || 0);
             const total = Number(month.total || 0);
-            if (budget > 0 && total >= budget * 0.8) notifications.push({ id: `budget-${new Date().toISOString().slice(0, 7)}`, icon: '🎯', title: 'خطوة ذكية للحفاظ على خطتك', body: `أنت استخدمت ${Math.round(total / budget * 100)}% من ميزانيتك (${fmt(total)} من ${fmt(budget)} جنيه). عندك فرصة جميلة تكمّل الشهر بهدوء؛ جرّب تراجع أكبر فئة صرف عندك.`, tone: 'amber' });
+            const categories = month.categories || month.byCategory || [];
+
+            if (budget > 0 && total >= budget * 0.8) {
+                notifications.push({ id: `budget-${new Date().toISOString().slice(0, 7)}`, icon: '🎯', title: 'خطوة ذكية للحفاظ على خطتك', body: `أنت استخدمت ${Math.round(total / budget * 100)}% من ميزانيتك (${fmt(total)} من ${fmt(budget)} جنيه). عندك فرصة جميلة تكمّل الشهر بهدوء؛ جرّب تراجع أكبر فئة صرف عندك.`, tone: 'amber' });
+            } else if (budget === 0 && total > 0) {
+                // مفيش ميزانية متسجلة — نبّهه إنه يحطها عشان يقدر يستفيد من التنبيهات دي أصلاً
+                notifications.push({ id: `set-budget-${new Date().toISOString().slice(0, 7)}`, icon: '🧭', title: 'حدّد ميزانيتك الشهرية', body: `صرفت لحد دلوقتي ${fmt(total)} جنيه الشهر ده من غير سقف محدد. حدّد ميزانية من "التخطيط" عشان أقدر أنبهك قبل ما تعدّيها.`, tone: 'amber' });
+            }
+
+            // أكبر فئة صرف — بيانات موجودة عند أي مستخدم عنده مصروف واحد بس، مش محتاجة financial_events
+            if (categories.length > 0) {
+                const topCat = [...categories].sort((a, b) => Number(b.amount || 0) - Number(a.amount || 0))[0];
+                const percent = total > 0 ? Math.round((Number(topCat.amount || 0) / total) * 100) : 0;
+                if (percent >= 40) {
+                    notifications.push({ id: `top-cat-${new Date().toISOString().slice(0, 7)}-${topCat.name}`, icon: getCategoryEmoji ? getCategoryEmoji(topCat.name) : '📌', title: 'أكبر بند في مصاريفك', body: `فئة "${topCat.name}" لوحدها بتاخد ${percent}% من مصاريف الشهر (${fmt(topCat.amount)} جنيه). ده مش بالضرورة مشكلة، بس يستاهل نظرة سريعة.`, tone: 'emerald' });
+                }
+            }
+
             const latestEvent = (month.financialEvents || [])[0];
             if (latestEvent) notifications.push({ id: `event-${latestEvent.id || latestEvent.created_at}`, icon: '✨', title: 'متابعة ممتازة', body: `آخر حركة عندك: ${typeLabel(latestEvent.event_type)} · ${fmt(latestEvent.amount, latestEvent.currency_code)}. الاستمرار في المتابعة هو أول خطوة للسيطرة على خطتك.`, tone: 'emerald' });
+
+            // صرفت أقل من الشهر اللي فات — مقارنة إيجابية بحتة، بدل ما تظهر بس لما القراءة سيئة
+            const prevTotal = Number(month.prevTotal || 0);
+            if (prevTotal > 0 && total > 0 && total < prevTotal) {
+                const dropPercent = Math.round(((prevTotal - total) / prevTotal) * 100);
+                if (dropPercent >= 5) {
+                    notifications.push({ id: `less-than-prev-${new Date().toISOString().slice(0, 7)}`, icon: '📉', title: 'أداء أحسن من الشهر اللي فات', body: `صرفت أقل من ${month.prevLabel || 'الشهر اللي فات'} بنسبة ${dropPercent}% (${fmt(total)} بدل ${fmt(prevTotal)}). استمر كده 👏`, tone: 'emerald' });
+                }
+            }
+
+            // سلسلة أيام متابعة متتالية — بيانات موجودة عند أي مستخدم بيسجل بانتظام
+            const activeDays = data.activeDays || {};
+            const lastSeven = activeDays.lastSevenDays || [];
+            let currentStreak = 0;
+            for (let i = lastSeven.length - 1; i >= 0; i -= 1) {
+                if (lastSeven[i]?.active) currentStreak += 1;
+                else break;
+            }
+            if (currentStreak >= 3) {
+                notifications.push({ id: `streak-${currentStreak}-${new Date().toISOString().slice(0, 10)}`, icon: '🔥', title: 'سلسلة متابعة قوية', body: `أنت بتسجل مصاريفك بانتظام من ${currentStreak} أيام متتالية. الاستمرارية دي هي سر السيطرة على أي خطة مالية 🙌`, tone: 'emerald' });
+            }
+
+            // تقدّم في الهدف المالي — يفضّل يفضل حاضر في ذهن المستخدم من غير ما يفتح الهدف بنفسه
+            const goal = data.goal;
+            if (goal && goal.percent >= 25) {
+                notifications.push({ id: `goal-${goal.id}-${Math.floor(goal.percent / 25) * 25}`, icon: '🎯', title: 'خطوة جديدة في هدفك', body: `وصلت لـ${goal.percent}% من هدف "${goal.title}" (${fmt(goal.savedAmount)} من ${fmt(goal.targetAmount)}). كمّل بنفس الروح، قربت أكتر 💪`, tone: 'emerald' });
+            }
+
+            // مصروف النهاردة — إشعار يومي إيجابي بحت، هدفه تعزيز عادة التسجيل اليومي (retention)
+            const today = data.today || window.__todayData;
+            if (today && today.total > 0) {
+                const streakLine = currentStreak >= 2 ? ` — ودي يوم رقم ${currentStreak} في سلسلة متابعتك 🔥` : '';
+                notifications.push({ id: `daily-pace-${new Date().toISOString().slice(0, 10)}`, icon: '🌱', title: 'وثّقت يومك النهاردة', body: `سجّلت ${today.count} عملية بإجمالي ${fmt(today.total)} النهاردة${streakLine}. كل يوم بتسجّله بيقربك أكتر من صورة كاملة وواضحة لفلوسك.`, tone: 'emerald' });
+            }
+
             let read = {};
             try { read = JSON.parse(localStorage.getItem(inAppNotificationsKey()) || '{}'); } catch {}
             if (!notifications.length) {
@@ -2582,9 +2670,33 @@
             if (!current) return;
             const notifications = {};
             try { const existing = JSON.parse(localStorage.getItem(inAppNotificationsKey()) || '{}'); Object.assign(notifications, existing); } catch {}
-            (window.__dashboardData?.month?.financialEvents || []).slice(0, 1).forEach((event) => { notifications[`event-${event.id || event.created_at}`] = true; });
+            const data = window.__dashboardData || {};
+            const month = data.month || {};
+            (month.financialEvents || []).slice(0, 1).forEach((event) => { notifications[`event-${event.id || event.created_at}`] = true; });
             const budget = Number(window.__financialSettings?.monthlyBudget || 0);
+            const total = Number(month.total || 0);
             if (budget > 0) notifications[`budget-${new Date().toISOString().slice(0, 7)}`] = true;
+            if (budget === 0 && total > 0) notifications[`set-budget-${new Date().toISOString().slice(0, 7)}`] = true;
+            const categories = month.categories || month.byCategory || [];
+            if (categories.length > 0) {
+                const topCat = [...categories].sort((a, b) => Number(b.amount || 0) - Number(a.amount || 0))[0];
+                notifications[`top-cat-${new Date().toISOString().slice(0, 7)}-${topCat.name}`] = true;
+            }
+            const prevTotal = Number(month.prevTotal || 0);
+            if (prevTotal > 0 && total > 0 && total < prevTotal) notifications[`less-than-prev-${new Date().toISOString().slice(0, 7)}`] = true;
+            const lastSeven = (data.activeDays || {}).lastSevenDays || [];
+            let currentStreak = 0;
+            for (let i = lastSeven.length - 1; i >= 0; i -= 1) {
+                if (lastSeven[i]?.active) currentStreak += 1;
+                else break;
+            }
+            if (currentStreak >= 3) notifications[`streak-${currentStreak}-${new Date().toISOString().slice(0, 10)}`] = true;
+            const goal = data.goal;
+            if (goal && goal.percent >= 25) notifications[`goal-${goal.id}-${Math.floor(goal.percent / 25) * 25}`] = true;
+            const today = data.today || window.__todayData;
+            if (today && today.total > 0) {
+                notifications[`daily-pace-${new Date().toISOString().slice(0, 10)}`] = true;
+            }
             localStorage.setItem(inAppNotificationsKey(), JSON.stringify(notifications));
             renderInAppNotifications(window.__dashboardData || {});
         }
@@ -2816,12 +2928,55 @@
             document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && (localSecurityConfig().biometricId || localSecurityConfig().patternHash)) showLocalSecurityOverlay('رجعت؟ افتح القفل المحلي للوصول لبياناتك المالية.'); });
         }
 
+        function pushSoftAskDismissedKey() { return `dabbar-push-soft-ask-dismissed-${currentUser?.id || 'guest'}`; }
+        const PUSH_SOFT_ASK_COOLDOWN_MS = 7 * 24 * 60 * 60 * 1000; // أسبوع
+
         function setupPushUI() {
+            const softAskModal = document.getElementById('push-soft-ask-modal');
+            function openSoftAsk() {
+                softAskModal.classList.remove('hidden');
+                softAskModal.classList.add('flex');
+            }
+            function closeSoftAsk() {
+                softAskModal.classList.add('hidden');
+                softAskModal.classList.remove('flex');
+            }
+            document.getElementById('push-soft-ask-decline')?.addEventListener('click', () => {
+                // بنسجّل إنه رفض من عندنا احنا بس — من غير ما نلمس Notification API خالص،
+                // عشان معدل رفض/تجاهل الطلب الحقيقي عند كروم يفضل زي ما هو ومعندوش سبب يصنّف الموقع "منخفض الثقة".
+                try { localStorage.setItem(pushSoftAskDismissedKey(), String(Date.now())); } catch (e) {}
+                closeSoftAsk();
+            });
+            document.getElementById('push-soft-ask-accept')?.addEventListener('click', async () => {
+                try { localStorage.removeItem(pushSoftAskDismissedKey()); } catch (e) {}
+                closeSoftAsk();
+                // اللحظة دي بس هي اللي بتستدعي Notification.requestPermission() الحقيقي —
+                // وبيتنادى من جوه ضغطة يوزر مباشرة (زرار "تفعيل الإشعارات" في نفس الـ modal)، مش تلقائي.
+                await enablePushNotifications();
+            });
+
             document.getElementById('push-notifications-toggle')?.addEventListener('click', async () => {
                 const registration = await getPushRegistration();
                 const subscription = await registration?.pushManager.getSubscription();
-                if (subscription) await disablePushNotifications();
-                else await enablePushNotifications();
+                if (subscription) {
+                    await disablePushNotifications();
+                    return;
+                }
+                // لو Chrome أصلاً حاجب الإذن (denied)، مفيش فايدة من الـ soft-ask — نوجّهه لإعدادات الموقع على طول
+                if ('Notification' in window && Notification.permission === 'denied') {
+                    await enablePushNotifications();
+                    return;
+                }
+                // Cooldown: لو رفض الـ soft-ask قبل كده بفترة أقل من أسبوع، منعرضهوش تاني —
+                // نسيبه يضغط تفعيل تاني بنفسه (نادر) بدل ما نلاحقه بنفس الرسالة كل مرة.
+                let dismissedAt = 0;
+                try { dismissedAt = Number(localStorage.getItem(pushSoftAskDismissedKey()) || 0); } catch (e) {}
+                if (dismissedAt && (Date.now() - dismissedAt) < PUSH_SOFT_ASK_COOLDOWN_MS) {
+                    const daysLeft = Math.ceil((PUSH_SOFT_ASK_COOLDOWN_MS - (Date.now() - dismissedAt)) / (24 * 60 * 60 * 1000));
+                    pushStatus(`قلت "مش دلوقتي" مؤخرًا. هنسألك تاني بعد ${daysLeft} ${daysLeft === 1 ? 'يوم' : 'أيام'} — أو دوس هنا تاني بعدها لو غيّرت رأيك.`);
+                    return;
+                }
+                openSoftAsk();
             });
             document.getElementById('push-notifications-save')?.addEventListener('click', savePushPreferencesFromUI);
             document.getElementById('in-app-notifications-read')?.addEventListener('click', markInAppNotificationsRead);
@@ -4251,26 +4406,79 @@
             }
         });
 
-        // ============ Financial Wrapped modal ============
+        // ============ إحالة — رابط قابل للنسخ/المشاركة ============
+        (function setupReferral() {
+            const REFERRAL_URL = 'https://buypilot-team.vercel.app';
+            const REFERRAL_TEXT = `دبّر خلاني أخيرًا أعرف فلوسي رايحة فين 🌱 جربه، هيفرق معاك: ${REFERRAL_URL}`;
+            const btn = document.getElementById('account-referral-copy-btn');
+            const label = document.getElementById('account-referral-copy-label');
+            if (!btn) return;
+            btn.addEventListener('click', async () => {
+                if (navigator.share) {
+                    try { await navigator.share({ text: REFERRAL_TEXT, url: REFERRAL_URL }); return; } catch (e) { /* المستخدم قفل الشير، نكمل على النسخ */ }
+                }
+                try {
+                    await navigator.clipboard.writeText(REFERRAL_TEXT);
+                    const original = label.textContent;
+                    label.textContent = 'اتنسخ ✅';
+                    setTimeout(() => { label.textContent = original; }, 1800);
+                } catch (e) {
+                    alert(REFERRAL_TEXT);
+                }
+            });
+        })();
+
+        // ============ Financial Wrapped modal (أسبوعي / شهري / سنوي بتابس) ============
         const wrappedModal = document.getElementById('wrapped-modal');
-        document.getElementById('asst-wrapped-open').addEventListener('click', () => {
-            const w = window.__wrappedData;
+        const WRAPPED_PERIOD_META = {
+            week: { kicker: 'DABBAR WEEKLY', titlePrefix: 'أسبوعك', bestLabel: 'أحسن يوم في الأسبوع' },
+            month: { kicker: 'DABBAR MONTHLY', titlePrefix: 'شهرك', bestLabel: 'أحسن أسبوع في الشهر' },
+            year: { kicker: 'DABBAR WRAPPED', titlePrefix: 'سنتك', bestLabel: 'أحسن شهر ماليًا' },
+        };
+        let currentWrappedPeriod = 'week';
+
+        function renderWrappedPeriod(period) {
+            currentWrappedPeriod = period;
+            const all = window.__wrappedData || {};
+            const w = all[period];
+            const meta = WRAPPED_PERIOD_META[period];
             const shareBtn = document.getElementById('wrapped-share-btn');
             const emptyNote = document.getElementById('wrapped-empty-note');
+
+            document.querySelectorAll('.wrapped-period-tab').forEach((btn) => {
+                const active = btn.dataset.period === period;
+                btn.classList.toggle('bg-emerald-500', active);
+                btn.classList.toggle('text-slate-900', active);
+                btn.classList.toggle('text-slate-400', !active);
+            });
+
             if (!w) {
                 document.getElementById('wrapped-card').classList.add('hidden');
                 shareBtn.classList.add('hidden');
                 emptyNote.classList.remove('hidden');
-            } else {
-                document.getElementById('wrapped-card').classList.remove('hidden');
-                shareBtn.classList.remove('hidden');
-                emptyNote.classList.add('hidden');
-                document.getElementById('wrapped-year').textContent = w.year;
-                document.getElementById('wrapped-total').textContent = fmt(w.total);
-                document.getElementById('wrapped-top-cat').textContent = w.topCategory ? `${getCategoryEmoji(w.topCategory.name)} ${w.topCategory.name}` : '—';
-                document.getElementById('wrapped-saved').textContent = w.savedEstimate > 0 ? fmt(w.savedEstimate) : '—';
-                document.getElementById('wrapped-best-month').textContent = w.bestMonthLabel ? `${w.bestMonthLabel} (${fmt(w.bestMonthTotal)})` : '—';
+                return;
             }
+            document.getElementById('wrapped-card').classList.remove('hidden');
+            shareBtn.classList.remove('hidden');
+            emptyNote.classList.add('hidden');
+
+            document.getElementById('wrapped-kicker').textContent = meta.kicker;
+            document.getElementById('wrapped-title').textContent = period === 'year'
+                ? `في سنة ${w.year}`
+                : `${meta.titlePrefix} ${w.periodLabel || ''}`;
+            document.getElementById('wrapped-total').textContent = fmt(w.total);
+            document.getElementById('wrapped-top-cat').textContent = w.topCategory ? `${getCategoryEmoji(w.topCategory.name)} ${w.topCategory.name}` : '—';
+            document.getElementById('wrapped-saved').textContent = w.savedEstimate > 0 ? fmt(w.savedEstimate) : '—';
+            document.getElementById('wrapped-best-month-label').textContent = meta.bestLabel;
+            document.getElementById('wrapped-best-month').textContent = w.bestMonthLabel ? `${w.bestMonthLabel} (${fmt(w.bestMonthTotal)})` : '—';
+        }
+
+        document.querySelectorAll('.wrapped-period-tab').forEach((btn) => {
+            btn.addEventListener('click', () => renderWrappedPeriod(btn.dataset.period));
+        });
+
+        document.getElementById('asst-wrapped-open').addEventListener('click', () => {
+            renderWrappedPeriod(currentWrappedPeriod);
             wrappedModal.classList.remove('hidden');
             wrappedModal.classList.add('flex');
         });
@@ -4279,9 +4487,11 @@
             wrappedModal.classList.remove('flex');
         });
         document.getElementById('wrapped-share-btn').addEventListener('click', async () => {
-            const w = window.__wrappedData;
+            const w = (window.__wrappedData || {})[currentWrappedPeriod];
+            const meta = WRAPPED_PERIOD_META[currentWrappedPeriod];
+            const titleLine = currentWrappedPeriod === 'year' ? `في سنة ${w ? w.year : ''}` : `${meta.titlePrefix} ${w ? (w.periodLabel || '') : ''}`;
             const text = w
-                ? `في سنة ${w.year}:\n💰 صرفت ${fmt(w.total)}\n🔝 أكبر بند: ${w.topCategory ? w.topCategory.name : '—'}\n💡 وفرت تقريبًا ${fmt(w.savedEstimate)}\n🏆 أحسن شهر: ${w.bestMonthLabel || '—'}\n\nمع دبّر — محاسبك الشخصي`
+                ? `${titleLine}:\n💰 صرفت ${fmt(w.total)}\n🔝 أكبر بند: ${w.topCategory ? w.topCategory.name : '—'}\n💡 وفرت تقريبًا ${fmt(w.savedEstimate)}\n🏆 ${meta.bestLabel}: ${w.bestMonthLabel || '—'}\n\nمع دبّر — محاسبك الشخصي`
                 : 'دبّر — محاسبك الشخصي';
 
             // نحاول الأول نصوّر الكارت نفسه كصورة عشان المشاركة تبقى بصرية زي Spotify Wrapped
@@ -4289,9 +4499,8 @@
             // مشاركة ملفات)، بنرجع لنفس سلوك مشاركة النص اللي كان شغال قبل كده.
             try {
                 const cardEl = document.getElementById('wrapped-card');
-                if (window.html2canvas && cardEl) {
-                    const canvas = await html2canvas(cardEl, { backgroundColor: null, scale: 2 });
-                    const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png', 0.95));
+                if (window.modernScreenshot && cardEl) {
+                    const blob = await window.modernScreenshot.domToBlob(cardEl, { scale: 2, backgroundColor: null });
                     if (blob) {
                         const file = new File([blob], 'dabbar-wrapped.png', { type: 'image/png' });
                         if (navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -4370,9 +4579,8 @@
                 : 'دبّر — محاسبك الشخصي';
             try {
                 const cardEl = document.getElementById('daily-wrapped-card');
-                if (window.html2canvas && cardEl) {
-                    const canvas = await html2canvas(cardEl, { backgroundColor: null, scale: 2 });
-                    const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png', 0.95));
+                if (window.modernScreenshot && cardEl) {
+                    const blob = await window.modernScreenshot.domToBlob(cardEl, { scale: 2, backgroundColor: null });
                     if (blob) {
                         const file = new File([blob], 'dabbar-daily-wrapped.png', { type: 'image/png' });
                         if (navigator.canShare && navigator.canShare({ files: [file] })) {

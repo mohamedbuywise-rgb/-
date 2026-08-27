@@ -234,42 +234,61 @@ export default async function handler(req, res) {
       .filter(d => d.direction === 'lent')
       .reduce((sum, d) => sum + Number(d.amount), 0);
 
-    // ---- "Financial Wrapped" السنة الحالية — استعلام واحد بس لكل السنة (مش شهر شهر) عشان يفضل خفيف ----
+    // ---- "Financial Wrapped" — أسبوعي/شهري/سنوي، كل واحد باستعلام واحد بس عشان يفضل خفيف ----
     const DISCRETIONARY_CATEGORIES = ['تسوق', 'ترفيه', 'اشتراكات', 'هدايا وتبرعات', 'شخصي وعناية'];
-    const yearStart = new Date(start.getFullYear(), 0, 1);
-    const yearEnd = new Date(start.getFullYear() + 1, 0, 1);
-    const yearExpenses = await getExpensesBetween(dataUserId, yearStart, yearEnd);
 
-    let wrapped = null;
-    if (yearExpenses.length > 0) {
-      const yearTotal = yearExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
-      const yearBreakdown = buildCategoryBreakdown(yearExpenses);
-      const discretionaryTotal = yearBreakdown
+    async function computeWrapped(periodStart, periodEnd, extraFields = {}) {
+      const expenses = await getExpensesBetween(dataUserId, periodStart, periodEnd);
+      if (expenses.length === 0) return null;
+
+      const total = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
+      const breakdown = buildCategoryBreakdown(expenses);
+      const discretionaryTotal = breakdown
         .filter((c) => DISCRETIONARY_CATEGORIES.includes(c.name))
         .reduce((sum, c) => sum + Number(c.amount), 0);
       const savedEstimate = Math.round((discretionaryTotal * 0.2) / 10) * 10;
 
       const perMonth = {};
-      for (const e of yearExpenses) {
+      for (const e of expenses) {
         const m = new Date(e.created_at).getMonth();
         perMonth[m] = (perMonth[m] || 0) + Number(e.amount);
       }
-      const monthEntries = Object.entries(perMonth).map(([m, total]) => ({ month: Number(m), total }));
+      const monthEntries = Object.entries(perMonth).map(([m, t]) => ({ month: Number(m), total: t }));
       const bestMonth = monthEntries.length > 0
         ? monthEntries.reduce((a, b) => (a.total < b.total ? a : b))
         : null;
 
-      wrapped = {
-        year: start.getFullYear(),
-        total: yearTotal,
-        count: yearExpenses.length,
-        topCategory: yearBreakdown[0] || null,
-        byCategory: yearBreakdown.slice(0, 5).map((b) => ({ name: b.name, amount: b.amount, currency_code: b.currency_code || 'EGP', percent: Number(b.percent) })),
+      return {
+        total,
+        count: expenses.length,
+        topCategory: breakdown[0] || null,
+        byCategory: breakdown.slice(0, 5).map((b) => ({ name: b.name, amount: b.amount, currency_code: b.currency_code || 'EGP', percent: Number(b.percent) })),
         savedEstimate,
         bestMonthLabel: bestMonth ? MONTH_NAMES[bestMonth.month] : null,
         bestMonthTotal: bestMonth ? bestMonth.total : null,
+        ...extraFields,
       };
     }
+
+    // الأسبوع الحالي (بنعيد استخدام weekStart/weekEnd المحسوبين فوق، متسقين مع باقي التطبيق)
+    const wrappedWeekEnd = new Date(weekStart);
+    wrappedWeekEnd.setDate(wrappedWeekEnd.getDate() + 7);
+
+    const monthStart = new Date(start.getFullYear(), start.getMonth(), 1);
+    const monthEnd = new Date(start.getFullYear(), start.getMonth() + 1, 1);
+
+    const yearStart = new Date(start.getFullYear(), 0, 1);
+    const yearEnd = new Date(start.getFullYear() + 1, 0, 1);
+
+    const [weekWrapped, monthWrapped, yearWrapped] = await Promise.all([
+      computeWrapped(weekStart, wrappedWeekEnd, { periodLabel: `${weekStart.getDate()}/${weekStart.getMonth() + 1} - ${new Date(wrappedWeekEnd.getTime() - 86400000).getDate()}/${new Date(wrappedWeekEnd.getTime() - 86400000).getMonth() + 1}` }),
+      computeWrapped(monthStart, monthEnd, { periodLabel: MONTH_NAMES[monthStart.getMonth()] }),
+      computeWrapped(yearStart, yearEnd, { year: start.getFullYear() }),
+    ]);
+
+    const wrapped = (weekWrapped || monthWrapped || yearWrapped)
+      ? { week: weekWrapped, month: monthWrapped, year: yearWrapped }
+      : null;
 
     // ---- حالة الاشتراك/التجربة ----
     const subActive = await hasActiveSubscription(dataUserId);

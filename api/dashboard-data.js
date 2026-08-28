@@ -237,7 +237,11 @@ export default async function handler(req, res) {
     // ---- "Financial Wrapped" — أسبوعي/شهري/سنوي، كل واحد باستعلام واحد بس عشان يفضل خفيف ----
     const DISCRETIONARY_CATEGORIES = ['تسوق', 'ترفيه', 'اشتراكات', 'هدايا وتبرعات', 'شخصي وعناية'];
 
-    async function computeWrapped(periodStart, periodEnd, extraFields = {}) {
+    const AR_DAY_NAMES = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+
+    // unit بيحدد إزاي نقسم الفترة لوحدات فرعية عشان نلاقي "أحسن" وحدة ماليًا جواها:
+    // أسبوعي -> نقسم بالأيام، شهري -> نقسم بالأسابيع، سنوي -> نقسم بالشهور
+    async function computeWrapped(periodStart, periodEnd, unit, extraFields = {}) {
       const expenses = await getExpensesBetween(dataUserId, periodStart, periodEnd);
       if (expenses.length === 0) return null;
 
@@ -248,14 +252,27 @@ export default async function handler(req, res) {
         .reduce((sum, c) => sum + Number(c.amount), 0);
       const savedEstimate = Math.round((discretionaryTotal * 0.2) / 10) * 10;
 
-      const perMonth = {};
+      const buckets = {};
       for (const e of expenses) {
-        const m = new Date(e.created_at).getMonth();
-        perMonth[m] = (perMonth[m] || 0) + Number(e.amount);
+        const d = new Date(e.created_at);
+        let key, label;
+        if (unit === 'day') {
+          key = d.toDateString();
+          label = AR_DAY_NAMES[d.getDay()];
+        } else if (unit === 'week') {
+          const weekIndex = Math.floor((d.getDate() - 1) / 7) + 1;
+          key = `w${weekIndex}`;
+          label = `الأسبوع ${weekIndex}`;
+        } else {
+          key = d.getMonth();
+          label = MONTH_NAMES[d.getMonth()];
+        }
+        if (!buckets[key]) buckets[key] = { label, total: 0 };
+        buckets[key].total += Number(e.amount);
       }
-      const monthEntries = Object.entries(perMonth).map(([m, t]) => ({ month: Number(m), total: t }));
-      const bestMonth = monthEntries.length > 0
-        ? monthEntries.reduce((a, b) => (a.total < b.total ? a : b))
+      const bucketList = Object.values(buckets);
+      const bestBucket = bucketList.length > 0
+        ? bucketList.reduce((a, b) => (a.total < b.total ? a : b))
         : null;
 
       return {
@@ -264,8 +281,8 @@ export default async function handler(req, res) {
         topCategory: breakdown[0] || null,
         byCategory: breakdown.slice(0, 5).map((b) => ({ name: b.name, amount: b.amount, currency_code: b.currency_code || 'EGP', percent: Number(b.percent) })),
         savedEstimate,
-        bestMonthLabel: bestMonth ? MONTH_NAMES[bestMonth.month] : null,
-        bestMonthTotal: bestMonth ? bestMonth.total : null,
+        bestMonthLabel: bestBucket ? bestBucket.label : null,
+        bestMonthTotal: bestBucket ? bestBucket.total : null,
         ...extraFields,
       };
     }
@@ -281,9 +298,9 @@ export default async function handler(req, res) {
     const yearEnd = new Date(start.getFullYear() + 1, 0, 1);
 
     const [weekWrapped, monthWrapped, yearWrapped] = await Promise.all([
-      computeWrapped(weekStart, wrappedWeekEnd, { periodLabel: `${weekStart.getDate()}/${weekStart.getMonth() + 1} - ${new Date(wrappedWeekEnd.getTime() - 86400000).getDate()}/${new Date(wrappedWeekEnd.getTime() - 86400000).getMonth() + 1}` }),
-      computeWrapped(monthStart, monthEnd, { periodLabel: MONTH_NAMES[monthStart.getMonth()] }),
-      computeWrapped(yearStart, yearEnd, { year: start.getFullYear() }),
+      computeWrapped(weekStart, wrappedWeekEnd, 'day', { periodLabel: `${weekStart.getDate()}/${weekStart.getMonth() + 1} - ${new Date(wrappedWeekEnd.getTime() - 86400000).getDate()}/${new Date(wrappedWeekEnd.getTime() - 86400000).getMonth() + 1}` }),
+      computeWrapped(monthStart, monthEnd, 'week', { periodLabel: MONTH_NAMES[monthStart.getMonth()] }),
+      computeWrapped(yearStart, yearEnd, 'month', { year: start.getFullYear() }),
     ]);
 
     const wrapped = (weekWrapped || monthWrapped || yearWrapped)

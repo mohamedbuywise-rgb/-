@@ -753,8 +753,10 @@
             z-index: 2;
         }
         html[data-theme="light"] .account-notification-badge {
-            border-color: #fffefa;
-            color: #173c2d;
+            background: #e11d48;
+            color: #fff;
+            border-color: var(--pm-surface, #fffdf8);
+            box-shadow: 0 3px 10px rgba(225,29,72,.35);
         }
 
         .notification-empty {
@@ -1895,8 +1897,8 @@
             <button id="asst-wrapped-open" class="w-full bg-gradient-to-br from-slate-900 to-slate-950 border border-emerald-500/25 rounded-3xl p-4 flex items-center gap-3 text-right transition hover:border-emerald-500/40">
                 <div class="w-11 h-11 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-lg shrink-0">🎁</div>
                 <div class="flex-1">
-                    <h4 class="text-sm font-bold text-slate-100">Wrapped سنة <span id="asst-wrapped-year">—</span></h4>
-                    <p class="text-[11px] text-slate-400">ملخص سنتك المالية بالكامل — جاهز للمشاركة</p>
+                    <h4 class="text-sm font-bold text-slate-100">Wrapped مصاريفك</h4>
+                    <p class="text-[11px] text-slate-400">ملخص مصاريفك أسبوعيًا وشهريًا وسنويًا — جاهز للمشاركة</p>
                 </div>
                 <span class="text-slate-500 text-xs">‹</span>
             </button>
@@ -3770,7 +3772,6 @@
             renderAsstSuggestion(data.smart, data.goal);
             renderAsstProjection(data.smart, data.month);
             renderAsstGoal(data.goal);
-            document.getElementById('asst-wrapped-year').textContent = data.wrapped ? data.wrapped.year : new Date().getFullYear();
         }
 
         function renderAsstSuggestion(smart, goal) {
@@ -4436,6 +4437,17 @@
             year: { kicker: 'DABBAR WRAPPED', titlePrefix: 'سنتك', bestLabel: 'أحسن شهر ماليًا' },
         };
         let currentWrappedPeriod = 'week';
+        // بنجهز صورة الكارت مقدمًا (مش وقت الضغط على مشاركة) عشان مشاركة الصورة متفشلش
+        // بسبب انتهاء "لمسة المستخدم" أثناء استنى تصوير الكارت أونلاين.
+        const wrappedImageCache = {};
+        async function prepareWrappedImage(cacheKey, cardId) {
+            try {
+                const cardEl = document.getElementById(cardId);
+                if (!window.modernScreenshot || !cardEl || cardEl.classList.contains('hidden')) return;
+                const blob = await window.modernScreenshot.domToBlob(cardEl, { scale: 2, backgroundColor: null });
+                if (blob) wrappedImageCache[cacheKey] = blob;
+            } catch (e) { /* هنرجع لمشاركة النص لو فشل */ }
+        }
 
         function renderWrappedPeriod(period) {
             currentWrappedPeriod = period;
@@ -4471,6 +4483,9 @@
             document.getElementById('wrapped-saved').textContent = w.savedEstimate > 0 ? fmt(w.savedEstimate) : '—';
             document.getElementById('wrapped-best-month-label').textContent = meta.bestLabel;
             document.getElementById('wrapped-best-month').textContent = w.bestMonthLabel ? `${w.bestMonthLabel} (${fmt(w.bestMonthTotal)})` : '—';
+
+            delete wrappedImageCache[`wrapped-${period}`];
+            requestAnimationFrame(() => prepareWrappedImage(`wrapped-${period}`, 'wrapped-card'));
         }
 
         document.querySelectorAll('.wrapped-period-tab').forEach((btn) => {
@@ -4494,19 +4509,23 @@
                 ? `${titleLine}:\n💰 صرفت ${fmt(w.total)}\n🔝 أكبر بند: ${w.topCategory ? w.topCategory.name : '—'}\n💡 وفرت تقريبًا ${fmt(w.savedEstimate)}\n🏆 ${meta.bestLabel}: ${w.bestMonthLabel || '—'}\n\nمع دبّر — محاسبك الشخصي`
                 : 'دبّر — محاسبك الشخصي';
 
-            // نحاول الأول نصوّر الكارت نفسه كصورة عشان المشاركة تبقى بصرية زي Spotify Wrapped
-            // بدل ما تكون نص بس. لو الميزة دي مش متاحة (مكتبة فشلت تحمّل أو المتصفح مش داعم
-            // مشاركة ملفات)، بنرجع لنفس سلوك مشاركة النص اللي كان شغال قبل كده.
+            // نحاول الأول نستخدم صورة الكارت اللي جهزناها مقدمًا (وقت فتح التاب) عشان المشاركة
+            // تبقى بصرية زي Spotify Wrapped بدل ما تكون نص بس، ومن غير أي تأخير وقت الضغط
+            // يفقّدنا "لمسة المستخدم" المطلوبة لمشاركة الملفات. لو مفيش صورة جاهزة (لسه بتتحمّل
+            // أو فشلت)، بنرجع لنفس سلوك مشاركة النص اللي كان شغال قبل كده.
             try {
-                const cardEl = document.getElementById('wrapped-card');
-                if (window.modernScreenshot && cardEl) {
-                    const blob = await window.modernScreenshot.domToBlob(cardEl, { scale: 2, backgroundColor: null });
-                    if (blob) {
-                        const file = new File([blob], 'dabbar-wrapped.png', { type: 'image/png' });
-                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                            await navigator.share({ files: [file], text });
-                            return;
-                        }
+                let blob = wrappedImageCache[`wrapped-${currentWrappedPeriod}`];
+                if (!blob) {
+                    const cardEl = document.getElementById('wrapped-card');
+                    if (window.modernScreenshot && cardEl) {
+                        blob = await window.modernScreenshot.domToBlob(cardEl, { scale: 2, backgroundColor: null });
+                    }
+                }
+                if (blob) {
+                    const file = new File([blob], 'dabbar-wrapped.png', { type: 'image/png' });
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        await navigator.share({ files: [file], text });
+                        return;
                     }
                 }
             } catch (e) { /* نكمل على fallback النص تحت */ }
@@ -4565,6 +4584,9 @@
             }
             dailyWrappedModal.classList.remove('hidden');
             dailyWrappedModal.classList.add('flex');
+
+            delete wrappedImageCache['daily'];
+            requestAnimationFrame(() => prepareWrappedImage('daily', 'daily-wrapped-card'));
         }
         document.getElementById('daily-wrapped-open').addEventListener('click', openDailyWrapped);
         document.getElementById('daily-wrapped-close').addEventListener('click', () => {
@@ -4578,15 +4600,18 @@
                 ? `يوم ${dateLabel}:\n💰 صرفت ${fmt(today.total)}\n📊 ${today.count} عملية\n\nمع دبّر — محاسبك الشخصي`
                 : 'دبّر — محاسبك الشخصي';
             try {
-                const cardEl = document.getElementById('daily-wrapped-card');
-                if (window.modernScreenshot && cardEl) {
-                    const blob = await window.modernScreenshot.domToBlob(cardEl, { scale: 2, backgroundColor: null });
-                    if (blob) {
-                        const file = new File([blob], 'dabbar-daily-wrapped.png', { type: 'image/png' });
-                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                            await navigator.share({ files: [file], text });
-                            return;
-                        }
+                let blob = wrappedImageCache['daily'];
+                if (!blob) {
+                    const cardEl = document.getElementById('daily-wrapped-card');
+                    if (window.modernScreenshot && cardEl) {
+                        blob = await window.modernScreenshot.domToBlob(cardEl, { scale: 2, backgroundColor: null });
+                    }
+                }
+                if (blob) {
+                    const file = new File([blob], 'dabbar-daily-wrapped.png', { type: 'image/png' });
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        await navigator.share({ files: [file], text });
+                        return;
                     }
                 }
             } catch (e) { /* نكمل على fallback النص تحت */ }

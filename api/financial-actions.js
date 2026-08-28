@@ -13,6 +13,7 @@ const cleanSettings = (row) => ({
   monthlyBudget: Number(row?.monthly_budget || 0),
   categoryBudgets: row?.category_budgets && typeof row.category_budgets === 'object' ? row.category_budgets : {},
   recurringExpenses: Array.isArray(row?.recurring_expenses) ? row.recurring_expenses : [],
+  balanceCategories: row?.balance_categories && typeof row.balance_categories === 'object' ? row.balance_categories : {},
 });
 
 export default async function handler(req, res) {
@@ -30,10 +31,11 @@ export default async function handler(req, res) {
       const monthlyIncome = Math.max(0, Number(body.monthlyIncome || 0));
       const monthlyBudget = Math.max(0, Number(body.monthlyBudget || 0));
       const categoryBudgets = body.categoryBudgets && typeof body.categoryBudgets === 'object' ? body.categoryBudgets : {};
+      const balanceCategories = body.balanceCategories && typeof body.balanceCategories === 'object' ? Object.fromEntries(Object.entries(body.balanceCategories).slice(0, 100).map(([name, bucket]) => [String(name).slice(0, 80), bucket === 'needs' ? 'needs' : 'wants'])) : {};
       const recurringExpenses = Array.isArray(body.recurringExpenses) ? body.recurringExpenses.slice(0, 50).map((item) => ({
         id: String(item.id || crypto.randomUUID()), name: String(item.name || '').trim().slice(0, 80), amount: Math.max(0, Number(item.amount || 0)), day: Math.min(31, Math.max(1, Number(item.day || 1))), category: String(item.category || 'أخرى').slice(0, 40), active: item.active !== false,
       })).filter((item) => item.name && item.amount > 0) : [];
-      const { data, error } = await supabase.from('financial_settings').upsert({ telegram_user_id: userId, monthly_income: monthlyIncome, monthly_budget: monthlyBudget, category_budgets: categoryBudgets, recurring_expenses: recurringExpenses, updated_at: new Date().toISOString() }, { onConflict: 'telegram_user_id' }).select('*').single();
+      const { data, error } = await supabase.from('financial_settings').upsert({ telegram_user_id: userId, monthly_income: monthlyIncome, monthly_budget: monthlyBudget, category_budgets: categoryBudgets, recurring_expenses: recurringExpenses, balance_categories: balanceCategories, updated_at: new Date().toISOString() }, { onConflict: 'telegram_user_id' }).select('*').single();
       if (error) throw error;
       return res.status(200).json({ settings: cleanSettings(data) });
     }

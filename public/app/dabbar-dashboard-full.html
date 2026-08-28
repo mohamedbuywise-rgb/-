@@ -1552,17 +1552,26 @@
                     <div class="flex items-start justify-between gap-3">
                         <div class="min-w-0">
                             <div class="flex items-center gap-1.5"><span class="text-sm">⚖️</span><h4 class="text-sm font-black text-slate-100">توازن مصاريفك</h4></div>
-                            <p class="mt-1 text-[10px] leading-relaxed text-slate-400">مؤشر إرشادي حسب دخلك وصرفك</p>
+                            <p class="mt-1 text-[10px] leading-relaxed text-slate-400">كل رقم قدامه المستهدف بتاعه</p>
                         </div>
-                        <div class="shrink-0 rounded-xl bg-emerald-500/10 px-2.5 py-1.5 text-left"><span class="block text-[9px] text-slate-500">الدخل الشهري</span><strong id="balance-income" class="text-xs font-black text-emerald-300">—</strong></div>
+                        <div class="shrink-0 rounded-xl bg-emerald-500/10 px-2.5 py-1.5 text-left"><span class="block text-[9px] text-slate-500">دخلك الشهري</span><strong id="balance-income" class="text-xs font-black text-emerald-300">—</strong></div>
                     </div>
                     <div id="balance-bars" class="space-y-2.5"></div>
-                    <div id="balance-insight" class="rounded-xl border border-emerald-500/15 bg-emerald-500/10 px-3 py-2 text-[10px] font-bold leading-relaxed text-emerald-300"></div>
+                    <div id="balance-insight" class="rounded-xl border border-emerald-500/15 bg-emerald-500/10 px-3 py-2 text-[10px] font-bold leading-relaxed text-emerald-300">الحسبة ببساطة: المستهدف = نسبة من دخلك، والفعلي = اللي صرفته</div>
                     <button id="balance-edit-link" type="button" class="flex w-full items-center justify-center gap-1 rounded-xl border border-emerald-500/15 py-2 text-[10px] font-bold text-emerald-300 transition hover:bg-emerald-500/10">تعديل التصنيف <span aria-hidden="true">‹</span></button>
+                    <p class="text-center text-[9px] text-slate-500">غيّر أي فئة من احتياجات لرغبات أو العكس</p>
                 </div>
                 <h4 class="text-xs font-bold text-slate-300">أكثر فئات تم الصرف فيها:</h4>
                 <div class="space-y-2.5 text-xs" id="monthly-categories-list">
                     <p class="text-slate-500">سجّل أول عملية وهتلاقي هنا أكتر فئة بتصرف فيها.</p>
+                </div>
+            </div>
+
+            <div id="balance-category-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
+                <div class="w-full max-w-sm rounded-3xl border border-slate-700 bg-slate-900 p-4 shadow-2xl">
+                    <div class="flex items-center justify-between gap-3"><div><h3 class="text-sm font-black text-slate-100">تعديل تصنيف الفئات</h3><p class="mt-1 text-[10px] text-slate-400">اختار كل فئة تتحسب احتياجات ولا رغبات</p></div><button id="balance-category-close" type="button" class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-800 text-slate-300">✕</button></div>
+                    <div id="balance-category-list" class="mt-4 max-h-[50vh] space-y-2 overflow-y-auto"></div>
+                    <div class="mt-4 flex gap-2"><button id="balance-category-save" type="button" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950">حفظ التصنيف</button><button id="balance-category-cancel" type="button" class="rounded-xl border border-slate-700 px-4 py-2.5 text-xs text-slate-300">إلغاء</button></div>
                 </div>
             </div>
 
@@ -2636,9 +2645,10 @@
             const balanceIncome = Number(settings.monthlyIncome || 0);
             if (balanceIncome > 0 && total > 0) {
                 const needsSet = new Set(['أكل', 'مواصلات', 'فواتير', 'صحة', 'تعليم', 'منزل وأثاث']);
-                const wantsSet = new Set(['تسوق', 'ترفيه', 'ملابس', 'اشتراكات', 'هدايا وتبرعات', 'شخصي وعناية']);
-                const needsTotal = categories.filter((item) => needsSet.has(item.name)).reduce((sum, item) => sum + Number(item.amount || 0), 0);
-                const wantsTotal = categories.filter((item) => wantsSet.has(item.name)).reduce((sum, item) => sum + Number(item.amount || 0), 0);
+                const overrides = settings.balanceCategories || {};
+                const isNeeds = (item) => (overrides[item.name] || (needsSet.has(item.name) ? 'needs' : 'wants')) === 'needs';
+                const needsTotal = categories.filter(isNeeds).reduce((sum, item) => sum + Number(item.amount || 0), 0);
+                const wantsTotal = categories.filter((item) => !isNeeds(item)).reduce((sum, item) => sum + Number(item.amount || 0), 0);
                 const savedTotal = Math.max(0, balanceIncome - total);
                 if (savedTotal >= balanceIncome * 0.20) notifications.push({ id: `balance-savings-20-${new Date().toISOString().slice(0, 7)}`, icon: '🏆', title: 'إنجاز جامد في الادخار', body: `فضل معاك ${fmt(savedTotal)} جنيه من دخلك — وصلت لهدف الـ٢٠٪ تقريبًا. دبّر فخور باستمرارك!`, tone: 'emerald' });
                 if (needsTotal >= balanceIncome * 0.50) notifications.push({ id: `balance-needs-50-${new Date().toISOString().slice(0, 7)}`, icon: '🛡️', title: 'الاحتياجات تحت السيطرة', body: `وصلت لمؤشر الاحتياجات بهدوء (${fmt(needsTotal)} جنيه). خليك مكمل بنفس الوعي.`, tone: 'emerald' });
@@ -2742,8 +2752,10 @@
             const balanceIncome = Number(window.__financialSettings?.monthlyIncome || 0);
             if (balanceIncome > 0 && total > 0) {
                 const categoriesForBalance = month.categories || month.byCategory || [];
-                const needsTotal = categoriesForBalance.filter((item) => ['أكل', 'مواصلات', 'فواتير', 'صحة', 'تعليم', 'منزل وأثاث'].includes(item.name)).reduce((sum, item) => sum + Number(item.amount || 0), 0);
-                const wantsTotal = categoriesForBalance.filter((item) => ['تسوق', 'ترفيه', 'ملابس', 'اشتراكات', 'هدايا وتبرعات', 'شخصي وعناية'].includes(item.name)).reduce((sum, item) => sum + Number(item.amount || 0), 0);
+                const overrides = window.__financialSettings?.balanceCategories || {};
+                const isNeeds = (item) => (overrides[item.name] || (['أكل', 'مواصلات', 'فواتير', 'صحة', 'تعليم', 'منزل وأثاث'].includes(item.name) ? 'needs' : 'wants')) === 'needs';
+                const needsTotal = categoriesForBalance.filter(isNeeds).reduce((sum, item) => sum + Number(item.amount || 0), 0);
+                const wantsTotal = categoriesForBalance.filter((item) => !isNeeds(item)).reduce((sum, item) => sum + Number(item.amount || 0), 0);
                 if (Math.max(0, balanceIncome - total) >= balanceIncome * 0.20) notifications[`balance-savings-20-${new Date().toISOString().slice(0, 7)}`] = true;
                 if (needsTotal >= balanceIncome * 0.50) notifications[`balance-needs-50-${new Date().toISOString().slice(0, 7)}`] = true;
                 if (wantsTotal >= balanceIncome * 0.30) notifications[`balance-wants-30-${new Date().toISOString().slice(0, 7)}`] = true;
@@ -3285,7 +3297,7 @@
         }
 
         function planningSettingsKey() { return `dabbar-financial-settings-${window.__dashboardData?.telegramUserId || currentUser?.id || 'guest'}`; }
-        function defaultPlanningSettings() { return { monthlyIncome: 0, monthlyBudget: 0, categoryBudgets: {}, recurringExpenses: [] }; }
+        function defaultPlanningSettings() { return { monthlyIncome: 0, monthlyBudget: 0, categoryBudgets: {}, recurringExpenses: [], balanceCategories: {} }; }
         function planningSettings() { return window.__financialSettings || defaultPlanningSettings(); }
         function formatPlanningNumber(value) { return Number(value || 0).toLocaleString('ar-EG'); }
         function ensurePlanningUI() {
@@ -3318,10 +3330,7 @@
             });
             document.getElementById('recurring-add').addEventListener('click', addRecurringExpense);
             document.getElementById('category-budget-add').addEventListener('click', addCategoryBudget);
-            document.getElementById('balance-edit-link')?.addEventListener('click', () => {
-                document.getElementById('planning-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                document.getElementById('planning-income')?.focus({ preventScroll: true });
-            });
+            document.getElementById('balance-edit-link')?.addEventListener('click', openBalanceCategoryEditor);
         }
         function addCategoryBudget() {
             const input = document.getElementById('category-budget-custom-name');
@@ -3413,13 +3422,18 @@
             { key: 'wants', label: 'رغبات', target: 0.30, color: '#a78bfa', categories: new Set(['تسوق', 'ترفيه', 'ملابس', 'اشتراكات', 'هدايا وتبرعات', 'شخصي وعناية']) },
             { key: 'savings', label: 'ادخار', target: 0.20, color: '#fbbf24', categories: new Set() },
         ];
+        function balanceBucketFor(category, settings = planningSettings()) {
+            const override = settings.balanceCategories?.[category];
+            if (override === 'needs' || override === 'wants') return override;
+            return BALANCE_BUCKETS[0].categories.has(category) ? 'needs' : 'wants';
+        }
         function calculateBalance(month, settings = planningSettings()) {
             const income = Number(settings.monthlyIncome || 0);
             const total = Number(month?.total || 0);
             const categories = Array.isArray(month?.byCategory) ? month.byCategory : [];
-            const needs = categories.filter((item) => BALANCE_BUCKETS[0].categories.has(item.name)).reduce((sum, item) => sum + Number(item.amount || 0), 0);
-            // أي فئة جديدة لا نعرفها تبدأ تلقائيًا كرغبات، كما اتفقنا.
-            const wants = categories.filter((item) => !BALANCE_BUCKETS[0].categories.has(item.name)).reduce((sum, item) => sum + Number(item.amount || 0), 0);
+            const needs = categories.filter((item) => balanceBucketFor(item.name, settings) === 'needs').reduce((sum, item) => sum + Number(item.amount || 0), 0);
+            // أي فئة جديدة لا يحددها المستخدم تبدأ تلقائيًا كرغبات.
+            const wants = categories.filter((item) => balanceBucketFor(item.name, settings) === 'wants').reduce((sum, item) => sum + Number(item.amount || 0), 0);
             const savings = Math.max(0, income - total);
             return { income, total, needs, wants, savings };
         }
@@ -3429,28 +3443,67 @@
             const balance = calculateBalance(month);
             if (balance.income <= 0) { card.classList.add('hidden'); return; }
             card.classList.remove('hidden');
-            document.getElementById('balance-income').textContent = `${fmt(balance.income)} ج.م`;
+            document.getElementById('balance-income').textContent = fmt(balance.income);
             const values = { needs: balance.needs, wants: balance.wants, savings: balance.savings };
             document.getElementById('balance-bars').innerHTML = BALANCE_BUCKETS.map((bucket) => {
                 const actual = values[bucket.key];
+                const target = Math.round(balance.income * bucket.target);
+                const delta = target - actual;
                 const actualPercent = Math.round((actual / balance.income) * 100);
-                const visualWidth = Math.min(100, Math.max(3, actualPercent / bucket.target * 100));
-                const state = actualPercent <= bucket.target * 100 + 2;
-                return `<div class="space-y-1.5"><div class="flex items-center justify-between gap-2 text-[10px]"><span class="font-bold text-slate-200">${bucket.label} <span class="font-normal text-slate-500">${Math.round(bucket.target * 100)}٪</span></span><span class="font-bold ${state ? 'text-emerald-300' : 'text-amber-300'}">فعلي ${fmt(actual)} ج.م · ${actualPercent}٪</span></div><div class="h-2 overflow-hidden rounded-full bg-slate-800/80"><div class="h-full rounded-full transition-all duration-500" style="width:${visualWidth}%;background:${bucket.color};box-shadow:0 0 12px ${bucket.color}66"></div></div></div>`;
+                const visualWidth = Math.min(100, Math.max(3, (actual / Math.max(1, target)) * 100));
+                const status = delta >= 0 ? `متبقي ${fmt(delta)}` : `زيادة ${fmt(Math.abs(delta))}`;
+                const statusClass = bucket.key === 'savings' && delta <= 0 ? 'text-emerald-300' : delta >= 0 ? 'text-slate-500' : 'text-amber-300';
+                return `<div class="space-y-1.5"><div class="flex items-center justify-between gap-2 text-[10px]"><span class="font-bold text-slate-200">${bucket.label} <span class="font-normal text-slate-500">${Math.round(bucket.target * 100)}٪</span></span><span class="font-bold ${statusClass}">${fmt(actual)} / ${fmt(target)} · ${status}</span></div><div class="h-2 overflow-hidden rounded-full bg-slate-800/80"><div class="h-full rounded-full transition-all duration-500" style="width:${visualWidth}%;background:${bucket.color};box-shadow:0 0 12px ${bucket.color}66"></div></div></div>`;
             }).join('');
             const wantsOver = Math.max(0, balance.wants - balance.income * 0.30);
             const saved = balance.savings;
             const insight = document.getElementById('balance-insight');
             if (wantsOver > 0) {
-                insight.textContent = `بهدوء كده: الرغبات أعلى من المؤشر بـ ${fmt(wantsOver)} ج.م — عندك فرصة ترجع للتوازن.`;
+                insight.textContent = `بهدوء كده: الرغبات زادت ${fmt(wantsOver)} عن مستهدفها — عندك فرصة ترجع للتوازن.`;
                 insight.className = 'rounded-xl border border-amber-400/20 bg-amber-400/10 px-3 py-2 text-[10px] font-bold leading-relaxed text-amber-200';
             } else if (saved >= balance.income * 0.20) {
-                insight.textContent = `جامد جدًا — حافظت على ادخار ${fmt(saved)} ج.م، وصلت لهدف الـ٢٠٪ تقريبًا.`;
+                insight.textContent = `جامد جدًا — ادخارك زاد ${fmt(saved - balance.income * 0.20)} عن المستهدف.`;
                 insight.className = 'rounded-xl border border-emerald-400/20 bg-emerald-400/10 px-3 py-2 text-[10px] font-bold leading-relaxed text-emerald-300';
             } else {
-                insight.textContent = `أنت ماشي كويس — فاضلك ${fmt(Math.max(0, balance.income * 0.20 - saved))} ج.م عشان تكمل هدف الادخار.`;
+                insight.textContent = `أنت ماشي كويس — فاضلك ${fmt(balance.income * 0.20 - saved)} عشان تكمل هدف الادخار.`;
                 insight.className = 'rounded-xl border border-emerald-400/20 bg-emerald-400/10 px-3 py-2 text-[10px] font-bold leading-relaxed text-emerald-300';
             }
+        }
+
+        function renderBalanceCategoryEditor() {
+            const list = document.getElementById('balance-category-list');
+            const categories = window.__dashboardData?.month?.byCategory || [];
+            const mapping = planningSettings().balanceCategories || {};
+            if (!list) return;
+            list.innerHTML = categories.length ? categories.map((item) => {
+                const bucket = balanceBucketFor(item.name);
+                return `<label class="flex items-center justify-between gap-2 rounded-xl border border-slate-700 bg-slate-950/50 px-3 py-2 text-[11px] text-slate-200"><span>${getCategoryEmoji(item.name)} ${item.name}</span><select data-balance-category="${item.name.replace(/"/g, '&quot;')}" class="rounded-lg border border-slate-700 bg-slate-900 px-2 py-1 text-[10px] text-slate-100"><option value="needs" ${bucket === 'needs' ? 'selected' : ''}>احتياجات</option><option value="wants" ${bucket === 'wants' ? 'selected' : ''}>رغبات</option></select></label>`;
+            }).join('') : '<p class="text-center text-[11px] text-slate-500">سجّل مصروفًا الأول عشان نعرض فئاته هنا.</p>';
+        }
+        function openBalanceCategoryEditor() {
+            renderBalanceCategoryEditor();
+            const modal = document.getElementById('balance-category-modal');
+            modal?.classList.remove('hidden'); modal?.classList.add('flex');
+        }
+        document.getElementById('balance-category-close')?.addEventListener('click', closeBalanceCategoryEditor);
+        document.getElementById('balance-category-cancel')?.addEventListener('click', closeBalanceCategoryEditor);
+        document.getElementById('balance-category-save')?.addEventListener('click', saveBalanceCategoryEditor);
+        function closeBalanceCategoryEditor() {
+            const modal = document.getElementById('balance-category-modal');
+            modal?.classList.add('hidden'); modal?.classList.remove('flex');
+        }
+        async function saveBalanceCategoryEditor() {
+            const current = planningSettings();
+            const balanceCategories = { ...(current.balanceCategories || {}) };
+            document.querySelectorAll('[data-balance-category]').forEach((select) => { balanceCategories[select.dataset.balanceCategory] = select.value === 'needs' ? 'needs' : 'wants'; });
+            const settings = { ...current, balanceCategories };
+            window.__financialSettings = settings;
+            localStorage.setItem(planningSettingsKey(), JSON.stringify(settings));
+            try { const res = await fetch('/api/financial-actions', { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` }, body: JSON.stringify(settings) }); if (res.ok) window.__financialSettings = (await res.json()).settings; } catch {}
+            closeBalanceCategoryEditor();
+            renderBalanceCard(window.__dashboardData?.month || {});
+            renderInAppNotifications(window.__dashboardData || {});
+            quickStatus('اتحفظ تصنيف الفئات واتحدث الكارت.', 'success');
         }
 
         function renderMonthly(month) {

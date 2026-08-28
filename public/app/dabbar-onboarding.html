@@ -362,6 +362,8 @@
         <span id="authSubmitLabel">تسجيل الدخول</span>
       </button>
     </form>
+    <button type="button" class="btn btn-ghost" id="passkeyBtn" style="display:none; width:100%; margin-top:10px;">🔐 الدخول بالبصمة (Passkey)</button>
+    <button type="button" class="btn btn-ghost" id="passkeyEnrollBtn" style="display:none; width:100%; margin-top:10px;">✨ تفعيل الدخول بالبصمة</button>
 
     <div id="google-auth-divider" style="display:flex; align-items:center; gap:10px; margin:16px 0; color:var(--muted); font-size:12px;"><span style="height:1px; flex:1; background:var(--line);"></span><span>أو</span><span style="height:1px; flex:1; background:var(--line);"></span></div>
     <button type="button" class="btn btn-ghost" id="googleSignInBtn" style="display:flex; align-items:center; justify-content:center; gap:8px; width:100%;"><b style="font-size:16px;">G</b><span>الدخول بحساب Google</span></button>
@@ -616,6 +618,16 @@
   const confirmPasswordInput = document.getElementById('confirmPasswordInput');
   const updatePasswordBtn = document.getElementById('updatePasswordBtn');
   const updatePasswordLabel = document.getElementById('updatePasswordLabel');
+  const passkeyBtn = document.getElementById('passkeyBtn');
+  const passkeyEnrollBtn = document.getElementById('passkeyEnrollBtn');
+
+  const pkDecode = (value) => { const s = value.replace(/-/g, '+').replace(/_/g, '/'); return Uint8Array.from(atob(s + '='.repeat((4 - s.length % 4) % 4)), (c) => c.charCodeAt(0)); };
+  const pkEncode = (value) => btoa(String.fromCharCode(...new Uint8Array(value))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  const pkJSON = (credential) => ({ id: credential.id, rawId: pkEncode(credential.rawId), type: credential.type, response: Object.fromEntries(Object.entries(credential.response).map(([key, value]) => [key, value instanceof ArrayBuffer ? pkEncode(value) : value])) });
+  async function passkeyFetch(action, body) { const session = (await sb.auth.getSession()).data.session; const res = await fetch(`/api/passkey?action=${action}`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}) }, body: JSON.stringify(body || {}) }); const data = await res.json().catch(() => ({})); if (!res.ok) throw new Error(data.error || 'تعذر تشغيل الدخول بالبصمة.'); return data; }
+  async function enrollPasskey() { if (!window.PublicKeyCredential || !navigator.credentials) return showAuthError('الجهاز أو المتصفح لا يدعم Passkey.'); try { const options = await passkeyFetch('register-options'); options.challenge = pkDecode(options.challenge); options.user.id = pkDecode(options.user.id); options.excludeCredentials = (options.excludeCredentials || []).map((x) => ({ ...x, id: pkDecode(x.id) })); const credential = await navigator.credentials.create({ publicKey: options }); await passkeyFetch('register-verify', { challenge: options.challenge && pkEncode(options.challenge), response: pkJSON(credential) }); showAuthNotice('اتفعّل الدخول بالبصمة. المرة الجاية هتدخل بضغطة واحدة.'); passkeyEnrollBtn.style.display = 'none'; } catch (error) { showAuthError(error.message || 'مقدرناش نفعّل Passkey دلوقتي.'); } }
+  async function loginWithPasskey() { if (!window.PublicKeyCredential || !navigator.credentials) return showAuthError('الجهاز أو المتصفح لا يدعم Passkey.'); try { const options = await passkeyFetch('login-options'); const challenge = options.challenge; options.challenge = pkDecode(challenge); const credential = await navigator.credentials.get({ publicKey: options }); const result = await passkeyFetch('login-verify', { challenge, response: pkJSON(credential) }); if (result.actionLink) window.location.href = result.actionLink; } catch (error) { showAuthError(error.message || 'مقدرناش ندخل بالبصمة. استخدم الإيميل والباسورد كبديل.'); } }
+  passkeyBtn?.addEventListener('click', loginWithPasskey); passkeyEnrollBtn?.addEventListener('click', enrollPasskey);
 
   let authMode = 'login';
 
@@ -629,6 +641,8 @@
     updatePasswordForm.style.display = 'none';
     authForm.style.display = 'block';
     forgotPasswordBtn.style.display = mode === 'login' ? 'block' : 'none';
+    passkeyBtn.style.display = mode === 'login' ? 'flex' : 'none';
+    passkeyEnrollBtn.style.display = mode === 'login' ? 'none' : 'none';
     hideAuthMessages();
     const isSignup = mode === 'signup';
     tabSignup.classList.toggle('active', isSignup);
@@ -835,9 +849,12 @@
           showAuthError('حصل خطأ في تسجيل الدخول، جرب تاني.');
           return;
         }
-        // ربط تيليجرام اختياري؛ الحساب المستقل يدخل الداش مباشرة لو التطبيق متثبت.
+        // نعرض تفعيل Passkey للمستخدم بعد أول دخول ناجح، مع الإبقاء على الدخول العادي كبديل.
+        passkeyEnrollBtn.style.display = 'flex';
+        showAuthNotice('دخلت بنجاح. فعّل الدخول بالبصمة عشان المرة الجاية تدخل بضغطة واحدة.');
+        // ربط تيليجرام اختياري؛ المستخدم يقدر يكمل حتى لو تجاهل Passkey.
         if (isStandalone()) {
-          window.location.href = DASHBOARD_URL;
+          setTimeout(() => { if (passkeyEnrollBtn.style.display !== 'none') window.location.href = DASHBOARD_URL; }, 5000);
         } else {
           showLinkScreen();
         }

@@ -15,7 +15,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="https://cdn.jsdelivr.net/npm/modern-screenshot@4/dist/index.umd.js"></script>
+    <script src="/vendor/modern-screenshot.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
     <!-- بنحدد الوضع (فاتح/غامق) بدري قبل ما الصفحة تترسم. الافتراضي دلوقتي "فاتح" -->
     <script>
@@ -4437,16 +4437,69 @@
             year: { kicker: 'DABBAR WRAPPED', titlePrefix: 'سنتك', bestLabel: 'أحسن شهر ماليًا' },
         };
         let currentWrappedPeriod = 'week';
-        // بنجهز صورة الكارت مقدمًا (مش وقت الضغط على مشاركة) عشان مشاركة الصورة متفشلش
-        // بسبب انتهاء "لمسة المستخدم" أثناء استنى تصوير الكارت أونلاين.
+        // بنجهز صورة الكارت مقدمًا، لكن المشاركة نفسها تعيد التصوير عند الحاجة.
+        // مهم: لا نستخدم مشاركة النص كـ fallback، لأن المطلوب مشاركة الكارت كصورة دائمًا.
         const wrappedImageCache = {};
-        async function prepareWrappedImage(cacheKey, cardId) {
-            try {
-                const cardEl = document.getElementById(cardId);
-                if (!window.modernScreenshot || !cardEl || cardEl.classList.contains('hidden')) return;
-                const blob = await window.modernScreenshot.domToBlob(cardEl, { scale: 2, backgroundColor: null });
-                if (blob) wrappedImageCache[cacheKey] = blob;
-            } catch (e) { /* هنرجع لمشاركة النص لو فشل */ }
+        async function getWrappedImage(cacheKey, cardId) {
+            let blob = wrappedImageCache[cacheKey];
+            if (blob && blob.size > 0) return blob;
+
+            const cardEl = document.getElementById(cardId);
+            if (!window.modernScreenshot || !cardEl || cardEl.classList.contains('hidden')) return null;
+
+            // ننتظر تحميل الخطوط والرسم التالي حتى لا تخرج الصورة ناقصة أو بدون نص.
+            if (document.fonts && document.fonts.ready) await document.fonts.ready;
+            await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+            blob = await window.modernScreenshot.domToBlob(cardEl, {
+                scale: Math.min(3, Math.max(2, window.devicePixelRatio || 2)),
+                type: 'image/png',
+                backgroundColor: null,
+            });
+            if (blob && blob.size > 0) wrappedImageCache[cacheKey] = blob;
+            return blob;
+        }
+
+        function downloadWrappedImage(blob, filename) {
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            link.rel = 'noopener';
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+
+        async function shareWrappedCard({ cacheKey, cardId, filename, text }) {
+            const blob = await getWrappedImage(cacheKey, cardId);
+            if (!blob) throw new Error('مش قادر أجهز صورة الكارت دلوقتي. افتح الكارت وحاول تاني.');
+
+            const file = new File([blob], filename, { type: 'image/png' });
+            const shareData = { files: [file], title: 'دبّر Wrapped', text };
+            let supportsFiles = true;
+            if (typeof navigator.canShare === 'function') {
+                try { supportsFiles = navigator.canShare({ files: [file] }); } catch (e) { supportsFiles = false; }
+            }
+
+            // بعض نسخ Safari لا توفر canShare، لذلك نجرب navigator.share مباشرة.
+            if (navigator.share && supportsFiles) {
+                await navigator.share(shareData);
+                return;
+            }
+
+            // fallback بصري: نسخ الصورة نفسها، ثم تنزيلها. لا نرجع أبدًا لمشاركة النص وحده.
+            if (navigator.clipboard && window.ClipboardItem) {
+                try {
+                    await navigator.clipboard.write([
+                        new ClipboardItem({ 'image/png': blob }),
+                    ]);
+                    alert('اتنسخت صورة الكارت. الصقها في واتساب أو أي مكان تحب.');
+                    return;
+                } catch (e) { /* نكمل بالتنزيل */ }
+            }
+            downloadWrappedImage(blob, filename);
+            alert('الصورة اتجهزت واتحفظت. اختارها من زر المشاركة في الموبايل أو ابعتها من الاستوديو.');
         }
 
         function renderWrappedPeriod(period) {
@@ -4493,9 +4546,10 @@
         });
 
         document.getElementById('asst-wrapped-open').addEventListener('click', () => {
-            renderWrappedPeriod(currentWrappedPeriod);
+            // نُظهر الـ modal قبل التصوير؛ تصوير عنصر داخل ancestor مخفي ينتج Blob فارغًا في بعض المتصفحات.
             wrappedModal.classList.remove('hidden');
             wrappedModal.classList.add('flex');
+            renderWrappedPeriod(currentWrappedPeriod);
         });
         document.getElementById('wrapped-close').addEventListener('click', () => {
             wrappedModal.classList.add('hidden');
@@ -4508,37 +4562,15 @@
             const text = w
                 ? `${titleLine}:\n💰 صرفت ${fmt(w.total)}\n🔝 أكبر بند: ${w.topCategory ? w.topCategory.name : '—'}\n💡 وفرت تقريبًا ${fmt(w.savedEstimate)}\n🏆 ${meta.bestLabel}: ${w.bestMonthLabel || '—'}\n\nمع دبّر — محاسبك الشخصي`
                 : 'دبّر — محاسبك الشخصي';
-
-            // نحاول الأول نستخدم صورة الكارت اللي جهزناها مقدمًا (وقت فتح التاب) عشان المشاركة
-            // تبقى بصرية زي Spotify Wrapped بدل ما تكون نص بس، ومن غير أي تأخير وقت الضغط
-            // يفقّدنا "لمسة المستخدم" المطلوبة لمشاركة الملفات. لو مفيش صورة جاهزة (لسه بتتحمّل
-            // أو فشلت)، بنرجع لنفس سلوك مشاركة النص اللي كان شغال قبل كده.
             try {
-                let blob = wrappedImageCache[`wrapped-${currentWrappedPeriod}`];
-                if (!blob) {
-                    const cardEl = document.getElementById('wrapped-card');
-                    if (window.modernScreenshot && cardEl) {
-                        blob = await window.modernScreenshot.domToBlob(cardEl, { scale: 2, backgroundColor: null });
-                    }
-                }
-                if (blob) {
-                    const file = new File([blob], 'dabbar-wrapped.png', { type: 'image/png' });
-                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                        await navigator.share({ files: [file], text });
-                        return;
-                    }
-                }
-            } catch (e) { /* نكمل على fallback النص تحت */ }
-
-            if (navigator.share) {
-                try { await navigator.share({ text }); } catch (e) {}
-            } else {
-                try {
-                    await navigator.clipboard.writeText(text);
-                    alert('تم نسخ ملخص Wrapped، تقدر تلزقه فين ما تحب.');
-                } catch (e) {
-                    alert(text);
-                }
+                await shareWrappedCard({
+                    cacheKey: `wrapped-${currentWrappedPeriod}`,
+                    cardId: 'wrapped-card',
+                    filename: `dabbar-${currentWrappedPeriod}-wrapped.png`,
+                    text,
+                });
+            } catch (e) {
+                if (e && e.name !== 'AbortError') alert(e.message || 'حصلت مشكلة في مشاركة الصورة.');
             }
         });
 
@@ -4600,31 +4632,14 @@
                 ? `يوم ${dateLabel}:\n💰 صرفت ${fmt(today.total)}\n📊 ${today.count} عملية\n\nمع دبّر — محاسبك الشخصي`
                 : 'دبّر — محاسبك الشخصي';
             try {
-                let blob = wrappedImageCache['daily'];
-                if (!blob) {
-                    const cardEl = document.getElementById('daily-wrapped-card');
-                    if (window.modernScreenshot && cardEl) {
-                        blob = await window.modernScreenshot.domToBlob(cardEl, { scale: 2, backgroundColor: null });
-                    }
-                }
-                if (blob) {
-                    const file = new File([blob], 'dabbar-daily-wrapped.png', { type: 'image/png' });
-                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                        await navigator.share({ files: [file], text });
-                        return;
-                    }
-                }
-            } catch (e) { /* نكمل على fallback النص تحت */ }
-
-            if (navigator.share) {
-                try { await navigator.share({ text }); } catch (e) {}
-            } else {
-                try {
-                    await navigator.clipboard.writeText(text);
-                    alert('تم نسخ ملخص يومك، تقدر تلزقه فين ما تحب.');
-                } catch (e) {
-                    alert(text);
-                }
+                await shareWrappedCard({
+                    cacheKey: 'daily',
+                    cardId: 'daily-wrapped-card',
+                    filename: 'dabbar-daily-wrapped.png',
+                    text,
+                });
+            } catch (e) {
+                if (e && e.name !== 'AbortError') alert(e.message || 'حصلت مشكلة في مشاركة الصورة.');
             }
         });
 

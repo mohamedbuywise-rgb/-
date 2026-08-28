@@ -1,4 +1,7 @@
 {
+  "rewrites": [
+    { "source": "/api/:route*", "destination": "/api/index?route=:route*" }
+  ],
   "headers": [
     {
       "source": "/app/sw.js",
@@ -8,31 +11,13 @@
     }
   ],
   "crons": [
-    {
-      "path": "/api/cron-daily",
-      "schedule": "5 5 * * *"
-    },
-    {
-      "path": "/api/cron-daily",
-      "schedule": "0 21 * * *"
-    }
+    { "path": "/api/cron-daily", "schedule": "5 5 * * *" },
+    { "path": "/api/cron-daily", "schedule": "0 21 * * *" }
   ],
   "functions": {
-    "api/telegram-webhook.js": {
+    "api/index.js": {
       "memory": 1536,
       "maxDuration": 60
-    },
-    "api/cron-daily.js": {
-      "memory": 1536,
-      "maxDuration": 60
-    },
-    "api/reports.js": {
-      "memory": 1536,
-      "maxDuration": 60
-    },
-    "api/assistant.js": {
-      "memory": 1024,
-      "maxDuration": 45
     }
   }
 }

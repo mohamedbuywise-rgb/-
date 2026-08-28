@@ -383,25 +383,6 @@
             text-shadow: 0 7px 24px rgba(16,185,129,.14);
         }
 
-        #in-app-notifications-list .notification-card { position: relative; border: 0 !important; border-radius: 1.35rem !important; opacity: 1 !important; background: linear-gradient(135deg, rgba(21, 26, 27, .96), rgba(18, 25, 25, .86)) !important; box-shadow: 0 10px 28px rgba(0,0,0,.14), inset 0 1px 0 rgba(255,255,255,.025) !important; }
-        #in-app-notifications-list .notification-card-unread { box-shadow: inset 3px 0 0 #32d399, 0 10px 28px rgba(0,0,0,.16), inset 0 1px 0 rgba(255,255,255,.035) !important; }
-        #in-app-notifications-list .notification-card-read { background: rgba(22, 29, 29, .72) !important; }
-        #in-app-notifications-list .notification-icon { display: flex; width: 2.65rem; height: 2.65rem; flex: 0 0 2.65rem; align-items: center; justify-content: center; border-radius: 999px; background: rgba(50, 211, 153, .10); font-size: 1.15rem; }
-        #in-app-notifications-list .notification-title { color: #f8fafc !important; letter-spacing: -.01em; }
-        #in-app-notifications-list .notification-body { color: #cbd5e1 !important; }
-        #in-app-notifications-list .notification-state { flex: 0 0 auto; font-size: 9px; font-weight: 800; }
-        #in-app-notifications-list .notification-state-new { color: #32d399 !important; }
-        #in-app-notifications-list .notification-state-new::before { content: '•'; margin-inline-end: 3px; }
-        #in-app-notifications-list .notification-state-read { color: #94a3b8 !important; }
-        html[data-theme="light"] #in-app-notifications-list .notification-card { background: linear-gradient(135deg, #ffffff, #f7fcf9) !important; box-shadow: 0 10px 26px rgba(39, 57, 48, .07), inset 0 1px 0 rgba(255,255,255,.85) !important; }
-        html[data-theme="light"] #in-app-notifications-list .notification-card-unread { box-shadow: inset 3px 0 0 #087b50, 0 10px 26px rgba(39, 57, 48, .08), inset 0 1px 0 rgba(255,255,255,.9) !important; }
-        html[data-theme="light"] #in-app-notifications-list .notification-card-read { background: #f3faf6 !important; }
-        html[data-theme="light"] #in-app-notifications-list .notification-icon { background: rgba(8, 123, 80, .075); }
-        html[data-theme="light"] #in-app-notifications-list .notification-title { color: #145c43 !important; }
-        html[data-theme="light"] #in-app-notifications-list .notification-body { color: #48665b !important; }
-        html[data-theme="light"] #in-app-notifications-list .notification-state-new { color: #087b50 !important; }
-        html[data-theme="light"] #in-app-notifications-list .notification-state-read { color: #6b8178 !important; }
-
         #balance-card {
             background: linear-gradient(135deg, rgba(16, 185, 129, .075), rgba(15, 23, 42, .22) 72%) !important;
             box-shadow: inset 0 1px 0 rgba(167, 243, 208, .06), 0 12px 28px rgba(2, 44, 34, .14);
@@ -1577,6 +1558,8 @@
                     </div>
                     <div id="balance-bars" class="space-y-2.5"></div>
                     <div id="balance-insight" class="rounded-xl border border-emerald-500/15 bg-emerald-500/10 px-3 py-2 text-[10px] font-bold leading-relaxed text-emerald-300">الحسبة ببساطة: المستهدف = نسبة من دخلك، والفعلي = اللي صرفته</div>
+                    <button id="balance-edit-link" type="button" class="flex w-full items-center justify-center gap-1 rounded-xl border border-emerald-500/15 py-2 text-[10px] font-bold text-emerald-300 transition hover:bg-emerald-500/10">تعديل التصنيف <span aria-hidden="true">‹</span></button>
+                    <p class="text-center text-[9px] text-slate-500">غيّر أي فئة من احتياجات لرغبات أو العكس</p>
                 </div>
                 <h4 class="text-xs font-bold text-slate-300">أكثر فئات تم الصرف فيها:</h4>
                 <div class="space-y-2.5 text-xs" id="monthly-categories-list">
@@ -2729,7 +2712,7 @@
             const unread = notifications.filter((item) => !read[item.id]).length;
             updateAccountNotificationBadge(unread);
             if (subtitle) subtitle.textContent = unread ? `${unread} رسالة مفيدة مستنياك.` : 'أنت متابع كل الرسائل الحالية.';
-            list.innerHTML = notifications.map((item) => `<article class="notification-card ${read[item.id] ? 'notification-card-read' : 'notification-card-unread'} flex items-start gap-3 p-3.5"><span class="notification-icon">${item.icon}</span><div class="min-w-0 flex-1"><div class="flex items-center justify-between gap-2"><p class="notification-title text-[11px] font-bold">${item.title}</p><span class="notification-state ${read[item.id] ? 'notification-state-read' : 'notification-state-new'}">${read[item.id] ? 'متابعة' : 'جديد'}</span></div><p class="notification-body mt-1 text-[10px] leading-relaxed">${item.body}</p></div></article>`).join('');
+            list.innerHTML = notifications.map((item) => `<article class="flex items-start gap-3 rounded-2xl border ${read[item.id] ? 'border-slate-800 bg-slate-900/20 opacity-70' : 'border-emerald-500/20 bg-emerald-500/5'} p-3"><span class="text-base">${item.icon}</span><div class="min-w-0"><p class="text-[11px] font-bold text-slate-200">${item.title}</p><p class="mt-1 text-[10px] leading-relaxed text-slate-400">${item.body}</p></div></article>`).join('');
         }
 
         function markInAppNotificationsRead() {

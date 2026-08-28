@@ -21,7 +21,7 @@
     document.getElementById('bootSplash')?.classList.add('hide');
   }, 6000);
 </script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.105.0"></script>
 
 <style>
   /* ===== هوية دبّر الموحّدة: أبيض + أخضر (زي index.html و guide.html بالظبط) ===== */
@@ -111,6 +111,17 @@
   .field input.text-input{ letter-spacing:normal; font-weight:500; text-align:right; }
   .field input.text-input::placeholder{ text-align:right; }
   .forgot-link{ display:block; margin:13px auto 0; border:none; background:none; color:var(--green-deep); font-family:'Cairo',sans-serif; font-size:12.5px; font-weight:800; cursor:pointer; text-decoration:underline; text-underline-offset:3px; }
+  .passkey-divider{ display:flex; align-items:center; gap:10px; margin:18px 0 12px; color:var(--muted); font-size:11px; }
+  .passkey-divider span{ height:1px; flex:1; background:var(--line); }
+  .passkey-btn{ background:#fff; color:var(--green-deep); border:1.5px solid var(--green-tint-2); box-shadow:none; }
+  .passkey-btn:hover{ background:var(--green-tint); }
+  .passkey-btn:disabled{ opacity:.6; cursor:not-allowed; }
+  .passkey-card{ display:none; margin-top:18px; padding:15px; background:var(--green-tint); border:1px solid var(--green-tint-2); border-radius:14px; text-align:center; }
+  .passkey-card.show{ display:block; }
+  .passkey-card h3{ font-family:'Cairo',sans-serif; font-weight:900; font-size:14px; color:var(--ink); margin-bottom:6px; }
+  .passkey-card p{ color:var(--muted); font-size:12px; line-height:1.8; margin-bottom:12px; }
+  .passkey-card .btn{ font-size:12.5px; padding:12px 16px; }
+  .passkey-skip{ display:block; margin:10px auto 0; border:0; background:transparent; color:var(--muted); font-family:'Tajawal',sans-serif; font-size:11.5px; cursor:pointer; }
   .recovery-card{ margin-top:18px; padding-top:18px; border-top:1px solid var(--line); }
   .recovery-card h3{ font-family:'Cairo',sans-serif; font-weight:900; font-size:17px; text-align:center; color:var(--ink); margin-bottom:6px; }
   .recovery-card > p{ text-align:center; color:var(--muted); font-size:12.5px; line-height:1.8; margin-bottom:14px; }
@@ -362,8 +373,15 @@
         <span id="authSubmitLabel">تسجيل الدخول</span>
       </button>
     </form>
-    <button type="button" class="btn btn-ghost" id="passkeyBtn" style="display:none; width:100%; margin-top:10px;">🔐 الدخول بالبصمة (Passkey)</button>
-    <button type="button" class="btn btn-ghost" id="passkeyEnrollBtn" style="display:none; width:100%; margin-top:10px;">✨ تفعيل الدخول بالبصمة</button>
+    <div class="passkey-divider" id="passkeyLoginDivider"><span></span><span>أو</span><span></span></div>
+    <button type="button" class="btn passkey-btn" id="passkeyLoginBtn">🔐 الدخول بالبصمة أو Passkey</button>
+
+    <div class="passkey-card" id="passkeySetupCard">
+      <h3>فعّل الدخول بالبصمة</h3>
+      <p>سجّل Passkey على جهازك عشان تقدر تدخل بسرعة بعد إعادة تثبيت التطبيق، باستخدام البصمة أو Face ID أو رمز الجهاز.</p>
+      <button type="button" class="btn btn-primary" id="passkeySetupBtn"><span id="passkeySetupLabel">تفعيل Passkey دلوقتي</span></button>
+      <button type="button" class="passkey-skip" id="passkeySkipBtn">مش دلوقتي</button>
+    </div>
 
     <div id="google-auth-divider" style="display:flex; align-items:center; gap:10px; margin:16px 0; color:var(--muted); font-size:12px;"><span style="height:1px; flex:1; background:var(--line);"></span><span>أو</span><span style="height:1px; flex:1; background:var(--line);"></span></div>
     <button type="button" class="btn btn-ghost" id="googleSignInBtn" style="display:flex; align-items:center; justify-content:center; gap:8px; width:100%;"><b style="font-size:16px;">G</b><span>الدخول بحساب Google</span></button>
@@ -443,7 +461,9 @@
   let sb = null;
   try {
     if (window.supabase?.createClient) {
-      sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+      sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        auth: { experimental: { passkey: true } }
+      });
     }
   } catch (e) {
     console.error('Supabase initialization failed:', e);
@@ -618,18 +638,61 @@
   const confirmPasswordInput = document.getElementById('confirmPasswordInput');
   const updatePasswordBtn = document.getElementById('updatePasswordBtn');
   const updatePasswordLabel = document.getElementById('updatePasswordLabel');
-  const passkeyBtn = document.getElementById('passkeyBtn');
-  const passkeyEnrollBtn = document.getElementById('passkeyEnrollBtn');
 
-  const pkDecode = (value) => { const s = value.replace(/-/g, '+').replace(/_/g, '/'); return Uint8Array.from(atob(s + '='.repeat((4 - s.length % 4) % 4)), (c) => c.charCodeAt(0)); };
-  const pkEncode = (value) => btoa(String.fromCharCode(...new Uint8Array(value))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-  const pkJSON = (credential) => ({ id: credential.id, rawId: pkEncode(credential.rawId), type: credential.type, response: Object.fromEntries(Object.entries(credential.response).map(([key, value]) => [key, value instanceof ArrayBuffer ? pkEncode(value) : value])) });
-  async function passkeyFetch(action, body) { const session = (await sb.auth.getSession()).data.session; const res = await fetch(`/api/passkey?action=${action}`, { method: 'POST', headers: { 'Content-Type': 'application/json', ...(session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {}) }, body: JSON.stringify(body || {}) }); const data = await res.json().catch(() => ({})); if (!res.ok) throw new Error(data.error || 'تعذر تشغيل الدخول بالبصمة.'); return data; }
-  async function enrollPasskey() { if (!window.PublicKeyCredential || !navigator.credentials) return showAuthError('الجهاز أو المتصفح لا يدعم Passkey.'); try { const options = await passkeyFetch('register-options'); options.challenge = pkDecode(options.challenge); options.user.id = pkDecode(options.user.id); options.excludeCredentials = (options.excludeCredentials || []).map((x) => ({ ...x, id: pkDecode(x.id) })); const credential = await navigator.credentials.create({ publicKey: options }); await passkeyFetch('register-verify', { challenge: options.challenge && pkEncode(options.challenge), response: pkJSON(credential) }); showAuthNotice('اتفعّل الدخول بالبصمة. المرة الجاية هتدخل بضغطة واحدة.'); passkeyEnrollBtn.style.display = 'none'; } catch (error) { showAuthError(error.message || 'مقدرناش نفعّل Passkey دلوقتي.'); } }
-  async function loginWithPasskey() { if (!window.PublicKeyCredential || !navigator.credentials) return showAuthError('الجهاز أو المتصفح لا يدعم Passkey.'); try { const options = await passkeyFetch('login-options'); const challenge = options.challenge; options.challenge = pkDecode(challenge); const credential = await navigator.credentials.get({ publicKey: options }); const result = await passkeyFetch('login-verify', { challenge, response: pkJSON(credential) }); if (result.actionLink) window.location.href = result.actionLink; } catch (error) { showAuthError(error.message || 'مقدرناش ندخل بالبصمة. استخدم الإيميل والباسورد كبديل.'); } }
-  passkeyBtn?.addEventListener('click', loginWithPasskey); passkeyEnrollBtn?.addEventListener('click', enrollPasskey);
-
+  const passkeyLoginDivider = document.getElementById('passkeyLoginDivider');
+  const passkeyLoginBtn = document.getElementById('passkeyLoginBtn');
+  const passkeySetupCard = document.getElementById('passkeySetupCard');
+  const passkeySetupBtn = document.getElementById('passkeySetupBtn');
+  const passkeySetupLabel = document.getElementById('passkeySetupLabel');
+  const passkeySkipBtn = document.getElementById('passkeySkipBtn');
   let authMode = 'login';
+
+  function passkeySupported() {
+    return Boolean(window.isSecureContext && window.PublicKeyCredential && sb?.auth?.signInWithPasskey && sb?.auth?.registerPasskey);
+  }
+
+  function passkeyErrorMessage(error) {
+    const name = error?.name || '';
+    const message = String(error?.message || '').toLowerCase();
+    if (name === 'NotAllowedError' || message.includes('cancel') || message.includes('aborted')) return 'تم إلغاء العملية. تقدر تستخدم الإيميل والباسورد بدلًا من ذلك.';
+    if (message.includes('not enabled') || message.includes('passkey')) return 'Passkey غير مفعّل للمشروع حاليًا. فعّله من Authentication → Passkeys في Supabase ثم جرّب مرة ثانية.';
+    if (!window.isSecureContext) return 'Passkey يحتاج فتح التطبيق من HTTPS أو من localhost.';
+    return error?.message || 'تعذر إتمام عملية Passkey. جرّب مرة أخرى أو استخدم الإيميل والباسورد.';
+  }
+
+  function continueAfterAuth() {
+    if (isStandalone()) window.location.href = DASHBOARD_URL;
+    else showLinkScreen();
+  }
+
+  function showPasskeySetupOffer() {
+    if (!passkeySupported()) {
+      continueAfterAuth();
+      return;
+    }
+    authForm.style.display = 'none';
+    passkeyLoginDivider.style.display = 'none';
+    passkeyLoginBtn.style.display = 'none';
+    forgotPasswordBtn.style.display = 'none';
+    passkeySetupCard.classList.add('show');
+    authTitle.textContent = 'أمّن دخولك بالبصمة';
+    authSub.textContent = 'فعّل Passkey دلوقتي عشان تدخل بسهولة بعد إعادة تثبيت التطبيق.';
+    hideAuthMessages();
+  }
+
+  async function registerCurrentUserPasskey() {
+    if (!sb?.auth?.registerPasskey) throw new Error('Passkey غير متاح في نسخة مكتبة المصادقة الحالية.');
+    const { data, error } = await sb.auth.registerPasskey();
+    if (error) throw error;
+    if (!data?.id) throw new Error('لم يرجع خادم المصادقة بيانات Passkey صالحة.');
+    return data;
+  }
+
+  function configurePasskeyUi() {
+    const supported = passkeySupported();
+    passkeyLoginDivider.style.display = supported && authMode === 'login' ? 'flex' : 'none';
+    passkeyLoginBtn.style.display = supported && authMode === 'login' ? 'flex' : 'none';
+  }
 
   function showAuthError(msg) { authError.textContent = msg; authError.classList.add('show'); authNotice.classList.remove('show'); }
   function showAuthNotice(msg) { authNotice.textContent = msg; authNotice.classList.add('show'); authError.classList.remove('show'); }
@@ -641,8 +704,6 @@
     updatePasswordForm.style.display = 'none';
     authForm.style.display = 'block';
     forgotPasswordBtn.style.display = mode === 'login' ? 'block' : 'none';
-    passkeyBtn.style.display = mode === 'login' ? 'flex' : 'none';
-    passkeyEnrollBtn.style.display = mode === 'login' ? 'none' : 'none';
     hideAuthMessages();
     const isSignup = mode === 'signup';
     tabSignup.classList.toggle('active', isSignup);
@@ -653,10 +714,12 @@
     authTitle.textContent = isSignup ? 'اعمل حسابك في دبّر' : 'أهلاً بيك تاني في دبّر';
     authSub.textContent = isSignup ? 'اسمك وإيميلك وباسورد عشان تدخل الداشبورد.' : 'سجّل دخول بالإيميل والباسورد بتاعك.';
     authSubmitLabel.textContent = isSignup ? 'إنشاء الحساب' : 'تسجيل الدخول';
+    configurePasskeyUi();
   }
 
   tabLogin.addEventListener('click', () => setAuthMode('login'));
   tabSignup.addEventListener('click', () => setAuthMode('signup'));
+  configurePasskeyUi();
 
   function showForgotPasswordForm() {
     hideAuthMessages();
@@ -760,6 +823,50 @@
 
   let authSubmitting = false;
 
+  passkeyLoginBtn?.addEventListener('click', async () => {
+    if (!sb?.auth?.signInWithPasskey || authSubmitting) return;
+    authSubmitting = true;
+    passkeyLoginBtn.disabled = true;
+    passkeyLoginBtn.innerHTML = '<span class="spinner spinner-dark"></span> بنفتح بالبصمة...';
+    hideAuthMessages();
+    try {
+      const { data, error } = await sb.auth.signInWithPasskey();
+      if (error) throw error;
+      if (!data?.session || !data?.user) throw new Error('لم يتم إنشاء جلسة دخول صالحة.');
+      continueAfterAuth();
+    } catch (error) {
+      showAuthError(passkeyErrorMessage(error));
+    } finally {
+      authSubmitting = false;
+      passkeyLoginBtn.disabled = false;
+      passkeyLoginBtn.innerHTML = '🔐 الدخول بالبصمة أو Passkey';
+    }
+  });
+
+  passkeySetupBtn?.addEventListener('click', async () => {
+    if (authSubmitting) return;
+    authSubmitting = true;
+    passkeySetupBtn.disabled = true;
+    passkeySetupLabel.innerHTML = '<span class="spinner"></span> بنفعّل Passkey...';
+    hideAuthMessages();
+    try {
+      await registerCurrentUserPasskey();
+      showAuthNotice('تم تفعيل Passkey بنجاح. المرة الجاية تقدر تدخل بالبصمة أو Face ID.');
+      setTimeout(continueAfterAuth, 650);
+    } catch (error) {
+      showAuthError(passkeyErrorMessage(error));
+    } finally {
+      authSubmitting = false;
+      passkeySetupBtn.disabled = false;
+      passkeySetupLabel.textContent = 'تفعيل Passkey دلوقتي';
+    }
+  });
+
+  passkeySkipBtn?.addEventListener('click', () => {
+    passkeySetupCard.classList.remove('show');
+    continueAfterAuth();
+  });
+
   googleSignInBtn?.addEventListener('click', async () => {
     if (!sb || authSubmitting) return;
     authSubmitting = true;
@@ -834,11 +941,7 @@
           return;
         }
 
-        if (isStandalone()) {
-          window.location.href = DASHBOARD_URL;
-        } else {
-          showLinkScreen();
-        }
+        showPasskeySetupOffer();
       } else {
         const { data, error } = await sb.auth.signInWithPassword({ email, password });
         if (error) {
@@ -849,15 +952,8 @@
           showAuthError('حصل خطأ في تسجيل الدخول، جرب تاني.');
           return;
         }
-        // نعرض تفعيل Passkey للمستخدم بعد أول دخول ناجح، مع الإبقاء على الدخول العادي كبديل.
-        passkeyEnrollBtn.style.display = 'flex';
-        showAuthNotice('دخلت بنجاح. فعّل الدخول بالبصمة عشان المرة الجاية تدخل بضغطة واحدة.');
-        // ربط تيليجرام اختياري؛ المستخدم يقدر يكمل حتى لو تجاهل Passkey.
-        if (isStandalone()) {
-          setTimeout(() => { if (passkeyEnrollBtn.style.display !== 'none') window.location.href = DASHBOARD_URL; }, 5000);
-        } else {
-          showLinkScreen();
-        }
+        // Passkey اختياري بعد تسجيل الدخول بالباسورد؛ الفشل لا يمنع المستخدم من المتابعة.
+        showPasskeySetupOffer();
       }
     } catch (err) {
       showAuthError(err.message || 'مقدرناش نتواصل مع السيرفر دلوقتي. جرب تاني.');

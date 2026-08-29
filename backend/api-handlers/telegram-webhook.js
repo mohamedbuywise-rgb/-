@@ -9,7 +9,7 @@ import { upsertUser, hasActiveSubscription, getSubscriptionExpiry, activateSubsc
 import { createLinkCode } from '../../lib/linking.js';
 import { isFinancialEventType, recordFinancialEvent } from '../../lib/financialEvents.js';
 import { normalizeDigits, extractDeterministicExpense, correctDebtDirections, normalizeFinancialTransaction, reconcileSingleTransaction } from '../../lib/textNormalize.js';
-import { checkVoiceUsage, checkOcrUsage, checkChatUsage, checkTextUsage, refundOcrUsage } from '../../lib/rateLimits.js';
+import { checkVoiceUsage, checkOcrUsage, checkChatUsage, refundOcrUsage } from '../../lib/rateLimits.js';
 import { GUIDE_URL, TRIAL_SUMMARY_BASE_URL, ADMIN_TELEGRAM_ID, SUBSCRIPTION_DAYS, SUBSCRIPTION_PRICE_EGP, INSTAPAY_LINK, ADMIN_CONTACT_USERNAME, VOICE_MAX_DURATION_SECONDS, TELEGRAM_WEBHOOK_SECRET } from '../../lib/config.js';
 import { createTrialSummaryToken } from '../../lib/trialToken.js';
 
@@ -479,18 +479,6 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true });
       }
 
-      // حد استهلاك للرسائل النصية المكتوبة (نفس منطق الفويس/الشات) — بيتفحص هنا بس (النص المكتوب)
-      // مش في handleIncomingText عشان الفويس (اللي ليه عداده الخاص) ميتخصمش منه مرتين.
-      const textUsage = await checkTextUsage(userId);
-      if (!textUsage.allowed) {
-        if (textUsage.isTrial) {
-          await sendTrialEndedPrompt(chatId, userId);
-        } else {
-          await sendTelegramMessage(chatId, '✍️ وصلت للحد الأقصى من الرسائل النصية الشهر ده. تقدر تستخدم الفويس أو تنتظر بداية الشهر الجاي.');
-        }
-        return res.status(200).json({ ok: true });
-      }
-
       await routeUserMessage(text, userId, chatId);
       return res.status(200).json({ ok: true });
     }
@@ -666,16 +654,6 @@ async function handleIncomingText(text, userId, chatId) {
     }
   } else if (transactions.length > 1 && successCount > 0) {
     await sendTelegramMessage(chatId, `✅ تم تسجيل ${successCount} معاملة بنجاح.`);
-  }
-
-  // تنبيه احتياطي: لو عدد الأرقام الظاهرة في النص أكبر بوضوح من عدد المعاملات اللي فهمناها،
-  // على الأرجح فاتنا بند. بننبه المستخدم بدل ما نسكت، من غير ما نمنع أي حاجة.
-  const numbersInText = (normalizeDigits(text).match(/\d+/g) || []).length;
-  if (successCount > 0 && numbersInText > transactions.length) {
-    await sendTelegramMessage(
-      chatId,
-      `⚠️ يمكن يكون فاتني بند من رسالتك (لقيت أرقام أكتر من المعاملات اللي سجلتها). راجع "تقرير" وأضف أي بند ناقص يدويًا.`
-    );
   }
 }
 

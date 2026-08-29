@@ -78,7 +78,6 @@
            بغض النظر عن ترتيب التحميل.
            ============================================================ */
         html[data-theme="light"] body { background-color: #f8fafc; color: #0f172a; }
-        html[data-theme="light"] { --dbr-track-bg: #e2e8f0; }
         ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
         html[data-theme="light"] ::-webkit-scrollbar-thumb { background: #cbd5e1; }
 
@@ -1858,8 +1857,8 @@
                         <span class="text-sm font-bold text-slate-100" id="asst-goal-title-label">—</span>
                         <span class="text-xs font-black text-emerald-400" id="asst-goal-percent">0%</span>
                     </div>
-                    <div class="w-full h-2.5 rounded-full overflow-hidden" style="background:var(--dbr-track-bg,#1e293b)">
-                        <div id="asst-goal-bar" class="h-full rounded-full transition-all" style="width:0%;background:linear-gradient(to left,#34d399,#2dd4bf);min-width:2px"></div>
+                    <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden">
+                        <div id="asst-goal-bar" class="h-full bg-gradient-to-l from-emerald-400 to-teal-400 rounded-full transition-all" style="width:0%"></div>
                     </div>
                     <div class="flex justify-between text-[11px] text-slate-400">
                         <span>وفرت: <b class="text-slate-200" id="asst-goal-saved">—</b></span>
@@ -3975,9 +3974,7 @@
             activeEl.classList.remove('hidden');
             document.getElementById('asst-goal-title-label').textContent = goal.title;
             document.getElementById('asst-goal-percent').textContent = `${goal.percent}%`;
-            const barEl = document.getElementById('asst-goal-bar');
-            barEl.style.width = '0%';
-            requestAnimationFrame(() => { barEl.style.width = `${goal.percent}%`; });
+            document.getElementById('asst-goal-bar').style.width = `${goal.percent}%`;
             document.getElementById('asst-goal-saved').textContent = fmt(goal.savedAmount);
             document.getElementById('asst-goal-target').textContent = fmt(goal.targetAmount);
 

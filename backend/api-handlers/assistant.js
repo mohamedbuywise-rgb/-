@@ -4,8 +4,8 @@ import { getDebtsSummaryText } from '../../lib/debts.js';
 import { extractItemizedReceiptFromImageBase64, askDabbarChat, classifyMessage, transcribeAudioBase64 } from '../../lib/groq.js';
 import { saveInvoiceRecord, deleteInvoiceById } from '../../lib/invoices.js';
 import { hasActiveSubscription, isInTrial } from '../../lib/users.js';
-import { checkOcrUsage, checkChatUsage, checkTextUsage, refundOcrUsage, refundUsage } from '../../lib/rateLimits.js';
-import { normalizeDigits, extractDeterministicExpense, extractMultipleDeterministicExpenses, correctDebtDirections, detectCurrency, currencyLabel, normalizeFinancialTransaction, reconcileSingleTransaction } from '../../lib/textNormalize.js';
+import { checkOcrUsage, checkChatUsage, refundOcrUsage, refundUsage } from '../../lib/rateLimits.js';
+import { normalizeDigits, extractDeterministicExpense, correctDebtDirections, detectCurrency, currencyLabel, normalizeFinancialTransaction, reconcileSingleTransaction } from '../../lib/textNormalize.js';
 import { maybeSendBudgetAlert } from '../../lib/webPush.js';
 import { getDashboardUserFromRequest } from '../../lib/dashboardAuth.js';
 import { isFinancialEventType, recordFinancialEvent } from '../../lib/financialEvents.js';
@@ -233,14 +233,6 @@ async function handleAsk(userId, body, res) {
 }
 
 async function handleEntryDraft(userId, body, res) {
-  // حد استهلاك لأي إدخال (نص أو صوت) من الداشبورد — نفس منطق الفويس/الشات/OCR بالظبط،
-  // عشان الميزة دي مكنش ليها أي سقف تكلفة قبل كده.
-  const textUsage = await checkTextUsage(userId);
-  if (!textUsage.allowed) {
-    if (textUsage.isTrial) return res.status(429).json({ error: 'خلصت فترة التجربة المجانية، اشترك عشان تكمل تسجيل مصاريفك.' });
-    return res.status(429).json({ error: 'وصلت للحد الأقصى من عمليات التسجيل الشهر ده. هيرجع تاني بداية الشهر الجاي.' });
-  }
-
   let text = String(body.text || '').trim();
   if (body.audioBase64) {
     if (String(body.audioBase64).length > 8 * 1024 * 1024) return res.status(413).json({ error: 'التسجيل طويل أوي. الحد الأقصى 30 ثانية.' });
@@ -258,18 +250,6 @@ async function handleEntryDraft(userId, body, res) {
   const normalizedTransactions = (Array.isArray(parsed) ? parsed : []).map((item) => normalizeFinancialTransaction(item, text));
   const transactions = reconcileSingleTransaction(correctDebtDirections(text, normalizedTransactions), text);
   let validTx = transactions.filter((item) => ((isFinancialEventType(item?.type) || item?.type === 'expense') || item?.type === 'debt') && Number.isFinite(Number(item.amount)) && Number(item.amount) > 0 && (item.type !== 'debt' || item.person));
-  // حارس أخير لمسار الويب: لو النص كله مصروفات واضحة والمصنف أعاد أول عنصر فقط،
-  // نستخرج كل مبلغ مستقلًا بدل عرض/حفظ أول مصروف فقط. لا نستخدمه عند وجود ديون حتى لا نخلط النوع.
-  const multipleExpenses = extractMultipleDeterministicExpenses(text);
-  if (multipleExpenses.length > 1) {
-    const smartDebts = validTx.filter((item) => item.type === 'debt');
-    const smartNonExpense = validTx.filter((item) => item.type !== 'expense' && item.type !== 'debt');
-    // نحتفظ بالديون/التسويات الذكية، ونستبدل المصروفات الناقصة بقائمة المصروفات الكاملة.
-    // بهذه الطريقة: «قهوة 100، أمازون 300، ...، أعطيت أحمد 500» تصبح كل المصروفات + الدين.
-    if (multipleExpenses.length + smartDebts.length + smartNonExpense.length > validTx.length) {
-      validTx = [...multipleExpenses, ...smartDebts, ...smartNonExpense];
-    }
-  }
   // لو التصنيف الذكي لم يلتقط جملة قصيرة مثل "غدا 100 جنيه"، نستخدم استخراجًا حتميًا
   // مقيدًا بعلامات المصروف، فلا نخلط جمل الديون أو الأسئلة مع مصروفات وهمية.
   if (!validTx.length) {

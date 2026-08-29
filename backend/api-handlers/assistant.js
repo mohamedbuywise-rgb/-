@@ -4,7 +4,7 @@ import { getDebtsSummaryText } from '../../lib/debts.js';
 import { extractItemizedReceiptFromImageBase64, askDabbarChat, classifyMessage, transcribeAudioBase64 } from '../../lib/groq.js';
 import { saveInvoiceRecord, deleteInvoiceById } from '../../lib/invoices.js';
 import { hasActiveSubscription, isInTrial } from '../../lib/users.js';
-import { checkOcrUsage, checkChatUsage, refundOcrUsage, refundUsage } from '../../lib/rateLimits.js';
+import { checkOcrUsage, checkChatUsage, checkTextUsage, refundOcrUsage, refundUsage } from '../../lib/rateLimits.js';
 import { normalizeDigits, extractDeterministicExpense, extractMultipleDeterministicExpenses, correctDebtDirections, detectCurrency, currencyLabel, normalizeFinancialTransaction, reconcileSingleTransaction } from '../../lib/textNormalize.js';
 import { maybeSendBudgetAlert } from '../../lib/webPush.js';
 import { getDashboardUserFromRequest } from '../../lib/dashboardAuth.js';
@@ -233,6 +233,14 @@ async function handleAsk(userId, body, res) {
 }
 
 async function handleEntryDraft(userId, body, res) {
+  // حد استهلاك لأي إدخال (نص أو صوت) من الداشبورد — نفس منطق الفويس/الشات/OCR بالظبط،
+  // عشان الميزة دي مكنش ليها أي سقف تكلفة قبل كده.
+  const textUsage = await checkTextUsage(userId);
+  if (!textUsage.allowed) {
+    if (textUsage.isTrial) return res.status(429).json({ error: 'خلصت فترة التجربة المجانية، اشترك عشان تكمل تسجيل مصاريفك.' });
+    return res.status(429).json({ error: 'وصلت للحد الأقصى من عمليات التسجيل الشهر ده. هيرجع تاني بداية الشهر الجاي.' });
+  }
+
   let text = String(body.text || '').trim();
   if (body.audioBase64) {
     if (String(body.audioBase64).length > 8 * 1024 * 1024) return res.status(413).json({ error: 'التسجيل طويل أوي. الحد الأقصى 30 ثانية.' });

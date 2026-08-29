@@ -975,6 +975,24 @@
             --pm-clay-dim: #7e352a;
         }
 
+        /* ============ شريط تقدم "هدفك المالي" — كلاسات مخصوصة (مش .from-emerald-400/.to-teal-400)
+           عشان القواعد اللي بتلوّن البطاقات بلون ذهبي خفيف (14%/7% مازوج مع لون الخلفية) أسفل الملف
+           متأثرش على الشريط ده. كان ده سبب اختفاء الشريط في الوضعين: نفس كلاسات التدرّج كانت بتتحول
+           للون قريب جدًا من لون الخلفية فيبقى غير مرئي تقريبًا. هنا بنستخدم ألوان صلبة (--pm-mint /
+           --pm-gold-bright) بدون أي مزج مع سطح الخلفية، فالشريط واضح وملموس في الوضع النهاري والليلي. */
+        .goal-progress-track {
+            background: var(--pm-surface-soft) !important;
+            border: 1px solid var(--pm-hairline);
+        }
+        .goal-progress-fill {
+            background: linear-gradient(90deg, var(--pm-mint), var(--pm-gold-bright)) !important;
+        }
+        html[data-theme="light"] .goal-progress-fill {
+            /* في الوضع النهاري --pm-mint و--pm-gold-bright قريبين من بعض (تدرجات بترول)، فبنستخدم
+               تدرج بلون واحد غامق وواضح بدل تدرج باهت بين لونين متشابهين. */
+            background: linear-gradient(90deg, var(--pm-gold), var(--pm-mint-dim)) !important;
+        }
+
         body, html[data-theme="light"] body { font-family: 'Cairo', sans-serif; }
 
         /* الكانفاس العام */
@@ -1857,8 +1875,8 @@
                         <span class="text-sm font-bold text-slate-100" id="asst-goal-title-label">—</span>
                         <span class="text-xs font-black text-emerald-400" id="asst-goal-percent">0%</span>
                     </div>
-                    <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden">
-                        <div id="asst-goal-bar" class="h-full bg-gradient-to-l from-emerald-400 to-teal-400 rounded-full transition-all" style="width:0%"></div>
+                    <div class="w-full h-2.5 goal-progress-track rounded-full overflow-hidden">
+                        <div id="asst-goal-bar" class="h-full goal-progress-fill rounded-full transition-all" style="width:0%"></div>
                     </div>
                     <div class="flex justify-between text-[11px] text-slate-400">
                         <span>وفرت: <b class="text-slate-200" id="asst-goal-saved">—</b></span>

@@ -5,8 +5,7 @@ import { extractItemizedReceiptFromImageBase64, askDabbarChat, classifyMessage, 
 import { saveInvoiceRecord, deleteInvoiceById } from '../../lib/invoices.js';
 import { hasActiveSubscription, isInTrial } from '../../lib/users.js';
 import { checkOcrUsage, checkChatUsage, refundOcrUsage, refundUsage } from '../../lib/rateLimits.js';
-import { normalizeDigits, extractDeterministicExpense, correctDebtDirections, correctExpenseMisclassifiedAsDebt, detectCurrency, currencyLabel, normalizeFinancialTransaction, reconcileSingleTransaction } from '../../lib/textNormalize.js';
-import { VOICE_MAX_DURATION_SECONDS } from '../../lib/config.js';
+import { normalizeDigits, extractDeterministicExpense, correctDebtDirections, detectCurrency, currencyLabel, normalizeFinancialTransaction, reconcileSingleTransaction } from '../../lib/textNormalize.js';
 import { maybeSendBudgetAlert } from '../../lib/webPush.js';
 import { getDashboardUserFromRequest } from '../../lib/dashboardAuth.js';
 import { isFinancialEventType, recordFinancialEvent } from '../../lib/financialEvents.js';
@@ -236,7 +235,7 @@ async function handleAsk(userId, body, res) {
 async function handleEntryDraft(userId, body, res) {
   let text = String(body.text || '').trim();
   if (body.audioBase64) {
-    if (String(body.audioBase64).length > 8 * 1024 * 1024) return res.status(413).json({ error: `التسجيل طويل أوي. الحد الأقصى ${VOICE_MAX_DURATION_SECONDS} ثانية.` });
+    if (String(body.audioBase64).length > 8 * 1024 * 1024) return res.status(413).json({ error: 'التسجيل طويل أوي. الحد الأقصى 30 ثانية.' });
     const transcript = await transcribeAudioBase64(body.audioBase64, body.mimeType || 'audio/webm');
     if (!transcript.success) return res.status(422).json({ error: transcript.error });
     text = transcript.text;
@@ -249,7 +248,7 @@ async function handleEntryDraft(userId, body, res) {
   // بدل ما نلقط أول معاملة بس ونسيب الباقي بلا تسجيل زي ما كان الموقع بيعمل قبل كده.
   const parsed = await classifyMessage(text);
   const normalizedTransactions = (Array.isArray(parsed) ? parsed : []).map((item) => normalizeFinancialTransaction(item, text));
-  const transactions = correctExpenseMisclassifiedAsDebt(text, reconcileSingleTransaction(correctDebtDirections(text, normalizedTransactions), text));
+  const transactions = reconcileSingleTransaction(correctDebtDirections(text, normalizedTransactions), text);
   let validTx = transactions.filter((item) => ((isFinancialEventType(item?.type) || item?.type === 'expense') || item?.type === 'debt') && Number.isFinite(Number(item.amount)) && Number(item.amount) > 0 && (item.type !== 'debt' || item.person));
   // لو التصنيف الذكي لم يلتقط جملة قصيرة مثل "غدا 100 جنيه"، نستخدم استخراجًا حتميًا
   // مقيدًا بعلامات المصروف، فلا نخلط جمل الديون أو الأسئلة مع مصروفات وهمية.

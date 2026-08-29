@@ -6,6 +6,7 @@ import { saveInvoiceRecord, deleteInvoiceById } from '../../lib/invoices.js';
 import { hasActiveSubscription, isInTrial } from '../../lib/users.js';
 import { checkOcrUsage, checkChatUsage, refundOcrUsage, refundUsage } from '../../lib/rateLimits.js';
 import { normalizeDigits, extractDeterministicExpense, correctDebtDirections, correctExpenseMisclassifiedAsDebt, detectCurrency, currencyLabel, normalizeFinancialTransaction, reconcileSingleTransaction } from '../../lib/textNormalize.js';
+import { VOICE_MAX_DURATION_SECONDS } from '../../lib/config.js';
 import { maybeSendBudgetAlert } from '../../lib/webPush.js';
 import { getDashboardUserFromRequest } from '../../lib/dashboardAuth.js';
 import { isFinancialEventType, recordFinancialEvent } from '../../lib/financialEvents.js';
@@ -235,7 +236,7 @@ async function handleAsk(userId, body, res) {
 async function handleEntryDraft(userId, body, res) {
   let text = String(body.text || '').trim();
   if (body.audioBase64) {
-    if (String(body.audioBase64).length > 8 * 1024 * 1024) return res.status(413).json({ error: 'التسجيل طويل أوي. الحد الأقصى 30 ثانية.' });
+    if (String(body.audioBase64).length > 8 * 1024 * 1024) return res.status(413).json({ error: `التسجيل طويل أوي. الحد الأقصى ${VOICE_MAX_DURATION_SECONDS} ثانية.` });
     const transcript = await transcribeAudioBase64(body.audioBase64, body.mimeType || 'audio/webm');
     if (!transcript.success) return res.status(422).json({ error: transcript.error });
     text = transcript.text;

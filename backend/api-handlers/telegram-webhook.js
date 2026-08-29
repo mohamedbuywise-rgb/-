@@ -1,4 +1,4 @@
-import { transcribeVoice, classifyMessage, answerDataQuestion, extractItemizedReceiptFromImage } from '../../lib/groq.js';
+import { transcribeVoice, classifyMessage, reviewTransactions, answerDataQuestion, extractItemizedReceiptFromImage } from '../../lib/groq.js';
 import { recordInvoice, deleteInvoiceById } from '../../lib/invoices.js';
 import { sendTelegramMessage, forwardTelegramMessage, answerCallbackQuery, editTelegramMessage, sendChatAction } from '../../lib/telegram.js';
 import { recordExpense, sendMonthlyReport, sendWeeklyReport, sendDataExport, sendExpenseSearch, deleteExpenseById, getMostRecentExpense, getRecentExpensesSummaryText } from '../../lib/expenses.js';
@@ -8,7 +8,7 @@ import { sendMonthlyWrapped } from '../../lib/wrapped.js';
 import { upsertUser, hasActiveSubscription, getSubscriptionExpiry, activateSubscription, getChatIdByUserId, isInTrial, getTrialDaysLeft } from '../../lib/users.js';
 import { createLinkCode } from '../../lib/linking.js';
 import { isFinancialEventType, recordFinancialEvent } from '../../lib/financialEvents.js';
-import { normalizeDigits, extractDeterministicExpenses, correctDebtDirections, normalizeFinancialTransaction, reconcileSingleTransaction } from '../../lib/textNormalize.js';
+import { normalizeDigits, extractDeterministicExpenses, correctDebtDirections, normalizeFinancialTransaction, reconcileSingleTransaction, countExpectedAmounts } from '../../lib/textNormalize.js';
 import { checkVoiceUsage, checkOcrUsage, checkChatUsage, refundOcrUsage } from '../../lib/rateLimits.js';
 import { GUIDE_URL, TRIAL_SUMMARY_BASE_URL, ADMIN_TELEGRAM_ID, SUBSCRIPTION_DAYS, SUBSCRIPTION_PRICE_EGP, INSTAPAY_LINK, ADMIN_CONTACT_USERNAME, VOICE_MAX_DURATION_SECONDS, TELEGRAM_WEBHOOK_SECRET } from '../../lib/config.js';
 import { createTrialSummaryToken } from '../../lib/trialToken.js';
@@ -617,10 +617,13 @@ async function handleIncomingText(text, userId, chatId) {
   // القديم تحت مكانش بيتفعل فيها أصلًا لأنه بيشتغل بس لو Groq فشل تمامًا (unknown)، مش لو نجح
   // برد غلط. هنا بنقارن: لو التقسيم الحتمي (اللي بيعتمد على الأرقام الصريحة في الجملة) لقى
   // بنود أكتر بوضوح من اللي Groq رجعها، نفضّله لأنه أضمن للحفاظ على كل رقم وفئته على حدة.
-  const deterministicSplitEarly = extractDeterministicExpenses(text);
-  const groqExpenseLikeCount = transactions.filter((t) => (t?.type === 'expense' || t?.type === 'debt') && Number(t.amount) > 0).length;
-  if (deterministicSplitEarly.length > 1 && deterministicSplitEarly.length > groqExpenseLikeCount) {
+  // (كان الشرط قبل كده ">" صارم، فلو Groq دمج 6 بنود في 3 والتقسيم الحتمي لقى 3 برضو —
+  // بس أرقام مختلفة فعليًا — كان بيسيب رد Groq الناقص من غير ما يتفعل. بقى ">=".)
+  let deterministicSplitEarly = extractDeterministicExpenses(text);
+  let groqExpenseLikeCount = transactions.filter((t) => (t?.type === 'expense' || t?.type === 'debt') && Number(t.amount) > 0).length;
+  if (deterministicSplitEarly.length > 1 && deterministicSplitEarly.length >= groqExpenseLikeCount) {
     transactions = deterministicSplitEarly;
+    groqExpenseLikeCount = deterministicSplitEarly.length;
   }
 
   // fallback آمن للجمل الصوتية إذا أعاد المصنّف unknown — extractDeterministicExpenses (بالجمع)
@@ -628,7 +631,36 @@ async function handleIncomingText(text, userId, chatId) {
   // وفئاتهم الصح، مش بند واحد بس زي ما كان بيحصل قبل كده.
   if (!transactions.some((t) => (t?.type === 'expense' || t?.type === 'debt') && Number(t.amount) > 0)) {
     const deterministicExpenses = extractDeterministicExpenses(text);
-    if (deterministicExpenses.length > 0) transactions = deterministicExpenses;
+    if (deterministicExpenses.length > 0) {
+      transactions = deterministicExpenses;
+      groqExpenseLikeCount = deterministicExpenses.length;
+    }
+  }
+
+  // تحقق أخير من "العدّ": لو عدد الأرقام الحقيقي المذكور في النص أكبر من عدد المعاملات اللي
+  // قدرنا نطلعها، معنى كده إن فيه بنود اتضاعت (زي فويس فيه 6 بنود ويطلعله 3 بس). في الحالة دي
+  // نعيد نداء Groq مرة كمان بـ temperature أعلى شوية (بيدّي فرصة لصياغة تانية تفكّك البنود صح)،
+  // ولو لسه ناقص نرجع للتقسيم الحتمي كحل أخير لأنه بيضمن إن كل رقم في الجملة هيتسجل.
+  const expectedAmountsCount = countExpectedAmounts(text);
+  if (expectedAmountsCount > 1 && groqExpenseLikeCount < expectedAmountsCount) {
+    const retryParsed = (await classifyMessage(text, { temperature: 0.15 })).map((item) => normalizeFinancialTransaction(item, text));
+    const retryTransactions = reconcileSingleTransaction(correctDebtDirections(text, retryParsed), text);
+    const retryCount = retryTransactions.filter((t) => (t?.type === 'expense' || t?.type === 'debt') && Number(t.amount) > 0).length;
+    if (retryCount > groqExpenseLikeCount) {
+      transactions = retryTransactions;
+      groqExpenseLikeCount = retryCount;
+    }
+    if (groqExpenseLikeCount < expectedAmountsCount && deterministicSplitEarly.length > groqExpenseLikeCount) {
+      transactions = deterministicSplitEarly;
+      groqExpenseLikeCount = deterministicSplitEarly.length;
+    }
+  }
+
+  // طبقة تحقق أخيرة (self-check): نداء تاني رخيص بيراجع الفئات والربط بين الأرقام والبنود قبل
+  // ما نسجل أي حاجة فعليًا. بنشغّلها بس لو فيه أكتر من بند واحد (رسالة معقدة فعلًا محتاجة مراجعة)،
+  // عشان مانضربش نداء إضافي على كل رسالة بسيطة زي "صرفت 50 جنيه أكل".
+  if (groqExpenseLikeCount > 1) {
+    transactions = await reviewTransactions(text, transactions);
   }
   let successCount = 0;
   const expenseCount = transactions.filter((t) => t.type === 'expense' && t.amount).length;

@@ -1444,8 +1444,53 @@
         @media (prefers-reduced-motion: reduce) {
             .fade-up, .mascot-float, .active-days-flame, .active-days-flame-wrap::before { animation: none !important; }
         }
+
+        /* ============ أنيميشن "مطر الفلوس" — بيغطي الصفحة كلها من فوق لتحت بعد تأكيد أي تسجيل ============ */
+        /* (صوت / كتابة / فاتورة بتتصفى كلها في نفس زرار quick-entry-confirm، فتفعيلها هنا بيغطي التلاتة مع بعض) */
+        #money-rain-overlay {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 9999;
+            overflow: hidden;
+        }
+        .money-rain-piece {
+            position: absolute;
+            top: -40px;
+            font-size: 22px;
+            line-height: 1;
+            will-change: transform, opacity;
+            animation: moneyRainFall linear forwards;
+        }
+        .money-rain-piece.coin {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #d4af37;
+            border: 2px solid #a97e17;
+            box-shadow: inset 0 0 0 3px rgba(255,255,255,0.25);
+        }
+        .money-rain-piece.note {
+            width: 30px;
+            height: 18px;
+            border-radius: 3px;
+            background: #1d9e75;
+            border: 1.5px solid #0f6e56;
+        }
+        html[data-theme="light"] .money-rain-piece.coin { background: #e8b93a; border-color: #b8871a; }
+        html[data-theme="light"] .money-rain-piece.note { background: #2fb98a; border-color: #0f6e56; }
+        @keyframes moneyRainFall {
+            0% { transform: translateY(-40px) rotate(0deg); opacity: 0; }
+            8% { opacity: 1; }
+            92% { opacity: 1; }
+            100% { transform: translateY(var(--fall-distance, 900px)) rotate(var(--fall-rot, 480deg)); opacity: 0; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .money-rain-piece { animation: none !important; display: none; }
+        }
     </style>
 </head>
+
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col overflow-hidden">
 
     <div id="dashboard-load-error" class="hidden mx-auto mt-4 w-[min(92%,56rem)] rounded-2xl border border-red-300/40 bg-red-50 px-4 py-3 text-center text-sm font-bold text-red-700" role="alert"></div>
@@ -4107,11 +4152,38 @@
             quickStatus(quickEntryDrafts.length > 1 ? `فهمنا ${quickEntryDrafts.length} معاملة — راجعهم ثم أكد التسجيل.` : 'راجع المبلغ والفئة ثم أكد التسجيل.');
         }
         async function analyzeQuickEntry(payload) { if (!requireQuickEntryAccess()) return; quickStatus('دبّر بيفهم العملية...'); try { const result = await asstApi(payload.imageBase64 ? 'entry_invoice_draft' : 'entry_draft', payload); quickDraft(result.drafts, result.transcript); } catch (e) { quickStatus(e.message || 'تعذر فهم العملية.', 'error'); } }
+        // ============ أنيميشن "مطر الفلوس" على الصفحة كلها — بتتنادى بعد أي تأكيد تسجيل ناجح (صوت/كتابة/فاتورة) ============
+        function playMoneyRain(pieceCount) {
+            if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+            const count = pieceCount || 45;
+            let overlay = document.getElementById('money-rain-overlay');
+            if (!overlay) {
+                overlay = document.createElement('div');
+                overlay.id = 'money-rain-overlay';
+                document.body.appendChild(overlay);
+            }
+            const viewportHeight = window.innerHeight || 800;
+            for (let i = 0; i < count; i++) {
+                const piece = document.createElement('span');
+                piece.className = 'money-rain-piece ' + (Math.random() < 0.55 ? 'coin' : 'note');
+                piece.style.left = (Math.random() * 96) + 'vw';
+                const duration = 1.4 + Math.random() * 1.1;
+                const delay = Math.random() * 0.6;
+                const rot = (Math.random() > 0.5 ? 1 : -1) * (360 + Math.random() * 480);
+                piece.style.setProperty('--fall-distance', (viewportHeight + 80) + 'px');
+                piece.style.setProperty('--fall-rot', rot + 'deg');
+                piece.style.animationDuration = duration + 's';
+                piece.style.animationDelay = delay + 's';
+                overlay.appendChild(piece);
+                setTimeout(() => piece.remove(), (duration + delay) * 1000 + 200);
+            }
+            setTimeout(() => { if (overlay && !overlay.childElementCount) overlay.remove(); }, (2.5 * 1000) + 900);
+        }
         document.getElementById('quick-entry-text')?.addEventListener('click', () => { if (!requireQuickEntryAccess()) return; quickShow('quick-entry-form', true); const input = document.getElementById('quick-entry-input'); if (input) input.value = ''; quickEntryDrafts = []; quickEntrySourceText = ''; input?.focus(); });
         document.getElementById('quick-entry-cancel')?.addEventListener('click', () => { quickShow('quick-entry-form', false); quickShow('quick-entry-draft', false); document.getElementById('quick-entry-input').value = ''; quickEntryDrafts = []; quickEntrySourceText = ''; quickStatus(''); });
         document.getElementById('quick-entry-edit')?.addEventListener('click', () => { quickShow('quick-entry-draft', false); quickShow('quick-entry-form', true); document.getElementById('quick-entry-input').value = quickEntrySourceText || ''; });
         document.getElementById('quick-entry-analyze')?.addEventListener('click', () => { const text = document.getElementById('quick-entry-input')?.value.trim(); if (!text) return quickStatus('اكتب العملية الأول.', 'error'); analyzeQuickEntry({ text }); });
-        document.getElementById('quick-entry-confirm')?.addEventListener('click', async () => { if (!requireQuickEntryAccess() || !quickEntryDrafts.length) return; const btn = document.getElementById('quick-entry-confirm'); btn.disabled = true; quickStatus('جاري حفظ العملية...'); try { const result = await asstApi('entry_confirm', { drafts: quickEntryDrafts }); document.getElementById('quick-entry-input').value = ''; quickEntryDrafts = []; quickEntrySourceText = ''; const draftList = document.getElementById('quick-entry-draft-list'); if (draftList) draftList.innerHTML = ''; quickShow('quick-entry-draft', false); quickStatus(result.message || 'تم التسجيل بنجاح.', 'success'); await loadDashboard(); } catch (e) { quickStatus(e.message || 'تعذر الحفظ.', 'error'); } finally { btn.disabled = false; } });
+        document.getElementById('quick-entry-confirm')?.addEventListener('click', async () => { if (!requireQuickEntryAccess() || !quickEntryDrafts.length) return; const btn = document.getElementById('quick-entry-confirm'); btn.disabled = true; quickStatus('جاري حفظ العملية...'); try { const draftCountForRain = quickEntryDrafts.length; const result = await asstApi('entry_confirm', { drafts: quickEntryDrafts }); document.getElementById('quick-entry-input').value = ''; quickEntryDrafts = []; quickEntrySourceText = ''; const draftList = document.getElementById('quick-entry-draft-list'); if (draftList) draftList.innerHTML = ''; quickShow('quick-entry-draft', false); quickStatus(result.message || 'تم التسجيل بنجاح.', 'success'); playMoneyRain(Math.min(70, 30 + draftCountForRain * 10)); await loadDashboard(); } catch (e) { quickStatus(e.message || 'تعذر الحفظ.', 'error'); } finally { btn.disabled = false; } });
         document.getElementById('quick-entry-invoice')?.addEventListener('click', () => { if (!requireQuickEntryAccess()) return; document.getElementById('quick-entry-invoice-input')?.click(); });
         document.getElementById('quick-entry-draft-close')?.addEventListener('click', () => { quickShow('quick-entry-draft', false); quickStatus(''); });
         // ============ فاتورة سريعة: نفس بالظبط سلوك "امسح فاتورة" — بتستخرج كل صنف بسعره وتتسجل أوتوماتيك من غير خطوة تأكيد إضافية ============
@@ -4203,6 +4275,7 @@
                 document.getElementById('quick-entry-draft-actions').classList.add('hidden');
                 quickShow('quick-entry-draft', true);
                 quickStatus('تم الحفظ في كل الفواتير ✅', 'success');
+                playMoneyRain(Math.min(70, 30 + ((result.items || []).length) * 10));
                 await loadDashboard();
                 await loadInvoicesCount?.();
             } catch (e) {

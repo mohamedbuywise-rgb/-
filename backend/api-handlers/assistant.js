@@ -5,7 +5,7 @@ import { extractItemizedReceiptFromImageBase64, askDabbarChat, classifyMessage, 
 import { saveInvoiceRecord, deleteInvoiceById } from '../../lib/invoices.js';
 import { hasActiveSubscription, isInTrial } from '../../lib/users.js';
 import { checkOcrUsage, checkChatUsage, refundOcrUsage, refundUsage } from '../../lib/rateLimits.js';
-import { normalizeDigits, extractDeterministicExpense, correctDebtDirections, detectCurrency, currencyLabel, normalizeFinancialTransaction, reconcileSingleTransaction } from '../../lib/textNormalize.js';
+import { normalizeDigits, extractDeterministicExpense, extractMultipleDeterministicExpenses, correctDebtDirections, detectCurrency, currencyLabel, normalizeFinancialTransaction, reconcileSingleTransaction } from '../../lib/textNormalize.js';
 import { maybeSendBudgetAlert } from '../../lib/webPush.js';
 import { getDashboardUserFromRequest } from '../../lib/dashboardAuth.js';
 import { isFinancialEventType, recordFinancialEvent } from '../../lib/financialEvents.js';
@@ -250,6 +250,18 @@ async function handleEntryDraft(userId, body, res) {
   const normalizedTransactions = (Array.isArray(parsed) ? parsed : []).map((item) => normalizeFinancialTransaction(item, text));
   const transactions = reconcileSingleTransaction(correctDebtDirections(text, normalizedTransactions), text);
   let validTx = transactions.filter((item) => ((isFinancialEventType(item?.type) || item?.type === 'expense') || item?.type === 'debt') && Number.isFinite(Number(item.amount)) && Number(item.amount) > 0 && (item.type !== 'debt' || item.person));
+  // حارس أخير لمسار الويب: لو النص كله مصروفات واضحة والمصنف أعاد أول عنصر فقط،
+  // نستخرج كل مبلغ مستقلًا بدل عرض/حفظ أول مصروف فقط. لا نستخدمه عند وجود ديون حتى لا نخلط النوع.
+  const multipleExpenses = extractMultipleDeterministicExpenses(text);
+  if (multipleExpenses.length > 1) {
+    const smartDebts = validTx.filter((item) => item.type === 'debt');
+    const smartNonExpense = validTx.filter((item) => item.type !== 'expense' && item.type !== 'debt');
+    // نحتفظ بالديون/التسويات الذكية، ونستبدل المصروفات الناقصة بقائمة المصروفات الكاملة.
+    // بهذه الطريقة: «قهوة 100، أمازون 300، ...، أعطيت أحمد 500» تصبح كل المصروفات + الدين.
+    if (multipleExpenses.length + smartDebts.length + smartNonExpense.length > validTx.length) {
+      validTx = [...multipleExpenses, ...smartDebts, ...smartNonExpense];
+    }
+  }
   // لو التصنيف الذكي لم يلتقط جملة قصيرة مثل "غدا 100 جنيه"، نستخدم استخراجًا حتميًا
   // مقيدًا بعلامات المصروف، فلا نخلط جمل الديون أو الأسئلة مع مصروفات وهمية.
   if (!validTx.length) {

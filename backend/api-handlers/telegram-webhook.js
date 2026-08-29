@@ -8,7 +8,7 @@ import { sendMonthlyWrapped } from '../../lib/wrapped.js';
 import { upsertUser, hasActiveSubscription, getSubscriptionExpiry, activateSubscription, getChatIdByUserId, isInTrial, getTrialDaysLeft } from '../../lib/users.js';
 import { createLinkCode } from '../../lib/linking.js';
 import { isFinancialEventType, recordFinancialEvent } from '../../lib/financialEvents.js';
-import { normalizeDigits, extractDeterministicExpense, correctDebtDirections, normalizeFinancialTransaction, reconcileSingleTransaction } from '../../lib/textNormalize.js';
+import { normalizeDigits, extractDeterministicExpenses, correctDebtDirections, normalizeFinancialTransaction, reconcileSingleTransaction } from '../../lib/textNormalize.js';
 import { checkVoiceUsage, checkOcrUsage, checkChatUsage, refundOcrUsage } from '../../lib/rateLimits.js';
 import { GUIDE_URL, TRIAL_SUMMARY_BASE_URL, ADMIN_TELEGRAM_ID, SUBSCRIPTION_DAYS, SUBSCRIPTION_PRICE_EGP, INSTAPAY_LINK, ADMIN_CONTACT_USERNAME, VOICE_MAX_DURATION_SECONDS, TELEGRAM_WEBHOOK_SECRET } from '../../lib/config.js';
 import { createTrialSummaryToken } from '../../lib/trialToken.js';
@@ -611,10 +611,24 @@ async function handleIncomingText(text, userId, chatId) {
 
   const parsedTransactions = (await classifyMessage(text)).map((item) => normalizeFinancialTransaction(item, text));
   let transactions = reconcileSingleTransaction(correctDebtDirections(text, parsedTransactions), text);
-  // fallback آمن للجمل الصوتية القصيرة مثل "غدا مية جنيه" إذا أعاد المصنّف unknown.
+
+  // طبقة حماية إضافية: أحيانًا Groq "بينجح" في الرد (JSON سليم) لكنه بيدمج كذا بند مع بعض في
+  // معاملة واحدة غلط (فئة واحدة موحدة لكل حاجة، ورقم واحد بدل كل الأرقام). الحالة دي الفولباك
+  // القديم تحت مكانش بيتفعل فيها أصلًا لأنه بيشتغل بس لو Groq فشل تمامًا (unknown)، مش لو نجح
+  // برد غلط. هنا بنقارن: لو التقسيم الحتمي (اللي بيعتمد على الأرقام الصريحة في الجملة) لقى
+  // بنود أكتر بوضوح من اللي Groq رجعها، نفضّله لأنه أضمن للحفاظ على كل رقم وفئته على حدة.
+  const deterministicSplitEarly = extractDeterministicExpenses(text);
+  const groqExpenseLikeCount = transactions.filter((t) => (t?.type === 'expense' || t?.type === 'debt') && Number(t.amount) > 0).length;
+  if (deterministicSplitEarly.length > 1 && deterministicSplitEarly.length > groqExpenseLikeCount) {
+    transactions = deterministicSplitEarly;
+  }
+
+  // fallback آمن للجمل الصوتية إذا أعاد المصنّف unknown — extractDeterministicExpenses (بالجمع)
+  // بتقسّم الرسالة لبنود منفصلة أول ما تحاول، فلو فيها كذا مصروف مع بعض بيرجعوا كلهم بأرقامهم
+  // وفئاتهم الصح، مش بند واحد بس زي ما كان بيحصل قبل كده.
   if (!transactions.some((t) => (t?.type === 'expense' || t?.type === 'debt') && Number(t.amount) > 0)) {
-    const deterministicExpense = extractDeterministicExpense(text);
-    if (deterministicExpense) transactions = [deterministicExpense];
+    const deterministicExpenses = extractDeterministicExpenses(text);
+    if (deterministicExpenses.length > 0) transactions = deterministicExpenses;
   }
   let successCount = 0;
   const expenseCount = transactions.filter((t) => t.type === 'expense' && t.amount).length;

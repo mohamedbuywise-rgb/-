@@ -975,6 +975,24 @@
             --pm-clay-dim: #7e352a;
         }
 
+        /* ============ شريط تقدم "هدفك المالي" — كلاسات مخصوصة (مش .from-emerald-400/.to-teal-400)
+           عشان القواعد اللي بتلوّن البطاقات بلون ذهبي خفيف (14%/7% مازوج مع لون الخلفية) أسفل الملف
+           متأثرش على الشريط ده. كان ده سبب اختفاء الشريط في الوضعين: نفس كلاسات التدرّج كانت بتتحول
+           للون قريب جدًا من لون الخلفية فيبقى غير مرئي تقريبًا. هنا بنستخدم ألوان صلبة (--pm-mint /
+           --pm-gold-bright) بدون أي مزج مع سطح الخلفية، فالشريط واضح وملموس في الوضع النهاري والليلي. */
+        .goal-progress-track {
+            background: var(--pm-surface-soft) !important;
+            border: 1px solid var(--pm-hairline);
+        }
+        .goal-progress-fill {
+            background: linear-gradient(90deg, var(--pm-mint), var(--pm-gold-bright)) !important;
+        }
+        html[data-theme="light"] .goal-progress-fill {
+            /* في الوضع النهاري --pm-mint و--pm-gold-bright قريبين من بعض (تدرجات بترول)، فبنستخدم
+               تدرج بلون واحد غامق وواضح بدل تدرج باهت بين لونين متشابهين. */
+            background: linear-gradient(90deg, var(--pm-gold), var(--pm-mint-dim)) !important;
+        }
+
         body, html[data-theme="light"] body { font-family: 'Cairo', sans-serif; }
 
         /* الكانفاس العام */
@@ -1444,53 +1462,8 @@
         @media (prefers-reduced-motion: reduce) {
             .fade-up, .mascot-float, .active-days-flame, .active-days-flame-wrap::before { animation: none !important; }
         }
-
-        /* ============ أنيميشن "مطر الفلوس" — بيغطي الصفحة كلها من فوق لتحت بعد تأكيد أي تسجيل ============ */
-        /* (صوت / كتابة / فاتورة بتتصفى كلها في نفس زرار quick-entry-confirm، فتفعيلها هنا بيغطي التلاتة مع بعض) */
-        #money-rain-overlay {
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            z-index: 9999;
-            overflow: hidden;
-        }
-        .money-rain-piece {
-            position: absolute;
-            top: -40px;
-            font-size: 22px;
-            line-height: 1;
-            will-change: transform, opacity;
-            animation: moneyRainFall linear forwards;
-        }
-        .money-rain-piece.coin {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: #d4af37;
-            border: 2px solid #a97e17;
-            box-shadow: inset 0 0 0 3px rgba(255,255,255,0.25);
-        }
-        .money-rain-piece.note {
-            width: 30px;
-            height: 18px;
-            border-radius: 3px;
-            background: #1d9e75;
-            border: 1.5px solid #0f6e56;
-        }
-        html[data-theme="light"] .money-rain-piece.coin { background: #e8b93a; border-color: #b8871a; }
-        html[data-theme="light"] .money-rain-piece.note { background: #2fb98a; border-color: #0f6e56; }
-        @keyframes moneyRainFall {
-            0% { transform: translateY(-40px) rotate(0deg); opacity: 0; }
-            8% { opacity: 1; }
-            92% { opacity: 1; }
-            100% { transform: translateY(var(--fall-distance, 900px)) rotate(var(--fall-rot, 480deg)); opacity: 0; }
-        }
-        @media (prefers-reduced-motion: reduce) {
-            .money-rain-piece { animation: none !important; display: none; }
-        }
     </style>
 </head>
-
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col overflow-hidden">
 
     <div id="dashboard-load-error" class="hidden mx-auto mt-4 w-[min(92%,56rem)] rounded-2xl border border-red-300/40 bg-red-50 px-4 py-3 text-center text-sm font-bold text-red-700" role="alert"></div>
@@ -1568,7 +1541,7 @@
                 <div class="grid grid-cols-3 gap-2"><button id="quick-entry-voice" class="rounded-2xl border border-emerald-200 bg-white/80 px-2 py-3 text-center shadow-sm transition hover:-translate-y-0.5 dark:bg-slate-900" type="button"><span class="mx-auto mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/15 text-xl">🎙</span><span class="block text-[11px] font-bold text-slate-700 dark:text-slate-200">صوت</span></button><button id="quick-entry-text" class="rounded-2xl border border-emerald-200 bg-white/80 px-2 py-3 text-center shadow-sm transition hover:-translate-y-0.5 dark:bg-slate-900" type="button"><span class="mx-auto mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/15 text-xl">✍️</span><span class="block text-[11px] font-bold text-slate-700 dark:text-slate-200">كتابة</span></button><button id="quick-entry-invoice" class="rounded-2xl border border-emerald-200 bg-white/80 px-2 py-3 text-center shadow-sm transition hover:-translate-y-0.5 dark:bg-slate-900" type="button"><span class="mx-auto mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/15 text-xl">📸</span><span class="block text-[11px] font-bold text-slate-700 dark:text-slate-200">فاتورة</span></button></div><p class="text-center text-[10px] text-slate-500">ملاحظة مهمة: أقل مدة لتسجيل الصوت هي <b class="quick-voice-minimum text-emerald-600 dark:text-emerald-300">5 ثواني</b> عشان دبّر يسمعه ويفهمه بدقة.</p>
                 <input type="file" id="quick-entry-invoice-input" accept="image/*" class="hidden">
                 <div id="quick-entry-scanning" class="hidden rounded-2xl border border-blue-200 bg-blue-50 p-3 text-center dark:border-blue-500/30 dark:bg-blue-500/10"><div class="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-white text-xl shadow-sm dark:bg-slate-900"><span style="display:inline-block;animation:dabbar-scan-spin 1s linear infinite">⟳</span></div><p class="text-xs font-bold text-blue-700 dark:text-blue-200">بنقرأ الفاتورة...</p><p class="mt-1 text-[10px] text-blue-600/70 dark:text-blue-200/70">دبّر بيستخرج المبلغ والأصناف</p></div>
-                <div id="quick-entry-form" class="hidden space-y-2"><textarea id="quick-entry-input" rows="2" maxlength="1200" placeholder="مثال: صرفت 75 جنيه أكل" class="w-full resize-none rounded-2xl border border-emerald-200 bg-white px-3 py-2.5 text-xs outline-none dark:bg-slate-900 dark:text-slate-100"></textarea><p class="text-center text-[10px] text-slate-500 dark:text-slate-400">تقدر تسجل لحد <b class="text-emerald-600 dark:text-emerald-300">5 مصروفات</b> مرة واحدة في نفس الرسالة.</p><div class="flex gap-2"><button id="quick-entry-analyze" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950" type="button">فهم وتجهيز</button><button id="quick-entry-cancel" class="rounded-xl border border-slate-300 px-3 py-2.5 text-xs text-slate-500 dark:border-slate-700" type="button">إلغاء</button></div></div>
+                <div id="quick-entry-form" class="hidden space-y-2"><textarea id="quick-entry-input" rows="2" maxlength="1200" placeholder="مثال: صرفت 75 جنيه أكل" class="w-full resize-none rounded-2xl border border-emerald-200 bg-white px-3 py-2.5 text-xs outline-none dark:bg-slate-900 dark:text-slate-100"></textarea><div class="flex gap-2"><button id="quick-entry-analyze" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950" type="button">فهم وتجهيز</button><button id="quick-entry-cancel" class="rounded-xl border border-slate-300 px-3 py-2.5 text-xs text-slate-500 dark:border-slate-700" type="button">إلغاء</button></div></div>
                 <div id="quick-entry-recording" class="hidden rounded-2xl border border-rose-200 bg-rose-50 p-3 text-center text-xs text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200"><div class="flex items-center justify-between gap-2"><span class="font-black">جاري التسجيل...</span><button id="quick-entry-recording-cancel" class="flex h-7 w-7 items-center justify-center rounded-full bg-white/70 text-sm font-black text-rose-500 transition hover:bg-white" type="button" aria-label="إلغاء التسجيل">✕</button></div><div id="quick-entry-recording-time" class="mt-1 font-black">00:00</div><div class="mt-2 flex gap-2"><button id="quick-entry-stop" class="flex-1 rounded-xl bg-rose-500 px-4 py-2 font-bold text-white" type="button">إيقاف وتحليل</button><button id="quick-entry-recording-cancel-bottom" class="rounded-xl bg-white/70 px-3 py-2 font-bold text-rose-500 transition hover:bg-white" type="button">إلغاء</button></div></div>
                 <div id="quick-entry-voice-preview" class="hidden rounded-2xl border border-emerald-200 bg-white p-3 dark:bg-slate-900 dark:border-slate-700 space-y-2"><div class="flex items-center justify-between gap-2"><p class="text-[11px] text-slate-500">سمّع تسجيلك للتأكد إنه واضح قبل ما نبعته</p><button id="quick-entry-voice-cancel" class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-black text-slate-500 transition hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700" type="button" aria-label="إلغاء التسجيل">✕</button></div><audio id="quick-entry-voice-audio" controls class="w-full"></audio><div class="flex gap-2"><button id="quick-entry-voice-send" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950" type="button">ابعت للتحليل</button><button id="quick-entry-voice-retry" class="rounded-xl border border-slate-300 px-3 py-2.5 text-xs text-slate-500 dark:border-slate-700" type="button">سجّل تاني</button><button id="quick-entry-voice-cancel-bottom" class="rounded-xl border border-rose-200 px-3 py-2.5 text-xs font-bold text-rose-500 dark:border-rose-500/30" type="button">إلغاء</button></div></div>
                 <div id="quick-entry-draft" class="hidden rounded-2xl border border-emerald-200 bg-white p-3 dark:bg-slate-900"><div class="flex items-center justify-between gap-2"><p id="quick-entry-draft-title" class="text-[11px] text-slate-500">راجع قبل الحفظ</p><button id="quick-entry-draft-close" type="button" aria-label="اقفل" class="shrink-0 w-6 h-6 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition text-sm font-bold">✕</button></div><div id="quick-entry-draft-list" class="mt-1 space-y-2"></div><div id="quick-entry-draft-actions" class="mt-3 flex gap-2"><button id="quick-entry-confirm" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950" type="button">تأكيد التسجيل</button><button id="quick-entry-edit" class="rounded-xl border border-slate-300 px-3 py-2.5 text-xs text-slate-500 dark:border-slate-700" type="button">تعديل</button></div></div><p id="quick-entry-status" class="min-h-4 text-center text-[11px] text-slate-500"></p>
@@ -1902,8 +1875,8 @@
                         <span class="text-sm font-bold text-slate-100" id="asst-goal-title-label">—</span>
                         <span class="text-xs font-black text-emerald-400" id="asst-goal-percent">0%</span>
                     </div>
-                    <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden">
-                        <div id="asst-goal-bar" class="h-full bg-gradient-to-l from-emerald-400 to-teal-400 rounded-full transition-all" style="width:0%"></div>
+                    <div class="w-full h-2.5 goal-progress-track rounded-full overflow-hidden">
+                        <div id="asst-goal-bar" class="h-full goal-progress-fill rounded-full transition-all" style="width:0%"></div>
                     </div>
                     <div class="flex justify-between text-[11px] text-slate-400">
                         <span>وفرت: <b class="text-slate-200" id="asst-goal-saved">—</b></span>
@@ -4127,7 +4100,7 @@
                 list.innerHTML = quickEntryDrafts.map((draft) => {
                     const isDebt = draft.type === 'debt';
                     const emoji = isDebt ? (draft.direction === 'lent' ? '📤' : '📥') : (draft.type === 'income' ? '💰' : draft.type === 'asset' ? '📦' : (getCategoryEmoji(draft.category)));
-                    const title = (draft.note && draft.note.trim()) || (isDebt ? draft.person : draft.category) || quickDraftLabel(draft.type);
+                    const title = (draft.displayLabel && draft.displayLabel.trim()) || (draft.note && draft.note.trim()) || (isDebt ? draft.person : draft.category) || quickDraftLabel(draft.type);
                     const metaBits = [];
                     if (isDebt) {
                         metaBits.push(draft.person);
@@ -4152,119 +4125,27 @@
             quickStatus(quickEntryDrafts.length > 1 ? `فهمنا ${quickEntryDrafts.length} معاملة — راجعهم ثم أكد التسجيل.` : 'راجع المبلغ والفئة ثم أكد التسجيل.');
         }
         async function analyzeQuickEntry(payload) { if (!requireQuickEntryAccess()) return; quickStatus('دبّر بيفهم العملية...'); try { const result = await asstApi(payload.imageBase64 ? 'entry_invoice_draft' : 'entry_draft', payload); quickDraft(result.drafts, result.transcript); } catch (e) { quickStatus(e.message || 'تعذر فهم العملية.', 'error'); } }
-        // ============ أنيميشن "مطر الفلوس" على الصفحة كلها — بتتنادى بعد أي تأكيد تسجيل ناجح (صوت/كتابة/فاتورة) ============
-        function playMoneyRain(pieceCount) {
-            if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-            const count = pieceCount || 45;
-            let overlay = document.getElementById('money-rain-overlay');
-            if (!overlay) {
-                overlay = document.createElement('div');
-                overlay.id = 'money-rain-overlay';
-                document.body.appendChild(overlay);
-            }
-            const viewportHeight = window.innerHeight || 800;
-            for (let i = 0; i < count; i++) {
-                const piece = document.createElement('span');
-                piece.className = 'money-rain-piece ' + (Math.random() < 0.55 ? 'coin' : 'note');
-                piece.style.left = (Math.random() * 96) + 'vw';
-                const duration = 1.4 + Math.random() * 1.1;
-                const delay = Math.random() * 0.6;
-                const rot = (Math.random() > 0.5 ? 1 : -1) * (360 + Math.random() * 480);
-                piece.style.setProperty('--fall-distance', (viewportHeight + 80) + 'px');
-                piece.style.setProperty('--fall-rot', rot + 'deg');
-                piece.style.animationDuration = duration + 's';
-                piece.style.animationDelay = delay + 's';
-                overlay.appendChild(piece);
-                setTimeout(() => piece.remove(), (duration + delay) * 1000 + 200);
-            }
-            setTimeout(() => { if (overlay && !overlay.childElementCount) overlay.remove(); }, (2.5 * 1000) + 900);
-        }
-        document.getElementById('quick-entry-text')?.addEventListener('click', () => { if (!requireQuickEntryAccess()) return; quickShow('quick-entry-form', true); const input = document.getElementById('quick-entry-input'); if (input) input.value = ''; quickEntryDrafts = []; quickEntrySourceText = ''; input?.focus(); });
-        document.getElementById('quick-entry-cancel')?.addEventListener('click', () => { quickShow('quick-entry-form', false); quickShow('quick-entry-draft', false); document.getElementById('quick-entry-input').value = ''; quickEntryDrafts = []; quickEntrySourceText = ''; quickStatus(''); });
+        document.getElementById('quick-entry-text')?.addEventListener('click', () => { if (!requireQuickEntryAccess()) return; quickShow('quick-entry-form', true); document.getElementById('quick-entry-input')?.focus(); });
+        document.getElementById('quick-entry-cancel')?.addEventListener('click', () => { quickShow('quick-entry-form', false); quickShow('quick-entry-draft', false); quickStatus(''); });
         document.getElementById('quick-entry-edit')?.addEventListener('click', () => { quickShow('quick-entry-draft', false); quickShow('quick-entry-form', true); document.getElementById('quick-entry-input').value = quickEntrySourceText || ''; });
         document.getElementById('quick-entry-analyze')?.addEventListener('click', () => { const text = document.getElementById('quick-entry-input')?.value.trim(); if (!text) return quickStatus('اكتب العملية الأول.', 'error'); analyzeQuickEntry({ text }); });
-        document.getElementById('quick-entry-confirm')?.addEventListener('click', async () => { if (!requireQuickEntryAccess() || !quickEntryDrafts.length) return; const btn = document.getElementById('quick-entry-confirm'); btn.disabled = true; quickStatus('جاري حفظ العملية...'); try { const draftCountForRain = quickEntryDrafts.length; const result = await asstApi('entry_confirm', { drafts: quickEntryDrafts }); document.getElementById('quick-entry-input').value = ''; quickEntryDrafts = []; quickEntrySourceText = ''; const draftList = document.getElementById('quick-entry-draft-list'); if (draftList) draftList.innerHTML = ''; quickShow('quick-entry-draft', false); quickStatus(result.message || 'تم التسجيل بنجاح.', 'success'); playMoneyRain(Math.min(70, 30 + draftCountForRain * 10)); await loadDashboard(); } catch (e) { quickStatus(e.message || 'تعذر الحفظ.', 'error'); } finally { btn.disabled = false; } });
+        document.getElementById('quick-entry-confirm')?.addEventListener('click', async () => { if (!requireQuickEntryAccess() || !quickEntryDrafts.length) return; const btn = document.getElementById('quick-entry-confirm'); btn.disabled = true; quickStatus('جاري حفظ العملية...'); try { const result = await asstApi('entry_confirm', { drafts: quickEntryDrafts }); document.getElementById('quick-entry-input').value = ''; quickShow('quick-entry-draft', false); quickStatus(result.message || 'تم التسجيل بنجاح.', 'success'); await loadDashboard(); } catch (e) { quickStatus(e.message || 'تعذر الحفظ.', 'error'); } finally { btn.disabled = false; } });
         document.getElementById('quick-entry-invoice')?.addEventListener('click', () => { if (!requireQuickEntryAccess()) return; document.getElementById('quick-entry-invoice-input')?.click(); });
         document.getElementById('quick-entry-draft-close')?.addEventListener('click', () => { quickShow('quick-entry-draft', false); quickStatus(''); });
         // ============ فاتورة سريعة: نفس بالظبط سلوك "امسح فاتورة" — بتستخرج كل صنف بسعره وتتسجل أوتوماتيك من غير خطوة تأكيد إضافية ============
-        // ============ نفس أنيميشن "بنقرأ الفاتورة" التفصيلي بتاع تبويب مساعد، بس بألوان تدعم الوضع الفاتح والغامق ============
-        let quickScanInterval = null;
-        function quickInvoiceScanHtml() {
-            return `
-                <div class="flex items-center gap-3 mb-3">
-                    <div class="w-10 h-10 rounded-xl bg-blue-50 dark:bg-slate-950 flex items-center justify-center relative shrink-0">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l3 3v15a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1z"/><path d="M9 9h6M9 13h6M9 17h3"/></svg>
-                        <div class="absolute -inset-[3px] rounded-[14px] border-2 border-transparent border-t-blue-500 border-r-blue-500" style="animation: dabbar-scan-spin 1s linear infinite;"></div>
-                    </div>
-                    <div class="min-w-0">
-                        <p id="quick-scan-status" class="text-xs font-bold text-slate-800 dark:text-slate-100 mb-0.5">بنقرأ الفاتورة</p>
-                        <p class="text-[10px] text-slate-500 dark:text-slate-400">دبّر بيحلل كل صنف وسعره</p>
-                    </div>
-                </div>
-                <div class="space-y-2">
-                    <div class="flex items-center gap-2.5 quick-scan-step" data-idx="0">
-                        <div class="w-4 h-4 rounded-full border-2 border-slate-300 dark:border-slate-700 shrink-0 flex items-center justify-center quick-scan-dot"></div>
-                        <span class="text-[11px] text-slate-500 dark:text-slate-600 quick-scan-lbl">استخراج بيانات الفاتورة</span>
-                    </div>
-                    <div class="flex items-center gap-2.5 quick-scan-step" data-idx="1">
-                        <div class="w-4 h-4 rounded-full border-2 border-slate-300 dark:border-slate-700 shrink-0 flex items-center justify-center quick-scan-dot"></div>
-                        <span class="text-[11px] text-slate-500 dark:text-slate-600 quick-scan-lbl">تقسيم الأصناف والأسعار</span>
-                    </div>
-                    <div class="flex items-center gap-2.5 quick-scan-step" data-idx="2">
-                        <div class="w-4 h-4 rounded-full border-2 border-slate-300 dark:border-slate-700 shrink-0 flex items-center justify-center quick-scan-dot"></div>
-                        <span class="text-[11px] text-slate-500 dark:text-slate-600 quick-scan-lbl">تجهيز التسجيل</span>
-                    </div>
-                </div>`;
-        }
-        function startQuickInvoiceScanAnimation() {
-            const statusEl = document.getElementById('quick-scan-status');
-            const steps = document.querySelectorAll('.quick-scan-step');
-            const msgs = ['بنقرأ الفاتورة', 'بنفصّل كل صنف', 'بنراجع الإجمالي'];
-            let i = 0;
-            function activate(idx) {
-                steps.forEach((step) => {
-                    const si = Number(step.dataset.idx);
-                    const dot = step.querySelector('.quick-scan-dot');
-                    const lbl = step.querySelector('.quick-scan-lbl');
-                    if (si < idx) {
-                        dot.className = 'w-4 h-4 rounded-full border-2 border-blue-500 bg-blue-500 shrink-0 flex items-center justify-center quick-scan-dot';
-                        dot.innerHTML = '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>';
-                        lbl.className = 'text-[11px] text-slate-500 dark:text-slate-400 quick-scan-lbl';
-                    } else if (si === idx) {
-                        dot.className = 'w-4 h-4 rounded-full border-2 border-blue-500 shrink-0 flex items-center justify-center quick-scan-dot';
-                        dot.innerHTML = '';
-                        lbl.className = 'text-[11px] text-slate-800 dark:text-slate-100 quick-scan-lbl';
-                    } else {
-                        dot.className = 'w-4 h-4 rounded-full border-2 border-slate-300 dark:border-slate-700 shrink-0 flex items-center justify-center quick-scan-dot';
-                        dot.innerHTML = '';
-                        lbl.className = 'text-[11px] text-slate-500 dark:text-slate-600 quick-scan-lbl';
-                    }
-                });
-            }
-            activate(0);
-            clearInterval(quickScanInterval);
-            quickScanInterval = setInterval(() => {
-                i = (i + 1) % 3;
-                activate(i);
-                if (statusEl) statusEl.textContent = msgs[i];
-            }, 1600);
-        }
-        function stopQuickInvoiceScanAnimation() {
-            if (quickScanInterval) { clearInterval(quickScanInterval); quickScanInterval = null; }
-        }
         async function analyzeQuickInvoice(file) {
             if (!requireQuickEntryAccess() || !file) return;
             if (!file.type.startsWith('image/')) return quickStatus('من فضلك اختار ملف صورة.', 'error');
             if (file.size > 8 * 1024 * 1024) return quickStatus('الصورة كبيرة أوي، اختار صورة أصغر من 8 ميجابايت.', 'error');
             quickShow('quick-entry-form', false);
             quickShow('quick-entry-draft', false);
+            // ============ أنيميشن بسيط وسريع مكانه جوه كارت "أضف مصروفك بسرعة" نفسه (مش أنيميشن "امسح فاتورة" التفصيلي) ============
             const list = document.getElementById('quick-entry-draft-list');
             document.getElementById('quick-entry-draft-title').textContent = 'بيقرا الفاتورة...';
             document.getElementById('quick-entry-draft-actions')?.classList.add('hidden');
-            list.innerHTML = quickInvoiceScanHtml();
+            list.innerHTML = '<div class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 py-1"><span class="w-4 h-4 rounded-full border-2 border-emerald-400 border-t-transparent animate-spin shrink-0"></span><span>دبّر بيقرا الفاتورة...</span></div>';
             quickShow('quick-entry-draft', true);
             quickStatus('');
-            startQuickInvoiceScanAnimation();
             try {
                 const base64 = await new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = reject; reader.readAsDataURL(file); });
                 const result = await asstApi('receipt_scan', { imageBase64: base64 });
@@ -4275,14 +4156,11 @@
                 document.getElementById('quick-entry-draft-actions').classList.add('hidden');
                 quickShow('quick-entry-draft', true);
                 quickStatus('تم الحفظ في كل الفواتير ✅', 'success');
-                playMoneyRain(Math.min(70, 30 + ((result.items || []).length) * 10));
                 await loadDashboard();
                 await loadInvoicesCount?.();
             } catch (e) {
                 quickStatus(e.message || 'معرفتش أقرا الفاتورة. جرب صورة أوضح.', 'error');
                 quickShow('quick-entry-draft', false);
-            } finally {
-                stopQuickInvoiceScanAnimation();
             }
         }
         document.getElementById('quick-entry-invoice-input')?.addEventListener('change', (event) => { const file = event.target.files?.[0]; analyzeQuickInvoice(file); event.target.value = ''; });

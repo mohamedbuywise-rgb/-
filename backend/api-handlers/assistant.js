@@ -1,11 +1,12 @@
 import { supabase } from '../../lib/supabaseClient.js';
 import { getRecentExpensesSummaryText } from '../../lib/expenses.js';
 import { getDebtsSummaryText } from '../../lib/debts.js';
-import { extractItemizedReceiptFromImageBase64, askDabbarChat, classifyMessage, reviewTransactions, transcribeAudioBase64 } from '../../lib/groq.js';
+import { extractItemizedReceiptFromImageBase64, askDabbarChat, classifyMessage, transcribeAudioBase64 } from '../../lib/groq.js';
 import { saveInvoiceRecord, deleteInvoiceById } from '../../lib/invoices.js';
 import { hasActiveSubscription, isInTrial } from '../../lib/users.js';
 import { checkOcrUsage, checkChatUsage, refundOcrUsage, refundUsage } from '../../lib/rateLimits.js';
-import { normalizeDigits, extractDeterministicExpenses, correctDebtDirections, detectCurrency, currencyLabel, normalizeFinancialTransaction, reconcileSingleTransaction, countExpectedAmounts } from '../../lib/textNormalize.js';
+import { normalizeDigits, extractDeterministicExpense, correctDebtDirections, correctExpenseMisclassifiedAsDebt, detectCurrency, currencyLabel, normalizeFinancialTransaction, reconcileSingleTransaction, finalizeTransactions } from '../../lib/textNormalize.js';
+import { VOICE_MAX_DURATION_SECONDS } from '../../lib/config.js';
 import { maybeSendBudgetAlert } from '../../lib/webPush.js';
 import { getDashboardUserFromRequest } from '../../lib/dashboardAuth.js';
 import { isFinancialEventType, recordFinancialEvent } from '../../lib/financialEvents.js';
@@ -235,7 +236,7 @@ async function handleAsk(userId, body, res) {
 async function handleEntryDraft(userId, body, res) {
   let text = String(body.text || '').trim();
   if (body.audioBase64) {
-    if (String(body.audioBase64).length > 8 * 1024 * 1024) return res.status(413).json({ error: 'التسجيل طويل أوي. الحد الأقصى 30 ثانية.' });
+    if (String(body.audioBase64).length > 8 * 1024 * 1024) return res.status(413).json({ error: `التسجيل طويل أوي. الحد الأقصى ${VOICE_MAX_DURATION_SECONDS} ثانية.` });
     const transcript = await transcribeAudioBase64(body.audioBase64, body.mimeType || 'audio/webm');
     if (!transcript.success) return res.status(422).json({ error: transcript.error });
     text = transcript.text;
@@ -248,47 +249,15 @@ async function handleEntryDraft(userId, body, res) {
   // بدل ما نلقط أول معاملة بس ونسيب الباقي بلا تسجيل زي ما كان الموقع بيعمل قبل كده.
   const parsed = await classifyMessage(text);
   const normalizedTransactions = (Array.isArray(parsed) ? parsed : []).map((item) => normalizeFinancialTransaction(item, text));
-  const transactions = reconcileSingleTransaction(correctDebtDirections(text, normalizedTransactions), text);
+  const transactions = finalizeTransactions(correctExpenseMisclassifiedAsDebt(text, reconcileSingleTransaction(correctDebtDirections(text, normalizedTransactions), text)));
   let validTx = transactions.filter((item) => ((isFinancialEventType(item?.type) || item?.type === 'expense') || item?.type === 'debt') && Number.isFinite(Number(item.amount)) && Number(item.amount) > 0 && (item.type !== 'debt' || item.person));
-
-  // طبقة حماية إضافية: لو Groq رجّع رد "صالح" لكنه دمج كذا بند في معاملة واحدة غلط (فئة موحدة،
-  // رقم واحد بدل الكل)، والتقسيم الحتمي لقى بنود أكتر بوضوح بالأرقام الصريحة، نفضّله عليه.
-  // (بقى ">=" بدل ">" الصارم — نفس تصحيح تليجرام: لو Groq دمج 6 بنود في 3 والتقسيم الحتمي
-  // لقى 3 برضو بس بأرقام مختلفة فعليًا، كان بيسيب رد Groq الناقص من غير ما يتفعل.)
-  let deterministicSplitEarly = extractDeterministicExpenses(text);
-  if (deterministicSplitEarly.length > 1 && deterministicSplitEarly.length >= validTx.length) {
-    validTx = deterministicSplitEarly;
-  }
-
   // لو التصنيف الذكي لم يلتقط جملة قصيرة مثل "غدا 100 جنيه"، نستخدم استخراجًا حتميًا
   // مقيدًا بعلامات المصروف، فلا نخلط جمل الديون أو الأسئلة مع مصروفات وهمية.
   if (!validTx.length) {
-    const deterministicExpenses = extractDeterministicExpenses(text);
-    if (deterministicExpenses.length) validTx = deterministicExpenses;
+    const deterministicExpense = extractDeterministicExpense(text);
+    if (deterministicExpense) validTx = [{ ...deterministicExpense, displayLabel: deterministicExpense.category || deterministicExpense.note || 'مصروف' }];
   }
-
-  // تحقق أخير من "العدّ": لو عدد الأرقام الحقيقي المذكور في النص أكبر من عدد المعاملات الصالحة
-  // اللي طلعناها، معناه إن بنود اتضاعت. نعيد نداء Groq مرة كمان بـ temperature أعلى شوية،
-  // ولو لسه ناقص نرجع للتقسيم الحتمي كحل أخير.
-  const expectedAmountsCount = countExpectedAmounts(text);
-  if (expectedAmountsCount > 1 && validTx.length < expectedAmountsCount) {
-    const retryParsed = await classifyMessage(text, { temperature: 0.15 });
-    const retryNormalized = (Array.isArray(retryParsed) ? retryParsed : []).map((item) => normalizeFinancialTransaction(item, text));
-    const retryTx = reconcileSingleTransaction(correctDebtDirections(text, retryNormalized), text)
-      .filter((item) => ((isFinancialEventType(item?.type) || item?.type === 'expense') || item?.type === 'debt') && Number.isFinite(Number(item.amount)) && Number(item.amount) > 0 && (item.type !== 'debt' || item.person));
-    if (retryTx.length > validTx.length) validTx = retryTx;
-    if (validTx.length < expectedAmountsCount && deterministicSplitEarly.length > validTx.length) {
-      validTx = deterministicSplitEarly;
-    }
-  }
-
   if (!validTx.length) return res.status(422).json({ error: 'محتاج مبلغ واضح عشان أفهم العملية.' });
-
-  // طبقة تحقق أخيرة (self-check): نفس منطق تليجرام بالظبط — نداء تاني رخيص بيراجع الفئات والربط
-  // بين الأرقام والبنود قبل ما نرجّع المسودات للمستخدم، بس لو فيه أكتر من بند واحد.
-  if (validTx.length > 1) {
-    validTx = await reviewTransactions(text, validTx);
-  }
 
   // لو معاملة واحدة بس، برضو بنستخدم النص الأصلي كوصف احتياطي (fallback) لو الموديل ما رجعش note —
   // بالظبط زي ما تليجرام بيعمل. لو أكتر من معاملة، مش بنكرر نفس النص الطويل في كل واحدة فيهم.

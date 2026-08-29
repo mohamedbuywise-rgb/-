@@ -1,4 +1,4 @@
-import { transcribeVoice, classifyMessage, reviewTransactions, answerDataQuestion, extractItemizedReceiptFromImage } from '../../lib/groq.js';
+import { transcribeVoice, classifyMessage, answerDataQuestion, extractItemizedReceiptFromImage } from '../../lib/groq.js';
 import { recordInvoice, deleteInvoiceById } from '../../lib/invoices.js';
 import { sendTelegramMessage, forwardTelegramMessage, answerCallbackQuery, editTelegramMessage, sendChatAction } from '../../lib/telegram.js';
 import { recordExpense, sendMonthlyReport, sendWeeklyReport, sendDataExport, sendExpenseSearch, deleteExpenseById, getMostRecentExpense, getRecentExpensesSummaryText } from '../../lib/expenses.js';
@@ -8,9 +8,9 @@ import { sendMonthlyWrapped } from '../../lib/wrapped.js';
 import { upsertUser, hasActiveSubscription, getSubscriptionExpiry, activateSubscription, getChatIdByUserId, isInTrial, getTrialDaysLeft } from '../../lib/users.js';
 import { createLinkCode } from '../../lib/linking.js';
 import { isFinancialEventType, recordFinancialEvent } from '../../lib/financialEvents.js';
-import { normalizeDigits, extractDeterministicExpenses, correctDebtDirections, normalizeFinancialTransaction, reconcileSingleTransaction, countExpectedAmounts } from '../../lib/textNormalize.js';
+import { normalizeDigits, extractDeterministicExpense, correctDebtDirections, correctExpenseMisclassifiedAsDebt, normalizeFinancialTransaction, reconcileSingleTransaction, finalizeTransactions } from '../../lib/textNormalize.js';
 import { checkVoiceUsage, checkOcrUsage, checkChatUsage, refundOcrUsage } from '../../lib/rateLimits.js';
-import { GUIDE_URL, TRIAL_SUMMARY_BASE_URL, ADMIN_TELEGRAM_ID, SUBSCRIPTION_DAYS, SUBSCRIPTION_PRICE_EGP, INSTAPAY_LINK, ADMIN_CONTACT_USERNAME, VOICE_MAX_DURATION_SECONDS, TELEGRAM_WEBHOOK_SECRET } from '../../lib/config.js';
+import { GUIDE_URL, TRIAL_SUMMARY_BASE_URL, ADMIN_TELEGRAM_ID, SUBSCRIPTION_DAYS, SUBSCRIPTION_PRICE_EGP, INSTAPAY_LINK, ADMIN_CONTACT_USERNAME, VOICE_MAX_DURATION_SECONDS, TELEGRAM_WEBHOOK_SECRET, CATEGORY_EMOJI } from '../../lib/config.js';
 import { createTrialSummaryToken } from '../../lib/trialToken.js';
 
 // ============ نص دليل الأوامر — بيتبعت مع /start وبرضو متاح في أي وقت عن طريق "مساعدة" ============
@@ -610,82 +610,110 @@ async function handleIncomingText(text, userId, chatId) {
   }
 
   const parsedTransactions = (await classifyMessage(text)).map((item) => normalizeFinancialTransaction(item, text));
-  let transactions = reconcileSingleTransaction(correctDebtDirections(text, parsedTransactions), text);
-
-  // طبقة حماية إضافية: أحيانًا Groq "بينجح" في الرد (JSON سليم) لكنه بيدمج كذا بند مع بعض في
-  // معاملة واحدة غلط (فئة واحدة موحدة لكل حاجة، ورقم واحد بدل كل الأرقام). الحالة دي الفولباك
-  // القديم تحت مكانش بيتفعل فيها أصلًا لأنه بيشتغل بس لو Groq فشل تمامًا (unknown)، مش لو نجح
-  // برد غلط. هنا بنقارن: لو التقسيم الحتمي (اللي بيعتمد على الأرقام الصريحة في الجملة) لقى
-  // بنود أكتر بوضوح من اللي Groq رجعها، نفضّله لأنه أضمن للحفاظ على كل رقم وفئته على حدة.
-  // (كان الشرط قبل كده ">" صارم، فلو Groq دمج 6 بنود في 3 والتقسيم الحتمي لقى 3 برضو —
-  // بس أرقام مختلفة فعليًا — كان بيسيب رد Groq الناقص من غير ما يتفعل. بقى ">=".)
-  let deterministicSplitEarly = extractDeterministicExpenses(text);
-  let groqExpenseLikeCount = transactions.filter((t) => (t?.type === 'expense' || t?.type === 'debt') && Number(t.amount) > 0).length;
-  if (deterministicSplitEarly.length > 1 && deterministicSplitEarly.length >= groqExpenseLikeCount) {
-    transactions = deterministicSplitEarly;
-    groqExpenseLikeCount = deterministicSplitEarly.length;
-  }
-
-  // fallback آمن للجمل الصوتية إذا أعاد المصنّف unknown — extractDeterministicExpenses (بالجمع)
-  // بتقسّم الرسالة لبنود منفصلة أول ما تحاول، فلو فيها كذا مصروف مع بعض بيرجعوا كلهم بأرقامهم
-  // وفئاتهم الصح، مش بند واحد بس زي ما كان بيحصل قبل كده.
+  let transactions = finalizeTransactions(correctExpenseMisclassifiedAsDebt(text, reconcileSingleTransaction(correctDebtDirections(text, parsedTransactions), text)));
+  // fallback آمن للجمل الصوتية القصيرة مثل "غدا مية جنيه" إذا أعاد المصنّف unknown.
   if (!transactions.some((t) => (t?.type === 'expense' || t?.type === 'debt') && Number(t.amount) > 0)) {
-    const deterministicExpenses = extractDeterministicExpenses(text);
-    if (deterministicExpenses.length > 0) {
-      transactions = deterministicExpenses;
-      groqExpenseLikeCount = deterministicExpenses.length;
-    }
-  }
-
-  // تحقق أخير من "العدّ": لو عدد الأرقام الحقيقي المذكور في النص أكبر من عدد المعاملات اللي
-  // قدرنا نطلعها، معنى كده إن فيه بنود اتضاعت (زي فويس فيه 6 بنود ويطلعله 3 بس). في الحالة دي
-  // نعيد نداء Groq مرة كمان بـ temperature أعلى شوية (بيدّي فرصة لصياغة تانية تفكّك البنود صح)،
-  // ولو لسه ناقص نرجع للتقسيم الحتمي كحل أخير لأنه بيضمن إن كل رقم في الجملة هيتسجل.
-  const expectedAmountsCount = countExpectedAmounts(text);
-  if (expectedAmountsCount > 1 && groqExpenseLikeCount < expectedAmountsCount) {
-    const retryParsed = (await classifyMessage(text, { temperature: 0.15 })).map((item) => normalizeFinancialTransaction(item, text));
-    const retryTransactions = reconcileSingleTransaction(correctDebtDirections(text, retryParsed), text);
-    const retryCount = retryTransactions.filter((t) => (t?.type === 'expense' || t?.type === 'debt') && Number(t.amount) > 0).length;
-    if (retryCount > groqExpenseLikeCount) {
-      transactions = retryTransactions;
-      groqExpenseLikeCount = retryCount;
-    }
-    if (groqExpenseLikeCount < expectedAmountsCount && deterministicSplitEarly.length > groqExpenseLikeCount) {
-      transactions = deterministicSplitEarly;
-      groqExpenseLikeCount = deterministicSplitEarly.length;
-    }
-  }
-
-  // طبقة تحقق أخيرة (self-check): نداء تاني رخيص بيراجع الفئات والربط بين الأرقام والبنود قبل
-  // ما نسجل أي حاجة فعليًا. بنشغّلها بس لو فيه أكتر من بند واحد (رسالة معقدة فعلًا محتاجة مراجعة)،
-  // عشان مانضربش نداء إضافي على كل رسالة بسيطة زي "صرفت 50 جنيه أكل".
-  if (groqExpenseLikeCount > 1) {
-    transactions = await reviewTransactions(text, transactions);
+    const deterministicExpense = extractDeterministicExpense(text);
+    if (deterministicExpense) transactions = [{ ...deterministicExpense, displayLabel: deterministicExpense.category || deterministicExpense.note || 'مصروف' }];
   }
   let successCount = 0;
-  const expenseCount = transactions.filter((t) => t.type === 'expense' && t.amount).length;
+  const isBatch = transactions.length > 1; // فويس/رسالة فيها أكتر من معاملة — هنا بنجمع الرد بدل ما نبعت رسالة لكل بند
 
-  for (const result of transactions) {
-    if (result.type === 'expense' && result.amount) {
-      // لو الرسالة/الفويس فيها أكتر من مصروف مع بعض، منستخدمش النص الأصلي الكامل كـ fallback لوصف
-      // كل مصروف على حدة — كان ده بالظبط سبب إن كل المصاريف في الرسالة الواحدة بتظهر في الداشبورد
-      // بنفس الوصف الطويل (نص الرسالة كله) بدل ما كل مصروف يوصف بنفسه. لو مصروف واحد بس، لسه بنستخدم
-      // النص الأصلي كـ fallback عادي (مفيد لو الموديل ما رجعش note).
-      const fallbackText = expenseCount > 1 ? '' : text;
-      await recordExpense(result, fallbackText, userId, chatId);
-      successCount++;
-    } else if (result.type === 'debt' && result.amount && result.person) {
-      await recordDebt(result, userId, chatId);
-      successCount++;
-    } else if (result.type === 'settlement' && result.person) {
-      await settleDebtWithPerson(result.person, userId, chatId);
-      successCount++;
-    } else if (isFinancialEventType(result.type) && result.amount) {
-      const savedEvent = await recordFinancialEvent({ ...result, sourceText: text }, userId);
-      if (savedEvent.ok) {
-        await sendTelegramMessage(chatId, `✅ سجلت ${savedEvent.label} بقيمة ${savedEvent.record.amount} ${savedEvent.record.currency_code || 'EGP'}${result.item ? ` — ${result.item}` : ''}.`);
+  // ============ مسار المعاملة الواحدة (الأغلبية العظمى من الرسائل): زي ما هو بالظبط —
+  // رسالة تأكيد كاملة فورية مع زرار حذف، من غير أي تغيير في السلوك القديم. ============
+  if (!isBatch) {
+    for (const result of transactions) {
+      if (result.type === 'expense' && result.amount) {
+        await recordExpense(result, text, userId, chatId);
         successCount++;
+      } else if (result.type === 'debt' && result.amount && result.person) {
+        await recordDebt(result, userId, chatId);
+        successCount++;
+      } else if (result.type === 'settlement' && result.person) {
+        await settleDebtWithPerson(result.person, userId, chatId);
+        successCount++;
+      } else if (isFinancialEventType(result.type) && result.amount) {
+        const savedEvent = await recordFinancialEvent({ ...result, sourceText: text }, userId);
+        if (savedEvent.ok) {
+          await sendTelegramMessage(chatId, `✅ سجلت ${savedEvent.label} بقيمة ${savedEvent.record.amount} ${savedEvent.record.currency_code || 'EGP'}${result.item ? ` — ${result.item}` : ''}.`);
+          successCount++;
+        }
       }
+    }
+  } else {
+    // ============ مسار كذا معاملة مع بعض (زي فويس "غدا 300 عشا 200 مواصلات 100 واصل لمحمد 500"):
+    // كل بند بيتسجل في القاعدة *منفصل تمامًا* بالظبط زي مسار الرسالة الواحدة (الدقة والفصل في
+    // البيانات مش بيتأثروا خالص)، لكن بدل ما كل بند يبعت رسالة تليجرام مستقلة (كان بيسبب "spam"
+    // فعلي — 10 رسائل لفويس فيه 10 بنود)، بنجمع كل النتائج ونبعت رسالة واحدة مجمّعة بالفئة، زي
+    // كارت "المعاملات الأخيرة" في تطبيقات زي Say، مع زرار حذف لكل بند لوحده تحت نفس الرسالة. ============
+    const expenseResults = []; // { id, category, amount, moneyLabel, detail, isDuplicate }
+    const debtResults = []; // { id, summary }
+    let lastMoneyLabel = 'جنيه';
+    let lastTodayTotal = null;
+    let lastCurrency = 'EGP';
+
+    for (const result of transactions) {
+      if (result.type === 'expense' && result.amount) {
+        const saved = await recordExpense(result, '', userId, chatId, '', { silent: true });
+        if (saved) {
+          expenseResults.push(saved);
+          lastMoneyLabel = saved.moneyLabel;
+          lastCurrency = saved.currency_code;
+          lastTodayTotal = saved.todayTotal;
+          successCount++;
+        }
+      } else if (result.type === 'debt' && result.amount && result.person) {
+        const saved = await recordDebt(result, userId, chatId, { silent: true });
+        if (saved) {
+          debtResults.push(saved);
+          successCount++;
+        }
+      } else if (result.type === 'settlement' && result.person) {
+        await settleDebtWithPerson(result.person, userId, chatId);
+        successCount++;
+      } else if (isFinancialEventType(result.type) && result.amount) {
+        const savedEvent = await recordFinancialEvent({ ...result, sourceText: text }, userId);
+        if (savedEvent.ok) successCount++;
+      }
+    }
+
+    if (expenseResults.length > 0 || debtResults.length > 0) {
+      // تجميع المصاريف بالفئة (زي "أكل — 800 (غدا 300، عشا 200، كارفور 300)")، عشان الرسالة
+      // تبقى مختصرة وواضحة بدل ما تكرر اسم الفئة في كل سطر لوحده.
+      const byCategory = new Map();
+      for (const e of expenseResults) {
+        if (!byCategory.has(e.category)) byCategory.set(e.category, { total: 0, parts: [], hasDuplicate: false });
+        const group = byCategory.get(e.category);
+        group.total += Number(e.amount) || 0;
+        group.parts.push(e.detail ? `${e.detail.replace(/^\s*\(|\)\s*$/g, '')} ${e.amount}` : `${e.amount}`);
+        if (e.isDuplicate) group.hasDuplicate = true;
+      }
+
+      const lines = [];
+      for (const [category, group] of byCategory) {
+        const emoji = CATEGORY_EMOJI[category] || '📌';
+        const breakdown = group.parts.length > 1 ? ` (${group.parts.join('، ')})` : '';
+        const dupNote = group.hasDuplicate ? ' ⚠️' : '';
+        lines.push(`${emoji} ${category} — ${group.total} ${lastMoneyLabel}${breakdown}${dupNote}`);
+      }
+      for (const d of debtResults) {
+        lines.push(d.summary);
+      }
+
+      let msg = `✅ <b>سجلت ${successCount} معاملة</b>\n${lines.join('\n')}`;
+      if (lastTodayTotal !== null) {
+        msg += `\n\n💰 إجمالي صرفك النهاردة: <b>${lastTodayTotal} ${lastMoneyLabel}</b>`;
+      }
+
+      // زرار حذف لكل بند لوحده (مش رسالة منفصلة)، عشان لو بند غلط يتصلح من غير ما يمسح الباقي
+      const deleteButtons = [
+        ...expenseResults.map((e) => ({ text: `🗑 ${e.category} ${e.amount}`, callback_data: `delexp:${e.id}` })),
+        ...debtResults.map((d) => ({ text: '🗑 دين', callback_data: `deldebt:${d.id}` })),
+      ];
+      const inline_keyboard = [];
+      for (let i = 0; i < deleteButtons.length; i += 2) inline_keyboard.push(deleteButtons.slice(i, i + 2));
+
+      await sendTelegramMessage(chatId, msg, 'HTML', inline_keyboard.length ? { inline_keyboard } : undefined);
     }
   }
 
@@ -698,8 +726,6 @@ async function handleIncomingText(text, userId, chatId) {
         'مش قادر أحدد المعاملات من رسالتك 🤔\nجرب تبعت زي كده: "صرفت 50 جنيه أكل" أو "عطيت محمد 200 جنيه" أو "خلصت مع محمد"'
       );
     }
-  } else if (transactions.length > 1 && successCount > 0) {
-    await sendTelegramMessage(chatId, `✅ تم تسجيل ${successCount} معاملة بنجاح.`);
   }
 }
 

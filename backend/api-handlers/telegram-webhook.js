@@ -655,6 +655,16 @@ async function handleIncomingText(text, userId, chatId) {
   } else if (transactions.length > 1 && successCount > 0) {
     await sendTelegramMessage(chatId, `✅ تم تسجيل ${successCount} معاملة بنجاح.`);
   }
+
+  // تنبيه احتياطي: لو عدد الأرقام الظاهرة في النص أكبر بوضوح من عدد المعاملات اللي فهمناها،
+  // على الأرجح فاتنا بند. بننبه المستخدم بدل ما نسكت، من غير ما نمنع أي حاجة.
+  const numbersInText = (normalizeDigits(text).match(/\d+/g) || []).length;
+  if (successCount > 0 && numbersInText > transactions.length) {
+    await sendTelegramMessage(
+      chatId,
+      `⚠️ يمكن يكون فاتني بند من رسالتك (لقيت أرقام أكتر من المعاملات اللي سجلتها). راجع "تقرير" وأضف أي بند ناقص يدويًا.`
+    );
+  }
 }
 
 // ============ حذف آخر مصروف/دين عن طريق أمر نصي (بديل سريع لزرار 🗑 تحت رسالة التسجيل) ============

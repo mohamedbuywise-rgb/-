@@ -9,43 +9,171 @@
 <link rel="apple-touch-icon" href="./icons/icon-192.png">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-  * { box-sizing: border-box; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
   body {
     margin: 0; min-height: 100vh; font-family: -apple-system, "Segoe UI", Tahoma, Arial, sans-serif;
-    background: #0E655B; color: #fff; display: flex; align-items: center; justify-content: center; padding: 20px;
+    color: #fff; display: flex; align-items: center; justify-content: center; padding: 20px;
+    position: relative; overflow: hidden;
   }
-  .card { width: 100%; max-width: 380px; }
-  .eyebrow { font-size: 12px; opacity: .8; margin: 0 0 4px; }
-  .headline { font-size: 17px; font-weight: 700; margin: 0 0 16px; line-height: 1.5; }
+  /* ============ خلفية بهوية دبّر (أخضر غامق + توهج كهرماني) بدل الشكل العام لمساعدي الذكاء الاصطناعي ============ */
+  .bg-layer { position: fixed; inset: 0; z-index: 0; overflow: hidden; background: #06231F; }
+  .bg-layer::before {
+    content: ""; position: absolute; inset: 0;
+    background: radial-gradient(120% 90% at 50% 120%, #0E655B 0%, #0A423B 45%, #06231F 75%);
+  }
+  .glow { position: absolute; border-radius: 50%; filter: blur(70px); pointer-events: none; }
+  .glow.g1 { width: 300px; height: 300px; background: rgba(255, 185, 90, .22); top: -70px; left: -60px; }
+  .glow.g2 { width: 260px; height: 260px; background: rgba(79, 216, 196, .28); bottom: -60px; right: -50px; }
+
+  .brand-mark {
+    width: 56px; height: 56px; margin: 0 auto 16px; border-radius: 18px; position: relative; z-index: 1;
+    background: linear-gradient(155deg, #FFC96B 0%, #4FD8C4 100%);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 10px 26px rgba(0,0,0,.35);
+  }
+  .brand-mark svg { width: 28px; height: 28px; }
+
+  .card {
+    width: 100%; max-width: 380px; position: relative; z-index: 1;
+    text-align: center;
+    animation: cardIn .45s cubic-bezier(.2,.8,.2,1);
+  }
+  @keyframes cardIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+  .fields { text-align: right; }
+
+  .eyebrow { font-size: 12px; opacity: .65; margin: 0 0 4px; letter-spacing: .3px; }
+  .headline { font-size: 17px; font-weight: 700; margin: 0 0 22px; line-height: 1.5; }
+
+  /* ============ تبديل الوضعين: كتابة / صوت ============ */
+  .mode-switch {
+    display: flex; position: relative; background: rgba(255,255,255,.12);
+    border-radius: 12px; padding: 4px; margin-bottom: 14px;
+  }
+  .mode-switch button {
+    flex: 1; position: relative; z-index: 1; background: transparent; border: none; color: rgba(255,255,255,.75);
+    font-size: 13px; font-weight: 700; padding: 9px 8px; border-radius: 9px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: 6px; transition: color .2s ease;
+  }
+  .mode-switch button.active { color: #0E655B; }
+  .mode-switch .pill {
+    position: absolute; top: 4px; bottom: 4px; width: calc(50% - 4px); right: 4px;
+    background: #fff; border-radius: 9px; transition: transform .28s cubic-bezier(.3,.8,.3,1);
+  }
+  .mode-switch.mode-voice .pill { transform: translateX(-100%); }
+
   textarea {
     width: 100%; min-height: 70px; border-radius: 12px; border: none; padding: 12px 14px;
     font-family: inherit; font-size: 14px; resize: vertical; background: rgba(255,255,255,.12); color: #fff;
+    outline: none;
   }
   textarea::placeholder { color: rgba(255,255,255,.6); }
+
   .row { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,.12); border-radius: 10px; padding: 10px 12px; margin-bottom: 10px; }
   .row span:first-child { font-size: 12px; opacity: .85; }
   .row span:last-child { font-size: 15px; font-weight: 700; }
-  button { border: none; border-radius: 10px; font-size: 14px; font-weight: 700; padding: 12px; cursor: pointer; width: 100%; }
+
+  button.btn-primary, button.btn-secondary { border: none; border-radius: 10px; font-size: 14px; font-weight: 700; padding: 12px; cursor: pointer; width: 100%; transition: transform .12s ease, opacity .2s ease; }
+  button.btn-primary:active, button.btn-secondary:active { transform: scale(.98); }
+  button:disabled { opacity: .55; cursor: not-allowed; }
   .btn-primary { background: #fff; color: #0E655B; margin-top: 6px; }
   .btn-secondary { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.4); margin-top: 8px; }
+
   .status { text-align: center; font-size: 13px; margin-top: 14px; min-height: 18px; opacity: .9; }
   .success { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; padding: 10px 0; }
-  .check { width: 46px; height: 46px; border-radius: 50%; background: rgba(255,255,255,.15); display: flex; align-items: center; justify-content: center; font-size: 22px; }
+  .check { width: 46px; height: 46px; border-radius: 50%; background: rgba(255,255,255,.15); display: flex; align-items: center; justify-content: center; font-size: 22px; animation: pop .35s cubic-bezier(.3,1.5,.5,1); }
+  @keyframes pop { from { transform: scale(.4); opacity: 0; } to { transform: scale(1); opacity: 1; } }
   .hidden { display: none !important; }
   a.link { color: #fff; text-decoration: underline; font-size: 13px; }
+
+  /* ============ منطقة التسجيل الصوتي ============ */
+  .voice-pane { display: flex; flex-direction: column; align-items: center; padding: 10px 0 4px; }
+  .mic-wrap { position: relative; width: 116px; height: 116px; display: flex; align-items: center; justify-content: center; margin-bottom: 14px; }
+  .mic-ring { position: absolute; inset: 0; border-radius: 50%; border: 2px solid rgba(255,255,255,.25); }
+  .mic-ring.pulse { animation: micPulse 1.6s ease-out infinite; }
+  @keyframes micPulse { 0% { transform: scale(.72); opacity: .8; } 100% { transform: scale(1.35); opacity: 0; } }
+  .mic-btn {
+    position: relative; z-index: 1; width: 84px; height: 84px; border-radius: 50%; border: none; cursor: pointer;
+    background: #fff; color: #0E655B; display: flex; align-items: center; justify-content: center;
+    transition: transform .15s ease, background .2s ease;
+  }
+  .mic-btn:active { transform: scale(.94); }
+  .mic-btn.recording { background: #FF5A5A; color: #fff; }
+  .mic-btn svg { width: 34px; height: 34px; }
+  .voice-hint { font-size: 13px; opacity: .85; text-align: center; margin: 0 0 4px; min-height: 18px; }
+  .rec-timer { font-size: 22px; font-weight: 800; letter-spacing: 1px; margin: 2px 0 10px; font-variant-numeric: tabular-nums; }
+
+  .voice-preview { width: 100%; padding-top: 4px; }
+  .voice-preview audio { width: 100%; margin-bottom: 10px; border-radius: 10px; }
+  .btn-row { display: flex; gap: 8px; }
+  .btn-row button { margin-top: 0; }
 </style>
 </head>
 <body>
+<div class="bg-layer"></div>
+<div class="glow g1"></div>
+<div class="glow g2"></div>
+
 <div class="card">
+  <div class="brand-mark">
+    <svg viewBox="0 0 24 24" fill="none" stroke="#06231F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 10h18M3 6h18v12H3z"/><circle cx="16.5" cy="14.5" r="1.5" fill="#06231F" stroke="none"/></svg>
+  </div>
   <p class="eyebrow" id="eyebrow">تسجيل مصروف سريع</p>
   <h1 class="headline" id="headline">دبّر بيفهم العملية...</h1>
 
-  <div id="input-view" class="hidden">
-    <textarea id="text-input" placeholder="اكتب العملية هنا، زي: دفعت 50 جنيه قهوة"></textarea>
-    <button class="btn-primary" id="analyze-btn">تحليل العملية</button>
-  </div>
+  <div class="fields">
+    <div id="mode-switch" class="mode-switch hidden">
+      <div class="pill"></div>
+      <button type="button" id="mode-text-btn" class="active">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 7h16M4 12h10M4 17h13"/></svg>
+        كتابة
+      </button>
+      <button type="button" id="mode-voice-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1M12 19v3"/></svg>
+        صوت
+      </button>
+    </div>
 
-  <div id="draft-view" class="hidden"></div>
+    <div id="input-view" class="hidden">
+      <div id="text-pane">
+        <textarea id="text-input" placeholder="اكتب العملية هنا، زي: دفعت 50 جنيه قهوة"></textarea>
+        <button class="btn-primary" id="analyze-btn">تحليل العملية</button>
+      </div>
+
+      <div id="voice-pane" class="voice-pane hidden">
+        <div id="voice-idle">
+          <div class="mic-wrap">
+            <div class="mic-ring"></div>
+            <button type="button" class="mic-btn" id="mic-btn" aria-label="ابدأ التسجيل">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1M12 19v3M8 22h8"/></svg>
+            </button>
+          </div>
+          <p class="voice-hint">اضغط وابدأ الكلام: قول المبلغ والتصنيف بوضوح</p>
+        </div>
+
+        <div id="voice-recording" class="hidden" style="width:100%; text-align:center;">
+          <div class="mic-wrap">
+            <div class="mic-ring pulse"></div>
+            <button type="button" class="mic-btn recording" id="mic-stop-btn" aria-label="إيقاف التسجيل">
+              <svg viewBox="0 0 24 24" fill="currentColor"><rect x="7" y="7" width="10" height="10" rx="2"/></svg>
+            </button>
+          </div>
+          <p class="rec-timer" id="rec-timer">00:00</p>
+          <p class="voice-hint">بيسمع دلوقتي... اضغط تاني عشان توقف</p>
+        </div>
+
+        <div id="voice-preview" class="voice-preview hidden">
+          <audio id="voice-audio" controls></audio>
+          <div class="btn-row">
+            <button class="btn-secondary" id="voice-retry-btn">إعادة التسجيل</button>
+            <button class="btn-primary" id="voice-send-btn">تحليل الصوت</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div id="draft-view" class="hidden"></div>
+  </div>
 
   <div id="success-view" class="success hidden">
     <div class="check">✓</div>
@@ -74,14 +202,35 @@
   let accessToken = null;
   let drafts = [];
 
+  // ============ حالة وضع الإدخال (كتابة / صوت) ============
+  let inputMode = 'text';
+  function setMode(mode) {
+    inputMode = mode;
+    const isVoice = mode === 'voice';
+    $('mode-switch')?.classList.toggle('mode-voice', isVoice);
+    $('mode-text-btn')?.classList.toggle('active', !isVoice);
+    $('mode-voice-btn')?.classList.toggle('active', isVoice);
+    show('text-pane', !isVoice);
+    show('voice-pane', isVoice);
+    if (isVoice) {
+      show('voice-idle', true); show('voice-recording', false); show('voice-preview', false);
+    }
+    $('status').textContent = '';
+  }
+  $('mode-text-btn')?.addEventListener('click', () => setMode('text'));
+  $('mode-voice-btn')?.addEventListener('click', () => setMode('voice'));
+
   function getSharedText() {
     const params = new URLSearchParams(window.location.search);
     return (params.get('text') || params.get('title') || '').trim();
   }
+  function isSharedLaunch() {
+    return new URLSearchParams(window.location.search).get('shared') === '1';
+  }
 
   async function callAssistant(action, payload) {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 30000);
+    const timeout = setTimeout(() => controller.abort(), 45000);
     try {
       const res = await fetch('/api/assistant', {
         method: 'POST',
@@ -100,6 +249,7 @@
   function renderDraft(list) {
     drafts = Array.isArray(list) ? list : [list];
     $('headline').textContent = 'راجع قبل الحفظ';
+    show('mode-switch', false);
     const html = drafts.map((d) => {
       const isDebt = d.type === 'debt';
       const title = (d.note && d.note.trim()) || (isDebt ? d.person : d.category) || typeLabel(d.type);
@@ -115,6 +265,8 @@
     $('edit-btn').addEventListener('click', () => {
       show('draft-view', false);
       show('input-view', true);
+      show('mode-switch', true);
+      setMode('text');
       $('headline').textContent = 'عدّل العملية';
       $('text-input').value = drafts[0]?.sourceText || '';
     });
@@ -129,7 +281,24 @@
     } catch (e) {
       $('status').textContent = e.message || 'تعذر فهم العملية.';
       show('input-view', true);
+      show('mode-switch', true);
       $('headline').textContent = 'اكتب العملية';
+    }
+  }
+
+  async function analyzeAudio(audioBase64, mimeType) {
+    $('status').textContent = 'بنفرّغ الصوت ونفهم العملية...';
+    show('mode-switch', false);
+    try {
+      const result = await callAssistant('entry_draft', { audioBase64, mimeType });
+      $('status').textContent = '';
+      renderDraft(result.drafts);
+    } catch (e) {
+      $('status').textContent = e.message || 'تعذر فهم التسجيل الصوتي.';
+      show('input-view', true);
+      show('mode-switch', true);
+      setMode('voice');
+      $('headline').textContent = 'اكتب أو سجّل العملية';
     }
   }
 
@@ -158,6 +327,143 @@
 
   $('open-app-btn')?.addEventListener('click', () => { window.location.href = './dabbar-dashboard-full.html'; });
 
+  // ============ التسجيل الصوتي المباشر داخل الصفحة (Web Audio / MediaRecorder) ============
+  // نفس منطق ونفس حدود لوحة التحكم الرئيسية (5 ثواني كحد أدنى، 30 ثانية كحد أقصى) عشان تجربة موحدة.
+  let recorder = null;
+  let chunks = [];
+  let seconds = 0;
+  let timerHandle = null;
+  let recordedBlob = null;
+
+  function pickVoiceMimeType() {
+    const candidates = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus', 'audio/ogg'];
+    for (const type of candidates) { if (window.MediaRecorder?.isTypeSupported?.(type)) return type; }
+    return '';
+  }
+
+  async function startRecording() {
+    if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) {
+      $('status').textContent = 'المتصفح لا يدعم التسجيل الصوتي.';
+      return;
+    }
+    if (recorder?.state === 'recording') return;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      chunks = [];
+      seconds = 0;
+      const mimeType = pickVoiceMimeType();
+      recorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+      recorder.ondataavailable = (e) => { if (e.data && e.data.size) chunks.push(e.data); };
+      recorder.onstop = () => {
+        stream.getTracks().forEach((t) => t.stop());
+        clearInterval(timerHandle);
+        show('voice-recording', false);
+        if (seconds < 5) {
+          $('status').textContent = 'التسجيل قصير جدًا. اتكلم شوية كمان وسجّل من جديد.';
+          show('voice-idle', true);
+          return;
+        }
+        const blob = new Blob(chunks, { type: recorder.mimeType || mimeType || 'audio/webm' });
+        if (!blob.size) {
+          $('status').textContent = 'مسجلناش أي صوت — تأكد من إذن الميكروفون وجرب تاني.';
+          show('voice-idle', true);
+          return;
+        }
+        recordedBlob = blob;
+        $('voice-audio').src = URL.createObjectURL(blob);
+        show('voice-preview', true);
+      };
+      recorder.start(1000);
+      $('status').textContent = '';
+      show('voice-idle', false);
+      show('voice-preview', false);
+      show('voice-recording', true);
+      $('rec-timer').textContent = '00:00';
+      timerHandle = setInterval(() => {
+        seconds++;
+        $('rec-timer').textContent = `00:${String(seconds).padStart(2, '0')}`;
+        if (seconds >= 30) recorder.stop();
+      }, 1000);
+    } catch {
+      $('status').textContent = 'لازم تسمح للموقع باستخدام الميكروفون.';
+    }
+  }
+  function stopRecording() { if (recorder?.state === 'recording') recorder.stop(); }
+
+  $('mic-btn')?.addEventListener('click', startRecording);
+  $('mic-stop-btn')?.addEventListener('click', stopRecording);
+  $('voice-retry-btn')?.addEventListener('click', () => {
+    recordedBlob = null;
+    show('voice-preview', false);
+    show('voice-idle', true);
+    $('status').textContent = '';
+  });
+  $('voice-send-btn')?.addEventListener('click', () => {
+    if (!recordedBlob) return;
+    show('voice-preview', false);
+    const reader = new FileReader();
+    reader.onloadend = () => analyzeAudio(reader.result, recordedBlob.type);
+    reader.readAsDataURL(recordedBlob);
+  });
+
+  // ============ استقبال ملف صوتي عبر "مشاركة" (Share Target) ============
+  // الملف بيتخزن مؤقتًا في IndexedDB بواسطة الـ Service Worker (sw.js) وقت استقبال الـ POST،
+  // وهنا بنقراه، نحوّله لـ base64، وننضفه من التخزين فورًا عشان مايتبعتش مرتين بالغلط.
+  const SHARE_DB_NAME = 'dabbar-share-db';
+  const SHARE_STORE = 'files';
+  const SHARE_KEY = 'pending-audio';
+
+  function openShareDb() {
+    return new Promise((resolve, reject) => {
+      const req = indexedDB.open(SHARE_DB_NAME, 1);
+      req.onupgradeneeded = () => { if (!req.result.objectStoreNames.contains(SHARE_STORE)) req.result.createObjectStore(SHARE_STORE); };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => reject(req.error);
+    });
+  }
+
+  async function takeSharedAudioFile() {
+    try {
+      const db = await openShareDb();
+      const file = await new Promise((resolve, reject) => {
+        const tx = db.transaction(SHARE_STORE, 'readwrite');
+        const store = tx.objectStore(SHARE_STORE);
+        const getReq = store.get(SHARE_KEY);
+        getReq.onsuccess = () => {
+          const result = getReq.result;
+          store.delete(SHARE_KEY);
+          resolve(result || null);
+        };
+        getReq.onerror = () => reject(getReq.error);
+      });
+      db.close();
+      return file;
+    } catch {
+      return null;
+    }
+  }
+
+  function blobToBase64(blob) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => resolve(reader.result);
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  }
+
+  async function handleSharedAudioIfAny() {
+    if (!isSharedLaunch()) return false;
+    const file = await takeSharedAudioFile();
+    if (!file || !file.size) return false;
+    show('input-view', false);
+    show('mode-switch', false);
+    $('headline').textContent = 'استلمنا التسجيل الصوتي';
+    const audioBase64 = await blobToBase64(file);
+    await analyzeAudio(audioBase64, file.type || 'audio/ogg');
+    return true;
+  }
+
   (async () => {
     const { data: { session } } = await sb.auth.getSession();
     if (!session) {
@@ -167,13 +473,19 @@
     }
     accessToken = session.access_token;
 
+    const handledSharedAudio = await handleSharedAudioIfAny();
+    if (handledSharedAudio) return;
+
     const sharedText = getSharedText();
     if (sharedText) {
       show('input-view', false);
+      show('mode-switch', false);
       analyzeText(sharedText);
     } else {
-      $('headline').textContent = 'اكتب العملية';
+      $('headline').textContent = 'اكتب أو سجّل العملية';
       $('text-input').value = '';
+      show('mode-switch', true);
+      setMode('text');
       show('input-view', true);
     }
   })();

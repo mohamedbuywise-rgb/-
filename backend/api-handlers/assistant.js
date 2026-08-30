@@ -4,7 +4,7 @@ import { getDebtsSummaryText } from '../../lib/debts.js';
 import { extractItemizedReceiptFromImageBase64, askDabbarChat, classifyMessage, transcribeAudioBase64 } from '../../lib/groq.js';
 import { saveInvoiceRecord, deleteInvoiceById } from '../../lib/invoices.js';
 import { hasActiveSubscription, isInTrial } from '../../lib/users.js';
-import { checkOcrUsage, checkChatUsage, refundOcrUsage, refundUsage } from '../../lib/rateLimits.js';
+import { checkOcrUsage, checkChatUsage, checkVoiceUsage, refundOcrUsage, refundUsage } from '../../lib/rateLimits.js';
 import { normalizeDigits, extractDeterministicExpense, correctDebtDirections, detectCurrency, currencyLabel, normalizeFinancialTransaction, reconcileSingleTransaction } from '../../lib/textNormalize.js';
 import { maybeSendBudgetAlert } from '../../lib/webPush.js';
 import { getDashboardUserFromRequest } from '../../lib/dashboardAuth.js';
@@ -234,10 +234,28 @@ async function handleAsk(userId, body, res) {
 
 async function handleEntryDraft(userId, body, res) {
   let text = String(body.text || '').trim();
+  let voiceUsageCharged = false;
   if (body.audioBase64) {
     if (String(body.audioBase64).length > 8 * 1024 * 1024) return res.status(413).json({ error: 'التسجيل طويل أوي. الحد الأقصى 30 ثانية.' });
+
+    // ============ أي صوت بييجي من الداشبورد (تسجيل مباشر أو ملف مُشارك من واتساب مثلاً) بيتحسب على ============
+    // نفس عداد "الـ 250 فويس" الشهري المستخدم مع بوت تليجرام بالظبط — عداد واحد موحّد لكل مصادر الصوت،
+    // من غير ما نعرض أي رقم/عداد في واجهة الداشبورد (العداد ده مخصوص لواجهة تليجرام فقط).
+    const voiceUsage = await checkVoiceUsage(userId);
+    if (!voiceUsage.allowed) {
+      if (voiceUsage.isTrial) {
+        return res.status(403).json({ error: 'خلصت حدود التسجيل الصوتي في التجربة المجانية. اشترك عشان تكمل.', trialEnded: true });
+      }
+      return res.status(429).json({ error: 'وصلت للحد الأقصى من التسجيلات الصوتية الشهر ده. هيرجع تاني بداية الشهر الجاي.', limitReached: true });
+    }
+    voiceUsageCharged = true;
+
     const transcript = await transcribeAudioBase64(body.audioBase64, body.mimeType || 'audio/webm');
-    if (!transcript.success) return res.status(422).json({ error: transcript.error });
+    if (!transcript.success) {
+      // الفشل مش غلطة المستخدم (مشكلة تفريغ صوت) — نرجّعله المحاولة اللي اتخصمت من عداده
+      await refundUsage(userId, 'voice');
+      return res.status(422).json({ error: transcript.error });
+    }
     text = transcript.text;
   }
   text = normalizeDigits(text);
@@ -256,7 +274,10 @@ async function handleEntryDraft(userId, body, res) {
     const deterministicExpense = extractDeterministicExpense(text);
     if (deterministicExpense) validTx = [deterministicExpense];
   }
-  if (!validTx.length) return res.status(422).json({ error: 'محتاج مبلغ واضح عشان أفهم العملية.' });
+  if (!validTx.length) {
+    if (voiceUsageCharged) await refundUsage(userId, 'voice');
+    return res.status(422).json({ error: 'محتاج مبلغ واضح عشان أفهم العملية.' });
+  }
 
   // لو معاملة واحدة بس، برضو بنستخدم النص الأصلي كوصف احتياطي (fallback) لو الموديل ما رجعش note —
   // بالظبط زي ما تليجرام بيعمل. لو أكتر من معاملة، مش بنكرر نفس النص الطويل في كل واحدة فيهم.

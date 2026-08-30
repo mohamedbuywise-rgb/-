@@ -2087,8 +2087,8 @@
                 <span class="bg-amber-500/15 text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded-full">جديد</span>
             </button>
 
-            <div id="bank-accounts-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-end justify-center z-50 p-0">
-                <div class="w-full max-w-md bg-slate-900 border-t border-slate-800 rounded-t-3xl p-5 max-h-[88vh] overflow-y-auto">
+            <div id="bank-accounts-modal" class="hidden w-full bg-slate-950/60 border border-slate-800 rounded-3xl p-4 mt-2">
+                <div class="w-full">
                     <div class="flex items-center justify-between mb-3">
                         <h3 class="text-sm font-bold text-slate-100">البنوك والمحافظ</h3>
                         <button type="button" id="bank-accounts-close" aria-label="اقفل" class="w-7 h-7 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-sm">✕</button>
@@ -2106,10 +2106,12 @@
                         <div class="flex items-start gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">1</span><span class="text-[12px] text-slate-300">هتحمّل تطبيق MacroDroid من Google Play (مجاني، لو مش عندك)</span></div>
                         <div class="flex items-start gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">2</span><span class="text-[12px] text-slate-300">دبّر هيحمّلك ملف إعداد جاهز فيه توكنك الخاص جوّه — هيظهر إشعار تحميل</span></div>
                         <div class="flex items-start gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">3</span><span class="text-[12px] text-slate-300">افتح الإشعار → لو ظهرلك اختيار "فتح باستخدام"، اختار MacroDroid (لو فتح المتصفح ملف نصي بدل كده، روح على مجلد "Downloads" في تطبيق الملفات، دوس مطولًا على الملف، واختار Open with MacroDroid)</span></div>
-                        <div class="flex items-start gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">4</span><span class="text-[12px] text-slate-300">MacroDroid هيفتح تلقائي على شاشة فيها اسم الـ Macro وزرار أزرق "Import" أو "Add" تحت — دوس عليه (مفيش أي تعديل مطلوب منك)</span></div>
-                        <div class="flex items-start gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">5</span><span class="text-[12px] text-slate-300">هيطلب منك صلاحية "قراءة الرسائل" → دوس السماح</span></div>
-                        <div class="flex items-start gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">6</span><span class="text-[12px] text-slate-300">ارجع لدبّر ودوس "تفعيل الاستقبال" تحت</span></div>
-                        <div class="flex items-start gap-2.5 py-2"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">7</span><span class="text-[12px] text-slate-300">من ساعتها، أي SMS بنكي حقيقي يوصلك، بيتسجل في دبّر تلقائي</span></div>
+                        <div class="flex items-start gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">4</span><span class="text-[12px] text-slate-300">MacroDroid هيفتح تلقائي على شاشة فيها اسم الـ Macro وتفاصيله (Triggers / Actions / Constraints) — ده معناه إنه اتحمّل صح، بس لسه محتاج يتحفظ</span></div>
+                        <div class="flex items-start gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">5</span><span class="text-[12px] text-slate-300">دوس على الزرار الدائري الأبيض ✚ تحت في الشاشة — هيفضل شوية (ممكن تظهر شاشة اشتراك MacroDroid المدفوع، مش مشكلة) دوس ✕ عشان تقفلها</span></div>
+                        <div class="flex items-start gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">6</span><span class="text-[12px] text-slate-300">دلوقتي الماكرو اتحفظ فعلًا — لو رجعت لقائمة "Macros" هتلاقيه ظاهر وفيه toggle شغال جنبه</span></div>
+                        <div class="flex items-start gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">7</span><span class="text-[12px] text-slate-300">هيطلب منك صلاحية "قراءة الرسائل" → دوس السماح</span></div>
+                        <div class="flex items-start gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">8</span><span class="text-[12px] text-slate-300">ارجع لدبّر ودوس "تفعيل الاستقبال" تحت</span></div>
+                        <div class="flex items-start gap-2.5 py-2"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">9</span><span class="text-[12px] text-slate-300">من ساعتها، أي SMS بنكي حقيقي يوصلك، بيتسجل في دبّر تلقائي</span></div>
                     </div>
 
                     <div class="flex items-center justify-between bg-slate-950/60 border border-slate-800 rounded-2xl p-3.5 mb-3">
@@ -2126,6 +2128,34 @@
                     <a href="#" id="bank-accounts-download-config" target="_blank" rel="noopener" class="w-full flex items-center justify-center gap-2 bg-emerald-500 text-slate-950 font-black text-[12px] py-2.5 rounded-xl">⬇️ ابدأ الربط (حمّل ملف الإعداد)</a>
 
                     <p class="text-[10px] text-slate-500 mt-3 leading-relaxed">قراءة الرسائل من MacroDroid مجانية بالكامل. ملف الإعداد بييجيلك فيه توكنك الخاص جاهز، مفيش تعديل مطلوب منك — ودبّر بيحدد بنكك/محفظتك تلقائي من اسم مرسل الرسالة.</p>
+
+                    <button type="button" id="ts-toggle-btn" class="w-full flex items-center gap-2 mt-4 pt-3 border-t border-slate-800 text-right">
+                        <span class="w-7 h-7 shrink-0 rounded-lg bg-amber-500/15 border border-amber-500/25 flex items-center justify-center text-sm">🛠️</span>
+                        <span class="flex-1 text-[12px] font-bold text-slate-200">مش شغال معايا؟ اتبع خطوات الاستكشاف</span>
+                        <span id="ts-toggle-chev" class="text-[11px] text-slate-500 transition-transform">▾</span>
+                    </button>
+
+                    <div id="ts-panel" class="hidden mt-3">
+                        <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-3.5 mb-3 flex items-center gap-3">
+                            <div class="flex-1">
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <span class="text-[11px] font-bold text-slate-400">التقدم</span>
+                                    <span id="ts-progress-label" class="text-[11px] font-bold text-emerald-400">0 من 6</span>
+                                </div>
+                                <div class="h-2 rounded-full bg-slate-800 overflow-hidden">
+                                    <div id="ts-progress-fill" class="h-full rounded-full transition-all" style="width:0%; background: linear-gradient(90deg,#10b981,#14b8a6);"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2" id="ts-steps-wrap"></div>
+
+                        <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-3.5 mt-3 text-center">
+                            <p class="text-[12px] font-bold text-slate-200 mb-1">لسه مش شغال بعد كل الخطوات؟</p>
+                            <p class="text-[11px] text-slate-400 mb-3 leading-relaxed">ابعتلنا سكرين شوت من قائمة الماكروهات في MacroDroid ومن صفحة إعدادات البطارية، وهنشوفها معاك.</p>
+                            <a href="mailto:support@dabbar.app" class="w-full flex items-center justify-center bg-emerald-500 text-slate-950 font-black text-[12px] py-2.5 rounded-xl">📩 كلم الدعم</a>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -2802,12 +2832,16 @@
             }
 
             card.addEventListener('click', () => {
+                const isOpen = !modal.classList.contains('hidden');
+                if (isOpen) {
+                    modal.classList.add('hidden');
+                    return;
+                }
                 modal.classList.remove('hidden');
-                modal.classList.add('flex');
                 loadBankAccounts();
+                modal.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             });
-            closeBtn?.addEventListener('click', () => { modal.classList.add('hidden'); modal.classList.remove('flex'); });
-            modal.addEventListener('click', (e) => { if (e.target === modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); } });
+            closeBtn?.addEventListener('click', () => { modal.classList.add('hidden'); });
 
             toggleBtn?.addEventListener('click', async () => {
                 const next = !bankState.enabled;
@@ -2822,6 +2856,130 @@
                     const data = await res.json();
                     if (data.ok) { bankState.enabled = data.enabled; renderToggle(); }
                 } catch (e) { /* تجاهل */ }
+            });
+        })();
+
+        (function setupBankTroubleshoot() {
+            const toggleBtn = document.getElementById('ts-toggle-btn');
+            const chev = document.getElementById('ts-toggle-chev');
+            const panel = document.getElementById('ts-panel');
+            const wrap = document.getElementById('ts-steps-wrap');
+            const progressLabel = document.getElementById('ts-progress-label');
+            const progressFill = document.getElementById('ts-progress-fill');
+            if (!toggleBtn || !wrap) return;
+
+            const steps = [
+                {
+                    icon: '📦',
+                    title: 'الماكرو اتحفظ فعلًا؟',
+                    subtitle: 'أول حاجة نتأكد إنه ظاهر في القائمة',
+                    body: `
+                        <p>افتح MacroDroid → تبويب "Macros" تحت.</p>
+                        <p>لازم تلاقي ماكرو اسمه <b class="text-slate-200">"SMS تلقائي - دبّر استيراد"</b> ظاهر في القائمة، وجنبه toggle لونه أخضر (مفعّل).</p>
+                        <p class="text-amber-500">لو مش ظاهر خالص: افتح ملف الإعداد تاني من دبّر، ولما تفتح شاشة التفاصيل (Triggers/Actions/Constraints)، دوس على الزرار الدائري الأبيض ✚ تحت — لو ظهرت شاشة اشتراك MacroDroid دوس ✕ عليها تقفلها. كده الماكرو هيتحفظ.</p>`
+                },
+                {
+                    icon: '🔒',
+                    title: 'صلاحية قراءة الرسائل',
+                    subtitle: 'الأندرويد لازم يكون سامحلها دايمًا',
+                    body: `
+                        <p>إعدادات الجهاز → التطبيقات → MacroDroid → Permissions.</p>
+                        <p>لازم تلاقي <b class="text-slate-200">SMS</b> مكتوب جنبها، مش "مرفوض" أو "اسأل كل مرة".</p>`
+                },
+                {
+                    icon: '🧹',
+                    title: 'إزالة الصلاحيات التلقائية مطفية؟',
+                    subtitle: 'خاصية بتسحب صلاحية SMS لوحدها',
+                    body: `
+                        <p>في نفس صفحة MacroDroid → App info، دور على خيار <b class="text-slate-200">"Remove permissions if app is unused"</b>.</p>
+                        <p>لازم يكون <b class="text-slate-200">مطفي (Off)</b> — لو شغال، الأندرويد بيسحب صلاحية القراءة لوحده بعد فترة من غير ما تلاحظ.</p>`
+                },
+                {
+                    icon: '🔋',
+                    title: 'إعدادات البطارية',
+                    subtitle: 'أشهر سبب لتوقف الاستقبال في الخلفية',
+                    body: `
+                        <p>إعدادات الجهاز → البطارية → MacroDroid → اختار <b class="text-slate-200">"بدون قيود" (Unrestricted)</b>.</p>
+                        <p>لو عندك سامسونج، فيه مكان تاني منفصل: <b class="text-slate-200">العناية بالجهاز والبطارية → البطارية → التطبيقات اللي معدلش استخدامها في الخلفية</b> — تأكد MacroDroid مش موجود في القايمة دي، ولو موجود امسحه منها.</p>`
+                },
+                {
+                    icon: '⚡',
+                    title: 'الاستقبال مفعّل جوه دبّر؟',
+                    subtitle: 'الخطوة الأخيرة اللي بتوصل الطرفين ببعض',
+                    body: `
+                        <p>ارجع لكارت "البنوك والمحافظ" في دبّر، وتأكد إن <b class="text-slate-200">"تفعيل الاستقبال التلقائي"</b> شغال (أخضر).</p>`
+                },
+                {
+                    icon: '✉️',
+                    title: 'بتختبر برسالة حقيقية؟',
+                    subtitle: 'الفرق بين SMS وإشعارات التطبيقات',
+                    body: `
+                        <p>الماكرو بيمسك <b class="text-slate-200">رسائل SMS تقليدية بس</b> — مش إشعارات واتساب أو تليجرام أو RCS.</p>
+                        <p>جرّب تبعتلك رسالة SMS عادية من رقم تاني (مش من دبّر) وشوف هل بتوصل دبّر ولا لأ.</p>`
+                }
+            ];
+
+            let built = false;
+            function buildSteps() {
+                if (built) return;
+                built = true;
+                steps.forEach((s, i) => {
+                    const card = document.createElement('div');
+                    card.className = 'ts-step bg-slate-950/60 border border-slate-800 rounded-2xl overflow-hidden transition-colors';
+                    card.innerHTML = `
+                        <div class="ts-step-head flex items-center gap-2.5 p-3 cursor-pointer select-none">
+                            <button type="button" class="ts-check w-6 h-6 rounded-full border-2 border-slate-600 flex items-center justify-center shrink-0 transition-all">
+                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" class="opacity-0 scale-50 transition-all"><path d="M5 13l4 4L19 7" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                            </button>
+                            <span class="w-7 h-7 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-[13px] shrink-0">${s.icon}</span>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-[12px] font-bold text-slate-200">${i + 1}. ${s.title}</p>
+                                <p class="text-[10.5px] text-slate-500">${s.subtitle}</p>
+                            </div>
+                            <span class="ts-chev text-[10px] text-slate-500 transition-transform">▾</span>
+                        </div>
+                        <div class="ts-step-panel hidden px-3 pb-3 space-y-1.5 text-[11.5px] leading-relaxed text-slate-300">${s.body}</div>
+                    `;
+                    wrap.appendChild(card);
+
+                    const head = card.querySelector('.ts-step-head');
+                    const checkBtn = card.querySelector('.ts-check');
+                    const checkSvg = checkBtn.querySelector('svg');
+                    const stepPanel = card.querySelector('.ts-step-panel');
+                    const stepChev = card.querySelector('.ts-chev');
+
+                    head.addEventListener('click', (e) => {
+                        if (e.target.closest('.ts-check')) return;
+                        const isOpen = !stepPanel.classList.contains('hidden');
+                        stepPanel.classList.toggle('hidden', isOpen);
+                        stepChev.style.transform = isOpen ? '' : 'rotate(180deg)';
+                    });
+
+                    checkBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const nowChecked = !checkBtn.classList.contains('bg-emerald-500');
+                        checkBtn.classList.toggle('bg-emerald-500', nowChecked);
+                        checkBtn.classList.toggle('border-emerald-500', nowChecked);
+                        checkSvg.classList.toggle('opacity-0', !nowChecked);
+                        checkSvg.classList.toggle('scale-50', !nowChecked);
+                        card.classList.toggle('border-emerald-500/50', nowChecked);
+                        updateProgress();
+                    });
+                });
+            }
+
+            function updateProgress() {
+                const total = steps.length;
+                const done = wrap.querySelectorAll('.ts-check.bg-emerald-500').length;
+                progressLabel.textContent = `${done} من ${total}`;
+                progressFill.style.width = `${(done / total) * 100}%`;
+            }
+
+            toggleBtn.addEventListener('click', () => {
+                buildSteps();
+                const isOpen = !panel.classList.contains('hidden');
+                panel.classList.toggle('hidden', isOpen);
+                chev.style.transform = isOpen ? '' : 'rotate(180deg)';
             });
         })();
 

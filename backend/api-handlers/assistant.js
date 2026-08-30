@@ -1,5 +1,5 @@
 import { supabase } from '../../lib/supabaseClient.js';
-import { getRecentExpensesSummaryText } from '../../lib/expenses.js';
+import { getRecentExpensesSummaryText, checkPossibleDuplicate } from '../../lib/expenses.js';
 import { getDebtsSummaryText } from '../../lib/debts.js';
 import { extractItemizedReceiptFromImageBase64, askDabbarChat, classifyMessage, transcribeAudioBase64 } from '../../lib/groq.js';
 import { saveInvoiceRecord, deleteInvoiceById } from '../../lib/invoices.js';
@@ -311,7 +311,20 @@ async function saveOneDraft(userId, draft) {
 
   if (draft.type === 'expense') {
     const currency_code = String(draft.currency_code || detectCurrency(draft.raw_text || draft.sourceText || '')).toUpperCase();
-    const { data, error } = await supabase.from('expenses').insert({ telegram_user_id: userId, amount, currency_code, category: String(draft.category || 'مصروف عام').slice(0, 80), description: String(draft.note || draft.sourceText || '').slice(0, 500) }).select('id, amount, currency_code, category, description, created_at').single();
+    const category = String(draft.category || 'مصروف عام').slice(0, 80);
+
+    // ============ حماية من التسجيل المزدوج (نفس منطق بوت تليجرام في lib/expenses.js) ============
+    // بتغطي حالة "دوس تأكيد مرتين بالغلط" أو ضغطة تانية بسبب شبكة بطيئة. بنمنع الحفظ المتكرر
+    // فعليًا هنا (بدل تحذير بعد الحفظ زي تليجرام) لأن واجهة الداشبورد مفيهاش زرار "حذف" جاهز فورًا
+    // زي رسالة تليجرام، فالأنسب نمنع التكرار قبل ما يحصل بدل ما نعتمد على المستخدم يمسحه بنفسه.
+    if (!draft.allowDuplicate) {
+      const isDuplicate = await checkPossibleDuplicate(userId, amount, category, currency_code);
+      if (isDuplicate) {
+        return { ok: false, duplicate: true, error: 'سجلت مصروف بنفس المبلغ والفئة من شوية. لو مش تكرار غلط، أكد تاني.' };
+      }
+    }
+
+    const { data, error } = await supabase.from('expenses').insert({ telegram_user_id: userId, amount, currency_code, category, description: String(draft.note || draft.sourceText || '').slice(0, 500) }).select('id, amount, currency_code, category, description, created_at').single();
     if (error) { console.error('entry_confirm expense error:', JSON.stringify(error)); return { ok: false, error: 'تعذر حفظ المصروف.' }; }
     await maybeSendBudgetAlert(userId).catch((pushError) => console.error('entry_confirm budget push failed:', pushError));
     return { ok: true, type: 'expense', record: data, message: `تم تسجيل مصروف ${data.amount} ${currencyLabel(data.currency_code)} في ${data.category}.` };
@@ -369,6 +382,11 @@ async function handleEntryConfirm(userId, body, res) {
 
   const succeeded = results.filter((r) => r.ok);
   if (!succeeded.length) {
+    // ============ لو السبب الوحيد للفشل إنه تكرار محتمل، نرجّع 409 مميز عشان الواجهة تعرض ============
+    // "أكد برضو" بدل ما تظهره كخطأ عادي (زي أي error تاني).
+    if (results.length === 1 && results[0]?.duplicate) {
+      return res.status(409).json({ error: results[0].error, duplicate: true });
+    }
     return res.status(500).json({ error: results[0]?.error || 'تعذر الحفظ.' });
   }
 

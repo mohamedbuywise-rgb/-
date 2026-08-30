@@ -108,6 +108,20 @@
         html[data-theme="light"] ::-webkit-scrollbar-thumb { background: #cbd5e1; }
 
         /* خلفيات */
+        /* ============ إصلاح غوستينج المودالز اللي بتفتح fullpage (سجل من بره التطبيق / البنوك والمحافظ) ============ */
+        /* المشكلة: المودال fixed وجواه عنصر overflow-y-auto، وChrome على أندرويد أحيانًا بيرسم بكسلات قديمة */
+        /* من الصفحة اللي وراه أثناء السكرول جوه المودال لو مفيهوش compositing layer مستقل. الحل: نجبره ياخد */
+        /* layer مستقل بـ translateZ + نديله خلفية صريحة (مش معتمدة بس على opacity/الشفافية اللي بتتغير أثناء الفتح). */
+        .modal-gpu-layer {
+            transform: translateZ(0);
+            -webkit-transform: translateZ(0);
+            will-change: transform, opacity;
+            isolation: isolate;
+            background-color: #020617; /* fallback صريح فوق bg-slate-950 نفسه */
+        }
+        html[data-theme="light"] .modal-gpu-layer { background-color: #f8fafc !important; }
+        .modal-gpu-layer > div:first-child { background-color: inherit; position: relative; z-index: 1; }
+
         html[data-theme="light"] .bg-slate-950 { background-color: #f8fafc !important; }
         html[data-theme="light"] .bg-slate-950\/40 { background-color: rgba(241,245,249,0.7) !important; }
         html[data-theme="light"] .bg-slate-950\/60 { background-color: rgba(241,245,249,0.9) !important; }
@@ -2067,7 +2081,7 @@
                 <span class="text-slate-500 text-sm">‹</span>
             </button>
 
-            <div id="quick-add-feature-modal" class="fixed inset-0 z-50 hidden flex-col bg-slate-950 opacity-0 translate-y-2 transition-all duration-200 ease-out">
+            <div id="quick-add-feature-modal" class="fixed inset-0 z-50 hidden flex-col bg-slate-950 opacity-0 translate-y-2 transition-all duration-200 ease-out modal-gpu-layer">
                 <div class="flex items-center gap-3 px-4 pt-[calc(env(safe-area-inset-top)+16px)] pb-3 border-b border-slate-800 shrink-0">
                     <button type="button" id="quick-add-feature-close" aria-label="رجوع" class="w-9 h-9 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 text-base shrink-0">→</button>
                     <h3 class="text-sm font-bold text-slate-100">سجّل من بره التطبيق</h3>
@@ -2115,7 +2129,7 @@
                 <span class="bg-amber-500/15 text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded-full">جديد</span>
             </button>
 
-            <div id="bank-accounts-modal" class="fixed inset-0 z-50 hidden flex-col bg-slate-950 opacity-0 translate-y-2 transition-all duration-200 ease-out">
+            <div id="bank-accounts-modal" class="fixed inset-0 z-50 hidden flex-col bg-slate-950 opacity-0 translate-y-2 transition-all duration-200 ease-out modal-gpu-layer">
                 <div class="flex items-center gap-3 px-4 pt-[calc(env(safe-area-inset-top)+16px)] pb-3 border-b border-slate-800 shrink-0">
                     <button type="button" id="bank-accounts-close" aria-label="رجوع" class="w-9 h-9 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 text-base shrink-0">→</button>
                     <h3 class="text-sm font-bold text-slate-100">البنوك والمحافظ</h3>
@@ -2163,7 +2177,7 @@
             </div>
 
             <!-- ============ شاشة "مش شغال معايا؟" — دليل حل مشاكل ربط البنوك خطوة بخطوة ============ -->
-            <div id="bank-accounts-troubleshoot-modal" class="fixed inset-0 z-50 hidden flex-col bg-slate-950 opacity-0 translate-y-2 transition-all duration-200 ease-out">
+            <div id="bank-accounts-troubleshoot-modal" class="fixed inset-0 z-50 hidden flex-col bg-slate-950 opacity-0 translate-y-2 transition-all duration-200 ease-out modal-gpu-layer">
                 <div class="bg-glow-ts"></div>
                 <div class="flex items-center gap-3 px-4 pt-[calc(env(safe-area-inset-top)+16px)] pb-3 border-b border-slate-800 shrink-0 relative z-10">
                     <button type="button" id="bank-accounts-troubleshoot-close" aria-label="رجوع" class="w-9 h-9 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 text-base shrink-0">→</button>

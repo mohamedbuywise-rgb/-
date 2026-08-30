@@ -23,5 +23,24 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
+  ],
+  "share_target": {
+    "action": "./dabbar-quick-add.html",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "shortcuts": [
+    {
+      "name": "إدخال سريع",
+      "short_name": "إدخال سريع",
+      "url": "./dabbar-quick-add.html",
+      "icons": [
+        { "src": "./icons/icon-192.png", "sizes": "192x192" }
+      ]
+    }
   ]
 }

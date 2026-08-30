@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>تسجيل سريع — دبّر</title>
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#0E655B">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100vh; font-family: -apple-system, "Segoe UI", Tahoma, Arial, sans-serif;
+    background: #0E655B; color: #fff; display: flex; align-items: center; justify-content: center; padding: 20px;
+  }
+  .card { width: 100%; max-width: 380px; }
+  .eyebrow { font-size: 12px; opacity: .8; margin: 0 0 4px; }
+  .headline { font-size: 17px; font-weight: 700; margin: 0 0 16px; line-height: 1.5; }
+  textarea {
+    width: 100%; min-height: 70px; border-radius: 12px; border: none; padding: 12px 14px;
+    font-family: inherit; font-size: 14px; resize: vertical; background: rgba(255,255,255,.12); color: #fff;
+  }
+  textarea::placeholder { color: rgba(255,255,255,.6); }
+  .row { display: flex; justify-content: space-between; align-items: center; background: rgba(255,255,255,.12); border-radius: 10px; padding: 10px 12px; margin-bottom: 10px; }
+  .row span:first-child { font-size: 12px; opacity: .85; }
+  .row span:last-child { font-size: 15px; font-weight: 700; }
+  button { border: none; border-radius: 10px; font-size: 14px; font-weight: 700; padding: 12px; cursor: pointer; width: 100%; }
+  .btn-primary { background: #fff; color: #0E655B; margin-top: 6px; }
+  .btn-secondary { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,.4); margin-top: 8px; }
+  .status { text-align: center; font-size: 13px; margin-top: 14px; min-height: 18px; opacity: .9; }
+  .success { display: flex; flex-direction: column; align-items: center; gap: 6px; text-align: center; padding: 10px 0; }
+  .check { width: 46px; height: 46px; border-radius: 50%; background: rgba(255,255,255,.15); display: flex; align-items: center; justify-content: center; font-size: 22px; }
+  .hidden { display: none !important; }
+  a.link { color: #fff; text-decoration: underline; font-size: 13px; }
+</style>
+</head>
+<body>
+<div class="card">
+  <p class="eyebrow" id="eyebrow">تسجيل مصروف سريع</p>
+  <h1 class="headline" id="headline">دبّر بيفهم العملية...</h1>
+
+  <div id="input-view" class="hidden">
+    <textarea id="text-input" placeholder="اكتب العملية هنا، زي: دفعت 50 جنيه قهوة"></textarea>
+    <button class="btn-primary" id="analyze-btn">تحليل العملية</button>
+  </div>
+
+  <div id="draft-view" class="hidden"></div>
+
+  <div id="success-view" class="success hidden">
+    <div class="check">✓</div>
+    <p id="success-text" style="margin:0;font-weight:700;font-size:15px;"></p>
+  </div>
+
+  <div id="auth-view" class="hidden" style="text-align:center;">
+    <p style="font-size:14px;opacity:.9;">سجّل دخولك في تطبيق دبّر الأول عشان تقدر تسجّل مصروف من هنا.</p>
+    <a class="link" href="./dabbar-onboarding.html">فتح دبّر لتسجيل الدخول</a>
+  </div>
+
+  <p class="status" id="status"></p>
+  <button class="btn-secondary hidden" id="open-app-btn">فتح دبّر</button>
+</div>
+
+<script>
+  const SUPABASE_URL = 'https://devywtyfzybnahdsqdkd.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_yHiX1cnEMCVEcjQxiIrqig_DRBiuveQ';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  const $ = (id) => document.getElementById(id);
+  const show = (id, on) => $(id)?.classList.toggle('hidden', !on);
+  const typeLabel = (t) => ({ expense: 'مصروف', income: 'دخل', purchase: 'شراء', asset: 'أصل', transfer: 'تحويل', refund: 'استرداد', debt: 'دين', invoice: 'فاتورة' }[t] || 'عملية مالية');
+  const fmt = (n) => Number(n || 0).toLocaleString('ar-EG', { maximumFractionDigits: 2 });
+
+  let accessToken = null;
+  let drafts = [];
+
+  function getSharedText() {
+    const params = new URLSearchParams(window.location.search);
+    return (params.get('text') || params.get('title') || '').trim();
+  }
+
+  async function callAssistant(action, payload) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000);
+    try {
+      const res = await fetch('/api/assistant', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+        body: JSON.stringify({ action, ...payload }),
+        signal: controller.signal,
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'حصل خطأ، جرب تاني.');
+      return data;
+    } finally {
+      clearTimeout(timeout);
+    }
+  }
+
+  function renderDraft(list) {
+    drafts = Array.isArray(list) ? list : [list];
+    $('headline').textContent = 'راجع قبل الحفظ';
+    const html = drafts.map((d) => {
+      const isDebt = d.type === 'debt';
+      const title = (d.note && d.note.trim()) || (isDebt ? d.person : d.category) || typeLabel(d.type);
+      const meta = [typeLabel(d.type), isDebt ? d.person : d.category].filter(Boolean).join(' · ');
+      return `<div class="row"><span>${title}${meta ? ' — ' + meta : ''}</span><span>${fmt(d.amount)} ج.م</span></div>`;
+    }).join('');
+    $('draft-view').innerHTML = html + `
+      <button class="btn-primary" id="confirm-btn">تأكيد التسجيل</button>
+      <button class="btn-secondary" id="edit-btn">تعديل</button>`;
+    show('draft-view', true);
+    show('input-view', false);
+    $('confirm-btn').addEventListener('click', confirmDraft);
+    $('edit-btn').addEventListener('click', () => {
+      show('draft-view', false);
+      show('input-view', true);
+      $('headline').textContent = 'عدّل العملية';
+      $('text-input').value = drafts[0]?.sourceText || '';
+    });
+  }
+
+  async function analyzeText(text) {
+    $('status').textContent = 'دبّر بيفهم العملية...';
+    try {
+      const result = await callAssistant('entry_draft', { text });
+      $('status').textContent = '';
+      renderDraft(result.drafts);
+    } catch (e) {
+      $('status').textContent = e.message || 'تعذر فهم العملية.';
+      show('input-view', true);
+      $('headline').textContent = 'اكتب العملية';
+    }
+  }
+
+  async function confirmDraft() {
+    const btn = $('confirm-btn');
+    btn.disabled = true;
+    $('status').textContent = 'جاري الحفظ...';
+    try {
+      const result = await callAssistant('entry_confirm', { drafts });
+      show('draft-view', false);
+      $('success-text').textContent = result.message || 'تم التسجيل بنجاح';
+      show('success-view', true);
+      show('open-app-btn', true);
+      $('status').textContent = '';
+    } catch (e) {
+      $('status').textContent = e.message || 'تعذر الحفظ، جرب تاني.';
+      btn.disabled = false;
+    }
+  }
+
+  $('analyze-btn')?.addEventListener('click', () => {
+    const text = $('text-input').value.trim();
+    if (!text) { $('status').textContent = 'اكتب العملية الأول.'; return; }
+    analyzeText(text);
+  });
+
+  $('open-app-btn')?.addEventListener('click', () => { window.location.href = './dabbar-dashboard-full.html'; });
+
+  (async () => {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) {
+      $('headline').textContent = 'سجّل دخولك الأول';
+      show('auth-view', true);
+      return;
+    }
+    accessToken = session.access_token;
+
+    const sharedText = getSharedText();
+    if (sharedText) {
+      show('input-view', false);
+      analyzeText(sharedText);
+    } else {
+      $('headline').textContent = 'اكتب العملية';
+      $('text-input').value = '';
+      show('input-view', true);
+    }
+  })();
+</script>
+</body>
+</html>

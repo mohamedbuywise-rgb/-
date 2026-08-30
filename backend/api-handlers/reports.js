@@ -141,6 +141,50 @@ async function handleMonthlyPdf(req, res, telegramUserId) {
   return res.status(200).send(pdfBuffer);
 }
 
+// ---- type=daily: PDF تقرير اليوم (كل عمليات اليوم بس) ----
+async function handleDailyPdf(req, res, telegramUserId) {
+  const offset = Number(req.query?.offset ?? 0) || 0;
+  const start = new Date();
+  start.setDate(start.getDate() + offset);
+  start.setHours(0, 0, 0, 0);
+  const end = new Date(start);
+  end.setDate(end.getDate() + 1);
+
+  const expenses = await getExpensesBetween(telegramUserId, start, end);
+
+  if (expenses.length === 0) {
+    return res.status(404).json({ error: 'لسه معندكش مصاريف مسجلة النهاردة.' });
+  }
+
+  const total = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
+  const breakdown = buildCategoryBreakdown(expenses);
+  const topCategory = breakdown[0];
+  const dayLabel = start.toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' });
+
+  const html = buildReportHtml({
+    title: 'تقرير اليوم',
+    periodLabel: `يوم ${dayLabel}`,
+    generatedAt: dayLabel,
+    total,
+    count: expenses.length,
+    topCategoryName: topCategory.name,
+    comparisonLine: '',
+    categories: breakdown,
+  });
+
+  const pdfBuffer = await renderPdfFromHtml(html);
+
+  const rawFileName = `تقرير-يومي-${dayLabel}.pdf`;
+  const encodedFileName = encodeURIComponent(rawFileName);
+
+  res.setHeader('Content-Type', 'application/pdf');
+  res.setHeader(
+    'Content-Disposition',
+    `attachment; filename="daily-report.pdf"; filename*=UTF-8''${encodedFileName}`
+  );
+  return res.status(200).send(pdfBuffer);
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -161,8 +205,10 @@ export default async function handler(req, res) {
         return await handleDebtsPdf(req, res, dataUserId, auth.user.email);
       case 'monthly':
         return await handleMonthlyPdf(req, res, dataUserId);
+      case 'daily':
+        return await handleDailyPdf(req, res, dataUserId);
       default:
-        return res.status(400).json({ error: 'type غير معروف. استخدم person أو debts أو monthly.' });
+        return res.status(400).json({ error: 'type غير معروف. استخدم person أو debts أو monthly أو daily.' });
     }
   } catch (err) {
     console.error(`reports (type=${type}) error:`, err);

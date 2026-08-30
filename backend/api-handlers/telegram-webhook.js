@@ -1,13 +1,15 @@
 import { transcribeVoice, classifyMessage, answerDataQuestion, extractItemizedReceiptFromImage } from '../../lib/groq.js';
 import { recordInvoice, deleteInvoiceById } from '../../lib/invoices.js';
 import { sendTelegramMessage, forwardTelegramMessage, answerCallbackQuery, editTelegramMessage, sendChatAction } from '../../lib/telegram.js';
-import { recordExpense, sendMonthlyReport, sendWeeklyReport, sendDataExport, sendExpenseSearch, deleteExpenseById, getMostRecentExpense, getRecentExpensesSummaryText } from '../../lib/expenses.js';
-import { recordDebt, sendDebtsReport, sendPersonDebtDetail, settleDebtWithPerson, deleteDebtById, getMostRecentDebt, getDebtsSummaryText } from '../../lib/debts.js';
+import { recordExpense, sendMonthlyReport, sendWeeklyReport, sendDataExport, sendExpenseSearch, deleteExpenseById, updateExpenseById, getMostRecentExpense, getRecentExpensesSummaryText } from '../../lib/expenses.js';
+import { recordDebt, sendDebtsReport, sendPersonDebtDetail, settleDebtWithPerson, deleteDebtById, updateDebtById, getMostRecentDebt, getDebtsSummaryText } from '../../lib/debts.js';
 import { createGoal, contributeToGoal, sendGoalStatus, cancelActiveGoal } from '../../lib/goals.js';
 import { sendMonthlyWrapped } from '../../lib/wrapped.js';
 import { upsertUser, hasActiveSubscription, getSubscriptionExpiry, activateSubscription, getChatIdByUserId, isInTrial, getTrialDaysLeft } from '../../lib/users.js';
 import { createLinkCode } from '../../lib/linking.js';
 import { isFinancialEventType, recordFinancialEvent } from '../../lib/financialEvents.js';
+import { CATEGORY_EMOJI } from '../../lib/config.js';
+import { currencyLabel } from '../../lib/textNormalize.js';
 import { normalizeDigits, extractDeterministicExpense, correctDebtDirections, normalizeFinancialTransaction, reconcileSingleTransaction } from '../../lib/textNormalize.js';
 import { checkVoiceUsage, checkOcrUsage, checkChatUsage, refundOcrUsage } from '../../lib/rateLimits.js';
 import { GUIDE_URL, TRIAL_SUMMARY_BASE_URL, ADMIN_TELEGRAM_ID, SUBSCRIPTION_DAYS, SUBSCRIPTION_PRICE_EGP, INSTAPAY_LINK, ADMIN_CONTACT_USERNAME, VOICE_MAX_DURATION_SECONDS, TELEGRAM_WEBHOOK_SECRET } from '../../lib/config.js';
@@ -132,7 +134,63 @@ function buildConfirmMarkup(action, id) {
 }
 
 function buildDeleteMarkup(action, id) {
-  return { inline_keyboard: [[{ text: '🗑 حذف العملية دي', callback_data: `${action}:${id}` }]] };
+  const editAction = action === 'delexp' ? 'editexp' : action === 'deldebt' ? 'editdebt' : null;
+  const row = [{ text: '🗑 حذف العملية دي', callback_data: `${action}:${id}` }];
+  if (editAction) row.push({ text: '✏️ تعديل', callback_data: `${editAction}:${id}` });
+  return { inline_keyboard: [row] };
+}
+
+// ============ استخراج مبلغ ونص من رد المستخدم على رسالة "✏️ تعديل" — مثلاً "120 قهوة" أو "قهوة" أو "120" ============
+function parseEditReply(text) {
+  const trimmed = (text || '').trim();
+  const amountMatch = trimmed.match(/(\d+(?:\.\d+)?)/);
+  const amount = amountMatch ? Number(amountMatch[1]) : null;
+  const remainder = trimmed.replace(/(\d+(?:\.\d+)?)/, '').trim();
+  return { amount, remainder: remainder || null };
+}
+
+// ============ لو المستخدم بيرد على رسالة "✏️ ابعت التعديل الجديد" اللي فيها ماركر مخفي #editexp_<id> أو #editdebt_<id> ============
+async function handleEditReply(message, userId, chatId) {
+  const repliedText = message.reply_to_message?.text || '';
+  const expMatch = repliedText.match(/#editexp_(\d+)/);
+  const debtMatch = repliedText.match(/#editdebt_(\d+)/);
+  if (!expMatch && !debtMatch) return false;
+
+  const { amount, remainder } = parseEditReply(message.text);
+  if (amount === null && !remainder) {
+    await sendTelegramMessage(chatId, 'محتاج تبعت المبلغ الجديد أو الاسم الجديد على الأقل.');
+    return true;
+  }
+
+  if (expMatch) {
+    const id = Number(expMatch[1]);
+    const updated = await updateExpenseById(id, userId, { amount, description: remainder });
+    if (!updated) {
+      await sendTelegramMessage(chatId, '❌ معرفتش أعدّل العملية دي — ممكن تكون اتمسحت قبل كده.');
+      return true;
+    }
+    const moneyLabel = currencyLabel(updated.currency_code);
+    await sendTelegramMessage(
+      chatId,
+      `✏️ <b>اتعدلت العملية</b>\n${CATEGORY_EMOJI[updated.category] || '📌'} ${updated.category}${updated.description ? ` (${updated.description})` : ''} · ${updated.amount} ${moneyLabel}`,
+      'HTML'
+    );
+    return true;
+  }
+
+  if (debtMatch) {
+    const id = Number(debtMatch[1]);
+    const updated = await updateDebtById(id, userId, { amount, person_name: remainder });
+    if (!updated) {
+      await sendTelegramMessage(chatId, '❌ معرفتش أعدّل العملية دي — ممكن تكون اتمسحت قبل كده.');
+      return true;
+    }
+    const moneyLabel = currencyLabel(updated.currency_code);
+    await sendTelegramMessage(chatId, `✏️ <b>اتعدلت العملية</b>\n${updated.person_name} · ${updated.amount} ${moneyLabel}`, 'HTML');
+    return true;
+  }
+
+  return false;
 }
 
 async function handleDeleteCallback(callbackQuery) {
@@ -197,6 +255,19 @@ async function handleDeleteCallback(callbackQuery) {
     }
     await answerCallbackQuery(callbackQuery.id, '🗑 اتمسحت');
     await editTelegramMessage(chatId, messageId, `🗑 <s>اتمسحت فاتورة ${deleted.merchant || ''} · ${deleted.total_amount} جنيه</s>`, 'HTML');
+    return;
+  }
+
+  // --- دوس "✏️ تعديل": نبعت رسالة جديدة (force reply) نطلب فيها القيمة الجديدة، مع ماركر مخفي فيها الـ id ---
+  if (rawAction === 'editexp' || rawAction === 'editdebt') {
+    await answerCallbackQuery(callbackQuery.id);
+    const marker = rawAction === 'editexp' ? `#editexp_${id}` : `#editdebt_${id}`;
+    await sendTelegramMessage(
+      chatId,
+      `✏️ اتفضل رد على الرسالة دي بالمبلغ الجديد و/أو الاسم الجديد (مثلاً: <code>120 قهوة</code>)\n\n<code>${marker}</code>`,
+      'HTML',
+      { force_reply: true, selective: true }
+    );
     return;
   }
 
@@ -269,6 +340,12 @@ export default async function handler(req, res) {
 
     // بنسجل/نحدّث المستخدم مع كل رسالة، عشان الـ cron jobs تعرف تبعتله لوحدها بعدين
     await upsertUser(userId, chatId);
+
+    // --- رد على رسالة "✏️ تعديل" — نتعامل معاه فورًا قبل أي حاجة تانية ---
+    if (message.text && message.reply_to_message) {
+      const handledEdit = await handleEditReply(message, userId, chatId);
+      if (handledEdit) return res.status(200).json({ ok: true });
+    }
 
     // --- أمر الأدمن السرّي لتفعيل الاشتراكات — بيتفحص الأول وبيتجاهل تمامًا لو مش من الأدمن ---
     if (message.text) {

@@ -921,6 +921,14 @@
         html[data-theme="light"] #planning-reset { background: #eef4f1 !important; color: #446256 !important; border: 1px solid #c7d8cf !important; }
         html[data-theme="light"] #quick-entry-card { background: linear-gradient(135deg,#ffffff,#f0faf5) !important; }
         html[data-theme="light"] #quick-entry-card > .grid > button { background: #ffffff !important; border: 1px solid #d3e2da !important; color: #24483a !important; box-shadow: 0 7px 18px rgba(23,74,50,.1) !important; }
+        /* بطاقة نتيجة "فاتورة/كتابة/صوت" السريعة — تُجبر على الألوان الفاتحة في الوضع النهاري بغض النظر عن ثيم نظام الجهاز */
+        html[data-theme="light"] #quick-entry-draft { background: #ffffff !important; border-color: #b5dfcc !important; }
+        html[data-theme="light"] #quick-entry-draft #quick-entry-draft-title { color: #35473c !important; }
+        html[data-theme="light"] #quick-entry-draft #quick-entry-draft-list,
+        html[data-theme="light"] #quick-entry-draft #quick-entry-draft-list * { color: #1c2b22 !important; }
+        html[data-theme="light"] #quick-entry-draft #quick-entry-draft-list .bg-emerald-50 { background: #eefaf3 !important; }
+        html[data-theme="light"] #quick-entry-draft #quick-entry-draft-list .text-emerald-600 { color: #0a8f5b !important; }
+        html[data-theme="light"] #quick-entry-draft #quick-entry-draft-close { color: #6b7d72 !important; }
         html[data-theme="light"] button { color: #25483a; }
         html[data-theme="light"] .tab-btn { color: #4f685c !important; }
         html[data-theme="light"] .tab-btn.active-tab { color: #087d55 !important; }
@@ -1226,6 +1234,8 @@
             color: #17120a !important;
             border-color: transparent !important;
         }
+        #quick-entry-card { position: relative; }
+        #dabbar-celebrate-canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 40; }
         html[data-theme="light"] button.bg-emerald-500, html[data-theme="light"] #quick-entry-analyze,
         html[data-theme="light"] #quick-entry-confirm, html[data-theme="light"] #quick-entry-voice-send,
         html[data-theme="light"] #asst-goal-create-btn, html[data-theme="light"] #asst-goal-contribute-btn,
@@ -1525,6 +1535,7 @@
             </section>
 
             <section id="quick-entry-card" class="bg-gradient-to-br from-emerald-50 via-white to-teal-50 border border-emerald-200 rounded-[28px] p-4 space-y-3 shadow-[0_12px_35px_rgba(16,185,129,.14)] dark:bg-slate-950/60 dark:from-slate-950/60 dark:via-slate-950/60 dark:to-slate-900 dark:border-slate-800" aria-label="إضافة مصروف">
+                <canvas id="dabbar-celebrate-canvas" aria-hidden="true"></canvas>
                 <div class="flex items-center justify-between"><div><span class="quick-entry-eyebrow">ابدأ من هنا</span><h3 class="text-base font-black text-slate-900 dark:text-slate-100">سجّل مصروفك الآن</h3><p class="text-[11px] text-slate-600 dark:text-slate-400">صوت أو كتابة أو صوّر الفاتورة — في ثواني</p></div><span class="text-2xl" aria-hidden="true">✨</span></div>
                 <div id="quick-entry-subscription-lock" class="hidden items-center justify-between gap-3 rounded-2xl border px-3 py-2.5 text-[11px]"><div><strong class="block">انتهت تجربتك المجانية</strong><span>اشترك عشان تقدر تسجّل مصروفاتك تاني.</span></div><button id="quick-entry-open-subscription" type="button" class="shrink-0 rounded-xl px-3 py-2 text-[10px] font-black">شوف الاشتراك</button></div>
                 <div class="grid grid-cols-3 gap-2"><button id="quick-entry-voice" class="rounded-2xl border border-emerald-200 bg-white/80 px-2 py-3 text-center shadow-sm transition hover:-translate-y-0.5 dark:bg-slate-900" type="button"><span class="mx-auto mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/15 text-xl">🎙</span><span class="block text-[11px] font-bold text-slate-700 dark:text-slate-200">صوت</span></button><button id="quick-entry-text" class="rounded-2xl border border-emerald-200 bg-white/80 px-2 py-3 text-center shadow-sm transition hover:-translate-y-0.5 dark:bg-slate-900" type="button"><span class="mx-auto mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/15 text-xl">✍️</span><span class="block text-[11px] font-bold text-slate-700 dark:text-slate-200">كتابة</span></button><button id="quick-entry-invoice" class="rounded-2xl border border-emerald-200 bg-white/80 px-2 py-3 text-center shadow-sm transition hover:-translate-y-0.5 dark:bg-slate-900" type="button"><span class="mx-auto mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/15 text-xl">📸</span><span class="block text-[11px] font-bold text-slate-700 dark:text-slate-200">فاتورة</span></button></div><p class="text-center text-[10px] text-slate-500">ملاحظة مهمة: أقل مدة لتسجيل الصوت هي <b class="quick-voice-minimum text-emerald-600 dark:text-emerald-300">5 ثواني</b> عشان دبّر يسمعه ويفهمه بدقة.</p>
@@ -1686,6 +1697,11 @@
                     <p class="text-xs text-slate-500">سجّل أول عملية النهاردة وهتظهر هنا.</p>
                 </div>
             </div>
+
+            <button id="download-daily-pdf" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-2">
+                <span id="download-daily-pdf-icon">📄</span> <span id="download-daily-pdf-label">تقرير PDF لليوم</span>
+            </button>
+            <p class="text-[9px] text-slate-500 text-center">تقرير بكل عمليات النهاردة بس — تقدر تشاركه أو تحتفظ بيه.</p>
 
         </div>
 
@@ -2014,6 +2030,103 @@
                     <span class="font-mono text-xs text-slate-200 select-all truncate" dir="ltr">https://buypilot-team.vercel.app</span>
                     <span id="account-referral-copy-label" class="text-[10px] font-bold text-emerald-400 shrink-0">نسخ 📋</span>
                 </button>
+            </div>
+
+            <button type="button" id="quick-add-feature-card" class="w-full bg-gradient-to-br from-emerald-500/10 to-teal-500/5 border border-emerald-500/25 rounded-3xl p-4 flex items-center gap-3 text-right">
+                <span class="w-9 h-9 shrink-0 rounded-xl bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center text-base">⚡</span>
+                <div class="flex-1 min-w-0">
+                    <p class="text-xs font-bold text-slate-200">سجّل مصروفك من بره التطبيق</p>
+                    <p class="text-[11px] text-slate-400 leading-relaxed">من واتساب أو أي حتة — من غير ما تفتح دبّر</p>
+                </div>
+                <span class="text-slate-500 text-sm">‹</span>
+            </button>
+
+            <div id="quick-add-feature-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-end justify-center z-50 p-0">
+                <div class="w-full max-w-md bg-slate-900 border-t border-slate-800 rounded-t-3xl p-5 max-h-[85vh] overflow-y-auto">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-sm font-bold text-slate-100">سجّل من بره التطبيق</h3>
+                        <button type="button" id="quick-add-feature-close" aria-label="اقفل" class="w-7 h-7 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-sm">✕</button>
+                    </div>
+                    <p class="text-[12px] text-slate-400 leading-relaxed mb-4">علّم نص فيه مصروف من أي تطبيق، أو استخدم اختصار سريع من الشاشة الرئيسية — من غير ما تفتح التطبيق أصلًا.</p>
+
+                    <div class="flex gap-2 mb-4">
+                        <button type="button" id="quick-add-tab-android" class="flex-1 text-xs font-bold py-2 rounded-xl border border-emerald-500/40 bg-emerald-500/15 text-emerald-400">أندرويد</button>
+                        <button type="button" id="quick-add-tab-ios" class="flex-1 text-xs font-bold py-2 rounded-xl border border-slate-700 text-slate-400">آيفون</button>
+                    </div>
+
+                    <div id="quick-add-steps-android" class="space-y-1">
+                        <p class="text-[11px] font-bold text-emerald-400 mb-1">الطريقة الأولى: مشاركة نص</p>
+                        <div class="flex items-center gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">1</span><span class="text-[12px] text-slate-300">علّم أي نص فيه مصروف في أي تطبيق</span></div>
+                        <div class="flex items-center gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">2</span><span class="text-[12px] text-slate-300">دوس زرار مشاركة (Share)</span></div>
+                        <div class="flex items-center gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">3</span><span class="text-[12px] text-slate-300">اختار دبّر من القائمة</span></div>
+                        <div class="flex items-center gap-2.5 py-2"><span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">4</span><span class="text-[12px] text-slate-300">راجع وأكد — يتسجل فورًا</span></div>
+
+                        <p class="text-[11px] font-bold text-emerald-400 mt-4 mb-1">الطريقة الثانية: اختصار من الشاشة الرئيسية</p>
+                        <div class="flex items-center gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">1</span><span class="text-[12px] text-slate-300">اضغط مطولًا على أيقونة دبّر</span></div>
+                        <div class="flex items-center gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">2</span><span class="text-[12px] text-slate-300">اختار "إدخال سريع" من القائمة اللي تظهر</span></div>
+                        <div class="flex items-center gap-2.5 py-2"><span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">3</span><span class="text-[12px] text-slate-300">اكتب مصروفك — يتسجل فورًا من غير ما تفتح التطبيق</span></div>
+                        <p class="text-[10px] text-slate-500 mt-2">شغالة على أغلب أجهزة أندرويد الحديثة، وبتحتاج دبّر يكون مثبّت على الشاشة الرئيسية.</p>
+                    </div>
+
+                    <div id="quick-add-steps-ios" class="hidden space-y-1">
+                        <div class="flex items-center gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">1</span><span class="text-[12px] text-slate-300">دوس زرار "ثبّت اختصار آيفون" تحت</span></div>
+                        <div class="flex items-center gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">2</span><span class="text-[12px] text-slate-300">دوس Add Shortcut في الرسالة اللي هتظهر</span></div>
+                        <div class="flex items-center gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">3</span><span class="text-[12px] text-slate-300">استخدمه من الشاشة الرئيسية أو بـ Siri</span></div>
+                        <div class="flex items-center gap-2.5 py-2"><span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">4</span><span class="text-[12px] text-slate-300">اكتب أو قول مصروفك — يتسجل فورًا</span></div>
+                        <a href="#" id="quick-add-ios-install-link" target="_blank" rel="noopener" class="mt-3 w-full flex items-center justify-center gap-2 bg-emerald-500 text-slate-950 font-black text-[12px] py-2.5 rounded-xl">⬇️ ثبّت اختصار آيفون</a>
+                    </div>
+                </div>
+            </div>
+
+            <button type="button" id="bank-accounts-card" class="w-full bg-gradient-to-br from-emerald-500/10 to-teal-500/5 border border-emerald-500/25 rounded-3xl p-4 flex items-center gap-3 text-right">
+                <span class="w-9 h-9 shrink-0 rounded-xl bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center text-base">🏦</span>
+                <div class="flex-1 min-w-0">
+                    <p class="text-xs font-bold text-slate-200">البنوك والمحافظ</p>
+                    <p class="text-[11px] text-slate-400 leading-relaxed">اربط بنكك عشان يتسجل مصروفك أوتوماتيك من الـ SMS</p>
+                </div>
+                <span class="bg-amber-500/15 text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded-full">جديد</span>
+            </button>
+
+            <div id="bank-accounts-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-end justify-center z-50 p-0">
+                <div class="w-full max-w-md bg-slate-900 border-t border-slate-800 rounded-t-3xl p-5 max-h-[88vh] overflow-y-auto">
+                    <div class="flex items-center justify-between mb-3">
+                        <h3 class="text-sm font-bold text-slate-100">البنوك والمحافظ</h3>
+                        <button type="button" id="bank-accounts-close" aria-label="اقفل" class="w-7 h-7 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-sm">✕</button>
+                    </div>
+
+                    <p id="bank-accounts-status-line" class="text-[12px] text-slate-400 leading-relaxed mb-4">اربط بنكك أو محفظتك مرة واحدة، ودبّر يسجل مصاريفك من رسائل SMS تلقائيًا.</p>
+
+                    <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-3 mb-4">
+                        <p class="text-[11px] font-bold text-emerald-400 mb-2">مدعومة حاليًا</p>
+                        <div id="bank-accounts-supported-list" class="flex flex-wrap gap-1.5"></div>
+                    </div>
+
+                    <p class="text-[11px] font-bold text-emerald-400 mb-2">هيحصل إيه بالظبط لما تدوس "ابدأ الربط"</p>
+                    <div class="space-y-1 mb-4">
+                        <div class="flex items-start gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">1</span><span class="text-[12px] text-slate-300">هتحمّل تطبيق MacroDroid من Google Play (مجاني، لو مش عندك)</span></div>
+                        <div class="flex items-start gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">2</span><span class="text-[12px] text-slate-300">دبّر هيحمّلك ملف إعداد جاهز فيه توكنك الخاص جوّه — هيظهر إشعار تحميل</span></div>
+                        <div class="flex items-start gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">3</span><span class="text-[12px] text-slate-300">افتح الإشعار → لو ظهرلك اختيار "فتح باستخدام"، اختار MacroDroid (لو فتح المتصفح ملف نصي بدل كده، روح على مجلد "Downloads" في تطبيق الملفات، دوس مطولًا على الملف، واختار Open with MacroDroid)</span></div>
+                        <div class="flex items-start gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">4</span><span class="text-[12px] text-slate-300">MacroDroid هيفتح تلقائي على شاشة فيها اسم الـ Macro وزرار أزرق "Import" أو "Add" تحت — دوس عليه (مفيش أي تعديل مطلوب منك)</span></div>
+                        <div class="flex items-start gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">5</span><span class="text-[12px] text-slate-300">هيطلب منك صلاحية "قراءة الرسائل" → دوس السماح</span></div>
+                        <div class="flex items-start gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">6</span><span class="text-[12px] text-slate-300">ارجع لدبّر ودوس "تفعيل الاستقبال" تحت</span></div>
+                        <div class="flex items-start gap-2.5 py-2"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">7</span><span class="text-[12px] text-slate-300">من ساعتها، أي SMS بنكي حقيقي يوصلك، بيتسجل في دبّر تلقائي</span></div>
+                    </div>
+
+                    <div class="flex items-center justify-between bg-slate-950/60 border border-slate-800 rounded-2xl p-3.5 mb-3">
+                        <div>
+                            <p class="text-xs font-bold text-slate-200">تفعيل الاستقبال التلقائي</p>
+                            <p class="text-[11px] text-slate-400" id="bank-accounts-enabled-label">متوقف</p>
+                        </div>
+                        <button type="button" id="bank-accounts-toggle" class="w-11 h-6 rounded-full bg-slate-700 relative transition" aria-label="تفعيل الاستقبال التلقائي">
+                            <span id="bank-accounts-toggle-dot" class="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-white transition-transform"></span>
+                        </button>
+                    </div>
+
+                    <a href="https://play.google.com/store/apps/details?id=com.arlosoft.macrodroid" target="_blank" rel="noopener" class="w-full flex items-center justify-center gap-2 bg-slate-800 border border-slate-700 text-slate-200 font-bold text-[12px] py-2.5 rounded-xl mb-2">1️⃣ حمّل MacroDroid</a>
+                    <a href="#" id="bank-accounts-download-config" target="_blank" rel="noopener" class="w-full flex items-center justify-center gap-2 bg-emerald-500 text-slate-950 font-black text-[12px] py-2.5 rounded-xl">⬇️ ابدأ الربط (حمّل ملف الإعداد)</a>
+
+                    <p class="text-[10px] text-slate-500 mt-3 leading-relaxed">قراءة الرسائل من MacroDroid مجانية بالكامل. ملف الإعداد بييجيلك فيه توكنك الخاص جاهز، مفيش تعديل مطلوب منك — ودبّر بيحدد بنكك/محفظتك تلقائي من اسم مرسل الرسالة.</p>
+                </div>
             </div>
 
             <button id="account-theme-toggle" class="w-full bg-slate-950/60 border border-slate-800 rounded-3xl p-4 flex items-center justify-between gap-3">
@@ -2595,6 +2708,122 @@
             badge.classList.remove('hidden');
             badge.classList.add('flex');
         }
+
+        (function setupQuickAddFeatureCard() {
+            const card = document.getElementById('quick-add-feature-card');
+            const modal = document.getElementById('quick-add-feature-modal');
+            const closeBtn = document.getElementById('quick-add-feature-close');
+            const tabAndroid = document.getElementById('quick-add-tab-android');
+            const tabIos = document.getElementById('quick-add-tab-ios');
+            const stepsAndroid = document.getElementById('quick-add-steps-android');
+            const stepsIos = document.getElementById('quick-add-steps-ios');
+            const iosLink = document.getElementById('quick-add-ios-install-link');
+            if (!card || !modal) return;
+            // ============ حط هنا رابط الـ iCloud Shortcut بتاعك بعد ما تعمله ============
+            iosLink.href = 'https://www.icloud.com/shortcuts/REPLACE_WITH_YOUR_SHORTCUT_ID';
+            const activeTabClasses = ['border-emerald-500/40', 'bg-emerald-500/15', 'text-emerald-400'];
+            const inactiveTabClasses = ['border-slate-700', 'text-slate-400'];
+            function setTab(target) {
+                const isAndroid = target === 'android';
+                stepsAndroid.classList.toggle('hidden', !isAndroid);
+                stepsIos.classList.toggle('hidden', isAndroid);
+                tabAndroid.classList.toggle('border-emerald-500/40', isAndroid);
+                tabAndroid.classList.toggle('bg-emerald-500/15', isAndroid);
+                tabAndroid.classList.toggle('text-emerald-400', isAndroid);
+                tabAndroid.classList.toggle('border-slate-700', !isAndroid);
+                tabAndroid.classList.toggle('text-slate-400', !isAndroid);
+                tabIos.classList.toggle('border-emerald-500/40', !isAndroid);
+                tabIos.classList.toggle('bg-emerald-500/15', !isAndroid);
+                tabIos.classList.toggle('text-emerald-400', !isAndroid);
+                tabIos.classList.toggle('border-slate-700', isAndroid);
+                tabIos.classList.toggle('text-slate-400', isAndroid);
+            }
+            card.addEventListener('click', () => { modal.classList.remove('hidden'); modal.classList.add('flex'); });
+            closeBtn?.addEventListener('click', () => { modal.classList.add('hidden'); modal.classList.remove('flex'); });
+            modal.addEventListener('click', (e) => { if (e.target === modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); } });
+            tabAndroid?.addEventListener('click', () => setTab('android'));
+            tabIos?.addEventListener('click', () => setTab('ios'));
+        })();
+
+        (function setupBankAccountsCard() {
+            const card = document.getElementById('bank-accounts-card');
+            const modal = document.getElementById('bank-accounts-modal');
+            const closeBtn = document.getElementById('bank-accounts-close');
+            const toggleBtn = document.getElementById('bank-accounts-toggle');
+            const toggleDot = document.getElementById('bank-accounts-toggle-dot');
+            const enabledLabel = document.getElementById('bank-accounts-enabled-label');
+            const supportedList = document.getElementById('bank-accounts-supported-list');
+            const downloadLink = document.getElementById('bank-accounts-download-config');
+            if (!card || !modal) return;
+
+            let bankState = { enabled: false, token: null, webhookUrl: null, banks: [] };
+
+            function renderToggle() {
+                toggleBtn.style.background = bankState.enabled ? '#10b981' : '';
+                toggleDot.style.transform = bankState.enabled ? 'translateX(-20px)' : 'translateX(0)';
+                enabledLabel.textContent = bankState.enabled ? 'شغال' : 'متوقف';
+            }
+
+            function renderBanks() {
+                supportedList.innerHTML = bankState.banks.map((b) =>
+                    `<span class="text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-1 rounded-full">${b.label}</span>`
+                ).join('');
+            }
+
+            async function updateDownloadLink() {
+                if (!bankState.token) return;
+                try {
+                    const { data: { session } } = await sb.auth.getSession();
+                    if (!session) return;
+                    const res = await fetch('/api/bank-accounts?action=macro-file', {
+                        headers: { Authorization: `Bearer ${session.access_token}` },
+                    });
+                    if (!res.ok) return;
+                    const blob = await res.blob();
+                    downloadLink.href = URL.createObjectURL(blob);
+                    downloadLink.download = 'dabbar-sms-import.macro';
+                } catch (e) { /* الرابط القديم (لو فيه) بيفضل شغال لو الطلب فشل */ }
+            }
+
+            async function loadBankAccounts() {
+                try {
+                    const { data: { session } } = await sb.auth.getSession();
+                    if (!session) return;
+                    const res = await fetch('/api/bank-accounts', {
+                        headers: { Authorization: `Bearer ${session.access_token}` },
+                    });
+                    const data = await res.json();
+                    if (!data.ok) return;
+                    bankState = { enabled: data.enabled, token: data.token, webhookUrl: data.webhookUrl, banks: data.banks || [] };
+                    renderToggle();
+                    renderBanks();
+                    updateDownloadLink();
+                } catch (e) { /* صامت — الكارت لسه بيفتح حتى لو فشل التحميل */ }
+            }
+
+            card.addEventListener('click', () => {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                loadBankAccounts();
+            });
+            closeBtn?.addEventListener('click', () => { modal.classList.add('hidden'); modal.classList.remove('flex'); });
+            modal.addEventListener('click', (e) => { if (e.target === modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); } });
+
+            toggleBtn?.addEventListener('click', async () => {
+                const next = !bankState.enabled;
+                try {
+                    const { data: { session } } = await sb.auth.getSession();
+                    if (!session) return;
+                    const res = await fetch('/api/bank-accounts', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+                        body: JSON.stringify({ enabled: next }),
+                    });
+                    const data = await res.json();
+                    if (data.ok) { bankState.enabled = data.enabled; renderToggle(); }
+                } catch (e) { /* تجاهل */ }
+            });
+        })();
 
         document.getElementById('account-theme-toggle').addEventListener('click', () => {
             setTheme(getTheme() === 'light' ? 'dark' : 'light');
@@ -4075,6 +4304,75 @@
             quickStatus('');
         }
         function quickDraftLabel(type) { return typeLabel(type); }
+        // ============ احتفال بصري (عملات + كونفيتي) بعد نجاح الحفظ الفعلي — بيشتغل في الفويس والكتابة والفاتورة ============
+        var dabbarCelebrateActive = false;
+        function celebrateSave(anchorEl) {
+            var section = document.getElementById('quick-entry-card');
+            var canvas = document.getElementById('dabbar-celebrate-canvas');
+            if (!section || !canvas || dabbarCelebrateActive) return;
+            var ctx = canvas.getContext('2d');
+            var sr = section.getBoundingClientRect();
+            canvas.width = sr.width;
+            canvas.height = sr.height;
+            var origin = { x: sr.width / 2, y: sr.height / 2 };
+            if (anchorEl && anchorEl.getBoundingClientRect) {
+                var br = anchorEl.getBoundingClientRect();
+                origin = { x: br.left - sr.left + br.width / 2, y: br.top - sr.top + br.height / 2 };
+            }
+            var particles = [];
+            var count = 40;
+            for (var i = 0; i < count; i++) {
+                var isCoin = Math.random() < 0.6;
+                var angle = Math.PI + Math.random() * Math.PI;
+                var speed = 3.5 + Math.random() * 6;
+                particles.push({
+                    x: origin.x + (Math.random() - 0.5) * 16, y: origin.y,
+                    vx: Math.cos(angle) * speed * 0.7, vy: Math.sin(angle) * speed - 3.5,
+                    rot: Math.random() * Math.PI * 2, vrot: (Math.random() - 0.5) * 0.25,
+                    size: isCoin ? (7 + Math.random() * 5) : (4 + Math.random() * 3.5),
+                    coin: isCoin, bounces: 0, drift: Math.random() * Math.PI * 2,
+                    color: ['#10b981', '#34d399', '#f0b93a', '#ffffff'][Math.floor(Math.random() * 4)]
+                });
+            }
+            var gravity = 0.3;
+            var startTime = 0;
+            var duration = 1900;
+            dabbarCelebrateActive = true;
+            function drawCoin(p) {
+                ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+                ctx.beginPath(); ctx.ellipse(0, 0, p.size, p.size * 0.85, 0, 0, Math.PI * 2);
+                ctx.fillStyle = '#c88f1f'; ctx.fill();
+                ctx.beginPath(); ctx.ellipse(-p.size * 0.12, -p.size * 0.12, p.size * 0.82, p.size * 0.7, 0, 0, Math.PI * 2);
+                ctx.fillStyle = '#f0b93a'; ctx.fill();
+                ctx.beginPath(); ctx.ellipse(-p.size * 0.3, -p.size * 0.35, p.size * 0.28, p.size * 0.18, -0.5, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255,235,180,0.55)'; ctx.fill();
+                ctx.restore();
+            }
+            function drawRibbon(p) {
+                ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+                ctx.fillStyle = p.color; ctx.fillRect(-p.size / 2, -p.size * 0.35, p.size, p.size * 0.7);
+                ctx.restore();
+            }
+            function tick(ts) {
+                if (!startTime) startTime = ts;
+                var elapsed = ts - startTime;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                var floorY = canvas.height - 4;
+                for (var i = 0; i < particles.length; i++) {
+                    var p = particles[i];
+                    p.vy += gravity; p.x += p.vx; p.y += p.vy; p.rot += p.vrot; p.drift += 0.06;
+                    if (!p.coin) p.x += Math.sin(p.drift) * 0.5;
+                    if (p.y + p.size > floorY && p.vy > 0) {
+                        if (p.bounces < 2) { p.y = floorY - p.size; p.vy *= -0.4; p.vx *= 0.6; p.bounces++; }
+                        else { p.y = floorY - p.size; p.vy = 0; p.vx *= 0.9; }
+                    }
+                    if (p.coin) drawCoin(p); else drawRibbon(p);
+                }
+                if (elapsed < duration) { requestAnimationFrame(tick); }
+                else { ctx.clearRect(0, 0, canvas.width, canvas.height); dabbarCelebrateActive = false; }
+            }
+            requestAnimationFrame(tick);
+        }
         // ============ زي رسالة تليجرام بالظبط لما رسالة واحدة فيها أكتر من معاملة — كل معاملة بتتعرض لوحدها هنا ============
         function quickDraft(drafts, transcript) {
             quickEntryDrafts = Array.isArray(drafts) ? drafts : [drafts];
@@ -4118,7 +4416,7 @@
         document.getElementById('quick-entry-cancel')?.addEventListener('click', () => { quickShow('quick-entry-form', false); quickShow('quick-entry-draft', false); quickStatus(''); document.getElementById('quick-entry-input').value = ''; });
         document.getElementById('quick-entry-edit')?.addEventListener('click', () => { quickShow('quick-entry-draft', false); quickShow('quick-entry-form', true); document.getElementById('quick-entry-input').value = quickEntrySourceText || ''; });
         document.getElementById('quick-entry-analyze')?.addEventListener('click', () => { const text = document.getElementById('quick-entry-input')?.value.trim(); if (!text) return quickStatus('اكتب العملية الأول.', 'error'); analyzeQuickEntry({ text }); });
-        document.getElementById('quick-entry-confirm')?.addEventListener('click', async () => { if (!requireQuickEntryAccess() || !quickEntryDrafts.length) return; const btn = document.getElementById('quick-entry-confirm'); btn.disabled = true; quickStatus('جاري حفظ العملية...'); try { const result = await asstApi('entry_confirm', { drafts: quickEntryDrafts }); document.getElementById('quick-entry-input').value = ''; quickShow('quick-entry-draft', false); quickStatus(result.message || 'تم التسجيل بنجاح.', 'success'); await loadDashboard(); } catch (e) { quickStatus(e.message || 'تعذر الحفظ.', 'error'); } finally { btn.disabled = false; } });
+        document.getElementById('quick-entry-confirm')?.addEventListener('click', async () => { if (!requireQuickEntryAccess() || !quickEntryDrafts.length) return; const btn = document.getElementById('quick-entry-confirm'); btn.disabled = true; quickStatus('جاري حفظ العملية...'); try { const result = await asstApi('entry_confirm', { drafts: quickEntryDrafts }); celebrateSave(btn); document.getElementById('quick-entry-input').value = ''; quickShow('quick-entry-draft', false); quickStatus(result.message || 'تم التسجيل بنجاح.', 'success'); await loadDashboard(); } catch (e) { quickStatus(e.message || 'تعذر الحفظ.', 'error'); } finally { btn.disabled = false; } });
         document.getElementById('quick-entry-invoice')?.addEventListener('click', () => { if (!requireQuickEntryAccess()) return; document.getElementById('quick-entry-invoice-input')?.click(); });
         document.getElementById('quick-entry-draft-close')?.addEventListener('click', () => { quickShow('quick-entry-draft', false); quickStatus(''); document.getElementById('quick-entry-input').value = ''; });
         // ============ فاتورة سريعة: نفس بالظبط سلوك "امسح فاتورة" — بتستخرج كل صنف بسعره وتتسجل أوتوماتيك من غير خطوة تأكيد إضافية ============
@@ -4144,6 +4442,7 @@
                 list.innerHTML = `${itemsHtml}<div class="flex items-center justify-between text-sm font-black pt-1 border-t border-emerald-200 dark:border-slate-700 mt-1 text-slate-800 dark:text-slate-100"><span>الإجمالي</span><span>${fmt(result.totalAmount)}</span></div>${debtHtml}`;
                 document.getElementById('quick-entry-draft-actions').classList.add('hidden');
                 quickShow('quick-entry-draft', true);
+                celebrateSave(document.getElementById('quick-entry-invoice'));
                 quickStatus('تم الحفظ في كل الفواتير ✅', 'success');
                 await loadDashboard();
                 await loadInvoicesCount?.();
@@ -4927,6 +5226,52 @@
                 URL.revokeObjectURL(url);
             } catch (e) {
                 alert(e.message || 'حصل خطأ، جرب تاني.');
+            } finally {
+                btn.disabled = false;
+                icon.textContent = '📄';
+                label.textContent = originalLabel;
+            }
+        });
+
+        document.getElementById('download-daily-pdf')?.addEventListener('click', async () => {
+            const btn = document.getElementById('download-daily-pdf');
+            const icon = document.getElementById('download-daily-pdf-icon');
+            const label = document.getElementById('download-daily-pdf-label');
+            const originalLabel = label.textContent;
+
+            btn.disabled = true;
+            icon.textContent = '⏳';
+            label.textContent = 'بنجهز الملف...';
+
+            try {
+                const res = await fetch('/api/reports?type=daily&offset=0', {
+                    headers: { Authorization: `Bearer ${accessToken}` },
+                });
+
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({}));
+                    throw new Error(err.error || 'فشل تحميل الملف');
+                }
+
+                const blob = await res.blob();
+                const fileName = 'تقرير-اليوم.pdf';
+
+                // لو المتصفح بيدعم مشاركة ملفات (أغلب أندرويد)، نديله خيار المشاركة المباشرة
+                const file = new File([blob], fileName, { type: 'application/pdf' });
+                if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({ files: [file], title: 'تقرير اليوم — دبّر' });
+                } else {
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = fileName;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    URL.revokeObjectURL(url);
+                }
+            } catch (e) {
+                if (e.name !== 'AbortError') alert(e.message || 'حصل خطأ، جرب تاني.');
             } finally {
                 btn.disabled = false;
                 icon.textContent = '📄';

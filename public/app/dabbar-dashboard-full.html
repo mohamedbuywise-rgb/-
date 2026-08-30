@@ -79,58 +79,41 @@
             .modal-screen-surface { transition: none !important; }
         }
 
-        /* ============ Bottom sheets — فتح مدمج بدل شاشة كاملة ============ */
-        .modal-sheet-backdrop {
-            background: rgba(2, 6, 23, .58) !important;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+        /* ============ Account nested pages — صفحات كاملة بدل Bottom Sheets ============ */
+        .account-subpage-view {
+            background: var(--pm-canvas) !important;
+            color: var(--pm-ink) !important;
             isolation: isolate;
-            transform: none !important;
-        }
-        .modal-sheet-backdrop .modal-sheet-panel {
-            position: relative;
-            width: min(100%, 560px);
-            max-height: min(88vh, 760px);
-            display: flex;
-            flex-direction: column;
             overflow: hidden;
-            border: 1px solid var(--pm-hairline);
-            border-bottom: 0;
-            border-radius: 2rem 2rem 0 0;
-            background: var(--pm-canvas);
-            box-shadow: 0 -18px 60px rgba(0, 0, 0, .28);
-            transform: translateY(22px);
+        }
+        .account-subpage-view .account-subpage-panel {
+            width: 100%;
+            max-width: none;
+            max-height: none;
+            height: 100%;
+            border: 0;
+            border-radius: 0;
+            box-shadow: none;
+            background: var(--pm-canvas) !important;
+            transform: translateX(24px) !important;
             transition: transform .28s cubic-bezier(.23, 1, .32, 1);
         }
-        .modal-sheet-backdrop:not(.opacity-0) .modal-sheet-panel { transform: translateY(0); }
-        .modal-sheet-handle {
-            width: 42px;
-            height: 4px;
-            margin: 10px auto 0;
-            border-radius: 999px;
-            background: color-mix(in srgb, var(--pm-ink) 20%, transparent);
-            flex: 0 0 auto;
+        .account-subpage-view:not(.opacity-0) .account-subpage-panel { transform: translateX(0) !important; }
+        .account-subpage-view .account-subpage-handle { display: none; }
+        .account-subpage-view .modal-header-surface {
+            padding-top: calc(env(safe-area-inset-top) + 16px) !important;
+            background: var(--pm-surface-hi) !important;
         }
-        .modal-sheet-backdrop .modal-header-surface {
-            background: transparent !important;
-            border-bottom: 1px solid var(--pm-hairline) !important;
+        .account-subpage-view .modal-body-surface {
+            width: 100%;
+            max-width: 56rem;
+            margin: 0 auto;
+            overflow-y: auto;
+            background: var(--pm-canvas) !important;
         }
-        .modal-sheet-backdrop .modal-body-surface {
-            background: transparent !important;
-            overscroll-behavior: contain;
-            padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
-        }
-        .modal-sheet-backdrop.opacity-0 { pointer-events: none; }
-        @media (min-width: 640px) {
-            .modal-sheet-backdrop { padding: 20px; align-items: center !important; }
-            .modal-sheet-backdrop .modal-sheet-panel {
-                max-height: min(86vh, 760px);
-                border-bottom: 1px solid var(--pm-hairline);
-                border-radius: 2rem;
-            }
-        }
+        .account-subpage-view.opacity-0 { pointer-events: none; }
         @media (prefers-reduced-motion: reduce) {
-            .modal-sheet-backdrop .modal-sheet-panel { transition: none !important; }
+            .account-subpage-view .account-subpage-panel { transition: none !important; }
         }
 
         /* ============ شاشة "مش شغال معايا؟" (البنوك والمحافظ) — glow خفيف + نبضة الأيقونة الرئيسية ============ */
@@ -2173,9 +2156,9 @@
                 <span class="text-slate-500 text-sm">‹</span>
             </button>
 
-            <div id="quick-add-feature-modal" class="modal-sheet-backdrop fixed inset-0 z-50 hidden flex-col items-center justify-end opacity-0 transition-opacity duration-[240ms] ease-out" aria-hidden="true">
-                <div class="modal-sheet-panel modal-screen-surface">
-                    <div class="modal-sheet-handle" aria-hidden="true"></div>
+            <div id="quick-add-feature-page" class="account-subpage-view fixed inset-0 z-50 hidden flex-col opacity-0 translate-x-4 transition-[opacity,transform] duration-[240ms] ease-out" aria-hidden="true" data-account-route="/account/external-expense">
+                <div class="account-subpage-panel modal-screen-surface">
+                    <div class="account-subpage-handle" aria-hidden="true"></div>
                 <div class="modal-header-surface flex items-center gap-3 px-4 pt-3 pb-3 border-b shrink-0">
                     <button type="button" id="quick-add-feature-close" aria-label="رجوع" class="w-9 h-9 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 text-base shrink-0">→</button>
                     <h3 class="text-sm font-bold text-slate-100">سجّل من بره التطبيق</h3>
@@ -2224,9 +2207,9 @@
                 <span class="bg-amber-500/15 text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded-full">جديد</span>
             </button>
 
-            <div id="bank-accounts-modal" class="modal-sheet-backdrop fixed inset-0 z-50 hidden flex-col items-center justify-end opacity-0 transition-opacity duration-[240ms] ease-out" aria-hidden="true">
-                <div class="modal-sheet-panel modal-screen-surface">
-                    <div class="modal-sheet-handle" aria-hidden="true"></div>
+            <div id="bank-accounts-page" class="account-subpage-view fixed inset-0 z-50 hidden flex-col opacity-0 translate-x-4 transition-[opacity,transform] duration-[240ms] ease-out" aria-hidden="true" data-account-route="/account/banks">
+                <div class="account-subpage-panel modal-screen-surface">
+                    <div class="account-subpage-handle" aria-hidden="true"></div>
                 <div class="modal-header-surface flex items-center gap-3 px-4 pt-3 pb-3 border-b shrink-0">
                     <button type="button" id="bank-accounts-close" aria-label="رجوع" class="w-9 h-9 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 text-base shrink-0">→</button>
                     <h3 class="text-sm font-bold text-slate-100">البنوك والمحافظ</h3>
@@ -2275,9 +2258,9 @@
             </div>
 
             <!-- ============ شاشة "مش شغال معايا؟" — دليل حل مشاكل ربط البنوك خطوة بخطوة ============ -->
-            <div id="bank-accounts-troubleshoot-modal" class="modal-sheet-backdrop fixed inset-0 z-50 hidden flex-col items-center justify-end opacity-0 transition-opacity duration-[240ms] ease-out" aria-hidden="true">
-                <div class="modal-sheet-panel modal-screen-surface">
-                    <div class="modal-sheet-handle" aria-hidden="true"></div>
+            <div id="bank-accounts-troubleshoot-page" class="account-subpage-view fixed inset-0 z-50 hidden flex-col opacity-0 translate-x-4 transition-[opacity,transform] duration-[240ms] ease-out" aria-hidden="true" data-account-route="/account/banks/troubleshooting">
+                <div class="account-subpage-panel modal-screen-surface">
+                    <div class="account-subpage-handle" aria-hidden="true"></div>
                 <div class="bg-glow-ts"></div>
                 <div class="modal-header-surface flex items-center gap-3 px-4 pt-3 pb-3 border-b shrink-0 relative z-10">
                     <button type="button" id="bank-accounts-troubleshoot-close" aria-label="رجوع" class="w-9 h-9 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 text-base shrink-0">→</button>
@@ -2907,44 +2890,95 @@
             badge.classList.add('flex');
         }
 
-        // ============ فتح/قفل Bottom Sheet — خلفية ضبابية ولوحة مدمجة ============
-        function openBottomSheet(modal) {
-            if (!modal) return;
-            modal._previousFocus = document.activeElement;
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
-            modal.setAttribute('aria-hidden', 'false');
-            modal.setAttribute('role', 'dialog');
-            modal.setAttribute('aria-modal', 'true');
+        // ============ Account nested router — صفحات الحساب الفرعية ============
+        const ACCOUNT_SUBPAGE_ROUTES = {
+            '/account/external-expense': 'quick-add-feature-page',
+            '/account/banks': 'bank-accounts-page',
+            '/account/banks/troubleshooting': 'bank-accounts-troubleshoot-page',
+        };
+        const ACCOUNT_SUBPAGE_TITLES = {
+            '/account/external-expense': 'سجّل من بره التطبيق - دبّر',
+            '/account/banks': 'البنوك والمحافظ - دبّر',
+            '/account/banks/troubleshooting': 'حل مشاكل البنوك والمحافظ - دبّر',
+        };
+        let activeAccountSubpage = null;
+
+        function normalizeAccountRoute() {
+            const path = window.location.pathname.replace(/\/+$/, '') || '/';
+            return path;
+        }
+
+        function showAccountTab() {
+            const accountTab = document.querySelector('.tab-btn[data-tab="account"]');
+            if (accountTab && !accountTab.classList.contains('active-tab')) accountTab.click();
+        }
+
+        function openAccountSubpage(page, route, { push = true, focus = true } = {}) {
+            if (!page) return;
+            const current = activeAccountSubpage;
+            if (current && current !== page) {
+                current.classList.add('hidden');
+                current.classList.remove('flex', 'opacity-0', 'translate-x-4');
+            }
+            activeAccountSubpage = page;
+            page._previousFocus = document.activeElement;
+            page.dataset.accountRoute = route;
+            if (push && normalizeAccountRoute() !== route) history.pushState({ accountSubpage: route }, '', route);
+            page.classList.remove('hidden');
+            page.classList.add('flex');
+            page.setAttribute('aria-hidden', 'false');
+            page.setAttribute('role', 'main');
+            document.title = ACCOUNT_SUBPAGE_TITLES[route] || 'دبّر';
+            document.body.classList.add('account-subpage-active');
             document.body.style.overflow = 'hidden';
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
-                    modal.classList.remove('opacity-0', 'translate-y-2');
-                    modal.querySelector('button, [href], input, select, textarea')?.focus({ preventScroll: true });
+                    page.classList.remove('opacity-0', 'translate-x-4');
+                    if (focus) page.querySelector('button, [href], input, select, textarea')?.focus({ preventScroll: true });
                 });
             });
-            const onKey = (e) => { if (e.key === 'Escape') closeBottomSheet(modal); };
-            modal._escHandler = onKey;
+            const onKey = (event) => {
+                if (event.key === 'Escape') closeAccountSubpage(page);
+            };
+            if (page._escHandler) document.removeEventListener('keydown', page._escHandler);
+            page._escHandler = onKey;
             document.addEventListener('keydown', onKey);
         }
-        function closeBottomSheet(modal) {
-            if (!modal) return;
-            modal.classList.add('opacity-0', 'translate-y-2');
-            modal.setAttribute('aria-hidden', 'true');
-            modal.removeAttribute('aria-modal');
+
+        function closeAccountSubpage(page, { push = true } = {}) {
+            if (!page) return;
+            page.classList.add('opacity-0', 'translate-x-4');
+            page.setAttribute('aria-hidden', 'true');
+            page.removeAttribute('role');
+            document.title = 'لوحة التحكم والتقارير - محاسبك الشخصي';
+            document.body.classList.remove('account-subpage-active');
             document.body.style.overflow = '';
-            if (modal._escHandler) { document.removeEventListener('keydown', modal._escHandler); modal._escHandler = null; }
+            if (page._escHandler) { document.removeEventListener('keydown', page._escHandler); page._escHandler = null; }
+            if (push && normalizeAccountRoute() !== '/account') history.pushState({ account: true }, '', '/account');
             setTimeout(() => {
-                modal.classList.add('hidden');
-                modal.classList.remove('flex');
-                modal._previousFocus?.focus?.({ preventScroll: true });
-                modal._previousFocus = null;
+                page.classList.add('hidden');
+                page.classList.remove('flex');
+                if (activeAccountSubpage === page) activeAccountSubpage = null;
+                page._previousFocus?.focus?.({ preventScroll: true });
+                page._previousFocus = null;
             }, 240);
+        }
+
+        function syncAccountRoute({ focus = true } = {}) {
+            const route = normalizeAccountRoute();
+            const pageId = ACCOUNT_SUBPAGE_ROUTES[route];
+            const page = pageId ? document.getElementById(pageId) : null;
+            if (page) {
+                showAccountTab();
+                openAccountSubpage(page, route, { push: false, focus });
+            } else if (activeAccountSubpage) {
+                closeAccountSubpage(activeAccountSubpage, { push: false });
+            }
         }
 
         (function setupQuickAddFeatureCard() {
             const card = document.getElementById('quick-add-feature-card');
-            const modal = document.getElementById('quick-add-feature-modal');
+            const modal = document.getElementById('quick-add-feature-page');
             const closeBtn = document.getElementById('quick-add-feature-close');
             const tabAndroid = document.getElementById('quick-add-tab-android');
             const tabIos = document.getElementById('quick-add-tab-ios');
@@ -2971,18 +3005,18 @@
                 tabIos.classList.toggle('border-slate-700', isAndroid);
                 tabIos.classList.toggle('text-slate-400', isAndroid);
             }
-            card.addEventListener('click', () => openBottomSheet(modal));
-            closeBtn?.addEventListener('click', () => closeBottomSheet(modal));
-            modal.addEventListener('click', (event) => {
-                if (event.target === modal) closeBottomSheet(modal);
+            card.addEventListener('click', () => {
+                showAccountTab();
+                openAccountSubpage(modal, modal.dataset.accountRoute);
             });
+            closeBtn?.addEventListener('click', () => closeAccountSubpage(modal));
             tabAndroid?.addEventListener('click', () => setTab('android'));
             tabIos?.addEventListener('click', () => setTab('ios'));
         })();
 
         (function setupBankAccountsCard() {
             const card = document.getElementById('bank-accounts-card');
-            const modal = document.getElementById('bank-accounts-modal');
+            const modal = document.getElementById('bank-accounts-page');
             const closeBtn = document.getElementById('bank-accounts-close');
             const toggleBtn = document.getElementById('bank-accounts-toggle');
             const toggleDot = document.getElementById('bank-accounts-toggle-dot');
@@ -3037,13 +3071,11 @@
             }
 
             card.addEventListener('click', () => {
-                openBottomSheet(modal);
+                showAccountTab();
+                openAccountSubpage(modal, modal.dataset.accountRoute);
                 loadBankAccounts();
             });
-            closeBtn?.addEventListener('click', () => closeBottomSheet(modal));
-            modal.addEventListener('click', (event) => {
-                if (event.target === modal) closeBottomSheet(modal);
-            });
+            closeBtn?.addEventListener('click', () => closeAccountSubpage(modal));
 
             toggleBtn?.addEventListener('click', async () => {
                 const next = !bankState.enabled;
@@ -3064,7 +3096,7 @@
         // ============ شاشة "مش شغال معايا؟" (استكشاف أخطاء ربط البنوك) ============
         (function setupBankAccountsTroubleshoot() {
             const openBtn = document.getElementById('bank-accounts-troubleshoot-open');
-            const modal = document.getElementById('bank-accounts-troubleshoot-modal');
+            const modal = document.getElementById('bank-accounts-troubleshoot-page');
             const closeBtn = document.getElementById('bank-accounts-troubleshoot-close');
             const stepsWrap = document.getElementById('ts-steps-wrap');
             const progressLabel = document.getElementById('ts-progress-label');
@@ -3237,12 +3269,10 @@
             openBtn.addEventListener('click', () => {
                 renderSteps();
                 resetSupportUI();
-                openBottomSheet(modal);
+                showAccountTab();
+                openAccountSubpage(modal, modal.dataset.accountRoute);
             });
-            closeBtn?.addEventListener('click', () => closeBottomSheet(modal));
-            modal.addEventListener('click', (event) => {
-                if (event.target === modal) closeBottomSheet(modal);
-            });
+            closeBtn?.addEventListener('click', () => closeAccountSubpage(modal));
         })();
 
         document.getElementById('account-theme-toggle').addEventListener('click', () => {
@@ -5613,6 +5643,10 @@
                 footerCta.style.display = btn.dataset.tab === 'monthly' ? 'block' : 'none';
             });
         });
+
+        // ============ مزامنة الصفحات الفرعية مع عنوان المتصفح وزر الرجوع ============
+        window.addEventListener('popstate', () => syncAccountRoute({ focus: false }));
+        syncAccountRoute({ focus: false });
 
         // ============ تحميل نفس تقرير الـ PDF الشهري اللي البوت بيبعته، بس من الموقع ============
         document.getElementById('download-monthly-pdf').addEventListener('click', async () => {

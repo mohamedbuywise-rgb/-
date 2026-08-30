@@ -1,5 +1,9 @@
 {
   "rewrites": [
+    { "source": "/account", "destination": "/app/dabbar-dashboard-full.html" },
+    { "source": "/account/external-expense", "destination": "/app/dabbar-dashboard-full.html" },
+    { "source": "/account/banks/troubleshooting", "destination": "/app/dabbar-dashboard-full.html" },
+    { "source": "/account/banks", "destination": "/app/dabbar-dashboard-full.html" },
     { "source": "/api/:route*", "destination": "/api/index?route=:route*" }
   ],
   "headers": [

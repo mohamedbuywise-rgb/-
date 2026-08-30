@@ -236,6 +236,10 @@ async function handleEntryDraft(userId, body, res) {
   let text = String(body.text || '').trim();
   let voiceUsageCharged = false;
   if (body.audioBase64) {
+    const audioDurationSeconds = Number(body.audioDurationSeconds);
+    if (Number.isFinite(audioDurationSeconds) && audioDurationSeconds > 30) {
+      return res.status(413).json({ error: 'الـ voice عدى 30 ثانية. ابعت تسجيل أقصر من 30 ثانية.' });
+    }
     if (String(body.audioBase64).length > 8 * 1024 * 1024) return res.status(413).json({ error: 'التسجيل طويل أوي. الحد الأقصى 30 ثانية.' });
 
     // ============ أي صوت بييجي من الداشبورد (تسجيل مباشر أو ملف مُشارك من واتساب مثلاً) بيتحسب على ============

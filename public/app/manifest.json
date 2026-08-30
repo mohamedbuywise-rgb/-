@@ -1,6 +1,7 @@
 {
   "name": "دبّر — تتبع مصاريفك وديونك",
   "short_name": "دبّر",
+  "id": "./",
   "description": "تتبع مصاريفك وديونك بالصوت، وشوف تقاريرك أول بأول",
   "start_url": "./dabbar-dashboard-full.html",
   "scope": "./",
@@ -43,9 +44,19 @@
             ".mp3",
             ".m4a",
             ".wav",
-            ".webm",
             ".amr",
-            ".aac"
+            ".aac",
+            ".3gp",
+            ".flac",
+            ".caf",
+            ".mka",
+            "audio/ogg",
+            "audio/opus",
+            "audio/x-opus+ogg",
+            "audio/x-m4a",
+            "audio/x-wav",
+            "audio/3gpp",
+            "application/ogg"
           ]
         }
       ]

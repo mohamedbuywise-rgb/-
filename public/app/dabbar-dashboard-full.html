@@ -41,6 +41,98 @@
         @keyframes fadeUp { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: translateY(0);} }
         .fade-up { animation: fadeUp .35s ease both; }
 
+        /* أسطح المودالات: خلفية صريحة + عزل بصري لمنع تسريب طبقات الصفحة الخلفية أثناء الرندر */
+        .modal-screen-surface {
+            background: var(--pm-canvas) !important;
+            color: var(--pm-ink) !important;
+            isolation: isolate;
+            contain: paint;
+            transform: translateZ(0);
+            backface-visibility: hidden;
+            will-change: transform, opacity;
+        }
+        .modal-header-surface {
+            position: relative;
+            z-index: 2;
+            flex: 0 0 auto;
+            background: var(--pm-surface-hi) !important;
+            color: var(--pm-ink) !important;
+            border-color: var(--pm-hairline) !important;
+            isolation: isolate;
+            transform: translateZ(0);
+            backface-visibility: hidden;
+        }
+        .modal-body-surface {
+            position: relative;
+            z-index: 1;
+            background: var(--pm-canvas) !important;
+            color: var(--pm-ink) !important;
+            isolation: isolate;
+            transform: translateZ(0);
+            backface-visibility: hidden;
+        }
+        .modal-screen-surface button:focus-visible {
+            outline: 2px solid var(--pm-gold-bright);
+            outline-offset: 3px;
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .modal-screen-surface { transition: none !important; }
+        }
+
+        /* ============ Bottom sheets — فتح مدمج بدل شاشة كاملة ============ */
+        .modal-sheet-backdrop {
+            background: rgba(2, 6, 23, .58) !important;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            isolation: isolate;
+            transform: none !important;
+        }
+        .modal-sheet-backdrop .modal-sheet-panel {
+            position: relative;
+            width: min(100%, 560px);
+            max-height: min(88vh, 760px);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            border: 1px solid var(--pm-hairline);
+            border-bottom: 0;
+            border-radius: 2rem 2rem 0 0;
+            background: var(--pm-canvas);
+            box-shadow: 0 -18px 60px rgba(0, 0, 0, .28);
+            transform: translateY(22px);
+            transition: transform .28s cubic-bezier(.23, 1, .32, 1);
+        }
+        .modal-sheet-backdrop:not(.opacity-0) .modal-sheet-panel { transform: translateY(0); }
+        .modal-sheet-handle {
+            width: 42px;
+            height: 4px;
+            margin: 10px auto 0;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--pm-ink) 20%, transparent);
+            flex: 0 0 auto;
+        }
+        .modal-sheet-backdrop .modal-header-surface {
+            background: transparent !important;
+            border-bottom: 1px solid var(--pm-hairline) !important;
+        }
+        .modal-sheet-backdrop .modal-body-surface {
+            background: transparent !important;
+            overscroll-behavior: contain;
+            padding-bottom: max(1.25rem, env(safe-area-inset-bottom));
+        }
+        .modal-sheet-backdrop.opacity-0 { pointer-events: none; }
+        @media (min-width: 640px) {
+            .modal-sheet-backdrop { padding: 20px; align-items: center !important; }
+            .modal-sheet-backdrop .modal-sheet-panel {
+                max-height: min(86vh, 760px);
+                border-bottom: 1px solid var(--pm-hairline);
+                border-radius: 2rem;
+            }
+        }
+        @media (prefers-reduced-motion: reduce) {
+            .modal-sheet-backdrop .modal-sheet-panel { transition: none !important; }
+        }
+
         /* ============ شاشة "مش شغال معايا؟" (البنوك والمحافظ) — glow خفيف + نبضة الأيقونة الرئيسية ============ */
         .bg-glow-ts { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
         .bg-glow-ts::before { content: ''; position: absolute; top: -10%; right: -10%; width: 60vw; height: 60vw; max-width: 420px; max-height: 420px; background: radial-gradient(circle, rgba(16,185,129,.16), transparent 70%); }
@@ -57,8 +149,22 @@
 
         .ts-chev { transition: transform .25s ease; }
         .ts-step-card.is-open .ts-chev { transform: rotate(180deg); }
-        .ts-panel { max-height: 0; overflow: hidden; transition: max-height .35s ease, opacity .3s ease, margin .3s ease; opacity: 0; }
-        .ts-step-card.is-open .ts-panel { opacity: 1; margin-top: .75rem; }
+        .ts-panel { max-height: 0; overflow: hidden; transition: max-height .28s ease, opacity .24s ease, margin .24s ease; opacity: 0; }
+        .ts-step-card.is-open .ts-panel { max-height: 900px; opacity: 1; margin-top: .15rem; }
+        .ts-row { display: flex; align-items: flex-start; gap: .5rem; margin-top: .6rem; }
+        .ts-row:first-child { margin-top: 0; }
+        .ts-row-tag { flex: 0 0 70px; padding: .2rem .25rem; border-radius: .45rem; font-size: 10px; line-height: 1.25; font-weight: 900; text-align: center; }
+        .ts-row-tag.where { background: #e0f2fe; color: #075985; }
+        .ts-row-tag.cause { background: #fef3c7; color: #92400e; }
+        .ts-row-tag.fix { background: #dcfce7; color: #166534; }
+        .ts-row-text { flex: 1; min-width: 0; color: #334155; font-size: 12px; line-height: 1.65; }
+        html:not([data-theme="light"]) .ts-row-text { color: #cbd5e1; }
+        html:not([data-theme="light"]) .ts-row-tag.where { background: rgba(14, 165, 233, .16); color: #7dd3fc; }
+        html:not([data-theme="light"]) .ts-row-tag.cause { background: rgba(245, 158, 11, .16); color: #fbbf24; }
+        html:not([data-theme="light"]) .ts-row-tag.fix { background: rgba(34, 197, 94, .16); color: #86efac; }
+        html[data-theme="light"] .ts-step-card { background: #fff !important; border-color: #e2e8f0 !important; }
+        html[data-theme="light"] .ts-step-card .ts-step-head .bg-slate-950\/60 { background: #f1f5f9 !important; }
+        html[data-theme="light"] .ts-step-card .ts-step-head .border-slate-800 { border-color: #e2e8f0 !important; }
 
         .ts-check-circle { transition: background .2s ease, border-color .2s ease, transform .15s ease; }
         .ts-check-circle.checked { background: #10b981; border-color: #10b981; transform: scale(1.05); }
@@ -108,20 +214,6 @@
         html[data-theme="light"] ::-webkit-scrollbar-thumb { background: #cbd5e1; }
 
         /* خلفيات */
-        /* ============ إصلاح غوستينج المودالز اللي بتفتح fullpage (سجل من بره التطبيق / البنوك والمحافظ) ============ */
-        /* المشكلة: المودال fixed وجواه عنصر overflow-y-auto، وChrome على أندرويد أحيانًا بيرسم بكسلات قديمة */
-        /* من الصفحة اللي وراه أثناء السكرول جوه المودال لو مفيهوش compositing layer مستقل. الحل: نجبره ياخد */
-        /* layer مستقل بـ translateZ + نديله خلفية صريحة (مش معتمدة بس على opacity/الشفافية اللي بتتغير أثناء الفتح). */
-        .modal-gpu-layer {
-            transform: translateZ(0);
-            -webkit-transform: translateZ(0);
-            will-change: transform, opacity;
-            isolation: isolate;
-            background-color: #020617; /* fallback صريح فوق bg-slate-950 نفسه */
-        }
-        html[data-theme="light"] .modal-gpu-layer { background-color: #f8fafc !important; }
-        .modal-gpu-layer > div:first-child { background-color: inherit; position: relative; z-index: 1; }
-
         html[data-theme="light"] .bg-slate-950 { background-color: #f8fafc !important; }
         html[data-theme="light"] .bg-slate-950\/40 { background-color: rgba(241,245,249,0.7) !important; }
         html[data-theme="light"] .bg-slate-950\/60 { background-color: rgba(241,245,249,0.9) !important; }
@@ -2081,12 +2173,14 @@
                 <span class="text-slate-500 text-sm">‹</span>
             </button>
 
-            <div id="quick-add-feature-modal" class="fixed inset-0 z-50 hidden flex-col bg-slate-950 opacity-0 translate-y-2 transition-all duration-200 ease-out modal-gpu-layer">
-                <div class="flex items-center gap-3 px-4 pt-[calc(env(safe-area-inset-top)+16px)] pb-3 border-b border-slate-800 shrink-0">
+            <div id="quick-add-feature-modal" class="modal-sheet-backdrop fixed inset-0 z-50 hidden flex-col items-center justify-end opacity-0 transition-opacity duration-[240ms] ease-out" aria-hidden="true">
+                <div class="modal-sheet-panel modal-screen-surface">
+                    <div class="modal-sheet-handle" aria-hidden="true"></div>
+                <div class="modal-header-surface flex items-center gap-3 px-4 pt-3 pb-3 border-b shrink-0">
                     <button type="button" id="quick-add-feature-close" aria-label="رجوع" class="w-9 h-9 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 text-base shrink-0">→</button>
                     <h3 class="text-sm font-bold text-slate-100">سجّل من بره التطبيق</h3>
                 </div>
-                <div class="flex-1 overflow-y-auto px-5 py-5">
+                <div class="modal-body-surface flex-1 overflow-y-auto px-5 py-5">
                     <div class="w-full max-w-md mx-auto">
                         <p class="text-[12px] text-slate-400 leading-relaxed mb-4">علّم نص فيه مصروف من أي تطبيق، أو استخدم اختصار سريع من الشاشة الرئيسية — من غير ما تفتح التطبيق أصلًا.</p>
 
@@ -2118,6 +2212,7 @@
                         </div>
                     </div>
                 </div>
+                </div>
             </div>
 
             <button type="button" id="bank-accounts-card" class="w-full bg-gradient-to-br from-emerald-500/10 to-teal-500/5 border border-emerald-500/25 rounded-3xl p-4 flex items-center gap-3 text-right">
@@ -2129,12 +2224,14 @@
                 <span class="bg-amber-500/15 text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded-full">جديد</span>
             </button>
 
-            <div id="bank-accounts-modal" class="fixed inset-0 z-50 hidden flex-col bg-slate-950 opacity-0 translate-y-2 transition-all duration-200 ease-out modal-gpu-layer">
-                <div class="flex items-center gap-3 px-4 pt-[calc(env(safe-area-inset-top)+16px)] pb-3 border-b border-slate-800 shrink-0">
+            <div id="bank-accounts-modal" class="modal-sheet-backdrop fixed inset-0 z-50 hidden flex-col items-center justify-end opacity-0 transition-opacity duration-[240ms] ease-out" aria-hidden="true">
+                <div class="modal-sheet-panel modal-screen-surface">
+                    <div class="modal-sheet-handle" aria-hidden="true"></div>
+                <div class="modal-header-surface flex items-center gap-3 px-4 pt-3 pb-3 border-b shrink-0">
                     <button type="button" id="bank-accounts-close" aria-label="رجوع" class="w-9 h-9 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 text-base shrink-0">→</button>
                     <h3 class="text-sm font-bold text-slate-100">البنوك والمحافظ</h3>
                 </div>
-                <div class="flex-1 overflow-y-auto px-5 py-5">
+                <div class="modal-body-surface flex-1 overflow-y-auto px-5 py-5">
                     <div class="w-full max-w-md mx-auto">
                         <p id="bank-accounts-status-line" class="text-[12px] text-slate-400 leading-relaxed mb-4">اربط بنكك أو محفظتك مرة واحدة، ودبّر يسجل مصاريفك من رسائل SMS تلقائيًا.</p>
 
@@ -2172,36 +2269,31 @@
                         <button type="button" id="bank-accounts-troubleshoot-open" class="w-full flex items-center justify-center gap-1.5 text-[11px] font-bold text-emerald-400 mt-4 py-2">
                             🛠️ مش شغال معايا؟
                         </button>
-                    </div>
+                                            </div>
+                </div>
                 </div>
             </div>
 
             <!-- ============ شاشة "مش شغال معايا؟" — دليل حل مشاكل ربط البنوك خطوة بخطوة ============ -->
-            <div id="bank-accounts-troubleshoot-modal" class="fixed inset-0 z-50 hidden flex-col bg-slate-950 opacity-0 translate-y-2 transition-all duration-200 ease-out modal-gpu-layer">
+            <div id="bank-accounts-troubleshoot-modal" class="modal-sheet-backdrop fixed inset-0 z-50 hidden flex-col items-center justify-end opacity-0 transition-opacity duration-[240ms] ease-out" aria-hidden="true">
+                <div class="modal-sheet-panel modal-screen-surface">
+                    <div class="modal-sheet-handle" aria-hidden="true"></div>
                 <div class="bg-glow-ts"></div>
-                <div class="flex items-center gap-3 px-4 pt-[calc(env(safe-area-inset-top)+16px)] pb-3 border-b border-slate-800 shrink-0 relative z-10">
+                <div class="modal-header-surface flex items-center gap-3 px-4 pt-3 pb-3 border-b shrink-0 relative z-10">
                     <button type="button" id="bank-accounts-troubleshoot-close" aria-label="رجوع" class="w-9 h-9 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 text-base shrink-0">→</button>
                     <h3 class="text-sm font-bold text-slate-100">البنوك والمحافظ</h3>
                 </div>
-                <div class="flex-1 overflow-y-auto px-5 py-5 relative z-10">
+                <div class="modal-body-surface flex-1 overflow-y-auto px-5 py-5 relative z-10">
                     <div class="w-full max-w-md mx-auto">
 
                         <div class="fade-up text-center mb-6" style="animation-delay:.02s">
                             <div class="ts-pulse w-16 h-16 mx-auto rounded-2xl flex items-center justify-center text-3xl mb-3" style="background:linear-gradient(135deg, rgba(16,185,129,.18), rgba(20,184,166,.08)); border:1px solid rgba(16,185,129,.3);">🛠️</div>
                             <h1 class="text-lg font-black mb-1 text-slate-100">مش شغال معايا؟</h1>
-                            <p class="text-[12.5px] text-slate-400 leading-relaxed px-4">اتبع الخطوات دي بالترتيب — كل خطوة هتتأكد إنها مظبوطة وبعدين تنتقل للي بعدها. غالبًا هتتحل من أول 3 خطوات.</p>
+                            <p class="text-[12.5px] text-slate-400 leading-relaxed px-4">افتح الخطوة اللي تخص مشكلتك. هتلاقي مكان الإعداد، السبب الشائع، والحل العملي في شكل مختصر.</p>
                         </div>
 
-                        <div class="fade-up bg-slate-900 border border-slate-800 rounded-2xl p-3.5 mb-5 flex items-center gap-3" style="animation-delay:.06s">
-                            <div class="flex-1">
-                                <div class="flex items-center justify-between mb-1.5">
-                                    <span class="text-[11px] font-bold text-slate-400">التقدم</span>
-                                    <span id="ts-progress-label" class="text-[11px] font-bold text-emerald-400">0 من 6</span>
-                                </div>
-                                <div class="h-2 rounded-full bg-slate-800 overflow-hidden">
-                                    <div id="ts-progress-fill" class="h-full rounded-full ts-progress-fill" style="width:0%"></div>
-                                </div>
-                            </div>
+                        <div class="text-center mb-5">
+                            <p class="text-[11px] text-slate-500">اختار خطوة واحدة وافتحها، وهتلاقي الحل مرتب في 3 أجزاء بسيطة.</p>
                         </div>
 
                         <div class="space-y-2.5" id="ts-steps-wrap"></div>
@@ -2231,6 +2323,7 @@
                         </div>
 
                     </div>
+                </div>
                 </div>
             </div>
 
@@ -2814,31 +2907,39 @@
             badge.classList.add('flex');
         }
 
-        // ============ فتح/قفل شاشة كاملة (بدل Bottom Sheet) — نفس فكرة Navigation، بس بمجرد إظهار/إخفاء + انتقال بسيط ============
-        function openFullPage(modal) {
+        // ============ فتح/قفل Bottom Sheet — خلفية ضبابية ولوحة مدمجة ============
+        function openBottomSheet(modal) {
             if (!modal) return;
+            modal._previousFocus = document.activeElement;
             modal.classList.remove('hidden');
             modal.classList.add('flex');
+            modal.setAttribute('aria-hidden', 'false');
+            modal.setAttribute('role', 'dialog');
+            modal.setAttribute('aria-modal', 'true');
             document.body.style.overflow = 'hidden';
-            // نأجل شيل الـ opacity/translate لفريم تاني عشان الترانزيشن يشتغل فعليًا
             requestAnimationFrame(() => {
                 requestAnimationFrame(() => {
                     modal.classList.remove('opacity-0', 'translate-y-2');
+                    modal.querySelector('button, [href], input, select, textarea')?.focus({ preventScroll: true });
                 });
             });
-            const onKey = (e) => { if (e.key === 'Escape') closeFullPage(modal); };
+            const onKey = (e) => { if (e.key === 'Escape') closeBottomSheet(modal); };
             modal._escHandler = onKey;
             document.addEventListener('keydown', onKey);
         }
-        function closeFullPage(modal) {
+        function closeBottomSheet(modal) {
             if (!modal) return;
             modal.classList.add('opacity-0', 'translate-y-2');
+            modal.setAttribute('aria-hidden', 'true');
+            modal.removeAttribute('aria-modal');
             document.body.style.overflow = '';
             if (modal._escHandler) { document.removeEventListener('keydown', modal._escHandler); modal._escHandler = null; }
             setTimeout(() => {
                 modal.classList.add('hidden');
                 modal.classList.remove('flex');
-            }, 200);
+                modal._previousFocus?.focus?.({ preventScroll: true });
+                modal._previousFocus = null;
+            }, 240);
         }
 
         (function setupQuickAddFeatureCard() {
@@ -2870,8 +2971,11 @@
                 tabIos.classList.toggle('border-slate-700', isAndroid);
                 tabIos.classList.toggle('text-slate-400', isAndroid);
             }
-            card.addEventListener('click', () => openFullPage(modal));
-            closeBtn?.addEventListener('click', () => closeFullPage(modal));
+            card.addEventListener('click', () => openBottomSheet(modal));
+            closeBtn?.addEventListener('click', () => closeBottomSheet(modal));
+            modal.addEventListener('click', (event) => {
+                if (event.target === modal) closeBottomSheet(modal);
+            });
             tabAndroid?.addEventListener('click', () => setTab('android'));
             tabIos?.addEventListener('click', () => setTab('ios'));
         })();
@@ -2933,10 +3037,13 @@
             }
 
             card.addEventListener('click', () => {
-                openFullPage(modal);
+                openBottomSheet(modal);
                 loadBankAccounts();
             });
-            closeBtn?.addEventListener('click', () => closeFullPage(modal));
+            closeBtn?.addEventListener('click', () => closeBottomSheet(modal));
+            modal.addEventListener('click', (event) => {
+                if (event.target === modal) closeBottomSheet(modal);
+            });
 
             toggleBtn?.addEventListener('click', async () => {
                 const next = !bankState.enabled;
@@ -2970,61 +3077,61 @@
                     icon: '📦',
                     title: 'الماكرو اتحفظ فعلًا؟',
                     subtitle: 'أول حاجة نتأكد إنه ظاهر في القائمة',
-                    body: `
-                        <div class="space-y-2 text-[12.5px] leading-relaxed text-slate-300">
-                            <p>افتح MacroDroid → تبويب "Macros" تحت.</p>
-                            <p>لازم تلاقي ماكرو اسمه <b class="text-slate-100">"SMS تلقائي - دبّر استيراد"</b> ظاهر في القائمة، وجنبه toggle لونه أخضر (مفعّل).</p>
-                            <p class="text-amber-500">لو مش ظاهر خالص: افتح ملف الإعداد تاني من دبّر، ولما تفتح شاشة التفاصيل (Triggers/Actions/Constraints)، دوس على الزرار الدائري الأبيض ✚ تحت — لو ظهرت شاشة اشتراك MacroDroid دوس ✕ عليها تقفلها. كده الماكرو هيتحفظ.</p>
-                        </div>`
+                    rows: [
+                        ['where', 'افتح MacroDroid → تبويب "Macros" تحت. لازم تلاقي ماكرو اسمه <b>"SMS تلقائي - دبّر استيراد"</b> وجنبه toggle أخضر.'],
+                        ['cause', 'الماكرو ممكن يكون اتفتح للاستيراد بس ما اتحفظش في القائمة، أو يكون الـ toggle بتاعه مقفول.'],
+                        ['fix', 'لو مش ظاهر: افتح ملف الإعداد من دبّر تاني، ومن شاشة التفاصيل دوس على ✚ الدائري تحت، واقفل شاشة الاشتراك لو ظهرت.']
+                    ]
                 },
                 {
                     icon: '🔒',
                     title: 'صلاحية قراءة الرسائل',
                     subtitle: 'الأندرويد لازم يكون سامحلها دايمًا',
-                    body: `
-                        <div class="space-y-2 text-[12.5px] leading-relaxed text-slate-300">
-                            <p>إعدادات الجهاز → التطبيقات → MacroDroid → Permissions.</p>
-                            <p>لازم تلاقي <b class="text-slate-100">SMS</b> مكتوب جنبها، مش "مرفوض" أو "اسأل كل مرة".</p>
-                        </div>`
+                    rows: [
+                        ['where', 'إعدادات الجهاز → التطبيقات → MacroDroid → Permissions.'],
+                        ['cause', 'الصلاحية ممكن تكون اترفضت وقت التفعيل أو اتسحبت تلقائيًا بعد فترة.'],
+                        ['fix', 'فعّل صلاحية <b>SMS</b> واختار السماح الدائم، مش "مرفوض" أو "اسأل كل مرة".']
+                    ]
                 },
                 {
                     icon: '🧹',
                     title: 'إزالة الصلاحيات التلقائية مطفية؟',
                     subtitle: 'خاصية بتسحب صلاحية SMS لوحدها',
-                    body: `
-                        <div class="space-y-2 text-[12.5px] leading-relaxed text-slate-300">
-                            <p>في نفس صفحة MacroDroid → App info، دور على خيار <b class="text-slate-100">"Remove permissions if app is unused"</b>.</p>
-                            <p>لازم يكون <b class="text-slate-100">مطفي (Off)</b> — لو شغال، الأندرويد بيسحب صلاحية القراءة لوحده بعد فترة من غير ما تلاحظ.</p>
-                        </div>`
+                    rows: [
+                        ['where', 'MacroDroid → App info → خيار <b>"Remove permissions if app is unused"</b>.'],
+                        ['cause', 'أندرويد بيسحب صلاحية SMS تلقائيًا لو شايف التطبيق مش مستخدم لفترة.'],
+                        ['fix', 'اتأكد إن الخيار مطفي (Off).']
+                    ]
                 },
                 {
                     icon: '🔋',
                     title: 'إعدادات البطارية',
                     subtitle: 'أشهر سبب لتوقف الاستقبال في الخلفية',
-                    body: `
-                        <div class="space-y-2 text-[12.5px] leading-relaxed text-slate-300">
-                            <p>إعدادات الجهاز → البطارية → MacroDroid → اختار <b class="text-slate-100">"بدون قيود" (Unrestricted)</b>.</p>
-                            <p>لو عندك سامسونج، فيه مكان تاني منفصل: <b class="text-slate-100">العناية بالجهاز والبطارية → البطارية → التطبيقات اللي معدلش استخدامها في الخلفية</b> — تأكد MacroDroid مش موجود في القايمة دي، ولو موجود امسحه منها.</p>
-                        </div>`
+                    rows: [
+                        ['where', 'إعدادات الجهاز → البطارية → MacroDroid، وعلى سامسونج: العناية بالجهاز والبطارية → البطارية.'],
+                        ['cause', 'توفير الطاقة بيجمّد التطبيقات في الخلفية، وده بيوقف استقبال الرسائل.'],
+                        ['fix', 'اختار <b>بدون قيود (Unrestricted)</b>، وشيل MacroDroid من قائمة التطبيقات غير النشطة لو موجود.']
+                    ]
                 },
                 {
                     icon: '⚡',
                     title: 'الاستقبال مفعّل جوه دبّر؟',
                     subtitle: 'الخطوة الأخيرة اللي بتوصل الطرفين ببعض',
-                    body: `
-                        <div class="space-y-2 text-[12.5px] leading-relaxed text-slate-300">
-                            <p>ارجع لكارت "البنوك والمحافظ" في دبّر، وتأكد إن <b class="text-slate-100">"تفعيل الاستقبال التلقائي"</b> شغال (أخضر).</p>
-                        </div>`
+                    rows: [
+                        ['where', 'كارت "البنوك والمحافظ" في دبّر → توجل "تفعيل الاستقبال التلقائي".'],
+                        ['cause', 'كل إعدادات MacroDroid ممكن تكون سليمة، لكن الاستقبال نفسه متوقف من داخل دبّر.'],
+                        ['fix', 'شغّل التوجل وخليه أخضر، وبعدها ابعت رسالة SMS تجريبية حقيقية.']
+                    ]
                 },
                 {
                     icon: '✉️',
                     title: 'بتختبر برسالة حقيقية؟',
                     subtitle: 'الفرق بين SMS وإشعارات التطبيقات',
-                    body: `
-                        <div class="space-y-2 text-[12.5px] leading-relaxed text-slate-300">
-                            <p>الماكرو بيمسك <b class="text-slate-100">رسائل SMS تقليدية بس</b> — مش إشعارات واتساب أو تليجرام أو RCS.</p>
-                            <p>جرّب تبعتلك رسالة SMS عادية من رقم تاني (مش من دبّر) وشوف هل بتوصل دبّر ولا لأ.</p>
-                        </div>`
+                    rows: [
+                        ['where', 'جرّب رسالة SMS عادية من رقم تاني، مش إشعار واتساب أو تليجرام.'],
+                        ['cause', 'الماكرو بيمسك SMS تقليدية بس؛ إشعارات التطبيقات وRCS مش بتظهر له كرسالة SMS خام.'],
+                        ['fix', 'لو البنك بيبعت RCS، استخدم "سجّل مصروفك من بره التطبيق" يدويًا بالنسخ واللصق.']
+                    ]
                 }
             ];
 
@@ -3036,11 +3143,15 @@
                     const card = document.createElement('div');
                     card.className = 'ts-step-card fade-up bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden';
                     card.style.animationDelay = `${0.1 + i * 0.06}s`;
+                    const rowLabels = { where: '📍 فين تدور', cause: '❓ السبب', fix: '✅ الحل' };
+                    const rowsHtml = s.rows.map(([type, text]) => `
+                        <div class="ts-row">
+                            <span class="ts-row-tag ${type}">${rowLabels[type]}</span>
+                            <span class="ts-row-text">${text}</span>
+                        </div>
+                    `).join('');
                     card.innerHTML = `
                         <div class="ts-step-head flex items-center gap-3 p-3.5 cursor-pointer select-none">
-                            <button class="ts-check-circle w-6 h-6 rounded-full border-2 border-slate-600 flex items-center justify-center shrink-0" data-ts-check aria-label="علّم كخطوة متأكد منها">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                            </button>
                             <span class="w-8 h-8 rounded-xl bg-slate-950/60 border border-slate-800 flex items-center justify-center text-[15px] shrink-0">${s.icon}</span>
                             <div class="flex-1 min-w-0">
                                 <p class="text-[13px] font-bold text-slate-100">${i + 1}. ${s.title}</p>
@@ -3048,23 +3159,13 @@
                             </div>
                             <span class="ts-chev text-[11px] text-slate-500">▾</span>
                         </div>
-                        <div class="ts-panel px-3.5">${s.body}</div>
+                        <div class="ts-panel px-3.5 pb-3.5">${rowsHtml}</div>
                     `;
                     stepsWrap.appendChild(card);
 
                     const head = card.querySelector('.ts-step-head');
-                    const checkBtn = card.querySelector('[data-ts-check]');
-
-                    head.addEventListener('click', (e) => {
-                        if (e.target.closest('[data-ts-check]')) return;
+                    head.addEventListener('click', () => {
                         card.classList.toggle('is-open');
-                    });
-
-                    checkBtn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        checkBtn.classList.toggle('checked');
-                        card.classList.toggle('is-done', checkBtn.classList.contains('checked'));
-                        updateProgress();
                     });
                 });
             }
@@ -3136,9 +3237,12 @@
             openBtn.addEventListener('click', () => {
                 renderSteps();
                 resetSupportUI();
-                openFullPage(modal);
+                openBottomSheet(modal);
             });
-            closeBtn?.addEventListener('click', () => closeFullPage(modal));
+            closeBtn?.addEventListener('click', () => closeBottomSheet(modal));
+            modal.addEventListener('click', (event) => {
+                if (event.target === modal) closeBottomSheet(modal);
+            });
         })();
 
         document.getElementById('account-theme-toggle').addEventListener('click', () => {

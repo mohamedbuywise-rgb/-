@@ -10,19 +10,14 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  /* ============ إصلاح شريط أبيض بيبان على الشمال/اليمين في بعض المتصفحات ============ */
-  /* السبب: width:100% بتتحسب على عرض الـ containing block مش عرض الشاشة الفعلي، فلو حصل */
-  /* أي overflow بسيط (زي سكرول بار أو تقريب نقاط عشري) بيسيب شريط أبيض من خلفية المتصفح الافتراضية. */
-  /* الحل: نثبت الخلفية على html نفسه (مش بس body)، ونستخدم 100vw/100dvw صريحة بدل ما نعتمد على 100%. */
-  html { background: #06231F; overflow-x: hidden; width: 100%; }
-  html, body { height: 100%; width: 100%; max-width: 100vw; }
+  html, body { height: 100%; width: 100%; }
   body {
-    margin: 0; min-height: 100vh; min-height: 100dvh; width: 100%; max-width: 100vw; font-family: -apple-system, "Segoe UI", Tahoma, Arial, sans-serif;
+    margin: 0; min-height: 100vh; width: 100%; font-family: -apple-system, "Segoe UI", Tahoma, Arial, sans-serif;
     color: #fff; display: flex; align-items: center; justify-content: center; padding: 20px;
     position: relative; overflow-x: hidden; overflow-y: auto;
   }
   /* ============ خلفية بهوية دبّر (أخضر غامق + توهج كهرماني) بدل الشكل العام لمساعدي الذكاء الاصطناعي ============ */
-  .bg-layer { position: fixed; top: 0; right: 0; bottom: 0; left: 0; width: 100vw; height: 100vh; height: 100dvh; z-index: 0; overflow: hidden; background: #06231F; }
+  .bg-layer { position: fixed; inset: 0; z-index: 0; overflow: hidden; background: #06231F; }
   .bg-layer::before {
     content: ""; position: absolute; inset: 0;
     background: radial-gradient(120% 90% at 50% 120%, #0E655B 0%, #0A423B 45%, #06231F 75%);
@@ -244,11 +239,7 @@
         signal: controller.signal,
       });
       const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        const err = new Error(data.error || 'حصل خطأ، جرب تاني.');
-        err.duplicate = Boolean(data.duplicate);
-        throw err;
-      }
+      if (!res.ok) throw new Error(data.error || 'حصل خطأ، جرب تاني.');
       return data;
     } finally {
       clearTimeout(timeout);
@@ -311,35 +302,19 @@
     }
   }
 
-  async function confirmDraft(forceDuplicate) {
+  async function confirmDraft() {
     const btn = $('confirm-btn');
     btn.disabled = true;
     $('status').textContent = 'جاري الحفظ...';
     try {
-      const payload = forceDuplicate ? { drafts: drafts.map((d) => ({ ...d, allowDuplicate: true })) } : { drafts };
-      const result = await callAssistant('entry_confirm', payload);
+      const result = await callAssistant('entry_confirm', { drafts });
       show('draft-view', false);
       $('success-text').textContent = result.message || 'تم التسجيل بنجاح';
       show('success-view', true);
       show('open-app-btn', true);
       $('status').textContent = '';
     } catch (e) {
-      if (e.duplicate) {
-        // ============ تكرار محتمل: نوضح للمستخدم ونديله اختيار "أكد برضو" بدل منعه خالص ============
-        $('status').innerHTML = '';
-        const wrap = document.createElement('div');
-        wrap.style.cssText = 'font-size:12px;line-height:1.6;';
-        wrap.textContent = e.message;
-        const confirmAnywayBtn = document.createElement('button');
-        confirmAnywayBtn.textContent = 'سجّل برضو';
-        confirmAnywayBtn.className = 'btn-secondary';
-        confirmAnywayBtn.style.marginTop = '8px';
-        confirmAnywayBtn.addEventListener('click', () => confirmDraft(true));
-        $('status').appendChild(wrap);
-        $('status').appendChild(confirmAnywayBtn);
-      } else {
-        $('status').textContent = e.message || 'تعذر الحفظ، جرب تاني.';
-      }
+      $('status').textContent = e.message || 'تعذر الحفظ، جرب تاني.';
       btn.disabled = false;
     }
   }

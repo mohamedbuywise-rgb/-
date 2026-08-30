@@ -9,6 +9,7 @@ import pushHandler from '../backend/api-handlers/push.js';
 import reportsHandler from '../backend/api-handlers/reports.js';
 import setupHandler from '../backend/api-handlers/setup.js';
 import smsWebhookHandler from '../backend/api-handlers/sms-webhook.js';
+import supportMessageHandler from '../backend/api-handlers/support-message.js';
 import telegramWebhookHandler from '../backend/api-handlers/telegram-webhook.js';
 import trialSummaryProofHandler from '../backend/api-handlers/trial-summary-proof.js';
 import trialSummaryHandler from '../backend/api-handlers/trial-summary.js';
@@ -25,6 +26,7 @@ const handlers = {
   reports: reportsHandler,
   setup: setupHandler,
   'sms-webhook': smsWebhookHandler,
+  'support-message': supportMessageHandler,
   'telegram-webhook': telegramWebhookHandler,
   'trial-summary-proof': trialSummaryProofHandler,
   'trial-summary': trialSummaryHandler,

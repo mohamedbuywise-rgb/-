@@ -41,6 +41,32 @@
         @keyframes fadeUp { from { opacity: 0; transform: translateY(6px);} to { opacity: 1; transform: translateY(0);} }
         .fade-up { animation: fadeUp .35s ease both; }
 
+        /* ============ شاشة "مش شغال معايا؟" (البنوك والمحافظ) — glow خفيف + نبضة الأيقونة الرئيسية ============ */
+        .bg-glow-ts { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+        .bg-glow-ts::before { content: ''; position: absolute; top: -10%; right: -10%; width: 60vw; height: 60vw; max-width: 420px; max-height: 420px; background: radial-gradient(circle, rgba(16,185,129,.16), transparent 70%); }
+        .bg-glow-ts::after { content: ''; position: absolute; bottom: -15%; left: -15%; width: 60vw; height: 60vw; max-width: 380px; max-height: 380px; background: radial-gradient(circle, rgba(20,184,166,.12), transparent 70%); }
+        html[data-theme="light"] .bg-glow-ts::before { background: radial-gradient(circle, rgba(16,185,129,.12), transparent 70%); }
+        html[data-theme="light"] .bg-glow-ts::after { background: radial-gradient(circle, rgba(20,184,166,.08), transparent 70%); }
+
+        @keyframes tsPulseRing { 0% { box-shadow: 0 0 0 0 rgba(16,185,129,.45); } 70% { box-shadow: 0 0 0 10px rgba(16,185,129,0); } 100% { box-shadow: 0 0 0 0 rgba(16,185,129,0); } }
+        .ts-pulse { animation: tsPulseRing 2.2s ease-out infinite; }
+
+        .ts-step-card { transition: border-color .25s ease, background .25s ease; }
+        .ts-step-card.is-done { border-color: rgba(16,185,129,.5) !important; background: rgba(16,185,129,.06) !important; }
+        html[data-theme="light"] .ts-step-card.is-done { background: rgba(16,185,129,.05) !important; }
+
+        .ts-chev { transition: transform .25s ease; }
+        .ts-step-card.is-open .ts-chev { transform: rotate(180deg); }
+        .ts-panel { max-height: 0; overflow: hidden; transition: max-height .35s ease, opacity .3s ease, margin .3s ease; opacity: 0; }
+        .ts-step-card.is-open .ts-panel { opacity: 1; margin-top: .75rem; }
+
+        .ts-check-circle { transition: background .2s ease, border-color .2s ease, transform .15s ease; }
+        .ts-check-circle.checked { background: #10b981; border-color: #10b981; transform: scale(1.05); }
+        .ts-check-circle.checked svg { opacity: 1; transform: scale(1); }
+        .ts-check-circle svg { opacity: 0; transform: scale(.5); transition: opacity .15s ease, transform .15s ease; }
+
+        .ts-progress-fill { transition: width .5s cubic-bezier(.16,.84,.44,1); background: linear-gradient(90deg,#10b981,#14b8a6); }
+
         /* عمود يوم في شارت "توزيع الصرف حسب أيام الأسبوع" — بيضغط عليه ويطلعله لمعة + يظهر عدد العمليات */
         .weekday-bar { position: relative; overflow: hidden; cursor: pointer; }
         .weekday-bar::after {
@@ -2041,39 +2067,41 @@
                 <span class="text-slate-500 text-sm">‹</span>
             </button>
 
-            <div id="quick-add-feature-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-end justify-center z-50 p-0">
-                <div class="w-full max-w-md bg-slate-900 border-t border-slate-800 rounded-t-3xl p-5 max-h-[85vh] overflow-y-auto">
-                    <div class="flex items-center justify-between mb-3">
-                        <h3 class="text-sm font-bold text-slate-100">سجّل من بره التطبيق</h3>
-                        <button type="button" id="quick-add-feature-close" aria-label="اقفل" class="w-7 h-7 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-sm">✕</button>
-                    </div>
-                    <p class="text-[12px] text-slate-400 leading-relaxed mb-4">علّم نص فيه مصروف من أي تطبيق، أو استخدم اختصار سريع من الشاشة الرئيسية — من غير ما تفتح التطبيق أصلًا.</p>
+            <div id="quick-add-feature-modal" class="fixed inset-0 z-50 hidden flex-col bg-slate-950 opacity-0 translate-y-2 transition-all duration-200 ease-out">
+                <div class="flex items-center gap-3 px-4 pt-[calc(env(safe-area-inset-top)+16px)] pb-3 border-b border-slate-800 shrink-0">
+                    <button type="button" id="quick-add-feature-close" aria-label="رجوع" class="w-9 h-9 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 text-base shrink-0">→</button>
+                    <h3 class="text-sm font-bold text-slate-100">سجّل من بره التطبيق</h3>
+                </div>
+                <div class="flex-1 overflow-y-auto px-5 py-5">
+                    <div class="w-full max-w-md mx-auto">
+                        <p class="text-[12px] text-slate-400 leading-relaxed mb-4">علّم نص فيه مصروف من أي تطبيق، أو استخدم اختصار سريع من الشاشة الرئيسية — من غير ما تفتح التطبيق أصلًا.</p>
 
-                    <div class="flex gap-2 mb-4">
-                        <button type="button" id="quick-add-tab-android" class="flex-1 text-xs font-bold py-2 rounded-xl border border-emerald-500/40 bg-emerald-500/15 text-emerald-400">أندرويد</button>
-                        <button type="button" id="quick-add-tab-ios" class="flex-1 text-xs font-bold py-2 rounded-xl border border-slate-700 text-slate-400">آيفون</button>
-                    </div>
+                        <div class="flex gap-2 mb-4">
+                            <button type="button" id="quick-add-tab-android" class="flex-1 text-xs font-bold py-2 rounded-xl border border-emerald-500/40 bg-emerald-500/15 text-emerald-400">أندرويد</button>
+                            <button type="button" id="quick-add-tab-ios" class="flex-1 text-xs font-bold py-2 rounded-xl border border-slate-700 text-slate-400">آيفون</button>
+                        </div>
 
-                    <div id="quick-add-steps-android" class="space-y-1">
-                        <p class="text-[11px] font-bold text-emerald-400 mb-1">الطريقة الأولى: مشاركة نص</p>
-                        <div class="flex items-center gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">1</span><span class="text-[12px] text-slate-300">علّم أي نص فيه مصروف في أي تطبيق</span></div>
-                        <div class="flex items-center gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">2</span><span class="text-[12px] text-slate-300">دوس زرار مشاركة (Share)</span></div>
-                        <div class="flex items-center gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">3</span><span class="text-[12px] text-slate-300">اختار دبّر من القائمة</span></div>
-                        <div class="flex items-center gap-2.5 py-2"><span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">4</span><span class="text-[12px] text-slate-300">راجع وأكد — يتسجل فورًا</span></div>
+                        <div id="quick-add-steps-android" class="space-y-1">
+                            <p class="text-[11px] font-bold text-emerald-400 mb-1">الطريقة الأولى: مشاركة نص</p>
+                            <div class="flex items-center gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">1</span><span class="text-[12px] text-slate-300">علّم أي نص فيه مصروف في أي تطبيق</span></div>
+                            <div class="flex items-center gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">2</span><span class="text-[12px] text-slate-300">دوس زرار مشاركة (Share)</span></div>
+                            <div class="flex items-center gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">3</span><span class="text-[12px] text-slate-300">اختار دبّر من القائمة</span></div>
+                            <div class="flex items-center gap-2.5 py-2"><span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">4</span><span class="text-[12px] text-slate-300">راجع وأكد — يتسجل فورًا</span></div>
 
-                        <p class="text-[11px] font-bold text-emerald-400 mt-4 mb-1">الطريقة الثانية: اختصار من الشاشة الرئيسية</p>
-                        <div class="flex items-center gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">1</span><span class="text-[12px] text-slate-300">اضغط مطولًا على أيقونة دبّر</span></div>
-                        <div class="flex items-center gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">2</span><span class="text-[12px] text-slate-300">اختار "إدخال سريع" من القائمة اللي تظهر</span></div>
-                        <div class="flex items-center gap-2.5 py-2"><span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">3</span><span class="text-[12px] text-slate-300">اكتب مصروفك — يتسجل فورًا من غير ما تفتح التطبيق</span></div>
-                        <p class="text-[10px] text-slate-500 mt-2">شغالة على أغلب أجهزة أندرويد الحديثة، وبتحتاج دبّر يكون مثبّت على الشاشة الرئيسية.</p>
-                    </div>
+                            <p class="text-[11px] font-bold text-emerald-400 mt-4 mb-1">الطريقة الثانية: اختصار من الشاشة الرئيسية</p>
+                            <div class="flex items-center gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">1</span><span class="text-[12px] text-slate-300">اضغط مطولًا على أيقونة دبّر</span></div>
+                            <div class="flex items-center gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">2</span><span class="text-[12px] text-slate-300">اختار "إدخال سريع" من القائمة اللي تظهر</span></div>
+                            <div class="flex items-center gap-2.5 py-2"><span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">3</span><span class="text-[12px] text-slate-300">اكتب مصروفك — يتسجل فورًا من غير ما تفتح التطبيق</span></div>
+                            <p class="text-[10px] text-slate-500 mt-2">شغالة على أغلب أجهزة أندرويد الحديثة، وبتحتاج دبّر يكون مثبّت على الشاشة الرئيسية.</p>
+                        </div>
 
-                    <div id="quick-add-steps-ios" class="hidden space-y-1">
-                        <div class="flex items-center gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">1</span><span class="text-[12px] text-slate-300">دوس زرار "ثبّت اختصار آيفون" تحت</span></div>
-                        <div class="flex items-center gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">2</span><span class="text-[12px] text-slate-300">دوس Add Shortcut في الرسالة اللي هتظهر</span></div>
-                        <div class="flex items-center gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">3</span><span class="text-[12px] text-slate-300">استخدمه من الشاشة الرئيسية أو بـ Siri</span></div>
-                        <div class="flex items-center gap-2.5 py-2"><span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">4</span><span class="text-[12px] text-slate-300">اكتب أو قول مصروفك — يتسجل فورًا</span></div>
-                        <a href="#" id="quick-add-ios-install-link" target="_blank" rel="noopener" class="mt-3 w-full flex items-center justify-center gap-2 bg-emerald-500 text-slate-950 font-black text-[12px] py-2.5 rounded-xl">⬇️ ثبّت اختصار آيفون</a>
+                        <div id="quick-add-steps-ios" class="hidden space-y-1">
+                            <div class="flex items-center gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">1</span><span class="text-[12px] text-slate-300">دوس زرار "ثبّت اختصار آيفون" تحت</span></div>
+                            <div class="flex items-center gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">2</span><span class="text-[12px] text-slate-300">دوس Add Shortcut في الرسالة اللي هتظهر</span></div>
+                            <div class="flex items-center gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">3</span><span class="text-[12px] text-slate-300">استخدمه من الشاشة الرئيسية أو بـ Siri</span></div>
+                            <div class="flex items-center gap-2.5 py-2"><span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">4</span><span class="text-[12px] text-slate-300">اكتب أو قول مصروفك — يتسجل فورًا</span></div>
+                            <a href="#" id="quick-add-ios-install-link" target="_blank" rel="noopener" class="mt-3 w-full flex items-center justify-center gap-2 bg-emerald-500 text-slate-950 font-black text-[12px] py-2.5 rounded-xl">⬇️ ثبّت اختصار آيفون</a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -2087,74 +2115,107 @@
                 <span class="bg-amber-500/15 text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded-full">جديد</span>
             </button>
 
-            <div id="bank-accounts-modal" class="hidden w-full bg-slate-950/60 border border-slate-800 rounded-3xl p-4 mt-2">
-                <div class="w-full">
-                    <div class="flex items-center justify-between mb-3">
-                        <h3 class="text-sm font-bold text-slate-100">البنوك والمحافظ</h3>
-                        <button type="button" id="bank-accounts-close" aria-label="اقفل" class="w-7 h-7 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-sm">✕</button>
-                    </div>
+            <div id="bank-accounts-modal" class="fixed inset-0 z-50 hidden flex-col bg-slate-950 opacity-0 translate-y-2 transition-all duration-200 ease-out">
+                <div class="flex items-center gap-3 px-4 pt-[calc(env(safe-area-inset-top)+16px)] pb-3 border-b border-slate-800 shrink-0">
+                    <button type="button" id="bank-accounts-close" aria-label="رجوع" class="w-9 h-9 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 text-base shrink-0">→</button>
+                    <h3 class="text-sm font-bold text-slate-100">البنوك والمحافظ</h3>
+                </div>
+                <div class="flex-1 overflow-y-auto px-5 py-5">
+                    <div class="w-full max-w-md mx-auto">
+                        <p id="bank-accounts-status-line" class="text-[12px] text-slate-400 leading-relaxed mb-4">اربط بنكك أو محفظتك مرة واحدة، ودبّر يسجل مصاريفك من رسائل SMS تلقائيًا.</p>
 
-                    <p id="bank-accounts-status-line" class="text-[12px] text-slate-400 leading-relaxed mb-4">اربط بنكك أو محفظتك مرة واحدة، ودبّر يسجل مصاريفك من رسائل SMS تلقائيًا.</p>
-
-                    <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-3 mb-4">
-                        <p class="text-[11px] font-bold text-emerald-400 mb-2">مدعومة حاليًا</p>
-                        <div id="bank-accounts-supported-list" class="flex flex-wrap gap-1.5"></div>
-                    </div>
-
-                    <p class="text-[11px] font-bold text-emerald-400 mb-2">هيحصل إيه بالظبط لما تدوس "ابدأ الربط"</p>
-                    <div class="space-y-1 mb-4">
-                        <div class="flex items-start gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">1</span><span class="text-[12px] text-slate-300">هتحمّل تطبيق MacroDroid من Google Play (مجاني، لو مش عندك)</span></div>
-                        <div class="flex items-start gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">2</span><span class="text-[12px] text-slate-300">دبّر هيحمّلك ملف إعداد جاهز فيه توكنك الخاص جوّه — هيظهر إشعار تحميل</span></div>
-                        <div class="flex items-start gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">3</span><span class="text-[12px] text-slate-300">افتح الإشعار → لو ظهرلك اختيار "فتح باستخدام"، اختار MacroDroid (لو فتح المتصفح ملف نصي بدل كده، روح على مجلد "Downloads" في تطبيق الملفات، دوس مطولًا على الملف، واختار Open with MacroDroid)</span></div>
-                        <div class="flex items-start gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">4</span><span class="text-[12px] text-slate-300">MacroDroid هيفتح تلقائي على شاشة فيها اسم الـ Macro وتفاصيله (Triggers / Actions / Constraints) — ده معناه إنه اتحمّل صح، بس لسه محتاج يتحفظ</span></div>
-                        <div class="flex items-start gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">5</span><span class="text-[12px] text-slate-300">دوس على الزرار الدائري الأبيض ✚ تحت في الشاشة — هيفضل شوية (ممكن تظهر شاشة اشتراك MacroDroid المدفوع، مش مشكلة) دوس ✕ عشان تقفلها</span></div>
-                        <div class="flex items-start gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">6</span><span class="text-[12px] text-slate-300">دلوقتي الماكرو اتحفظ فعلًا — لو رجعت لقائمة "Macros" هتلاقيه ظاهر وفيه toggle شغال جنبه</span></div>
-                        <div class="flex items-start gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">7</span><span class="text-[12px] text-slate-300">هيطلب منك صلاحية "قراءة الرسائل" → دوس السماح</span></div>
-                        <div class="flex items-start gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">8</span><span class="text-[12px] text-slate-300">ارجع لدبّر ودوس "تفعيل الاستقبال" تحت</span></div>
-                        <div class="flex items-start gap-2.5 py-2"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">9</span><span class="text-[12px] text-slate-300">من ساعتها، أي SMS بنكي حقيقي يوصلك، بيتسجل في دبّر تلقائي</span></div>
-                    </div>
-
-                    <div class="flex items-center justify-between bg-slate-950/60 border border-slate-800 rounded-2xl p-3.5 mb-3">
-                        <div>
-                            <p class="text-xs font-bold text-slate-200">تفعيل الاستقبال التلقائي</p>
-                            <p class="text-[11px] text-slate-400" id="bank-accounts-enabled-label">متوقف</p>
+                        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3 mb-4">
+                            <p class="text-[11px] font-bold text-emerald-400 mb-2">مدعومة حاليًا</p>
+                            <div id="bank-accounts-supported-list" class="flex flex-wrap gap-1.5"></div>
                         </div>
-                        <button type="button" id="bank-accounts-toggle" class="w-11 h-6 rounded-full bg-slate-700 relative transition" aria-label="تفعيل الاستقبال التلقائي">
-                            <span id="bank-accounts-toggle-dot" class="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-white transition-transform"></span>
+
+                        <p class="text-[11px] font-bold text-emerald-400 mb-2">هيحصل إيه بالظبط لما تدوس "ابدأ الربط"</p>
+                        <div class="space-y-1 mb-4">
+                            <div class="flex items-start gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">1</span><span class="text-[12px] text-slate-300">هتحمّل تطبيق MacroDroid من Google Play (مجاني، لو مش عندك)</span></div>
+                            <div class="flex items-start gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">2</span><span class="text-[12px] text-slate-300">دبّر هيحمّلك ملف إعداد جاهز فيه توكنك الخاص جوّه — هيظهر إشعار تحميل</span></div>
+                            <div class="flex items-start gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">3</span><span class="text-[12px] text-slate-300">افتح الإشعار → لو ظهرلك اختيار "فتح باستخدام"، اختار MacroDroid (لو فتح المتصفح ملف نصي بدل كده، روح على مجلد "Downloads" في تطبيق الملفات، دوس مطولًا على الملف، واختار Open with MacroDroid)</span></div>
+                            <div class="flex items-start gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">4</span><span class="text-[12px] text-slate-300">MacroDroid هيفتح تلقائي على شاشة فيها اسم الـ Macro وزرار أزرق "Import" أو "Add" تحت — دوس عليه (مفيش أي تعديل مطلوب منك)</span></div>
+                            <div class="flex items-start gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">5</span><span class="text-[12px] text-slate-300">هيطلب منك صلاحية "قراءة الرسائل" → دوس السماح</span></div>
+                            <div class="flex items-start gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">6</span><span class="text-[12px] text-slate-300">ارجع لدبّر ودوس "تفعيل الاستقبال" تحت</span></div>
+                            <div class="flex items-start gap-2.5 py-2"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">7</span><span class="text-[12px] text-slate-300">من ساعتها، أي SMS بنكي حقيقي يوصلك، بيتسجل في دبّر تلقائي</span></div>
+                        </div>
+
+                        <div class="flex items-center justify-between bg-slate-900 border border-slate-800 rounded-2xl p-3.5 mb-3">
+                            <div>
+                                <p class="text-xs font-bold text-slate-200">تفعيل الاستقبال التلقائي</p>
+                                <p class="text-[11px] text-slate-400" id="bank-accounts-enabled-label">متوقف</p>
+                            </div>
+                            <button type="button" id="bank-accounts-toggle" class="w-11 h-6 rounded-full bg-slate-700 relative transition" aria-label="تفعيل الاستقبال التلقائي">
+                                <span id="bank-accounts-toggle-dot" class="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-white transition-transform"></span>
+                            </button>
+                        </div>
+
+                        <a href="https://play.google.com/store/apps/details?id=com.arlosoft.macrodroid" target="_blank" rel="noopener" class="w-full flex items-center justify-center gap-2 bg-slate-800 border border-slate-700 text-slate-200 font-bold text-[12px] py-2.5 rounded-xl mb-2">1️⃣ حمّل MacroDroid</a>
+                        <a href="#" id="bank-accounts-download-config" target="_blank" rel="noopener" class="w-full flex items-center justify-center gap-2 bg-emerald-500 text-slate-950 font-black text-[12px] py-2.5 rounded-xl">⬇️ ابدأ الربط (حمّل ملف الإعداد)</a>
+
+                        <p class="text-[10px] text-slate-500 mt-3 leading-relaxed">قراءة الرسائل من MacroDroid مجانية بالكامل. ملف الإعداد بييجيلك فيه توكنك الخاص جاهز، مفيش تعديل مطلوب منك — ودبّر بيحدد بنكك/محفظتك تلقائي من اسم مرسل الرسالة.</p>
+
+                        <button type="button" id="bank-accounts-troubleshoot-open" class="w-full flex items-center justify-center gap-1.5 text-[11px] font-bold text-emerald-400 mt-4 py-2">
+                            🛠️ مش شغال معايا؟
                         </button>
                     </div>
+                </div>
+            </div>
 
-                    <a href="https://play.google.com/store/apps/details?id=com.arlosoft.macrodroid" target="_blank" rel="noopener" class="w-full flex items-center justify-center gap-2 bg-slate-800 border border-slate-700 text-slate-200 font-bold text-[12px] py-2.5 rounded-xl mb-2">1️⃣ حمّل MacroDroid</a>
-                    <a href="#" id="bank-accounts-download-config" target="_blank" rel="noopener" class="w-full flex items-center justify-center gap-2 bg-emerald-500 text-slate-950 font-black text-[12px] py-2.5 rounded-xl">⬇️ ابدأ الربط (حمّل ملف الإعداد)</a>
+            <!-- ============ شاشة "مش شغال معايا؟" — دليل حل مشاكل ربط البنوك خطوة بخطوة ============ -->
+            <div id="bank-accounts-troubleshoot-modal" class="fixed inset-0 z-50 hidden flex-col bg-slate-950 opacity-0 translate-y-2 transition-all duration-200 ease-out">
+                <div class="bg-glow-ts"></div>
+                <div class="flex items-center gap-3 px-4 pt-[calc(env(safe-area-inset-top)+16px)] pb-3 border-b border-slate-800 shrink-0 relative z-10">
+                    <button type="button" id="bank-accounts-troubleshoot-close" aria-label="رجوع" class="w-9 h-9 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-300 text-base shrink-0">→</button>
+                    <h3 class="text-sm font-bold text-slate-100">البنوك والمحافظ</h3>
+                </div>
+                <div class="flex-1 overflow-y-auto px-5 py-5 relative z-10">
+                    <div class="w-full max-w-md mx-auto">
 
-                    <p class="text-[10px] text-slate-500 mt-3 leading-relaxed">قراءة الرسائل من MacroDroid مجانية بالكامل. ملف الإعداد بييجيلك فيه توكنك الخاص جاهز، مفيش تعديل مطلوب منك — ودبّر بيحدد بنكك/محفظتك تلقائي من اسم مرسل الرسالة.</p>
+                        <div class="fade-up text-center mb-6" style="animation-delay:.02s">
+                            <div class="ts-pulse w-16 h-16 mx-auto rounded-2xl flex items-center justify-center text-3xl mb-3" style="background:linear-gradient(135deg, rgba(16,185,129,.18), rgba(20,184,166,.08)); border:1px solid rgba(16,185,129,.3);">🛠️</div>
+                            <h1 class="text-lg font-black mb-1 text-slate-100">مش شغال معايا؟</h1>
+                            <p class="text-[12.5px] text-slate-400 leading-relaxed px-4">اتبع الخطوات دي بالترتيب — كل خطوة هتتأكد إنها مظبوطة وبعدين تنتقل للي بعدها. غالبًا هتتحل من أول 3 خطوات.</p>
+                        </div>
 
-                    <button type="button" id="ts-toggle-btn" class="w-full flex items-center gap-2 mt-4 pt-3 border-t border-slate-800 text-right">
-                        <span class="w-7 h-7 shrink-0 rounded-lg bg-amber-500/15 border border-amber-500/25 flex items-center justify-center text-sm">🛠️</span>
-                        <span class="flex-1 text-[12px] font-bold text-slate-200">مش شغال معايا؟ اتبع خطوات الاستكشاف</span>
-                        <span id="ts-toggle-chev" class="text-[11px] text-slate-500 transition-transform">▾</span>
-                    </button>
-
-                    <div id="ts-panel" class="hidden mt-3">
-                        <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-3.5 mb-3 flex items-center gap-3">
+                        <div class="fade-up bg-slate-900 border border-slate-800 rounded-2xl p-3.5 mb-5 flex items-center gap-3" style="animation-delay:.06s">
                             <div class="flex-1">
                                 <div class="flex items-center justify-between mb-1.5">
                                     <span class="text-[11px] font-bold text-slate-400">التقدم</span>
                                     <span id="ts-progress-label" class="text-[11px] font-bold text-emerald-400">0 من 6</span>
                                 </div>
                                 <div class="h-2 rounded-full bg-slate-800 overflow-hidden">
-                                    <div id="ts-progress-fill" class="h-full rounded-full transition-all" style="width:0%; background: linear-gradient(90deg,#10b981,#14b8a6);"></div>
+                                    <div id="ts-progress-fill" class="h-full rounded-full ts-progress-fill" style="width:0%"></div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="space-y-2" id="ts-steps-wrap"></div>
+                        <div class="space-y-2.5" id="ts-steps-wrap"></div>
 
-                        <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-3.5 mt-3 text-center">
-                            <p class="text-[12px] font-bold text-slate-200 mb-1">لسه مش شغال بعد كل الخطوات؟</p>
-                            <p class="text-[11px] text-slate-400 mb-3 leading-relaxed">ابعتلنا سكرين شوت من قائمة الماكروهات في MacroDroid ومن صفحة إعدادات البطارية، وهنشوفها معاك.</p>
-                            <a href="mailto:support@dabbar.app" class="w-full flex items-center justify-center bg-emerald-500 text-slate-950 font-black text-[12px] py-2.5 rounded-xl">📩 كلم الدعم</a>
+                        <div class="fade-up bg-slate-900 border border-slate-800 rounded-2xl p-4 mt-6" style="animation-delay:.5s">
+                            <p class="text-[12.5px] font-bold text-slate-100 mb-1 text-center">لسه مش شغال بعد كل الخطوات؟</p>
+                            <p class="text-[11px] text-slate-400 mb-3 leading-relaxed text-center">ابعتلنا تفاصيل المشكلة (وممكن سكرين شوت من قائمة الماكروهات في MacroDroid لو حابب)، وهنشوفها معاك.</p>
+
+                            <div id="ts-support-idle">
+                                <button type="button" id="ts-support-open-compose" class="w-full bg-emerald-500 text-slate-950 font-black text-[12.5px] py-3 rounded-xl">📩 كلم الدعم</button>
+                            </div>
+
+                            <div id="ts-support-compose" class="hidden">
+                                <textarea id="ts-support-textarea" rows="4" placeholder="اكتب مشكلتك هنا... (مثلاً: عملت كل الخطوات وبرضو المصروف مش بيتسجل من رسائل CIB)" class="w-full text-[12.5px] bg-slate-950/60 border border-slate-800 rounded-xl p-3 resize-none text-slate-200 placeholder:text-slate-500 focus:outline-none focus:border-emerald-500/50 mb-2.5"></textarea>
+                                <div class="flex gap-2">
+                                    <button type="button" id="ts-support-cancel" class="flex-1 text-[12px] font-bold text-slate-400 border border-slate-800 rounded-xl py-2.5">إلغاء</button>
+                                    <button type="button" id="ts-support-send" class="flex-1 bg-emerald-500 text-slate-950 font-black text-[12px] py-2.5 rounded-xl">إرسال للدعم</button>
+                                </div>
+                                <p id="ts-support-error" class="hidden text-[11px] text-rose-400 mt-2 text-center"></p>
+                            </div>
+
+                            <div id="ts-support-sent" class="hidden text-center">
+                                <p class="text-3xl mb-1.5">✅</p>
+                                <p class="text-[12.5px] font-bold text-slate-100 mb-1">وصلت رسالتك!</p>
+                                <p class="text-[11px] text-slate-400">هنرد عليك في أقرب وقت — تابع تليجرام البوت.</p>
+                            </div>
                         </div>
+
                     </div>
                 </div>
             </div>
@@ -2739,6 +2800,33 @@
             badge.classList.add('flex');
         }
 
+        // ============ فتح/قفل شاشة كاملة (بدل Bottom Sheet) — نفس فكرة Navigation، بس بمجرد إظهار/إخفاء + انتقال بسيط ============
+        function openFullPage(modal) {
+            if (!modal) return;
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            document.body.style.overflow = 'hidden';
+            // نأجل شيل الـ opacity/translate لفريم تاني عشان الترانزيشن يشتغل فعليًا
+            requestAnimationFrame(() => {
+                requestAnimationFrame(() => {
+                    modal.classList.remove('opacity-0', 'translate-y-2');
+                });
+            });
+            const onKey = (e) => { if (e.key === 'Escape') closeFullPage(modal); };
+            modal._escHandler = onKey;
+            document.addEventListener('keydown', onKey);
+        }
+        function closeFullPage(modal) {
+            if (!modal) return;
+            modal.classList.add('opacity-0', 'translate-y-2');
+            document.body.style.overflow = '';
+            if (modal._escHandler) { document.removeEventListener('keydown', modal._escHandler); modal._escHandler = null; }
+            setTimeout(() => {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }, 200);
+        }
+
         (function setupQuickAddFeatureCard() {
             const card = document.getElementById('quick-add-feature-card');
             const modal = document.getElementById('quick-add-feature-modal');
@@ -2768,9 +2856,8 @@
                 tabIos.classList.toggle('border-slate-700', isAndroid);
                 tabIos.classList.toggle('text-slate-400', isAndroid);
             }
-            card.addEventListener('click', () => { modal.classList.remove('hidden'); modal.classList.add('flex'); });
-            closeBtn?.addEventListener('click', () => { modal.classList.add('hidden'); modal.classList.remove('flex'); });
-            modal.addEventListener('click', (e) => { if (e.target === modal) { modal.classList.add('hidden'); modal.classList.remove('flex'); } });
+            card.addEventListener('click', () => openFullPage(modal));
+            closeBtn?.addEventListener('click', () => closeFullPage(modal));
             tabAndroid?.addEventListener('click', () => setTab('android'));
             tabIos?.addEventListener('click', () => setTab('ios'));
         })();
@@ -2832,16 +2919,10 @@
             }
 
             card.addEventListener('click', () => {
-                const isOpen = !modal.classList.contains('hidden');
-                if (isOpen) {
-                    modal.classList.add('hidden');
-                    return;
-                }
-                modal.classList.remove('hidden');
+                openFullPage(modal);
                 loadBankAccounts();
-                modal.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             });
-            closeBtn?.addEventListener('click', () => { modal.classList.add('hidden'); });
+            closeBtn?.addEventListener('click', () => closeFullPage(modal));
 
             toggleBtn?.addEventListener('click', async () => {
                 const next = !bankState.enabled;
@@ -2859,110 +2940,116 @@
             });
         })();
 
-        (function setupBankTroubleshoot() {
-            const toggleBtn = document.getElementById('ts-toggle-btn');
-            const chev = document.getElementById('ts-toggle-chev');
-            const panel = document.getElementById('ts-panel');
-            const wrap = document.getElementById('ts-steps-wrap');
+        // ============ شاشة "مش شغال معايا؟" (استكشاف أخطاء ربط البنوك) ============
+        (function setupBankAccountsTroubleshoot() {
+            const openBtn = document.getElementById('bank-accounts-troubleshoot-open');
+            const modal = document.getElementById('bank-accounts-troubleshoot-modal');
+            const closeBtn = document.getElementById('bank-accounts-troubleshoot-close');
+            const stepsWrap = document.getElementById('ts-steps-wrap');
             const progressLabel = document.getElementById('ts-progress-label');
             const progressFill = document.getElementById('ts-progress-fill');
-            if (!toggleBtn || !wrap) return;
+            if (!openBtn || !modal || !stepsWrap) return;
 
+            // ============ ترتيب منطقي: الأكتر شيوعًا كسبب للمشكلة أولًا ============
             const steps = [
                 {
                     icon: '📦',
                     title: 'الماكرو اتحفظ فعلًا؟',
                     subtitle: 'أول حاجة نتأكد إنه ظاهر في القائمة',
                     body: `
-                        <p>افتح MacroDroid → تبويب "Macros" تحت.</p>
-                        <p>لازم تلاقي ماكرو اسمه <b class="text-slate-200">"SMS تلقائي - دبّر استيراد"</b> ظاهر في القائمة، وجنبه toggle لونه أخضر (مفعّل).</p>
-                        <p class="text-amber-500">لو مش ظاهر خالص: افتح ملف الإعداد تاني من دبّر، ولما تفتح شاشة التفاصيل (Triggers/Actions/Constraints)، دوس على الزرار الدائري الأبيض ✚ تحت — لو ظهرت شاشة اشتراك MacroDroid دوس ✕ عليها تقفلها. كده الماكرو هيتحفظ.</p>`
+                        <div class="space-y-2 text-[12.5px] leading-relaxed text-slate-300">
+                            <p>افتح MacroDroid → تبويب "Macros" تحت.</p>
+                            <p>لازم تلاقي ماكرو اسمه <b class="text-slate-100">"SMS تلقائي - دبّر استيراد"</b> ظاهر في القائمة، وجنبه toggle لونه أخضر (مفعّل).</p>
+                            <p class="text-amber-500">لو مش ظاهر خالص: افتح ملف الإعداد تاني من دبّر، ولما تفتح شاشة التفاصيل (Triggers/Actions/Constraints)، دوس على الزرار الدائري الأبيض ✚ تحت — لو ظهرت شاشة اشتراك MacroDroid دوس ✕ عليها تقفلها. كده الماكرو هيتحفظ.</p>
+                        </div>`
                 },
                 {
                     icon: '🔒',
                     title: 'صلاحية قراءة الرسائل',
                     subtitle: 'الأندرويد لازم يكون سامحلها دايمًا',
                     body: `
-                        <p>إعدادات الجهاز → التطبيقات → MacroDroid → Permissions.</p>
-                        <p>لازم تلاقي <b class="text-slate-200">SMS</b> مكتوب جنبها، مش "مرفوض" أو "اسأل كل مرة".</p>`
+                        <div class="space-y-2 text-[12.5px] leading-relaxed text-slate-300">
+                            <p>إعدادات الجهاز → التطبيقات → MacroDroid → Permissions.</p>
+                            <p>لازم تلاقي <b class="text-slate-100">SMS</b> مكتوب جنبها، مش "مرفوض" أو "اسأل كل مرة".</p>
+                        </div>`
                 },
                 {
                     icon: '🧹',
                     title: 'إزالة الصلاحيات التلقائية مطفية؟',
                     subtitle: 'خاصية بتسحب صلاحية SMS لوحدها',
                     body: `
-                        <p>في نفس صفحة MacroDroid → App info، دور على خيار <b class="text-slate-200">"Remove permissions if app is unused"</b>.</p>
-                        <p>لازم يكون <b class="text-slate-200">مطفي (Off)</b> — لو شغال، الأندرويد بيسحب صلاحية القراءة لوحده بعد فترة من غير ما تلاحظ.</p>`
+                        <div class="space-y-2 text-[12.5px] leading-relaxed text-slate-300">
+                            <p>في نفس صفحة MacroDroid → App info، دور على خيار <b class="text-slate-100">"Remove permissions if app is unused"</b>.</p>
+                            <p>لازم يكون <b class="text-slate-100">مطفي (Off)</b> — لو شغال، الأندرويد بيسحب صلاحية القراءة لوحده بعد فترة من غير ما تلاحظ.</p>
+                        </div>`
                 },
                 {
                     icon: '🔋',
                     title: 'إعدادات البطارية',
                     subtitle: 'أشهر سبب لتوقف الاستقبال في الخلفية',
                     body: `
-                        <p>إعدادات الجهاز → البطارية → MacroDroid → اختار <b class="text-slate-200">"بدون قيود" (Unrestricted)</b>.</p>
-                        <p>لو عندك سامسونج، فيه مكان تاني منفصل: <b class="text-slate-200">العناية بالجهاز والبطارية → البطارية → التطبيقات اللي معدلش استخدامها في الخلفية</b> — تأكد MacroDroid مش موجود في القايمة دي، ولو موجود امسحه منها.</p>`
+                        <div class="space-y-2 text-[12.5px] leading-relaxed text-slate-300">
+                            <p>إعدادات الجهاز → البطارية → MacroDroid → اختار <b class="text-slate-100">"بدون قيود" (Unrestricted)</b>.</p>
+                            <p>لو عندك سامسونج، فيه مكان تاني منفصل: <b class="text-slate-100">العناية بالجهاز والبطارية → البطارية → التطبيقات اللي معدلش استخدامها في الخلفية</b> — تأكد MacroDroid مش موجود في القايمة دي، ولو موجود امسحه منها.</p>
+                        </div>`
                 },
                 {
                     icon: '⚡',
                     title: 'الاستقبال مفعّل جوه دبّر؟',
                     subtitle: 'الخطوة الأخيرة اللي بتوصل الطرفين ببعض',
                     body: `
-                        <p>ارجع لكارت "البنوك والمحافظ" في دبّر، وتأكد إن <b class="text-slate-200">"تفعيل الاستقبال التلقائي"</b> شغال (أخضر).</p>`
+                        <div class="space-y-2 text-[12.5px] leading-relaxed text-slate-300">
+                            <p>ارجع لكارت "البنوك والمحافظ" في دبّر، وتأكد إن <b class="text-slate-100">"تفعيل الاستقبال التلقائي"</b> شغال (أخضر).</p>
+                        </div>`
                 },
                 {
                     icon: '✉️',
                     title: 'بتختبر برسالة حقيقية؟',
                     subtitle: 'الفرق بين SMS وإشعارات التطبيقات',
                     body: `
-                        <p>الماكرو بيمسك <b class="text-slate-200">رسائل SMS تقليدية بس</b> — مش إشعارات واتساب أو تليجرام أو RCS.</p>
-                        <p>جرّب تبعتلك رسالة SMS عادية من رقم تاني (مش من دبّر) وشوف هل بتوصل دبّر ولا لأ.</p>`
+                        <div class="space-y-2 text-[12.5px] leading-relaxed text-slate-300">
+                            <p>الماكرو بيمسك <b class="text-slate-100">رسائل SMS تقليدية بس</b> — مش إشعارات واتساب أو تليجرام أو RCS.</p>
+                            <p>جرّب تبعتلك رسالة SMS عادية من رقم تاني (مش من دبّر) وشوف هل بتوصل دبّر ولا لأ.</p>
+                        </div>`
                 }
             ];
 
-            let built = false;
-            function buildSteps() {
-                if (built) return;
-                built = true;
+            let rendered = false;
+            function renderSteps() {
+                if (rendered) return;
+                rendered = true;
                 steps.forEach((s, i) => {
                     const card = document.createElement('div');
-                    card.className = 'ts-step bg-slate-950/60 border border-slate-800 rounded-2xl overflow-hidden transition-colors';
+                    card.className = 'ts-step-card fade-up bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden';
+                    card.style.animationDelay = `${0.1 + i * 0.06}s`;
                     card.innerHTML = `
-                        <div class="ts-step-head flex items-center gap-2.5 p-3 cursor-pointer select-none">
-                            <button type="button" class="ts-check w-6 h-6 rounded-full border-2 border-slate-600 flex items-center justify-center shrink-0 transition-all">
-                                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" class="opacity-0 scale-50 transition-all"><path d="M5 13l4 4L19 7" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        <div class="ts-step-head flex items-center gap-3 p-3.5 cursor-pointer select-none">
+                            <button class="ts-check-circle w-6 h-6 rounded-full border-2 border-slate-600 flex items-center justify-center shrink-0" data-ts-check aria-label="علّم كخطوة متأكد منها">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M5 13l4 4L19 7" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
                             </button>
-                            <span class="w-7 h-7 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-[13px] shrink-0">${s.icon}</span>
+                            <span class="w-8 h-8 rounded-xl bg-slate-950/60 border border-slate-800 flex items-center justify-center text-[15px] shrink-0">${s.icon}</span>
                             <div class="flex-1 min-w-0">
-                                <p class="text-[12px] font-bold text-slate-200">${i + 1}. ${s.title}</p>
-                                <p class="text-[10.5px] text-slate-500">${s.subtitle}</p>
+                                <p class="text-[13px] font-bold text-slate-100">${i + 1}. ${s.title}</p>
+                                <p class="text-[11px] text-slate-500">${s.subtitle}</p>
                             </div>
-                            <span class="ts-chev text-[10px] text-slate-500 transition-transform">▾</span>
+                            <span class="ts-chev text-[11px] text-slate-500">▾</span>
                         </div>
-                        <div class="ts-step-panel hidden px-3 pb-3 space-y-1.5 text-[11.5px] leading-relaxed text-slate-300">${s.body}</div>
+                        <div class="ts-panel px-3.5">${s.body}</div>
                     `;
-                    wrap.appendChild(card);
+                    stepsWrap.appendChild(card);
 
                     const head = card.querySelector('.ts-step-head');
-                    const checkBtn = card.querySelector('.ts-check');
-                    const checkSvg = checkBtn.querySelector('svg');
-                    const stepPanel = card.querySelector('.ts-step-panel');
-                    const stepChev = card.querySelector('.ts-chev');
+                    const checkBtn = card.querySelector('[data-ts-check]');
 
                     head.addEventListener('click', (e) => {
-                        if (e.target.closest('.ts-check')) return;
-                        const isOpen = !stepPanel.classList.contains('hidden');
-                        stepPanel.classList.toggle('hidden', isOpen);
-                        stepChev.style.transform = isOpen ? '' : 'rotate(180deg)';
+                        if (e.target.closest('[data-ts-check]')) return;
+                        card.classList.toggle('is-open');
                     });
 
                     checkBtn.addEventListener('click', (e) => {
                         e.stopPropagation();
-                        const nowChecked = !checkBtn.classList.contains('bg-emerald-500');
-                        checkBtn.classList.toggle('bg-emerald-500', nowChecked);
-                        checkBtn.classList.toggle('border-emerald-500', nowChecked);
-                        checkSvg.classList.toggle('opacity-0', !nowChecked);
-                        checkSvg.classList.toggle('scale-50', !nowChecked);
-                        card.classList.toggle('border-emerald-500/50', nowChecked);
+                        checkBtn.classList.toggle('checked');
+                        card.classList.toggle('is-done', checkBtn.classList.contains('checked'));
                         updateProgress();
                     });
                 });
@@ -2970,17 +3057,74 @@
 
             function updateProgress() {
                 const total = steps.length;
-                const done = wrap.querySelectorAll('.ts-check.bg-emerald-500').length;
+                const done = stepsWrap.querySelectorAll('.ts-check-circle.checked').length;
                 progressLabel.textContent = `${done} من ${total}`;
                 progressFill.style.width = `${(done / total) * 100}%`;
             }
 
-            toggleBtn.addEventListener('click', () => {
-                buildSteps();
-                const isOpen = !panel.classList.contains('hidden');
-                panel.classList.toggle('hidden', isOpen);
-                chev.style.transform = isOpen ? '' : 'rotate(180deg)';
+            // ============ "كلم الدعم" — بيبعت رسالة فورًا لبوت تليجرام الأدمن عن طريق /api/support-message ============
+            const supportIdle = document.getElementById('ts-support-idle');
+            const supportCompose = document.getElementById('ts-support-compose');
+            const supportSent = document.getElementById('ts-support-sent');
+            const supportTextarea = document.getElementById('ts-support-textarea');
+            const supportError = document.getElementById('ts-support-error');
+            const openComposeBtn = document.getElementById('ts-support-open-compose');
+            const cancelBtn = document.getElementById('ts-support-cancel');
+            const sendBtn = document.getElementById('ts-support-send');
+
+            function resetSupportUI() {
+                supportIdle.classList.remove('hidden');
+                supportCompose.classList.add('hidden');
+                supportSent.classList.add('hidden');
+                supportError.classList.add('hidden');
+                supportTextarea.value = '';
+                sendBtn.disabled = false;
+                sendBtn.textContent = 'إرسال للدعم';
+            }
+
+            openComposeBtn?.addEventListener('click', () => {
+                supportIdle.classList.add('hidden');
+                supportCompose.classList.remove('hidden');
+                supportTextarea.focus();
             });
+            cancelBtn?.addEventListener('click', resetSupportUI);
+
+            sendBtn?.addEventListener('click', async () => {
+                const message = supportTextarea.value.trim();
+                if (!message) {
+                    supportError.textContent = 'اكتب مشكلتك الأول.';
+                    supportError.classList.remove('hidden');
+                    return;
+                }
+                supportError.classList.add('hidden');
+                sendBtn.disabled = true;
+                sendBtn.textContent = 'جاري الإرسال...';
+                try {
+                    const { data: { session } } = await sb.auth.getSession();
+                    if (!session) throw new Error('no-session');
+                    const res = await fetch('/api/support-message', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
+                        body: JSON.stringify({ message, source: 'bank-accounts-troubleshoot' }),
+                    });
+                    const data = await res.json();
+                    if (!data.ok) throw new Error(data.error || 'failed');
+                    supportCompose.classList.add('hidden');
+                    supportSent.classList.remove('hidden');
+                } catch (e) {
+                    supportError.textContent = 'حصل خطأ في الإرسال، جرب تاني.';
+                    supportError.classList.remove('hidden');
+                    sendBtn.disabled = false;
+                    sendBtn.textContent = 'إرسال للدعم';
+                }
+            });
+
+            openBtn.addEventListener('click', () => {
+                renderSteps();
+                resetSupportUI();
+                openFullPage(modal);
+            });
+            closeBtn?.addEventListener('click', () => closeFullPage(modal));
         })();
 
         document.getElementById('account-theme-toggle').addEventListener('click', () => {

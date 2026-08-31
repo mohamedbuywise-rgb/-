@@ -6,6 +6,7 @@ import bankMovementsHandler from '../backend/api-handlers/bank-movements.js';
 import cronDailyHandler from '../backend/api-handlers/cron-daily.js';
 import dashboardDataHandler from '../backend/api-handlers/dashboard-data.js';
 import financialActionsHandler from '../backend/api-handlers/financial-actions.js';
+import importDataHandler from '../backend/api-handlers/import-data.js';
 import pushHandler from '../backend/api-handlers/push.js';
 import reportsHandler from '../backend/api-handlers/reports.js';
 import setupHandler from '../backend/api-handlers/setup.js';
@@ -24,6 +25,7 @@ const handlers = {
   'cron-daily': cronDailyHandler,
   'dashboard-data': dashboardDataHandler,
   'financial-actions': financialActionsHandler,
+  'import-data': importDataHandler,
   push: pushHandler,
   reports: reportsHandler,
   setup: setupHandler,

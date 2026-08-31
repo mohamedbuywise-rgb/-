@@ -728,6 +728,7 @@
         .personalized-insight-main { display:grid; grid-template-columns:6.3rem 1fr; align-items:center; gap:.7rem; }
         .personalized-insight-art { width:6.1rem; height:6.1rem; display:flex; align-items:center; justify-content:center; color:#6ee7b7; }
         .personalized-insight-art svg { width:100%; height:100%; filter: drop-shadow(0 8px 10px rgba(0,0,0,.22)); }
+        .personalized-insight-icon-emoji { font-size: 3.6rem; line-height: 1; filter: drop-shadow(0 8px 10px rgba(0,0,0,.28)); }
         .personalized-insight-kicker { font-size:.62rem; color:#a7f3d0; font-weight:800; }
         .personalized-insight-copy h3 { margin:.28rem 0 .4rem; font-size:1.2rem; line-height:1.35; font-weight:950; color:#fff; }
         .personalized-insight-copy p { margin:0; font-size:.72rem; line-height:1.8; color:#d1fae5; }
@@ -736,10 +737,7 @@
         .personalized-insight-actions button { flex:1; border-radius:.8rem; padding:.65rem .5rem; font-size:.72rem; font-weight:900; cursor:pointer; }
         .personalized-insight-share { border:1px solid #6ee7b7; background:transparent; color:#ecfdf5; }
         .personalized-insight-more { border:1px solid transparent; background:#34d399; color:#052e24; }
-        html[data-theme="light"] .personalized-insight-card { background: linear-gradient(135deg, #d1fae5, #047857); color:#ecfdf5; box-shadow:0 18px 38px rgba(4,120,87,.16); }
-        html[data-theme="light"] .personalized-insight-brand, html[data-theme="light"] .personalized-insight-role, html[data-theme="light"] .personalized-insight-copy p { color:#ecfdf5 !important; }
-        html[data-theme="light"] .personalized-insight-label { background:rgba(6,78,59,.28) !important; color:#ecfdf5 !important; }
-        html[data-theme="light"] .personalized-insight-card { background: linear-gradient(135deg, #075e48 0%, #064e3b 100%) !important; border-color: #047857 !important; color: #f0fdf4 !important; }
+        html[data-theme="light"] .personalized-insight-card { background: linear-gradient(135deg, #075e48 0%, #064e3b 100%); border-color: #047857; color: #f0fdf4; box-shadow:0 18px 38px rgba(4,120,87,.16); }
         html[data-theme="light"] .personalized-insight-card .personalized-insight-brand,
         html[data-theme="light"] .personalized-insight-card .personalized-insight-role,
         html[data-theme="light"] .personalized-insight-card .personalized-insight-label,
@@ -1627,6 +1625,7 @@
     
         .debts-tab-btn { color: #94a3b8; }
         .debts-tab-btn.active { background: #10b981; color: #0f172a; }
+        html:not([data-theme="light"]) .debts-tab-btn.active { background: linear-gradient(135deg, #f4c648, #b8860b) !important; color: #241b05 !important; }
         html[data-theme="light"] .debts-tab-btn { color: #64748b !important; }
         html[data-theme="light"] .debts-tab-btn.active { background: #10b981 !important; color: #0f172a !important; }
         html[data-theme="light"] #debts-active-search, html[data-theme="light"] #debts-statement-search { background: #f8fafc !important; color: #1e293b !important; border-color: #cbd5e1 !important; }
@@ -1782,7 +1781,7 @@
 
             <section id="personalized-insight-card" class="personalized-insight-card hidden" aria-label="دبّر يقرأك">
                 <div class="personalized-insight-head"><div><span class="personalized-insight-brand">دبّر</span><span class="personalized-insight-role">محاسبك الشخصي</span></div><div class="personalized-insight-head-actions"><span class="personalized-insight-label">دبّر يقرأك</span><button type="button" id="personalized-insight-close" class="personalized-insight-close" aria-label="إغلاق البطاقة">×</button></div></div>
-                <div class="personalized-insight-main"><div class="personalized-insight-art" aria-hidden="true"><svg viewBox="0 0 120 120" role="img"><path d="M34 43h48l-5 51H43z" fill="none" stroke="currentColor" stroke-width="5"/><path d="M42 42c0-15 32-15 36 0M82 55c22-5 23 25 1 27" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><path d="M18 24l5 9 9 5-9 5-5 9-5-9-9-5 9-5zM98 15l3 6 6 3-6 3-3 6-3-6-6-3 6-3z" fill="currentColor" opacity=".72"/></svg></div><div class="personalized-insight-copy"><span id="personalized-insight-kicker" class="personalized-insight-kicker">بصراحة يا بطل...</span><h3 id="personalized-insight-title">دبّر بيقرأ عاداتك</h3><p id="personalized-insight-body">سجّل شوية مصاريف وهقولك ملاحظة شخصية تستاهل المشاركة.</p></div></div>
+                <div class="personalized-insight-main"><div class="personalized-insight-art" aria-hidden="true"><span id="personalized-insight-icon" class="personalized-insight-icon-emoji">📊</span></div><div class="personalized-insight-copy"><span id="personalized-insight-kicker" class="personalized-insight-kicker">بصراحة يا بطل...</span><h3 id="personalized-insight-title">دبّر بيقرأ عاداتك</h3><p id="personalized-insight-body">سجّل شوية مصاريف وهقولك ملاحظة شخصية تستاهل المشاركة.</p></div></div>
                 <div class="personalized-insight-suggestion"><span>💡</span><span id="personalized-insight-suggestion">اقتراح دبّر: خليك واعي بعادتك الجاية.</span></div>
                 <div class="personalized-insight-actions"><button type="button" id="personalized-insight-share" class="personalized-insight-share">شارك الرؤية</button><button type="button" id="personalized-insight-more" class="personalized-insight-more">فهمني أكتر</button></div>
             </section>
@@ -1809,6 +1808,13 @@
 
         <!-- ===================== TAB: DAILY ===================== -->
         <div class="tab-content p-5 space-y-4" id="tab-daily">
+
+            <section id="personalized-insight-card-daily" class="personalized-insight-card hidden" aria-label="دبّر يقرأك بالليل">
+                <div class="personalized-insight-head"><div><span class="personalized-insight-brand">دبّر</span><span class="personalized-insight-role">محاسبك الشخصي</span></div><div class="personalized-insight-head-actions"><span class="personalized-insight-label">دبّر يقرأك</span><button type="button" id="personalized-insight-close-daily" class="personalized-insight-close" aria-label="إغلاق البطاقة">×</button></div></div>
+                <div class="personalized-insight-main"><div class="personalized-insight-art" aria-hidden="true"><span id="personalized-insight-icon-daily" class="personalized-insight-icon-emoji">📊</span></div><div class="personalized-insight-copy"><span id="personalized-insight-kicker-daily" class="personalized-insight-kicker">آخر تحديث النهاردة...</span><h3 id="personalized-insight-title-daily">دبّر بيقرا يومك</h3><p id="personalized-insight-body-daily">سجّل مصاريف النهاردة وهقولك إيه اللي أخد أكتر حصة.</p></div></div>
+                <div class="personalized-insight-suggestion"><span>💡</span><span id="personalized-insight-suggestion-daily">اقتراح دبّر: خليك واعي بعادتك الجاية.</span></div>
+                <div class="personalized-insight-actions"><button type="button" id="personalized-insight-share-daily" class="personalized-insight-share">شارك الرؤية</button><button type="button" id="personalized-insight-more-daily" class="personalized-insight-more">شوف كل مصاريف اليوم</button></div>
+            </section>
 
             <div class="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-2xl p-3 space-y-1.5 shadow-lg">
                 <div class="flex justify-between items-center">
@@ -2196,6 +2202,24 @@
                     </div>
                 </div>
                 <span id="account-telegram-badge" class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-slate-800 text-slate-400">—</span>
+            </div>
+
+            <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3" id="data-import-card">
+                <div class="flex items-center gap-3">
+                    <span class="w-9 h-9 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-base">📥</span>
+                    <div>
+                        <p class="text-xs font-bold text-slate-200">استيراد بياناتك من تطبيق تاني</p>
+                        <p class="text-[11px] text-slate-500">ارفع ملف التصدير (CSV / Excel) وهنفهمه وناخد بياناتك من غير ما تكتبها بإيدك</p>
+                    </div>
+                </div>
+                <input type="text" id="data-import-source-name" placeholder="اسم التطبيق اللي هتستورد منه (اختياري)" class="w-full bg-slate-900/70 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 placeholder:text-slate-600">
+                <input type="file" id="data-import-file-input" accept=".csv,.txt,.tsv,.xlsx,.xls" class="hidden">
+                <button type="button" id="data-import-pick-btn" class="w-full bg-slate-900/70 border border-dashed border-slate-700 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-300">اختار ملف الاستيراد</button>
+                <div id="data-import-progress-wrap" class="hidden space-y-1.5">
+                    <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden"><div id="data-import-progress-bar" class="bg-sky-400 h-full rounded-full" style="width:0%"></div></div>
+                    <p class="text-[11px] text-slate-500" id="data-import-progress-text">—</p>
+                </div>
+                <p class="text-[10px] text-slate-600 leading-relaxed">لو الصفحة اتقفلت في نص الاستيراد، افتح تبويب "حسابي" تاني وهيكمل من عند ما وقف من غير ما يكرر أي عملية.</p>
             </div>
 
             <div class="bg-gradient-to-br from-emerald-500/10 to-teal-500/5 border border-emerald-500/25 rounded-3xl p-4 space-y-3">
@@ -3042,6 +3066,134 @@
                 closeAccountSubpage(activeAccountSubpage, { push: false });
             }
         }
+
+        (function setupDataImportCard() {
+            const pickBtn = document.getElementById('data-import-pick-btn');
+            const fileInput = document.getElementById('data-import-file-input');
+            const sourceInput = document.getElementById('data-import-source-name');
+            const progressWrap = document.getElementById('data-import-progress-wrap');
+            const progressBar = document.getElementById('data-import-progress-bar');
+            const progressText = document.getElementById('data-import-progress-text');
+            if (!pickBtn || !fileInput) return;
+
+            const ROWS_PER_BATCH = 25; // دفعة صغيرة عشان الـ AI يفهمها كويس وميحصلش timeout
+            let sheetJsLoadPromise = null;
+            function loadSheetJs() {
+                if (window.XLSX) return Promise.resolve();
+                if (!sheetJsLoadPromise) {
+                    sheetJsLoadPromise = new Promise((resolve, reject) => {
+                        const script = document.createElement('script');
+                        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+                        script.onload = resolve;
+                        script.onerror = reject;
+                        document.head.appendChild(script);
+                    });
+                }
+                return sheetJsLoadPromise;
+            }
+
+            async function fileToRows(file) {
+                const isExcel = /\.(xlsx|xls)$/i.test(file.name);
+                if (isExcel) {
+                    await loadSheetJs();
+                    const buf = await file.arrayBuffer();
+                    const wb = window.XLSX.read(buf, { type: 'array' });
+                    const sheet = wb.Sheets[wb.SheetNames[0]];
+                    const csv = window.XLSX.utils.sheet_to_csv(sheet);
+                    return csv.split(/\r?\n/).map((r) => r.trim()).filter(Boolean);
+                }
+                const text = await file.text();
+                return text.split(/\r?\n/).map((r) => r.trim()).filter(Boolean);
+            }
+
+            function setProgress(processed, total, extraLabel) {
+                progressWrap.classList.remove('hidden');
+                const pct = total > 0 ? Math.min(100, Math.round((processed / total) * 100)) : 0;
+                progressBar.style.width = `${pct}%`;
+                progressText.textContent = extraLabel || `اتفحص ${processed} من ${total} سطر...`;
+            }
+
+            async function authHeaders() {
+                const { data: { session } } = await sb.auth.getSession();
+                return { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` };
+            }
+
+            async function runImport(rowBatches, sourceApp, existingJob) {
+                let job = existingJob;
+                if (!job) {
+                    const totalRows = rowBatches.reduce((sum, b) => sum + b.length, 0);
+                    const res = await fetch('/api/import-data?action=start', {
+                        method: 'POST',
+                        headers: await authHeaders(),
+                        body: JSON.stringify({ fileName: fileInput.files[0]?.name || '', sourceApp, totalRows }),
+                    });
+                    const body = await res.json();
+                    if (!res.ok || !body.ok) throw new Error(body.error || 'معرفناش نبدأ الاستيراد.');
+                    job = body.job;
+                }
+
+                // لو ده استكمال job قديم، نتخطى الدفعات اللي اتعملت خلاص (processed_rows) عشان
+                // نكمل من عند ما وقفنا مش نبدأ من الأول.
+                let skippedRows = 0;
+                for (const batch of rowBatches) {
+                    if (skippedRows + batch.length <= job.processed_rows) {
+                        skippedRows += batch.length;
+                        continue;
+                    }
+                    skippedRows += batch.length;
+                    setProgress(job.processed_rows, job.total_rows);
+                    const res = await fetch('/api/import-data?action=chunk', {
+                        method: 'POST',
+                        headers: await authHeaders(),
+                        body: JSON.stringify({ jobId: job.id, rows: batch, sourceApp }),
+                    });
+                    const body = await res.json();
+                    if (!res.ok || !body.ok) throw new Error(body.error || 'حصل خطأ أثناء الاستيراد.');
+                    job = body.job;
+                    setProgress(job.processed_rows, job.total_rows);
+                }
+                progressText.textContent = `تم! اتضافلك ${job.inserted_rows} عملية${job.skipped_rows ? ` (${job.skipped_rows} كانوا مستوردين قبل كده)` : ''}.`;
+                progressBar.style.width = '100%';
+                if (typeof loadDashboard === 'function') loadDashboard();
+            }
+
+            pickBtn.addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', async () => {
+                const file = fileInput.files[0];
+                if (!file) return;
+                pickBtn.disabled = true;
+                pickBtn.textContent = 'بنقرا الملف...';
+                try {
+                    const allRows = await fileToRows(file);
+                    if (allRows.length === 0) throw new Error('الملف فاضي أو مقدرناش نقراه.');
+                    const batches = [];
+                    for (let i = 0; i < allRows.length; i += ROWS_PER_BATCH) batches.push(allRows.slice(i, i + ROWS_PER_BATCH));
+                    await runImport(batches, sourceInput.value.trim());
+                } catch (err) {
+                    progressWrap.classList.remove('hidden');
+                    progressText.textContent = err.message || 'حصل خطأ أثناء الاستيراد.';
+                } finally {
+                    pickBtn.disabled = false;
+                    pickBtn.textContent = 'اختار ملف الاستيراد';
+                    fileInput.value = '';
+                }
+            });
+
+            // لو فيه job من قبل مخلصش (المستخدم قفل الصفحة في النص)، بلّغه إنه يقدر يكمله
+            // بس من غير ما نعيد رفع الملف تلقائي (مفيش الملف نفسه محفوظ) — نعرض حالته بس
+            // ولو حبّ يكمل يرفع نفس الملف تاني وهو هيتخطى اللي اتعمل خلاص لوحده.
+            (async () => {
+                try {
+                    const res = await fetch('/api/import-data', { headers: await authHeaders() });
+                    const body = await res.json();
+                    if (body.ok && body.job && body.job.status === 'processing' && body.job.processed_rows > 0) {
+                        progressWrap.classList.remove('hidden');
+                        progressBar.style.width = `${Math.round((body.job.processed_rows / (body.job.total_rows || 1)) * 100)}%`;
+                        progressText.textContent = `فيه استيراد لملف "${body.job.file_name || ''}" متوقف عند ${body.job.processed_rows}/${body.job.total_rows} سطر — ارفع نفس الملف تاني عشان يكمل من هنا.`;
+                    }
+                } catch {}
+            })();
+        })();
 
         (function setupQuickAddFeatureCard() {
             const card = document.getElementById('quick-add-feature-card');
@@ -4243,35 +4395,81 @@
                 const percent = Math.round(spike.growth * 100);
                 const id = `spike-${spike.name}-${insightWindowKey}`;
                 const lower = String(spike.name).toLocaleLowerCase('ar');
-                if (lower.includes('قهوة') || lower.includes('كافيه')) return { id, title: 'القهوة بدأت تغيّر سلوكك', body: `صرفك على القهوة زاد حوالي ${percent}% عن الأسبوع اللي فات. واضح إن الكافيه بقى جزء من ميزانيتك الثابتة.`, suggestion: 'اقتراح دبّر: جرّب يومين قهوة من البيت الأسبوع ده.' };
-                if (lower.includes('أكل') || lower.includes('مطاعم') || lower.includes('دليفري')) return { id, title: 'مطبخ البيت دخل إجازة', body: `صرفك على ${spike.name} زاد حوالي ${percent}% عن الأسبوع اللي فات. واضح إن الدليفري بدأ يمسك الإدارة.`, suggestion: 'اقتراح دبّر: حضّر وجبتين في البيت قبل الطلب الجاي.' };
-                return { id, title: `واضح إن ${spike.name} بقت عادة`, body: `صرفك على ${spike.name} زاد حوالي ${percent}% عن الأسبوع اللي فات. دبّر لاحظ التغيير قبل ما يتحول لروتين.`, suggestion: `اقتراح دبّر: راجع أي دفعة جديدة في ${spike.name} قبل ما تأكدها.` };
+                if (lower.includes('قهوة') || lower.includes('كافيه')) return { id, category: spike.name, title: 'القهوة بدأت تغيّر سلوكك', body: `صرفك على القهوة زاد حوالي ${percent}% عن الأسبوع اللي فات. واضح إن الكافيه بقى جزء من ميزانيتك الثابتة.`, suggestion: 'اقتراح دبّر: جرّب يومين قهوة من البيت الأسبوع ده.' };
+                if (lower.includes('أكل') || lower.includes('مطاعم') || lower.includes('دليفري')) return { id, category: spike.name, title: 'مطبخ البيت دخل إجازة', body: `صرفك على ${spike.name} زاد حوالي ${percent}% عن الأسبوع اللي فات. واضح إن الدليفري بدأ يمسك الإدارة.`, suggestion: 'اقتراح دبّر: حضّر وجبتين في البيت قبل الطلب الجاي.' };
+                return { id, category: spike.name, title: `واضح إن ${spike.name} بقت عادة`, body: `صرفك على ${spike.name} زاد حوالي ${percent}% عن الأسبوع اللي فات. دبّر لاحظ التغيير قبل ما يتحول لروتين.`, suggestion: `اقتراح دبّر: راجع أي دفعة جديدة في ${spike.name} قبل ما تأكدها.` };
             }
             const topShare = Number(top.percent || (top.amount / currentTotal) * 100);
             if (topShare >= 35 && Number(top.amount) > Number(previousByName[top.name] || 0) * 1.15) {
                 const id = `dominant-${top.name}-${insightWindowKey}`;
-                return { id, title: `${top.name} ماسكة زمام الشهر`, body: `${top.name} لوحدها أخذت ${Math.round(topShare)}% من صرفك الحالي. دبّر شايف مين بقى المدير المالي عندك.`, suggestion: `اقتراح دبّر: حط سقفًا صغيرًا لـ${top.name} في الفترة الجاية.` };
+                return { id, category: top.name, title: `${top.name} ماسكة زمام الشهر`, body: `${top.name} لوحدها أخذت ${Math.round(topShare)}% من صرفك الحالي. دبّر شايف مين بقى المدير المالي عندك.`, suggestion: `اقتراح دبّر: حط سقفًا صغيرًا لـ${top.name} في الفترة الجاية.` };
             }
             return null;
         }
-        function renderPersonalizedInsight(month) {
-            const card = document.getElementById('personalized-insight-card');
+
+        // ============ "دبّر يقرأك بالليل" — كارت كوميدي عن أكتر فئة صرفت فيها النهاردة، بيظهر بس من الساعة ١١ بالليل ============
+        // العنوان نفسه هو "القفشة" (مش وصف عام) عشان يبقى قابل للمشاركة كصورة لوحده، والأيقونة إيموجي
+        // الفئة نفسها فبتتغير كل مرة حسب الموضوع بدل ما تفضل ثابتة.
+        const DAILY_INSIGHT_HOUR = 23; // ١١ م
+        const DAILY_INSIGHT_COPY = {
+            'أكل': { title: 'بطنك بقت شريكة في الميزانية 🍔', body: 'أكل ودليفري ومطاعم أخدوا أكبر حصة من صرفك النهاردة — واضح إن مطبخ البيت في إجازة.' },
+            'مواصلات': { title: 'يوم كامل وانت بين تاكسي وأوبر 🚕', body: 'المواصلات أخدت أكبر نصيب من صرف النهاردة — يمكن نفكر في اشتراك مواصلات عام؟' },
+            'فواتير': { title: 'يوم الفواتير خد يومك كله 🧾', body: 'الفواتير كانت أكبر بند صرفته فيه النهاردة — على الأقل مفيش مفاجآت الشهر الجاي.' },
+            'تسوق': { title: 'إيدك كانت في الكارت طول اليوم 🛍️', body: 'التسوق أخد أكبر حصة من صرفك النهاردة — البنطلون ده كان لازم فعلًا؟' },
+            'ترفيه': { title: 'يوم استمتاع رسمي 🎬', body: 'الترفيه أخد أكبر نصيب من مصاريفك النهاردة — استمتعت؟ يبقى يستاهل.' },
+            'صحة': { title: 'جسمك كلّفك النهاردة 💊', body: 'الصحة كانت أكبر بند صرفت فيه النهاردة — استثمار في نفسك، ده حلو فعلًا.' },
+            'تعليم': { title: 'يوم استثمار في مخّك 📚', body: 'التعليم أخد أكبر حصة من صرف النهاردة — دبّر فخور بيك.' },
+            'منزل وأثاث': { title: 'البيت بيوكل من جيبك 🏠', body: 'منزل وأثاث كانوا أكبر بند صرفته فيه النهاردة — البيت بيتزين شوية شوية.' },
+            'ملابس': { title: 'خزانتك اتزودت النهاردة 👕', body: 'الملابس أخدت أكبر حصة من صرفك النهاردة — إطلالة جديدة تستاهل.' },
+            'اشتراكات': { title: 'يوم الاشتراكات الشهرية 🔁', body: 'اشتراكاتك أخدت أكبر نصيب من صرف النهاردة — يستاهل تراجعها وتشوف إيه اللي بتستخدمه فعلًا.' },
+            'هدايا وتبرعات': { title: 'يوم كرم رسمي 🎁', body: 'الهدايا والتبرعات أخدوا أكبر حصة من صرف النهاردة — إيد على قلبك، ده حلو.' },
+            'شخصي وعناية': { title: 'يوم دلع النفس 🧴', body: 'العناية الشخصية أخدت أكبر نصيب من صرف النهاردة — تستاهل تدلّع نفسك أحيانًا.' },
+        };
+        function getDailyCategoryInsight(today) {
+            if (!today || new Date().getHours() < DAILY_INSIGHT_HOUR) return null;
+            const items = Array.isArray(today.items) ? today.items : [];
+            if (items.length === 0) return null;
+            const byCategory = {};
+            items.forEach((it) => { byCategory[it.category] = (byCategory[it.category] || 0) + Number(it.amount || 0); });
+            const [topName, topAmount] = Object.entries(byCategory).sort((a, b) => b[1] - a[1])[0];
+            const percent = Math.round((topAmount / Math.max(1, Number(today.total || topAmount))) * 100);
+            const dateKey = new Date().toISOString().slice(0, 10);
+            const copy = DAILY_INSIGHT_COPY[topName] || { title: `${topName} كانت نجمة يومك النهاردة`, body: `${topName} أخدت أكبر حصة من صرفك النهاردة.` };
+            return {
+                id: `daily-cat-${dateKey}-${topName}`,
+                category: topName,
+                title: copy.title,
+                body: `${copy.body} (${fmt(topAmount)} من إجمالي ${fmt(today.total)}، حوالي ${percent}%)`,
+                suggestion: `اقتراح دبّر: بكرة جرّب تقلل من ${topName} شوية وشوف الفرق.`,
+            };
+        }
+
+        // ============ رسّام عام للكارت — بيتنادى مرتين: مرة للكارت الشهري ومرة لكارت "دبّر يقرأك بالليل" ============
+        function paintInsightCard(suffix, insight) {
+            const card = document.getElementById(`personalized-insight-card${suffix}`);
             if (!card) return;
-            const insight = getBehavioralInsight(month);
             if (!insight || localStorage.getItem(personalizedInsightDismissKey(insight.id)) === '1') { card.classList.add('hidden'); return; }
-            document.getElementById('personalized-insight-title').textContent = insight.title;
-            document.getElementById('personalized-insight-body').textContent = insight.body;
-            document.getElementById('personalized-insight-suggestion').textContent = insight.suggestion;
+            document.getElementById(`personalized-insight-title${suffix}`).textContent = insight.title;
+            document.getElementById(`personalized-insight-body${suffix}`).textContent = insight.body;
+            document.getElementById(`personalized-insight-suggestion${suffix}`).textContent = insight.suggestion;
+            const iconEl = document.getElementById(`personalized-insight-icon${suffix}`);
+            if (iconEl) iconEl.textContent = insight.category ? getCategoryEmoji(insight.category) : '📊';
             card.classList.remove('hidden');
             card.dataset.shareText = `${insight.title}. ${insight.body}`;
             card.dataset.insightId = insight.id;
+        }
+        function renderPersonalizedInsight(month) {
+            paintInsightCard('', getBehavioralInsight(month));
         }
         function renderMonthly(month) {
             renderBalanceCard(month);
             document.getElementById('monthly-total').textContent = fmt(month.total);
             document.getElementById('monthly-count').textContent = `${month.count} عملية`;
-            const daysPassed = Math.max(1, new Date().getDate());
-            document.getElementById('monthly-avg').textContent = fmt(Math.round(month.total / daysPassed));
+            const activeDays = Math.max(1, Number(month.activeSpendingDaysThisMonth) || 0);
+            const monthlyAvg = Number.isFinite(month.avgPerActiveDay)
+                ? month.avgPerActiveDay
+                : Math.round(month.total / activeDays);
+            document.getElementById('monthly-avg').textContent = fmt(monthlyAvg);
 
             const compareEl = document.getElementById('monthly-compare');
             if (month.prevTotal > 0) {
@@ -4311,25 +4509,44 @@
             }
         }
 
-        document.getElementById('personalized-insight-close')?.addEventListener('click', () => {
-            const card = document.getElementById('personalized-insight-card');
-            const insightId = card?.dataset.insightId;
-            if (insightId) localStorage.setItem(personalizedInsightDismissKey(insightId), '1');
-            card?.classList.add('hidden');
-        });
-        document.getElementById('personalized-insight-more')?.addEventListener('click', () => document.getElementById('monthly-tip-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
-        document.getElementById('personalized-insight-share')?.addEventListener('click', async () => {
-            const btn = document.getElementById('personalized-insight-share');
-            try { btn.disabled = true; btn.textContent = 'بنجهز الصورة...'; await shareWrappedCard({ cacheKey: `personalized-insight-${document.getElementById('personalized-insight-card')?.dataset.insightId || 'current'}`, cardId: 'personalized-insight-card', filename: 'dabbar-yqraak.png', text: document.getElementById('personalized-insight-card')?.dataset.shareText || 'دبّر — محاسبك الشخصي' }); } catch (e) { if (e.name !== 'AbortError') alert(e.message || 'حصل خطأ أثناء تجهيز الصورة.'); } finally { btn.disabled = false; btn.textContent = 'شارك الرؤية'; }
-        });
+        function setupInsightCardActions(suffix, { moreAction } = {}) {
+            document.getElementById(`personalized-insight-close${suffix}`)?.addEventListener('click', () => {
+                const card = document.getElementById(`personalized-insight-card${suffix}`);
+                const insightId = card?.dataset.insightId;
+                if (insightId) localStorage.setItem(personalizedInsightDismissKey(insightId), '1');
+                card?.classList.add('hidden');
+            });
+            document.getElementById(`personalized-insight-more${suffix}`)?.addEventListener('click', () => {
+                if (moreAction) return moreAction();
+                document.getElementById('monthly-tip-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            });
+            document.getElementById(`personalized-insight-share${suffix}`)?.addEventListener('click', async () => {
+                const btn = document.getElementById(`personalized-insight-share${suffix}`);
+                try {
+                    btn.disabled = true; btn.textContent = 'بنجهز الصورة...';
+                    await shareWrappedCard({
+                        cacheKey: `personalized-insight${suffix}-${document.getElementById(`personalized-insight-card${suffix}`)?.dataset.insightId || 'current'}`,
+                        cardId: `personalized-insight-card${suffix}`,
+                        filename: 'dabbar-yqraak.png',
+                        text: document.getElementById(`personalized-insight-card${suffix}`)?.dataset.shareText || 'دبّر — محاسبك الشخصي',
+                    });
+                } catch (e) { if (e.name !== 'AbortError') alert(e.message || 'حصل خطأ أثناء تجهيز الصورة.'); }
+                finally { btn.disabled = false; btn.textContent = 'شارك الرؤية'; }
+            });
+        }
+        setupInsightCardActions('');
+        setupInsightCardActions('-daily', { moreAction: () => document.getElementById('daily-items-list')?.scrollIntoView({ behavior: 'smooth', block: 'center' }) });
 
         function renderDaily(today, flow) {
             window.__todayData = today;
+            paintInsightCard('-daily', getDailyCategoryInsight(today));
             document.getElementById('daily-date').textContent =
                 new Date().toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long' });
             document.getElementById('daily-total').textContent = fmt(today.total);
             document.getElementById('daily-count').textContent = `${today.count} عملية`;
-            document.getElementById('daily-avg').textContent = fmt(today.avgPerDayThisMonth);
+            document.getElementById('daily-avg').textContent = fmt(
+                Number.isFinite(today.avgPerActiveDay) ? today.avgPerActiveDay : today.avgPerDayThisMonth
+            );
             document.getElementById('daily-note').textContent =
                 today.count > 0 ? `سجلت ${today.count} عملية النهاردة.` : 'سجّل أول عملية النهاردة وهتلاقيها هنا.';
 

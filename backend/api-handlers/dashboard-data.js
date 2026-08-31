@@ -151,7 +151,18 @@ export default async function handler(req, res) {
       1,
       Math.ceil((Date.now() - start.getTime()) / (24 * 60 * 60 * 1000))
     );
+    // avgPerDayThisMonth (بالتقويم) بيتستخدم للتوقّع بتاع آخر الشهر فقط، لأنه محتاج
+    // كل أيام الشهر اللي عدت حتى اللي مفيهاش صرف، عشان يعمل extrapolation صحيح.
     const avgPerDayThisMonth = Math.round(monthTotal / daysPassedThisMonth);
+
+    // متوسط الصرف "الحقيقي" اللي بيتعرض للمستخدم لازم يتقسم على أيام الصرف الفعلية
+    // (مش كل أيام الشهر اللي عدت)، عشان أول يوم في الشهر ميبقاش المتوسط = إجمالي الشهر.
+    const activeSpendingDaysThisMonth = new Set(
+      monthExpenses.map((e) => new Date(e.created_at).toDateString())
+    ).size;
+    const avgPerActiveDay = Math.round(
+      monthTotal / Math.max(1, activeSpendingDaysThisMonth)
+    );
 
 
 
@@ -335,6 +346,7 @@ export default async function handler(req, res) {
         total: todayTotal,
         count: todayExpenses.length,
         avgPerDayThisMonth,
+        avgPerActiveDay,
           byCurrency: todayByCurrency,
           items: todayExpenses.map((e) => ({
           id: e.id,
@@ -363,6 +375,8 @@ export default async function handler(req, res) {
         weekTotal,
         weekByCategory,
         previousWeekByCategory,
+        activeSpendingDaysThisMonth,
+        avgPerActiveDay,
       },
       debts: {
         net: owedToYouTotal - youOweTotal,

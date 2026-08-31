@@ -3411,53 +3411,15 @@
             list.innerHTML = notifications.map((item) => `<article class="flex items-start gap-3 rounded-2xl border ${read[item.id] ? 'border-slate-800 bg-slate-900/20 opacity-70' : 'border-emerald-500/20 bg-emerald-500/5'} p-3"><span class="text-base">${item.icon}</span><div class="min-w-0"><p class="text-[11px] font-bold text-slate-200">${item.title}</p><p class="mt-1 text-[10px] leading-relaxed text-slate-400">${item.body}</p></div></article>`).join('');
         }
 
+        function inAppNotificationsClearedAtKey() { return `dabbar-notifications-cleared-at-${currentUser?.id || 'guest'}`; }
         function markInAppNotificationsRead() {
             const list = document.getElementById('in-app-notifications-list');
             if (!list) return;
-            const current = list.querySelectorAll('article').length;
-            if (!current) return;
-            const notifications = {};
-            try { const existing = JSON.parse(localStorage.getItem(inAppNotificationsKey()) || '{}'); Object.assign(notifications, existing); } catch {}
-            const data = window.__dashboardData || {};
-            const month = data.month || {};
-            (month.financialEvents || []).slice(0, 1).forEach((event) => { notifications[`event-${event.id || event.created_at}`] = true; });
-            const budget = Number(window.__financialSettings?.monthlyBudget || 0);
-            const total = Number(month.total || 0);
-            if (budget > 0) notifications[`budget-${new Date().toISOString().slice(0, 7)}`] = true;
-            if (budget === 0 && total > 0) notifications[`set-budget-${new Date().toISOString().slice(0, 7)}`] = true;
-            const categories = month.categories || month.byCategory || [];
-            if (categories.length > 0) {
-                const topCat = [...categories].sort((a, b) => Number(b.amount || 0) - Number(a.amount || 0))[0];
-                notifications[`top-cat-${new Date().toISOString().slice(0, 7)}-${topCat.name}`] = true;
-            }
-            const prevTotal = Number(month.prevTotal || 0);
-            if (prevTotal > 0 && total > 0 && total < prevTotal) notifications[`less-than-prev-${new Date().toISOString().slice(0, 7)}`] = true;
-            const lastSeven = (data.activeDays || {}).lastSevenDays || [];
-            let currentStreak = 0;
-            for (let i = lastSeven.length - 1; i >= 0; i -= 1) {
-                if (lastSeven[i]?.active) currentStreak += 1;
-                else break;
-            }
-            if (currentStreak >= 3) notifications[`streak-${currentStreak}-${new Date().toISOString().slice(0, 10)}`] = true;
-            const goal = data.goal;
-            if (goal && goal.percent >= 25) notifications[`goal-${goal.id}-${Math.floor(goal.percent / 25) * 25}`] = true;
-            const today = data.today || window.__todayData;
-            if (today && today.total > 0) {
-                notifications[`daily-pace-${new Date().toISOString().slice(0, 10)}`] = true;
-            }
-            const balanceIncome = Number(window.__financialSettings?.monthlyIncome || 0);
-            if (balanceIncome > 0 && total > 0) {
-                const categoriesForBalance = month.categories || month.byCategory || [];
-                const overrides = window.__financialSettings?.balanceCategories || {};
-                const isNeeds = (item) => (overrides[item.name] || (['أكل', 'مواصلات', 'فواتير', 'صحة', 'تعليم', 'منزل وأثاث'].includes(item.name) ? 'needs' : 'wants')) === 'needs';
-                const needsTotal = categoriesForBalance.filter(isNeeds).reduce((sum, item) => sum + Number(item.amount || 0), 0);
-                const wantsTotal = categoriesForBalance.filter((item) => !isNeeds(item)).reduce((sum, item) => sum + Number(item.amount || 0), 0);
-                if (Math.max(0, balanceIncome - total) >= balanceIncome * 0.20) notifications[`balance-savings-20-${new Date().toISOString().slice(0, 7)}`] = true;
-                if (needsTotal >= balanceIncome * 0.50) notifications[`balance-needs-50-${new Date().toISOString().slice(0, 7)}`] = true;
-                if (wantsTotal >= balanceIncome * 0.30) notifications[`balance-wants-30-${new Date().toISOString().slice(0, 7)}`] = true;
-            }
-            localStorage.setItem(inAppNotificationsKey(), JSON.stringify(notifications));
-            renderInAppNotifications(window.__dashboardData || {});
+            localStorage.setItem(inAppNotificationsClearedAtKey(), new Date().toISOString());
+            if (typeof updateAccountNotificationBadge === 'function') updateAccountNotificationBadge(0);
+            list.innerHTML = '<div class="notification-empty rounded-2xl border p-3 text-[11px] leading-relaxed" style="color:var(--slate-400, #94a3b8)"><strong>هنا هتظهر لك الفايدة أول بأول</strong><br>هتلاقي ملخصًا لمتابعتك، وتنبيهًا لطيفًا لما تقترب من حد فئة، واقتراحًا صغيرًا يساعدك تكمل خطتك براحة.</div>';
+            const subtitle = document.getElementById('in-app-notifications-subtitle');
+            if (subtitle) subtitle.textContent = 'أنت متابع كل الرسائل الحالية.';
         }
 
         function urlBase64ToUint8Array(base64String) {

@@ -53,6 +53,11 @@
     background: var(--db-accent-soft); color: var(--db-ink); border-radius: 12px;
     padding: 12px 14px; font-size: 12.5px; line-height: 1.7; margin-bottom: 14px;
   }
+  .note-accordion { background: var(--db-accent-soft); border-radius: 12px; margin-bottom: 14px; overflow: hidden; }
+  .note-accordion-toggle { width: 100%; display: flex; align-items: center; justify-content: space-between; background: transparent; border: none; cursor: pointer; padding: 12px 14px; color: var(--db-ink); font-size: 12.5px; font-weight: 700; }
+  .note-accordion-caret { transition: transform .2s ease; color: var(--db-accent); font-size: 13px; }
+  .note-accordion-toggle[aria-expanded="true"] .note-accordion-caret { transform: rotate(180deg); }
+  .note-accordion-body { transition: max-height .25s ease; }
   .stats-row { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; margin-bottom: 14px; }
   .stat-card { border-radius: 10px; padding: 10px; }
   .stat-card .lbl { font-size: 11px; margin-bottom: 4px; }
@@ -116,10 +121,11 @@
     <button class="close-btn" id="close-btn" aria-label="إغلاق">✕</button>
   </div>
 
-  <div class="note-box"><ul style="margin:0; padding-inline-start:18px; display:flex; flex-direction:column; gap:6px;"><li>السحب والإيداع والتحويل بين حساباتك بيتسجلوا هنا للمتابعة بس، من غير ما يدخلوا في إجمالي مصروفاتك.</li><li>الاشتراكات والمشتريات بتتحسب مصروف حقيقي ومباشر زي أي حاجة تانية.</li><li><span style="color:#f2b90c;">⚠️</span> أي حركة مبهمة هتتحط تحت "تحتاج مراجعة" لحد ما تحددها بنفسك.</li></ul></div>
+  <div class="note-accordion"><button type="button" class="note-accordion-toggle" id="note-toggle" aria-expanded="false"><span>دليل تصنيف الحركات البنكية</span><span class="note-accordion-caret" id="note-caret">▾</span></button><div class="note-accordion-body" id="note-body" style="max-height:0; overflow:hidden;"><ul style="margin:0; padding:12px 14px; padding-inline-start:28px; display:flex; flex-direction:column; gap:6px; color:var(--db-ink);"><li>السحب والإيداع والتحويل بين حساباتك بتتسجل هنا للمتابعة بس، من غير ما تدخل في إجمالي مصروفاتك.</li><li>الاشتراكات والمشتريات بتتحسب مصروف حقيقي ومباشر زي أي حاجة تانية.</li><li><span style="color:#f2b90c;">⚠️</span> أي حركة مبهمة هتتحط تحت "تحتاج مراجعة" لحد ما تحددها بنفسك.</li></ul></div></div>
 
   <div id="status" class="status">بنجيب حركاتك...</div>
 
+  <div class="filters" id="bank-filters"><button class="filter-btn active" data-filter="all">الكل</button><button class="filter-btn" data-filter="withdrawal">سحب / مشتريات</button><button class="filter-btn" data-filter="deposit">إيداع / وارد</button><button class="filter-btn" data-filter="review">تحتاج مراجعة ⚠️</button></div>
   <div id="content" class="hidden">
     <div class="stats-row">
       <div class="stat-card stat-danger"><div class="lbl">سحب</div><div class="val" id="stat-withdrawal">0 ج.م</div></div>
@@ -127,22 +133,13 @@
       <div class="stat-card stat-neutral"><div class="lbl">تحويل</div><div class="val" id="stat-transfer">0 ج.م</div></div>
     </div>
 
-    <div class="filters">
-      <button class="filter-btn active" data-f="all">الكل</button>
-      <button class="filter-btn" data-f="withdrawal">سحب / مشتريات</button>
-      <button class="filter-btn" data-f="deposit">إيداع / وارد</button>
-      <button class="filter-btn" data-f="transfer">تحويلات</button>
-      <button class="filter-btn" data-f="review">تحتاج مراجعة ⚠️</button>
-    </div>
-
-    <div class="list-card" id="list-card"></div>
+        <div class="list-card" id="list-card"></div>
   </div>
 
   <div id="empty-state" class="empty-state hidden">
     <div class="empty-icon">🏦</div>
-    <div class="empty-title">لسه مفيش حركات بنكية مسجلة</div>
-    <div class="empty-sub">اربط بنكك أو محفظتك من «حسابي» عشان دبّر يقرأ حركاتك أول بأول ويعرضها هنا تلقائيًا.</div>
-    <button class="cta-btn" id="go-account-btn">اذهب لحسابي</button>
+    <div class="empty-sub" style="color: var(--db-muted); font-size: 13px; line-height: 1.6; max-width: 320px; margin: 0 auto 16px;">علشان تبدأ تشوف حركاتك ومعاملاتك المالية هنا أول بأول، اربط حساباتك البنكية والمحافظ الإلكترونية من صفحة حسابي.</div>
+    <button class="cta-btn" id="go-account-btn" style="background: var(--db-accent); color: var(--db-canvas); border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; cursor: pointer;">روح لحسابي</button>
   </div>
 </div>
 
@@ -249,7 +246,7 @@
     btn.addEventListener('click', () => {
       document.querySelectorAll('.filter-btn').forEach((b) => b.classList.remove('active'));
       btn.classList.add('active');
-      currentFilter = btn.dataset.f;
+      currentFilter = btn.dataset.filter || btn.dataset.f;
       renderList();
     });
   });
@@ -291,6 +288,14 @@
       // متبقاش تفشل الواجهة لو فشل التحديث؛ المستخدم يقدر يحاول تاني
     }
   }
+
+  const noteToggle = $('note-toggle');
+  const noteBody = $('note-body');
+  if (noteToggle && noteBody) noteToggle.addEventListener('click', () => {
+    const isOpen = noteToggle.getAttribute('aria-expanded') === 'true';
+    noteToggle.setAttribute('aria-expanded', String(!isOpen));
+    noteBody.style.maxHeight = isOpen ? '0px' : `${noteBody.scrollHeight}px`;
+  });
 
   $('close-btn').addEventListener('click', () => { window.location.href = './dabbar-dashboard-full.html'; });
   $('go-account-btn')?.addEventListener('click', () => { window.location.href = './dabbar-dashboard-full.html#account-bank-linking'; });

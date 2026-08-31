@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>الحركات البنكية — دبّر</title>
+<link rel="manifest" href="./manifest.json">
+<meta name="theme-color" content="#0E655B">
+<link rel="apple-touch-icon" href="./icons/icon-192.png">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.105.0"></script>
+<style>
+  :root[data-theme="light"] {
+    --db-canvas: #f4f8f5;
+    --db-surface: #ffffff;
+    --db-surface-soft: #edf5ef;
+    --db-ink: #143126;
+    --db-muted: #718078;
+    --db-accent: #16a878;
+    --db-accent-soft: rgba(22,168,120,.11);
+    --db-danger: #c0392b;
+    --db-danger-soft: #fbe9e7;
+    --db-success: #0f6e56;
+    --db-success-soft: #e1f5ee;
+  }
+  :root[data-theme="dark"] {
+    --db-canvas: #08100e;
+    --db-surface: #121c18;
+    --db-surface-soft: rgba(30,48,39,.72);
+    --db-ink: #eef8f1;
+    --db-muted: #9aac9f;
+    --db-accent: #34d399;
+    --db-accent-soft: rgba(52,211,153,.12);
+    --db-danger: #f28b82;
+    --db-danger-soft: rgba(242,139,130,.14);
+    --db-success: #34d399;
+    --db-success-soft: rgba(52,211,153,.14);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; min-height: 100dvh; background: var(--db-canvas); color: var(--db-ink);
+    font-family: -apple-system, "Segoe UI", Tahoma, Arial, sans-serif;
+    padding: 16px; padding-bottom: 40px;
+  }
+  .wrap { max-width: 480px; margin: 0 auto; }
+  .top-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .top-row h1 { font-size: 18px; font-weight: 700; margin: 0; }
+  .close-btn {
+    width: 36px; height: 36px; border-radius: 50%; border: none; cursor: pointer;
+    background: var(--db-surface-soft); color: var(--db-ink); font-size: 18px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .note-box {
+    background: var(--db-accent-soft); color: var(--db-ink); border-radius: 12px;
+    padding: 12px 14px; font-size: 12.5px; line-height: 1.7; margin-bottom: 14px;
+  }
+  .stats-row { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 8px; margin-bottom: 14px; }
+  .stat-card { border-radius: 10px; padding: 10px; }
+  .stat-card .lbl { font-size: 11px; margin-bottom: 4px; }
+  .stat-card .val { font-size: 15px; font-weight: 700; }
+  .stat-danger { background: var(--db-danger-soft); color: var(--db-danger); }
+  .stat-success { background: var(--db-success-soft); color: var(--db-success); }
+  .stat-neutral { background: var(--db-surface-soft); color: var(--db-ink); }
+  .filters { display: flex; gap: 6px; margin-bottom: 12px; overflow-x: auto; }
+  .filter-btn {
+    white-space: nowrap; padding: 6px 14px; border-radius: 20px; font-size: 12.5px;
+    border: 1px solid var(--db-surface-soft); background: transparent; color: var(--db-muted); cursor: pointer;
+  }
+  .filter-btn.active { background: var(--db-surface); border-color: var(--db-accent); color: var(--db-accent); font-weight: 700; }
+  .list-card { background: var(--db-surface); border-radius: 14px; padding: 4px 12px; }
+  .row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-top: 1px solid var(--db-surface-soft); }
+  .row:first-child { border-top: none; }
+  .row .desc { font-size: 13.5px; color: var(--db-ink); margin-bottom: 3px; }
+  .row .meta { font-size: 11.5px; color: var(--db-muted); display: flex; align-items: center; gap: 6px; }
+  .review-badge { width: 7px; height: 7px; border-radius: 50%; background: #f2b90c; display: inline-block; }
+  .amount { font-size: 14.5px; font-weight: 700; }
+  .amount-danger { color: var(--db-danger); }
+  .amount-success { color: var(--db-success); }
+  .amount-neutral { color: var(--db-ink); }
+  .review-btn { border: none; background: transparent; color: var(--db-accent); font-size: 12px; cursor: pointer; font-weight: 700; }
+  .empty-state { text-align: center; padding: 48px 16px; }
+  .empty-icon {
+    width: 52px; height: 52px; border-radius: 50%; background: var(--db-surface-soft); color: var(--db-muted);
+    display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; font-size: 22px;
+  }
+  .empty-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+  .empty-sub { font-size: 13px; color: var(--db-muted); line-height: 1.7; margin-bottom: 16px; }
+  .cta-btn {
+    display: inline-block; padding: 10px 20px; border-radius: 10px; border: 1.5px solid var(--db-accent);
+    color: var(--db-accent); font-size: 13.5px; font-weight: 700; text-decoration: none; background: transparent;
+    cursor: pointer;
+  }
+  .status { text-align: center; font-size: 13px; color: var(--db-muted); padding: 30px 0; }
+  .hidden { display: none !important; }
+  .review-modal-backdrop {
+    position: fixed; inset: 0; background: rgba(0,0,0,.45); display: flex; align-items: flex-end;
+    justify-content: center; z-index: 10;
+  }
+  .review-modal {
+    background: var(--db-surface); color: var(--db-ink); width: 100%; max-width: 480px; border-radius: 16px 16px 0 0;
+    padding: 20px 18px 26px;
+  }
+  .review-modal h3 { margin: 0 0 6px; font-size: 15px; }
+  .review-modal p { margin: 0 0 16px; font-size: 12.5px; color: var(--db-muted); line-height: 1.6; }
+  .review-options { display: flex; flex-direction: column; gap: 8px; }
+  .review-options button {
+    padding: 12px; border-radius: 10px; border: 1px solid var(--db-surface-soft); background: transparent;
+    color: var(--db-ink); font-size: 13.5px; cursor: pointer; text-align: right;
+  }
+  .review-options button:active { background: var(--db-surface-soft); }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top-row">
+    <h1>الحركات البنكية</h1>
+    <button class="close-btn" id="close-btn" aria-label="إغلاق">✕</button>
+  </div>
+
+  <div class="note-box">
+    سحب وإيداع وتحويل بين حساباتك بتتسجل هنا بس عشان تتابعها، من غير ما تدخل ضمن إجمالي مصروفاتك. أما خصم الاشتراكات والمشتريات فبيتحسب مصروف حقيقي زي أي حاجة تانية. أي حركة فيها اسم شخص من غير سياق واضح هتلاقيها هنا بعلامة صفراء تقولك "تحتاج مراجعة" لحد ما تحددها بنفسك.
+  </div>
+
+  <div id="status" class="status">بنجيب حركاتك...</div>
+
+  <div id="content" class="hidden">
+    <div class="stats-row">
+      <div class="stat-card stat-danger"><div class="lbl">سحب</div><div class="val" id="stat-withdrawal">0 ج.م</div></div>
+      <div class="stat-card stat-success"><div class="lbl">إيداع</div><div class="val" id="stat-deposit">0 ج.م</div></div>
+      <div class="stat-card stat-neutral"><div class="lbl">تحويل</div><div class="val" id="stat-transfer">0 ج.م</div></div>
+    </div>
+
+    <div class="filters">
+      <button class="filter-btn active" data-f="all">الكل</button>
+      <button class="filter-btn" data-f="withdrawal">سحب</button>
+      <button class="filter-btn" data-f="deposit">إيداع</button>
+      <button class="filter-btn" data-f="transfer">تحويل</button>
+      <button class="filter-btn" data-f="review">تحتاج مراجعة</button>
+    </div>
+
+    <div class="list-card" id="list-card"></div>
+  </div>
+
+  <div id="empty-state" class="empty-state hidden">
+    <div class="empty-icon">🏦</div>
+    <div class="empty-title">لسه مفيش حركات بنكية مسجلة</div>
+    <div class="empty-sub">اربط بنكك أو محفظتك من «حسابي» عشان دبّر يقرأ حركاتك أول بأول ويعرضها هنا تلقائيًا.</div>
+    <button class="cta-btn" id="go-account-btn">اذهب لحسابي</button>
+  </div>
+</div>
+
+<div id="review-modal-root"></div>
+
+<script>
+  const SUPABASE_URL = 'https://devywtyfzybnahdsqdkd.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_yHiX1cnEMCVEcjQxiIrqig_DRBiuveQ';
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const $ = (id) => document.getElementById(id);
+
+  function applySavedTheme() {
+    const saved = localStorage.getItem('dabbar-theme') || 'light';
+    document.documentElement.setAttribute('data-theme', saved);
+  }
+  applySavedTheme();
+
+  const fmt = (n) => Number(n || 0).toLocaleString('ar-EG', { maximumFractionDigits: 0 });
+  const TYPE_LABELS = { withdrawal: 'سحب', deposit: 'إيداع', transfer: 'تحويل' };
+
+  let allMovements = [];
+  let currentFilter = 'all';
+  let accessToken = null;
+
+  async function boot() {
+    const { data: { session } } = await sb.auth.getSession();
+    if (!session) {
+      $('status').textContent = 'محتاج تسجّل دخولك الأول من دبّر.';
+      return;
+    }
+    accessToken = session.access_token;
+    await loadMovements();
+  }
+
+  async function loadMovements() {
+    try {
+      const res = await fetch('/api?route=bank-movements&period=month', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        $('status').textContent = data.error || 'تعذر تحميل الحركات.';
+        return;
+      }
+      allMovements = data.movements || [];
+      $('status').classList.add('hidden');
+      if (!allMovements.length) {
+        $('empty-state').classList.remove('hidden');
+        return;
+      }
+      $('content').classList.remove('hidden');
+      $('stat-withdrawal').textContent = `${fmt(data.totals.withdrawal)} ج.م`;
+      $('stat-deposit').textContent = `${fmt(data.totals.deposit)} ج.م`;
+      $('stat-transfer').textContent = `${fmt(data.totals.transfer)} ج.م`;
+      renderList();
+    } catch (e) {
+      $('status').classList.remove('hidden');
+      $('status').textContent = 'تعذر الاتصال بالسيرفر.';
+    }
+  }
+
+  function renderList() {
+    const list = $('list-card');
+    list.innerHTML = '';
+    const filtered = allMovements.filter((m) => {
+      if (currentFilter === 'all') return true;
+      if (currentFilter === 'review') return m.needs_review;
+      return m.event_type === currentFilter;
+    });
+    if (!filtered.length) {
+      list.innerHTML = '<div style="padding:24px 0; text-align:center; color:var(--db-muted); font-size:13px;">مفيش حركات في التصنيف ده.</div>';
+      return;
+    }
+    filtered.forEach((m) => {
+      const row = document.createElement('div');
+      row.className = 'row';
+      const amountClass = m.event_type === 'withdrawal' ? 'amount-danger' : (m.event_type === 'deposit' ? 'amount-success' : 'amount-neutral');
+      const sign = m.event_type === 'withdrawal' ? '-' : (m.event_type === 'deposit' ? '+' : '');
+      const desc = m.description || m.counterparty || TYPE_LABELS[m.event_type] || m.label;
+      const date = new Date(m.created_at).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' });
+      row.innerHTML = `
+        <div>
+          <div class="desc">${desc}</div>
+          <div class="meta">${m.needs_review ? '<span class="review-badge"></span>' : ''}<span>${TYPE_LABELS[m.event_type] || m.label} · ${date}</span></div>
+        </div>
+        <div style="text-align:left;">
+          <div class="amount ${amountClass}">${sign}${fmt(m.amount)} ج.م</div>
+          ${m.needs_review ? `<button class="review-btn" data-id="${m.id}">حدد نوعها</button>` : ''}
+        </div>`;
+      list.appendChild(row);
+    });
+    list.querySelectorAll('.review-btn').forEach((btn) => {
+      btn.addEventListener('click', () => openReviewModal(btn.dataset.id));
+    });
+  }
+
+  document.querySelectorAll('.filter-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.filter-btn').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentFilter = btn.dataset.f;
+      renderList();
+    });
+  });
+
+  function openReviewModal(eventId) {
+    const movement = allMovements.find((m) => String(m.id) === String(eventId));
+    if (!movement) return;
+    const root = $('review-modal-root');
+    root.innerHTML = `
+      <div class="review-modal-backdrop" id="modal-backdrop">
+        <div class="review-modal">
+          <h3>الحركة دي إيه فعليًا؟</h3>
+          <p>${movement.description || movement.counterparty || 'تحويل'} — ${fmt(movement.amount)} ج.م. حدد نوعها عشان تتسجل في مكانها الصح.</p>
+          <div class="review-options">
+            <button data-r="debt_lent">ليّا عند الشخص ده (دين ليك)</button>
+            <button data-r="debt_borrowed">عليّا للشخص ده (دين عليك)</button>
+            <button data-r="expense">كان مصروف / دفعت مقابل حاجة</button>
+            <button data-r="income">دخل جاني</button>
+            <button data-r="keep_transfer">لأ، سيبها حركة بنكية عادية</button>
+          </div>
+        </div>
+      </div>`;
+    root.querySelectorAll('[data-r]').forEach((btn) => {
+      btn.addEventListener('click', () => resolveMovement(eventId, btn.dataset.r));
+    });
+    $('modal-backdrop').addEventListener('click', (e) => { if (e.target.id === 'modal-backdrop') root.innerHTML = ''; });
+  }
+
+  async function resolveMovement(eventId, resolution) {
+    $('review-modal-root').innerHTML = '';
+    try {
+      await fetch('/api?route=bank-movements', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` },
+        body: JSON.stringify({ action: 'resolve', eventId, resolution }),
+      });
+      await loadMovements();
+    } catch (e) {
+      // متبقاش تفشل الواجهة لو فشل التحديث؛ المستخدم يقدر يحاول تاني
+    }
+  }
+
+  $('close-btn').addEventListener('click', () => { window.location.href = './dabbar-dashboard-full.html'; });
+  $('go-account-btn')?.addEventListener('click', () => { window.location.href = './dabbar-dashboard-full.html#account-bank-linking'; });
+
+  boot();
+</script>
+</body>
+</html>

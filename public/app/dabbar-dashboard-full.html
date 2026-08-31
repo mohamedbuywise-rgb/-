@@ -739,7 +739,29 @@
         html[data-theme="light"] .personalized-insight-card { background: linear-gradient(135deg, #d1fae5, #047857); color:#ecfdf5; box-shadow:0 18px 38px rgba(4,120,87,.16); }
         html[data-theme="light"] .personalized-insight-brand, html[data-theme="light"] .personalized-insight-role, html[data-theme="light"] .personalized-insight-copy p { color:#ecfdf5 !important; }
         html[data-theme="light"] .personalized-insight-label { background:rgba(6,78,59,.28) !important; color:#ecfdf5 !important; }
-        html[data-theme="light"] .personalized-insight-close { background:rgba(6,78,59,.24) !important; color:#ecfdf5 !important; }
+        html[data-theme="light"] .personalized-insight-card { background: linear-gradient(135deg, #075e48 0%, #064e3b 100%) !important; border-color: #047857 !important; color: #f0fdf4 !important; }
+        html[data-theme="light"] .personalized-insight-card .personalized-insight-brand,
+        html[data-theme="light"] .personalized-insight-card .personalized-insight-role,
+        html[data-theme="light"] .personalized-insight-card .personalized-insight-label,
+        html[data-theme="light"] .personalized-insight-card .personalized-insight-kicker,
+        html[data-theme="light"] .personalized-insight-card .personalized-insight-copy h3,
+        html[data-theme="light"] .personalized-insight-card .personalized-insight-copy p,
+        html[data-theme="light"] .personalized-insight-card .personalized-insight-suggestion { color:#f0fdf4 !important; }
+        html[data-theme="light"] .personalized-insight-card .personalized-insight-art { color:#6ee7b7 !important; }
+        html[data-theme="light"] .personalized-insight-close { background:rgba(6,78,59,.45) !important; color:#ecfdf5 !important; }
+        html:not([data-theme="light"]) .personalized-insight-card { background: linear-gradient(135deg, #3a2b08 0%, #17130a 55%, #0b1512 100%) !important; border-color: rgba(244,198,72,.62) !important; box-shadow: 0 18px 40px rgba(0,0,0,.28), inset 0 0 0 1px rgba(244,198,72,.08); }
+        html:not([data-theme="light"]) .personalized-insight-card .personalized-insight-brand,
+        html:not([data-theme="light"]) .personalized-insight-card .personalized-insight-role,
+        html:not([data-theme="light"]) .personalized-insight-card .personalized-insight-label,
+        html:not([data-theme="light"]) .personalized-insight-card .personalized-insight-kicker,
+        html:not([data-theme="light"]) .personalized-insight-card .personalized-insight-copy h3,
+        html:not([data-theme="light"]) .personalized-insight-card .personalized-insight-copy p,
+        html:not([data-theme="light"]) .personalized-insight-card .personalized-insight-suggestion { color:#fff4c2 !important; }
+        html:not([data-theme="light"]) .personalized-insight-card .personalized-insight-art { color:#f4c648 !important; }
+        html:not([data-theme="light"]) .personalized-insight-card .personalized-insight-label,
+        html:not([data-theme="light"]) .personalized-insight-card .personalized-insight-close { border-color:rgba(244,198,72,.45) !important; background:rgba(244,198,72,.10) !important; color:#ffe58a !important; }
+        html:not([data-theme="light"]) .personalized-insight-card .personalized-insight-share { border-color:#f4c648 !important; color:#fff4c2 !important; }
+        html:not([data-theme="light"]) .personalized-insight-card .personalized-insight-more { background:#f4c648 !important; color:#241b05 !important; }
 
 
         #tab-daily > div:first-child,
@@ -775,14 +797,15 @@
             display: none !important;
         }
 
-        #tab-monthly.active > #quick-entry-card { order: 1; }
-        #tab-monthly.active > #daily-reminder-card { order: 2; }
-        #tab-monthly.active > #active-days-card { order: 3; }
-        #tab-monthly.active > #planning-card { order: 4; }
-        #tab-monthly.active > #expense-ledger-card { order: 5; }
-        #tab-monthly.active > #monthly-categories-card { order: 6; }
-        #tab-monthly.active > #monthly-tip-card { order: 7; }
-        #tab-monthly.active > #footer-cta { order: 8; }
+        #tab-monthly.active > #personalized-insight-card { order: 1; }
+        #tab-monthly.active > #quick-entry-card { order: 2; }
+        #tab-monthly.active > #daily-reminder-card { order: 3; }
+        #tab-monthly.active > #active-days-card { order: 4; }
+        #tab-monthly.active > #planning-card { order: 5; }
+        #tab-monthly.active > #expense-ledger-card { order: 6; }
+        #tab-monthly.active > #monthly-categories-card { order: 7; }
+        #tab-monthly.active > #monthly-tip-card { order: 8; }
+        #tab-monthly.active > #footer-cta { order: 9; }
 
         #tab-monthly.active > div:not(#quick-entry-card):not(#monthly-categories-card):not(#monthly-tip-card):not(#footer-cta) {
             order: 4;
@@ -2946,6 +2969,8 @@
         let activeAccountSubpage = null;
 
         function normalizeAccountRoute() {
+            const requested = new URLSearchParams(window.location.search).get('accountSubpage');
+            if (requested && ACCOUNT_SUBPAGE_ROUTES[requested]) return requested;
             const path = window.location.pathname.replace(/\/+$/, '') || '/';
             return path;
         }

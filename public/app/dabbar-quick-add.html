@@ -74,10 +74,11 @@
   }
   .mode-switch button.active { color: #0E655B; }
   .mode-switch .pill {
-    position: absolute; top: 4px; bottom: 4px; width: calc(50% - 4px); right: 4px;
+    position: absolute; top: 4px; bottom: 4px; width: calc(33.333% - 5.33px); right: 4px;
     background: #fff; border-radius: 9px; transition: transform .28s cubic-bezier(.3,.8,.3,1);
   }
   .mode-switch.mode-voice .pill { transform: translateX(-100%); }
+  .mode-switch.mode-invoice .pill { transform: translateX(-200%); }
 
   textarea {
     width: 100%; min-height: 70px; border-radius: 12px; border: none; padding: 12px 14px;
@@ -149,6 +150,10 @@
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v1a7 7 0 0 1-14 0v-1M12 19v3"/></svg>
         صوت
       </button>
+      <button type="button" id="mode-invoice-btn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
+        فاتورة
+      </button>
     </div>
 
     <div id="input-view" class="hidden">
@@ -184,6 +189,25 @@
           <div class="btn-row">
             <button class="btn-secondary" id="voice-retry-btn">إعادة التسجيل</button>
             <button class="btn-primary" id="voice-send-btn">تحليل الصوت</button>
+          </div>
+        </div>
+      </div>
+
+      <div id="invoice-pane" class="hidden">
+        <div id="invoice-idle" style="text-align:center;">
+          <p class="voice-hint" style="margin-bottom:14px;">صوّر الفاتورة أو ارفع صورة موجودة عندك، ودبّر هيقرا الأصناف والمبلغ</p>
+          <div class="btn-row" style="flex-direction:column; gap:10px;">
+            <button type="button" class="btn-primary" id="invoice-camera-btn">📷 تصوير الفاتورة</button>
+            <button type="button" class="btn-secondary" id="invoice-upload-btn">رفع صورة من المعرض</button>
+          </div>
+          <input type="file" id="invoice-camera-input" accept="image/*" capture="environment" class="hidden">
+          <input type="file" id="invoice-upload-input" accept="image/*" class="hidden">
+        </div>
+        <div id="invoice-preview" class="hidden" style="text-align:center;">
+          <img id="invoice-preview-img" style="max-width:100%; max-height:220px; border-radius:12px; margin-bottom:12px;">
+          <div class="btn-row">
+            <button class="btn-secondary" id="invoice-retry-btn">صورة تانية</button>
+            <button class="btn-primary" id="invoice-send-btn">تحليل الفاتورة</button>
           </div>
         </div>
       </div>
@@ -224,18 +248,27 @@
   function setMode(mode) {
     inputMode = mode;
     const isVoice = mode === 'voice';
+    const isInvoice = mode === 'invoice';
     $('mode-switch')?.classList.toggle('mode-voice', isVoice);
-    $('mode-text-btn')?.classList.toggle('active', !isVoice);
+    $('mode-switch')?.classList.toggle('mode-invoice', isInvoice);
+    $('mode-text-btn')?.classList.toggle('active', mode === 'text');
     $('mode-voice-btn')?.classList.toggle('active', isVoice);
-    show('text-pane', !isVoice);
+    $('mode-invoice-btn')?.classList.toggle('active', isInvoice);
+    show('text-pane', mode === 'text');
     show('voice-pane', isVoice);
+    show('invoice-pane', isInvoice);
     if (isVoice) {
       show('voice-idle', true); show('voice-recording', false); show('voice-preview', false);
+    }
+    if (isInvoice) {
+      show('invoice-idle', true); show('invoice-preview', false);
+      invoiceFile = null;
     }
     $('status').textContent = '';
   }
   $('mode-text-btn')?.addEventListener('click', () => setMode('text'));
   $('mode-voice-btn')?.addEventListener('click', () => setMode('voice'));
+  $('mode-invoice-btn')?.addEventListener('click', () => setMode('invoice'));
 
   function getSharedText() {
     const params = new URLSearchParams(window.location.search);
@@ -456,12 +489,49 @@
     reader.readAsDataURL(recordedBlob);
   });
 
-  // ============ استقبال ملف صوتي عبر "مشاركة" (Share Target) ============
+  // ============ فاتورة: تصوير أو رفع صورة، بنفس محرك "امسح فاتورة" (entry_invoice_draft) — بيستخدم نفس حد الـ50 فاتورة الشهري أيًا كان مصدر الصورة ============
+  let invoiceFile = null;
+  function setInvoicePreview(file) {
+    invoiceFile = file;
+    $('invoice-preview-img').src = URL.createObjectURL(file);
+    show('invoice-idle', false);
+    show('invoice-preview', true);
+  }
+  $('invoice-camera-btn')?.addEventListener('click', () => $('invoice-camera-input')?.click());
+  $('invoice-upload-btn')?.addEventListener('click', () => $('invoice-upload-input')?.click());
+  $('invoice-camera-input')?.addEventListener('change', (e) => { const f = e.target.files?.[0]; if (f) setInvoicePreview(f); e.target.value = ''; });
+  $('invoice-upload-input')?.addEventListener('change', (e) => { const f = e.target.files?.[0]; if (f) setInvoicePreview(f); e.target.value = ''; });
+  $('invoice-retry-btn')?.addEventListener('click', () => { invoiceFile = null; show('invoice-preview', false); show('invoice-idle', true); $('status').textContent = ''; });
+  $('invoice-send-btn')?.addEventListener('click', () => {
+    if (!invoiceFile) return;
+    show('invoice-preview', false);
+    const reader = new FileReader();
+    reader.onloadend = () => analyzeInvoiceImage(reader.result);
+    reader.readAsDataURL(invoiceFile);
+  });
+
+  async function analyzeInvoiceImage(imageBase64) {
+    $('status').textContent = 'بنقرا الفاتورة...';
+    show('mode-switch', false);
+    try {
+      const result = await callAssistant('entry_invoice_draft', { imageBase64 });
+      $('status').textContent = '';
+      renderDraft(result.drafts);
+    } catch (e) {
+      $('status').textContent = e.message || 'معرفتش أقرا الفاتورة. جرّب صورة أوضح.';
+      show('input-view', true);
+      show('mode-switch', true);
+      setMode('invoice');
+    }
+  }
+
+  // ============ استقبال ملف صوتي أو صورة فاتورة عبر "مشاركة" (Share Target) ============
   // الملف بيتخزن مؤقتًا في IndexedDB بواسطة الـ Service Worker (sw.js) وقت استقبال الـ POST،
   // وهنا بنقراه، نحوّله لـ base64، وننضفه من التخزين فورًا عشان مايتبعتش مرتين بالغلط.
   const SHARE_DB_NAME = 'dabbar-share-db';
   const SHARE_STORE = 'files';
-  const SHARE_KEY = 'pending-audio';
+  const SHARE_KEY_AUDIO = 'pending-audio';
+  const SHARE_KEY_IMAGE = 'pending-image';
 
   function openShareDb() {
     return new Promise((resolve, reject) => {
@@ -472,16 +542,16 @@
     });
   }
 
-  async function takeSharedAudioFile() {
+  async function takeSharedFile(key) {
     try {
       const db = await openShareDb();
       const file = await new Promise((resolve, reject) => {
         const tx = db.transaction(SHARE_STORE, 'readwrite');
         const store = tx.objectStore(SHARE_STORE);
-        const getReq = store.get(SHARE_KEY);
+        const getReq = store.get(key);
         getReq.onsuccess = () => {
           const result = getReq.result;
-          store.delete(SHARE_KEY);
+          store.delete(key);
           resolve(result || null);
         };
         getReq.onerror = () => reject(getReq.error);
@@ -508,13 +578,47 @@
     return type.startsWith('audio/') || /\.(ogg|oga|opus|mp3|m4a|wav|amr|aac|3gp|flac|caf|mka)$/.test(name);
   }
 
+  function isLikelyImageFile(file) {
+    const type = String(file?.type || '').toLowerCase();
+    const name = String(file?.name || '').toLowerCase();
+    return type.startsWith('image/') || /\.(jpg|jpeg|png|webp|heic)$/.test(name);
+  }
+
+  function getSharedKind() {
+    try { return new URLSearchParams(window.location.search).get('kind') || ''; } catch { return ''; }
+  }
+
+  // فاتورة جاية عبر مشاركة صورة: بتتعامل بنفس محرك entry_invoice_draft، وبتاخد من نفس حد الـ50 فاتورة الشهري
+  // مهما كان مصدر الصورة (تصوير مباشر، رفع من المعرض، أو مشاركة من تطبيق تاني زي المعرض/واتساب).
+  async function handleSharedImageIfAny() {
+    if (!isSharedLaunch()) return false;
+    if (getSharedKind() && getSharedKind() !== 'image') return false;
+    const file = await takeSharedFile(SHARE_KEY_IMAGE);
+    if (!file || !file.size) return false;
+    if (!isLikelyImageFile(file)) {
+      $('headline').textContent = 'الملف ده مش صورة';
+      $('status').textContent = 'دبّر يستقبل نص، صوت، أو صورة فاتورة. جرّب صورة واضحة للفاتورة.';
+      show('input-view', true);
+      show('mode-switch', true);
+      setMode('text');
+      return true;
+    }
+    show('input-view', false);
+    show('mode-switch', false);
+    $('headline').textContent = 'استلمنا صورة الفاتورة';
+    const imageBase64 = await blobToBase64(file);
+    await analyzeInvoiceImage(imageBase64);
+    return true;
+  }
+
   async function handleSharedAudioIfAny() {
     if (!isSharedLaunch()) return false;
-    const file = await takeSharedAudioFile();
+    if (getSharedKind() && getSharedKind() !== 'audio') return false;
+    const file = await takeSharedFile(SHARE_KEY_AUDIO);
     if (!file || !file.size) return false;
     if (!isLikelyAudioFile(file)) {
       $('headline').textContent = 'الملف ده مش صوت';
-      $('status').textContent = 'دبّر يستقبل نص أو Voice فقط. اختار تسجيلًا صوتيًا وجرب المشاركة تاني.';
+      $('status').textContent = 'دبّر يستقبل نص، صوت، أو صورة فاتورة. جرّب تسجيل صوتي أو صورة فاتورة وجرب المشاركة تاني.';
       show('input-view', true);
       show('mode-switch', true);
       setMode('text');
@@ -550,6 +654,9 @@
 
     const handledSharedAudio = await handleSharedAudioIfAny();
     if (handledSharedAudio) return;
+
+    const handledSharedImage = await handleSharedImageIfAny();
+    if (handledSharedImage) return;
 
     const sharedText = getSharedText();
     if (sharedText) {

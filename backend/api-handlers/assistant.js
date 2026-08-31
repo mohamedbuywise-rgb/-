@@ -4,7 +4,7 @@ import { getDebtsSummaryText } from '../../lib/debts.js';
 import { extractItemizedReceiptFromImageBase64, askDabbarChat, classifyMessage, transcribeAudioBase64 } from '../../lib/groq.js';
 import { saveInvoiceRecord, deleteInvoiceById } from '../../lib/invoices.js';
 import { hasActiveSubscription, isInTrial } from '../../lib/users.js';
-import { checkOcrUsage, checkChatUsage, checkVoiceUsage, refundOcrUsage, refundUsage } from '../../lib/rateLimits.js';
+import { checkOcrUsage, checkChatUsage, checkVoiceUsage, checkTextUsage, refundOcrUsage, refundUsage } from '../../lib/rateLimits.js';
 import { normalizeDigits, extractDeterministicExpense, correctDebtDirections, detectCurrency, currencyLabel, normalizeFinancialTransaction, reconcileSingleTransaction } from '../../lib/textNormalize.js';
 import { maybeSendBudgetAlert } from '../../lib/webPush.js';
 import { getDashboardUserFromRequest } from '../../lib/dashboardAuth.js';
@@ -235,6 +235,19 @@ async function handleAsk(userId, body, res) {
 async function handleEntryDraft(userId, body, res) {
   let text = String(body.text || '').trim();
   let voiceUsageCharged = false;
+
+  // الإدخال اليدوي النصي له عداد شهري موحد مع رسائل Telegram وSMS.
+  // الصوت لا يستهلك هذا العداد؛ هو محسوب في عداد voice مستقل.
+  if (!body.audioBase64) {
+    if (!text) return res.status(400).json({ error: 'اكتب وصف العملية الأول.' });
+    const textUsage = await checkTextUsage(userId);
+    if (!textUsage.allowed) {
+      if (textUsage.isTrial) {
+        return res.status(403).json({ error: 'خلصت حدود الإدخال النصي في التجربة المجانية. اشترك عشان تكمل.', trialEnded: true });
+      }
+      return res.status(429).json({ error: 'وصلت للحد الأقصى من الإدخالات النصية الشهر ده. هيرجع تاني بداية الشهر الجاي.', limitReached: true });
+    }
+  }
   if (body.audioBase64) {
     const audioDurationSeconds = Number(body.audioDurationSeconds);
     if (Number.isFinite(audioDurationSeconds) && audioDurationSeconds > 30) {
@@ -302,9 +315,22 @@ async function handleEntryDraft(userId, body, res) {
 async function handleEntryInvoiceDraft(userId, body, res) {
   const imageBase64 = String(body.imageBase64 || '').replace(/^data:[^,]+,/, '');
   if (!imageBase64) return res.status(400).json({ error: 'الصورة فاضية.' });
+
+  // كل صور الفواتير من أي مصدر تستخدم عداد OCR واحد: الشهري، المساعد، وTelegram.
+  const usage = await checkOcrUsage(userId);
+  if (!usage.allowed) {
+    if (usage.isTrial) {
+      return res.status(403).json({ error: 'خلصت حدود مسح الفواتير في التجربة المجانية. اشترك عشان تكمل.', trialEnded: true });
+    }
+    return res.status(429).json({ error: 'وصلت للحد الأقصى من 50 فاتورة الشهر ده. هيرجع تاني بداية الشهر الجاي.', limitReached: true });
+  }
+
   const receipt = await extractItemizedReceiptFromImageBase64(imageBase64);
-  if (!receipt.success) return res.status(422).json({ error: receipt.hint || 'معرفتش أقرا الفاتورة. جرّب صورة أوضح.' });
-  return res.status(200).json({ drafts: [{ type: 'invoice', amount: Number(receipt.totalAmount), merchant: receipt.merchant || '', items: receipt.items || [], category: receipt.items?.[0]?.category || 'مصروف عام', note: receipt.merchant || 'فاتورة', sourceText: 'فاتورة مصوّرة', needsConfirmation: true, confidence: 0.9 }] });
+  if (!receipt.success) {
+    await refundUsage(userId, 'ocr');
+    return res.status(422).json({ error: receipt.hint || 'معرفتش أقرا الفاتورة. جرّب صورة أوضح.', refunded: true });
+  }
+  return res.status(200).json({ drafts: [{ type: 'invoice', amount: Number(receipt.totalAmount), merchant: receipt.merchant || '', items: receipt.items || [], category: receipt.items?.[0]?.category || 'مصروف عام', note: receipt.merchant || 'فاتورة', sourceText: 'فاتورة مصوّرة', needsConfirmation: true, confidence: 0.9 }], usage: !usage.isTrial && usage.remaining !== null ? { remaining: usage.remaining, limit: usage.limit } : null });
 }
 
 // ============ حفظ معاملة واحدة (مصروف / دخل / شراء / أصل / تحويل / دين / فاتورة) — القلب المشترك ============

@@ -1,7 +1,7 @@
 import { supabase } from '../../lib/supabaseClient.js';
 import { getDashboardUserFromRequest } from '../../lib/dashboardAuth.js';
 import { getMonthRange, getExpensesBetween, buildCategoryBreakdown } from '../../lib/expenses.js';
-import { computeNetByPerson } from '../../lib/debts.js';
+import { computeNetByPerson, getDebtPeople } from '../../lib/debts.js';
 import { getInvoicesList, getInvoiceDetail } from '../../lib/invoices.js';
 import { MONTH_NAMES, CATEGORY_EMOJI, SUBSCRIPTION_PRICE_EGP, INSTAPAY_LINK } from '../../lib/config.js';
 import { hasActiveSubscription, getSubscriptionExpiry, isInTrial, getTrialDaysLeft } from '../../lib/users.js';
@@ -212,7 +212,7 @@ export default async function handler(req, res) {
     };
 
     // ---- الديون ----
-    const netByPerson = await computeNetByPerson(dataUserId);
+    const [netByPerson, debtPeople] = await Promise.all([computeNetByPerson(dataUserId), getDebtPeople(dataUserId)]);
     const entries = Object.values(netByPerson).filter((v) => v.net !== 0);
     const owedToYou = entries.filter((v) => v.net > 0).sort((a, b) => b.net - a.net);
     const youOwe = entries.filter((v) => v.net < 0).sort((a, b) => a.net - b.net);
@@ -363,6 +363,7 @@ export default async function handler(req, res) {
         youOweTotal,
         owedToYou: owedToYou.map((v) => ({ name: v.displayName, amount: v.net })),
         youOwe: youOwe.map((v) => ({ name: v.displayName, amount: Math.abs(v.net) })),
+        settledPeople: debtPeople.filter((p) => p.status === 'settled').map((p) => ({ name: p.name, lastSettlement: p.lastSettlement, transactionCount: p.transactionCount })),
       },
       flow: {
         in: flowIn,

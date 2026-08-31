@@ -1577,7 +1577,25 @@
             .fade-up, .mascot-float, .active-days-flame, .active-days-flame-wrap::before { animation: none !important; }
         }
     </style>
-</head>
+
+        /* ===================== Debt & account statement refresh ===================== */
+        #tab-debts .debt-action-bar { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.55rem; }
+        #tab-debts .debt-action-btn { min-height:3.55rem; border:1px solid rgba(244,198,72,.22); background:linear-gradient(145deg,rgba(244,198,72,.11),rgba(15,23,42,.72)); border-radius:1rem; color:#f8fafc; font-size:.69rem; font-weight:900; line-height:1.3; padding:.65rem .4rem; transition:transform .16s ease, border-color .16s ease, background .16s ease; }
+        #tab-debts .debt-action-btn:hover { border-color:rgba(244,198,72,.62); background:linear-gradient(145deg,rgba(244,198,72,.19),rgba(15,23,42,.88)); }
+        #tab-debts .debt-action-btn:active { transform:scale(.97); }
+        #tab-debts .debt-action-btn .debt-action-icon { display:block; font-size:1.05rem; margin-bottom:.2rem; }
+        #tab-debts .debt-search-shell { border:1px solid rgba(244,198,72,.22); background:rgba(15,23,42,.58); border-radius:1.25rem; padding:.8rem; }
+        #tab-debts .debt-search-input { width:100%; background:rgba(2,6,23,.54); border:1px solid rgba(148,163,184,.24); border-radius:.85rem; color:#f8fafc; outline:none; font-size:.75rem; padding:.72rem .85rem; }
+        #tab-debts .debt-search-input:focus { border-color:rgba(244,198,72,.72); box-shadow:0 0 0 3px rgba(244,198,72,.10); }
+        #tab-debts .debt-search-result { border-top:1px solid rgba(148,163,184,.13); padding-top:.55rem; margin-top:.55rem; }
+        #tab-debts .debt-search-result button { width:100%; text-align:right; }
+        #tab-debts .debt-person-row { transition:background .16s ease, transform .16s ease; }
+        #tab-debts .debt-person-row:hover { background:rgba(244,198,72,.06); transform:translateY(-1px); }
+        #person-debt-overlay .statement-search { width:100%; background:rgba(2,6,23,.5); border:1px solid rgba(148,163,184,.22); border-radius:.85rem; color:#f8fafc; outline:none; font-size:.72rem; padding:.68rem .8rem; }
+        #person-debt-overlay .statement-search:focus { border-color:rgba(244,198,72,.72); box-shadow:0 0 0 3px rgba(244,198,72,.10); }
+        @media (max-width:430px) { #tab-debts .debt-action-btn { font-size:.62rem; min-height:3.35rem; } }
+
+    </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col overflow-hidden">
 
     <div id="dashboard-load-error" class="hidden mx-auto mt-4 w-[min(92%,56rem)] rounded-2xl border border-red-300/40 bg-red-50 px-4 py-3 text-center text-sm font-bold text-red-700" role="alert"></div>
@@ -1679,6 +1697,17 @@
                     </div>
                 </div>
             </div>
+
+            <button type="button" id="bank-movements-card" class="w-full flex items-center justify-between gap-3 rounded-2xl border border-emerald-500/25 bg-emerald-500/[0.06] px-4 py-3 text-right transition hover:bg-emerald-500/10">
+                <div class="flex items-center gap-3 min-w-0">
+                    <span class="shrink-0 flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500/15 text-lg">🏦</span>
+                    <div class="min-w-0">
+                        <span class="block text-[13px] font-bold text-slate-100">الحركات البنكية</span>
+                        <span class="block text-[10.5px] text-slate-400">سحب وإيداع وتحويلات — من غير ما تأثر على مصاريفك</span>
+                    </div>
+                </div>
+                <span class="shrink-0 text-slate-400">‹</span>
+            </button>
 
             <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3" id="monthly-categories-card">
                 <div id="balance-card" class="hidden rounded-[1.35rem] border border-emerald-500/20 bg-emerald-500/[0.045] p-3.5 space-y-3">
@@ -1911,6 +1940,19 @@
                 <p class="text-[11px] text-slate-400" id="debts-net-note">لسه معندكش ديون مسجلة.</p>
             </div>
 
+            <div class="debt-action-bar" aria-label="إجراءات الديون وكشف الحساب">
+                <button type="button" class="debt-action-btn" id="open-active-debt-search">
+                    <span class="debt-action-icon">🔎</span>بحث في الديون
+                </button>
+                <button type="button" class="debt-action-btn" id="open-settlement-message">
+                    <span class="debt-action-icon">✅</span>رسالة عند التصفية
+                </button>
+                <button type="button" class="debt-action-btn" id="open-debt-statement">
+                    <span class="debt-action-icon">📒</span>كشف الحساب
+                </button>
+            </div>
+            <p id="debt-action-hint" class="text-[10px] text-slate-500 text-center -mt-2">اختار أي إجراء من الثلاثة — الأسماء النشطة في البحث، والتاريخ الكامل محفوظ في كشف الحساب.</p>
+
             <div class="grid grid-cols-2 gap-3">
                 <div class="bg-slate-950/60 border border-emerald-500/20 p-3.5 rounded-2xl">
                     <span class="text-[11px] text-slate-400 block mb-1">ليك عند الناس</span>
@@ -1920,6 +1962,32 @@
                     <span class="text-[11px] text-slate-400 block mb-1">عليك للناس</span>
                     <span class="text-lg font-bold text-rose-400" id="debts-you-owe-total">—</span>
                 </div>
+            </div>
+
+            <div id="debts-search-panel" class="debt-search-shell hidden space-y-2.5">
+                <div class="flex items-center justify-between gap-2">
+                    <div>
+                        <h4 class="text-xs font-black text-slate-100">بحث في الديون النشطة</h4>
+                        <p class="text-[10px] text-slate-500 mt-0.5">بيظهر هنا اللي لسه عنده رصيد عليك أو ليك.</p>
+                    </div>
+                    <button type="button" id="close-active-debt-search" class="text-slate-500 hover:text-slate-200 text-xs" aria-label="إغلاق البحث">✕</button>
+                </div>
+                <input id="debts-active-search" class="debt-search-input" type="search" autocomplete="off" placeholder="اكتب اسم الشخص..." aria-label="بحث في الديون النشطة">
+                <p id="debts-active-search-count" class="text-[10px] text-slate-500"></p>
+                <div id="debts-search-results" class="debt-search-result space-y-1"></div>
+            </div>
+
+            <div id="debt-statement-panel" class="debt-search-shell hidden space-y-2.5">
+                <div class="flex items-center justify-between gap-2">
+                    <div>
+                        <h4 class="text-xs font-black text-slate-100">كشف الحساب — كل الأشخاص</h4>
+                        <p class="text-[10px] text-slate-500 mt-0.5">هنا تلاقي النشط والمتصفّي، والتصفية لا تمسح أي تعامل.</p>
+                    </div>
+                    <button type="button" id="close-debt-statement" class="text-slate-500 hover:text-slate-200 text-xs" aria-label="إغلاق كشف الحساب">✕</button>
+                </div>
+                <input id="debt-statement-search" class="debt-search-input" type="search" autocomplete="off" placeholder="ابحث باسم الشخص في كشف الحساب..." aria-label="بحث في كشف الحساب">
+                <p id="debt-statement-status" class="text-[10px] text-slate-500">جاري تحميل الأسماء...</p>
+                <div id="debt-statement-results" class="debt-search-result space-y-1"></div>
             </div>
 
             <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3" id="debts-owed-to-you-card" style="display:none;">
@@ -1939,7 +2007,7 @@
             <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-3.5 flex items-start gap-3">
                 <div class="w-8 h-8 rounded-full bg-slate-700/50 text-slate-300 flex items-center justify-center text-xs font-bold shrink-0 border border-slate-700">ℹ️</div>
                 <div class="text-xs text-slate-300 leading-relaxed">
-                    عشان تسجل سلفة جديدة، ابعت رسالة زي "عطيت محمد 200 جنيه" أو "استلفت من سارة 100 جنيه" في بوت تليجرام.
+                    اضغط على اسم أي شخص عشان تفتح <b class="text-amber-300">كشف حسابه الكامل</b> من أول تعامل، حتى لو الحساب اتصفّى واختفى من الديون النشطة.
                 </div>
             </div>
 
@@ -2589,22 +2657,52 @@
         </div>
     </div>
 
-    <!-- Person Debt Detail Overlay -->
+    <!-- Person Debt Detail Overlay / full account statement -->
     <div id="person-debt-overlay" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
-        <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[80vh]">
-            <div class="bg-slate-900/90 border-b border-slate-800/80 p-5 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-slate-700 to-slate-600 flex items-center justify-center text-slate-100 font-black text-xl">🧑</div>
-                    <div>
-                        <h2 class="font-bold text-base text-slate-100 leading-tight" id="person-debt-name">—</h2>
-                        <span class="text-xs font-semibold" id="person-debt-net-line">—</span>
+        <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[86vh]">
+            <div class="bg-slate-900/95 border-b border-slate-800/80 p-5 space-y-3">
+                <div class="flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-slate-700 to-slate-600 flex items-center justify-center text-slate-100 font-black text-xl shrink-0">🧑</div>
+                        <div class="min-w-0">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h2 class="font-bold text-base text-slate-100 leading-tight truncate" id="person-debt-name">—</h2>
+                                <span class="text-[9px] bg-amber-500/15 border border-amber-500/25 text-amber-300 rounded-full px-2 py-0.5 font-black">كشف كامل</span>
+                            </div>
+                            <span class="text-xs font-semibold" id="person-debt-net-line">—</span>
+                        </div>
                     </div>
+                    <button id="close-person-debt" class="w-9 h-9 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-sm shrink-0">✕</button>
                 </div>
-                <button id="close-person-debt" class="w-9 h-9 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-sm">✕</button>
+                <div class="relative">
+                    <input id="person-statement-search" class="statement-search" type="search" autocomplete="off" placeholder="ابحث داخل التعاملات أو الملاحظات..." aria-label="بحث داخل كشف الحساب">
+                    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 text-xs">⌕</span>
+                </div>
+                <p id="person-statement-meta" class="text-[10px] text-slate-500">كل التعاملات المالية بينكم محفوظة هنا.</p>
             </div>
-
             <div class="flex-1 overflow-y-auto p-5 space-y-2.5" id="person-debt-list">
                 <p class="text-xs text-slate-500 text-center p-4">جاري التحميل...</p>
+            </div>
+            <div class="border-t border-slate-800/80 p-3 text-center text-[10px] text-slate-500">التصفية تمسح الاسم من الديون النشطة فقط — لا تحذف كشف الحساب.</div>
+        </div>
+    </div>
+
+    <!-- Settlement message preview -->
+    <div id="settlement-message-overlay" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="max-w-sm w-full bg-slate-900 border border-amber-500/25 rounded-3xl shadow-2xl overflow-hidden">
+            <div class="p-5 flex items-start justify-between gap-3 border-b border-slate-800/80">
+                <div>
+                    <span class="text-[10px] text-amber-300 font-black uppercase tracking-wider">رسالة تصفية الحساب</span>
+                    <h2 class="font-black text-lg text-slate-100 mt-1">الحساب اتصفّى بنجاح ✅</h2>
+                </div>
+                <button id="close-settlement-message" class="w-9 h-9 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-sm">✕</button>
+            </div>
+            <div class="p-5 space-y-4">
+                <div class="rounded-2xl bg-emerald-500/10 border border-emerald-500/25 p-4 leading-relaxed">
+                    <p class="text-sm font-bold text-emerald-300" id="settlement-message-copy">تم تصفية الحساب بينك وبين محمد أحمد، وتم مسح اسمه من خانة الديون النشطة.</p>
+                    <p class="text-xs text-slate-300 mt-2 leading-relaxed">كل التعاملات المالية بينكم ما زالت محفوظة في <b class="text-amber-300">كشف الحساب</b> وتقدر ترجع لها في أي وقت.</p>
+                </div>
+                <button type="button" id="settlement-open-statement" class="w-full bg-amber-400 hover:bg-amber-300 text-slate-950 font-black py-3 rounded-2xl text-xs transition">📒 افتح كشف الحساب</button>
             </div>
         </div>
     </div>
@@ -4465,120 +4563,183 @@
             });
         }
 
-        function renderDebts(debts) {
-            const netEl = document.getElementById('debts-net');
-            const noteEl = document.getElementById('debts-net-note');
-            netEl.textContent = `${debts.net >= 0 ? '+' : ''}${fmt(debts.net)}`;
-            netEl.className = `text-3xl font-black ${debts.net >= 0 ? 'text-emerald-300' : 'text-rose-400'}`;
-            if (debts.net === 0 && debts.owedToYouTotal === 0 && debts.youOweTotal === 0) {
-                noteEl.textContent = 'لسه معندكش ديون مسجلة.';
-            } else {
-                noteEl.textContent = debts.net >= 0 ? `ليك أكتر مما عليك بـ ${fmt(Math.abs(debts.net))}` : `عليك أكتر مما ليك بـ ${fmt(Math.abs(debts.net))}`;
-            }
+        let debtUiState = {
+            activePeople: [],
+            statementPeople: [],
+            settledPeople: [],
+            personTransactions: [],
+            currentPersonName: '',
+        };
 
-            document.getElementById('debts-owed-to-you-total').textContent = fmt(debts.owedToYouTotal);
-            document.getElementById('debts-you-owe-total').textContent = fmt(debts.youOweTotal);
+        function debtEscape(value) {
+            return String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[char]));
+        }
+        function debtPersonKey(name) { return String(name || '').trim().toLowerCase(); }
+        function debtPersonHref(name) { return encodeURIComponent(String(name || '')); }
+        function debtOpenRow(row) { const encoded = row.dataset.personName; if (encoded) openPersonDebtDetail(decodeURIComponent(encoded)); }
 
-            const owedCard = document.getElementById('debts-owed-to-you-card');
-            const owedList = document.getElementById('debts-owed-to-you-list');
-            if (debts.owedToYou.length > 0) {
-                owedCard.style.display = 'block';
-                owedList.innerHTML = debts.owedToYou.map((p, i) => `
-                    <div class="flex items-center justify-between py-2 cursor-pointer active:opacity-70 ${i < debts.owedToYou.length - 1 ? 'border-b border-slate-800/60' : ''}" data-person-name="${p.name}">
-                        <div class="flex items-center gap-2.5">
-                            <span class="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-sm">🧑</span>
-                            <p class="text-xs font-semibold text-slate-200">${p.name}</p>
-                        </div>
-                        <span class="text-xs font-bold text-emerald-400">+${fmt(p.amount)}</span>
+        function personDebtRowHtml(person, direction) {
+            const isOwed = direction === 'owed';
+            const amount = Number(person.amount || 0);
+            return `
+                <div class="debt-person-row flex items-center justify-between py-2 px-1 cursor-pointer active:opacity-70" data-person-name="${debtPersonHref(person.name)}" role="button" tabindex="0">
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        <span class="w-8 h-8 rounded-xl ${isOwed ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-rose-500/10 border border-rose-500/20'} flex items-center justify-center text-sm shrink-0">🧑</span>
+                        <div class="min-w-0"><p class="text-xs font-semibold text-slate-200 truncate">${debtEscape(person.name)}</p><p class="text-[10px] text-slate-500">اضغط لفتح كشف الحساب الكامل</p></div>
                     </div>
-                `).join('');
-            } else {
-                owedCard.style.display = 'none';
-            }
+                    <span class="text-xs font-bold ${isOwed ? 'text-emerald-400' : 'text-rose-400'} shrink-0">${isOwed ? '+' : '-'}${fmt(amount)}</span>
+                </div>`;
+        }
 
-            const oweCard = document.getElementById('debts-you-owe-card');
-            const oweList = document.getElementById('debts-you-owe-list');
-            if (debts.youOwe.length > 0) {
-                oweCard.style.display = 'block';
-                oweList.innerHTML = debts.youOwe.map((p, i) => `
-                    <div class="flex items-center justify-between py-2 cursor-pointer active:opacity-70 ${i < debts.youOwe.length - 1 ? 'border-b border-slate-800/60' : ''}" data-person-name="${p.name}">
-                        <div class="flex items-center gap-2.5">
-                            <span class="w-8 h-8 rounded-xl bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-sm">🧑</span>
-                            <p class="text-xs font-semibold text-slate-200">${p.name}</p>
-                        </div>
-                        <span class="text-xs font-bold text-rose-400">-${fmt(p.amount)}</span>
-                    </div>
-                `).join('');
-            } else {
-                oweCard.style.display = 'none';
-            }
-
-            // نربط كل صف شخص بحدث الدوس عليه (بنعمله هنا كل مرة بعد ما الـ HTML يتحدّث)
-            document.querySelectorAll('#debts-owed-to-you-list [data-person-name], #debts-you-owe-list [data-person-name]').forEach((row) => {
-                row.addEventListener('click', () => openPersonDebtDetail(row.dataset.personName));
+        function bindDebtRows(selector) {
+            document.querySelectorAll(selector).forEach((row) => {
+                row.addEventListener('click', () => debtOpenRow(row));
+                row.addEventListener('keydown', (event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); debtOpenRow(row); } });
             });
         }
 
-        // ============ فتح تفاصيل شخص معيّن (كل عملياته) لما تدوس على اسمه في تبويب الديون ============
+        function renderActiveDebtSearch() {
+            const input = document.getElementById('debts-active-search');
+            const results = document.getElementById('debts-search-results');
+            const count = document.getElementById('debts-active-search-count');
+            if (!input || !results || !count) return;
+            const query = String(input.value || '').trim().toLowerCase();
+            const all = debtUiState.activePeople;
+            const filtered = query ? all.filter((p) => String(p.name || '').toLowerCase().includes(query)) : all;
+            count.textContent = query ? `${filtered.length} نتيجة مطابقة` : `${all.length} اسم نشط — اكتب اسم الشخص للبحث`;
+            if (!filtered.length) {
+                results.innerHTML = '<p class="text-[11px] text-slate-500 text-center py-2">مش لاقي اسم بالبحث ده في الديون النشطة.</p>';
+                return;
+            }
+            results.innerHTML = filtered.map((p) => personDebtRowHtml(p, Number(p.amount || p.net || 0) >= 0 ? 'owed' : 'owe')).join('');
+            bindDebtRows('#debts-search-results [data-person-name]');
+        }
+
+        function renderStatementPeople() {
+            const input = document.getElementById('debt-statement-search');
+            const results = document.getElementById('debt-statement-results');
+            const status = document.getElementById('debt-statement-status');
+            if (!input || !results || !status) return;
+            const query = String(input.value || '').trim().toLowerCase();
+            const all = debtUiState.statementPeople;
+            const filtered = query ? all.filter((p) => String(p.name || '').toLowerCase().includes(query)) : all;
+            status.textContent = all.length ? `${filtered.length} من ${all.length} شخص في كشف الحساب — النشط والمتصفّي` : 'لسه مفيش تعاملات محفوظة في كشف الحساب.';
+            if (!filtered.length) {
+                results.innerHTML = '<p class="text-[11px] text-slate-500 text-center py-2">مش لاقي الاسم ده في كشف الحساب.</p>';
+                return;
+            }
+            results.innerHTML = filtered.map((p) => {
+                const active = p.status === 'active';
+                const settled = p.status === 'settled';
+                const stateLabel = active ? 'دين نشط' : 'متصفّي — التاريخ محفوظ';
+                const stateColor = active ? 'text-emerald-400' : 'text-amber-300';
+                const signed = Number(p.activeNet || 0);
+                return `<div class="debt-person-row flex items-center justify-between py-2 px-1 cursor-pointer active:opacity-70" data-person-name="${debtPersonHref(p.name)}" role="button" tabindex="0">
+                    <div class="flex items-center gap-2.5 min-w-0"><span class="w-8 h-8 rounded-xl ${active ? 'bg-emerald-500/10 border border-emerald-500/20' : 'bg-amber-500/10 border border-amber-500/20'} flex items-center justify-center text-sm shrink-0">${settled ? '🗂️' : '🧑'}</span>
+                    <div class="min-w-0"><p class="text-xs font-semibold text-slate-200 truncate">${debtEscape(p.name)}</p><p class="text-[10px] ${stateColor}">${stateLabel} · ${Number(p.transactionCount || 0)} عملية</p></div></div>
+                    <span class="text-[10px] font-bold ${active ? (signed >= 0 ? 'text-emerald-400' : 'text-rose-400') : 'text-slate-500'} shrink-0">${active ? (signed >= 0 ? '+' : '-') + fmt(Math.abs(signed)) : 'صفر'}</span>
+                </div>`;
+            }).join('');
+            bindDebtRows('#debt-statement-results [data-person-name]');
+        }
+
+        async function loadDebtPeople() {
+            const status = document.getElementById('debt-statement-status');
+            if (debtUiState.statementPeople.length) { renderStatementPeople(); return; }
+            if (status) status.textContent = 'جاري تحميل كل الأسماء والتعاملات...';
+            try {
+                const res = await fetch('/api/reports?type=people', { headers: { Authorization: `Bearer ${accessToken}` }, cache: 'no-store' });
+                const body = await res.json().catch(() => ({}));
+                if (!res.ok) throw new Error(body.error || 'تعذر تحميل كشف الحساب');
+                debtUiState.statementPeople = Array.isArray(body.people) ? body.people : [];
+                debtUiState.settledPeople = debtUiState.statementPeople.filter((p) => p.status === 'settled');
+                renderStatementPeople();
+            } catch (error) {
+                if (status) status.textContent = error.message || 'حصل خطأ أثناء تحميل كشف الحساب.';
+            }
+        }
+
+        function renderDebts(debts) {
+            const safeDebts = debts || {};
+            const net = Number(safeDebts.net || 0);
+            const owed = Array.isArray(safeDebts.owedToYou) ? safeDebts.owedToYou : [];
+            const owe = Array.isArray(safeDebts.youOwe) ? safeDebts.youOwe : [];
+            debtUiState.activePeople = [...owed.map((p) => ({ ...p, activeNet: Number(p.amount || 0), status: 'active' })), ...owe.map((p) => ({ ...p, activeNet: -Number(p.amount || 0), status: 'active' }))];
+            debtUiState.settledPeople = Array.isArray(safeDebts.settledPeople) ? safeDebts.settledPeople : [];
+            debtUiState.statementPeople = [];
+
+            const netEl = document.getElementById('debts-net');
+            const noteEl = document.getElementById('debts-net-note');
+            netEl.textContent = `${net >= 0 ? '+' : ''}${fmt(net)}`;
+            netEl.className = `text-3xl font-black ${net >= 0 ? 'text-emerald-300' : 'text-rose-400'}`;
+            noteEl.textContent = net === 0 && !owed.length && !owe.length ? 'مفيش ديون نشطة دلوقتي — كشف الحساب لسه محفوظ.' : (net >= 0 ? `ليك أكتر مما عليك بـ ${fmt(Math.abs(net))}` : `عليك أكتر مما ليك بـ ${fmt(Math.abs(net))}`);
+            document.getElementById('debts-owed-to-you-total').textContent = fmt(Number(safeDebts.owedToYouTotal || 0));
+            document.getElementById('debts-you-owe-total').textContent = fmt(Number(safeDebts.youOweTotal || 0));
+
+            const owedCard = document.getElementById('debts-owed-to-you-card');
+            const owedList = document.getElementById('debts-owed-to-you-list');
+            owedCard.style.display = owed.length ? 'block' : 'none';
+            owedList.innerHTML = owed.map((p) => personDebtRowHtml(p, 'owed')).join('');
+            const oweCard = document.getElementById('debts-you-owe-card');
+            const oweList = document.getElementById('debts-you-owe-list');
+            oweCard.style.display = owe.length ? 'block' : 'none';
+            oweList.innerHTML = owe.map((p) => personDebtRowHtml(p, 'owe')).join('');
+            bindDebtRows('#debts-owed-to-you-list [data-person-name], #debts-you-owe-list [data-person-name]');
+            renderActiveDebtSearch();
+        }
+
+        function renderPersonTransactions(query = '') {
+            const listEl = document.getElementById('person-debt-list');
+            const metaEl = document.getElementById('person-statement-meta');
+            const normalized = String(query || '').trim().toLowerCase();
+            const all = debtUiState.personTransactions || [];
+            const transactions = normalized ? all.filter((t) => `${t.note || ''} ${t.direction || ''} ${t.isRepayment ? 'تسوية' : ''}`.toLowerCase().includes(normalized)) : all;
+            if (metaEl) metaEl.textContent = `${transactions.length} من ${all.length} عملية ظاهرة — التصفية لا تحذف أي تعامل.`;
+            if (!transactions.length) {
+                listEl.innerHTML = normalized ? '<p class="text-xs text-slate-500 text-center p-4">مش لاقي تعامل مطابق للبحث.</p>' : '<p class="text-xs text-slate-500 text-center p-4">مفيش عمليات.</p>';
+                return;
+            }
+            listEl.innerHTML = transactions.map((t) => {
+                const isLent = t.direction === 'lent';
+                const label = t.isRepayment ? (isLent ? 'إنت رجّعت' : 'رجّعلك') : (isLent ? 'إنت ديت' : 'إنت استلفت');
+                const emoji = t.isRepayment ? '↩️' : (isLent ? '📤' : '📥');
+                const signColor = isLent ? 'text-emerald-400' : 'text-rose-400';
+                const dateStr = t.createdAt ? new Date(t.createdAt).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+                return `<div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-3 flex items-center justify-between gap-3"><div class="flex items-center gap-2.5 min-w-0"><span class="text-base shrink-0">${emoji}</span><div class="min-w-0"><p class="text-xs font-semibold text-slate-200 truncate">${label}${t.note ? ` — ${debtEscape(t.note)}` : ''}</p><p class="text-[10px] text-slate-500">${dateStr}</p></div></div><span class="text-xs font-bold ${signColor} shrink-0">${fmt(Number(t.amount || 0))}</span></div>`;
+            }).join('');
+        }
+
         async function openPersonDebtDetail(personName) {
             const overlay = document.getElementById('person-debt-overlay');
             const nameEl = document.getElementById('person-debt-name');
             const netLineEl = document.getElementById('person-debt-net-line');
             const listEl = document.getElementById('person-debt-list');
-
+            const searchEl = document.getElementById('person-statement-search');
+            debtUiState.currentPersonName = personName;
+            debtUiState.personTransactions = [];
             nameEl.textContent = personName;
-            netLineEl.textContent = '—';
-            listEl.innerHTML = '<p class="text-xs text-slate-500 text-center p-4">جاري التحميل...</p>';
+            netLineEl.textContent = 'جاري تحميل كشف الحساب...';
+            netLineEl.className = 'text-xs font-semibold text-slate-400';
+            if (searchEl) searchEl.value = '';
+            listEl.innerHTML = '<p class="text-xs text-slate-500 text-center p-4">جاري تحميل كل التعاملات...</p>';
             overlay.classList.remove('hidden');
             overlay.classList.add('flex');
-
             try {
-                const res = await fetch(`/api/reports?type=person&name=${encodeURIComponent(personName)}`, {
-                    headers: { Authorization: `Bearer ${accessToken}` },
-                });
+                const res = await fetch(`/api/reports?type=person&name=${encodeURIComponent(personName)}`, { headers: { Authorization: `Bearer ${accessToken}` }, cache: 'no-store' });
                 const data = await res.json();
                 if (!res.ok) throw new Error(data.error || 'فشل تحميل البيانات');
-
-                const net = data.relevantNet;
-                netLineEl.textContent = net === 0
-                    ? 'متعادلين، مفيش حد ليه على التاني حاجة'
-                    : (net > 0 ? `ليك عنده ${fmt(net)}` : `عليك له ${fmt(Math.abs(net))}`);
-                netLineEl.className = `text-xs font-semibold ${net > 0 ? 'text-emerald-400' : net < 0 ? 'text-rose-400' : 'text-slate-400'}`;
-
-                if (data.transactions.length === 0) {
-                    listEl.innerHTML = '<p class="text-xs text-slate-500 text-center p-4">مفيش عمليات.</p>';
-                    return;
-                }
-
-                listEl.innerHTML = data.transactions.map((t) => {
-                    const isLent = t.direction === 'lent';
-                    const label = t.isRepayment
-                        ? (isLent ? 'إنت رجّعت' : 'رجّعلك')
-                        : (isLent ? 'إنت ديت' : 'إنت استلفت');
-                    const emoji = t.isRepayment ? '↩️' : (isLent ? '📤' : '📥');
-                    const signColor = isLent ? 'text-emerald-400' : 'text-rose-400';
-                    const dateStr = new Date(t.createdAt).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' });
-                    return `
-                        <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-3 flex items-center justify-between">
-                            <div class="flex items-center gap-2.5">
-                                <span class="text-base">${emoji}</span>
-                                <div>
-                                    <p class="text-xs font-semibold text-slate-200">${label}${t.note ? ` — ${t.note}` : ''}</p>
-                                    <p class="text-[10px] text-slate-500">${dateStr}</p>
-                                </div>
-                            </div>
-                            <span class="text-xs font-bold ${signColor}">${fmt(t.amount)}</span>
-                        </div>
-                    `;
-                }).join('');
-
+                const net = Number(data.relevantNet || 0);
+                netLineEl.textContent = net === 0 ? 'الحساب متصفّي — مفيش رصيد حالي' : (net > 0 ? `ليك عنده ${fmt(net)}` : `عليك له ${fmt(Math.abs(net))}`);
+                netLineEl.className = `text-xs font-semibold ${net > 0 ? 'text-emerald-400' : net < 0 ? 'text-rose-400' : 'text-amber-300'}`;
+                debtUiState.personTransactions = Array.isArray(data.transactions) ? data.transactions : [];
+                renderPersonTransactions();
                 if (data.lastSettlement) {
                     const settleDate = new Date(data.lastSettlement).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' });
-                    listEl.innerHTML += `<p class="text-[10px] text-slate-500 text-center pt-2">✅ آخر تسوية: ${settleDate} — الصافي فوق محسوب من وقتها بس</p>`;
+                    listEl.innerHTML += `<p class="text-[10px] text-amber-300 text-center pt-2">✅ تم تصفية الحساب سابقًا في ${settleDate} — التاريخ الكامل محفوظ فوق</p>`;
                 }
             } catch (e) {
                 console.error('debt-person-detail fetch failed:', e);
-                listEl.innerHTML = `<p class="text-xs text-rose-400 text-center p-4">${e.message || 'حصل خطأ، جرب تاني.'}</p>`;
+                listEl.innerHTML = `<p class="text-xs text-rose-400 text-center p-4">${debtEscape(e.message || 'حصل خطأ، جرب تاني.')}</p>`;
             }
         }
 
@@ -4902,6 +5063,7 @@
             }
         }
         document.getElementById('quick-entry-invoice-input')?.addEventListener('change', (event) => { const file = event.target.files?.[0]; analyzeQuickInvoice(file); event.target.value = ''; });
+        document.getElementById('bank-movements-card')?.addEventListener('click', () => { window.location.href = './dabbar-bank-movements.html'; });
         // ============ اختيار كودك مدعوم صراحةً بدل الاعتماد على الافتراضي (بعض المتصفحات بترجع بيانات ناقصة/فاضية مع الافتراضي) ============
         function pickVoiceMimeType() {
             const candidates = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus', 'audio/ogg'];
@@ -6112,6 +6274,42 @@
             overlay.classList.add('hidden');
             overlay.classList.remove('flex');
         });
+
+
+        document.getElementById('open-active-debt-search').addEventListener('click', () => {
+            document.getElementById('debts-search-panel').classList.remove('hidden');
+            document.getElementById('debt-statement-panel').classList.add('hidden');
+            document.getElementById('debts-active-search').focus();
+            document.getElementById('debt-action-hint').textContent = 'البحث هنا في الديون النشطة فقط — اضغط على الاسم لفتح كشف الحساب الكامل.';
+        });
+        document.getElementById('close-active-debt-search').addEventListener('click', () => document.getElementById('debts-search-panel').classList.add('hidden'));
+        document.getElementById('debts-active-search').addEventListener('input', renderActiveDebtSearch);
+        document.getElementById('open-debt-statement').addEventListener('click', async () => {
+            document.getElementById('debt-statement-panel').classList.remove('hidden');
+            document.getElementById('debts-search-panel').classList.add('hidden');
+            document.getElementById('debt-action-hint').textContent = 'كشف الحساب أرشيف دائم: النشط والمتصفّي، وكل اسم يفتح كل تعاملاته بالكامل.';
+            await loadDebtPeople();
+            document.getElementById('debt-statement-search').focus();
+        });
+        document.getElementById('close-debt-statement').addEventListener('click', () => document.getElementById('debt-statement-panel').classList.add('hidden'));
+        document.getElementById('debt-statement-search').addEventListener('input', renderStatementPeople);
+        document.getElementById('open-settlement-message').addEventListener('click', () => {
+            const settled = [...debtUiState.settledPeople].sort((a, b) => new Date(b.lastSettlement || 0) - new Date(a.lastSettlement || 0));
+            const personName = settled[0]?.name || 'محمد أحمد';
+            document.getElementById('settlement-message-copy').textContent = `تم تصفية الحساب بينك وبين ${personName}، وتم مسح اسمه من خانة الديون النشطة.`;
+            document.getElementById('settlement-message-overlay').classList.remove('hidden');
+            document.getElementById('settlement-message-overlay').classList.add('flex');
+        });
+        document.getElementById('close-settlement-message').addEventListener('click', () => {
+            document.getElementById('settlement-message-overlay').classList.add('hidden');
+            document.getElementById('settlement-message-overlay').classList.remove('flex');
+        });
+        document.getElementById('settlement-open-statement').addEventListener('click', () => {
+            document.getElementById('settlement-message-overlay').classList.add('hidden');
+            document.getElementById('settlement-message-overlay').classList.remove('flex');
+            document.getElementById('open-debt-statement').click();
+        });
+        document.getElementById('person-statement-search').addEventListener('input', (event) => renderPersonTransactions(event.target.value));
 
         document.getElementById('close-person-debt').addEventListener('click', () => {
             const overlay = document.getElementById('person-debt-overlay');

@@ -1,5 +1,5 @@
 import { supabase } from '../../lib/supabaseClient.js';
-import { getPersonDebtDetail, getFullDebtReportData } from '../../lib/debts.js';
+import { getPersonDebtDetail, getFullDebtReportData, getDebtPeople } from '../../lib/debts.js';
 import { buildFullDebtReportHtml } from '../../lib/debtReportTemplate.js';
 import { getMonthRange, getExpensesBetween, buildCategoryBreakdown } from '../../lib/expenses.js';
 import { buildReportHtml } from '../../lib/reportTemplate.js';
@@ -52,6 +52,12 @@ async function handlePersonDetail(req, res, telegramUserId) {
         createdAt: t.createdAt,
       })),
   });
+}
+
+
+async function handleDebtPeople(req, res, telegramUserId) {
+  const people = await getDebtPeople(telegramUserId);
+  return res.status(200).json({ people });
 }
 
 // ---- type=debts: PDF كشف الديون الشامل ----
@@ -201,6 +207,8 @@ export default async function handler(req, res) {
     switch (type) {
       case 'person':
         return await handlePersonDetail(req, res, dataUserId);
+      case 'people':
+        return await handleDebtPeople(req, res, dataUserId);
       case 'debts':
         return await handleDebtsPdf(req, res, dataUserId, auth.user.email);
       case 'monthly':
@@ -208,7 +216,7 @@ export default async function handler(req, res) {
       case 'daily':
         return await handleDailyPdf(req, res, dataUserId);
       default:
-        return res.status(400).json({ error: 'type غير معروف. استخدم person أو debts أو monthly أو daily.' });
+        return res.status(400).json({ error: 'type غير معروف. استخدم person أو people أو debts أو monthly أو daily.' });
     }
   } catch (err) {
     console.error(`reports (type=${type}) error:`, err);

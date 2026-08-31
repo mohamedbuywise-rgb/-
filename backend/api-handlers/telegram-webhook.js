@@ -11,7 +11,7 @@ import { isFinancialEventType, recordFinancialEvent } from '../../lib/financialE
 import { CATEGORY_EMOJI } from '../../lib/config.js';
 import { currencyLabel } from '../../lib/textNormalize.js';
 import { normalizeDigits, extractDeterministicExpense, correctDebtDirections, normalizeFinancialTransaction, reconcileSingleTransaction } from '../../lib/textNormalize.js';
-import { checkVoiceUsage, checkOcrUsage, checkChatUsage, refundOcrUsage } from '../../lib/rateLimits.js';
+import { checkVoiceUsage, checkOcrUsage, checkChatUsage, checkTextUsage, refundOcrUsage } from '../../lib/rateLimits.js';
 import { GUIDE_URL, TRIAL_SUMMARY_BASE_URL, ADMIN_TELEGRAM_ID, SUBSCRIPTION_DAYS, SUBSCRIPTION_PRICE_EGP, INSTAPAY_LINK, ADMIN_CONTACT_USERNAME, VOICE_MAX_DURATION_SECONDS, TELEGRAM_WEBHOOK_SECRET } from '../../lib/config.js';
 import { createTrialSummaryToken } from '../../lib/trialToken.js';
 
@@ -524,7 +524,7 @@ export default async function handler(req, res) {
       }
 
       const text = await transcribeVoice(message.voice.file_id);
-      await routeUserMessage(text, userId, chatId);
+      await routeUserMessage(text, userId, chatId, { fromVoice: true });
       return res.status(200).json({ ok: true });
     }
 
@@ -571,7 +571,7 @@ export default async function handler(req, res) {
 // بتفحص الأوامر الثابتة الأول (تقرير/ديون/دور على/صدّر البيانات)، ولو مفيش أمر معروف تعتبرها
 // مصروف أو دين أو تسوية وتبعتها للتصنيف الذكي. المسار ده واحد لكل من الكتابة والصوت، عشان
 // أي أمر بتقوله بالصوت يشتغل بالظبط زي ما لو كتبته.
-async function routeUserMessage(text, userId, chatId) {
+async function routeUserMessage(text, userId, chatId, { fromVoice = false } = {}) {
   if (!text) {
     await sendTelegramMessage(chatId, 'معرفتش أفهم الرسالة، ممكن تعيدها؟');
     return;
@@ -676,14 +676,27 @@ async function routeUserMessage(text, userId, chatId) {
   }
 
   // غير كده، اعتبرها مصروف أو دين أو تسوية، وابعتها للتصنيف الذكي
-  await handleIncomingText(text, userId, chatId);
+  await handleIncomingText(text, userId, chatId, { fromVoice });
 }
 
 // ============ التصنيف الذكي لأي رسالة (مصروف / دين / تسوية) — بيتنادى بس لو الرسالة مش أمر معروف ============
-async function handleIncomingText(text, userId, chatId) {
+async function handleIncomingText(text, userId, chatId, { fromVoice = false } = {}) {
   if (!text) {
     await sendTelegramMessage(chatId, 'معرفتش أفهم الرسالة، ممكن تعيدها؟');
     return;
+  }
+
+  // النص اليدوي وSMS يشتركان في عداد text. النص الناتج من Voice مستثنى لأنه استهلك عداد voice.
+  if (!fromVoice) {
+    const usage = await checkTextUsage(userId);
+    if (!usage.allowed) {
+      if (usage.isTrial) {
+        await sendTrialEndedPrompt(chatId, userId);
+      } else {
+        await sendTelegramMessage(chatId, 'وصلت للحد الأقصى من الإدخالات النصية الشهر ده. هيرجع تاني بداية الشهر الجاي.');
+      }
+      return;
+    }
   }
 
   const parsedTransactions = (await classifyMessage(text)).map((item) => normalizeFinancialTransaction(item, text));

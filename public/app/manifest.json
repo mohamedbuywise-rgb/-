@@ -58,6 +58,17 @@
             "audio/3gpp",
             "application/ogg"
           ]
+        },
+        {
+          "name": "image",
+          "accept": [
+            "image/*",
+            ".jpg",
+            ".jpeg",
+            ".png",
+            ".webp",
+            ".heic"
+          ]
         }
       ]
     }

@@ -1,6 +1,6 @@
 // v2: لازم نغيّر الاسم عشان أي جهاز عنده الكاش القديم (اللي كان بيحفظ ردود الـ API غلط)
 // يمسحه فورًا ويبدأ من كاش جديد فاضي — خطوة activate تحت بتمسح أي CACHE_NAME قديم تلقائي.
-const CACHE_NAME = 'dabbar-cache-v4';
+const CACHE_NAME = 'dabbar-cache-v5';
 const PRECACHE_URLS = [
   './dabbar-onboarding.html',
   './dabbar-dashboard-full.html',
@@ -63,7 +63,8 @@ self.addEventListener('notificationclick', (event) => {
 // وبعدين نعمل redirect لنفس الصفحة بـ GET عادي (?shared=1) عشان الصفحة تتفتح وتقرا الملف المخزّن.
 const SHARE_DB_NAME = 'dabbar-share-db';
 const SHARE_STORE = 'files';
-const SHARE_KEY = 'pending-audio';
+const SHARE_KEY_AUDIO = 'pending-audio';
+const SHARE_KEY_IMAGE = 'pending-image';
 
 function openShareDb() {
   return new Promise((resolve, reject) => {
@@ -74,32 +75,42 @@ function openShareDb() {
   });
 }
 
-async function saveSharedAudio(file) {
+async function saveSharedFile(file, key) {
   const db = await openShareDb();
   await new Promise((resolve, reject) => {
     const tx = db.transaction(SHARE_STORE, 'readwrite');
-    tx.objectStore(SHARE_STORE).put(file, SHARE_KEY);
+    tx.objectStore(SHARE_STORE).put(file, key);
     tx.oncomplete = resolve;
     tx.onerror = () => reject(tx.error);
   });
   db.close();
 }
 
+// ============ استقبال صورة فاتورة عبر "مشاركة" (بالإضافة للصوت) ============
+// نفس آلية الصوت بالظبط: بنخزّن الصورة في IndexedDB ونعمل redirect بعلامة ?shared=1&kind=image
+// عشان الصفحة تعرف تفتح مباشرة على وضع "فاتورة" بدل وضع الكتابة الافتراضي.
 async function handleShareTarget(event) {
   const requestUrl = new URL(event.request.url);
   let sharedText = '';
+  let sharedKind = '';
   try {
     const formData = await event.request.formData();
     sharedText = String(formData.get('text') || formData.get('title') || '').trim();
     const audioFile = formData.get('audio');
+    const imageFile = formData.get('image');
     if (audioFile && typeof audioFile.size === 'number' && audioFile.size > 0) {
-      await saveSharedAudio(audioFile);
+      await saveSharedFile(audioFile, SHARE_KEY_AUDIO);
+      sharedKind = 'audio';
+    } else if (imageFile && typeof imageFile.size === 'number' && imageFile.size > 0) {
+      await saveSharedFile(imageFile, SHARE_KEY_IMAGE);
+      sharedKind = 'image';
     }
   } catch (err) {
-    // لو تحليل الـ form فشل لأي سبب، نكمل عادي بدون ملف صوت بدل ما نفشل المشاركة كلها
+    // لو تحليل الـ form فشل لأي سبب، نكمل عادي بدون ملف بدل ما نفشل المشاركة كلها
   }
   const redirectUrl = new URL(requestUrl.pathname, self.location.origin);
   redirectUrl.searchParams.set('shared', '1');
+  if (sharedKind) redirectUrl.searchParams.set('kind', sharedKind);
   if (sharedText) redirectUrl.searchParams.set('text', sharedText);
   return Response.redirect(redirectUrl.href, 303);
 }

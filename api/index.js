@@ -2,6 +2,7 @@ import adminHandler from '../backend/api-handlers/admin.js';
 import assistantHandler from '../backend/api-handlers/assistant.js';
 import authByCodeHandler from '../backend/api-handlers/auth-by-code.js';
 import bankAccountsHandler from '../backend/api-handlers/bank-accounts.js';
+import bankMovementsHandler from '../backend/api-handlers/bank-movements.js';
 import cronDailyHandler from '../backend/api-handlers/cron-daily.js';
 import dashboardDataHandler from '../backend/api-handlers/dashboard-data.js';
 import financialActionsHandler from '../backend/api-handlers/financial-actions.js';
@@ -19,6 +20,7 @@ const handlers = {
   assistant: assistantHandler,
   'auth-by-code': authByCodeHandler,
   'bank-accounts': bankAccountsHandler,
+  'bank-movements': bankMovementsHandler,
   'cron-daily': cronDailyHandler,
   'dashboard-data': dashboardDataHandler,
   'financial-actions': financialActionsHandler,

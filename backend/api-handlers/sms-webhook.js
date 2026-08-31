@@ -15,7 +15,9 @@ import { supabase } from '../../lib/supabaseClient.js';
 import { classifyMessage } from '../../lib/groq.js';
 import { recordExpense } from '../../lib/expenses.js';
 import { recordDebt } from '../../lib/debts.js';
+import { recordFinancialEvent } from '../../lib/financialEvents.js';
 import { matchBankSender } from '../../lib/bank-senders.js';
+import { checkTextUsage } from '../../lib/rateLimits.js';
 
 const DAILY_SMS_LIMIT = 80; // حد أقصى يومي للحماية من استهلاك API غير متوقع لكل مستخدم
 
@@ -85,6 +87,14 @@ export default async function handler(req, res) {
   }
   const chatId = telegramUserId; // في محادثات البوت الخاصة، chat.id == from.id في تليجرام
 
+  // SMS البنكية تستخدم نفس عداد التصنيف النصي الشهري، مع Telegram والداشبورد.
+  const textUsage = await checkTextUsage(telegramUserId);
+  if (!textUsage.allowed) {
+    return res.status(429).json({ ok: false, error: textUsage.isTrial
+      ? 'خلصت حدود الإدخال النصي في التجربة المجانية.'
+      : 'وصلت للحد الأقصى من الإدخالات النصية الشهر ده.' });
+  }
+
   try {
     const result = await classifyMessage(text);
     const transactions = Array.isArray(result?.transactions) ? result.transactions : [];
@@ -96,8 +106,13 @@ export default async function handler(req, res) {
       } else if (item.type === 'debt') {
         await recordDebt(item, telegramUserId, chatId);
         recorded += 1;
+      } else if (item.type === 'withdrawal' || item.type === 'deposit' || item.type === 'transfer') {
+        // حركة بنكية محايدة (سحب/إيداع/تحويل) — بتتسجل في "الحركات البنكية" ومتدخلش إجمالي المصروفات.
+        // لو غامضة (تحويل لشخص/رقم موبايل بدون سياق تجاري) بتتحط needs_review عشان المستخدم يراجعها بنفسه.
+        await recordFinancialEvent(item, telegramUserId);
+        recorded += 1;
       }
-      // أنواع زي transfer/settlement/unknown بنتجاهلها هنا عشان منسجلش حاجة غلط أوتوماتيك بدون مراجعة المستخدم
+      // settlement/unknown بنتجاهلها هنا عشان منسجلش حاجة غلط أوتوماتيك بدون مراجعة المستخدم
     }
     return res.status(200).json({ ok: true, recorded, bank: bankMatch.label });
   } catch (err) {

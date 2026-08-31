@@ -89,6 +89,11 @@ export default async function handler(req, res) {
     weekEnd.setDate(weekEnd.getDate() + 7);
 
     const weekExpenses = await getExpensesBetween(dataUserId, weekStart, weekEnd);
+    const previousWeekStart = new Date(weekStart);
+    previousWeekStart.setDate(previousWeekStart.getDate() - 7);
+    const previousWeekExpenses = await getExpensesBetween(dataUserId, previousWeekStart, weekStart);
+    const weekByCategory = buildCategoryBreakdown(weekExpenses).map(({ name, amount, percent }) => ({ name, amount: Number(amount), percent: Number(percent) }));
+    const previousWeekByCategory = buildCategoryBreakdown(previousWeekExpenses).map(({ name, amount, percent }) => ({ name, amount: Number(amount), percent: Number(percent) }));
 
     const weekdayTotals = [0, 0, 0, 0, 0, 0, 0];
     const weekdayCounts = [0, 0, 0, 0, 0, 0, 0];
@@ -356,6 +361,8 @@ export default async function handler(req, res) {
         byWeekdayTopCategory,
         weekDates,
         weekTotal,
+        weekByCategory,
+        previousWeekByCategory,
       },
       debts: {
         net: owedToYouTotal - youOweTotal,

@@ -65,11 +65,14 @@
   .stat-danger { background: var(--db-danger-soft); color: var(--db-danger); }
   .stat-success { background: var(--db-success-soft); color: var(--db-success); }
   .stat-neutral { background: var(--db-surface-soft); color: var(--db-ink); }
-  .filters { display: flex; gap: 6px; margin-bottom: 12px; overflow-x: auto; }
+  .filters { display: flex; gap: 10px; margin-bottom: 12px; overflow-x: auto; padding: 6px; background: var(--db-surface); border: 1px solid var(--db-surface-soft); border-radius: 14px; }
   .filter-btn {
-    white-space: nowrap; padding: 6px 14px; border-radius: 20px; font-size: 12.5px;
-    border: 1px solid var(--db-surface-soft); background: transparent; color: var(--db-muted); cursor: pointer;
+    white-space: nowrap; padding: 7px 14px; border-radius: 20px; font-size: 12.5px;
+    border: 1px solid transparent; background: transparent; color: var(--db-muted); cursor: pointer; flex: 0 0 auto;
   }
+  .filter-btn + .filter-btn { margin-inline-start: 2px; }
+  :root[data-theme="light"] .filter-btn:not(.active) { border-color: #d9e8de; background: #f8fbf9; }
+  :root[data-theme="dark"] .filter-btn:not(.active) { border-color: rgba(154,172,159,.22); background: rgba(18,28,24,.7); }
   .filter-btn.active { background: var(--db-surface); border-color: var(--db-accent); color: var(--db-accent); font-weight: 700; }
   .list-card { background: var(--db-surface); border-radius: 14px; padding: 4px 12px; }
   .row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-top: 1px solid var(--db-surface-soft); }
@@ -138,8 +141,8 @@
 
   <div id="empty-state" class="empty-state hidden">
     <div class="empty-icon">🏦</div>
-    <div class="empty-sub" style="color: var(--db-muted); font-size: 13px; line-height: 1.6; max-width: 320px; margin: 0 auto 16px;">علشان تبدأ تشوف حركاتك ومعاملاتك المالية هنا أول بأول، اربط حساباتك البنكية والمحافظ الإلكترونية من صفحة حسابي.</div>
-    <button class="cta-btn" id="go-account-btn" style="background: var(--db-accent); color: var(--db-canvas); border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; cursor: pointer;">روح لحسابي</button>
+    <div id="empty-state-message" class="empty-sub" style="color: var(--db-muted); font-size: 13px; line-height: 1.6; max-width: 320px; margin: 0 auto 16px;">لم تقم بربط أي حسابات أو محافظ حتى الآن.</div>
+    <button class="cta-btn" id="go-account-btn" style="background: var(--db-accent); color: var(--db-canvas); border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; cursor: pointer;">ربط الحسابات والمحافظ</button>
   </div>
 </div>
 
@@ -167,7 +170,7 @@
   async function boot() {
     const { data: { session } } = await sb.auth.getSession();
     if (!session) {
-      $('status').textContent = 'محتاج تسجّل دخولك الأول من دبّر.';
+      showNoAccountsState();
       return;
     }
     accessToken = session.access_token;
@@ -181,13 +184,13 @@
       });
       const data = await res.json();
       if (!res.ok || !data.ok) {
-        $('status').textContent = data.error || 'تعذر تحميل الحركات.';
+        showNoAccountsState();
         return;
       }
       allMovements = data.movements || [];
       $('status').classList.add('hidden');
       if (!allMovements.length) {
-        $('empty-state').classList.remove('hidden');
+        showNoAccountsState();
         return;
       }
       $('content').classList.remove('hidden');
@@ -196,9 +199,16 @@
       $('stat-transfer').textContent = `${fmt(data.totals.transfer)} ج.م`;
       renderList();
     } catch (e) {
-      $('status').classList.remove('hidden');
-      $('status').textContent = 'تعذر الاتصال بالسيرفر.';
+      showNoAccountsState();
     }
+  }
+
+  function showNoAccountsState() {
+    $('status').classList.add('hidden');
+    $('content').classList.add('hidden');
+    $('empty-state').classList.remove('hidden');
+    const message = $('empty-state-message');
+    if (message) message.textContent = 'لم تقم بربط أي حسابات أو محافظ حتى الآن.';
   }
 
   function renderList() {

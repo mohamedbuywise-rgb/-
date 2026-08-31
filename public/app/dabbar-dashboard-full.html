@@ -716,6 +716,31 @@
         #monthly-tip-card {
             background: transparent !important;
         }
+        .personalized-insight-card { background: linear-gradient(135deg, rgba(16,185,129,.22), rgba(6,78,59,.92)); border: 1px solid rgba(52,211,153,.55); border-radius: 1.7rem; padding: 1rem; color: #ecfdf5; overflow: hidden; position: relative; box-shadow: 0 18px 38px rgba(6,78,59,.18); }
+        .personalized-insight-card::after { content: ''; position: absolute; width: 170px; height: 170px; left: -55px; top: 105px; border-radius: 50%; background: rgba(52,211,153,.10); pointer-events: none; }
+        .personalized-insight-head, .personalized-insight-main, .personalized-insight-suggestion, .personalized-insight-actions { position: relative; z-index: 1; }
+        .personalized-insight-head { display:flex; align-items:center; justify-content:space-between; gap:.75rem; margin-bottom:.9rem; }
+        .personalized-insight-brand { display:block; font-size:1.15rem; line-height:1; font-weight:950; color:#a7f3d0; }
+        .personalized-insight-role { display:block; margin-top:.2rem; font-size:.62rem; font-weight:800; color:#d1fae5; }
+        .personalized-insight-head-actions { display:flex; align-items:center; gap:.4rem; }
+        .personalized-insight-label { border:1px solid rgba(167,243,208,.32); background:rgba(2,44,34,.35); border-radius:999px; padding:.4rem .65rem; font-size:.62rem; font-weight:900; color:#d1fae5; }
+        .personalized-insight-close { width:1.7rem; height:1.7rem; border:1px solid rgba(167,243,208,.32); border-radius:50%; background:rgba(2,44,34,.28); color:#d1fae5; font-size:1.05rem; line-height:1; cursor:pointer; }
+        .personalized-insight-main { display:grid; grid-template-columns:6.3rem 1fr; align-items:center; gap:.7rem; }
+        .personalized-insight-art { width:6.1rem; height:6.1rem; display:flex; align-items:center; justify-content:center; color:#6ee7b7; }
+        .personalized-insight-art svg { width:100%; height:100%; filter: drop-shadow(0 8px 10px rgba(0,0,0,.22)); }
+        .personalized-insight-kicker { font-size:.62rem; color:#a7f3d0; font-weight:800; }
+        .personalized-insight-copy h3 { margin:.28rem 0 .4rem; font-size:1.2rem; line-height:1.35; font-weight:950; color:#fff; }
+        .personalized-insight-copy p { margin:0; font-size:.72rem; line-height:1.8; color:#d1fae5; }
+        .personalized-insight-suggestion { display:flex; gap:.45rem; align-items:flex-start; margin-top:.85rem; padding-top:.75rem; border-top:1px solid rgba(167,243,208,.22); font-size:.7rem; line-height:1.7; color:#ecfdf5; }
+        .personalized-insight-actions { display:flex; gap:.5rem; margin-top:.85rem; }
+        .personalized-insight-actions button { flex:1; border-radius:.8rem; padding:.65rem .5rem; font-size:.72rem; font-weight:900; cursor:pointer; }
+        .personalized-insight-share { border:1px solid #6ee7b7; background:transparent; color:#ecfdf5; }
+        .personalized-insight-more { border:1px solid transparent; background:#34d399; color:#052e24; }
+        html[data-theme="light"] .personalized-insight-card { background: linear-gradient(135deg, #d1fae5, #047857); color:#ecfdf5; box-shadow:0 18px 38px rgba(4,120,87,.16); }
+        html[data-theme="light"] .personalized-insight-brand, html[data-theme="light"] .personalized-insight-role, html[data-theme="light"] .personalized-insight-copy p { color:#ecfdf5 !important; }
+        html[data-theme="light"] .personalized-insight-label { background:rgba(6,78,59,.28) !important; color:#ecfdf5 !important; }
+        html[data-theme="light"] .personalized-insight-close { background:rgba(6,78,59,.24) !important; color:#ecfdf5 !important; }
+
 
         #tab-daily > div:first-child,
         #tab-categories > div:first-child,
@@ -1731,6 +1756,13 @@
                     <div class="mt-4 flex gap-2"><button id="balance-category-save" type="button" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950">حفظ التصنيف</button><button id="balance-category-cancel" type="button" class="rounded-xl border border-slate-700 px-4 py-2.5 text-xs text-slate-300">إلغاء</button></div>
                 </div>
             </div>
+
+            <section id="personalized-insight-card" class="personalized-insight-card hidden" aria-label="دبّر يقرأك">
+                <div class="personalized-insight-head"><div><span class="personalized-insight-brand">دبّر</span><span class="personalized-insight-role">محاسبك الشخصي</span></div><div class="personalized-insight-head-actions"><span class="personalized-insight-label">دبّر يقرأك</span><button type="button" id="personalized-insight-close" class="personalized-insight-close" aria-label="إغلاق البطاقة">×</button></div></div>
+                <div class="personalized-insight-main"><div class="personalized-insight-art" aria-hidden="true"><svg viewBox="0 0 120 120" role="img"><path d="M34 43h48l-5 51H43z" fill="none" stroke="currentColor" stroke-width="5"/><path d="M42 42c0-15 32-15 36 0M82 55c22-5 23 25 1 27" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round"/><path d="M18 24l5 9 9 5-9 5-5 9-5-9-9-5 9-5zM98 15l3 6 6 3-6 3-3 6-3-6-6-3 6-3z" fill="currentColor" opacity=".72"/></svg></div><div class="personalized-insight-copy"><span id="personalized-insight-kicker" class="personalized-insight-kicker">بصراحة يا بطل...</span><h3 id="personalized-insight-title">دبّر بيقرأ عاداتك</h3><p id="personalized-insight-body">سجّل شوية مصاريف وهقولك ملاحظة شخصية تستاهل المشاركة.</p></div></div>
+                <div class="personalized-insight-suggestion"><span>💡</span><span id="personalized-insight-suggestion">اقتراح دبّر: خليك واعي بعادتك الجاية.</span></div>
+                <div class="personalized-insight-actions"><button type="button" id="personalized-insight-share" class="personalized-insight-share">شارك الرؤية</button><button type="button" id="personalized-insight-more" class="personalized-insight-more">فهمني أكتر</button></div>
+            </section>
 
             <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-3.5 flex items-start gap-3" id="monthly-tip-card" style="display:none;">
                 <div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold shrink-0 border border-emerald-500/30">💡</div>
@@ -4164,6 +4196,51 @@
             quickStatus('اتحفظ تصنيف الفئات واتحدث الكارت.', 'success');
         }
 
+        function personalizedInsightDismissKey(insightId) { return `dabbar-personalized-insight-dismissed-${currentUser?.id || 'guest'}-${insightId}`; }
+        function getBehavioralInsight(month) {
+            const current = Array.isArray(month?.weekByCategory) ? month.weekByCategory : [];
+            const previous = Array.isArray(month?.previousWeekByCategory) ? month.previousWeekByCategory : [];
+            const previousByName = Object.fromEntries(previous.map((item) => [String(item.name), Number(item.amount || 0)]));
+            const currentTotal = current.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+            if (!current.length || !currentTotal) return null;
+            const insightWindow = new Date();
+            insightWindow.setDate(insightWindow.getDate() - insightWindow.getDay());
+            const insightWindowKey = insightWindow.toISOString().slice(0, 10);
+            const increased = current.map((item) => {
+                const amount = Number(item.amount || 0);
+                const before = Number(previousByName[item.name] || 0);
+                const growth = before > 0 ? (amount - before) / before : 1;
+                return { ...item, amount, before, growth };
+            }).sort((a, b) => b.growth - a.growth);
+            const spike = increased.find((item) => item.amount > 0 && ((item.before > 0 && item.growth >= 0.25 && item.amount - item.before >= 100) || (item.before === 0 && item.amount >= 2 * Math.max(1, currentTotal * 0.08))));
+            const top = current[0];
+            if (spike) {
+                const percent = Math.round(spike.growth * 100);
+                const id = `spike-${spike.name}-${insightWindowKey}`;
+                const lower = String(spike.name).toLocaleLowerCase('ar');
+                if (lower.includes('قهوة') || lower.includes('كافيه')) return { id, title: 'القهوة بدأت تغيّر سلوكك', body: `صرفك على القهوة زاد حوالي ${percent}% عن الأسبوع اللي فات. واضح إن الكافيه بقى جزء من ميزانيتك الثابتة.`, suggestion: 'اقتراح دبّر: جرّب يومين قهوة من البيت الأسبوع ده.' };
+                if (lower.includes('أكل') || lower.includes('مطاعم') || lower.includes('دليفري')) return { id, title: 'مطبخ البيت دخل إجازة', body: `صرفك على ${spike.name} زاد حوالي ${percent}% عن الأسبوع اللي فات. واضح إن الدليفري بدأ يمسك الإدارة.`, suggestion: 'اقتراح دبّر: حضّر وجبتين في البيت قبل الطلب الجاي.' };
+                return { id, title: `واضح إن ${spike.name} بقت عادة`, body: `صرفك على ${spike.name} زاد حوالي ${percent}% عن الأسبوع اللي فات. دبّر لاحظ التغيير قبل ما يتحول لروتين.`, suggestion: `اقتراح دبّر: راجع أي دفعة جديدة في ${spike.name} قبل ما تأكدها.` };
+            }
+            const topShare = Number(top.percent || (top.amount / currentTotal) * 100);
+            if (topShare >= 35 && Number(top.amount) > Number(previousByName[top.name] || 0) * 1.15) {
+                const id = `dominant-${top.name}-${insightWindowKey}`;
+                return { id, title: `${top.name} ماسكة زمام الشهر`, body: `${top.name} لوحدها أخذت ${Math.round(topShare)}% من صرفك الحالي. دبّر شايف مين بقى المدير المالي عندك.`, suggestion: `اقتراح دبّر: حط سقفًا صغيرًا لـ${top.name} في الفترة الجاية.` };
+            }
+            return null;
+        }
+        function renderPersonalizedInsight(month) {
+            const card = document.getElementById('personalized-insight-card');
+            if (!card) return;
+            const insight = getBehavioralInsight(month);
+            if (!insight || localStorage.getItem(personalizedInsightDismissKey(insight.id)) === '1') { card.classList.add('hidden'); return; }
+            document.getElementById('personalized-insight-title').textContent = insight.title;
+            document.getElementById('personalized-insight-body').textContent = insight.body;
+            document.getElementById('personalized-insight-suggestion').textContent = insight.suggestion;
+            card.classList.remove('hidden');
+            card.dataset.shareText = `${insight.title}. ${insight.body}`;
+            card.dataset.insightId = insight.id;
+        }
         function renderMonthly(month) {
             renderBalanceCard(month);
             document.getElementById('monthly-total').textContent = fmt(month.total);
@@ -4197,6 +4274,7 @@
                 `).join('');
             }
 
+            renderPersonalizedInsight(month);
             const tipCard = document.getElementById('monthly-tip-card');
             if (month.byCategory.length > 0) {
                 tipCard.style.display = 'flex';
@@ -4207,6 +4285,18 @@
                 tipCard.style.display = 'none';
             }
         }
+
+        document.getElementById('personalized-insight-close')?.addEventListener('click', () => {
+            const card = document.getElementById('personalized-insight-card');
+            const insightId = card?.dataset.insightId;
+            if (insightId) localStorage.setItem(personalizedInsightDismissKey(insightId), '1');
+            card?.classList.add('hidden');
+        });
+        document.getElementById('personalized-insight-more')?.addEventListener('click', () => document.getElementById('monthly-tip-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
+        document.getElementById('personalized-insight-share')?.addEventListener('click', async () => {
+            const btn = document.getElementById('personalized-insight-share');
+            try { btn.disabled = true; btn.textContent = 'بنجهز الصورة...'; await shareWrappedCard({ cacheKey: `personalized-insight-${document.getElementById('personalized-insight-card')?.dataset.insightId || 'current'}`, cardId: 'personalized-insight-card', filename: 'dabbar-yqraak.png', text: document.getElementById('personalized-insight-card')?.dataset.shareText || 'دبّر — محاسبك الشخصي' }); } catch (e) { if (e.name !== 'AbortError') alert(e.message || 'حصل خطأ أثناء تجهيز الصورة.'); } finally { btn.disabled = false; btn.textContent = 'شارك الرؤية'; }
+        });
 
         function renderDaily(today, flow) {
             window.__todayData = today;

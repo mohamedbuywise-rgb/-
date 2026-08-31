@@ -1,5 +1,5 @@
 import { supabase } from '../../lib/supabaseClient.js';
-import { getPersonDebtDetail, getFullDebtReportData } from '../../lib/debts.js';
+import { getPersonDebtDetail, getFullDebtReportData, getDebtHistoryData, deleteDebtById } from '../../lib/debts.js';
 import { buildFullDebtReportHtml } from '../../lib/debtReportTemplate.js';
 import { getMonthRange, getExpensesBetween, buildCategoryBreakdown } from '../../lib/expenses.js';
 import { buildReportHtml } from '../../lib/reportTemplate.js';
@@ -41,10 +41,11 @@ async function handlePersonDetail(req, res, telegramUserId) {
     net: detail.net,
     relevantNet: detail.relevantNet,
     lastSettlement: detail.lastSettlement,
-    transactions: detail.transactions
+        transactions: detail.transactions
       .slice()
       .reverse() // الأحدث الأول، أسهل للقراءة على الموقع
       .map((t) => ({
+        id: t.id,
         amount: t.amount,
         direction: t.direction,
         isRepayment: t.isRepayment,
@@ -55,6 +56,18 @@ async function handlePersonDetail(req, res, telegramUserId) {
 }
 
 // ---- type=debts: PDF كشف الديون الشامل ----
+async function handleDebtHistory(req, res, telegramUserId) {
+  return res.status(200).json(await getDebtHistoryData(telegramUserId));
+}
+
+async function handleDeleteDebt(req, res, telegramUserId) {
+  const debtId = req.body?.debtId;
+  if (!debtId) return res.status(400).json({ error: 'معرّف المعاملة مطلوب.' });
+  const deleted = await deleteDebtById(debtId, telegramUserId);
+  if (!deleted) return res.status(404).json({ error: 'المعاملة غير موجودة أو لا تخص حسابك.' });
+  return res.status(200).json({ ok: true });
+}
+
 async function handleDebtsPdf(req, res, telegramUserId, userEmail) {
   const byPerson = await getFullDebtReportData(telegramUserId);
   const entries = Object.values(byPerson).filter((v) => v.net !== 0);
@@ -186,11 +199,15 @@ async function handleDailyPdf(req, res, telegramUserId) {
 }
 
 export default async function handler(req, res) {
+  const type = String(req.query?.type || '');
+  if (req.method === 'POST' && type === 'delete-debt') {
+    const auth = await requireLink(req, res);
+    if (!auth) return;
+    return await handleDeleteDebt(req, res, auth.dataUserId);
+  }
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
-
-  const type = String(req.query?.type || '');
 
   try {
     const auth = await requireLink(req, res);
@@ -201,6 +218,8 @@ export default async function handler(req, res) {
     switch (type) {
       case 'person':
         return await handlePersonDetail(req, res, dataUserId);
+      case 'debt-history':
+        return await handleDebtHistory(req, res, dataUserId);
       case 'debts':
         return await handleDebtsPdf(req, res, dataUserId, auth.user.email);
       case 'monthly':
@@ -208,7 +227,7 @@ export default async function handler(req, res) {
       case 'daily':
         return await handleDailyPdf(req, res, dataUserId);
       default:
-        return res.status(400).json({ error: 'type غير معروف. استخدم person أو debts أو monthly أو daily.' });
+        return res.status(400).json({ error: 'type غير معروف. استخدم person أو debt-history أو debts أو monthly أو daily.' });
     }
   } catch (err) {
     console.error(`reports (type=${type}) error:`, err);

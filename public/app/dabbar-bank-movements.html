@@ -69,9 +69,9 @@
   .list-card { background: var(--db-surface); border-radius: 14px; padding: 4px 12px; }
   .row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-top: 1px solid var(--db-surface-soft); }
   .row:first-child { border-top: none; }
-  .row .desc { font-size: 13.5px; color: var(--db-ink); margin-bottom: 3px; }
+  .row .desc { font-size: 13.5px; color: var(--db-ink); margin-bottom: 3px; font-weight: 600; }
   .row .meta { font-size: 11.5px; color: var(--db-muted); display: flex; align-items: center; gap: 6px; }
-  .review-badge { width: 7px; height: 7px; border-radius: 50%; background: #f2b90c; display: inline-block; }
+  .review-badge { color: #f2b90c; display: inline-block; font-size: 14px; line-height: 1; }
   .amount { font-size: 14.5px; font-weight: 700; }
   .amount-danger { color: var(--db-danger); }
   .amount-success { color: var(--db-success); }
@@ -116,9 +116,7 @@
     <button class="close-btn" id="close-btn" aria-label="إغلاق">✕</button>
   </div>
 
-  <div class="note-box">
-    سحب وإيداع وتحويل بين حساباتك بتتسجل هنا بس عشان تتابعها، من غير ما تدخل ضمن إجمالي مصروفاتك. أما خصم الاشتراكات والمشتريات فبيتحسب مصروف حقيقي زي أي حاجة تانية. أي حركة فيها اسم شخص من غير سياق واضح هتلاقيها هنا بعلامة صفراء تقولك "تحتاج مراجعة" لحد ما تحددها بنفسك.
-  </div>
+  <div class="note-box"><ul style="margin:0; padding-inline-start:18px; display:flex; flex-direction:column; gap:6px;"><li>السحب والإيداع والتحويل بين حساباتك بيتسجلوا هنا للمتابعة بس، من غير ما يدخلوا في إجمالي مصروفاتك.</li><li>الاشتراكات والمشتريات بتتحسب مصروف حقيقي ومباشر زي أي حاجة تانية.</li><li><span style="color:#f2b90c;">⚠️</span> أي حركة مبهمة هتتحط تحت "تحتاج مراجعة" لحد ما تحددها بنفسك.</li></ul></div>
 
   <div id="status" class="status">بنجيب حركاتك...</div>
 
@@ -131,10 +129,10 @@
 
     <div class="filters">
       <button class="filter-btn active" data-f="all">الكل</button>
-      <button class="filter-btn" data-f="withdrawal">سحب</button>
-      <button class="filter-btn" data-f="deposit">إيداع</button>
-      <button class="filter-btn" data-f="transfer">تحويل</button>
-      <button class="filter-btn" data-f="review">تحتاج مراجعة</button>
+      <button class="filter-btn" data-f="withdrawal">سحب / مشتريات</button>
+      <button class="filter-btn" data-f="deposit">إيداع / وارد</button>
+      <button class="filter-btn" data-f="transfer">تحويلات</button>
+      <button class="filter-btn" data-f="review">تحتاج مراجعة ⚠️</button>
     </div>
 
     <div class="list-card" id="list-card"></div>
@@ -212,6 +210,7 @@
     const filtered = allMovements.filter((m) => {
       if (currentFilter === 'all') return true;
       if (currentFilter === 'review') return m.needs_review;
+      if (currentFilter === 'withdrawal') return m.event_type === 'withdrawal' || ['expense', 'purchase', 'subscription'].includes(String(m.category || m.event_category || m.type || '').toLowerCase());
       return m.event_type === currentFilter;
     });
     if (!filtered.length) {
@@ -221,14 +220,19 @@
     filtered.forEach((m) => {
       const row = document.createElement('div');
       row.className = 'row';
-      const amountClass = m.event_type === 'withdrawal' ? 'amount-danger' : (m.event_type === 'deposit' ? 'amount-success' : 'amount-neutral');
-      const sign = m.event_type === 'withdrawal' ? '-' : (m.event_type === 'deposit' ? '+' : '');
+      const isExpenseLike = m.event_type === 'withdrawal' || ['expense', 'purchase', 'subscription'].includes(String(m.category || m.event_category || m.type || '').toLowerCase());
+      const amountClass = isExpenseLike ? 'amount-danger' : (m.event_type === 'deposit' ? 'amount-success' : 'amount-neutral');
+      const sign = isExpenseLike ? '-' : (m.event_type === 'deposit' ? '+' : '');
       const desc = m.description || m.counterparty || TYPE_LABELS[m.event_type] || m.label;
-      const date = new Date(m.created_at).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' });
+      const movementDate = new Date(m.created_at);
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
+      const dateOnly = new Date(movementDate); dateOnly.setHours(0, 0, 0, 0);
+      const date = dateOnly.getTime() === today.getTime() ? 'اليوم' : (dateOnly.getTime() === yesterday.getTime() ? 'أمس' : movementDate.toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' }));
       row.innerHTML = `
         <div>
-          <div class="desc">${desc}</div>
-          <div class="meta">${m.needs_review ? '<span class="review-badge"></span>' : ''}<span>${TYPE_LABELS[m.event_type] || m.label} · ${date}</span></div>
+          <div class="desc">${m.needs_review ? '<span class="review-badge" aria-label="تحتاج مراجعة">⚠️</span> ' : ''}${desc}</div>
+          <div class="meta"><span>${TYPE_LABELS[m.event_type] || m.label} · ${date}</span></div>
         </div>
         <div style="text-align:left;">
           <div class="amount ${amountClass}">${sign}${fmt(m.amount)} ج.م</div>

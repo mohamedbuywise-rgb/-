@@ -1,0 +1,27 @@
+{
+  "rewrites": [
+    { "source": "/account", "destination": "/app/dabbar-dashboard-full.html" },
+    { "source": "/account/external-expense", "destination": "/app/dabbar-dashboard-full.html" },
+    { "source": "/account/banks/troubleshooting", "destination": "/app/dabbar-dashboard-full.html" },
+    { "source": "/account/banks", "destination": "/app/dabbar-dashboard-full.html" },
+    { "source": "/api/:route*", "destination": "/api/index?route=:route*" }
+  ],
+  "headers": [
+    {
+      "source": "/app/sw.js",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-store, no-cache, must-revalidate" }
+      ]
+    }
+  ],
+  "crons": [
+    { "path": "/api/cron-daily", "schedule": "5 5 * * *" },
+    { "path": "/api/cron-daily", "schedule": "0 21 * * *" }
+  ],
+  "functions": {
+    "api/index.js": {
+      "memory": 1536,
+      "maxDuration": 60
+    }
+  }
+}

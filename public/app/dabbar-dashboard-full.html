@@ -1717,6 +1717,48 @@
             padding-bottom: .58rem !important;
         }
 
+        /* Share capture: domToBlob ينسخ الكارت وحده، لذلك نثبت الثيم على الكارت نفسه */
+        .personalized-insight-card.share-capture-light {
+            background: linear-gradient(145deg, #08785c 0%, #075b47 58%, #064e3b 100%) !important;
+            border-color: #10a477 !important;
+            color: #ffffff !important;
+        }
+        .personalized-insight-card.share-capture-light::before { background: rgba(167,243,208,.12) !important; }
+        .personalized-insight-card.share-capture-light::after { background: rgba(255,255,255,.055) !important; }
+        .personalized-insight-card.share-capture-light .personalized-insight-brand,
+        .personalized-insight-card.share-capture-light .personalized-insight-role,
+        .personalized-insight-card.share-capture-light .personalized-insight-label,
+        .personalized-insight-card.share-capture-light .personalized-insight-kicker,
+        .personalized-insight-card.share-capture-light .personalized-insight-copy h3,
+        .personalized-insight-card.share-capture-light .personalized-insight-copy p,
+        .personalized-insight-card.share-capture-light .personalized-insight-suggestion { color: #ffffff !important; }
+        .personalized-insight-card.share-capture-light .personalized-insight-art { color: #a7f3d0 !important; }
+        .personalized-insight-card.share-capture-light .personalized-insight-label,
+        .personalized-insight-card.share-capture-light .personalized-insight-close { border-color: rgba(167,243,208,.48) !important; background: rgba(6,78,59,.45) !important; color: #ecfdf5 !important; }
+        .personalized-insight-card.share-capture-light .personalized-insight-suggestion { border-top-color: rgba(255,255,255,.28) !important; }
+        .personalized-insight-card.share-capture-light .personalized-insight-share { border-color: #a7f3d0 !important; color: #ffffff !important; }
+        .personalized-insight-card.share-capture-light .personalized-insight-more { background: #34d399 !important; color: #052e24 !important; }
+        .personalized-insight-card.share-capture-dark {
+            background: linear-gradient(145deg, #3c2c08 0%, #241b06 52%, #151207 100%) !important;
+            border-color: rgba(244,198,72,.72) !important;
+            color: #fff8df !important;
+        }
+        .personalized-insight-card.share-capture-dark::before { background: rgba(244,198,72,.10) !important; }
+        .personalized-insight-card.share-capture-dark::after { background: rgba(244,198,72,.065) !important; }
+        .personalized-insight-card.share-capture-dark .personalized-insight-brand,
+        .personalized-insight-card.share-capture-dark .personalized-insight-role,
+        .personalized-insight-card.share-capture-dark .personalized-insight-label,
+        .personalized-insight-card.share-capture-dark .personalized-insight-kicker,
+        .personalized-insight-card.share-capture-dark .personalized-insight-copy h3,
+        .personalized-insight-card.share-capture-dark .personalized-insight-copy p,
+        .personalized-insight-card.share-capture-dark .personalized-insight-suggestion { color: #fff8df !important; }
+        .personalized-insight-card.share-capture-dark .personalized-insight-art { color: #f4c648 !important; }
+        .personalized-insight-card.share-capture-dark .personalized-insight-label,
+        .personalized-insight-card.share-capture-dark .personalized-insight-close { border-color: rgba(244,198,72,.45) !important; background: rgba(244,198,72,.10) !important; color: #ffe58a !important; }
+        .personalized-insight-card.share-capture-dark .personalized-insight-suggestion { border-top-color: rgba(244,198,72,.34) !important; }
+        .personalized-insight-card.share-capture-dark .personalized-insight-share { border-color: #f4c648 !important; color: #fff4c2 !important; }
+        .personalized-insight-card.share-capture-dark .personalized-insight-more { background: #f4c648 !important; color: #241b05 !important; }
+
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col overflow-hidden">
@@ -5737,24 +5779,32 @@
         // بنجهز صورة الكارت مقدمًا، لكن المشاركة نفسها تعيد التصوير عند الحاجة.
         // مهم: لا نستخدم مشاركة النص كـ fallback، لأن المطلوب مشاركة الكارت كصورة دائمًا.
         const wrappedImageCache = {};
-        async function getWrappedImage(cacheKey, cardId) {
-            let blob = wrappedImageCache[cacheKey];
+                async function getWrappedImage(cacheKey, cardId) {
+            const theme = document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+            const themeCacheKey = `${cacheKey}-${theme}`;
+            let blob = wrappedImageCache[themeCacheKey];
             if (blob && blob.size > 0) return blob;
-
             const cardEl = document.getElementById(cardId);
             if (!window.modernScreenshot || !cardEl || cardEl.classList.contains('hidden')) return null;
-
-            // ننتظر تحميل الخطوط والرسم التالي حتى لا تخرج الصورة ناقصة أو بدون نص.
-            if (document.fonts && document.fonts.ready) await document.fonts.ready;
-            await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
-            blob = await window.modernScreenshot.domToBlob(cardEl, {
-                scale: Math.min(3, Math.max(2, window.devicePixelRatio || 2)),
-                type: 'image/png',
-                backgroundColor: null,
-            });
-            if (blob && blob.size > 0) wrappedImageCache[cacheKey] = blob;
+            // domToBlob ينسخ الكارت وحده، لذلك نضيف هوية الثيم على العنصر نفسه قبل التصوير.
+            const captureClass = theme === 'light' ? 'share-capture-light' : 'share-capture-dark';
+            cardEl.classList.add(captureClass);
+            try {
+                // ننتظر تحميل الخطوط والرسم التالي حتى لا تخرج الصورة ناقصة أو بدون نص.
+                if (document.fonts && document.fonts.ready) await document.fonts.ready;
+                await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
+                blob = await window.modernScreenshot.domToBlob(cardEl, {
+                    scale: Math.min(3, Math.max(2, window.devicePixelRatio || 2)),
+                    type: 'image/png',
+                    backgroundColor: null,
+                });
+            } finally {
+                cardEl.classList.remove(captureClass);
+            }
+            if (blob && blob.size > 0) wrappedImageCache[themeCacheKey] = blob;
             return blob;
         }
+
 
         function downloadWrappedImage(blob, filename) {
             const url = URL.createObjectURL(blob);

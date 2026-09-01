@@ -43,8 +43,13 @@ export default async function handler(req, res) {
 
   try {
     const pdfBuffer = await renderPdfFromHtml(html);
+    const rawFileName = `كشف-حساب-${label}-${start.getFullYear()}.pdf`;
+    const encodedFileName = encodeURIComponent(rawFileName);
     res.setHeader('Content-Type', 'application/pdf');
-    res.setHeader('Content-Disposition', `attachment; filename="dabbar-${label}-${start.getFullYear()}.pdf"`);
+    res.setHeader(
+      'Content-Disposition',
+      `attachment; filename="archive-month.pdf"; filename*=UTF-8''${encodedFileName}`
+    );
     return res.status(200).send(pdfBuffer);
   } catch (err) {
     console.error('archive-month-pdf render failed:', err);

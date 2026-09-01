@@ -715,46 +715,52 @@
         #monthly-categories-card,
         #monthly-tip-card h3 { font-size: .95rem; }
         #monthly-tip-card .personalized-insight-copy p { font-size: .78rem; }
-        .personalized-insight-card { background: linear-gradient(135deg, rgba(16,185,129,.22), rgba(6,78,59,.92)); border: 1px solid rgba(52,211,153,.55); border-radius: 1.7rem; padding: 1rem; color: #ecfdf5; overflow: hidden; position: relative; box-shadow: 0 18px 38px rgba(6,78,59,.18); }
-        .personalized-insight-card::after { content: ''; position: absolute; width: 170px; height: 170px; left: -55px; top: 105px; border-radius: 50%; background: rgba(52,211,153,.10); pointer-events: none; }
+        .personalized-insight-card, .personalized-insight-card button { font-family:'Cairo', Arial, sans-serif; -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility; }
+        .personalized-insight-card { background: linear-gradient(145deg, #08785c 0%, #075b47 58%, #064e3b 100%); border: 1px solid rgba(110,231,183,.70); border-radius: 1.85rem; padding: 1.15rem; color: #ecfdf5; overflow: hidden; position: relative; box-shadow: 0 20px 42px rgba(6,78,59,.24), inset 0 1px 0 rgba(255,255,255,.12); isolation: isolate; }
+        .personalized-insight-card::before { content: ''; position: absolute; width: 14rem; height: 14rem; left: -5.5rem; bottom: -6.5rem; border-radius: 50%; background: rgba(110,231,183,.12); pointer-events: none; z-index: -1; }
+        .personalized-insight-card::after { content: ''; position: absolute; width: 9rem; height: 9rem; right: -4.5rem; top: -4.5rem; border-radius: 50%; background: rgba(255,255,255,.055); pointer-events: none; z-index: -1; }
         .personalized-insight-head, .personalized-insight-main, .personalized-insight-suggestion, .personalized-insight-actions { position: relative; z-index: 1; }
-        .personalized-insight-head { display:flex; align-items:center; justify-content:space-between; gap:.75rem; margin-bottom:.9rem; }
-        .personalized-insight-brand { display:block; font-size:1.15rem; line-height:1; font-weight:950; color:#a7f3d0; }
-        .personalized-insight-role { display:block; margin-top:.2rem; font-size:.62rem; font-weight:800; color:#d1fae5; }
+        .personalized-insight-head { display:flex; align-items:center; justify-content:space-between; gap:.75rem; margin-bottom:1.15rem; }
+        .personalized-insight-brand { display:block; font-size:1.28rem; line-height:1; font-weight:950; letter-spacing:-.04em; color:#ecfdf5; }
+        .personalized-insight-role { display:block; margin-top:.28rem; font-size:.62rem; font-weight:800; color:rgba(236,253,245,.82); }
         .personalized-insight-head-actions { display:flex; align-items:center; gap:.4rem; }
-        .personalized-insight-label { border:1px solid rgba(167,243,208,.32); background:rgba(2,44,34,.35); border-radius:999px; padding:.4rem .65rem; font-size:.62rem; font-weight:900; color:#d1fae5; }
-        .personalized-insight-close { width:1.7rem; height:1.7rem; border:1px solid rgba(167,243,208,.32); border-radius:50%; background:rgba(2,44,34,.28); color:#d1fae5; font-size:1.05rem; line-height:1; cursor:pointer; }
-        .personalized-insight-main { display:grid; grid-template-columns:6.3rem 1fr; align-items:center; gap:.7rem; }
-        .personalized-insight-art { width:6.1rem; height:6.1rem; display:flex; align-items:center; justify-content:center; color:#6ee7b7; }
+        .personalized-insight-label { border:1px solid rgba(167,243,208,.45); background:rgba(2,44,34,.24); border-radius:999px; padding:.48rem .72rem; font-size:.62rem; font-weight:900; color:#ecfdf5; }
+        .personalized-insight-close { width:1.9rem; height:1.9rem; border:1px solid rgba(167,243,208,.45); border-radius:50%; background:rgba(2,44,34,.24); color:#ecfdf5; font-size:1.08rem; line-height:1; cursor:pointer; transition:transform .2s ease, background .2s ease; }
+        .personalized-insight-close:hover { transform:scale(1.06); background:rgba(255,255,255,.12); }
+        .personalized-insight-main { display:grid; grid-template-columns:6.5rem 1fr; align-items:center; gap:.85rem; }
+        .personalized-insight-art { width:6.35rem; height:6.35rem; display:flex; align-items:center; justify-content:center; color:#a7f3d0; }
         .personalized-insight-art svg { width:100%; height:100%; filter: drop-shadow(0 8px 10px rgba(0,0,0,.22)); }
-        .personalized-insight-icon-emoji { font-size: 3.6rem; line-height: 1; filter: drop-shadow(0 8px 10px rgba(0,0,0,.28)); }
-        .personalized-insight-kicker { font-size:.62rem; color:#a7f3d0; font-weight:800; }
-        .personalized-insight-copy h3 { margin:.28rem 0 .4rem; font-size:1.2rem; line-height:1.35; font-weight:950; color:#fff; }
-        .personalized-insight-copy p { margin:0; font-size:.72rem; line-height:1.8; color:#d1fae5; }
-        .personalized-insight-suggestion { display:flex; gap:.45rem; align-items:flex-start; margin-top:.85rem; padding-top:.75rem; border-top:1px solid rgba(167,243,208,.22); font-size:.7rem; line-height:1.7; color:#ecfdf5; }
-        .personalized-insight-actions { display:flex; gap:.5rem; margin-top:.85rem; }
-        .personalized-insight-actions button { flex:1; border-radius:.8rem; padding:.65rem .5rem; font-size:.72rem; font-weight:900; cursor:pointer; }
+        .personalized-insight-icon-emoji { display:block; font-size:4.15rem; line-height:1; filter:drop-shadow(0 10px 12px rgba(0,0,0,.28)); transform:rotate(-4deg); }
+        .personalized-insight-kicker { font-size:.65rem; color:#a7f3d0; font-weight:800; }
+        .personalized-insight-copy h3 { margin:.32rem 0 .48rem; font-size:1.38rem; line-height:1.42; font-weight:900; letter-spacing:-.02em; color:#fff; }
+        .personalized-insight-copy p { margin:0; font-size:.78rem; line-height:1.95; font-weight:700; color:#e8fff5; }
+        .personalized-insight-suggestion { display:flex; gap:.5rem; align-items:flex-start; margin-top:1.1rem; padding-top:.9rem; border-top:1px solid rgba(167,243,208,.32); font-size:.75rem; line-height:1.85; font-weight:700; color:#f4fff9; }
+        .personalized-insight-actions { display:flex; gap:.6rem; margin-top:1rem; }
+        .personalized-insight-actions button { flex:1; min-height:2.85rem; border-radius:1rem; padding:.72rem .55rem; font-size:.73rem; font-weight:900; cursor:pointer; transition:transform .2s ease, filter .2s ease, background .2s ease; }
+        .personalized-insight-actions button:hover { transform:translateY(-2px); filter:brightness(1.06); }
         .personalized-insight-share { border:1px solid #6ee7b7; background:transparent; color:#ecfdf5; }
         .personalized-insight-more { border:1px solid transparent; background:#34d399; color:#052e24; }
-        html[data-theme="light"] .personalized-insight-card { background: linear-gradient(135deg, #075e48 0%, #064e3b 100%); border-color: #047857; color: #f0fdf4; box-shadow:0 18px 38px rgba(4,120,87,.16); }
+        html[data-theme="light"] .personalized-insight-card { background:linear-gradient(145deg, #08785c 0%, #07634d 56%, #075542 100%) !important; border-color:#10a477 !important; color:#f0fdf4 !important; box-shadow:0 20px 42px rgba(4,120,87,.22), inset 0 1px 0 rgba(255,255,255,.14) !important; }
         html[data-theme="light"] .personalized-insight-card .personalized-insight-brand,
         html[data-theme="light"] .personalized-insight-card .personalized-insight-role,
         html[data-theme="light"] .personalized-insight-card .personalized-insight-label,
         html[data-theme="light"] .personalized-insight-card .personalized-insight-kicker,
         html[data-theme="light"] .personalized-insight-card .personalized-insight-copy h3,
         html[data-theme="light"] .personalized-insight-card .personalized-insight-copy p,
-        html[data-theme="light"] .personalized-insight-card .personalized-insight-suggestion { color:#f0fdf4 !important; }
-        html[data-theme="light"] .personalized-insight-card .personalized-insight-art { color:#6ee7b7 !important; }
+        html[data-theme="light"] .personalized-insight-card .personalized-insight-suggestion { color:#ffffff !important; }
+        html[data-theme="light"] .personalized-insight-card .personalized-insight-art { color:#a7f3d0 !important; }
         html[data-theme="light"] .personalized-insight-close { background:rgba(6,78,59,.45) !important; color:#ecfdf5 !important; }
-        html:not([data-theme="light"]) .personalized-insight-card { background: linear-gradient(135deg, #3a2b08 0%, #17130a 55%, #0b1512 100%) !important; border-color: rgba(244,198,72,.62) !important; box-shadow: 0 18px 40px rgba(0,0,0,.28), inset 0 0 0 1px rgba(244,198,72,.08); }
+        html:not([data-theme="light"]) .personalized-insight-card { background:linear-gradient(145deg, #3c2c08 0%, #241b06 52%, #151207 100%) !important; border-color:rgba(244,198,72,.72) !important; box-shadow:0 22px 44px rgba(0,0,0,.34), inset 0 1px 0 rgba(255,231,143,.12) !important; }
         html:not([data-theme="light"]) .personalized-insight-card .personalized-insight-brand,
         html:not([data-theme="light"]) .personalized-insight-card .personalized-insight-role,
         html:not([data-theme="light"]) .personalized-insight-card .personalized-insight-label,
         html:not([data-theme="light"]) .personalized-insight-card .personalized-insight-kicker,
         html:not([data-theme="light"]) .personalized-insight-card .personalized-insight-copy h3,
         html:not([data-theme="light"]) .personalized-insight-card .personalized-insight-copy p,
-        html:not([data-theme="light"]) .personalized-insight-card .personalized-insight-suggestion { color:#fff4c2 !important; }
+        html:not([data-theme="light"]) .personalized-insight-card .personalized-insight-suggestion { color:#fff8df !important; }
         html:not([data-theme="light"]) .personalized-insight-card .personalized-insight-art { color:#f4c648 !important; }
+        html:not([data-theme="light"]) .personalized-insight-card::before { background:rgba(244,198,72,.10); }
+        html:not([data-theme="light"]) .personalized-insight-card::after { background:rgba(244,198,72,.065); }
         html:not([data-theme="light"]) .personalized-insight-card .personalized-insight-label,
         html:not([data-theme="light"]) .personalized-insight-card .personalized-insight-close { border-color:rgba(244,198,72,.45) !important; background:rgba(244,198,72,.10) !important; color:#ffe58a !important; }
         html:not([data-theme="light"]) .personalized-insight-card .personalized-insight-share { border-color:#f4c648 !important; color:#fff4c2 !important; }
@@ -1057,7 +1063,7 @@
         html[data-theme="light"] .border-slate-800 { border-color: #d3e1da !important; }
         /* النهاري هنا Canvas واحدة؛ التمييز بالمسافات والضوء وليس بكروت متجاورة */
         html[data-theme="light"] #tab-monthly { background: #edf4f0 !important; }
-        html[data-theme="light"] #tab-monthly > section,
+        html[data-theme="light"] #tab-monthly > section:not(.personalized-insight-card),
         html[data-theme="light"] #tab-monthly > div { background: transparent !important; border: 0 !important; box-shadow: none !important; border-radius: 0 !important; }
         html[data-theme="light"] #tab-monthly > #quick-entry-card { background: linear-gradient(135deg,#ffffff,#f0faf5) !important; border-radius: 1.5rem !important; box-shadow: 0 10px 26px rgba(30,70,50,.07) !important; }
         html[data-theme="light"] #planning-card,
@@ -1532,7 +1538,7 @@
             box-shadow: var(--day-shadow) !important;
         }
         html[data-theme="light"] #tab-monthly > div:not(#footer-cta),
-        html[data-theme="light"] #tab-monthly > section:not(#daily-reminder-card):not(#active-days-card):not(#quick-entry-card) {
+        html[data-theme="light"] #tab-monthly > section:not(#daily-reminder-card):not(#active-days-card):not(#quick-entry-card):not(.personalized-insight-card) {
             background: var(--day-card) !important;
             border: 1px solid var(--day-line) !important;
             border-radius: 1.5rem !important;
@@ -4413,10 +4419,10 @@
             return null;
         }
 
-        // ============ "دبّر يقرأك بالليل" — كارت كوميدي عن أكتر فئة صرفت فيها النهاردة، بيظهر بس من الساعة ١١ بالليل ============
+        // ============ "دبّر يقرأك بالليل" — كارت كوميدي عن أكتر فئة صرفت فيها النهاردة، بيظهر بس من الساعة ٩ بالليل ============
         // العنوان نفسه هو "القفشة" (مش وصف عام) عشان يبقى قابل للمشاركة كصورة لوحده، والأيقونة إيموجي
         // الفئة نفسها فبتتغير كل مرة حسب الموضوع بدل ما تفضل ثابتة.
-        const DAILY_INSIGHT_HOUR = 23; // ١١ م
+        const DAILY_INSIGHT_HOUR = 21; // ٩ م
         const DAILY_INSIGHT_COPY = {
             'أكل': { title: 'بطنك بقت شريكة في الميزانية 🍔', body: 'أكل ودليفري ومطاعم أخدوا أكبر حصة من صرفك النهاردة — واضح إن مطبخ البيت في إجازة.' },
             'مواصلات': { title: 'يوم كامل وانت بين تاكسي وأوبر 🚕', body: 'المواصلات أخدت أكبر نصيب من صرف النهاردة — يمكن نفكر في اشتراك مواصلات عام؟' },
@@ -4459,7 +4465,7 @@
             document.getElementById(`personalized-insight-body${suffix}`).textContent = insight.body;
             document.getElementById(`personalized-insight-suggestion${suffix}`).textContent = insight.suggestion;
             const iconEl = document.getElementById(`personalized-insight-icon${suffix}`);
-            if (iconEl) iconEl.textContent = insight.category ? getCategoryEmoji(insight.category) : '📊';
+            if (iconEl) iconEl.textContent = insight.icon || (insight.category ? getCategoryEmoji(insight.category) : '🧠');
             card.classList.remove('hidden');
             card.dataset.shareText = `${insight.title}. ${insight.body}`;
             card.dataset.insightId = insight.id;
@@ -4526,6 +4532,7 @@
             return {
                 id: `newmonth-${monthKey}`,
                 category: null,
+                icon: '🎉',
                 title: 'شهر جديد بدأ رسميًا 🎉',
                 body: `الأرقام رجعت للصفر مش لأن حاجة ضاعت — كنت خلّصت ${fmt(prevTotal)} الشهر اللي فات وده اتسجل وآمن في الأرشيف. دلوقتي صفحة جديدة، يلا نبدأ صح.`,
                 suggestion: 'اقتراح دبّر: افتح الأرشيف وشوف الشهر اللي فات كان عامل إزاي قبل ما تبدأ.',

@@ -1641,6 +1641,55 @@
         html[data-theme="light"] .debt-history-badge.active { background: #d1fae5 !important; color: #047857 !important; }
         html[data-theme="light"] .debt-history-badge.settled { background: #e2e8f0 !important; color: #64748b !important; }
 
+        /* Final lock: هوية دبّر يقرأك لا تتأثر بسطح الوضع النهاري العام */
+        html[data-theme="light"] #tab-monthly > #personalized-insight-card,
+        html[data-theme="light"] #tab-monthly > #personalized-insight-card-newmonth,
+        html[data-theme="light"] #tab-monthly > #monthly-tip-card,
+        html[data-theme="light"] #tab-daily > #personalized-insight-card-daily {
+            background: #08785c !important;
+            color: #ffffff !important;
+            border: 1px solid #10a477 !important;
+            border-radius: 1.85rem !important;
+            box-shadow: 0 20px 42px rgba(4,120,87,.24), inset 0 1px 0 rgba(255,255,255,.16) !important;
+        }
+        html[data-theme="light"] .personalized-insight-card .personalized-insight-brand,
+        html[data-theme="light"] .personalized-insight-card .personalized-insight-role,
+        html[data-theme="light"] .personalized-insight-card .personalized-insight-label,
+        html[data-theme="light"] .personalized-insight-card .personalized-insight-kicker,
+        html[data-theme="light"] .personalized-insight-card .personalized-insight-copy h3,
+        html[data-theme="light"] .personalized-insight-card .personalized-insight-copy p,
+        html[data-theme="light"] .personalized-insight-card .personalized-insight-suggestion {
+            color: #ffffff !important;
+        }
+        html[data-theme="light"] .personalized-insight-card .personalized-insight-art { color: #a7f3d0 !important; }
+        html[data-theme="light"] .personalized-insight-card .personalized-insight-suggestion { border-top-color: rgba(255,255,255,.28) !important; }
+        html[data-theme="light"] .personalized-insight-card .personalized-insight-share { border-color: #a7f3d0 !important; color: #ffffff !important; }
+        html[data-theme="light"] .personalized-insight-card .personalized-insight-more { background: #34d399 !important; color: #052e24 !important; }
+
+        html:not([data-theme="light"]) #tab-monthly > #personalized-insight-card,
+        html:not([data-theme="light"]) #tab-monthly > #personalized-insight-card-newmonth,
+        html:not([data-theme="light"]) #tab-monthly > #monthly-tip-card,
+        html:not([data-theme="light"]) #tab-daily > #personalized-insight-card-daily {
+            background: #17130a !important;
+            color: #fff8df !important;
+            border: 1px solid rgba(244,198,72,.72) !important;
+            border-radius: 1.85rem !important;
+            box-shadow: 0 22px 44px rgba(0,0,0,.36), inset 0 1px 0 rgba(255,231,143,.14) !important;
+        }
+        html:not([data-theme="light"]) .personalized-insight-card .personalized-insight-brand,
+        html:not([data-theme="light"]) .personalized-insight-card .personalized-insight-role,
+        html:not([data-theme="light"]) .personalized-insight-card .personalized-insight-label,
+        html:not([data-theme="light"]) .personalized-insight-card .personalized-insight-kicker,
+        html:not([data-theme="light"]) .personalized-insight-card .personalized-insight-copy h3,
+        html:not([data-theme="light"]) .personalized-insight-card .personalized-insight-copy p,
+        html:not([data-theme="light"]) .personalized-insight-card .personalized-insight-suggestion {
+            color: #fff8df !important;
+        }
+        html:not([data-theme="light"]) .personalized-insight-card .personalized-insight-art { color: #f4c648 !important; }
+        html:not([data-theme="light"]) .personalized-insight-card .personalized-insight-suggestion { border-top-color: rgba(244,198,72,.34) !important; }
+        html:not([data-theme="light"]) .personalized-insight-card .personalized-insight-share { border-color: #f4c648 !important; color: #fff8df !important; }
+        html:not([data-theme="light"]) .personalized-insight-card .personalized-insight-more { background: #f4c648 !important; color: #241b05 !important; }
+
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col overflow-hidden">

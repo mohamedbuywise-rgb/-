@@ -1690,6 +1690,17 @@
         html:not([data-theme="light"]) .personalized-insight-card .personalized-insight-share { border-color: #f4c648 !important; color: #fff8df !important; }
         html:not([data-theme="light"]) .personalized-insight-card .personalized-insight-more { background: #f4c648 !important; color: #241b05 !important; }
 
+        /* ملخص الشهر فقط: نسخة أقصر دون التأثير على أي بطاقة تستخدم الكلاس العام */
+        #monthly-tip-card.personalized-insight-card { padding: .95rem !important; }
+        #monthly-tip-card.personalized-insight-card .personalized-insight-head { margin-bottom: .86rem !important; }
+        #monthly-tip-card.personalized-insight-card .personalized-insight-art { width: 5.6rem !important; height: 5.6rem !important; }
+        #monthly-tip-card.personalized-insight-card .personalized-insight-icon-emoji { font-size: 3.6rem !important; }
+        #monthly-tip-card.personalized-insight-card .personalized-insight-suggestion { margin-top: .74rem !important; padding-top: .66rem !important; }
+        #monthly-tip-card.personalized-insight-card .personalized-insight-actions { margin-top: .72rem !important; }
+        #monthly-tip-card.personalized-insight-card .personalized-insight-actions button { min-height: 2.45rem !important; padding-top: .54rem !important; padding-bottom: .54rem !important; }
+        #monthly-tip-advice { margin-top: .35rem !important; font-size: .68rem !important; line-height: 1.5 !important; opacity: .85 !important; font-weight: 600 !important; }
+
+
         /* Compact share card: تقليل الارتفاع من الفراغات فقط مع الحفاظ على وضوح المحتوى */
         .personalized-insight-card {
             padding: .92rem !important;
@@ -1918,7 +1929,7 @@
 
             <section id="monthly-tip-card" class="personalized-insight-card" style="display:none;" aria-label="أكتر فئة صرفت فيها">
                 <div class="personalized-insight-head"><div><span class="personalized-insight-brand">دبّر</span><span class="personalized-insight-role">ملخص الشهر</span></div></div>
-                <div class="personalized-insight-main"><div class="personalized-insight-art" aria-hidden="true"><span id="monthly-tip-icon" class="personalized-insight-icon-emoji">🏆</span></div><div class="personalized-insight-copy"><span class="personalized-insight-kicker">أكتر فئة صرفت فيها</span><h3 id="monthly-tip-title"></h3><p id="monthly-tip-text"></p></div></div>
+                <div class="personalized-insight-main"><div class="personalized-insight-art" aria-hidden="true"><span id="monthly-tip-icon" class="personalized-insight-icon-emoji">🏆</span></div><div class="personalized-insight-copy"><span class="personalized-insight-kicker">أكتر فئة صرفت فيها</span><h3 id="monthly-tip-title"></h3><p id="monthly-tip-text"></p><p id="monthly-tip-advice" class="monthly-tip-advice"></p></div></div>
             </section>
 
             <!-- أزرار الشهر داخل محتوى تبويب شهري -->
@@ -2162,7 +2173,8 @@
             <!-- اقتراح ذكي تلقائي -->
             <div id="asst-suggestion-card" class="hidden bg-gradient-to-br from-emerald-500/15 to-slate-900 border border-emerald-500/30 rounded-2xl p-4 flex items-start gap-3">
                 <div class="w-9 h-9 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm shrink-0 border border-emerald-500/30">💡</div>
-                <div class="flex-1 space-y-2">
+                <button type="button" id="asst-suggestion-close" class="personalized-insight-close shrink-0" aria-label="إغلاق الاقتراح">×</button>
+                <div class="flex-1 space-y-2 min-w-0">
                     <p class="text-xs text-slate-200 leading-relaxed" id="asst-suggestion-text"></p>
                     <button id="asst-suggestion-action" class="text-[11px] font-bold bg-emerald-500 hover:bg-emerald-400 text-slate-900 py-2 px-3 rounded-xl transition"></button>
                 </div>
@@ -3053,6 +3065,29 @@
         }
         const MONTH_NAMES = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
         const CATEGORY_BAR_COLOR = { 'أكل':'bg-rose-400', 'مواصلات':'bg-teal-400', 'فواتير':'bg-amber-400', 'تسوق':'bg-violet-400', 'ترفيه':'bg-pink-400', 'صحة':'bg-emerald-400', 'تعليم':'bg-blue-400', 'منزل وأثاث':'bg-orange-400', 'ملابس':'bg-fuchsia-400', 'اشتراكات':'bg-indigo-400', 'هدايا وتبرعات':'bg-amber-500', 'شخصي وعناية':'bg-cyan-400' };
+        const CATEGORY_QUICK_TIPS = {
+            'أكل': ['جرّب تحدد ميزانية للأكل قبل أول طلب', 'وجبة من البيت ممكن توفر معاك فرق حلو', 'خطط لوجباتك، وهتطلب براحة أكتر'],
+            'مواصلات': ['جمّع مشاويرك، ممكن توفّر في تكلفة التنقل', 'اختار الطريق الأقل تكلفة في المشاوير المتكررة', 'خطط لمشاويرك بدري وخلي ميزانيتك مرتاحة'],
+            'فواتير': ['جرب تراجع اشتراكاتك، ممكن تلاقي حاجة مش بتستخدمها', 'خلي مواعيد الفواتير واضحة عشان تخطط براحة', 'قارن الباقات كل فترة واختار اللي يناسبك'],
+            'تسوق': ['اكتب اللي محتاجه قبل ما تنزل تشتري', 'قارن الأسعار وخد وقتك قبل قرار الشراء', 'سيب مساحة صغيرة في ميزانيتك للمفاجآت الحلوة'],
+            'ترفيه': ['خصص مبلغ للترفيه وخليه جزء من خطتك', 'اختار خروجة حلوة من غير ما تضغط ميزانيتك', 'المتعة أحلى لما تكون محسوبة ومرتاحة'],
+            'صحة': ['صحتك أولوية، خطط لمصاريفها براحة', 'قارن البدائل المناسبة قبل ما تشتري', 'خلي بند الصحة موجودًا في خطتك كل شهر'],
+            'تعليم': ['استثمر في تعليمك وخطط للمبلغ بدري', 'قسّم تكلفة الكورس على شهور لو ينفع', 'كل خطوة تعلم صغيرة بتقربك لهدفك'],
+            'منزل وأثاث': ['قسّم مشتريات البيت ورتب أولوياتك', 'قارن الخامات والأسعار قبل الشراء', 'ابدأ بالأهم وخلي الباقي على مراحل'],
+            'ملابس': ['اختار قطع عملية تكمل لبسك بسهولة', 'حدد ميزانية للملابس قبل موسم التخفيضات', 'قطعة مناسبة ومستخدمة كتير اختيار ذكي'],
+            'اشتراكات': ['راجع اشتراكاتك كل شهر وخلي المفيد بس', 'جرّب توقف أي خدمة مش بتستخدمها', 'اختار الباقة اللي تناسب استخدامك فعلًا'],
+            'هدايا وتبرعات': ['حط بند ثابت للعطاء على قد استطاعتك', 'خطط لهداياك بدري واختار اللي يفرّحهم', 'اللفتة الحلوة مش لازم تكون غالية'],
+            'شخصي وعناية': ['خصص للعناية مبلغًا مريحًا ضمن ميزانيتك', 'قارن البدائل وخد اللي يناسب احتياجك', 'اهتم بنفسك من غير ما تضغط على خطتك'],
+            fallback: ['قسّم الفئة لحدود صغيرة وخلي خطتك مرنة', 'كل خطوة صغيرة بتفرق في آخر الشهر', 'خليك متابع، وهتلاقي اختياراتك أوضح']
+        };
+        function getMonthlyCategoryTip(category) {
+            const tips = CATEGORY_QUICK_TIPS[category] || CATEGORY_QUICK_TIPS.fallback;
+            const now = new Date();
+            const seed = `${now.getFullYear()}-${now.getMonth() + 1}-${category || 'fallback'}`;
+            let hash = 0;
+            for (let i = 0; i < seed.length; i += 1) hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
+            return tips[hash % tips.length];
+        }
         const CURRENCY_LABELS = { EGP: 'ج.م', USD: 'دولار', EUR: 'يورو', GBP: 'جنيه إسترليني', SAR: 'ريال سعودي', AED: 'درهم', KWD: 'دينار كويتي', QAR: 'ريال قطري' };
         const currencyCode = (code) => String(code || 'EGP').toUpperCase();
         const fmt = (n, code = 'EGP') => `${Number(n).toLocaleString('ar-EG')} ${CURRENCY_LABELS[currencyCode(code)] || currencyCode(code)}`;
@@ -4633,10 +4668,13 @@
             if (month.byCategory.length > 0) {
                 tipCard.style.display = 'block';
                 document.getElementById('monthly-tip-icon').textContent = getCategoryEmoji(month.topCategory.name);
-                document.getElementById('monthly-tip-title').textContent = month.topCategory.name;
-                document.getElementById('monthly-tip-text').textContent = `${fmt(month.topCategory.amount)} — ${month.topCategory.percent}% من صرف الشهر`;
+                const topCat = month.topCategory;
+                document.getElementById('monthly-tip-title').textContent = topCat.name;
+                document.getElementById('monthly-tip-text').textContent = `${fmt(topCat.amount)} — ${topCat.percent}% من صرف الشهر`;
+                document.getElementById('monthly-tip-advice').textContent = getMonthlyCategoryTip(topCat.name);
             } else {
                 tipCard.style.display = 'none';
+                document.getElementById('monthly-tip-advice').textContent = '';
             }
         }
 
@@ -5044,13 +5082,24 @@
 
         function renderAsstSuggestion(smart, goal) {
             const card = document.getElementById('asst-suggestion-card');
+            const closeBtn = document.getElementById('asst-suggestion-close');
             const textEl = document.getElementById('asst-suggestion-text');
             const actionBtn = document.getElementById('asst-suggestion-action');
             if (!smart || !smart.potentialSaving || smart.potentialSaving <= 0) {
                 card.classList.add('hidden');
                 return;
             }
+            const now = new Date();
+            const dismissKey = `dabbar-dismissed-suggestion-${now.getFullYear()}-${now.getMonth() + 1}-${smart.potentialSaving}`;
+            if (localStorage.getItem(dismissKey) === '1') {
+                card.classList.add('hidden');
+                return;
+            }
             card.classList.remove('hidden');
+            closeBtn.onclick = () => {
+                card.classList.add('hidden');
+                localStorage.setItem(dismissKey, '1');
+            };
             if (goal) {
                 textEl.textContent = `لاحظنا إنك على مسار توفير حوالي ${fmt(smart.potentialSaving)} الشهر ده مقارنة بمعدلك المعتاد. تحب تحولهم لهدف "${goal.title}"؟`;
                 actionBtn.textContent = `أضف ${fmt(smart.potentialSaving)} لهدفي`;

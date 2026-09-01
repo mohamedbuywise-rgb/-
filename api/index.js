@@ -7,6 +7,7 @@ import cronDailyHandler from '../backend/api-handlers/cron-daily.js';
 import dashboardDataHandler from '../backend/api-handlers/dashboard-data.js';
 import financialActionsHandler from '../backend/api-handlers/financial-actions.js';
 import importDataHandler from '../backend/api-handlers/import-data.js';
+import archiveMonthPdfHandler from '../backend/api-handlers/archive-month-pdf.js';
 import pushHandler from '../backend/api-handlers/push.js';
 import reportsHandler from '../backend/api-handlers/reports.js';
 import setupHandler from '../backend/api-handlers/setup.js';
@@ -26,6 +27,7 @@ const handlers = {
   'dashboard-data': dashboardDataHandler,
   'financial-actions': financialActionsHandler,
   'import-data': importDataHandler,
+  'archive-month-pdf': archiveMonthPdfHandler,
   push: pushHandler,
   reports: reportsHandler,
   setup: setupHandler,

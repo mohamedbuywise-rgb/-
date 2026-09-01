@@ -185,6 +185,7 @@ export default async function handler(req, res) {
         total: rangeTotal,
         count: rangeExpenses.length,
         topCategoryName: rangeBreakdown[0]?.name || null,
+        monthOffset: offset,
       });
     }
 

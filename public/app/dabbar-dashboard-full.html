@@ -713,9 +713,8 @@
         }
 
         #monthly-categories-card,
-        #monthly-tip-card {
-            background: transparent !important;
-        }
+        #monthly-tip-card h3 { font-size: .95rem; }
+        #monthly-tip-card .personalized-insight-copy p { font-size: .78rem; }
         .personalized-insight-card { background: linear-gradient(135deg, rgba(16,185,129,.22), rgba(6,78,59,.92)); border: 1px solid rgba(52,211,153,.55); border-radius: 1.7rem; padding: 1rem; color: #ecfdf5; overflow: hidden; position: relative; box-shadow: 0 18px 38px rgba(6,78,59,.18); }
         .personalized-insight-card::after { content: ''; position: absolute; width: 170px; height: 170px; left: -55px; top: 105px; border-radius: 50%; background: rgba(52,211,153,.10); pointer-events: none; }
         .personalized-insight-head, .personalized-insight-main, .personalized-insight-suggestion, .personalized-insight-actions { position: relative; z-index: 1; }
@@ -1786,10 +1785,17 @@
                 <div class="personalized-insight-actions"><button type="button" id="personalized-insight-share" class="personalized-insight-share">شارك الرؤية</button><button type="button" id="personalized-insight-more" class="personalized-insight-more">فهمني أكتر</button></div>
             </section>
 
-            <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-3.5 flex items-start gap-3" id="monthly-tip-card" style="display:none;">
-                <div class="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xs font-bold shrink-0 border border-emerald-500/30">💡</div>
-                <div class="text-xs text-slate-300 leading-relaxed" id="monthly-tip-text"></div>
-            </div>
+            <section id="personalized-insight-card-newmonth" class="personalized-insight-card hidden" aria-label="شهر جديد">
+                <div class="personalized-insight-head"><div><span class="personalized-insight-brand">دبّر</span><span class="personalized-insight-role">محاسبك الشخصي</span></div><div class="personalized-insight-head-actions"><span class="personalized-insight-label">دبّر يقرأك</span><button type="button" id="personalized-insight-close-newmonth" class="personalized-insight-close" aria-label="إغلاق البطاقة">×</button></div></div>
+                <div class="personalized-insight-main"><div class="personalized-insight-art" aria-hidden="true"><span id="personalized-insight-icon-newmonth" class="personalized-insight-icon-emoji">🎉</span></div><div class="personalized-insight-copy"><span id="personalized-insight-kicker-newmonth" class="personalized-insight-kicker">صفحة جديدة يا بطل...</span><h3 id="personalized-insight-title-newmonth">شهر جديد بدأ رسميًا 🎉</h3><p id="personalized-insight-body-newmonth">الأرقام رجعت للصفر مش لأن حاجة ضاعت — ده طبيعي، كل شهر بييجي بصفحة جديدة.</p></div></div>
+                <div class="personalized-insight-suggestion"><span>💡</span><span id="personalized-insight-suggestion-newmonth">اقتراح دبّر: افتح الأرشيف وشوف الشهر اللي فات كان عامل إزاي.</span></div>
+                <div class="personalized-insight-actions"><button type="button" id="personalized-insight-share-newmonth" class="personalized-insight-share">شارك الرؤية</button><button type="button" id="personalized-insight-more-newmonth" class="personalized-insight-more">شوف أرشيف الشهور</button></div>
+            </section>
+
+            <section id="monthly-tip-card" class="personalized-insight-card" style="display:none;" aria-label="أكتر فئة صرفت فيها">
+                <div class="personalized-insight-head"><div><span class="personalized-insight-brand">دبّر</span><span class="personalized-insight-role">ملخص الشهر</span></div></div>
+                <div class="personalized-insight-main"><div class="personalized-insight-art" aria-hidden="true"><span id="monthly-tip-icon" class="personalized-insight-icon-emoji">🏆</span></div><div class="personalized-insight-copy"><span class="personalized-insight-kicker">أكتر فئة صرفت فيها</span><h3 id="monthly-tip-title"></h3><p id="monthly-tip-text"></p></div></div>
+            </section>
 
             <!-- أزرار الشهر داخل محتوى تبويب شهري -->
             <div class="monthly-inline-actions" id="footer-cta">
@@ -4498,15 +4504,32 @@
             }
 
             renderPersonalizedInsight(month);
+            paintInsightCard('-newmonth', getNewMonthInsight(month));
             const tipCard = document.getElementById('monthly-tip-card');
             if (month.byCategory.length > 0) {
-                tipCard.style.display = 'flex';
-                document.getElementById('monthly-tip-text').innerHTML =
-                    `<strong class="text-emerald-400 block mb-0.5">أكتر فئة صرفت فيها:</strong>` +
-                    `${getCategoryEmoji(month.topCategory.name)} ${month.topCategory.name} — ${fmt(month.topCategory.amount)} (${month.topCategory.percent}% من صرف الشهر)`;
+                tipCard.style.display = 'block';
+                document.getElementById('monthly-tip-icon').textContent = getCategoryEmoji(month.topCategory.name);
+                document.getElementById('monthly-tip-title').textContent = month.topCategory.name;
+                document.getElementById('monthly-tip-text').textContent = `${fmt(month.topCategory.amount)} — ${month.topCategory.percent}% من صرف الشهر`;
             } else {
                 tipCard.style.display = 'none';
             }
+        }
+
+        // ============ كارت "شهر جديد بدأ" — بيظهر أول يومين من الشهر بس لو المستخدم عنده تاريخ صرف قبل كده ============
+        // الهدف إن العميل ميتخضش لما يشوف الأرقام رجعت صفر فجأة، فبنسبقه بتوضيح كوميدي إن ده طبيعي.
+        function getNewMonthInsight(month) {
+            const dayOfMonth = new Date().getDate();
+            const prevTotal = Number(month?.prevTotal || 0);
+            if (dayOfMonth > 2 || prevTotal <= 0) return null;
+            const monthKey = new Date().toISOString().slice(0, 7);
+            return {
+                id: `newmonth-${monthKey}`,
+                category: null,
+                title: 'شهر جديد بدأ رسميًا 🎉',
+                body: `الأرقام رجعت للصفر مش لأن حاجة ضاعت — كنت خلّصت ${fmt(prevTotal)} الشهر اللي فات وده اتسجل وآمن في الأرشيف. دلوقتي صفحة جديدة، يلا نبدأ صح.`,
+                suggestion: 'اقتراح دبّر: افتح الأرشيف وشوف الشهر اللي فات كان عامل إزاي قبل ما تبدأ.',
+            };
         }
 
         function setupInsightCardActions(suffix, { moreAction } = {}) {
@@ -4536,6 +4559,7 @@
         }
         setupInsightCardActions('');
         setupInsightCardActions('-daily', { moreAction: () => document.getElementById('daily-items-list')?.scrollIntoView({ behavior: 'smooth', block: 'center' }) });
+        setupInsightCardActions('-newmonth', { moreAction: () => document.getElementById('open-archive')?.click() });
 
         function renderDaily(today, flow) {
             window.__todayData = today;
@@ -4856,8 +4880,30 @@
                         <span class="text-lg font-black text-slate-200">${fmt(h.total)}</span>
                     </div>
                     ${h.topCategoryName ? `<p class="text-[11px] text-slate-400">أكتر فئة صرف: ${getCategoryEmoji(h.topCategoryName)} ${h.topCategoryName}</p>` : ''}
+                    <button type="button" class="archive-pdf-btn w-full mt-1 bg-slate-900/70 border border-slate-800 rounded-xl px-3 py-2 text-[11px] font-bold text-slate-300" data-month-offset="${h.monthOffset}">📄 حمّل كشف الحساب PDF</button>
                 </div>
             `).join('');
+            listEl.querySelectorAll('.archive-pdf-btn').forEach((btn) => {
+                btn.addEventListener('click', async () => {
+                    const original = btn.textContent;
+                    btn.disabled = true; btn.textContent = 'بنجهز الملف...';
+                    try {
+                        const { data: { session } } = await sb.auth.getSession();
+                        const res = await fetch(`/api/archive-month-pdf?monthOffset=${btn.dataset.monthOffset}`, { headers: { Authorization: `Bearer ${session.access_token}` } });
+                        if (!res.ok) { const body = await res.json().catch(() => ({})); throw new Error(body.error || 'تعذر تحميل الملف.'); }
+                        const blob = await res.blob();
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url; a.download = `dabbar-${btn.dataset.monthOffset}.pdf`;
+                        document.body.appendChild(a); a.click(); a.remove();
+                        URL.revokeObjectURL(url);
+                    } catch (err) {
+                        alert(err.message || 'حصل خطأ أثناء تحميل الملف.');
+                    } finally {
+                        btn.disabled = false; btn.textContent = original;
+                    }
+                });
+            });
         }
 
         // ============================================================

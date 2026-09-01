@@ -1690,15 +1690,80 @@
         html:not([data-theme="light"]) .personalized-insight-card .personalized-insight-share { border-color: #f4c648 !important; color: #fff8df !important; }
         html:not([data-theme="light"]) .personalized-insight-card .personalized-insight-more { background: #f4c648 !important; color: #241b05 !important; }
 
-        /* ملخص الشهر فقط: نسخة أقصر دون التأثير على أي بطاقة تستخدم الكلاس العام */
-        #monthly-tip-card.personalized-insight-card { padding: .95rem !important; }
-        #monthly-tip-card.personalized-insight-card .personalized-insight-head { margin-bottom: .86rem !important; }
-        #monthly-tip-card.personalized-insight-card .personalized-insight-art { width: 5.6rem !important; height: 5.6rem !important; }
-        #monthly-tip-card.personalized-insight-card .personalized-insight-icon-emoji { font-size: 3.6rem !important; }
-        #monthly-tip-card.personalized-insight-card .personalized-insight-suggestion { margin-top: .74rem !important; padding-top: .66rem !important; }
-        #monthly-tip-card.personalized-insight-card .personalized-insight-actions { margin-top: .72rem !important; }
-        #monthly-tip-card.personalized-insight-card .personalized-insight-actions button { min-height: 2.45rem !important; padding-top: .54rem !important; padding-bottom: .54rem !important; }
-        #monthly-tip-advice { margin-top: .35rem !important; font-size: .68rem !important; line-height: 1.5 !important; opacity: .85 !important; font-weight: 600 !important; }
+        /* ملخص الشهر فقط: شريط أفقي مضغوط — لا يؤثر على أي بطاقة تستخدم الكلاس العام */
+        #monthly-tip-card.personalized-insight-card {
+            display: flex !important;
+            align-items: center !important;
+            flex-direction: row !important;
+            direction: ltr !important;
+            gap: .45rem !important;
+            padding: .4rem .55rem !important;
+            border-radius: .9rem !important;
+        }
+        #monthly-tip-card.personalized-insight-card .personalized-insight-art {
+            flex: 0 0 1.15rem !important;
+            width: 1.15rem !important;
+            height: 1.15rem !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+        #monthly-tip-card.personalized-insight-card .personalized-insight-icon-emoji {
+            font-size: 1.15rem !important;
+            line-height: 1 !important;
+        }
+        #monthly-tip-card.personalized-insight-card .personalized-insight-copy {
+            min-width: 0 !important;
+            flex: 1 1 auto !important;
+            display: flex !important;
+            flex-direction: column !important;
+            align-items: stretch !important;
+            direction: rtl !important;
+            text-align: right !important;
+        }
+        #monthly-tip-card.personalized-insight-card .personalized-insight-kicker { display: none !important; }
+        #monthly-tip-card.personalized-insight-card .monthly-tip-mainline {
+            display: flex !important;
+            align-items: baseline !important;
+            gap: .35rem !important;
+            min-width: 0 !important;
+            line-height: 1.15 !important;
+            white-space: nowrap !important;
+        }
+        #monthly-tip-card.personalized-insight-card .personalized-insight-copy h3 {
+            flex: 0 1 auto !important;
+            min-width: 0 !important;
+            margin: 0 !important;
+            font-size: .72rem !important;
+            line-height: 1.2 !important;
+            font-weight: 900 !important;
+            color: #ffffff !important;
+            white-space: nowrap !important;
+        }
+        #monthly-tip-card.personalized-insight-card .personalized-insight-copy #monthly-tip-text {
+            flex: 0 1 auto !important;
+            min-width: 0 !important;
+            margin: 0 !important;
+            font-size: .55rem !important;
+            line-height: 1.2 !important;
+            font-weight: 700 !important;
+            color: #a7f3d0 !important;
+            white-space: nowrap !important;
+        }
+        #monthly-tip-card.personalized-insight-card #monthly-tip-advice {
+            display: block !important;
+            min-width: 0 !important;
+            max-width: 100% !important;
+            margin-top: .1rem !important;
+            font-size: .5rem !important;
+            line-height: 1.25 !important;
+            font-weight: 600 !important;
+            opacity: .85 !important;
+            color: rgba(236,253,245,.9) !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+        }
 
 
         /* Compact share card: تقليل الارتفاع من الفراغات فقط مع الحفاظ على وضوح المحتوى */
@@ -1928,8 +1993,11 @@
             </section>
 
             <section id="monthly-tip-card" class="personalized-insight-card" style="display:none;" aria-label="أكتر فئة صرفت فيها">
-                <div class="personalized-insight-head"><div><span class="personalized-insight-brand">دبّر</span><span class="personalized-insight-role">ملخص الشهر</span></div></div>
-                <div class="personalized-insight-main"><div class="personalized-insight-art" aria-hidden="true"><span id="monthly-tip-icon" class="personalized-insight-icon-emoji">🏆</span></div><div class="personalized-insight-copy"><span class="personalized-insight-kicker">أكتر فئة صرفت فيها</span><h3 id="monthly-tip-title"></h3><p id="monthly-tip-text"></p><p id="monthly-tip-advice" class="monthly-tip-advice"></p></div></div>
+                <div class="personalized-insight-art" aria-hidden="true"><span id="monthly-tip-icon" class="personalized-insight-icon-emoji">🧩</span></div>
+                <div class="personalized-insight-copy">
+                    <div class="monthly-tip-mainline"><h3 id="monthly-tip-title"></h3><p id="monthly-tip-text"></p></div>
+                    <p id="monthly-tip-advice" class="monthly-tip-advice"></p>
+                </div>
             </section>
 
             <!-- أزرار الشهر داخل محتوى تبويب شهري -->
@@ -4667,8 +4735,8 @@
             const tipCard = document.getElementById('monthly-tip-card');
             if (month.byCategory.length > 0) {
                 tipCard.style.display = 'block';
-                document.getElementById('monthly-tip-icon').textContent = getCategoryEmoji(month.topCategory.name);
                 const topCat = month.topCategory;
+                document.getElementById('monthly-tip-icon').textContent = getCategoryEmoji(topCat.name);
                 document.getElementById('monthly-tip-title').textContent = topCat.name;
                 document.getElementById('monthly-tip-text').textContent = `${fmt(topCat.amount)} — ${topCat.percent}% من صرف الشهر`;
                 document.getElementById('monthly-tip-advice').textContent = getMonthlyCategoryTip(topCat.name);

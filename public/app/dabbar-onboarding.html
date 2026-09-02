@@ -64,6 +64,8 @@
   /* ===== link + create-account screen (merged, 3 خطوات) ===== */
   #linkScreen{ display:none; align-items:center; justify-content:center; }
   #linkScreen.active{ display:flex; }
+  #authScreen{ display:none; }
+  #authScreen.active{ display:flex; }
   .link-card{ width:100%; max-width:420px; margin:0 auto; padding:0 24px 40px; }
   .link-card h2{ font-family:'Cairo',sans-serif; font-weight:900; font-size:19px; text-align:center; margin-bottom:8px; color:var(--ink); }
   .link-card > p.sub{ text-align:center; color:var(--muted); font-size:13px; line-height:1.9; margin-bottom:20px; }
@@ -322,13 +324,13 @@
     </div>
     <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
     <div class="progress-stages">
-      <div class="stage current" id="stage-account">
+      <div class="stage current" id="stage-install">
         <div class="stage-dot"><span class="stage-mascot mascot-blink">🔥</span></div>
-        <span class="stage-label">بياناتي</span>
-      </div>
-      <div class="stage" id="stage-install">
-        <div class="stage-dot"><span class="stage-mascot">🔥</span></div>
         <span class="stage-label">تثبيت دبّر</span>
+      </div>
+      <div class="stage" id="stage-account">
+        <div class="stage-dot"><span class="stage-mascot">🔥</span></div>
+        <span class="stage-label">بياناتي</span>
       </div>
       <div class="stage" id="stage-done">
         <div class="stage-dot"><span class="stage-mascot">🔥</span></div>
@@ -443,7 +445,7 @@
       <div class="top-brand" style="padding-top:0; margin-bottom:18px; justify-content:center;"><span class="brand-dot"></span>دبّر</div>
       <div class="success-icon">✅</div>
       <h2>اتثبّت بنجاح!</h2>
-      <p class="sub">بنودّيك دلوقتي على الداشبورد بتاعك...</p>
+      <p class="sub">خطوة أخيرة وبسيطة: سجّل دخولك أو اعمل حسابك...</p>
       <div style="display:flex; justify-content:center; margin-top:6px;"><div class="spinner spinner-dark"></div></div>
     </div>
 
@@ -505,27 +507,35 @@
     }
   })();
 
-  // ربط تيليجرام اختياري. بعد وجود جلسة صحيحة، الحساب يقدر يدخل الداش
-  // سواء كان مربوطًا أو مستقلًا؛ خطوة التثبيت فقط تظل كما هي في هذا التدفق.
+  // التدفق الجديد: التثبيت (PWA) هو أول خطوة إجبارية قبل أي تسجيل حساب.
+  // لسه المستخدم مش مثبّت التطبيق → نوريله شاشة التثبيت بس، ومش بنعرض شاشة الحساب خالص لحد ما يثبّت.
+  // بعد ما يثبّت ويفتح دبّر من الأيقونة (standalone)، هناك بس بيتعرض عليه تسجيل الدخول / إنشاء الحساب.
 
   // ---- لو المستخدم عنده جلسة شغالة أصلاً (رجع تاني على onboarding بالغلط) ----
-  // لو شغال كـ standalone (يعني اتثبّت خلاص) وبالفعل مربوط بتليجرام → نوديه على طول للداشبورد.
-  // لو لسه مش مربوط → نوريله شاشة الربط بدل ما نرجّعه للداشبورد وهو مش هيقدر يفتحها أصلاً.
   (async () => {
     try {
-      if (!sb) { hideBootSplash(); return; }
-      const { data: { session } } = await sb.auth.getSession();
+      if (!sb) { showInstallScreen(); hideBootSplash(); return; }
       const recoveryMode = new URLSearchParams(window.location.search).get('mode') === 'recovery' || window.location.hash.includes('type=recovery');
-      if (recoveryMode) { hideBootSplash(); return; }
-      if (!session) { hideBootSplash(); return; } // مفيش جلسة، يفضل على شاشة تسجيل الدخول
-      if (isStandalone()) {
+      if (recoveryMode) { showAuthScreen(); hideBootSplash(); return; } // رابط استرجاع كلمة المرور بيحتاج شاشة الحساب مباشرة
+
+      if (!isStandalone()) {
+        // لسه مش مثبّت على الشاشة الرئيسية → خطوة التثبيت أولًا، مفيش تسجيل قبلها
+        showInstallScreen();
+        hideBootSplash();
+        return;
+      }
+
+      // مثبّت بالفعل (standalone): لو عنده جلسة شغالة يدخل الداش على طول، لو مفيش نوريله تسجيل الدخول
+      const { data: { session } } = await sb.auth.getSession();
+      if (session) {
         window.location.href = DASHBOARD_URL;
       } else {
-        showLinkScreen();
+        showAuthScreen();
         hideBootSplash();
       }
     } catch (e) {
-      hideBootSplash(); // مفيش جلسة أو حصل خطأ، نكمل عادي على شاشة الدخول
+      showInstallScreen();
+      hideBootSplash(); // حصل خطأ في الفحص، منسيبش المستخدم واقف على شاشة التحميل للأبد
     }
   })();
 
@@ -578,8 +588,8 @@
   const authScreen = document.getElementById('authScreen');
   const linkScreen = document.getElementById('linkScreen');
 
-  // ---- بار التقدم بالنار (Streak): 3 مراحل (بياناتك → التثبيت → تم) ----
-  const PROGRESS_STAGES = ['account', 'install', 'done'];
+  // ---- بار التقدم بالنار (Streak): 3 مراحل (التثبيت → بياناتك → تم) ----
+  const PROGRESS_STAGES = ['install', 'account', 'done'];
   const progressFill = document.getElementById('progressFill');
   const progressPct = document.getElementById('progressPct');
   function setProgressStage(stageKey) {
@@ -605,12 +615,16 @@
     });
   }
 
-  function showLinkScreen() {
-    authScreen.style.display = 'none';
+  function showInstallScreen() {
+    authScreen.classList.remove('active');
     linkScreen.classList.add('active');
     setProgressStage('install');
   }
-  setProgressStage('account');
+  function showAuthScreen() {
+    linkScreen.classList.remove('active');
+    authScreen.classList.add('active');
+    setProgressStage('account');
+  }
 
   const tabLogin = document.getElementById('tabLogin');
   const tabSignup = document.getElementById('tabSignup');
@@ -661,8 +675,10 @@
   }
 
   function continueAfterAuth() {
+    // شاشة الحساب دلوقتي بتظهر بس بعد ما يثبّت التطبيق (standalone)، فبعد نجاح الدخول نروح للداشبورد على طول.
+    // لو حصل ونادرًا وصل هنا وهو لسه مش مثبّت (مثلاً فتح رابط استرجاع كلمة مرور)، نرجّعه لشاشة التثبيت الأول.
     if (isStandalone()) window.location.href = DASHBOARD_URL;
-    else showLinkScreen();
+    else showInstallScreen();
   }
 
   function showPasskeySetupOffer() {
@@ -980,12 +996,23 @@
     return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
   }
 
-  // ============ خلاص التثبيت — بتظهر حالة النجاح وتودّي على طول للداشبورد ============
-  function finishInstallStep() {
+  // ============ خلاص التثبيت — بتظهر حالة النجاح، وبعدين تودّي المستخدم لتسجيل الدخول ============
+  // (أو للداشبورد على طول لو عنده جلسة شغالة أصلاً، مثلاً لو ثبّت التطبيق تاني على جهاز جديد وهو مسجّل بالفعل)
+  async function finishInstallStep() {
     linkFormState.style.display = 'none';
     successState.classList.add('show');
-    setProgressStage('done');
-    setTimeout(() => { window.location.href = DASHBOARD_URL; }, 1100);
+    setTimeout(async () => {
+      try {
+        const { data: { session } } = sb ? await sb.auth.getSession() : { data: { session: null } };
+        if (session) {
+          window.location.href = DASHBOARD_URL;
+          return;
+        }
+      } catch (e) { /* هنكمل على شاشة تسجيل الدخول عادي */ }
+      successState.classList.remove('show');
+      linkFormState.style.display = '';
+      showAuthScreen();
+    }, 1100);
   }
 
   window.addEventListener('beforeinstallprompt', (e) => {

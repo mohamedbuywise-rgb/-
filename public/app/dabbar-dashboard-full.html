@@ -1912,6 +1912,7 @@
                 <canvas id="dabbar-celebrate-canvas" aria-hidden="true"></canvas>
                 <div class="flex items-center justify-between"><div><span class="quick-entry-eyebrow">ابدأ من هنا</span><h3 class="text-base font-black text-slate-900 dark:text-slate-100">سجّل مصروفك الآن</h3><p class="text-[11px] text-slate-600 dark:text-slate-400">صوت أو كتابة أو صوّر الفاتورة — في ثواني</p></div><span class="text-2xl" aria-hidden="true">✨</span></div>
                 <div id="quick-entry-subscription-lock" class="hidden items-center justify-between gap-3 rounded-2xl border px-3 py-2.5 text-[11px]"><div><strong class="block">انتهت تجربتك المجانية</strong><span>اشترك عشان تقدر تسجّل مصروفاتك تاني.</span></div><button id="quick-entry-open-subscription" type="button" class="shrink-0 rounded-xl px-3 py-2 text-[10px] font-black">شوف الاشتراك</button></div>
+                <div class="flex bg-white/60 dark:bg-slate-900 border border-emerald-200 dark:border-slate-700 rounded-2xl p-1"><button type="button" id="quick-entry-mode-expense" class="flex-1 rounded-xl bg-emerald-500 py-2 text-[11px] font-black text-slate-950">مصروف</button><button type="button" id="quick-entry-mode-income" class="flex-1 rounded-xl py-2 text-[11px] font-bold text-slate-500 dark:text-slate-400">دخل 💰</button></div>
                 <div class="grid grid-cols-3 gap-2"><button id="quick-entry-voice" class="rounded-2xl border border-emerald-200 bg-white/80 px-2 py-3 text-center shadow-sm transition hover:-translate-y-0.5 dark:bg-slate-900" type="button"><span class="mx-auto mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/15 text-xl">🎙</span><span class="block text-[11px] font-bold text-slate-700 dark:text-slate-200">صوت</span></button><button id="quick-entry-text" class="rounded-2xl border border-emerald-200 bg-white/80 px-2 py-3 text-center shadow-sm transition hover:-translate-y-0.5 dark:bg-slate-900" type="button"><span class="mx-auto mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/15 text-xl">✍️</span><span class="block text-[11px] font-bold text-slate-700 dark:text-slate-200">كتابة</span></button><button id="quick-entry-invoice" class="rounded-2xl border border-emerald-200 bg-white/80 px-2 py-3 text-center shadow-sm transition hover:-translate-y-0.5 dark:bg-slate-900" type="button"><span class="mx-auto mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/15 text-xl">📸</span><span class="block text-[11px] font-bold text-slate-700 dark:text-slate-200">فاتورة</span></button></div><p class="text-center text-[10px] text-slate-500">ملاحظة مهمة: أقل مدة لتسجيل الصوت هي <b class="quick-voice-minimum text-emerald-600 dark:text-emerald-300">5 ثواني</b> عشان دبّر يسمعه ويفهمه بدقة.</p>
                 <input type="file" id="quick-entry-invoice-input" accept="image/*" class="hidden">
                 <div id="quick-entry-scanning" class="hidden rounded-2xl border border-blue-200 bg-blue-50 p-3 text-center dark:border-blue-500/30 dark:bg-blue-500/10"><div class="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-white text-xl shadow-sm dark:bg-slate-900"><span style="display:inline-block;animation:dabbar-scan-spin 1s linear infinite">⟳</span></div><p class="text-xs font-bold text-blue-700 dark:text-blue-200">بنقرأ الفاتورة...</p><p class="mt-1 text-[10px] text-blue-600/70 dark:text-blue-200/70">دبّر بيستخرج المبلغ والأصناف</p></div>
@@ -1921,23 +1922,34 @@
                 <div id="quick-entry-draft" class="hidden rounded-2xl border border-emerald-200 bg-white p-3 dark:bg-slate-900"><div class="flex items-center justify-between gap-2"><p id="quick-entry-draft-title" class="text-[11px] text-slate-500">راجع قبل الحفظ</p><button id="quick-entry-draft-close" type="button" aria-label="اقفل" class="shrink-0 w-6 h-6 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition text-sm font-bold">✕</button></div><div id="quick-entry-draft-list" class="mt-1 space-y-2"></div><div id="quick-entry-draft-actions" class="mt-3 flex gap-2"><button id="quick-entry-confirm" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950" type="button">تأكيد التسجيل</button><button id="quick-entry-edit" class="rounded-xl border border-slate-300 px-3 py-2.5 text-xs text-slate-500 dark:border-slate-700" type="button">تعديل</button></div></div><p id="quick-entry-status" class="min-h-4 text-center text-[11px] text-slate-500"></p>
             </section>
 
-            <div class="bg-gradient-to-br from-emerald-950/60 to-slate-900 border border-emerald-500/30 rounded-3xl p-4 shadow-lg">
-                <div class="text-center space-y-1 pb-3">
-                    <span class="text-xs text-emerald-400 font-semibold block" id="monthly-total-label">إجمالي صرفك الشهر ده</span>
-                    <h3 class="text-3xl font-black text-emerald-300" id="monthly-total">—</h3>
-                    <p class="text-[11px] text-slate-400" id="monthly-compare">سجّل شوية عمليات كمان وهنقارنلك بالشهر اللي فات.</p>
-                </div>
-                <div class="grid grid-cols-2 divide-x divide-x-reverse divide-emerald-500/20 border-t border-emerald-500/20 pt-3">
-                    <div class="text-center">
-                        <span class="block text-[10px] text-slate-400 mb-0.5">عدد العمليات الشهر ده</span>
-                        <span class="block text-base font-black text-slate-100" id="monthly-count">—</span>
+            <div class="grid grid-cols-2 gap-3">
+                <div class="bg-gradient-to-br from-emerald-950/60 to-slate-900 border border-emerald-500/30 rounded-3xl p-4 shadow-lg">
+                    <div class="text-center space-y-1 pb-3">
+                        <span class="text-xs text-emerald-400 font-semibold block" id="monthly-total-label">إجمالي صرفك الشهر ده</span>
+                        <h3 class="text-2xl font-black text-emerald-300" id="monthly-total">—</h3>
+                        <p class="text-[11px] text-slate-400" id="monthly-compare">سجّل شوية عمليات كمان وهنقارنلك بالشهر اللي فات.</p>
                     </div>
-                    <div class="text-center">
-                        <span class="block text-[10px] text-slate-400 mb-0.5">متوسط اليوم</span>
-                        <span class="block text-base font-black text-rose-400" id="monthly-avg">—</span>
+                    <div class="grid grid-cols-2 divide-x divide-x-reverse divide-emerald-500/20 border-t border-emerald-500/20 pt-3">
+                        <div class="text-center">
+                            <span class="block text-[10px] text-slate-400 mb-0.5">عدد العمليات الشهر ده</span>
+                            <span class="block text-base font-black text-slate-100" id="monthly-count">—</span>
+                        </div>
+                        <div class="text-center">
+                            <span class="block text-[10px] text-slate-400 mb-0.5">متوسط اليوم</span>
+                            <span class="block text-base font-black text-rose-400" id="monthly-avg">—</span>
+                        </div>
                     </div>
                 </div>
+                <button type="button" id="monthly-income-toggle" class="bg-gradient-to-br from-teal-950/60 to-slate-900 border border-teal-500/30 rounded-3xl p-4 shadow-lg flex flex-col justify-center text-right w-full" aria-expanded="false">
+                    <div class="text-center space-y-1">
+                        <span class="text-xs text-teal-400 font-semibold block">💰 دخلك الشهر ده</span>
+                        <h3 class="text-2xl font-black text-teal-300" id="monthly-income">—</h3>
+                        <p class="text-[10.5px] text-teal-500" id="monthly-income-compare"></p>
+                        <p class="text-[11px] text-slate-400" id="monthly-income-count">لسه مفيش دخل مسجّل الشهر ده.</p>
+                    </div>
+                </button>
             </div>
+            <div id="monthly-income-details" class="hidden bg-slate-950/60 border border-teal-500/20 rounded-3xl p-4 space-y-1"></div>
 
             <button type="button" id="bank-movements-card" class="w-full flex items-center justify-between gap-3 rounded-2xl border border-emerald-500/25 bg-emerald-500/[0.06] px-4 py-3 text-right transition hover:bg-emerald-500/10">
                 <div class="flex items-center gap-3 min-w-0">
@@ -2222,11 +2234,32 @@
                 <input id="debts-active-search" type="search" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-100 outline-none focus:border-emerald-400" placeholder="دوّر على اسم..." autocomplete="off">
                 <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3" id="debts-owed-to-you-card" style="display:none;"><h4 class="text-xs font-bold text-slate-300 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> ليك عند الناس</h4><div class="space-y-1" id="debts-owed-to-you-list"></div></div>
                 <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3" id="debts-you-owe-card" style="display:none;"><h4 class="text-xs font-bold text-slate-300 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-rose-400"></span> عليك للناس</h4><div class="space-y-1" id="debts-you-owe-list"></div></div>
-                <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-3.5 flex items-start gap-3"><div class="w-8 h-8 rounded-full bg-slate-700/50 text-slate-300 flex items-center justify-center text-xs font-bold shrink-0 border border-slate-700">ℹ️</div><div class="text-xs text-slate-300 leading-relaxed">عشان تسجل سلفة جديدة، ابعت رسالة زي "عطيت محمد 200 جنيه" أو "استلفت من سارة 100 جنيه" في بوت تليجرام.</div></div>
+                <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-3.5 flex items-start gap-3"><div class="w-8 h-8 rounded-full bg-slate-700/50 text-slate-300 flex items-center justify-center text-xs font-bold shrink-0 border border-slate-700">ℹ️</div><div class="text-xs text-slate-300 leading-relaxed">عشان تسجل سلفة جديدة، ابعت رسالة زي "عطيت محمد 200 جنيه" أو "استلفت من سارة 100 جنيه".</div></div>
                 <button id="download-debts-pdf" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-3 rounded-2xl text-sm transition border border-slate-700 flex items-center justify-center gap-2 mt-2"><span id="download-debts-pdf-icon">📄</span> <span id="download-debts-pdf-label">تحميل كشف حساب كل الديون (PDF)</span></button>
             </div>
             <div id="debts-panel-settlement" class="space-y-3 hidden"><div id="debts-settlement-list" class="space-y-3"></div></div>
             <div id="debts-panel-statement" class="space-y-3 hidden"><input id="debts-statement-search" type="search" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-100 outline-none focus:border-emerald-400" placeholder="دوّر على اسم..." autocomplete="off"><div id="debts-statement-list" class="space-y-2"></div></div>
+        </div>
+
+        <!-- ===================== TAB: REMINDERS ===================== -->
+        <div class="tab-content p-5 space-y-4" id="tab-reminders">
+            <div id="reminders-telegram-banner" class="hidden bg-amber-500/10 border border-amber-500/30 rounded-2xl p-3.5 flex items-center justify-between gap-3">
+                <div class="min-w-0"><p class="text-xs font-bold text-amber-300">التذكيرات هتوصلك رسالة تليجرام في وقتها</p><p class="text-[10.5px] text-amber-400/80 mt-0.5">لسه مربوطش تليجرام — اربطه عشان توصلك برة التطبيق</p></div>
+                <button type="button" id="reminders-link-telegram-btn" class="shrink-0 rounded-xl bg-amber-500 px-3 py-2 text-[11px] font-black text-slate-950">اربط تليجرام</button>
+            </div>
+
+            <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-2.5">
+                <h4 class="text-xs font-bold text-slate-300">تذكير جديد</h4>
+                <input type="text" id="reminder-title-input" maxlength="200" placeholder="تذكير بإيه؟ مثال: دفع قسط العربية" class="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2.5 text-xs text-slate-100 outline-none">
+                <input type="date" id="reminder-date-input" class="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2.5 text-xs text-slate-100 outline-none">
+                <button type="button" id="reminder-save-btn" class="w-full rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950">حفظ التذكير</button>
+                <p id="reminder-form-status" class="min-h-4 text-center text-[11px] text-rose-400"></p>
+            </div>
+
+            <div>
+                <h4 class="text-xs font-bold text-slate-300 mb-2">القادمة</h4>
+                <div id="reminders-list" class="space-y-2"><p class="text-xs text-slate-500 text-center py-4">بيتحمّل...</p></div>
+            </div>
         </div>
 
         <!-- ===================== TAB: ASSISTANT (دبّر الذكي) ===================== -->
@@ -2794,7 +2827,7 @@
                     <p class="text-[9px] leading-relaxed text-slate-500">القفل محفوظ على هذا الجهاز فقط. لا نرسل بصمتك أو وجهك أو النمط للسيرفر.</p>
                 </div>
                 <div class="grid grid-cols-2 gap-2"><button id="account-export-data" type="button" class="rounded-xl bg-slate-800 py-2.5 text-[11px] font-bold text-slate-200">تصدير بياناتي</button><button id="account-clear-local" type="button" class="rounded-xl border border-slate-700 py-2.5 text-[11px] font-bold text-slate-400">مسح إعدادات الجهاز</button></div>
-                <p class="text-[10px] leading-relaxed text-slate-500">تسجيلات الصوت المؤقتة لا تُرسل للتحليل إلا بعد ضغط «ابعت للتحليل». يمكنك حذف إعدادات الخطة المحفوظة على هذا الجهاز.</p>
+
             </div>
 
             <button id="account-logout-btn" class="w-full bg-slate-950/60 border border-rose-500/20 text-rose-400 font-bold py-3.5 rounded-2xl text-sm transition flex items-center justify-center gap-2 hover:bg-rose-500/10">
@@ -2826,6 +2859,11 @@
             <button class="tab-btn flex flex-col items-center gap-1 px-3 py-1 text-slate-500 text-[10px] font-semibold" data-tab="debts" data-title="الديون والسلف" data-sub="● متابعة اللي ليك واللي عليك" data-icon="🤝" data-badge="—">
                 <span class="tab-icon-wrap w-9 h-9 rounded-xl border border-transparent flex items-center justify-center text-base">🤝</span>
                 ديون
+            </button>
+            <button class="tab-btn relative flex flex-col items-center gap-1 px-3 py-1 text-slate-500 text-[10px] font-semibold" data-tab="reminders" data-title="تذكيراتي" data-sub="● فاكرك بمواعيدك المهمة" data-icon="🔔" data-badge="—">
+                <span class="tab-icon-wrap w-9 h-9 rounded-xl border border-transparent flex items-center justify-center text-base">🔔</span>
+                <span id="reminders-notification-badge" class="account-notification-badge" aria-label="تذكيرات قريبة"></span>
+                تذكيرات
             </button>
             <button class="tab-btn flex flex-col items-center gap-1 px-3 py-1 text-slate-500 text-[10px] font-semibold" data-tab="assistant" data-title="دبّر الذكي" data-sub="● مساعدك المالي الشخصي" data-icon="✨" data-badge="جديد">
                 <span class="tab-icon-wrap w-9 h-9 rounded-xl border border-transparent flex items-center justify-center text-base">✨</span>
@@ -4354,6 +4392,7 @@
             renderCategories(data.month);
             renderTips(data.month);
             renderDebts(data.debts);
+            renderRemindersTelegramBanner(data.linked);
             renderArchive(data.history);
             renderSubscription(data.subscription);
             renderAssistant(data);
@@ -4704,6 +4743,43 @@
                 : Math.round(month.total / activeDays);
             document.getElementById('monthly-avg').textContent = fmt(monthlyAvg);
 
+            const incomeTotal = Number(month.incomeTotal || month.incomeByCurrency?.EGP || 0);
+            const incomeItems = Array.isArray(month.incomeItems) ? month.incomeItems : [];
+            document.getElementById('monthly-income').textContent = incomeTotal > 0 ? fmt(incomeTotal) : '—';
+            document.getElementById('monthly-income-count').textContent = incomeItems.length > 0
+                ? `من ${incomeItems.length} ${incomeItems.length === 1 ? 'عملية' : 'عمليات'} (بيع/دخل + سلف مستلَفة)`
+                : 'لسه مفيش دخل مسجّل الشهر ده.';
+
+            const prevIncomeTotal = Number(month.prevIncomeTotal || 0);
+            const incomeCompareEl = document.getElementById('monthly-income-compare');
+            if (prevIncomeTotal > 0 && incomeTotal > 0) {
+                const diffPercent = Math.round(((incomeTotal - prevIncomeTotal) / prevIncomeTotal) * 100);
+                incomeCompareEl.textContent = diffPercent === 0 ? 'زي دخل الشهر اللي فات بالظبط' : diffPercent > 0 ? `كسبت ${diffPercent}% أكتر من ${month.prevLabel}` : `كسبت ${Math.abs(diffPercent)}% أقل من ${month.prevLabel}`;
+            } else {
+                incomeCompareEl.textContent = '';
+            }
+
+            const incomeDetails = document.getElementById('monthly-income-details');
+            incomeDetails.innerHTML = incomeItems.length ? incomeItems.map((it) => `
+                <div class="flex items-center justify-between py-1.5 border-b border-slate-800/60 last:border-0">
+                    <div class="min-w-0">
+                        <p class="text-[11px] text-slate-300 truncate">${it.isDebt ? '🤝 ' : ''}${it.desc}</p>
+                        <p class="text-[10px] text-slate-500">${new Date(it.date).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' })}</p>
+                    </div>
+                    <span class="shrink-0 text-[11px] font-bold text-teal-300">${fmt(it.amount)}</span>
+                </div>
+            `).join('') : '<p class="text-[10px] text-slate-500 py-2 text-center">لسه مفيش عمليات دخل الشهر ده.</p>';
+
+            const incomeToggle = document.getElementById('monthly-income-toggle');
+            if (incomeToggle && !incomeToggle.dataset.bound) {
+                incomeToggle.dataset.bound = '1';
+                incomeToggle.addEventListener('click', () => {
+                    const isOpen = !incomeDetails.classList.contains('hidden');
+                    incomeDetails.classList.toggle('hidden', isOpen);
+                    incomeToggle.setAttribute('aria-expanded', String(!isOpen));
+                });
+            }
+
             const compareEl = document.getElementById('monthly-compare');
             if (month.prevTotal > 0) {
                 const diff = Math.round(Math.abs(((month.total - month.prevTotal) / month.prevTotal) * 100));
@@ -4846,17 +4922,70 @@
             if (month.byCategory.length === 0) {
                 listEl.innerHTML = '<p class="text-slate-500">سجّل أول عملية وهتلاقي هنا أكتر فئة بتصرف فيها.</p>';
             } else {
-                listEl.innerHTML = month.byCategory.map((c) => `
+                listEl.innerHTML = month.byCategory.map((c, idx) => {
+                    const items = Array.isArray(c.items) ? c.items : [];
+                    const itemsHtml = items.length ? `
+                        <div class="flex gap-1.5 pt-2 pb-1">
+                            <button type="button" class="cat-filter-btn flex-1 rounded-lg py-1 text-[10px] font-bold bg-emerald-500 text-slate-950" data-cat-idx="${idx}" data-range="all">الشهر كله</button>
+                            <button type="button" class="cat-filter-btn flex-1 rounded-lg py-1 text-[10px] font-bold bg-slate-800 text-slate-400" data-cat-idx="${idx}" data-range="7">آخر 7 أيام</button>
+                        </div>
+                        <div class="cat-items-inner" data-cat-items-inner="${idx}">${items.map((it) => `
+                            <div class="flex items-center justify-between py-1.5 border-b border-slate-800/60 last:border-0" data-item-date="${it.date}">
+                                <div class="min-w-0">
+                                    <p class="text-[11px] text-slate-300 truncate">${it.desc || c.name}</p>
+                                    <p class="text-[10px] text-slate-500">${new Date(it.date).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' })}</p>
+                                </div>
+                                <span class="shrink-0 text-[11px] font-bold text-slate-200">${fmt(it.amount)}</span>
+                            </div>
+                        `).join('')}</div>
+                    ` : '<p class="text-[10px] text-slate-500 py-2">مفيش تفاصيل متاحة لهذه الفئة.</p>';
+                    return `
                     <div>
-                        <div class="flex justify-between mb-1 text-slate-300">
-                            <span>${getCategoryEmoji(c.name)} ${c.name}</span>
-                            <span class="font-bold text-slate-200">${fmt(c.amount)} (${c.percent}%)</span>
-                        </div>
-                        <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                            <div class="${CATEGORY_BAR_COLOR[c.name] || 'bg-slate-400'} h-full rounded-full" style="width: ${c.percent}%"></div>
-                        </div>
+                        <button type="button" class="category-toggle w-full text-right" data-category-idx="${idx}" aria-expanded="false">
+                            <div class="flex justify-between mb-1 text-slate-300 items-center">
+                                <span>${getCategoryEmoji(c.name)} ${c.name} <span class="category-toggle-arrow inline-block transition-transform text-[9px] text-slate-500">‹</span></span>
+                                <span class="font-bold text-slate-200">${fmt(c.amount)} (${c.percent}%)</span>
+                            </div>
+                            <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                                <div class="${CATEGORY_BAR_COLOR[c.name] || 'bg-slate-400'} h-full rounded-full" style="width: ${c.percent}%"></div>
+                            </div>
+                        </button>
+                        <div class="category-items hidden mt-2 bg-slate-950/40 rounded-2xl px-3" data-category-items="${idx}">${itemsHtml}</div>
                     </div>
-                `).join('');
+                `;
+                }).join('');
+
+                listEl.querySelectorAll('.category-toggle').forEach((btn) => {
+                    btn.addEventListener('click', () => {
+                        const idx = btn.getAttribute('data-category-idx');
+                        const panel = listEl.querySelector(`[data-category-items="${idx}"]`);
+                        const arrow = btn.querySelector('.category-toggle-arrow');
+                        const isOpen = !panel.classList.contains('hidden');
+                        panel.classList.toggle('hidden', isOpen);
+                        btn.setAttribute('aria-expanded', String(!isOpen));
+                        if (arrow) arrow.style.transform = isOpen ? '' : 'rotate(-90deg)';
+                    });
+                });
+
+                listEl.querySelectorAll('.cat-filter-btn').forEach((btn) => {
+                    btn.addEventListener('click', () => {
+                        const idx = btn.getAttribute('data-cat-idx');
+                        const range = btn.getAttribute('data-range');
+                        listEl.querySelectorAll(`.cat-filter-btn[data-cat-idx="${idx}"]`).forEach((b) => {
+                            const active = b === btn;
+                            b.classList.toggle('bg-emerald-500', active);
+                            b.classList.toggle('text-slate-950', active);
+                            b.classList.toggle('bg-slate-800', !active);
+                            b.classList.toggle('text-slate-400', !active);
+                        });
+                        const inner = listEl.querySelector(`[data-cat-items-inner="${idx}"]`);
+                        const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
+                        inner.querySelectorAll('[data-item-date]').forEach((row) => {
+                            const rowDate = new Date(row.getAttribute('data-item-date')).getTime();
+                            row.classList.toggle('hidden', range === '7' && rowDate < cutoff);
+                        });
+                    });
+                });
             }
         }
 
@@ -5045,6 +5174,94 @@
             applyDebtActiveSearch();
             loadDebtHistory();
         }
+
+        // ============ التذكيرات — إدخال يدوي بالكامل، مفيش AI هنا خالص ============
+        function renderRemindersTelegramBanner(linked) {
+            const banner = document.getElementById('reminders-telegram-banner');
+            if (!banner) return;
+            banner.classList.toggle('hidden', !!linked);
+        }
+        document.getElementById('reminders-link-telegram-btn')?.addEventListener('click', () => {
+            document.querySelector('.tab-btn[data-tab="account"]')?.click();
+            setTimeout(() => openTelegramLinkOverlay(), 200);
+        });
+
+        function reminderDaysLabel(dueDate) {
+            const today = new Date(); today.setHours(0, 0, 0, 0);
+            const due = new Date(dueDate + 'T00:00:00');
+            const diffDays = Math.round((due - today) / (24 * 60 * 60 * 1000));
+            if (diffDays < 0) return 'فات معاده';
+            if (diffDays === 0) return 'النهاردة';
+            if (diffDays === 1) return 'بكرة';
+            return `بعد ${diffDays} يوم`;
+        }
+
+        async function loadReminders() {
+            const listEl = document.getElementById('reminders-list');
+            const badge = document.getElementById('reminders-notification-badge');
+            try {
+                const res = await fetch('/api/reminders', { headers: { Authorization: `Bearer ${accessToken}` } });
+                const data = await res.json();
+                const reminders = data.reminders || [];
+
+                const urgentCount = reminders.filter((r) => {
+                    const days = Math.round((new Date(r.due_date + 'T00:00:00') - new Date(new Date().toDateString())) / (24 * 60 * 60 * 1000));
+                    return days <= 2;
+                }).length;
+                if (badge) {
+                    badge.textContent = urgentCount > 0 ? String(urgentCount) : '';
+                    badge.style.display = urgentCount > 0 ? 'grid' : 'none';
+                }
+
+                listEl.innerHTML = reminders.length ? reminders.map((r) => `
+                    <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-3 flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2.5 min-w-0"><span class="text-base shrink-0">🔔</span><div class="min-w-0"><p class="text-xs font-semibold text-slate-200 truncate">${debtEscape(r.title)}</p><p class="text-[10px] text-slate-500">${new Date(r.due_date + 'T00:00:00').toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' })}</p></div></div>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 rounded-full px-2 py-1">${reminderDaysLabel(r.due_date)}</span>
+                            <button type="button" class="text-slate-400 hover:text-rose-400 text-lg" data-delete-reminder="${debtEscape(r.id)}" aria-label="حذف التذكير">×</button>
+                        </div>
+                    </div>
+                `).join('') : '<p class="text-xs text-slate-500 text-center p-4">مفيش تذكيرات قادمة، ضيف واحد فوق.</p>';
+
+                listEl.querySelectorAll('[data-delete-reminder]').forEach((btn) => btn.addEventListener('click', () => {
+                    const id = btn.getAttribute('data-delete-reminder');
+                    const row = btn.closest('div.bg-slate-950\\/60');
+                    const title = row?.querySelector('p.truncate')?.textContent || 'التذكير';
+                    row.style.display = 'none';
+                    showUndoToast(
+                        `اتمسح "${title}"`,
+                        async () => { try { await fetch(`/api/reminders?id=${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${accessToken}` } }); } catch (e) { /* اتمسح بصريًا برضو */ } loadReminders(); },
+                        () => { row.style.display = ''; }
+                    );
+                }));
+            } catch (e) {
+                listEl.innerHTML = '<p class="text-xs text-rose-400 text-center p-4">تعذر تحميل التذكيرات.</p>';
+            }
+        }
+
+        document.getElementById('reminder-save-btn')?.addEventListener('click', async () => {
+            const titleInput = document.getElementById('reminder-title-input');
+            const dateInput = document.getElementById('reminder-date-input');
+            const statusEl = document.getElementById('reminder-form-status');
+            const title = titleInput.value.trim();
+            const dueDate = dateInput.value;
+            if (!title) { statusEl.textContent = 'اكتب عنوان التذكير الأول.'; return; }
+            if (!dueDate) { statusEl.textContent = 'اختار تاريخ.'; return; }
+            statusEl.textContent = '';
+            try {
+                const res = await fetch('/api/reminders', {
+                    method: 'POST',
+                    headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, due_date: dueDate }),
+                });
+                if (!res.ok) { const err = await res.json(); statusEl.textContent = err.error || 'حصل خطأ.'; return; }
+                titleInput.value = ''; dateInput.value = '';
+                loadReminders();
+            } catch (e) { statusEl.textContent = 'حصل خطأ، حاول تاني.'; }
+        });
+
+        document.querySelector('.tab-btn[data-tab="reminders"]')?.addEventListener('click', loadReminders);
+
         function initDebtsTabs() {
             if (__debtTabInitialized) return;
             __debtTabInitialized = true;
@@ -5086,14 +5303,14 @@
             try {
                 const res = await fetch(`/api/reports?type=person&name=${encodeURIComponent(personName)}${eternal ? '&all=1' : ''}`, { headers: { Authorization: `Bearer ${accessToken}` } });
                 const data = await res.json(); if (!res.ok) throw new Error(data.error || 'فشل تحميل البيانات');
-                const net = data.relevantNet; netLineEl.textContent = net === 0 ? 'متعادلين، مفيش حد ليه على التاني حاجة' : (net > 0 ? `ليك عنده ${fmt(net)}` : `عليك له ${fmt(Math.abs(net))}`); netLineEl.className = `text-xs font-semibold ${net > 0 ? 'text-emerald-400' : net < 0 ? 'text-rose-400' : 'text-slate-400'}`;
+                const net = data.relevantNet; netLineEl.textContent = net === 0 ? 'متصفي 🤝 مفيش حد ليه على التاني حاجة' : (net > 0 ? `ليك عنده ${fmt(net)}` : `عليك له ${fmt(Math.abs(net))}`); netLineEl.className = `text-xs font-semibold ${net > 0 ? 'text-emerald-400' : net < 0 ? 'text-rose-400' : 'text-slate-400'}`;
                 listEl.innerHTML = data.transactions.length ? data.transactions.map((t) => `<div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-3 flex items-center justify-between"><div class="flex items-center gap-2.5"><span class="text-base">${t.isRepayment ? '↩️' : (t.direction === 'lent' ? '📤' : '📥')}</span><div><p class="text-xs font-semibold text-slate-200">${t.isRepayment ? (t.direction === 'lent' ? 'إنت رجّعت' : 'رجّعلك') : (t.direction === 'lent' ? 'إنت ديت' : 'إنت استلفت')}${t.note ? ` — ${debtEscape(t.note)}` : ''}</p><p class="text-[10px] text-slate-500">${new Date(t.createdAt).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' })}</p></div></div><div class="flex items-center gap-2"><span class="text-xs font-bold ${t.direction === 'lent' ? 'text-emerald-400' : 'text-rose-400'}">${fmt(t.amount)}</span>${eternal && t.id ? `<button type="button" class="text-slate-400 hover:text-rose-400 text-lg" data-delete-debt="${debtEscape(t.id)}" aria-label="حذف المعاملة">×</button>` : ''}</div></div>`).join('') : '<p class="text-xs text-slate-500 text-center p-4">مفيش عمليات.</p>';
                 listEl.querySelectorAll('[data-delete-debt]').forEach((btn) => btn.addEventListener('click', (e) => { e.stopPropagation(); openDebtDeleteConfirm(btn.dataset.deleteDebt, personName); }));
             } catch (e) { listEl.innerHTML = `<p class="text-xs text-rose-400 text-center p-4">${debtEscape(e.message || 'حصل خطأ، جرب تاني.')}</p>`; }
         }
         function openDebtDeleteConfirm(debtId, personName) {
             const root = document.getElementById('review-modal-root'); root.innerHTML = `<div class="review-modal-backdrop" id="debt-delete-modal-backdrop"><div class="review-modal"><h3>حذف المعاملة</h3><p>متأكد إنك عايز تمسح المعاملة دي؟ الإجراء ده مش هيترجع</p><div class="flex gap-2"><button type="button" class="flex-1 rounded-xl border border-slate-700 py-3 text-sm text-slate-300" id="cancel-debt-delete">إلغاء</button><button type="button" class="flex-1 rounded-xl bg-rose-500 py-3 text-sm font-bold text-white" id="confirm-debt-delete">تأكيد الحذف</button></div></div></div>`;
-            document.getElementById('cancel-debt-delete').onclick = () => root.innerHTML = ''; document.getElementById('debt-delete-modal-backdrop').onclick = (e) => { if (e.target.id === 'debt-delete-modal-backdrop') root.innerHTML = ''; }; document.getElementById('confirm-debt-delete').onclick = async () => { const btn = document.getElementById('confirm-debt-delete'); btn.disabled = true; try { const res = await fetch('/api/reports?type=delete-debt', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({ debtId }) }); if (!res.ok) throw new Error((await res.json()).error || 'فشل حذف المعاملة'); root.innerHTML = ''; await openPersonDebtDetail(personName, true); } catch (e) { btn.disabled = false; alert(e.message || 'حصل خطأ أثناء الحذف.'); } };
+            document.getElementById('cancel-debt-delete').onclick = () => root.innerHTML = ''; document.getElementById('debt-delete-modal-backdrop').onclick = (e) => { if (e.target.id === 'debt-delete-modal-backdrop') root.innerHTML = ''; }; document.getElementById('confirm-debt-delete').onclick = () => { root.innerHTML = ''; showUndoToast('اتمسحت المعاملة', async () => { try { const res = await fetch('/api/reports?type=delete-debt', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({ debtId }) }); if (!res.ok) throw new Error((await res.json()).error || 'فشل حذف المعاملة'); } catch (e) { alert(e.message || 'حصل خطأ أثناء الحذف.'); } await openPersonDebtDetail(personName, true); }, () => {}); };
         }
         function renderArchive(history) {
             const listEl = document.getElementById('archive-list');
@@ -5278,6 +5495,23 @@
             // ============ رسالة النجاح مش المفروض تفضل ظاهرة على طول — تختفي لوحدها بعد 10 ثواني ============
             if (kind === 'success' && message) quickStatusTimer = setTimeout(() => { if (el.textContent === message) el.textContent = ''; }, 10000);
         }
+
+        // ============ Undo toast عام: بيتفتح بعد أي حذف، ولو محدش دوس "تراجع" خلال 5 ثواني ينفّذ الحذف الفعلي ============
+        // الاستخدام: بيتعمل hide بصري للعنصر فورًا (Optimistic UI)، والـ DELETE الحقيقي في السيرفر بيتأجل 5 ثواني.
+        function showUndoToast(message, onConfirmDelete, onUndo) {
+            document.getElementById('undo-toast')?.remove();
+            const toast = document.createElement('div');
+            toast.id = 'undo-toast';
+            toast.className = 'fixed left-1/2 bottom-24 -translate-x-1/2 z-[999] bg-slate-900 border border-slate-700 text-slate-100 text-xs rounded-2xl shadow-2xl px-4 py-3 flex items-center gap-3';
+            toast.innerHTML = `<span>${message}</span><button type="button" class="font-black text-emerald-400 shrink-0">تراجع</button>`;
+            document.body.appendChild(toast);
+            const timer = setTimeout(() => { toast.remove(); onConfirmDelete(); }, 5000);
+            toast.querySelector('button').addEventListener('click', () => {
+                clearTimeout(timer);
+                toast.remove();
+                if (onUndo) onUndo();
+            });
+        }
         function quickShow(id, show) { document.getElementById(id)?.classList.toggle('hidden', !show); }
         function clearQuickVoicePreview() {
             const audioEl = document.getElementById('quick-entry-voice-audio');
@@ -5412,6 +5646,27 @@
         document.getElementById('quick-entry-cancel')?.addEventListener('click', () => { quickShow('quick-entry-form', false); quickShow('quick-entry-draft', false); quickStatus(''); document.getElementById('quick-entry-input').value = ''; });
         document.getElementById('quick-entry-edit')?.addEventListener('click', () => { quickShow('quick-entry-draft', false); quickShow('quick-entry-form', true); document.getElementById('quick-entry-input').value = quickEntrySourceText || ''; });
         document.getElementById('quick-entry-analyze')?.addEventListener('click', () => { const text = document.getElementById('quick-entry-input')?.value.trim(); if (!text) return quickStatus('اكتب العملية الأول.', 'error'); analyzeQuickEntry({ text }); });
+
+        (function setupQuickEntryModeToggle() {
+            const expenseBtn = document.getElementById('quick-entry-mode-expense');
+            const incomeBtn = document.getElementById('quick-entry-mode-income');
+            const input = document.getElementById('quick-entry-input');
+            if (!expenseBtn || !incomeBtn || !input) return;
+            const PLACEHOLDERS = { expense: 'مثال: صرفت 75 جنيه أكل', income: 'مثال: بعت شغل تصميم بـ 3000 جنيه' };
+            function setMode(mode) {
+                input.placeholder = PLACEHOLDERS[mode];
+                expenseBtn.classList.toggle('bg-emerald-500', mode === 'expense');
+                expenseBtn.classList.toggle('text-slate-950', mode === 'expense');
+                expenseBtn.classList.toggle('font-black', mode === 'expense');
+                expenseBtn.classList.toggle('text-slate-500', mode !== 'expense');
+                incomeBtn.classList.toggle('bg-emerald-500', mode === 'income');
+                incomeBtn.classList.toggle('text-slate-950', mode === 'income');
+                incomeBtn.classList.toggle('font-black', mode === 'income');
+                incomeBtn.classList.toggle('text-slate-500', mode !== 'income');
+            }
+            expenseBtn.addEventListener('click', () => setMode('expense'));
+            incomeBtn.addEventListener('click', () => setMode('income'));
+        })();
         document.getElementById('quick-entry-confirm')?.addEventListener('click', async () => { if (!requireQuickEntryAccess() || !quickEntryDrafts.length) return; const btn = document.getElementById('quick-entry-confirm'); btn.disabled = true; quickStatus('جاري حفظ العملية...'); try { const result = await asstApi('entry_confirm', { drafts: quickEntryDrafts }); celebrateSave(btn); document.getElementById('quick-entry-input').value = ''; quickShow('quick-entry-draft', false); quickStatus(result.message || 'تم التسجيل بنجاح.', 'success'); await loadDashboard(); } catch (e) { quickStatus(e.message || 'تعذر الحفظ.', 'error'); } finally { btn.disabled = false; } });
         document.getElementById('quick-entry-invoice')?.addEventListener('click', () => { if (!requireQuickEntryAccess()) return; document.getElementById('quick-entry-invoice-input')?.click(); });
         document.getElementById('quick-entry-draft-close')?.addEventListener('click', () => { quickShow('quick-entry-draft', false); quickStatus(''); document.getElementById('quick-entry-input').value = ''; });
@@ -5872,7 +6127,7 @@
             if (!btn) return;
             btn.addEventListener('click', async () => {
                 if (navigator.share) {
-                    try { await navigator.share({ text: REFERRAL_TEXT, url: REFERRAL_URL }); return; } catch (e) { /* المستخدم قفل الشير، نكمل على النسخ */ }
+                    try { await navigator.share({ text: REFERRAL_TEXT }); return; } catch (e) { /* المستخدم قفل الشير، نكمل على النسخ */ }
                 }
                 try {
                     await navigator.clipboard.writeText(REFERRAL_TEXT);

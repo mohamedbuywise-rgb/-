@@ -2,6 +2,7 @@ import { supabase } from '../../lib/supabaseClient.js';
 import { sendTelegramMessage } from '../../lib/telegram.js';
 import { getExpensesBetween, sendMonthlyReport, sendWeeklyReport, sendReportPdf } from '../../lib/expenses.js';
 import { getOldUnsettledDebtsSummary, recordDebtReminders } from '../../lib/debts.js';
+import { getRemindersNeedingNotification, markReminderNotified, buildReminderMessage } from '../../lib/reminders.js';
 import { generateFriendlyReminderIntro } from '../../lib/groq.js';
 import { getAllUsers } from '../../lib/users.js';
 import { claimCronSlot } from '../../lib/cronRuns.js';
@@ -177,7 +178,7 @@ async function sendPushWeeklySummary(userId, preferences, isFriday, now) {
 }
 
 // ============ كل التقارير/التذكيرات المطلوبة لمستخدم واحد ============
-async function processUser(user, { isFriday, isLastDayOfMonth, monthKey }) {
+async function processUser(user, { isFriday, isLastDayOfMonth, monthKey, remindersByUser }) {
   const { telegram_user_id: userId, chat_id: chatId, subscription_expires_at } = user;
   const expiresAt = subscription_expires_at ? new Date(subscription_expires_at) : null;
   const isSubscribed = !!expiresAt && expiresAt.getTime() > Date.now();
@@ -217,6 +218,17 @@ async function processUser(user, { isFriday, isLastDayOfMonth, monthKey }) {
     await sendDailyReport(userId, chatId);
     await sendOldDebtsReminder(userId, chatId);
 
+    // ---- تنبيهات التذكيرات (يومين قبل / يوم قبل / يوم الاستحقاق) — مفيش أي AI هنا، رسالة ثابتة بس ----
+    const userReminders = remindersByUser?.[userId] || [];
+    for (const r of userReminders) {
+      try {
+        await sendTelegramMessage(chatId, buildReminderMessage(r.title, r.stage));
+        await markReminderNotified(r.id, r.stage);
+      } catch (error) {
+        console.error(`Reminder notification failed for user ${userId}, reminder ${r.id}:`, error);
+      }
+    }
+
     if (isFriday) {
       const claimed = await claimCronSlot(userId, 'weekly', new Date().toISOString().slice(0, 10));
       if (claimed) await sendWeeklyReport(userId, chatId);
@@ -247,6 +259,16 @@ export default async function handler(req, res) {
 
   const users = await getAllUsers();
 
+  // التذكيرات المستحقة تنبيه النهاردة (يومين قبل / يوم قبل / يوم الاستحقاق) — بنجيبها مرة واحدة بس لكل المستخدمين
+  const dueReminders = await getRemindersNeedingNotification().catch((error) => {
+    console.error('getRemindersNeedingNotification failed:', error);
+    return [];
+  });
+  const remindersByUser = dueReminders.reduce((acc, r) => {
+    (acc[r.telegram_user_id] = acc[r.telegram_user_id] || []).push(r);
+    return acc;
+  }, {});
+
   // الكرون بيشتغل بعد نص الليل بشوية، يعني "النهاردة" فعليًا هو اليوم الجديد.
   // فلما نيجي نحدد "هل امبارح كان جمعة" أو "هل امبارح كان آخر يوم في الشهر"، لازم نرجع يوم لورا.
   const today = new Date();
@@ -259,7 +281,7 @@ export default async function handler(req, res) {
   const monthKey = `${yesterday.getFullYear()}-${String(yesterday.getMonth() + 1).padStart(2, '0')}`;
 
   const results = await runWithConcurrencyLimit(users, CONCURRENCY, (user) =>
-    processUser(user, { isFriday, isLastDayOfMonth, monthKey })
+    processUser(user, { isFriday, isLastDayOfMonth, monthKey, remindersByUser })
   );
 
   const processed = results.filter((r) => r && r.ok).length;

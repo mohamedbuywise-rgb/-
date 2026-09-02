@@ -19,10 +19,8 @@ function sumByCurrency(rows = []) {
 // بيرجّع بيانات حقيقية بس (صفر mock data): مصاريف النهاردة، مصاريف الشهر بالتصنيفات، والديون.
 // Header: Authorization: Bearer <supabase access token>
 //
-// ملحوظة مهمة: مفيش أي مفهوم "دخل" أو "توفير" في قاعدة بيانات البوت — البوت بيسجل مصاريف
-// وديون بس، مفيش جدول income. فالـ response ده ملوش أي رقم "دخل" أو "نسبة توفير"، عشان
-// معندناش مصدر بيانات حقيقي لهم. لو عايز الميزة دي، محتاجين أول جدول income + طريقة تسجيله
-// (يدوي من الداشبورد، أو رسالة زي "قبضت 8000 جنيه" في البوت).
+// ملحوظة: الدخل بيتحسب من جدول financial_events (event_type='income') + السلف المستلَفة
+// من جدول debts (direction='borrowed') — راجع month.incomeTotal و month.incomeItems تحت.
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -171,6 +169,26 @@ export default async function handler(req, res) {
     const prevExpenses = await getExpensesBetween(dataUserId, prevRange.start, prevRange.end);
     const prevTotal = prevExpenses.reduce((sum, e) => sum + Number(e.amount), 0);
 
+    // ---- دخل الشهر السابق (نفس منطق الشهر الحالي: event + سلف مستلَفة) عشان نقارن ----
+    const { data: prevFinancialEvents } = await supabase
+      .from('financial_events')
+      .select('event_type, amount, currency_code')
+      .eq('telegram_user_id', dataUserId)
+      .eq('event_type', 'income')
+      .gte('created_at', prevRange.start.toISOString())
+      .lt('created_at', prevRange.end.toISOString());
+    const prevIncomeTotal = (prevFinancialEvents || []).reduce((sum, e) => (e.currency_code || 'EGP') === 'EGP' ? sum + Number(e.amount) : sum, 0);
+    const { data: prevBorrowedDebts } = await supabase
+      .from('debts')
+      .select('amount, currency_code')
+      .eq('telegram_user_id', dataUserId)
+      .eq('direction', 'borrowed')
+      .eq('is_repayment', false)
+      .gte('created_at', prevRange.start.toISOString())
+      .lt('created_at', prevRange.end.toISOString());
+    const prevBorrowedTotal = (prevBorrowedDebts || []).reduce((sum, d) => (d.currency_code || 'EGP') === 'EGP' ? sum + Number(d.amount) : sum, 0);
+    const prevIncomeGrandTotal = prevIncomeTotal + prevBorrowedTotal;
+
     // ---- أرشيف آخر 4 شهور فاتت (بيانات حقيقية من جدول expenses، مش تلخيص محفوظ منفصل) ----
     const history = [];
     for (let offset = -1; offset >= -4; offset--) {
@@ -235,6 +253,25 @@ export default async function handler(req, res) {
     const youOwe = entries.filter((v) => v.net < 0).sort((a, b) => a.net - b.net);
     const owedToYouTotal = owedToYou.reduce((sum, v) => sum + v.net, 0);
     const youOweTotal = youOwe.reduce((sum, v) => sum + Math.abs(v.net), 0);
+
+    // ---- سلف مستلَفة الشهر ده — بتتحسب ضمن "الدخل" برضو لأن فلوس دخلت إيدك فعليًا، حتى لو دين ----
+    const { data: monthBorrowedDebts } = await supabase
+      .from('debts')
+      .select('id, person_name, amount, currency_code, note, created_at')
+      .eq('telegram_user_id', dataUserId)
+      .eq('direction', 'borrowed')
+      .eq('is_repayment', false)
+      .gte('created_at', start.toISOString())
+      .lt('created_at', end.toISOString())
+      .order('created_at', { ascending: false });
+    const borrowedThisMonth = (monthBorrowedDebts || []).map((d) => ({
+      desc: `استلفت من ${d.person_name || 'حد'}${d.note ? ` — ${d.note}` : ''}`,
+      amount: Number(d.amount),
+      currency_code: d.currency_code || 'EGP',
+      date: d.created_at,
+      isDebt: true,
+    }));
+    const borrowedThisMonthTotal = borrowedThisMonth.reduce((sum, d) => sum + d.amount, 0);
 
     // ---- حركة السيولة اليومية (واصل من / واصل لـ) ----
     const { data: todayFlowData } = await supabase
@@ -363,11 +400,17 @@ export default async function handler(req, res) {
         total: monthTotal,
         byCurrency: monthByCurrency,
         incomeByCurrency,
+        incomeTotal: (incomeByCurrency.EGP || 0) + borrowedThisMonthTotal,
+        prevIncomeTotal: prevIncomeGrandTotal,
+        incomeItems: [
+          ...incomeEvents.map((e) => ({ desc: e.description || e.category || 'دخل', amount: Number(e.amount), currency_code: e.currency_code || 'EGP', date: e.created_at, isDebt: false })),
+          ...borrowedThisMonth,
+        ].sort((a, b) => new Date(b.date) - new Date(a.date)),
         financialEvents: financialEvents.map((event) => ({ ...event, amount: Number(event.amount), currency_code: event.currency_code || 'EGP' })),
         count: monthExpenses.length,
         prevTotal,
         prevLabel: MONTH_NAMES[prevRange.start.getMonth()],
-        byCategory: breakdown.map((b) => ({ name: b.name, amount: b.amount, currency_code: b.currency_code || 'EGP', percent: Number(b.percent) })),
+        byCategory: breakdown.map((b) => ({ name: b.name, amount: b.amount, currency_code: b.currency_code || 'EGP', percent: Number(b.percent), items: b.items })),
         topCategory: breakdown[0] || null,
         byWeekday,
         byWeekdayCount,

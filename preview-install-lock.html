@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>بريفيو — تثبيت إجباري</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --green:#1FAA6E; --green-deep:#0E8C57; --green-tint:#EAF8F1; --green-tint-2:#DCF3E7;
+    --ink:#0F2A1F; --text:#16241D; --muted:#6B7B72; --line:#E7EEE9; --paper:#FFFFFF;
+    --warn:#8A5A17; --warn-bg:#FFF7ED; --warn-line:#FBD9A5;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{ font-family:'Tajawal',sans-serif; background:#F1F5F2; color:var(--text); min-height:100vh; padding:32px 16px; }
+  .disp{ font-family:'Cairo',sans-serif; }
+  h1.page-title{ font-family:'Cairo',sans-serif; font-weight:900; font-size:20px; text-align:center; margin-bottom:6px; color:var(--ink); }
+  p.page-sub{ text-align:center; color:var(--muted); font-size:13px; margin-bottom:32px; }
+
+  .wrap{ display:flex; flex-wrap:wrap; gap:28px; justify-content:center; }
+  .phone-col{ display:flex; flex-direction:column; align-items:center; gap:12px; }
+  .col-label{ font-family:'Cairo',sans-serif; font-weight:800; font-size:13px; color:var(--muted); }
+  .phone{ width:300px; height:610px; background:#fff; border-radius:36px; border:8px solid #16241D; box-shadow:0 24px 50px -18px rgba(15,42,31,0.35); overflow:hidden; position:relative; display:flex; flex-direction:column; }
+  .notch{ position:absolute; top:0; left:50%; transform:translateX(-50%); width:110px; height:20px; background:#16241D; border-radius:0 0 14px 14px; z-index:5; }
+  .screen{ flex:1; padding:34px 18px 18px; display:flex; flex-direction:column; }
+
+  .top-brand{ display:flex; align-items:center; justify-content:center; gap:7px; margin-bottom:14px; font-family:'Cairo',sans-serif; font-weight:900; font-size:14px; color:var(--ink); }
+  .brand-dot{ width:8px; height:8px; border-radius:50%; background:var(--green); box-shadow:0 0 0 3px var(--green-tint); }
+
+  .lock-icon{ width:56px; height:56px; border-radius:16px; background:var(--warn-bg); border:1.5px solid var(--warn-line); display:flex; align-items:center; justify-content:center; font-size:26px; margin:6px auto 14px; }
+  .lock-icon.ok{ background:var(--green-tint); border-color:var(--green-tint-2); }
+  h2.card-title{ font-family:'Cairo',sans-serif; font-weight:900; font-size:16px; text-align:center; margin-bottom:6px; color:var(--ink); }
+  p.card-sub{ text-align:center; color:var(--muted); font-size:11.5px; line-height:1.8; margin-bottom:16px; }
+
+  .install-notice{ background:var(--warn-bg); border:1.5px solid var(--warn-line); border-radius:13px; padding:12px 13px; margin-bottom:14px; }
+  .install-notice-title{ font-family:'Cairo',sans-serif; font-weight:900; font-size:11.5px; color:var(--warn); display:flex; align-items:center; gap:5px; }
+  .install-notice-txt{ font-size:10.5px; color:var(--warn); line-height:1.7; margin-top:5px; opacity:.92; }
+  .install-btn{ margin-top:9px; background:#fff; border:1.5px solid var(--warn-line); color:var(--warn); font-family:'Cairo',sans-serif; font-weight:800; font-size:11.5px; padding:9px; border-radius:9px; width:100%; text-align:center; }
+
+  .fields{ opacity:.4; pointer-events:none; }
+  .field-mock{ background:#fff; border:1.5px solid var(--line); border-radius:9px; padding:11px; text-align:center; color:#B7C4BC; font-size:12px; margin-bottom:10px; }
+  .btn-mock{ font-family:'Cairo',sans-serif; font-weight:800; font-size:13px; padding:13px; border-radius:11px; text-align:center; width:100%; margin-top:auto; }
+  .btn-locked{ background:#E7EEE9; color:#9FAEA6; }
+  .btn-unlocked{ background:var(--green); color:#fff; box-shadow:0 12px 26px -10px rgba(31,170,110,0.45); }
+
+  .badge{ position:absolute; top:14px; left:14px; background:var(--ink); color:#fff; font-family:'Cairo',sans-serif; font-weight:800; font-size:10px; padding:5px 9px; border-radius:20px; z-index:6; }
+  .badge.standalone{ background:var(--green-deep); }
+
+  .steps-mini{ display:flex; flex-direction:column; gap:7px; margin-top:6px; }
+  .step-mini{ display:flex; gap:8px; align-items:flex-start; }
+  .step-mini .num{ width:16px; height:16px; border-radius:50%; background:var(--green); color:#fff; font-size:9px; font-family:'Cairo',sans-serif; font-weight:900; display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:1px; }
+  .step-mini .txt{ font-size:10.5px; color:var(--text); line-height:1.6; }
+
+  .link-card-mock{ display:flex; flex-direction:column; height:100%; }
+  .code-mock{ background:#fff; border:1.5px solid var(--green-tint-2); border-radius:9px; padding:11px; text-align:center; color:var(--ink); font-weight:800; letter-spacing:5px; font-size:13px; margin:12px 0; }
+
+  .note{ max-width:760px; margin:32px auto 0; background:#fff; border:1.5px solid var(--line); border-radius:16px; padding:18px 20px; font-size:13px; line-height:2; color:var(--text); }
+  .note b{ font-family:'Cairo',sans-serif; color:var(--ink); }
+</style>
+</head>
+<body>
+
+<h1 class="page-title">🔒 بريفيو: التثبيت الإجباري قبل الربط</h1>
+<p class="page-sub">مقارنة بين الحالتين — مفتوح من المتصفح العادي (مقفول) مقابل مفتوح من الأيقونة بعد التثبيت (متاح)</p>
+
+<div class="wrap">
+
+  <!-- الحالة 1: فاتح من المتصفح، لسه مثبتش -->
+  <div class="phone-col">
+    <div class="col-label">📱 فاتح من المتصفح — لسه مثبّتش</div>
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="badge">متصفح Safari / Chrome</div>
+      <div class="screen">
+        <div class="top-brand"><span class="brand-dot"></span>دبّر</div>
+        <div class="lock-icon">🔒</div>
+        <h2 class="card-title">اربط حسابك بتليجرام</h2>
+        <p class="card-sub">لازم تثبّت دبّر على شاشتك الأول عشان تقدر تكتب الكود وتكمل.</p>
+
+        <div class="install-notice">
+          <div class="install-notice-title">📲 خطوة إجبارية</div>
+          <div class="install-notice-txt">ثبّت دبّر على شاشتك الرئيسية، وبعد كده افتحه من الأيقونة نفسها عشان تكمل الربط.</div>
+          <div class="install-btn">➕ ثبّت الداشبورد دلوقتي</div>
+        </div>
+
+        <div class="fields">
+          <div class="field-mock">123456</div>
+        </div>
+        <div class="btn-mock btn-locked">🔒 ثبّت الأول عشان تكمل</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- الحالة 2: فاتح من الأيقونة بعد التثبيت -->
+  <div class="phone-col">
+    <div class="col-label">✅ فاتح من الأيقونة — بعد التثبيت</div>
+    <div class="phone">
+      <div class="notch"></div>
+      <div class="badge standalone">تطبيق دبّر المثبّت</div>
+      <div class="screen">
+        <div class="top-brand"><span class="brand-dot"></span>دبّر</div>
+        <div class="lock-icon ok">🔗</div>
+        <h2 class="card-title">اربط حسابك بتليجرام</h2>
+        <p class="card-sub">خطوة أخيرة عشان أي حاجة تسجّلها في تليجرام تظهر في الداشبورد على طول.</p>
+
+        <div class="steps-mini">
+          <div class="step-mini"><div class="num">1</div><div class="txt">افتح <b>دبّر على تليجرام</b> بضغطة واحدة</div></div>
+          <div class="step-mini"><div class="num">2</div><div class="txt">هيبعتلك <b>كود من 6 أرقام</b></div></div>
+          <div class="step-mini"><div class="num">3</div><div class="txt">اكتبه هنا ويترابط حسابك</div></div>
+        </div>
+
+        <div class="code-mock">1 2 3 4 5 6</div>
+        <div class="btn-mock btn-unlocked">✅ تأكيد الربط</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="note">
+  <b>إزاي بيتفرق بين الحالتين؟</b> بنقرا <code>display-mode: standalone</code> (أو <code>navigator.standalone</code> على آيفون) — القيمة دي بتبقى <code>true</code> بس لما الصفحة مفتوحة من الأيقونة اللي على الشاشة الرئيسية بعد التثبيت، مش من تبويب متصفح عادي. لو مش standalone، فورم الكود بيتقفل تمامًا (مش بس تصميميًا) والزرار بيبقى معطّل، وبنستبدله برسالة + زرار "ثبّت دلوقتي" بس.<br><br>
+  <b>وللتأكيد من السيرفر:</b> وقت إرسال الكود لـ <code>/api/auth-by-code</code>، بنبعت مع الطلب علامة إن الصفحة كانت standalone. لو مش كده، السيرفر برضه بيرفض الربط — حتى لو حد لعب في كود الصفحة من الـ DevTools.
+</div>
+
+</body>
+</html>

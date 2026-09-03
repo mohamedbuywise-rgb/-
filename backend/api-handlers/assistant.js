@@ -15,9 +15,10 @@ import { isFinancialEventType, recordFinancialEvent } from '../../lib/financialE
 // بنفس فكرة api/reports.js — عشان نفضل تحت حد Vercel Hobby (12 function كحد أقصى) بدل ما نضيف
 // ملف مستقل لكل ميزة.
 //
+// ملحوظة: بيتقبل لحد 3 أهداف نشطة لكل مستخدم في نفس الوقت (شوف MAX_ACTIVE_GOALS/sql/goals.sql)
 // action = "goal_create"      { title, targetAmount, targetDate? }
-// action = "goal_contribute"  { amount }
-// action = "goal_cancel"      {}
+// action = "goal_contribute"  { amount, goalId? }  — goalId مطلوب لو عنده أكتر من هدف نشط
+// action = "goal_cancel"      { goalId? }           — goalId مطلوب لو عنده أكتر من هدف نشط
 // action = "receipt_scan"     { imageBase64 }
 // action = "invoice_delete"   { invoiceId }
 // action = "ask"              { question }
@@ -55,6 +56,8 @@ function formatGoal(row) {
   };
 }
 
+const MAX_ACTIVE_GOALS = 3;
+
 async function handleGoalCreate(userId, body, res) {
   const title = (body.title || '').trim();
   const targetAmount = Number(body.targetAmount);
@@ -68,11 +71,13 @@ async function handleGoalCreate(userId, body, res) {
     .from('goals')
     .select('id')
     .eq('telegram_user_id', userId)
-    .eq('is_active', true)
-    .maybeSingle();
+    .eq('is_active', true);
 
-  if (existing) {
-    return res.status(400).json({ error: 'عندك هدف شغال دلوقتي بالفعل. لازم تلغيه الأول عشان تبدأ هدف جديد.' });
+  if ((existing || []).length >= MAX_ACTIVE_GOALS) {
+    return res.status(400).json({
+      error: `معاك ${MAX_ACTIVE_GOALS} أهداف شغالة دلوقتي (الحد الأقصى). لازم تلغي واحد منهم الأول عشان تبدأ هدف جديد.`,
+      maxGoalsReached: true,
+    });
   }
 
   const { data, error } = await supabase
@@ -83,27 +88,51 @@ async function handleGoalCreate(userId, body, res) {
 
   if (error) {
     console.error('goal_create insert error:', JSON.stringify(error));
+    if (String(error.message || '').includes('MAX_ACTIVE_GOALS_REACHED')) {
+      return res.status(400).json({ error: `معاك ${MAX_ACTIVE_GOALS} أهداف شغالة بالفعل.`, maxGoalsReached: true });
+    }
     return res.status(500).json({ error: 'حصل خطأ وإحنا بنسجل الهدف، جرب تاني.' });
   }
 
-  return res.status(200).json({ goal: formatGoal(data) });
+  const goals = await fetchActiveGoals(userId);
+  return res.status(200).json({ goal: formatGoal(data), goals: goals.map(formatGoal) });
 }
 
-async function handleGoalContribute(userId, body, res) {
-  const amount = Number(body.amount);
-  if (!amount || amount <= 0) {
-    return res.status(400).json({ error: 'محتاج مبلغ صحيح أكبر من صفر.' });
-  }
-
-  const { data: goal, error: fetchError } = await supabase
+async function fetchActiveGoals(userId) {
+  const { data, error } = await supabase
     .from('goals')
     .select('*')
     .eq('telegram_user_id', userId)
     .eq('is_active', true)
-    .maybeSingle();
+    .order('created_at', { ascending: true });
+  if (error) {
+    console.error('fetchActiveGoals error:', JSON.stringify(error));
+    return [];
+  }
+  return data || [];
+}
 
-  if (fetchError) console.error('goal_contribute fetch error:', JSON.stringify(fetchError));
-  if (!goal) return res.status(400).json({ error: 'معندكش هدف شغال دلوقتي.' });
+async function handleGoalContribute(userId, body, res) {
+  const amount = Number(body.amount);
+  const goalId = body.goalId;
+  if (!amount || amount <= 0) {
+    return res.status(400).json({ error: 'محتاج مبلغ صحيح أكبر من صفر.' });
+  }
+
+  const activeGoals = await fetchActiveGoals(userId);
+  if (activeGoals.length === 0) {
+    return res.status(400).json({ error: 'معندكش هدف شغال دلوقتي.' });
+  }
+
+  let goal;
+  if (goalId) {
+    goal = activeGoals.find((g) => String(g.id) === String(goalId));
+    if (!goal) return res.status(400).json({ error: 'الهدف ده مش شغال أو مش موجود.' });
+  } else if (activeGoals.length === 1) {
+    goal = activeGoals[0];
+  } else {
+    return res.status(400).json({ error: 'معاك أكتر من هدف، لازم تحدد أنهي هدف بالـ goalId.', ambiguous: true });
+  }
 
   const newSaved = Number(goal.saved_amount) + amount;
   const achieved = newSaved >= Number(goal.target_amount);
@@ -120,18 +149,58 @@ async function handleGoalContribute(userId, body, res) {
     return res.status(500).json({ error: 'حصل خطأ وإحنا بنحدّث هدفك، جرب تاني.' });
   }
 
-  return res.status(200).json({ goal: formatGoal(updated), achieved });
+  const goals = await fetchActiveGoals(userId);
+  return res.status(200).json({ goal: formatGoal(updated), achieved, goals: goals.map(formatGoal) });
 }
 
-async function handleGoalCancel(userId, res) {
-  const { data: goal } = await supabase
-    .from('goals')
-    .select('id')
-    .eq('telegram_user_id', userId)
-    .eq('is_active', true)
-    .maybeSingle();
+async function handleGoalUpdateDate(userId, body, res) {
+  const goalId = body.goalId;
+  const targetDate = body.targetDate || null;
 
-  if (!goal) return res.status(400).json({ error: 'معندكش هدف شغال أصلاً.' });
+  const activeGoals = await fetchActiveGoals(userId);
+  if (activeGoals.length === 0) return res.status(400).json({ error: 'معندكش هدف شغال أصلاً.' });
+
+  let goal;
+  if (goalId) {
+    goal = activeGoals.find((g) => String(g.id) === String(goalId));
+    if (!goal) return res.status(400).json({ error: 'الهدف ده مش شغال أو مش موجود.' });
+  } else if (activeGoals.length === 1) {
+    goal = activeGoals[0];
+  } else {
+    return res.status(400).json({ error: 'معاك أكتر من هدف، لازم تحدد أنهي هدف بالـ goalId.', ambiguous: true });
+  }
+
+  const { data: updated, error } = await supabase
+    .from('goals')
+    .update({ target_date: targetDate })
+    .eq('id', goal.id)
+    .select('*')
+    .single();
+
+  if (error) {
+    console.error('goal_update_date error:', JSON.stringify(error));
+    return res.status(500).json({ error: 'حصل خطأ وإحنا بنحدّث تاريخ الهدف، جرب تاني.' });
+  }
+
+  return res.status(200).json({ goal: formatGoal(updated) });
+}
+
+async function handleGoalCancel(userId, body, res) {
+  const goalId = body && body.goalId;
+  const activeGoals = await fetchActiveGoals(userId);
+  if (activeGoals.length === 0) {
+    return res.status(400).json({ error: 'معندكش هدف شغال أصلاً.' });
+  }
+
+  let goal;
+  if (goalId) {
+    goal = activeGoals.find((g) => String(g.id) === String(goalId));
+    if (!goal) return res.status(400).json({ error: 'الهدف ده مش شغال أو مش موجود.' });
+  } else if (activeGoals.length === 1) {
+    goal = activeGoals[0];
+  } else {
+    return res.status(400).json({ error: 'معاك أكتر من هدف، لازم تحدد أنهي هدف بالـ goalId.', ambiguous: true });
+  }
 
   const { error } = await supabase.from('goals').update({ is_active: false }).eq('id', goal.id);
   if (error) {
@@ -139,7 +208,8 @@ async function handleGoalCancel(userId, res) {
     return res.status(500).json({ error: 'حصل خطأ وإحنا بنلغي الهدف، جرب تاني.' });
   }
 
-  return res.status(200).json({ ok: true });
+  const goals = await fetchActiveGoals(userId);
+  return res.status(200).json({ ok: true, goals: goals.map(formatGoal) });
 }
 
 async function handleReceiptScan(userId, body, res) {
@@ -205,7 +275,7 @@ async function handleAsk(userId, body, res) {
       .select('title, target_amount, saved_amount')
       .eq('telegram_user_id', userId)
       .eq('is_active', true)
-      .maybeSingle(),
+      .order('created_at', { ascending: true }),
   ]);
 
   const expensesText = expensesResult.status === 'fulfilled'
@@ -214,9 +284,10 @@ async function handleAsk(userId, body, res) {
   const debtsText = debtsResult.status === 'fulfilled'
     ? debtsResult.value
     : 'تعذر تحميل ملخص الديون مؤقتًا.';
-  const goalRow = goalResult.status === 'fulfilled' ? goalResult.value.data : null;
-  const goalText = goalRow
-    ? `هدفه المالي الحالي: ${goalRow.title} — وفّر ${Number(goalRow.saved_amount)} من ${Number(goalRow.target_amount)} جنيه.`
+  const goalRows = goalResult.status === 'fulfilled' ? (goalResult.value.data || []) : [];
+  const goalText = goalRows.length > 0
+    ? `أهدافه المالية الحالية (${goalRows.length}):\n` +
+      goalRows.map((g) => `- ${g.title} — وفّر ${Number(g.saved_amount)} من ${Number(g.target_amount)} جنيه`).join('\n')
     : 'مفيش هدف مالي مسجل دلوقتي.';
 
   const dataContext = `${expensesText}\n\n${debtsText}\n\n${goalText}`;
@@ -284,21 +355,14 @@ async function handleEntryDraft(userId, body, res) {
   const parsed = await classifyMessage(text);
   const normalizedTransactions = (Array.isArray(parsed) ? parsed : []).map((item) => normalizeFinancialTransaction(item, text));
   const reconciledTransactions = reconcileSingleTransaction(correctDebtDirections(text, normalizedTransactions), text);
-  // اختيار المستخدم هو المرجع النهائي في الإدخال اليدوي/الصوتي: يمنع أن يقلب المصنف "دخل" إلى "مصروف"
-  // أو العكس بسبب صياغة قصيرة أو لهجة غير واضحة. لا نغيّر الديون أو التحويلات لأن لها مسارًا محاسبيًا مختلفًا.
-  const requestedType = body.requestedType === 'income' || body.requestedType === 'expense' ? body.requestedType : null;
-  const transactions = requestedType
-    ? reconciledTransactions.map((item) => {
-        const protectedType = ['debt', 'transfer', 'withdrawal', 'deposit', 'refund', 'subscription', 'purchase', 'asset', 'other'].includes(item?.type);
-        return protectedType ? item : { ...item, type: requestedType };
-      })
-    : reconciledTransactions;
+  // العميل مبيختارش دخل/مصروف يدويًا في الإدخال السريع — دبّر يصنّف كل عملية من كلامه مباشرة (classifyMessage)
+  const transactions = reconciledTransactions;
   let validTx = transactions.filter((item) => ((isFinancialEventType(item?.type) || item?.type === 'expense') || item?.type === 'debt') && Number.isFinite(Number(item.amount)) && Number(item.amount) > 0 && (item.type !== 'debt' || item.person));
   // لو التصنيف الذكي لم يلتقط جملة قصيرة مثل "غدا 100 جنيه"، نستخدم استخراجًا حتميًا
   // مقيدًا بعلامات المصروف، فلا نخلط جمل الديون أو الأسئلة مع مصروفات وهمية.
   if (!validTx.length) {
     const deterministicExpense = extractDeterministicExpense(text);
-    if (deterministicExpense) validTx = [{ ...deterministicExpense, type: requestedType || 'expense' }];
+    if (deterministicExpense) validTx = [{ ...deterministicExpense, type: 'expense' }];
   }
   if (!validTx.length) {
     if (voiceUsageCharged) await refundUsage(userId, 'voice');
@@ -446,7 +510,9 @@ export default async function handler(req, res) {
       case 'goal_contribute':
         return await handleGoalContribute(userId, body, res);
       case 'goal_cancel':
-        return await handleGoalCancel(userId, res);
+        return await handleGoalCancel(userId, body, res);
+      case 'goal_update_date':
+        return await handleGoalUpdateDate(userId, body, res);
       case 'receipt_scan':
         return await handleReceiptScan(userId, body, res);
       case 'invoice_delete':

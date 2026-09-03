@@ -693,18 +693,20 @@
         html[data-theme="light"] #monthly-total-card {
             background: #ffffff !important; border-color: #e2e8f0 !important; box-shadow: 0 8px 20px rgba(15,23,42,.06) !important;
         }
-        html[data-theme="light"] #monthly-total-card #monthly-total-label { color: #176b49 !important; }
-        html[data-theme="light"] #monthly-total-card #monthly-total { color: #0b5f3f !important; }
+        html[data-theme="light"] #monthly-total-card #monthly-total-label { color: #b4232f !important; }
+        html[data-theme="light"] #monthly-total-card #monthly-total { color: #a61d2b !important; }
         html[data-theme="light"] #monthly-total-card #monthly-compare { color: #64748b !important; }
         html[data-theme="light"] #monthly-income-toggle {
             background: #ffffff !important; border-color: #e2e8f0 !important; box-shadow: 0 8px 20px rgba(15,23,42,.06) !important;
         }
-        html[data-theme="light"] #monthly-income-toggle .text-teal-700 { color: #176b6b !important; }
-        html[data-theme="light"] #monthly-income-toggle #monthly-income { color: #075d5d !important; }
+        html[data-theme="light"] #monthly-income-toggle .text-emerald-700 { color: #176b49 !important; }
+        html[data-theme="light"] #monthly-income-toggle #monthly-income { color: #0f6a45 !important; }
         html[data-theme="light"] #monthly-income-toggle #monthly-income-compare { color: #64748b !important; }
         html[data-theme="dark"] #monthly-total-card {
             background: #0b1220 !important; border-color: rgba(148,163,184,.22) !important; box-shadow: none !important;
         }
+        html[data-theme="dark"] #monthly-total-card #monthly-total-label { color: #f87171 !important; }
+        html[data-theme="dark"] #monthly-total-card #monthly-total { color: #f87171 !important; }
         html[data-theme="dark"] #monthly-income-toggle {
             background: #0b1220 !important; border-color: rgba(148,163,184,.22) !important; box-shadow: none !important;
         }
@@ -721,6 +723,70 @@
         html[data-theme="dark"] #net-worth-label { color: #f4c648 !important; }
         html[data-theme="dark"] #net-worth-total { color: #fbe7a8 !important; }
         html[data-theme="dark"] #net-worth-breakdown span { color: #c9b98a !important; }
+
+        /* ===== كارت "المتاح ليك تصرفه" الموحّد (بديل صافي الثروة) + خانات الدخل/المصروف المدمجة ===== */
+        #available-card, #available-empty { border-radius: 1.6rem; padding: 1.15rem 1.1rem 1.25rem; }
+        html[data-theme="dark"] #available-card { background: #1c1406; border: 1px solid rgba(244,198,72,.35); box-shadow: 0 12px 28px rgba(0,0,0,.18); }
+        html[data-theme="light"] #available-card { background: #fdf6e3; border: 1px solid #e8d28a; box-shadow: 0 10px 24px rgba(139,107,10,.1); }
+        #available-hero { text-align: center; padding-bottom: 1rem; margin-bottom: 1rem; border-bottom: 1px dashed rgba(244,198,72,.28); }
+        html[data-theme="light"] #available-hero { border-bottom-color: #e8d28a; }
+        #available-hero-label { font-size: .8rem; font-weight: 800; display: block; }
+        html[data-theme="dark"] #available-hero-label { color: #f4c648; }
+        html[data-theme="light"] #available-hero-label { color: #8a6d0a; }
+        #available-hero-value { font-size: 2.1rem; font-weight: 900; display: block; margin-top: .22rem; letter-spacing: -.5px; }
+        html[data-theme="dark"] #available-hero-value { color: #fbe7a8; }
+        html[data-theme="light"] #available-hero-value { color: #6b5300; }
+        #available-hero-note { font-size: .66rem; opacity: .72; margin: .45rem 0 0; line-height: 1.7; }
+        #available-progress-track { height: 8px; border-radius: 99px; margin: .75rem 0 0; overflow: hidden; }
+        html[data-theme="dark"] #available-progress-track { background: rgba(0,0,0,.35); }
+        html[data-theme="light"] #available-progress-track { background: rgba(0,0,0,.1); }
+        #available-progress-fill { height: 100%; border-radius: 99px; }
+        html[data-theme="dark"] #available-progress-fill { background: #f1d37f; }
+        html[data-theme="light"] #available-progress-fill { background: #c9971f; }
+        #available-progress-pct { font-size: .62rem; opacity: .65; display: block; text-align: center; margin-top: .32rem; }
+        #available-empty { text-align: center; border: 1px dashed rgba(244,198,72,.35); font-size: .72rem; line-height: 1.8; }
+        html[data-theme="light"] #available-empty { border-color: #e8d28a; color: #6b6252; }
+        html[data-theme="dark"] #available-empty { color: #a89f8c; }
+        #available-empty button { margin-top: .5rem; background: #10b981; color: #04140e; border: none; border-radius: .8rem; padding: .5rem 1rem; font-weight: 800; font-size: .72rem; cursor: pointer; }
+
+        .available-cell { position: relative; border-radius: 1.1rem; padding: 1.35rem .7rem .7rem !important; }
+        .available-count-badge {
+            position: absolute; top: -.55rem; left: 50%; transform: translateX(-50%); white-space: nowrap;
+            font-size: .56rem; font-weight: 800; border-radius: 999px; padding: .2rem .5rem; line-height: 1.3;
+            box-shadow: 0 3px 8px rgba(0,0,0,.15);
+        }
+        html[data-theme="dark"] .available-count-badge.gold { background: rgba(244,198,72,.14); border: 1px solid rgba(244,198,72,.3); color: #f4c648; }
+        html[data-theme="light"] .available-count-badge.gold { background: rgba(138,109,10,.1); border: 1px solid rgba(138,109,10,.25); color: #8a6d0a; }
+
+        /* ===== المحفظة الاستثمارية القابلة للطي ===== */
+        #portfolio-collapsible { border-radius: 1.6rem; margin-top: .75rem; overflow: hidden; box-shadow: 0 10px 24px rgba(0,0,0,.12); }
+        html[data-theme="dark"] #portfolio-collapsible { background: #0f1c17; border: 1px solid rgba(16,185,129,.28); }
+        html[data-theme="light"] #portfolio-collapsible { background: #e7f7ef; border: 1px solid #bfe6d3; }
+        #portfolio-summary { list-style: none; cursor: pointer; padding: 1.05rem 1.1rem; display: flex; justify-content: space-between; align-items: center; }
+        #portfolio-summary::-webkit-details-marker { display: none; }
+        .portfolio-eyebrow { font-size: .62rem; font-weight: 800; color: #10b981; display: block; }
+        .portfolio-title { font-size: .85rem; font-weight: 900; margin-top: .15rem; display: block; }
+        .portfolio-right { display: flex; align-items: center; gap: .55rem; }
+        .portfolio-total-quick { font-size: .95rem; font-weight: 900; }
+        html[data-theme="dark"] .portfolio-total-quick { color: #fbe7a8; }
+        html[data-theme="light"] .portfolio-total-quick { color: #0e655b; }
+        .portfolio-chev { transition: transform .2s; opacity: .6; }
+        #portfolio-collapsible[open] .portfolio-chev { transform: rotate(180deg); }
+        .portfolio-body { padding: 0 1.1rem 1.15rem; border-top: 1px dashed rgba(16,185,129,.25); }
+        html[data-theme="light"] .portfolio-body { border-top-color: #bfe6d3; }
+        .portfolio-change { text-align: center; font-size: .64rem; opacity: .75; margin: .75rem 0; }
+        .portfolio-asset { display: flex; justify-content: space-between; align-items: center; border-radius: 1rem; padding: .6rem .7rem; margin-top: .5rem; }
+        html[data-theme="dark"] .portfolio-asset { background: rgba(0,0,0,.2); }
+        html[data-theme="light"] .portfolio-asset { background: rgba(255,255,255,.65); }
+        .portfolio-asset .portfolio-asset-name { font-size: .78rem; font-weight: 800; }
+        .portfolio-asset .portfolio-asset-sub { font-size: .6rem; opacity: .65; }
+        .portfolio-asset .portfolio-asset-val strong { font-size: .85rem; display: block; text-align: left; }
+        .portfolio-asset-val .up { color: #34d399; font-size: .64rem; }
+        html[data-theme="light"] .portfolio-asset-val .up { color: #0a9463; }
+        .portfolio-asset-val .down { color: #fb7185; font-size: .64rem; }
+        html[data-theme="light"] .portfolio-asset-val .down { color: #c73a52; }
+        .portfolio-add-btn { margin-top: .7rem; width: 100%; border: 1px dashed rgba(16,185,129,.45); background: transparent; color: #10b981; border-radius: 1rem; padding: .65rem; font-size: .75rem; font-weight: 800; cursor: pointer; }
+        .portfolio-note { font-size: .6rem; opacity: .6; margin-top: .6rem; text-align: center; line-height: 1.8; }
         /* كارت الاشتراكات المتكررة: سطح محايد في الوضعين + ألوان واضحة لصف زاد سعره vs صف مستقر */
         html[data-theme="light"] #subscriptions-card { background: var(--day-card, #fff) !important; border: 1px solid var(--day-line, #e2e8f0) !important; }
         html[data-theme="light"] #subscriptions-title { color: #176b49 !important; }
@@ -757,15 +823,15 @@
         html[data-theme="dark"] #quick-entry-card #quick-entry-draft,
         html[data-theme="dark"] #quick-entry-card #quick-entry-voice-preview { background: #101516 !important; border-color: rgba(154,172,159,.24) !important; }
         #quick-entry-type-expense, #quick-entry-type-income { min-height: 38px; transition: background-color .18s ease, color .18s ease, box-shadow .18s ease; }
-        html[data-theme="light"] #quick-entry-type-expense { background: #fff1f1 !important; color: #b4232f !important; }
-        html[data-theme="light"] #quick-entry-type-income { background: #edf8f2 !important; color: #176b49 !important; }
-        html[data-theme="light"] #quick-entry-type-expense[aria-pressed="true"] { background: #ffe1e3 !important; color: #a61d2b !important; box-shadow: 0 2px 8px rgba(180, 35, 47, .10) !important; }
-        html[data-theme="light"] #quick-entry-type-income[aria-pressed="true"] { background: #d9f1e3 !important; color: #0f6a45 !important; box-shadow: 0 2px 8px rgba(15, 106, 69, .10) !important; }
-        /* الوضع الغامق: ألوان متسقة مع هوية دبّر بدل الرمادي الأزرق الافتراضي */
+        /* موحّد مع نظام ألوان تبويب "الديون النشطة": نهاري = أخضر، ليلي = دهبي */
+        html[data-theme="light"] #quick-entry-type-expense { background: #f1f5f3 !important; color: #64748b !important; }
+        html[data-theme="light"] #quick-entry-type-income { background: #f1f5f3 !important; color: #64748b !important; }
+        html[data-theme="light"] #quick-entry-type-expense[aria-pressed="true"] { background: #10b981 !important; color: #0f172a !important; box-shadow: 0 2px 8px rgba(16, 185, 129, .18) !important; }
+        html[data-theme="light"] #quick-entry-type-income[aria-pressed="true"] { background: #10b981 !important; color: #0f172a !important; box-shadow: 0 2px 8px rgba(16, 185, 129, .18) !important; }
         html[data-theme="dark"] #quick-entry-type-expense { background: transparent !important; color: #94a3b8 !important; }
         html[data-theme="dark"] #quick-entry-type-income { background: transparent !important; color: #94a3b8 !important; }
-        html[data-theme="dark"] #quick-entry-type-expense[aria-pressed="true"] { background: rgba(244,63,94,.16) !important; color: #fda4af !important; box-shadow: none !important; }
-        html[data-theme="dark"] #quick-entry-type-income[aria-pressed="true"] { background: rgba(20,184,166,.16) !important; color: #5eead4 !important; box-shadow: none !important; }
+        html[data-theme="dark"] #quick-entry-type-expense[aria-pressed="true"] { background: linear-gradient(135deg, #f4c648, #b8860b) !important; color: #241b05 !important; box-shadow: none !important; }
+        html[data-theme="dark"] #quick-entry-type-income[aria-pressed="true"] { background: linear-gradient(135deg, #f4c648, #b8860b) !important; color: #241b05 !important; box-shadow: none !important; }
         html[data-theme="light"] #quick-add-ios-install-link { display: flex !important; background: #0f8f68 !important; color: #ffffff !important; border: 1px solid #087654 !important; box-shadow: 0 6px 14px rgba(15, 143, 104, .18) !important; }
         html[data-theme="light"] .debt-history-badge.settled { background: #eef1ef !important; color: #66736c !important; border: 1px solid #cbd4ce !important; }
         html[data-theme="dark"] .debt-history-badge.settled { background: rgba(154,172,159,.12) !important; color: #aebbb2 !important; border: 1px solid rgba(154,172,159,.24) !important; }
@@ -1356,7 +1422,7 @@
         #debts-owed-to-you-total, #debts-you-owe-total, #flow-in, #flow-out, #flow-net,
         #top-category-name, #weekday-chart-total, #weekday-detail-amount,
         #account-sub-price, .cat-amt, #monthly-count, #monthly-avg, #daily-count, #daily-avg,
-        #asst-goal-saved, #asst-goal-target, #wrapped-year {
+        .asst-goal-saved, .asst-goal-target, #wrapped-year {
             font-family: 'Fraunces', 'Cairo', sans-serif !important;
             font-weight: 600 !important;
             letter-spacing: 0;
@@ -1509,7 +1575,7 @@
            لدرجة لون قريبة جدًا من خلفية الكارت نفسها (14%/7% دهبي بس فوق pm-surface-hi)،
            فبيبقى شبه مختفي في الوضعين الفاتح والغامق. بنرجّعله تدرّج دهبي واضح وعالي التباين
            بدل ما يفضل يورث اللون الشفاف تقريبًا ده. */
-        #asst-goal-bar {
+        .asst-goal-bar {
             background: linear-gradient(90deg, var(--pm-gold-bright), var(--pm-gold)) !important;
         }
         button.bg-emerald-500, #quick-entry-analyze, #quick-entry-confirm,
@@ -2036,7 +2102,7 @@
                 <div class="flex items-center justify-between"><div><span class="quick-entry-eyebrow">ابدأ من هنا</span><h3 class="text-base font-black text-slate-900 dark:text-slate-100">سجّل عمليتك الآن</h3><p class="text-[11px] text-slate-600 dark:text-slate-400">صوت أو كتابة أو صوّر الفاتورة — في ثواني</p></div><span class="text-2xl" aria-hidden="true">✨</span></div>
                 <div id="quick-entry-subscription-lock" class="hidden items-center justify-between gap-3 rounded-2xl border px-3 py-2.5 text-[11px]"><div><strong class="block">انتهت تجربتك المجانية</strong><span>اشترك عشان تقدر تسجّل عملياتك تاني.</span></div><button id="quick-entry-open-subscription" type="button" class="shrink-0 rounded-xl px-3 py-2 text-[10px] font-black">شوف الاشتراك</button></div>
                 <p class="text-center text-[10px] text-slate-500 dark:text-slate-400">اختار نوع العملية الأول، وهتفضل شغالة لحد ما تغيّرها بنفسك.</p>
-                <div id="quick-entry-type-toggle" class="grid grid-cols-2 gap-2 rounded-xl bg-slate-100 p-1 dark:bg-slate-800" role="group" aria-label="نوع العملية"><button type="button" id="quick-entry-type-expense" data-entry-type="expense" class="rounded-lg bg-white px-3 py-2 text-xs font-black text-rose-600 shadow-sm dark:bg-slate-700 dark:text-rose-300">🔴 مصروف</button><button type="button" id="quick-entry-type-income" data-entry-type="income" class="rounded-lg px-3 py-2 text-xs font-bold text-slate-500 dark:text-slate-400">🟢 دخل</button></div>
+                
                 <div class="grid grid-cols-3 gap-2"><button id="quick-entry-voice" class="rounded-2xl border border-emerald-200 bg-white/80 px-2 py-3 text-center shadow-sm transition hover:-translate-y-0.5 dark:bg-slate-900" type="button"><span class="mx-auto mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/15 text-xl">🎙</span><span class="block text-[11px] font-bold text-slate-700 dark:text-slate-200">صوت</span></button><button id="quick-entry-text" class="rounded-2xl border border-emerald-200 bg-white/80 px-2 py-3 text-center shadow-sm transition hover:-translate-y-0.5 dark:bg-slate-900" type="button"><span class="mx-auto mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/15 text-xl">✍️</span><span class="block text-[11px] font-bold text-slate-700 dark:text-slate-200">كتابة</span></button><button id="quick-entry-invoice" class="rounded-2xl border border-emerald-200 bg-white/80 px-2 py-3 text-center shadow-sm transition hover:-translate-y-0.5 dark:bg-slate-900" type="button"><span class="mx-auto mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/15 text-xl">📸</span><span class="block text-[11px] font-bold text-slate-700 dark:text-slate-200">فاتورة</span></button></div><p class="text-center text-[10px] text-slate-500">ملاحظة مهمة: أقل مدة لتسجيل الصوت هي <b class="quick-voice-minimum text-emerald-600 dark:text-emerald-300">5 ثواني</b> عشان دبّر يسمعه ويفهمه بدقة.</p>
                 <input type="file" id="quick-entry-invoice-input" accept="image/*" class="hidden">
                 <div id="quick-entry-scanning" class="hidden rounded-2xl border border-blue-200 bg-blue-50 p-3 text-center dark:border-blue-500/30 dark:bg-blue-500/10"><div class="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-white text-xl shadow-sm dark:bg-slate-900"><span style="display:inline-block;animation:dabbar-scan-spin 1s linear infinite">⟳</span></div><p class="text-xs font-bold text-blue-700 dark:text-blue-200">بنقرأ الفاتورة...</p><p class="mt-1 text-[10px] text-blue-600/70 dark:text-blue-200/70">دبّر بيستخرج المبلغ والأصناف</p></div>
@@ -2046,45 +2112,70 @@
                 <div id="quick-entry-draft" class="hidden rounded-2xl border border-emerald-200 bg-white p-3 dark:bg-slate-900"><div class="flex items-center justify-between gap-2"><p id="quick-entry-draft-title" class="text-[11px] text-slate-500">راجع قبل الحفظ</p><button id="quick-entry-draft-close" type="button" aria-label="اقفل" class="shrink-0 w-6 h-6 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition text-sm font-bold">✕</button></div><div id="quick-entry-draft-list" class="mt-1 space-y-2"></div><div id="quick-entry-draft-actions" class="mt-3 flex gap-2"><button id="quick-entry-confirm" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950" type="button">تأكيد التسجيل</button><button id="quick-entry-edit" class="rounded-xl border border-slate-300 px-3 py-2.5 text-xs text-slate-500 dark:border-slate-700" type="button">تعديل</button></div></div><p id="quick-entry-status" class="min-h-4 text-center text-[11px] text-slate-500"></p>
             </section>
 
-            <div id="net-worth-card" class="rounded-3xl p-4 space-y-1 text-center">
-                <span class="text-xs font-bold block" id="net-worth-label">⚖️ صافي ثروتك</span>
-                <h3 class="text-2xl font-black" id="net-worth-total">—</h3>
-                <div class="flex items-center justify-center gap-3 text-[10px] pt-1" id="net-worth-breakdown">
-                    <span id="net-worth-cash">💵 كاش: —</span>
-                    <span id="net-worth-owed">🤝 ليك: —</span>
-                    <span id="net-worth-owe">📤 عليك: —</span>
-                </div>
-                <p class="mt-1 text-[9.5px] leading-relaxed opacity-70">= كاش (دخلك ناقص مصاريفك) + فلوس ليك عند الناس − فلوس عليك للناس</p>
+            <!-- كارت "المتاح ليك تصرفه" الموحّد: بديل صافي ثروتك، بيظهر بس لما العميل يحدد دخله أو ميزانيته -->
+            <div id="available-empty" class="hidden">
+                💡 لسه ما حددتش دخلك أو ميزانيتك الشهرية.<br>
+                حددها من قسم «الدخل والميزانية» تحت، وهيبان هنا «المتاح ليك تصرفه الشهر ده» تلقائيًا.
             </div>
+            <div id="available-card" class="hidden">
+                <div id="available-hero">
+                    <span id="available-hero-label">💸 المتاح ليك تصرفه الشهر ده</span>
+                    <strong id="available-hero-value">—</strong>
+                    <p id="available-hero-note">من دخلك أو ميزانيتك، ناقص اللي صرفته فعلًا لحد النهاردة</p>
+                    <div id="available-progress-track"><div id="available-progress-fill" style="width:0%"></div></div>
+                    <span id="available-progress-pct"></span>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <button type="button" id="monthly-income-toggle" class="available-cell bg-black/5 dark:bg-white/5 text-center w-full" aria-expanded="false">
+                        <span class="available-count-badge gold" id="monthly-income-count-badge">—</span>
+                        <span class="text-xs text-emerald-700 dark:text-emerald-400 font-semibold block">💰 دخلك الشهر ده</span>
+                        <h3 class="text-lg font-black text-emerald-800 dark:text-emerald-300" id="monthly-income">—</h3>
+                        <p class="text-[10px] text-emerald-600 dark:text-emerald-500" id="monthly-income-compare"></p>
+                    </button>
+                    <div id="monthly-total-card" class="available-cell bg-black/5 dark:bg-white/5 text-center">
+                        <span class="available-count-badge gold" id="monthly-count-badge">—</span>
+                        <span class="text-xs text-rose-700 dark:text-rose-400 font-semibold block" id="monthly-total-label">إجمالي صرفك الشهر ده</span>
+                        <h3 class="text-lg font-black text-rose-800 dark:text-rose-300" id="monthly-total">—</h3>
+                        <p class="text-[10px] text-slate-600 dark:text-slate-400" id="monthly-compare">—</p>
+                    </div>
+                </div>
+                <!-- عناصر مخفية محتفظ بيها عشان الجافاسكريبت الحالي يفضل شغال من غير تعديل -->
+                <span class="hidden" id="monthly-income-count"></span>
+                <span class="hidden" id="monthly-count"></span>
+                <span class="hidden" id="monthly-avg"></span>
+            </div>
+            <div id="monthly-income-details" class="hidden bg-white dark:bg-slate-950/60 border border-emerald-300 dark:border-emerald-500/20 rounded-3xl p-4 space-y-1 mt-2"></div>
 
-            <div class="grid grid-cols-2 gap-3">
-                <div id="monthly-total-card" class="bg-white dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 shadow-sm dark:shadow-none">
-                    <div class="text-center space-y-1 pb-3">
-                        <span class="text-xs text-emerald-700 dark:text-emerald-400 font-semibold block" id="monthly-total-label">إجمالي صرفك الشهر ده</span>
-                        <h3 class="text-2xl font-black text-emerald-800 dark:text-emerald-300" id="monthly-total">—</h3>
-                        <p class="text-[11px] text-slate-600 dark:text-slate-400" id="monthly-compare">سجّل شوية عمليات كمان وهنقارنلك بالشهر اللي فات.</p>
+            <!-- المحفظة الاستثمارية: قابلة للطي، مفهوم تصميمي فقط في هذه المرحلة -->
+            <details id="portfolio-collapsible">
+                <summary id="portfolio-summary">
+                    <div>
+                        <span class="portfolio-eyebrow">مفهوم تصميمي فقط</span>
+                        <span class="portfolio-title">💼 محفظتك الاستثمارية</span>
                     </div>
-                    <div class="grid grid-cols-2 divide-x divide-x-reverse divide-slate-200 dark:divide-slate-800 border-t border-slate-200 dark:border-slate-800 pt-3">
-                        <div class="text-center">
-                            <span class="block text-[10px] text-slate-500 dark:text-slate-400 mb-0.5">عدد العمليات الشهر ده</span>
-                            <span class="block text-base font-black text-slate-800 dark:text-slate-100" id="monthly-count">—</span>
-                        </div>
-                        <div class="text-center">
-                            <span class="block text-[10px] text-slate-500 dark:text-slate-400 mb-0.5">متوسط اليوم</span>
-                            <span class="block text-base font-black text-rose-600 dark:text-rose-400" id="monthly-avg">—</span>
-                        </div>
+                    <div class="portfolio-right">
+                        <span class="portfolio-total-quick" id="portfolio-total-quick">245,800 ج.م</span>
+                        <span class="portfolio-chev">⌄</span>
                     </div>
+                </summary>
+                <div class="portfolio-body">
+                    <div class="portfolio-change">+3.2% من الشهر اللي فات</div>
+                    <div class="portfolio-asset">
+                        <div><div class="portfolio-asset-name">🥇 ذهب</div><div class="portfolio-asset-sub">120 جرام</div></div>
+                        <div class="portfolio-asset-val"><strong>156,000</strong><span class="up">4.1% ▲</span></div>
+                    </div>
+                    <div class="portfolio-asset">
+                        <div><div class="portfolio-asset-name">🏦 صناديق استثمار</div><div class="portfolio-asset-sub">بنك مصر</div></div>
+                        <div class="portfolio-asset-val"><strong>65,800</strong><span class="up">1.8% ▲</span></div>
+                    </div>
+                    <div class="portfolio-asset">
+                        <div><div class="portfolio-asset-name">₿ عملات رقمية</div><div class="portfolio-asset-sub">محفظة خارجية</div></div>
+                        <div class="portfolio-asset-val"><strong>24,000</strong><span class="down">2.4% ▼</span></div>
+                    </div>
+                    <button type="button" class="portfolio-add-btn">+ أضف أصل جديد يدويًا</button>
+                    <p class="portfolio-note">شراء أصل = تحويل، ولا يُحسب دخل أو مصروف. بيع أصل = دخل حقيقي ويُخصم من هنا تلقائيًا.</p>
                 </div>
-                <button type="button" id="monthly-income-toggle" class="bg-white dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 shadow-sm dark:shadow-none flex flex-col justify-center text-right w-full" aria-expanded="false">
-                    <div class="text-center space-y-1">
-                        <span class="text-xs text-teal-700 dark:text-teal-400 font-semibold block">💰 دخلك الشهر ده</span>
-                        <h3 class="text-2xl font-black text-teal-800 dark:text-teal-300" id="monthly-income">—</h3>
-                        <p class="text-[10.5px] text-teal-600 dark:text-teal-500" id="monthly-income-compare"></p>
-                        <p class="text-[11px] text-slate-500 dark:text-slate-400" id="monthly-income-count">لسه مفيش دخل مسجّل الشهر ده.</p>
-                    </div>
-                </button>
-            </div>
-            <div id="monthly-income-details" class="hidden bg-white dark:bg-slate-950/60 border border-teal-300 dark:border-teal-500/20 rounded-3xl p-4 space-y-1"></div>
+            </details>
 
             <button type="button" id="bank-movements-card" class="hidden w-full flex items-center justify-between gap-3 rounded-2xl border border-emerald-500/25 bg-emerald-500/[0.06] px-4 py-3 text-right transition hover:bg-emerald-500/10">
                 <div class="flex items-center gap-3 min-w-0">
@@ -2433,39 +2524,61 @@
             <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3">
                 <h4 class="text-xs font-bold text-slate-300 flex items-center gap-1.5">🎯 هدفك المالي</h4>
 
-                <!-- مفيش هدف حاليًا -->
+                <!-- كروت الأهداف النشطة (لحد 3) بيتحقنوا هنا من renderAsstGoal -->
+                <div id="asst-goal-list" class="space-y-2.5"></div>
+
+                <!-- فورم إضافة هدف — بيتخفي أوتوماتيك لو وصلنا لـ 3 أهداف نشطة -->
                 <div id="asst-goal-empty" class="space-y-2.5">
-                    <p class="text-[11px] text-slate-500">مفيش هدف مسجل دلوقتي. حدد هدف وابدأ توفر ليه.</p>
-                    <input id="asst-goal-title" type="text" placeholder="اسم الهدف (مثلاً: لابتوب)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-100 placeholder-slate-500 outline-none focus:border-emerald-500/50">
+                    <p id="asst-goal-empty-hint" class="text-[11px] text-slate-500">مفيش هدف مسجل دلوقتي. حدد هدف وابدأ توفر ليه.</p>
+                    <input id="asst-goal-title" type="text" placeholder="اسم الهدف (مثلاً: عربية BMW أو رحلة تركيا)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-100 placeholder-slate-500 outline-none focus:border-emerald-500/50">
                     <div class="flex gap-2">
                         <input id="asst-goal-amount" type="number" inputmode="numeric" placeholder="المبلغ المطلوب" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-100 placeholder-slate-500 outline-none focus:border-emerald-500/50">
                         <input id="asst-goal-date" type="date" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-100 outline-none focus:border-emerald-500/50">
                     </div>
                     <button id="asst-goal-create-btn" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold py-2.5 rounded-xl text-xs transition">ابدأ الهدف ده</button>
                     <p id="asst-goal-error" class="hidden text-[11px] text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-lg p-2 text-center"></p>
+                    <p class="text-[10px] text-emerald-600 dark:text-emerald-400/80 text-center leading-relaxed">اكتب اسم هدفك بس، وسيبلنا الباقي — دبّر معاك خطوة بخطوة لحد ما توصله 💪</p>
                 </div>
 
-                <!-- هدف نشط -->
-                <div id="asst-goal-active" class="hidden space-y-3">
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm font-bold text-slate-100" id="asst-goal-title-label">—</span>
-                        <span class="text-xs font-black text-emerald-400" id="asst-goal-percent">0%</span>
-                    </div>
-                    <div class="w-full h-2.5 bg-slate-800 rounded-full overflow-hidden">
-                        <div id="asst-goal-bar" class="h-full bg-gradient-to-l from-emerald-400 to-teal-400 rounded-full transition-all" style="width:0%"></div>
-                    </div>
-                    <div class="flex justify-between text-[11px] text-slate-400">
-                        <span>وفرت: <b class="text-slate-200" id="asst-goal-saved">—</b></span>
-                        <span>الهدف: <b class="text-slate-200" id="asst-goal-target">—</b></span>
-                    </div>
-                    <p id="asst-goal-daily-line" class="text-[10.5px] text-slate-500"></p>
-                    <div class="flex gap-2">
-                        <input id="asst-goal-contribute-amount" type="number" inputmode="numeric" placeholder="وفرت كام؟" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 placeholder-slate-500 outline-none focus:border-emerald-500/50">
-                        <button id="asst-goal-contribute-btn" class="bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold py-2 px-4 rounded-xl text-xs transition">إضافة</button>
-                    </div>
-                    <button id="asst-goal-cancel-btn" class="w-full text-[11px] text-rose-400 hover:text-rose-300 py-1.5 transition">إلغاء الهدف</button>
-                </div>
+                <!-- رسالة لما نوصل لـ 3 أهداف نشطة (أقصى عدد مسموح) -->
+                <p id="asst-goal-max-reached" class="hidden text-[11px] text-amber-500 dark:text-amber-400 bg-amber-500/10 border border-amber-500/20 rounded-lg p-2 text-center">معاك 3 أهداف شغالة دلوقتي (الحد الأقصى). لازم تلغي واحد منهم عشان تبدأ هدف جديد.</p>
+
+                <!-- تمبلت هدف واحد — بينسخه JS لكل هدف نشط في asst-goal-list -->
+                <template id="asst-goal-item-template">
+                    <details class="asst-goal-item group bg-slate-900/40 border border-slate-800 rounded-2xl px-3 py-2.5" open>
+                        <summary class="flex items-center gap-3 cursor-pointer list-none">
+                            <span class="asst-goal-icon shrink-0 flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-500 dark:text-emerald-400"></span>
+                            <div class="min-w-0 flex-1">
+                                <div class="flex items-center justify-between gap-2">
+                                    <span class="asst-goal-title-label text-sm font-bold text-slate-100 truncate">—</span>
+                                    <span class="asst-goal-percent text-xs font-black text-emerald-400 shrink-0">0%</span>
+                                </div>
+                                <div class="w-full h-2 mt-1.5 bg-slate-800 rounded-full overflow-hidden">
+                                    <div class="asst-goal-bar h-full bg-gradient-to-l from-emerald-400 to-teal-400 rounded-full transition-all" style="width:0%"></div>
+                                </div>
+                            </div>
+                            <span class="shrink-0 text-slate-500 text-xs transition-transform group-open:rotate-180">⌄</span>
+                        </summary>
+                        <div class="pt-3 space-y-3">
+                            <div class="flex justify-between text-[11px] text-slate-400">
+                                <span>وفرت: <b class="asst-goal-saved text-slate-200">—</b></span>
+                                <span>الهدف: <b class="asst-goal-target text-slate-200">—</b></span>
+                            </div>
+                            <p class="asst-goal-daily-line text-[10.5px] text-slate-500"></p>
+                            <label class="flex items-center justify-between gap-2 rounded-xl bg-slate-900/60 border border-slate-800 px-3 py-2 text-[11px] text-slate-400">
+                                <span>🗓️ تاريخ الهدف</span>
+                                <input class="asst-goal-date-edit bg-transparent text-emerald-400 font-bold text-[11px] outline-none" type="date">
+                            </label>
+                            <div class="flex gap-2">
+                                <input class="asst-goal-contribute-amount flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 placeholder-slate-500 outline-none focus:border-emerald-500/50" type="number" inputmode="numeric" placeholder="وفرت كام؟">
+                                <button class="asst-goal-contribute-btn bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold py-2 px-4 rounded-xl text-xs transition">إضافة</button>
+                            </div>
+                            <button class="asst-goal-cancel-btn w-full text-[11px] text-rose-400 hover:text-rose-300 py-1.5 transition">إلغاء الهدف</button>
+                        </div>
+                    </details>
+                </template>
             </div>
+
 
             <!-- Smart Receipt Scanner -->
             <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-2.5">
@@ -4630,9 +4743,9 @@
                 <div id="planning-summary" class="rounded-2xl bg-emerald-500/10 px-3 py-3 text-[11px] text-emerald-200"></div>
                 <details class="group"><summary class="flex cursor-pointer list-none items-center justify-between rounded-xl bg-slate-900/60 px-3 py-2 text-[10px] font-bold text-slate-400"><span>حدود مصروف لكل فئة (اختياري)</span><span class="text-slate-600 transition group-open:rotate-180">⌄</span></summary>
                 <div class="mt-2 space-y-2"><p class="text-[9.5px] leading-relaxed text-slate-500">حد تخطيطي بس، مش مصروف بيتسجل — دبّر ينبهك لما توصل لـ <b class="text-amber-300">80%</b> منه.</p><div id="category-budgets-list" class="space-y-1.5"></div><div class="flex gap-2"><input id="category-budget-custom-name" type="text" maxlength="40" placeholder="اكتب أي فئة: قهوة، سفر..." class="min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-900 px-2.5 py-2 text-[10px] text-slate-300 outline-none focus:border-emerald-400"><button id="category-budget-add" type="button" class="rounded-xl border border-emerald-500/25 px-3 py-2 text-[10px] font-bold text-emerald-300">إضافة</button></div></div></details>
-                <div class="flex gap-2"><button id="planning-save" type="button" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950">حفظ خطتي</button><button id="planning-reset" type="button" title="إدارة ومسح خطة الدخل والميزانية" class="rounded-xl border border-slate-700/60 px-3 py-2.5 text-xs text-slate-500">إدارة</button></div>
                 <details class="group border-t border-slate-800 pt-3"><summary class="flex cursor-pointer list-none items-center justify-between text-[10px] font-bold text-slate-400"><span>📌 التزامات شهرية متوقعة (إيجار / اشتراكات)</span><span class="text-slate-600 transition group-open:rotate-180">⌄</span></summary>
-                <div class="mt-2 space-y-2"><p class="text-[9px] text-slate-500">للتخطيط فقط — لا تُضاف للصرف الفعلي إلا عند تسجيلها.</p><div class="grid grid-cols-[1fr_5rem_2.5rem] gap-2"><input id="recurring-name" placeholder="إيجار / اشتراك" class="rounded-xl border border-slate-700 bg-slate-900 px-2.5 py-2 text-[10px] text-slate-100 outline-none"><input id="recurring-amount" type="number" min="0" placeholder="المبلغ" class="rounded-xl border border-slate-700 bg-slate-900 px-2.5 py-2 text-[10px] text-slate-100 outline-none"><button id="recurring-add" type="button" class="rounded-xl bg-slate-800 text-lg text-emerald-400">+</button></div><div id="recurring-list" class="mt-2 space-y-1.5"></div></div></details>`;
+                <div class="mt-2 space-y-2"><p class="text-[9px] text-slate-500">للتخطيط فقط — لا تُضاف للصرف الفعلي إلا عند تسجيلها.</p><div class="grid grid-cols-[1fr_5rem_2.5rem] gap-2"><input id="recurring-name" placeholder="إيجار / اشتراك" class="rounded-xl border border-slate-700 bg-slate-900 px-2.5 py-2 text-[10px] text-slate-100 outline-none"><input id="recurring-amount" type="number" min="0" placeholder="المبلغ" class="rounded-xl border border-slate-700 bg-slate-900 px-2.5 py-2 text-[10px] text-slate-100 outline-none"><button id="recurring-add" type="button" class="rounded-xl bg-slate-800 text-lg text-emerald-400">+</button></div><div id="recurring-list" class="mt-2 space-y-1.5"></div></div></details>
+                <div class="flex gap-2 border-t border-slate-800 pt-3"><button id="planning-save" type="button" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950">حفظ خطتي</button><button id="planning-reset" type="button" title="إدارة ومسح خطة الدخل والميزانية" class="rounded-xl border border-slate-700/60 px-3 py-2.5 text-xs text-slate-500">إدارة</button></div>`;
             monthly.insertBefore(wrap, quick.nextSibling);
             const ledger = document.createElement('section');
             ledger.id = 'expense-ledger-card';
@@ -4685,6 +4798,34 @@
             const summary = document.getElementById('planning-summary');
             const recurringTotal = (settings.recurringExpenses || []).reduce((sum, item) => sum + Number(item.amount || 0), 0);
             const afterExpected = Math.max(0, remaining - recurringTotal);
+
+            // كارت "المتاح ليك تصرفه" الموحّد فوق الصفحة: يظهر بس لو فيه دخل أو ميزانية متسجلة
+            const availableCard = document.getElementById('available-card');
+            const availableEmpty = document.getElementById('available-empty');
+            if (availableCard && availableEmpty) {
+                if (incomeOrBudget) {
+                    availableCard.classList.remove('hidden');
+                    availableEmpty.classList.add('hidden');
+                    const heroValue = document.getElementById('available-hero-value');
+                    const heroNote = document.getElementById('available-hero-note');
+                    const fill = document.getElementById('available-progress-fill');
+                    const pctLabel = document.getElementById('available-progress-pct');
+                    if (heroValue) heroValue.textContent = `${fmt(remaining)} ج.م`;
+                    if (heroNote) heroNote.textContent = income && budget
+                        ? 'من دخلك وميزانيتك، ناقص اللي صرفته فعلًا لحد النهاردة'
+                        : income ? 'من دخلك الشهر ده، ناقص اللي صرفته فعلًا لحد النهاردة' : 'من ميزانيتك الشهرية، ناقص اللي صرفته فعلًا لحد النهاردة';
+                    const pct = budget ? Math.min(100, Math.round((total / budget) * 100)) : null;
+                    if (fill) fill.style.width = `${pct !== null ? Math.min(100, pct) : Math.min(100, incomeOrBudget ? Math.round((total / incomeOrBudget) * 100) : 0)}%`;
+                    if (pctLabel) {
+                        const shownPct = pct !== null ? pct : Math.round((total / incomeOrBudget) * 100);
+                        pctLabel.textContent = `${Math.max(0, 100 - shownPct)}% لسه متاح ليك`;
+                    }
+                } else {
+                    availableCard.classList.add('hidden');
+                    availableEmpty.classList.remove('hidden');
+                }
+            }
+
             if (summary) {
                 if (incomeOrBudget) {
                     const pct = (income && budget) ? Math.min(100, Math.round((total / budget) * 100)) : null;
@@ -4930,14 +5071,16 @@
             const totalEl = document.getElementById('net-worth-total');
             if (!totalEl) return;
             totalEl.textContent = `${netWorth.total >= 0 ? '+' : ''}${fmt(netWorth.total)}`;
-            document.getElementById('net-worth-cash').textContent = `💵 كاش: ${fmt(netWorth.cash)}`;
-            document.getElementById('net-worth-owed').textContent = `🤝 ليك: ${fmt(netWorth.owedToYouTotal)}`;
-            document.getElementById('net-worth-owe').textContent = `📤 عليك: -${fmt(netWorth.youOweTotal)}`;
+            const netDebts = (netWorth.owedToYouTotal || 0) - (netWorth.youOweTotal || 0);
+            document.getElementById('net-worth-cash').textContent = `${netWorth.cash >= 0 ? '+' : ''}${fmt(netWorth.cash)}`;
+            document.getElementById('net-worth-debts').textContent = `${netDebts >= 0 ? '+' : ''}${fmt(netDebts)}`;
         }
         function renderMonthly(month) {
             renderBalanceCard(month);
             document.getElementById('monthly-total').textContent = fmt(month.total);
             document.getElementById('monthly-count').textContent = `${month.count} عملية`;
+            const monthlyCountBadge = document.getElementById('monthly-count-badge');
+            if (monthlyCountBadge) monthlyCountBadge.textContent = `${month.count} ${month.count === 1 ? 'عملية' : 'عمليات'} ⌄`;
             const activeDays = Math.max(1, Number(month.activeSpendingDaysThisMonth) || 0);
             const monthlyAvg = Number.isFinite(month.avgPerActiveDay)
                 ? month.avgPerActiveDay
@@ -4950,6 +5093,10 @@
             document.getElementById('monthly-income-count').textContent = incomeItems.length > 0
                 ? `من ${incomeItems.length} ${incomeItems.length === 1 ? 'عملية' : 'عمليات'} (بيع/دخل + سلف مستلَفة)`
                 : 'لسه مفيش دخل مسجّل الشهر ده.';
+            const incomeCountBadge = document.getElementById('monthly-income-count-badge');
+            if (incomeCountBadge) incomeCountBadge.textContent = incomeItems.length > 0
+                ? `${incomeItems.length} ${incomeItems.length === 1 ? 'عملية' : 'عمليات'} ⌄`
+                : 'لسه مفيش ⌄';
 
             const prevIncomeTotal = Number(month.prevIncomeTotal || 0);
             const incomeCompareEl = document.getElementById('monthly-income-compare');
@@ -5586,11 +5733,13 @@
         // ============ تاب "مساعد" (دبّر الذكي) — رندر البيانات ============
         // ============================================================
         function renderAssistant(data) {
-            window.__goalState = data.goal || null;
+            const goals = Array.isArray(data.goals) ? data.goals : (data.goal ? [data.goal] : []);
+            window.__goalsState = goals;
+            window.__goalState = goals[0] || null; // توافق خلفي لأي كود قديم بيقرا هدف واحد
             window.__wrappedData = data.wrapped || null;
-            renderAsstSuggestion(data.smart, data.goal);
+            renderAsstSuggestion(data.smart, goals[0] || null);
             renderAsstProjection(data.smart, data.month);
-            renderAsstGoal(data.goal);
+            renderAsstGoal(goals);
         }
 
         function renderAsstSuggestion(smart, goal) {
@@ -5639,23 +5788,72 @@
             el.innerHTML = text;
         }
 
-        function renderAsstGoal(goal) {
-            const emptyEl = document.getElementById('asst-goal-empty');
-            const activeEl = document.getElementById('asst-goal-active');
-            if (!goal) {
-                emptyEl.classList.remove('hidden');
-                activeEl.classList.add('hidden');
-                return;
-            }
-            emptyEl.classList.add('hidden');
-            activeEl.classList.remove('hidden');
-            document.getElementById('asst-goal-title-label').textContent = goal.title;
-            document.getElementById('asst-goal-percent').textContent = `${goal.percent}%`;
-            document.getElementById('asst-goal-bar').style.width = `${goal.percent}%`;
-            document.getElementById('asst-goal-saved').textContent = fmt(goal.savedAmount);
-            document.getElementById('asst-goal-target').textContent = fmt(goal.targetAmount);
+        // اختيار أيقونة الهدف تلقائيًا من اسمه — مفيش اختيار يدوي، دبّر بيحدد الشكل المناسب من كلمات مفتاحية
+        const GOAL_ICON_RULES = [
+            { keys: ['عربية', 'عربيه', 'سيارة', 'سياره', 'موتوسيكل', 'bmw', 'مرسيدس', 'kia', 'hyundai', 'car'], svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px]"><path d="M3 13l1.6-5.2A2 2 0 0 1 6.5 6.3h11a2 2 0 0 1 1.9 1.5L21 13"/><path d="M2.5 13h19v4.2a1 1 0 0 1-1 1h-1.2a1 1 0 0 1-1-1v-1H5.7v1a1 1 0 0 1-1 1H3.5a1 1 0 0 1-1-1z"/><circle cx="7" cy="17.2" r="1.5"/><circle cx="17" cy="17.2" r="1.5"/></svg>' },
+            { keys: ['شقة', 'شقه', 'بيت', 'عقار', 'فيلا', 'مقدم', 'apartment', 'flat'], svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px]"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg>' },
+            { keys: ['سفر', 'رحلة', 'رحله', 'سياحة', 'سياحه', 'تركيا', 'دبي', 'travel', 'trip'], svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px]"><path d="M22 12h-4l-3 9-6-18-3 9H2"/></svg>' },
+            { keys: ['لابتوب', 'كمبيوتر', 'موبايل', 'هاتف', 'ايفون', 'iphone', 'laptop', 'phone'], svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px]"><rect x="6" y="2.5" width="12" height="19" rx="2"/><path d="M11 18h2"/></svg>' },
+            { keys: ['جواز', 'زواج', 'عرس', 'خطوبة', 'خطوبه', 'فرح'], svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px]"><path d="M12 21s-7-4.4-9.4-8.9A5.4 5.4 0 0 1 12 5.6a5.4 5.4 0 0 1 9.4 6.5C19 16.6 12 21 12 21z"/></svg>' },
+            { keys: ['تعليم', 'دراسة', 'دراسه', 'كورس', 'جامعة', 'جامعه', 'study', 'course'], svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px]"><path d="M12 3L2 8l10 5 10-5-10-5z"/><path d="M6 10.5V16c0 1 2.7 2.5 6 2.5s6-1.5 6-2.5v-5.5"/></svg>' },
+            { keys: ['صحة', 'صحه', 'علاج', 'عملية', 'عمليه', 'health'], svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px]"><path d="M20.8 8.6a4.8 4.8 0 0 0-8.1-3.4l-.7.7-.7-.7a4.8 4.8 0 0 0-6.8 6.8l.7.7L12 19.8l6.8-6.8.7-.7c.8-.8 1.3-2 1.3-3.2z"/></svg>' },
+            { keys: ['شغل', 'مشروع', 'بزنس', 'استثمار', 'business', 'investment'], svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px]"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M8 8V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M3 13h18"/></svg>' },
+        ];
+        const GOAL_ICON_DEFAULT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px]"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>';
+        function pickGoalIcon(title) {
+            const t = String(title || '').toLowerCase();
+            const rule = GOAL_ICON_RULES.find((r) => r.keys.some((k) => t.includes(k)));
+            return rule ? rule.svg : GOAL_ICON_DEFAULT;
+        }
 
-            const dailyLineEl = document.getElementById('asst-goal-daily-line');
+        const ASST_MAX_GOALS = 3;
+
+        // بيرندر كل الأهداف النشطة (لحد 3) في asst-goal-list، وبيتحكم في ظهور فورم
+        // الإضافة ورسالة "وصلت للحد الأقصى" على حسب عدد الأهداف الحالي.
+        function renderAsstGoal(goals) {
+            const list = Array.isArray(goals) ? goals : (goals ? [goals] : []);
+            const listEl = document.getElementById('asst-goal-list');
+            const emptyEl = document.getElementById('asst-goal-empty');
+            const emptyHintEl = document.getElementById('asst-goal-empty-hint');
+            const maxReachedEl = document.getElementById('asst-goal-max-reached');
+            const template = document.getElementById('asst-goal-item-template');
+
+            listEl.innerHTML = '';
+            list.forEach((goal) => listEl.appendChild(buildGoalCard(goal, template)));
+
+            if (list.length >= ASST_MAX_GOALS) {
+                emptyEl.classList.add('hidden');
+                maxReachedEl.classList.remove('hidden');
+            } else {
+                emptyEl.classList.remove('hidden');
+                maxReachedEl.classList.add('hidden');
+                emptyHintEl.textContent = list.length === 0
+                    ? 'مفيش هدف مسجل دلوقتي. حدد هدف وابدأ توفر ليه.'
+                    : `تقدر تضيف هدف تاني (${list.length}/${ASST_MAX_GOALS}).`;
+            }
+        }
+
+        function buildGoalCard(goal, template) {
+            const node = template.content.firstElementChild.cloneNode(true);
+            node.dataset.goalId = goal.id;
+
+            node.querySelector('.asst-goal-title-label').textContent = goal.title;
+            node.querySelector('.asst-goal-percent').textContent = `${goal.percent}%`;
+            node.querySelector('.asst-goal-bar').style.width = `${goal.percent}%`;
+            node.querySelector('.asst-goal-saved').textContent = fmt(goal.savedAmount);
+            node.querySelector('.asst-goal-target').textContent = fmt(goal.targetAmount);
+            node.querySelector('.asst-goal-icon').innerHTML = pickGoalIcon(goal.title);
+
+            const dateEditEl = node.querySelector('.asst-goal-date-edit');
+            dateEditEl.value = goal.targetDate ? String(goal.targetDate).slice(0, 10) : '';
+            dateEditEl.addEventListener('change', async () => {
+                try {
+                    await asstApi('goal_update_date', { goalId: goal.id, targetDate: dateEditEl.value || null });
+                    loadDashboard();
+                } catch (e) { quickStatus('تعذّر تحديث تاريخ الهدف.', 'error'); }
+            });
+
+            const dailyLineEl = node.querySelector('.asst-goal-daily-line');
             if (goal.targetDate) {
                 const today = new Date(); today.setHours(0, 0, 0, 0);
                 const target = new Date(goal.targetDate);
@@ -5670,6 +5868,26 @@
             } else {
                 dailyLineEl.textContent = '';
             }
+
+            node.querySelector('.asst-goal-contribute-btn').addEventListener('click', () => {
+                const input = node.querySelector('.asst-goal-contribute-amount');
+                const amount = Number(input.value);
+                if (!amount || amount <= 0) { alert('اكتب مبلغ صحيح.'); return; }
+                input.value = '';
+                goalContribute(amount, goal.id);
+            });
+
+            node.querySelector('.asst-goal-cancel-btn').addEventListener('click', async () => {
+                if (!confirm(`متأكد عايز تلغي هدف "${goal.title}"؟`)) return;
+                try {
+                    await asstApi('goal_cancel', { goalId: goal.id });
+                    await loadDashboard();
+                } catch (e) {
+                    alert(e.message);
+                }
+            });
+
+            return node;
         }
 
         // ============ نداء عام لـ /api/assistant ============
@@ -5713,27 +5931,12 @@
             return false;
         }
         let quickEntryDrafts = [], quickEntrySourceText = '', quickEntryRecorder = null, quickEntryChunks = [], quickEntryTimer = null, quickEntrySeconds = 0, quickEntryVoiceBlob = null, quickEntryVoiceCancelled = false;
-        let quickEntrySelectedType = 'expense';
-        function setQuickEntryType(type) {
-            quickEntrySelectedType = type === 'income' ? 'income' : 'expense';
-            const expenseBtn = document.getElementById('quick-entry-type-expense');
-            const incomeBtn = document.getElementById('quick-entry-type-income');
-            const active = 'rounded-lg bg-white px-3 py-2 text-xs font-black shadow-sm';
-            const inactive = 'rounded-lg px-3 py-2 text-xs font-bold text-slate-500 dark:text-slate-400';
-            if (expenseBtn) {
-                expenseBtn.className = quickEntrySelectedType === 'expense' ? `${active} text-rose-600 dark:bg-slate-700 dark:text-rose-300` : `${inactive}`;
-                expenseBtn.setAttribute('aria-pressed', String(quickEntrySelectedType === 'expense'));
-            }
-            if (incomeBtn) {
-                incomeBtn.className = quickEntrySelectedType === 'income' ? `${active} text-teal-600 dark:bg-slate-700 dark:text-teal-300` : `${inactive}`;
-                incomeBtn.setAttribute('aria-pressed', String(quickEntrySelectedType === 'income'));
-            }
-            // ============ نفس النوع المختار بيتعرض واضح أثناء التسجيل ومراجعة الصوت، عشان محدش يفاجأ إنها اتسجلت دخل بدل مصروف أو العكس ============
-            const typeLabel = quickEntrySelectedType === 'income' ? 'دخل 🟢' : 'مصروف 🔴';
+        // ============ دبّر بيصنّف دخل/مصروف من كلام العميل نفسه (classifyMessage)، من غير ما يختار نوع مقدمًا ============
+        function setQuickEntryType() {
             const recLabel = document.getElementById('quick-entry-recording-type-label');
-            if (recLabel) recLabel.textContent = `(${typeLabel})`;
+            if (recLabel) recLabel.textContent = '';
             const previewLabel = document.getElementById('quick-entry-voice-preview-type-label');
-            if (previewLabel) previewLabel.textContent = ` ${typeLabel}`;
+            if (previewLabel) previewLabel.textContent = '';
         }
         let quickStatusTimer = null;
         function quickStatus(message, kind = 'normal') {
@@ -5891,18 +6094,16 @@
             }
             quickStatus(quickEntryDrafts.length > 1 ? `فهمنا ${quickEntryDrafts.length} معاملة — راجعهم ثم أكد التسجيل.` : 'راجع المبلغ والفئة ثم أكد التسجيل.');
         }
-        async function analyzeQuickEntry(payload) { if (!requireQuickEntryAccess()) return; quickStatus('دبّر بيفهم العملية...'); try { const requestPayload = payload.imageBase64 ? payload : { ...payload, requestedType: quickEntrySelectedType }; const result = await asstApi(payload.imageBase64 ? 'entry_invoice_draft' : 'entry_draft', requestPayload); quickDraft(result.drafts, result.transcript); } catch (e) { quickStatus(e.message || 'تعذر فهم العملية.', 'error'); } }
-        document.getElementById('quick-entry-type-expense')?.addEventListener('click', () => setQuickEntryType('expense'));
-        document.getElementById('quick-entry-type-income')?.addEventListener('click', () => setQuickEntryType('income'));
-        setQuickEntryType('expense');
-        document.getElementById('quick-entry-text')?.addEventListener('click', () => { if (!requireQuickEntryAccess()) return; document.getElementById('quick-entry-input').value = ''; quickShow('quick-entry-form', true); setQuickEntryType(quickEntrySelectedType); document.getElementById('quick-entry-input')?.focus(); });
+        async function analyzeQuickEntry(payload) { if (!requireQuickEntryAccess()) return; quickStatus('دبّر بيفهم العملية...'); try { const result = await asstApi(payload.imageBase64 ? 'entry_invoice_draft' : 'entry_draft', payload); quickDraft(result.drafts, result.transcript); } catch (e) { quickStatus(e.message || 'تعذر فهم العملية.', 'error'); } }
+        setQuickEntryType();
+        document.getElementById('quick-entry-text')?.addEventListener('click', () => { if (!requireQuickEntryAccess()) return; document.getElementById('quick-entry-input').value = ''; quickShow('quick-entry-form', true); document.getElementById('quick-entry-input')?.focus(); });
         document.getElementById('quick-entry-cancel')?.addEventListener('click', () => { quickShow('quick-entry-form', false); quickShow('quick-entry-draft', false); quickStatus(''); document.getElementById('quick-entry-input').value = ''; });
         document.getElementById('quick-entry-edit')?.addEventListener('click', () => { quickShow('quick-entry-draft', false); quickShow('quick-entry-form', true); document.getElementById('quick-entry-input').value = quickEntrySourceText || ''; });
         document.getElementById('quick-entry-analyze')?.addEventListener('click', () => { const text = document.getElementById('quick-entry-input')?.value.trim(); if (!text) return quickStatus('اكتب العملية الأول.', 'error'); analyzeQuickEntry({ text }); });
 
-        // اختيار النوع هنا فعلي، وليس مجرد تغيير لون: requestedType يُرسل مع الكتابة والصوت
+        // دبّر بيصنّف كل عملية (دخل/مصروف/دين...) من كلام العميل نفسه من غير اختيار مسبق
         // ويجعل الخادم يحفظ العملية في جدول المصروفات أو جدول الدخل الصحيح.
-        document.getElementById('quick-entry-confirm')?.addEventListener('click', async () => { if (!requireQuickEntryAccess() || !quickEntryDrafts.length) return; const btn = document.getElementById('quick-entry-confirm'); btn.disabled = true; quickStatus('جاري حفظ العملية...'); try { const result = await asstApi('entry_confirm', { drafts: quickEntryDrafts }); celebrateSave(btn); document.getElementById('quick-entry-input').value = ''; quickShow('quick-entry-draft', false); quickStatus(result.message || 'تم التسجيل بنجاح.', 'success'); setQuickEntryType('expense'); await loadDashboard(); } catch (e) { quickStatus(e.message || 'تعذر الحفظ.', 'error'); } finally { btn.disabled = false; } });
+        document.getElementById('quick-entry-confirm')?.addEventListener('click', async () => { if (!requireQuickEntryAccess() || !quickEntryDrafts.length) return; const btn = document.getElementById('quick-entry-confirm'); btn.disabled = true; quickStatus('جاري حفظ العملية...'); try { const result = await asstApi('entry_confirm', { drafts: quickEntryDrafts }); celebrateSave(btn); document.getElementById('quick-entry-input').value = ''; quickShow('quick-entry-draft', false); quickStatus(result.message || 'تم التسجيل بنجاح.', 'success'); await loadDashboard(); } catch (e) { quickStatus(e.message || 'تعذر الحفظ.', 'error'); } finally { btn.disabled = false; } });
         document.getElementById('quick-entry-invoice')?.addEventListener('click', () => { if (!requireQuickEntryAccess()) return; document.getElementById('quick-entry-invoice-input')?.click(); });
         document.getElementById('quick-entry-draft-close')?.addEventListener('click', () => { quickShow('quick-entry-draft', false); quickStatus(''); document.getElementById('quick-entry-input').value = ''; });
         // ============ فاتورة سريعة: نفس بالظبط سلوك "امسح فاتورة" — بتستخرج كل صنف بسعره وتتسجل أوتوماتيك من غير خطوة تأكيد إضافية ============
@@ -6048,34 +6249,17 @@
             }
         });
 
-        // ---- إضافة مبلغ موفّر على الهدف ----
-        async function goalContribute(amount) {
+        // ---- إضافة مبلغ موفّر على هدف (goalId اختياري — لو مش موجود وعنده هدف واحد بس، الباك إند بيحدده لوحده) ----
+        async function goalContribute(amount, goalId) {
             try {
-                const result = await asstApi('goal_contribute', { amount });
+                const result = await asstApi('goal_contribute', goalId ? { amount, goalId } : { amount });
                 await loadDashboard();
                 if (result.achieved) alert('🎉 مبروك! وصلت لهدفك بالكامل.');
             } catch (e) {
                 alert(e.message);
             }
         }
-        document.getElementById('asst-goal-contribute-btn').addEventListener('click', () => {
-            const input = document.getElementById('asst-goal-contribute-amount');
-            const amount = Number(input.value);
-            if (!amount || amount <= 0) { alert('اكتب مبلغ صحيح.'); return; }
-            input.value = '';
-            goalContribute(amount);
-        });
-
-        // ---- إلغاء الهدف ----
-        document.getElementById('asst-goal-cancel-btn').addEventListener('click', async () => {
-            if (!confirm('متأكد عايز تلغي الهدف؟')) return;
-            try {
-                await asstApi('goal_cancel', {});
-                await loadDashboard();
-            } catch (e) {
-                alert(e.message);
-            }
-        });
+        // الأزرار الخاصة بكل هدف بتتربط ديناميكيًا جوه buildGoalCard() فوق
 
         // ============ Smart Receipt Scanner (كاميرا + معرض منفصلين) ============
         const asstReceiptCameraInput = document.getElementById('asst-receipt-camera-input');

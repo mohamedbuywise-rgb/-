@@ -207,26 +207,26 @@ export default async function handler(req, res) {
       });
     }
 
-    // ---- الهدف المالي النشط (لو موجود) — نفس جدول goals اللي البوت بيستخدمه ----
-    const { data: goalRow, error: goalError } = await supabase
+    // ---- الأهداف المالية النشطة (لحد 3) — نفس جدول goals اللي البوت بيستخدمه ----
+    const { data: goalRows, error: goalError } = await supabase
       .from('goals')
       .select('*')
       .eq('telegram_user_id', dataUserId)
       .eq('is_active', true)
-      .limit(1)
-      .maybeSingle();
+      .order('created_at', { ascending: true });
     if (goalError) console.error('dashboard-data goal lookup error:', JSON.stringify(goalError));
 
-    const goal = goalRow
-      ? {
-          id: goalRow.id,
-          title: goalRow.title,
-          targetAmount: Number(goalRow.target_amount),
-          savedAmount: Number(goalRow.saved_amount),
-          targetDate: goalRow.target_date,
-          percent: Math.min(100, Math.round((Number(goalRow.saved_amount) / Number(goalRow.target_amount)) * 100)),
-        }
-      : null;
+    const goals = (goalRows || []).map((goalRow) => ({
+      id: goalRow.id,
+      title: goalRow.title,
+      targetAmount: Number(goalRow.target_amount),
+      savedAmount: Number(goalRow.saved_amount),
+      targetDate: goalRow.target_date,
+      percent: Math.min(100, Math.round((Number(goalRow.saved_amount) / Number(goalRow.target_amount)) * 100)),
+    }));
+
+    // "goal" فضل موجود للتوافق الخلفي مع أي كود قديم بيقرا هدف واحد بس (أول هدف نشط)
+    const goal = goals[0] || null;
 
     // ---- توقّع نهاية الشهر + اقتراح ذكي (كله محسوب من أرقام حقيقية فوق، صفر أرقام مختلقة) ----
     const daysInMonth = new Date(start.getFullYear(), start.getMonth() + 1, 0).getDate();
@@ -450,6 +450,7 @@ export default async function handler(req, res) {
       },
       history,
       goal,
+      goals,
       smart,
       wrapped,
     });

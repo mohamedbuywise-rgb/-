@@ -654,16 +654,20 @@ async function routeUserMessage(text, userId, chatId, { fromVoice = false } = {}
     return;
   }
 
-  // "وفرت 500" أو "ضيف على هدفي 500" → إضافة مبلغ موفّر على الهدف الحالي
-  const contributeMatch = text.match(/^(?:وفرت|ضيف على هدفي|زود هدفي)\s+(\d+(?:\.\d+)?)/);
+  // "وفرت 500" أو "وفرت 500 لابتوب" أو "ضيف على هدفي 500" → إضافة مبلغ موفّر على هدف
+  // (اسم الهدف اختياري؛ لو المستخدم عنده أكتر من هدف نشط بنطلب منه يحدد بالاسم)
+  const contributeMatch = text.match(/^(?:وفرت|ضيف على هدفي|زود هدفي)\s+(\d+(?:\.\d+)?)\s*(?:جنيه|ج)?\s*(.*)$/);
   if (contributeMatch) {
-    await contributeToGoal(parseFloat(contributeMatch[1]), userId, chatId);
+    const goalTitleHint = contributeMatch[2].trim();
+    await contributeToGoal(parseFloat(contributeMatch[1]), userId, chatId, goalTitleHint);
     return;
   }
 
-  // إلغاء الهدف الحالي
-  if (['احذف هدفي', 'الغاء هدفي', 'إلغاء هدفي', 'امسح هدفي'].includes(text)) {
-    await cancelActiveGoal(userId, chatId);
+  // إلغاء هدف — "احذف هدفي" أو "احذف هدفي لابتوب" (لو أكتر من هدف نشط)
+  const cancelGoalMatch = text.match(/^(?:احذف هدفي|الغاء هدفي|إلغاء هدفي|امسح هدفي)\s*(.*)$/);
+  if (cancelGoalMatch) {
+    const goalTitleHint = cancelGoalMatch[1].trim();
+    await cancelActiveGoal(userId, chatId, goalTitleHint);
     return;
   }
 

@@ -16,7 +16,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
-    <script src="/vendor/modern-screenshot.js"></script>
+    <script src="../vendor/modern-screenshot.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
     <!-- بنحدد الوضع (فاتح/غامق) بدري قبل ما الصفحة تترسم. الافتراضي دلوقتي "فاتح" -->
     <script>
@@ -76,99 +76,6 @@
         }
         @media (prefers-reduced-motion: reduce) {
             .modal-screen-surface { transition: none !important; }
-        }
-
-        /* ============ بطاقة الحساب الجديدة — تصميم نهاري/ليلي ============ */
-        .profile-design-card {
-            position: relative;
-            overflow: hidden;
-            isolation: isolate;
-            aspect-ratio: 2.32 / 1;
-            border-radius: 1.55rem;
-            border: 1px solid var(--pm-hairline-soft);
-            box-shadow: 0 16px 34px rgba(15, 23, 42, .18);
-            background: #101918 center / cover no-repeat;
-        }
-        .profile-design-card::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            z-index: 0;
-            background: var(--profile-card-image) center / cover no-repeat;
-        }
-        .profile-design-card::after {
-            content: '';
-            position: absolute;
-            z-index: 0;
-            inset: 14% 29% 4%;
-            border-radius: 1.2rem;
-            background: rgba(13, 24, 24, .78);
-            box-shadow: 0 0 34px rgba(4, 12, 12, .22);
-        }
-        html[data-theme="light"] .profile-design-card {
-            --profile-card-image: url('./assets/profile-card-light.jpg');
-            background: #f7faf7;
-            box-shadow: 0 16px 34px rgba(40, 70, 58, .16);
-        }
-        html[data-theme="light"] .profile-design-card::after {
-            background: rgba(255, 255, 255, .89);
-            box-shadow: 0 0 34px rgba(255, 255, 255, .30);
-        }
-        .profile-design-card-content {
-            position: relative;
-            z-index: 1;
-            height: 100%;
-            padding: 1.15rem .8rem .95rem;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            gap: .45rem;
-            text-align: center;
-        }
-        .profile-design-avatar-wrap { position: relative; }
-        .profile-design-avatar {
-            width: 5.7rem;
-            height: 5.7rem;
-            border-radius: 999px;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(145deg, #263b38, #0b1414);
-            border: 3px solid rgba(231, 194, 91, .78);
-            color: #f9fafb;
-            font-size: 1.8rem;
-            font-weight: 900;
-            box-shadow: 0 7px 18px rgba(0, 0, 0, .30);
-        }
-        html[data-theme="light"] .profile-design-avatar { background: #e8eeea; color: #073d32; border-color: #c79835; }
-        .profile-design-avatar img { width: 100%; height: 100%; object-fit: cover; }
-        .profile-design-camera {
-            position: absolute;
-            inset-inline-start: -.15rem;
-            bottom: -.2rem;
-            width: 2rem;
-            height: 2rem;
-            display: grid;
-            place-items: center;
-            border-radius: 999px;
-            border: 2px solid #152321;
-            background: #152321;
-            font-size: .9rem;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, .28);
-        }
-        html[data-theme="light"] .profile-design-camera { border-color: #fff; background: #fffaf0; }
-        .profile-design-name { margin-top: .2rem; color: #f8fafc; font-size: 1.45rem; line-height: 1.2; font-weight: 900; text-shadow: 0 2px 8px rgba(0,0,0,.24); }
-        .profile-design-email { max-width: 100%; overflow-wrap: anywhere; color: #d1d5db; font-size: .82rem; line-height: 1.4; }
-        html[data-theme="light"] .profile-design-name { color: #063d32; text-shadow: none; }
-        html[data-theme="light"] .profile-design-email { color: #49635a; }
-        @media (max-width: 420px) {
-            .profile-design-card-content { padding: .65rem .55rem .55rem; }
-            .profile-design-avatar { width: 4.25rem; height: 4.25rem; }
-            .profile-design-camera { width: 1.65rem; height: 1.65rem; font-size: .75rem; }
-            .profile-design-name { font-size: 1.25rem; }
-            .profile-design-email { font-size: .75rem; }
         }
 
         /* ============ Account nested pages — صفحات كاملة بدل Bottom Sheets ============ */
@@ -373,54 +280,6 @@
         html:not([data-theme="light"]) .active-days-badge { color:#4ade80; background:rgba(74,222,128,.15); border-color:rgba(74,222,128,.25); }
         html:not([data-theme="light"]) .active-days-dot-mark { background:#252d2f; border-color:#374144; }
         html:not([data-theme="light"]) .active-days-dot { color:#6e7d78; }
-
-        /* صفحة التذكيرات — هرمية أوضح وترتيب عملي */
-        .reminders-page-heading { display:flex; align-items:center; gap:.75rem; padding:.2rem .15rem .35rem; }
-        .reminders-heading-icon { width:3rem; height:3rem; display:grid; place-items:center; border-radius:1rem; background:color-mix(in srgb, var(--pm-gold) 16%, var(--pm-surface-hi)); border:1px solid color-mix(in srgb, var(--pm-gold) 38%, transparent); font-size:1.35rem; box-shadow:0 8px 18px rgba(0,0,0,.12); }
-        .reminders-page-heading h3 { margin:0; color:var(--pm-ink); font-size:1.25rem; font-weight:900; }
-        .reminders-page-heading p { margin:.15rem 0 0; color:var(--pm-muted); font-size:.7rem; }
-        .reminders-telegram-banner { align-items:center; justify-content:space-between; gap:.75rem; padding:.8rem; border-radius:1rem; background:color-mix(in srgb, var(--pm-gold) 10%, var(--pm-surface-hi)); border:1px solid color-mix(in srgb, var(--pm-gold) 38%, transparent); }
-        #reminders-notification-badge { background:var(--pm-gold) !important; color:#17120a !important; border-color:var(--pm-surface) !important; box-shadow:0 3px 10px color-mix(in srgb, var(--pm-gold) 35%, transparent) !important; }
-        html[data-theme="light"] #reminders-notification-badge { background:#16a878 !important; color:#fff !important; border-color:#fffdf8 !important; box-shadow:0 3px 10px rgba(22,168,120,.32) !important; }
-        .reminders-alert-card { display:flex; align-items:center; gap:.7rem; padding:.8rem; border:1px solid color-mix(in srgb, var(--pm-gold) 52%, transparent); border-radius:1.1rem; background:linear-gradient(135deg,color-mix(in srgb, var(--pm-gold) 15%, var(--pm-surface-hi)),var(--pm-surface-hi)); box-shadow:0 9px 20px rgba(0,0,0,.1); }
-        .reminders-alert-icon { width:2.6rem; height:2.6rem; display:grid; place-items:center; flex:none; border-radius:50%; background:color-mix(in srgb, var(--pm-gold) 25%, var(--pm-surface)); font-size:1.25rem; }
-        .reminders-alert-copy { min-width:0; flex:1; }
-        .reminders-alert-copy strong { display:block; color:var(--pm-ink); font-size:.78rem; font-weight:900; }
-        .reminders-alert-copy span { display:block; margin-top:.15rem; color:var(--pm-muted); font-size:.65rem; line-height:1.5; }
-        .reminders-alert-stage { flex:none; padding:.3rem .45rem; border-radius:.55rem; color:var(--pm-gold-bright); background:color-mix(in srgb, var(--pm-gold) 20%, transparent); font-size:.6rem; font-weight:900; }
-        .reminders-stats-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:.55rem; padding:.15rem; }
-        .reminders-stat { min-width:0; display:flex; flex-direction:column; align-items:center; gap:.12rem; padding:.7rem .35rem; border:1px solid var(--pm-hairline-soft); border-radius:1rem; background:var(--pm-surface-hi); }
-        .reminders-stat-icon { color:var(--pm-gold-bright); font-size:.9rem; line-height:1; }
-        .reminders-stat strong { color:var(--pm-ink); font:700 1.25rem/1 'Fraunces','Cairo',sans-serif; }
-        .reminders-stat small { color:var(--pm-muted); font-size:.62rem; }
-        .reminders-create-card { padding:1rem; border:1px solid var(--pm-gold); border-radius:1.35rem; background:linear-gradient(145deg,color-mix(in srgb, var(--pm-gold) 7%, var(--pm-surface-hi)),var(--pm-surface-hi)); box-shadow:0 12px 28px rgba(0,0,0,.12); }
-        .reminders-section-heading { display:flex; align-items:center; gap:.6rem; margin-bottom:.85rem; }
-        .reminders-section-icon { width:2rem; height:2rem; display:grid; place-items:center; border-radius:.7rem; color:#17120a; background:linear-gradient(135deg,var(--pm-gold-bright),var(--pm-gold)); font-size:1.3rem; font-weight:900; }
-        .reminders-section-heading h4 { margin:0; color:var(--pm-ink); font-size:.9rem; font-weight:900; }
-        .reminders-section-heading p { margin:.1rem 0 0; color:var(--pm-muted); font-size:.65rem; }
-        .reminders-field-label { display:block; margin:.55rem 0 .3rem; color:var(--pm-muted); font-size:.65rem; font-weight:700; }
-        .reminders-input { width:100%; box-sizing:border-box; border:1px solid var(--pm-hairline-soft); border-radius:.8rem; background:var(--pm-surface); color:var(--pm-ink); padding:.72rem .8rem; outline:none; font:600 .75rem 'Cairo',sans-serif; }
-        .reminders-input:focus { border-color:var(--pm-gold); box-shadow:0 0 0 3px color-mix(in srgb, var(--pm-gold) 14%, transparent); }
-        .reminders-primary-btn { width:100%; margin-top:.85rem; padding:.78rem; border:0; border-radius:.85rem; background:linear-gradient(135deg,var(--pm-gold-bright),var(--pm-gold)); color:#17120a; font:900 .78rem 'Cairo',sans-serif; cursor:pointer; }
-        .reminders-list-section { padding:.15rem .1rem; }
-        .reminders-list-heading { display:flex; align-items:baseline; justify-content:space-between; gap:.5rem; margin-bottom:.65rem; }
-        .reminders-list-heading h4 { margin:0; color:var(--pm-ink); font-size:.85rem; font-weight:900; }
-        .reminders-list-heading span { color:var(--pm-muted); font-size:.62rem; }
-        .reminders-featured:empty { display:none; }
-        .reminder-featured-card { display:flex; align-items:center; gap:.7rem; padding:.85rem; margin-bottom:.65rem; border:1px solid color-mix(in srgb, var(--pm-gold) 42%, transparent); border-radius:1.1rem; background:color-mix(in srgb, var(--pm-gold) 8%, var(--pm-surface-hi)); }
-        .reminder-featured-icon { width:2.65rem; height:2.65rem; flex:none; display:grid; place-items:center; border-radius:50%; background:color-mix(in srgb, var(--pm-gold) 18%, var(--pm-surface)); font-size:1.3rem; }
-        .reminder-featured-main { min-width:0; flex:1; }
-        .reminder-featured-main strong { display:block; color:var(--pm-ink); font-size:.78rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-        .reminder-featured-main small { display:block; margin-top:.15rem; color:var(--pm-muted); font-size:.63rem; }
-        .reminder-featured-badge { flex:none; padding:.28rem .45rem; border-radius:.55rem; background:color-mix(in srgb, var(--pm-gold) 22%, transparent); color:var(--pm-gold-bright); font-size:.62rem; font-weight:900; }
-        .reminder-row { display:flex; align-items:center; gap:.65rem; padding:.72rem .7rem; border:1px solid var(--pm-hairline-soft); border-radius:.95rem; background:var(--pm-surface-hi); }
-        .reminder-row-icon { flex:none; width:2rem; height:2rem; display:grid; place-items:center; border-radius:.65rem; background:color-mix(in srgb, var(--pm-gold) 12%, var(--pm-surface)); font-size:1rem; }
-        .reminder-row-main { min-width:0; flex:1; }
-        .reminder-row-main strong { display:block; color:var(--pm-ink); font-size:.72rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-        .reminder-row-main small { display:block; color:var(--pm-muted); font-size:.6rem; margin-top:.12rem; }
-        .reminder-row-badge { flex:none; color:var(--pm-gold-bright); font-size:.6rem; font-weight:800; }
-        .reminder-delete-btn { flex:none; color:var(--pm-muted); background:none; border:0; font-size:1.1rem; cursor:pointer; }
-        @media (max-width:390px) { .reminders-stat { padding-inline:.2rem; } .reminders-page-heading h3 { font-size:1.1rem; } }
 
         .daily-reminder-card {
             direction: rtl;
@@ -2446,6 +2305,10 @@
                         <input id="portfolio-add-name" type="text" placeholder="اسم الأصل (مثلاً: ذهب، صناديق بنك مصر)" class="portfolio-form-input">
                         <input id="portfolio-add-sub" type="text" placeholder="وصف اختياري (مثلاً: 120 جرام أو عيار 24)" class="portfolio-form-input">
                         <input id="portfolio-add-amount" type="number" inputmode="numeric" placeholder="القيمة الحالية بالجنيه" class="portfolio-form-input">
+
+
+
+                        <div class="icon-library-row" id="portfolio-icon-picker" aria-label="اختار أيقونة الأصل"></div>
                         <div style="display:flex;gap:.5rem;">
                             <button type="button" id="portfolio-add-confirm" class="portfolio-form-submit">حفظ الأصل</button>
                             <button type="button" id="portfolio-add-cancel" class="portfolio-form-cancel">إلغاء</button>
@@ -2756,43 +2619,23 @@
 
         <!-- ===================== TAB: REMINDERS ===================== -->
         <div class="tab-content p-5 space-y-4" id="tab-reminders">
-            <div class="reminders-page-heading">
-                <div class="reminders-heading-icon">🔔</div>
-                <div class="min-w-0"><h3>تذكيراتي</h3><p>فاكرك بمواعيدك المهمة قبل ما تفوتك</p></div>
-            </div>
-
-            <div id="reminders-telegram-banner" class="hidden reminders-telegram-banner">
+            <div id="reminders-telegram-banner" class="hidden bg-amber-500/10 border border-amber-500/30 rounded-2xl p-3.5 flex items-center justify-between gap-3">
                 <div class="min-w-0"><p class="text-xs font-bold text-amber-300">التذكيرات هتوصلك رسالة تليجرام في وقتها</p><p class="text-[10.5px] text-amber-400/80 mt-0.5">لسه مربوطش تليجرام — اربطه عشان توصلك برة التطبيق</p></div>
                 <button type="button" id="reminders-link-telegram-btn" class="shrink-0 rounded-xl bg-amber-500 px-3 py-2 text-[11px] font-black text-slate-950">اربط تليجرام</button>
             </div>
 
-            <div id="reminders-alert-card" class="reminders-alert-card hidden" role="status" aria-live="polite"></div>
-
-            <div class="reminders-stats-grid" aria-label="ملخص التذكيرات">
-                <div class="reminders-stat"><span class="reminders-stat-icon">🔔</span><strong id="reminders-count-upcoming">—</strong><small>القادمة</small></div>
-                <div class="reminders-stat"><span class="reminders-stat-icon">📅</span><strong id="reminders-count-month">—</strong><small>هذا الشهر</small></div>
-                <div class="reminders-stat"><span class="reminders-stat-icon">✓</span><strong id="reminders-count-done">0</strong><small>منجزة</small></div>
+            <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-2.5">
+                <h4 class="text-xs font-bold text-slate-300">تذكير جديد</h4>
+                <input type="text" id="reminder-title-input" maxlength="200" placeholder="تذكير بإيه؟ مثال: دفع قسط العربية" class="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2.5 text-xs text-slate-100 outline-none">
+                <input type="date" id="reminder-date-input" class="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2.5 text-xs text-slate-100 outline-none">
+                <button type="button" id="reminder-save-btn" class="w-full rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950">حفظ التذكير</button>
+                <p id="reminder-form-status" class="min-h-4 text-center text-[11px] text-rose-400"></p>
             </div>
 
-            <section class="reminders-create-card" aria-labelledby="reminder-create-title">
-                <div class="reminders-section-heading"><span class="reminders-section-icon">＋</span><div><h4 id="reminder-create-title">تذكير جديد</h4><p>اكتب الموعد، وأنا هفكّرك بيه</p></div></div>
-                <label class="reminders-field-label" for="reminder-title-input">إيه اللي تحب تفتكره؟</label>
-                <input type="text" id="reminder-title-input" maxlength="200" placeholder="مثال: دفع قسط العربية" class="reminders-input">
-                <label class="reminders-field-label" for="reminder-date-input">إمتى؟</label>
-                <input type="date" id="reminder-date-input" class="reminders-input">
-                <button type="button" id="reminder-save-btn" class="reminders-primary-btn">حفظ التذكير</button>
-                <p id="reminder-form-status" class="min-h-4 text-center text-[11px] text-rose-400"></p>
-            </section>
-
-            <section class="reminders-list-section" aria-labelledby="reminders-upcoming-title">
-                <div class="reminders-list-heading"><h4 id="reminders-upcoming-title">أقرب المواعيد</h4><span id="reminders-next-label">—</span></div>
-                <div id="reminders-featured" class="reminders-featured"></div>
-            </section>
-
-            <section class="reminders-list-section" aria-labelledby="reminders-all-title">
-                <div class="reminders-list-heading"><h4 id="reminders-all-title">كل التذكيرات</h4><span>مرتبة حسب الموعد</span></div>
+            <div class="rounded-3xl p-4">
+                <h4 class="text-xs font-bold text-slate-300 mb-2">القادمة</h4>
                 <div id="reminders-list" class="space-y-2"><p class="text-xs text-slate-500 text-center py-3">بيتحمّل...</p></div>
-            </section>
+            </div>
         </div>
 
         <!-- ===================== TAB: ASSISTANT (دبّر الذكي) ===================== -->
@@ -2834,9 +2677,13 @@
                     <div class="flex gap-2">
                         <input id="asst-goal-amount" type="number" inputmode="numeric" placeholder="المبلغ المطلوب" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-100 placeholder-slate-500 outline-none focus:border-emerald-500/50">
                         <input id="asst-goal-date" type="date" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-100 outline-none focus:border-emerald-500/50">
+
+
+
                     </div>
                     <button id="asst-goal-create-btn" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold py-2.5 rounded-xl text-xs transition">ابدأ الهدف ده</button>
                     <p id="asst-goal-error" class="hidden text-[11px] text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-lg p-2 text-center"></p>
+                    <div class="icon-library-row" id="goal-icon-picker" aria-label="اختار أيقونة الهدف"></div>
                     <p class="text-[10px] text-emerald-600 dark:text-emerald-400/80 text-center leading-relaxed">اكتب اسم هدفك بس، وسيبلنا الباقي — دبّر معاك خطوة بخطوة لحد ما توصله 💪</p>
                 </div>
 
@@ -2976,18 +2823,18 @@
         <!-- ===================== TAB: ACCOUNT ===================== -->
         <div class="tab-content p-5 space-y-4" id="tab-account">
 
-            <div class="profile-design-card" style="--profile-card-image: url('./assets/profile-card-dark.jpg');">
-                <div class="profile-design-card-content">
-                    <div class="profile-design-avatar-wrap">
-                        <button id="avatar-btn" class="profile-design-avatar" title="غيّر صورتك" aria-label="غيّر صورة البروفايل">
-                            <img id="account-avatar-img" class="hidden" alt="صورة البروفايل">
-                            <span id="account-avatar-initial">—</span>
-                        </button>
-                        <span class="profile-design-camera" aria-hidden="true">📷</span>
-                        <input type="file" id="avatar-file-input" accept="image/*" class="hidden">
-                    </div>
-                    <h3 class="profile-design-name" id="account-name">—</h3>
-                    <p class="profile-design-email" id="account-email">—</p>
+            <div id="account-profile-card" class="account-profile-card bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-5 flex flex-col items-center text-center gap-3 shadow-lg">
+                <div class="relative">
+                    <button id="avatar-btn" class="w-20 h-20 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-slate-950 font-black text-2xl overflow-hidden border-2 border-slate-800 shadow-lg" title="غيّر صورتك">
+                        <img id="account-avatar-img" class="w-full h-full object-cover hidden" alt="صورة البروفايل">
+                        <span id="account-avatar-initial">—</span>
+                    </button>
+                    <span class="absolute -bottom-1 -left-1 w-7 h-7 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs">📷</span>
+                    <input type="file" id="avatar-file-input" accept="image/*" class="hidden">
+                </div>
+                <div>
+                    <h3 class="text-base font-bold text-slate-100" id="account-name">—</h3>
+                    <p class="text-xs text-slate-400" id="account-email">—</p>
                 </div>
             </div>
 
@@ -4505,8 +4352,6 @@
                 notifications.push({ id: `daily-pace-${new Date().toISOString().slice(0, 10)}`, icon: '🌱', title: 'وثّقت يومك النهاردة', body: `سجّلت ${today.count} عملية بإجمالي ${fmt(today.total)} النهاردة${streakLine}. كل يوم بتسجّله بيقربك أكتر من صورة كاملة وواضحة لفلوسك.`, tone: 'emerald' });
             }
 
-            // نحتفظ بمعرّفات الإشعارات الحالية حتى يستطيع زر "تحديد الكل كمقروء" حفظها فعلياً.
-            window.__inAppNotificationIds = notifications.map((item) => item.id);
             let read = {};
             try { read = JSON.parse(localStorage.getItem(inAppNotificationsKey()) || '{}'); } catch {}
             if (!notifications.length) {
@@ -4525,12 +4370,6 @@
         function markInAppNotificationsRead() {
             const list = document.getElementById('in-app-notifications-list');
             if (!list) return;
-            const notificationIds = Array.isArray(window.__inAppNotificationIds) ? window.__inAppNotificationIds : [];
-            let read = {};
-            try { read = JSON.parse(localStorage.getItem(inAppNotificationsKey()) || '{}'); } catch {}
-            notificationIds.forEach((id) => { read[id] = true; });
-            localStorage.setItem(inAppNotificationsKey(), JSON.stringify(read));
-            // نترك وقت المسح للتوافق مع النسخ السابقة، لكن مصدر الحالة الأساسي هو خريطة المعرّفات.
             localStorage.setItem(inAppNotificationsClearedAtKey(), new Date().toISOString());
             if (typeof updateAccountNotificationBadge === 'function') updateAccountNotificationBadge(0);
             list.innerHTML = '<div class="notification-empty rounded-2xl border p-3 text-[11px] leading-relaxed" style="color:var(--slate-400, #94a3b8)"><strong>هنا هتظهر لك الفايدة أول بأول</strong><br>هتلاقي ملخصًا لمتابعتك، وتنبيهًا لطيفًا لما تقترب من حد فئة، واقتراحًا صغيرًا يساعدك تكمل خطتك براحة.</div>';
@@ -4835,8 +4674,6 @@
                 await loadDashboard(true); // أول تحميل — الربط اختياري والداش تفتح للحساب المستقل عادي
                 await loadPlanningSettings();
                 await loadAccountTab();
-                // تحديث شارة التذكيرات من البداية، وليس فقط عند فتح تبويب التذكيرات.
-                loadReminders();
                 loadInvoicesCount();
                 setupAutoRefresh();
             } catch (e) {
@@ -5953,57 +5790,41 @@
 
         async function loadReminders() {
             const listEl = document.getElementById('reminders-list');
-            const featuredEl = document.getElementById('reminders-featured');
             const badge = document.getElementById('reminders-notification-badge');
             try {
                 const res = await fetch('/api/reminders', { headers: { Authorization: `Bearer ${accessToken}` } });
                 const data = await res.json();
                 const reminders = data.reminders || [];
-                const today = new Date(); today.setHours(0, 0, 0, 0);
-                const withDays = reminders.map((r) => ({ ...r, days: Math.round((new Date(r.due_date + 'T00:00:00') - today) / (24 * 60 * 60 * 1000)) }));
-                const upcoming = withDays.filter((r) => r.days >= 0);
-                const monthKey = today.toISOString().slice(0, 7);
-                const monthCount = upcoming.filter((r) => String(r.due_date).slice(0, 7) === monthKey).length;
-                const countUpcoming = document.getElementById('reminders-count-upcoming');
-                const countMonth = document.getElementById('reminders-count-month');
-                if (countUpcoming) countUpcoming.textContent = upcoming.length;
-                if (countMonth) countMonth.textContent = monthCount;
-                // الشارة لا تظهر للتذكيرات البعيدة؛ هي فقط لعدد المواعيد التي تحتاج تنبيهاً الآن (خلال يومين أو أقل).
-                const nearDue = upcoming.filter((r) => r.days <= 2);
+
+                const urgentCount = reminders.filter((r) => {
+                    const days = Math.round((new Date(r.due_date + 'T00:00:00') - new Date(new Date().toDateString())) / (24 * 60 * 60 * 1000));
+                    return days <= 2;
+                }).length;
                 if (badge) {
-                    badge.textContent = nearDue.length > 9 ? '9+' : (nearDue.length ? String(nearDue.length) : '');
-                    badge.style.display = nearDue.length ? 'grid' : 'none';
+                    badge.textContent = urgentCount > 0 ? String(urgentCount) : '';
+                    badge.style.display = urgentCount > 0 ? 'grid' : 'none';
                 }
 
-                // تنبيه داخل الصفحة يظهر فقط في نافذة المتابعة الأخيرة: يومين، يوم، أو يوم الموعد.
-                const alertEl = document.getElementById('reminders-alert-card');
-                const alertReminder = [...upcoming].filter((r) => r.days <= 2).sort((a, b) => a.days - b.days)[0];
-                if (alertEl) {
-                    if (alertReminder) {
-                        const stage = alertReminder.days === 0 ? 'اليوم' : alertReminder.days === 1 ? 'بكرة' : 'بعد يومين';
-                        const title = alertReminder.days === 0 ? 'موعدك النهاردة' : alertReminder.days === 1 ? 'موعدك بكرة' : 'فاضل يومين على الموعد';
-                        const detail = alertReminder.days === 0 ? 'خد بالك، ده ميعاد التذكير اللي سجلته.' : `لسه فاكرينك بموعد «${debtEscape(alertReminder.title)}» قبل ما ييجي.`;
-                        alertEl.innerHTML = `<div class="reminders-alert-icon">🔔</div><div class="reminders-alert-copy"><strong>${title}</strong><span>${detail}</span></div><span class="reminders-alert-stage">${stage}</span>`;
-                        alertEl.classList.remove('hidden');
-                    } else {
-                        alertEl.classList.add('hidden');
-                        alertEl.innerHTML = '';
-                    }
-                }
+                listEl.innerHTML = reminders.length ? reminders.map((r) => `
+                    <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-2.5 flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2.5 min-w-0"><span class="text-base shrink-0">🔔</span><div class="min-w-0"><p class="text-xs font-semibold text-slate-200 truncate">${debtEscape(r.title)}</p><p class="text-[10px] text-slate-500">${new Date(r.due_date + 'T00:00:00').toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' })}</p></div></div>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 rounded-full px-2 py-1">${reminderDaysLabel(r.due_date)}</span>
+                            <button type="button" class="text-slate-400 hover:text-rose-400 text-lg" data-delete-reminder="${debtEscape(r.id)}" aria-label="حذف التذكير">×</button>
+                        </div>
+                    </div>
+                `).join('') : '<p class="text-xs text-slate-500 text-center p-3">مفيش تذكيرات قادمة، ضيف واحد فوق.</p>';
 
-                const [featured, ...rest] = upcoming;
-                const dateLabel = (r) => new Date(r.due_date + 'T00:00:00').toLocaleDateString('ar-EG', { day: 'numeric', month: 'long' });
-                const nextLabel = document.getElementById('reminders-next-label');
-                if (nextLabel) nextLabel.textContent = featured ? reminderDaysLabel(featured.due_date) : 'مفيش مواعيد قريبة';
-                if (featuredEl) featuredEl.innerHTML = featured ? `<div class="reminder-featured-card"><div class="reminder-featured-icon">🔔</div><div class="reminder-featured-main"><strong>${debtEscape(featured.title)}</strong><small>${dateLabel(featured)}</small></div><span class="reminder-featured-badge">${reminderDaysLabel(featured.due_date)}</span><button type="button" class="reminder-delete-btn" data-delete-reminder="${debtEscape(featured.id)}" aria-label="حذف التذكير">×</button></div>` : '<p class="text-xs text-slate-500 text-center p-3">مفيش تذكيرات قادمة دلوقتي.</p>';
-                listEl.innerHTML = rest.length ? rest.map((r) => `<div class="reminder-row"><span class="reminder-row-icon">🔔</span><div class="reminder-row-main"><strong>${debtEscape(r.title)}</strong><small>${dateLabel(r)}</small></div><span class="reminder-row-badge">${reminderDaysLabel(r.due_date)}</span><button type="button" class="reminder-delete-btn" data-delete-reminder="${debtEscape(r.id)}" aria-label="حذف التذكير">×</button></div>`).join('') : (featured ? '<p class="text-xs text-slate-500 text-center p-3">ده كل اللي عندك حالياً.</p>' : '');
-
-                document.querySelectorAll('#reminders-featured [data-delete-reminder], #reminders-list [data-delete-reminder]').forEach((btn) => btn.addEventListener('click', () => {
+                listEl.querySelectorAll('[data-delete-reminder]').forEach((btn) => btn.addEventListener('click', () => {
                     const id = btn.getAttribute('data-delete-reminder');
-                    const row = btn.closest('.reminder-featured-card, .reminder-row');
-                    const title = row?.querySelector('strong')?.textContent || 'التذكير';
-                    if (row) row.style.display = 'none';
-                    showUndoToast(`اتمسح "${title}"`, async () => { try { await fetch(`/api/reminders?id=${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${accessToken}` } }); } catch (e) {} loadReminders(); }, () => { if (row) row.style.display = ''; });
+                    const row = btn.closest('div.bg-slate-950\\/60');
+                    const title = row?.querySelector('p.truncate')?.textContent || 'التذكير';
+                    row.style.display = 'none';
+                    showUndoToast(
+                        `اتمسح "${title}"`,
+                        async () => { try { await fetch(`/api/reminders?id=${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${accessToken}` } }); } catch (e) { /* اتمسح بصريًا برضو */ } loadReminders(); },
+                        () => { row.style.display = ''; }
+                    );
                 }));
             } catch (e) {
                 listEl.innerHTML = '<p class="text-xs text-rose-400 text-center p-4">تعذر تحميل التذكيرات.</p>';
@@ -6129,26 +5950,31 @@
         // ============ المحفظة الاستثمارية — بيانات حقيقية من portfolio_assets ==========
         // ============================================================
         const PORTFOLIO_ASSET_ICONS = {
-            gold: 'ph:coins-duotone',
-            silver: 'ph:coins-duotone',
-            bitcoin: 'cryptocurrency:btc',
-            ethereum: 'cryptocurrency:eth',
-            crypto: 'ph:currency-circle-dollar-duotone',
-            cash: 'ph:money-duotone',
-            realestate: 'ph:buildings-duotone',
+            gold: 'ph:coins-duotone', silver: 'ph:coins-duotone',
+            bitcoin: 'simple-icons:bitcoin', ethereum: 'simple-icons:ethereum',
+            crypto: 'ph:currency-circle-dollar-duotone', cash: 'ph:money-duotone',
+            realestate: 'ph:buildings-duotone', funds: 'ph:chart-line-up-duotone',
+            stocks: 'ph:chart-line-up-duotone', silverbar: 'ph:coins-duotone',
             default: 'ph:briefcase-duotone',
         };
 
         function getPortfolioAssetPresentation(asset) {
             const searchable = `${asset?.name || ''} ${asset?.sub_label || ''}`.trim().toLowerCase();
-            if (/بيتكوين|bitcoin|btc/.test(searchable)) return { tone: 'crypto-btc', icon: PORTFOLIO_ASSET_ICONS.bitcoin };
-            if (/ايثيريوم|إيثيريوم|ethereum|eth/.test(searchable)) return { tone: 'crypto-eth', icon: PORTFOLIO_ASSET_ICONS.ethereum };
+            const savedIcon = localStorage.getItem(`dabbar-portfolio-icon:${String(asset?.name || '').trim().toLowerCase()}`);
+            if (/بيتكوين|bitcoin|btc/.test(searchable)) return { tone: 'crypto-btc', icon: savedIcon || PORTFOLIO_ASSET_ICONS.bitcoin };
+            if (/ايثيريوم|إيثيريوم|ethereum|eth/.test(searchable)) return { tone: 'crypto-eth', icon: savedIcon || PORTFOLIO_ASSET_ICONS.ethereum };
+            if (/صندوق|صناديق|fund|etf/.test(searchable)) return { tone: 'funds', icon: PORTFOLIO_ASSET_ICONS.funds };
+            if (/سهم|أسهم|اسهم|stock/.test(searchable)) return { tone: 'stocks', icon: PORTFOLIO_ASSET_ICONS.stocks };
+            if (/صندوق|صناديق|fund|etf/.test(searchable)) return { tone: 'funds', icon: PORTFOLIO_ASSET_ICONS.funds };
+            if (/سهم|أسهم|اسهم|stock/.test(searchable)) return { tone: 'stocks', icon: PORTFOLIO_ASSET_ICONS.stocks };
+            if (/صندوق|صناديق|fund|etf/.test(searchable)) return { tone: 'funds', icon: PORTFOLIO_ASSET_ICONS.funds };
+            if (/سهم|أسهم|اسهم|stock/.test(searchable)) return { tone: 'stocks', icon: PORTFOLIO_ASSET_ICONS.stocks };
             if (/كريبتو|crypto|عملة رقمية|عملات رقمية|usdt|عملة مشفرة/.test(searchable)) return { tone: 'crypto', icon: PORTFOLIO_ASSET_ICONS.crypto };
-            if (/ذهب|دهب|gold/.test(searchable)) return { tone: 'gold', icon: PORTFOLIO_ASSET_ICONS.gold };
+            if (/ذهب|دهب|gold/.test(searchable)) return { tone: 'gold', icon: savedIcon || PORTFOLIO_ASSET_ICONS.gold };
             if (/فضة|silver/.test(searchable)) return { tone: 'silver', icon: PORTFOLIO_ASSET_ICONS.silver };
-            if (/عقار|عقارات|شقة|شقق|أرض|ارض|real estate|property/.test(searchable)) return { tone: 'realestate', icon: PORTFOLIO_ASSET_ICONS.realestate };
-            if (/كاش|نقد|سيولة|فلوس|cash|money/.test(searchable)) return { tone: 'cash', icon: PORTFOLIO_ASSET_ICONS.cash };
-            return { tone: 'default', icon: PORTFOLIO_ASSET_ICONS.default };
+            if (/عقار|عقارات|شقة|شقق|أرض|ارض|real estate|property/.test(searchable)) return { tone: 'realestate', icon: savedIcon || PORTFOLIO_ASSET_ICONS.realestate };
+            if (/كاش|نقد|سيولة|فلوس|cash|money/.test(searchable)) return { tone: 'cash', icon: savedIcon || PORTFOLIO_ASSET_ICONS.cash };
+            return { tone: 'default', icon: savedIcon || PORTFOLIO_ASSET_ICONS.default };
         }
 
         function closePortfolioMenus(except = null) {
@@ -6184,7 +6010,7 @@
                 const node = template.content.firstElementChild.cloneNode(true);
                 const presentation = getPortfolioAssetPresentation(asset);
                 node.dataset.tone = presentation.tone;
-                node.querySelector('.portfolio-asset-icon').setAttribute('icon', presentation.icon);
+                node.querySelector('.portfolio-asset-icon').innerHTML = `<iconify-icon icon=\"${presentation.icon}\"></iconify-icon>`;
                 node.querySelector('.portfolio-asset-name').textContent = asset.name || 'أصل استثماري';
                 node.querySelector('.portfolio-asset-sub').textContent = asset.sub_label || 'قيمة حالية';
                 node.querySelector('strong').textContent = fmt(asset.amount);
@@ -6227,6 +6053,7 @@
         let portfolioEditingId = null;
 
         function openPortfolioForm(asset = null) {
+            bindIconPicker('portfolio-icon-picker', 'portfolio');
             const form = document.getElementById('portfolio-add-form');
             const addBtn = document.getElementById('portfolio-add-btn');
             const titleEl = document.getElementById('portfolio-form-title');
@@ -6243,6 +6070,8 @@
             nameInput.value = asset?.name || '';
             subInput.value = asset?.sub_label || '';
             amountInput.value = asset?.amount ?? '';
+            const picker = document.getElementById('portfolio-icon-picker');
+            if (picker) { const saved = asset?.name ? localStorage.getItem(`dabbar-portfolio-icon:${asset.name.trim().toLowerCase()}`) : null; picker.dataset.selected = saved || ''; picker.querySelectorAll('.selected').forEach((x) => x.classList.toggle('selected', x.dataset.iconValue === saved)); }
             errEl.classList.add('hidden');
             form.classList.remove('hidden');
             addBtn.classList.add('hidden');
@@ -6285,6 +6114,7 @@
                 const name = nameInput.value.trim();
                 const subLabel = subInput.value.trim();
                 const amount = Number(amountInput.value);
+                const selectedIcon = document.getElementById('portfolio-icon-picker')?.dataset.selected;
                 if (!name || !amount || amount <= 0) {
                     errEl.textContent = 'محتاج اسم الأصل وقيمة صحيحة أكبر من صفر.';
                     errEl.classList.remove('hidden');
@@ -6296,6 +6126,7 @@
                     const payload = { name, subLabel, amount };
                     if (isEditing) payload.assetId = portfolioEditingId;
                     await asstApi(isEditing ? 'portfolio_asset_update' : 'portfolio_asset_add', payload);
+                    if (selectedIcon) localStorage.setItem(`dabbar-portfolio-icon:${name.toLowerCase()}`, selectedIcon);
                     resetPortfolioForm();
                     await loadDashboard();
                 } catch (e) {
@@ -6368,22 +6199,35 @@
 
         // اختيار أيقونة الهدف تلقائيًا من اسمه — مفيش اختيار يدوي، دبّر بيحدد الشكل المناسب من كلمات مفتاحية
         const GOAL_ICON_RULES = [
-            { keys: ['عربية', 'عربيه', 'سيارة', 'سياره', 'موتوسيكل', 'bmw', 'مرسيدس', 'kia', 'hyundai', 'car'], svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px]"><path d="M3 13l1.6-5.2A2 2 0 0 1 6.5 6.3h11a2 2 0 0 1 1.9 1.5L21 13"/><path d="M2.5 13h19v4.2a1 1 0 0 1-1 1h-1.2a1 1 0 0 1-1-1v-1H5.7v1a1 1 0 0 1-1 1H3.5a1 1 0 0 1-1-1z"/><circle cx="7" cy="17.2" r="1.5"/><circle cx="17" cy="17.2" r="1.5"/></svg>' },
-            { keys: ['شقة', 'شقه', 'بيت', 'عقار', 'فيلا', 'مقدم', 'apartment', 'flat'], svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px]"><path d="M3 10.5L12 3l9 7.5"/><path d="M5 9.5V20a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V9.5"/></svg>' },
-            { keys: ['سفر', 'رحلة', 'رحله', 'سياحة', 'سياحه', 'تركيا', 'دبي', 'travel', 'trip'], svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px]"><path d="M22 12h-4l-3 9-6-18-3 9H2"/></svg>' },
-            { keys: ['لابتوب', 'كمبيوتر', 'موبايل', 'هاتف', 'ايفون', 'iphone', 'laptop', 'phone'], svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px]"><rect x="6" y="2.5" width="12" height="19" rx="2"/><path d="M11 18h2"/></svg>' },
-            { keys: ['جواز', 'زواج', 'عرس', 'خطوبة', 'خطوبه', 'فرح'], svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px]"><path d="M12 21s-7-4.4-9.4-8.9A5.4 5.4 0 0 1 12 5.6a5.4 5.4 0 0 1 9.4 6.5C19 16.6 12 21 12 21z"/></svg>' },
-            { keys: ['تعليم', 'دراسة', 'دراسه', 'كورس', 'جامعة', 'جامعه', 'study', 'course'], svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px]"><path d="M12 3L2 8l10 5 10-5-10-5z"/><path d="M6 10.5V16c0 1 2.7 2.5 6 2.5s6-1.5 6-2.5v-5.5"/></svg>' },
-            { keys: ['صحة', 'صحه', 'علاج', 'عملية', 'عمليه', 'health'], svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px]"><path d="M20.8 8.6a4.8 4.8 0 0 0-8.1-3.4l-.7.7-.7-.7a4.8 4.8 0 0 0-6.8 6.8l.7.7L12 19.8l6.8-6.8.7-.7c.8-.8 1.3-2 1.3-3.2z"/></svg>' },
-            { keys: ['شغل', 'مشروع', 'بزنس', 'استثمار', 'business', 'investment'], svg: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px]"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M8 8V6a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><path d="M3 13h18"/></svg>' },
+            { keys: ['بلايستيشن','بلاي ستيشن','playstation','xbox','gaming','جيمنج','جيمنج','لعبة','العاب','ألعاب','game'], icon: 'ph:game-controller-duotone' },
+            { keys: ['لابتوب','لاب توب','كمبيوتر','حاسب','laptop','computer','macbook'], icon: 'ph:laptop-duotone' },
+            { keys: ['موبايل','هاتف','تليفون','ايفون','آيفون','iphone','phone','mobile','samsung'], icon: 'ph:device-mobile-duotone' },
+            { keys: ['عربية','عربيه','سيارة','سياره','موتوسيكل','bmw','مرسيدس','kia','hyundai','car'], icon: 'ph:car-duotone' },
+            { keys: ['شقة','شقه','بيت','عقار','فيلا','مقدم','apartment','flat'], icon: 'ph:house-duotone' },
+            { keys: ['سفر','رحلة','رحله','سياحة','سياحه','تركيا','دبي','travel','trip'], icon: 'ph:airplane-tilt-duotone' },
+            { keys: ['جواز','زواج','عرس','خطوبة','خطوبه','فرح'], icon: 'ph:heart-duotone' },
+            { keys: ['تعليم','دراسة','دراسه','كورس','جامعة','جامعه','study','course'], icon: 'ph:graduation-cap-duotone' },
+            { keys: ['صحة','صحه','علاج','عملية','عمليه','health'], icon: 'ph:first-aid-kit-duotone' },
+            { keys: ['شغل','مشروع','بزنس','استثمار','business','investment'], icon: 'ph:briefcase-duotone' },
         ];
-        const GOAL_ICON_DEFAULT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" class="w-[18px] h-[18px]"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>';
+        const GOAL_ICON_DEFAULT = 'ph:target-duotone';
+        const ICON_LIBRARY = ['ph:target-duotone','ph:laptop-duotone','ph:device-mobile-duotone','ph:game-controller-duotone','ph:car-duotone','ph:house-duotone','ph:airplane-tilt-duotone','ph:graduation-cap-duotone','ph:coins-duotone','ph:money-duotone','ph:chart-line-up-duotone','ph:heart-duotone'];
         function pickGoalIcon(title) {
+            const key = `dabbar-goal-icon:${String(title || '').trim().toLowerCase()}`;
+            const saved = localStorage.getItem(key);
+            if (saved) return `<iconify-icon icon="${saved}"></iconify-icon>`;
             const t = String(title || '').toLowerCase();
             const rule = GOAL_ICON_RULES.find((r) => r.keys.some((k) => t.includes(k)));
-            return rule ? rule.svg : GOAL_ICON_DEFAULT;
+            return `<iconify-icon icon="${rule?.icon || GOAL_ICON_DEFAULT}"></iconify-icon>`;
         }
-
+        function iconPickerHtml(kind, current = null) {
+            return ICON_LIBRARY.map((icon) => `<button type="button" class="icon-library-btn${icon === current ? ' selected' : ''}" data-icon-kind="${kind}" data-icon-value="${icon}" title="${icon}"><iconify-icon icon="${icon}"></iconify-icon></button>`).join('');
+        }
+        function bindIconPicker(id, kind) {
+            const el = document.getElementById(id); if (!el) return;
+            el.innerHTML = iconPickerHtml(kind);
+            el.querySelectorAll('[data-icon-value]').forEach((btn) => btn.addEventListener('click', () => { el.querySelectorAll('.selected').forEach((x) => x.classList.remove('selected')); btn.classList.add('selected'); el.dataset.selected = btn.dataset.iconValue; }));
+        }
         const ASST_MAX_GOALS = 3;
         // بيحفظ مين الأهداف اللي المستخدم فتحها بإيده، عشان ما تتقفلش/تتفتحش
         // تلقائي كل مرة بنعيد رسم القائمة (مثلاً بعد إضافة مبلغ أو تعديل تاريخ).
@@ -6817,12 +6661,16 @@
             const title = document.getElementById('asst-goal-title').value.trim();
             const targetAmount = Number(document.getElementById('asst-goal-amount').value);
             const targetDate = document.getElementById('asst-goal-date').value || null;
+            const selectedGoalIcon = document.getElementById('goal-icon-picker')?.dataset.selected;
 
             btn.disabled = true;
             const original = btn.textContent;
             btn.textContent = 'جاري الحفظ...';
             try {
                 await asstApi('goal_create', { title, targetAmount, targetDate });
+                if (selectedGoalIcon) localStorage.setItem(`dabbar-goal-icon:${title.toLowerCase()}`, selectedGoalIcon);
+                if (selectedGoalIcon) localStorage.setItem(`dabbar-goal-icon:${title.toLowerCase()}`, selectedGoalIcon);
+                if (selectedGoalIcon) localStorage.setItem(`dabbar-goal-icon:${title.toLowerCase()}`, selectedGoalIcon);
                 document.getElementById('asst-goal-title').value = '';
                 document.getElementById('asst-goal-amount').value = '';
                 document.getElementById('asst-goal-date').value = '';

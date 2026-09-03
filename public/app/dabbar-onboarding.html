@@ -62,11 +62,11 @@
   .brand-dot{ width:9px; height:9px; border-radius:50%; background:var(--green); box-shadow:0 0 0 4px var(--green-tint); }
 
   /* ===== link + create-account screen (merged, 3 خطوات) ===== */
-  #linkScreen{ display:none; align-items:center; justify-content:center; }
-  #linkScreen.active{ display:flex; }
+  #linkScreen{ display:none; align-items:center; justify-content:center; flex:1; min-height:calc(100vh - 150px); overflow-y:auto; padding-top:18px; }
+  #linkScreen.active{ display:flex !important; visibility:visible !important; opacity:1 !important; }
   #authScreen{ display:none; }
   #authScreen.active{ display:flex; }
-  .link-card{ width:100%; max-width:420px; margin:0 auto; padding:0 24px 40px; }
+  .link-card{ width:100%; max-width:420px; margin:0 auto; padding:0 24px 40px; position:relative; z-index:2; }
   .link-card h2{ font-family:'Cairo',sans-serif; font-weight:900; font-size:19px; text-align:center; margin-bottom:8px; color:var(--ink); }
   .link-card > p.sub{ text-align:center; color:var(--muted); font-size:13px; line-height:1.9; margin-bottom:20px; }
 
@@ -436,7 +436,11 @@
         <div class="manual-install" id="manualInstall">
           <div class="manual-install-title" id="manualInstallTitle">إزاي تثبّته يدوي:</div>
           <ol id="manualInstallSteps"></ol>
-        </div>
+          <div class="manual-install" id="installPendingNotice"><div class="manual-install-title">🕐 خليك معانا ثواني...</div><div class="manual-install-txt">التطبيق بيتثبّت دلوقتي على جهازك. بمجرد ما تلاقيه ظاهر كأيقونة على شاشتك الرئيسية، افتحه من هناك وكمّل بياناتك من جوّاه عشان تجربتك تبقى زي أي تطبيق تاني بالظبط.</div></div>
+      </div>
+        
+        
+        
       </div>
     </div>
 
@@ -996,23 +1000,23 @@
     return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
   }
 
-  // ============ خلاص التثبيت — بتظهر حالة النجاح، وبعدين تودّي المستخدم لتسجيل الدخول ============
+  // ============ خلاص التثبيت — لا نكمل إلا بعد التأكد من وضع standalone ============
   // (أو للداشبورد على طول لو عنده جلسة شغالة أصلاً، مثلاً لو ثبّت التطبيق تاني على جهاز جديد وهو مسجّل بالفعل)
   async function finishInstallStep() {
+    if (!isStandalone()) {
+      linkFormState.style.display = '';
+      successState.classList.remove('show');
+      const notice = document.getElementById('installPendingNotice');
+      if (notice) notice.classList.add('show');
+      return;
+    }
     linkFormState.style.display = 'none';
     successState.classList.add('show');
-    setTimeout(async () => {
-      try {
-        const { data: { session } } = sb ? await sb.auth.getSession() : { data: { session: null } };
-        if (session) {
-          window.location.href = DASHBOARD_URL;
-          return;
-        }
-      } catch (e) { /* هنكمل على شاشة تسجيل الدخول عادي */ }
-      successState.classList.remove('show');
-      linkFormState.style.display = '';
-      showAuthScreen();
-    }, 1100);
+    try {
+      const { data: { session } } = sb ? await sb.auth.getSession() : { data: { session: null } };
+      if (session) { window.location.href = DASHBOARD_URL; return; }
+    } catch (e) {}
+    setTimeout(() => { successState.classList.remove('show'); linkFormState.style.display = ''; showAuthScreen(); }, 700);
   }
 
   window.addEventListener('beforeinstallprompt', (e) => {
@@ -1026,7 +1030,7 @@
       const choice = await deferredPrompt.userChoice;
       deferredPrompt = null;
       if (choice && choice.outcome === 'accepted') {
-        finishInstallStep();
+        document.getElementById('installPendingNotice')?.classList.add('show');
         return;
       }
     }

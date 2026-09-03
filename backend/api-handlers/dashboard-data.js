@@ -6,6 +6,7 @@ import { getInvoicesList, getInvoiceDetail } from '../../lib/invoices.js';
 import { MONTH_NAMES, CATEGORY_EMOJI, SUBSCRIPTION_PRICE_EGP, INSTAPAY_LINK } from '../../lib/config.js';
 import { hasActiveSubscription, getSubscriptionExpiry, isInTrial, getTrialDaysLeft } from '../../lib/users.js';
 import { getActiveDays } from '../../lib/activeDays.js';
+import { getPortfolio } from '../../lib/investments.js';
 
 function sumByCurrency(rows = []) {
   return rows.reduce((acc, row) => {
@@ -227,6 +228,9 @@ export default async function handler(req, res) {
 
     // "goal" فضل موجود للتوافق الخلفي مع أي كود قديم بيقرا هدف واحد بس (أول هدف نشط)
     const goal = goals[0] || null;
+
+    // ---- محفظة الاستثمار الحقيقية للعميل (بيانات حقيقية بيدخلها بنفسه، مفيش mock هنا) ----
+    const portfolio = await getPortfolio(dataUserId);
 
     // ---- توقّع نهاية الشهر + اقتراح ذكي (كله محسوب من أرقام حقيقية فوق، صفر أرقام مختلقة) ----
     const daysInMonth = new Date(start.getFullYear(), start.getMonth() + 1, 0).getDate();
@@ -451,6 +455,7 @@ export default async function handler(req, res) {
       history,
       goal,
       goals,
+      portfolio,
       smart,
       wrapped,
     });

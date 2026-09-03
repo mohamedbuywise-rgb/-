@@ -9,6 +9,7 @@ import { normalizeDigits, extractDeterministicExpense, correctDebtDirections, de
 import { maybeSendBudgetAlert } from '../../lib/webPush.js';
 import { getDashboardUserFromRequest } from '../../lib/dashboardAuth.js';
 import { isFinancialEventType, recordFinancialEvent } from '../../lib/financialEvents.js';
+import { getPortfolio, addPortfolioAsset, updatePortfolioAsset, deletePortfolioAsset, buyIntoPortfolio, sellFromPortfolio } from '../../lib/investments.js';
 
 // ============ Router: POST /api/assistant  { action: ... } ============
 // كل ميزات "دبّر الذكي" الجديدة (الأهداف، امسح فاتورة، اسأل دبّر) اتلمّت هنا في endpoint واحد،
@@ -357,7 +358,7 @@ async function handleEntryDraft(userId, body, res) {
   const reconciledTransactions = reconcileSingleTransaction(correctDebtDirections(text, normalizedTransactions), text);
   // العميل مبيختارش دخل/مصروف يدويًا في الإدخال السريع — دبّر يصنّف كل عملية من كلامه مباشرة (classifyMessage)
   const transactions = reconciledTransactions;
-  let validTx = transactions.filter((item) => ((isFinancialEventType(item?.type) || item?.type === 'expense') || item?.type === 'debt') && Number.isFinite(Number(item.amount)) && Number(item.amount) > 0 && (item.type !== 'debt' || item.person));
+  let validTx = transactions.filter((item) => ((isFinancialEventType(item?.type) || item?.type === 'expense') || item?.type === 'debt' || item?.type === 'portfolio_buy' || item?.type === 'portfolio_sell') && Number.isFinite(Number(item.amount)) && Number(item.amount) > 0 && (item.type !== 'debt' || item.person));
   // لو التصنيف الذكي لم يلتقط جملة قصيرة مثل "غدا 100 جنيه"، نستخدم استخراجًا حتميًا
   // مقيدًا بعلامات المصروف، فلا نخلط جمل الديون أو الأسئلة مع مصروفات وهمية.
   if (!validTx.length) {
@@ -420,6 +421,30 @@ async function saveOneDraft(userId, draft) {
     return { ok: true, type: 'expense', record: data, message: `تم تسجيل مصروف ${data.amount} ${currencyLabel(data.currency_code)} في ${data.category}.` };
   }
 
+  // ============ شراء/بيع أصل استثماري (محفظة) — بيربط تلقائيًا مع portfolio_assets ============
+  if (draft.type === 'portfolio_buy' || draft.type === 'portfolio_sell') {
+    const assetName = String(draft.asset_name || draft.item || '').trim();
+    if (!assetName) return { ok: false, error: 'محتاج اسم الأصل عشان أسجله في محفظتك.' };
+    const currency_code = String(draft.currency_code || detectCurrency(draft.raw_text || draft.sourceText || '')).toUpperCase();
+
+    if (draft.type === 'portfolio_buy') {
+      const bought = await buyIntoPortfolio(userId, { name: assetName, quantity: draft.quantity, unit: draft.unit, cost: amount });
+      if (bought.error) return { ok: false, error: bought.error };
+      const savedEvent = await recordFinancialEvent({ type: 'transfer', amount, currency_code, note: draft.note || `شراء ${assetName}`, raw_text: draft.raw_text }, userId);
+      if (!savedEvent.ok) return savedEvent;
+      return { ok: true, type: 'portfolio_buy', record: savedEvent.record, asset: bought.asset, message: `تم تسجيل شراء ${assetName} بقيمة ${amount} ${currencyLabel(currency_code)} في محفظتك الاستثمارية.` };
+    }
+
+    const sold = await sellFromPortfolio(userId, { name: assetName, quantity: draft.quantity, proceeds: amount });
+    if (sold.error === 'notfound') return { ok: false, error: `معنديش أصل اسمه "${assetName}" في محفظتك. سجّله الأول من شاشة المحفظة.` };
+    if (sold.error) return { ok: false, error: sold.error };
+    const savedEvent = await recordFinancialEvent({ type: 'income', amount, currency_code, category: 'بيع أصل استثماري', note: draft.note || `بيع ${assetName}`, raw_text: draft.raw_text }, userId);
+    if (!savedEvent.ok) return savedEvent;
+    const gain = sold.realizedGain;
+    const gainSuffix = Number.isFinite(gain) ? (gain >= 0 ? ` — مكسب حوالي ${Math.round(gain)} جنيه.` : ` — خسارة حوالي ${Math.round(Math.abs(gain))} جنيه.`) : '';
+    return { ok: true, type: 'portfolio_sell', record: savedEvent.record, asset: sold.asset, realizedGain: gain, message: `تم تسجيل بيع ${assetName} بقيمة ${amount} ${currencyLabel(currency_code)}${gainSuffix}` };
+  }
+
   // ============ العمليات المالية العامة — تحفظ العبارة الطبيعية كاملة مع النوع والتفاصيل ============
   if (isFinancialEventType(draft.type)) {
     const savedEvent = await recordFinancialEvent(draft, userId);
@@ -457,6 +482,31 @@ async function saveOneDraft(userId, draft) {
   }
 
   return { ok: false, error: 'نوع العملية غير مدعوم.' };
+}
+
+async function handlePortfolioAdd(userId, body, res) {
+  const result = await addPortfolioAsset(userId, { name: body.name, subLabel: body.subLabel, amount: body.amount });
+  if (result.error) return res.status(400).json({ error: result.error });
+  const portfolio = await getPortfolio(userId);
+  return res.status(200).json({ asset: result.asset, portfolio });
+}
+
+async function handlePortfolioUpdate(userId, body, res) {
+  const assetId = body.assetId;
+  if (!assetId) return res.status(400).json({ error: 'مفيش رقم أصل اتبعت.' });
+  const result = await updatePortfolioAsset(userId, assetId, { name: body.name, subLabel: body.subLabel, amount: body.amount });
+  if (result.error) return res.status(400).json({ error: result.error });
+  const portfolio = await getPortfolio(userId);
+  return res.status(200).json({ asset: result.asset, portfolio });
+}
+
+async function handlePortfolioDelete(userId, body, res) {
+  const assetId = body.assetId;
+  if (!assetId) return res.status(400).json({ error: 'مفيش رقم أصل اتبعت.' });
+  const result = await deletePortfolioAsset(userId, assetId);
+  if (result.error) return res.status(400).json({ error: result.error });
+  const portfolio = await getPortfolio(userId);
+  return res.status(200).json({ ok: true, portfolio });
 }
 
 async function handleEntryConfirm(userId, body, res) {
@@ -513,6 +563,12 @@ export default async function handler(req, res) {
         return await handleGoalCancel(userId, body, res);
       case 'goal_update_date':
         return await handleGoalUpdateDate(userId, body, res);
+      case 'portfolio_asset_add':
+        return await handlePortfolioAdd(userId, body, res);
+      case 'portfolio_asset_update':
+        return await handlePortfolioUpdate(userId, body, res);
+      case 'portfolio_asset_delete':
+        return await handlePortfolioDelete(userId, body, res);
       case 'receipt_scan':
         return await handleReceiptScan(userId, body, res);
       case 'invoice_delete':

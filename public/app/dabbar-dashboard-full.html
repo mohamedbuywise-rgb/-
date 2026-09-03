@@ -201,6 +201,8 @@
         html[data-theme="light"] .bg-slate-950\/80 { background-color: rgba(241,245,249,0.97) !important; }
         html[data-theme="light"] .bg-slate-900 { background-color: #ffffff !important; }
         html[data-theme="light"] .bg-slate-900\/90 { background-color: rgba(255,255,255,0.92) !important; }
+        html[data-theme="light"] .bg-slate-900\/40 { background-color: rgba(241,245,249,0.9) !important; }
+        html[data-theme="light"] .bg-slate-900\/60 { background-color: rgba(241,245,249,0.95) !important; }
         html[data-theme="light"] .bg-slate-800 { background-color: #e2e8f0 !important; }
         html[data-theme="light"] .bg-slate-700 { background-color: #cbd5e1 !important; }
         html[data-theme="light"] .bg-slate-700\/50 { background-color: rgba(203,213,225,0.6) !important; }
@@ -709,6 +711,11 @@
         html[data-theme="dark"] #monthly-total-card #monthly-total { color: #f87171 !important; }
         html[data-theme="dark"] #monthly-income-toggle {
             background: #0b1220 !important; border-color: rgba(148,163,184,.22) !important; box-shadow: none !important;
+        }
+        /* جملتي المقارنة بالشهر اللي فات ("صرفت X% أقل/أكتر" و"كسبت X% أكتر/أقل") — نفس اللون الدهبي في الوضع الليلي عشان تبقى واضحة ومتناسقة */
+        html[data-theme="dark"] #monthly-total-card #monthly-compare,
+        html[data-theme="dark"] #monthly-income-toggle #monthly-income-compare {
+            color: #d4b978 !important;
         }
         /* كارت صافي الثروة: هوية دهبية مميزة عن كارتي الدخل/المصروف عشان يبان إنه ملخص شامل مش رقم شهري */
         html[data-theme="light"] #net-worth-card {
@@ -2146,34 +2153,43 @@
             </div>
             <div id="monthly-income-details" class="hidden bg-white dark:bg-slate-950/60 border border-emerald-300 dark:border-emerald-500/20 rounded-3xl p-4 space-y-1 mt-2"></div>
 
-            <!-- المحفظة الاستثمارية: قابلة للطي، مفهوم تصميمي فقط في هذه المرحلة -->
+            <!-- المحفظة الاستثمارية: بيانات حقيقية بيدخلها العميل بنفسه (ذهب/صناديق/عملات رقمية/أي أصل) -->
             <details id="portfolio-collapsible">
                 <summary id="portfolio-summary">
                     <div>
-                        <span class="portfolio-eyebrow">مفهوم تصميمي فقط</span>
+                        <span class="portfolio-eyebrow">محفظتك (بياناتك الحقيقية)</span>
                         <span class="portfolio-title">💼 محفظتك الاستثمارية</span>
                     </div>
                     <div class="portfolio-right">
-                        <span class="portfolio-total-quick" id="portfolio-total-quick">245,800 ج.م</span>
+                        <span class="portfolio-total-quick" id="portfolio-total-quick">—</span>
                         <span class="portfolio-chev">⌄</span>
                     </div>
                 </summary>
                 <div class="portfolio-body">
-                    <div class="portfolio-change">+3.2% من الشهر اللي فات</div>
-                    <div class="portfolio-asset">
-                        <div><div class="portfolio-asset-name">🥇 ذهب</div><div class="portfolio-asset-sub">120 جرام</div></div>
-                        <div class="portfolio-asset-val"><strong>156,000</strong><span class="up">4.1% ▲</span></div>
+                    <div id="portfolio-empty" class="hidden portfolio-note" style="text-align:center;padding:.5rem 0;">مفيش أصول مسجلة لسه. ضيف أول أصل (ذهب، صناديق استثمار، عملات رقمية... إلخ) وهنجمّعلك إجمالي محفظتك تلقائيًا.</div>
+                    <div id="portfolio-asset-list"></div>
+                    <template id="portfolio-asset-template">
+                        <div class="portfolio-asset">
+                            <div><div class="portfolio-asset-name"></div><div class="portfolio-asset-sub"></div></div>
+                            <div class="portfolio-asset-val" style="display:flex;align-items:center;gap:.5rem;">
+                                <strong></strong>
+                                <button type="button" class="portfolio-asset-delete" style="background:none;border:none;color:#fb7185;font-size:1rem;cursor:pointer;padding:0 .2rem;">✕</button>
+                            </div>
+                        </div>
+                    </template>
+
+                    <div id="portfolio-add-form" class="hidden" style="margin-top:.7rem;display:flex;flex-direction:column;gap:.5rem;">
+                        <input id="portfolio-add-name" type="text" placeholder="اسم الأصل (مثلاً: ذهب، صناديق بنك مصر)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 placeholder-slate-500 outline-none focus:border-emerald-500/50">
+                        <input id="portfolio-add-sub" type="text" placeholder="وصف اختياري (مثلاً: 120 جرام)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 placeholder-slate-500 outline-none focus:border-emerald-500/50">
+                        <input id="portfolio-add-amount" type="number" inputmode="numeric" placeholder="القيمة الحالية بالجنيه" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 placeholder-slate-500 outline-none focus:border-emerald-500/50">
+                        <div style="display:flex;gap:.5rem;">
+                            <button type="button" id="portfolio-add-confirm" class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold py-2 rounded-xl text-xs transition">حفظ الأصل</button>
+                            <button type="button" id="portfolio-add-cancel" class="rounded-xl border border-slate-700 px-4 py-2 text-xs text-slate-300">إلغاء</button>
+                        </div>
+                        <p id="portfolio-add-error" class="hidden text-[11px] text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-lg p-2 text-center"></p>
                     </div>
-                    <div class="portfolio-asset">
-                        <div><div class="portfolio-asset-name">🏦 صناديق استثمار</div><div class="portfolio-asset-sub">بنك مصر</div></div>
-                        <div class="portfolio-asset-val"><strong>65,800</strong><span class="up">1.8% ▲</span></div>
-                    </div>
-                    <div class="portfolio-asset">
-                        <div><div class="portfolio-asset-name">₿ عملات رقمية</div><div class="portfolio-asset-sub">محفظة خارجية</div></div>
-                        <div class="portfolio-asset-val"><strong>24,000</strong><span class="down">2.4% ▼</span></div>
-                    </div>
-                    <button type="button" class="portfolio-add-btn">+ أضف أصل جديد يدويًا</button>
-                    <p class="portfolio-note">شراء أصل = تحويل، ولا يُحسب دخل أو مصروف. بيع أصل = دخل حقيقي ويُخصم من هنا تلقائيًا.</p>
+                    <button type="button" class="portfolio-add-btn" id="portfolio-add-btn">+ أضف أصل جديد يدويًا</button>
+                    <p class="portfolio-note">القيمة اللي بتدخلها هي آخر تقييم حقيقي للأصل عندك، وإنت اللي بتحدّثها وقت ما تحب.</p>
                 </div>
             </details>
 
@@ -2718,6 +2734,21 @@
                     <p class="text-[11px] text-slate-500" id="data-import-progress-text">—</p>
                 </div>
                 <p class="text-[10px] text-slate-600 leading-relaxed">لو الصفحة اتقفلت في نص الاستيراد، افتح تبويب "حسابي" تاني وهيكمل من عند ما وقف من غير ما يكرر أي عملية.</p>
+            </div>
+
+            <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3" id="bank-statement-import-card">
+                <div class="flex items-center gap-3">
+                    <span class="w-9 h-9 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-base">🏦</span>
+                    <div>
+                        <p class="text-xs font-bold text-slate-200">رفع كشف حساب بنكي</p>
+                        <p class="text-[11px] text-slate-500">صدّر كشف الحساب PDF من تطبيق بنكك، وارفعه هنا — هنسجل كل عملياته دفعة واحدة</p>
+                    </div>
+                    <span id="bank-statement-usage-badge" class="hidden shrink-0 text-[9.5px] font-semibold text-slate-500 bg-slate-900 border border-slate-800 rounded-full px-2 py-0.5"></span>
+                </div>
+                <input type="file" id="bank-statement-file-input" accept=".pdf,application/pdf" class="hidden">
+                <button type="button" id="bank-statement-pick-btn" class="w-full bg-slate-900/70 border border-dashed border-slate-700 rounded-xl px-3 py-2.5 text-xs font-bold text-slate-300">اختار ملف PDF لكشف الحساب</button>
+                <div id="bank-statement-status" class="hidden text-[11px] text-slate-400"></div>
+                <p class="text-[10px] text-slate-600 leading-relaxed">لازم يكون كشف حساب PDF نصي (مش صورة ممسوحة ضوئيًا) — الخيار موجود في كل تطبيقات البنوك المصرية تقريبًا تحت "كشف حساب" أو "Statement". لو عندك SMS بنكية مفعّلة، مش هنكرر أي عملية موجودة عندك بالفعل.</p>
             </div>
 
             <div class="bg-gradient-to-br from-emerald-500/10 to-teal-500/5 border border-emerald-500/25 rounded-3xl p-4 space-y-3">
@@ -3736,6 +3767,60 @@
             })();
         })();
 
+        (function setupBankStatementImport() {
+            const pickBtn = document.getElementById('bank-statement-pick-btn');
+            const fileInput = document.getElementById('bank-statement-file-input');
+            const statusEl = document.getElementById('bank-statement-status');
+            const usageBadge = document.getElementById('bank-statement-usage-badge');
+            if (!pickBtn || !fileInput) return;
+
+            async function authHeaders() {
+                const { data: { session } } = await sb.auth.getSession();
+                return { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` };
+            }
+
+            function fileToBase64(file) {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(String(reader.result).split(',')[1] || '');
+                    reader.onerror = () => reject(new Error('معرفناش نقرا الملف.'));
+                    reader.readAsDataURL(file);
+                });
+            }
+
+            pickBtn.addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', async () => {
+                const file = fileInput.files[0];
+                if (!file) return;
+                pickBtn.disabled = true;
+                pickBtn.textContent = 'بنقرا الكشف...';
+                statusEl.classList.remove('hidden');
+                statusEl.textContent = 'بنستخرج العمليات من الكشف، ممكن ياخد شوية ثواني...';
+                try {
+                    const fileBase64 = await fileToBase64(file);
+                    const res = await fetch('/api/bank-statement-import', {
+                        method: 'POST',
+                        headers: await authHeaders(),
+                        body: JSON.stringify({ fileBase64, fileName: file.name, mimeType: file.type || 'application/pdf' }),
+                    });
+                    const body = await res.json();
+                    if (!res.ok || !body.ok) throw new Error(body.error || 'حصل خطأ أثناء قراءة الكشف.');
+                    statusEl.textContent = body.message || 'تم الاستيراد.';
+                    if (body.usage) {
+                        usageBadge.textContent = `${body.usage.remaining}/${body.usage.limit} متبقي الشهر ده`;
+                        usageBadge.classList.remove('hidden');
+                    }
+                    if (typeof loadDashboard === 'function') loadDashboard();
+                } catch (err) {
+                    statusEl.textContent = err.message || 'حصل خطأ أثناء قراءة الكشف.';
+                } finally {
+                    pickBtn.disabled = false;
+                    pickBtn.textContent = 'اختار ملف PDF لكشف الحساب';
+                    fileInput.value = '';
+                }
+            });
+        })();
+
         (function setupQuickAddFeatureCard() {
             const card = document.getElementById('quick-add-feature-card');
             const modal = document.getElementById('quick-add-feature-page');
@@ -4686,6 +4771,7 @@
             renderArchive(data.history);
             renderSubscription(data.subscription);
             renderAssistant(data);
+            renderPortfolio(data.portfolio);
             applyStreak(data.streak);
             updateHeaderForTab(document.querySelector('.tab-btn.active-tab').dataset.tab, data);
 
@@ -4810,7 +4896,7 @@
                     const heroNote = document.getElementById('available-hero-note');
                     const fill = document.getElementById('available-progress-fill');
                     const pctLabel = document.getElementById('available-progress-pct');
-                    if (heroValue) heroValue.textContent = `${fmt(remaining)} ج.م`;
+                    if (heroValue) heroValue.textContent = fmt(remaining);
                     if (heroNote) heroNote.textContent = income && budget
                         ? 'من دخلك وميزانيتك، ناقص اللي صرفته فعلًا لحد النهاردة'
                         : income ? 'من دخلك الشهر ده، ناقص اللي صرفته فعلًا لحد النهاردة' : 'من ميزانيتك الشهرية، ناقص اللي صرفته فعلًا لحد النهاردة';
@@ -4830,11 +4916,11 @@
                 if (incomeOrBudget) {
                     const pct = (income && budget) ? Math.min(100, Math.round((total / budget) * 100)) : null;
                     summary.innerHTML = `
-                        <div class="planning-hero"><span class="planning-hero-label">المتاح لك دلوقتي</span><strong class="planning-hero-value">${fmt(remaining)} ج.م</strong></div>
+                        <div class="planning-hero"><span class="planning-hero-label">المتاح لك دلوقتي</span><strong class="planning-hero-value">${fmt(remaining)}</strong></div>
                         <div class="planning-subrow"><span>💸 صرفت فعليًا: <b>${fmt(total)}</b></span></div>
                         ${pct !== null ? `<div class="planning-progress-wrap"><div class="planning-progress-track"><div class="planning-progress-fill" style="width:${pct}%"></div></div><span class="planning-progress-pct">${pct}% من ميزانيتك اتصرف</span></div>` : ''}
                         <p class="planning-summary-note">"المتاح" = دخلك أو ميزانيتك، ناقص اللي صرفته فعلًا بس.</p>
-                        ${recurringTotal ? `<div class="planning-forecast"><span>🔮 لو دفعت التزاماتك المتوقعة (${fmt(recurringTotal)})، هيفضلّلك</span><strong>${fmt(afterExpected)} ج.م</strong></div>` : ''}`;
+                        ${recurringTotal ? `<div class="planning-forecast"><span>🔮 لو دفعت التزاماتك المتوقعة (${fmt(recurringTotal)})، هيفضلّلك</span><strong>${fmt(afterExpected)}</strong></div>` : ''}`;
                 } else {
                     summary.innerHTML = '<p class="planning-empty-note">أدخل دخلك أو حد مصروفاتك عشان دبّر يحسبلك المتاح.</p><p class="planning-summary-note">الالتزامات المتكررة للتخطيط فقط، ولا تُخصم تلقائيًا.</p>';
                 }
@@ -5728,6 +5814,93 @@
                 });
             });
         }
+
+        // ============================================================
+        // ============ المحفظة الاستثمارية — بيانات حقيقية من portfolio_assets ============
+        // ============================================================
+        window.__portfolioState = { assets: [], total: 0 };
+
+        function renderPortfolio(portfolio) {
+            const data = portfolio || { assets: [], total: 0 };
+            window.__portfolioState = data;
+
+            const totalEl = document.getElementById('portfolio-total-quick');
+            const listEl = document.getElementById('portfolio-asset-list');
+            const emptyEl = document.getElementById('portfolio-empty');
+            const template = document.getElementById('portfolio-asset-template');
+
+            if (totalEl) totalEl.textContent = fmt(data.total || 0);
+
+            listEl.innerHTML = '';
+            if (!data.assets || data.assets.length === 0) {
+                emptyEl.classList.remove('hidden');
+            } else {
+                emptyEl.classList.add('hidden');
+                data.assets.forEach((asset) => {
+                    const node = template.content.firstElementChild.cloneNode(true);
+                    node.querySelector('.portfolio-asset-name').textContent = asset.name;
+                    node.querySelector('.portfolio-asset-sub').textContent = asset.sub_label || '';
+                    node.querySelector('strong').textContent = fmt(asset.amount);
+                    node.querySelector('.portfolio-asset-delete').addEventListener('click', async (e) => {
+                        e.preventDefault();
+                        if (!confirm(`متأكد عايز تحذف "${asset.name}" من محفظتك؟`)) return;
+                        try {
+                            await asstApi('portfolio_asset_delete', { assetId: asset.id });
+                            await loadDashboard();
+                        } catch (err) { alert(err.message); }
+                    });
+                    listEl.appendChild(node);
+                });
+            }
+        }
+
+        (function bindPortfolioAddForm() {
+            const addBtn = document.getElementById('portfolio-add-btn');
+            const form = document.getElementById('portfolio-add-form');
+            const nameInput = document.getElementById('portfolio-add-name');
+            const subInput = document.getElementById('portfolio-add-sub');
+            const amountInput = document.getElementById('portfolio-add-amount');
+            const confirmBtn = document.getElementById('portfolio-add-confirm');
+            const cancelBtn = document.getElementById('portfolio-add-cancel');
+            const errEl = document.getElementById('portfolio-add-error');
+            if (!addBtn || !form) return;
+
+            addBtn.addEventListener('click', () => {
+                form.classList.remove('hidden');
+                addBtn.classList.add('hidden');
+                nameInput.focus();
+            });
+            cancelBtn.addEventListener('click', () => {
+                form.classList.add('hidden');
+                addBtn.classList.remove('hidden');
+                errEl.classList.add('hidden');
+                nameInput.value = ''; subInput.value = ''; amountInput.value = '';
+            });
+            confirmBtn.addEventListener('click', async () => {
+                errEl.classList.add('hidden');
+                const name = nameInput.value.trim();
+                const subLabel = subInput.value.trim();
+                const amount = Number(amountInput.value);
+                if (!name || !amount || amount <= 0) {
+                    errEl.textContent = 'محتاج اسم الأصل وقيمة صحيحة أكبر من صفر.';
+                    errEl.classList.remove('hidden');
+                    return;
+                }
+                confirmBtn.disabled = true;
+                try {
+                    await asstApi('portfolio_asset_add', { name, subLabel, amount });
+                    nameInput.value = ''; subInput.value = ''; amountInput.value = '';
+                    form.classList.add('hidden');
+                    addBtn.classList.remove('hidden');
+                    await loadDashboard();
+                } catch (e) {
+                    errEl.textContent = e.message;
+                    errEl.classList.remove('hidden');
+                } finally {
+                    confirmBtn.disabled = false;
+                }
+            });
+        })();
 
         // ============================================================
         // ============ تاب "مساعد" (دبّر الذكي) — رندر البيانات ============

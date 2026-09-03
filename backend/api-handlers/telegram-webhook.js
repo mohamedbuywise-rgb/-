@@ -8,6 +8,7 @@ import { sendMonthlyWrapped } from '../../lib/wrapped.js';
 import { upsertUser, hasActiveSubscription, getSubscriptionExpiry, activateSubscription, getChatIdByUserId, isInTrial, getTrialDaysLeft } from '../../lib/users.js';
 import { createLinkCode } from '../../lib/linking.js';
 import { isFinancialEventType, recordFinancialEvent } from '../../lib/financialEvents.js';
+import { buyIntoPortfolio, sellFromPortfolio } from '../../lib/investments.js';
 import { CATEGORY_EMOJI } from '../../lib/config.js';
 import { currencyLabel } from '../../lib/textNormalize.js';
 import { normalizeDigits, extractDeterministicExpense, correctDebtDirections, normalizeFinancialTransaction, reconcileSingleTransaction } from '../../lib/textNormalize.js';
@@ -683,6 +684,61 @@ async function routeUserMessage(text, userId, chatId, { fromVoice = false } = {}
   await handleIncomingText(text, userId, chatId, { fromVoice });
 }
 
+// ============ شراء/بيع أصل استثماري (محفظة): بيربط تلقائيًا بين financial_events و portfolio_assets ============
+// شراء = تحويل مالي (مش مصروف) + يزوّد/ينشئ الأصل في المحفظة.
+// بيع = دخل حقيقي + يقلل/يحذف الأصل من المحفظة، مع حساب المكسب/الخسارة المحققة من الصفقة.
+// بيرجع true لو اتسجلت العملية بنجاح، وfalse لو محتاجة توضيح من المستخدم (مبعتش رسالة "معرفتش أفهم" تلقائي).
+async function handlePortfolioTransaction(result, text, userId, chatId) {
+  const assetName = String(result.asset_name || result.item || '').trim();
+  if (!assetName) {
+    await sendTelegramMessage(chatId, 'قولي اسم الأصل اللي تقصده بالظبط (زي "ذهب" أو "بيتكوين") عشان أقدر أسجله في محفظتك.');
+    return false;
+  }
+
+  if (result.type === 'portfolio_buy') {
+    const bought = await buyIntoPortfolio(userId, { name: assetName, quantity: result.quantity, unit: result.unit, cost: result.amount });
+    if (bought.error) {
+      await sendTelegramMessage(chatId, `⚠️ ${bought.error}`);
+      return false;
+    }
+    const savedEvent = await recordFinancialEvent(
+      { type: 'transfer', amount: result.amount, currency_code: result.currency_code, note: result.note || `شراء ${assetName}`, raw_text: result.raw_text, sourceText: text },
+      userId,
+    );
+    if (!savedEvent.ok) {
+      await sendTelegramMessage(chatId, `⚠️ ${savedEvent.error || 'حصل خطأ في تسجيل العملية.'}`);
+      return false;
+    }
+    await sendTelegramMessage(chatId, `✅ سجلت شراء ${assetName} بقيمة ${result.amount} ${result.currency_code || 'EGP'} في محفظتك الاستثمارية (مش هيتحسب من مصروفاتك).`);
+    return true;
+  }
+
+  // portfolio_sell
+  const sold = await sellFromPortfolio(userId, { name: assetName, quantity: result.quantity, proceeds: result.amount });
+  if (sold.error === 'notfound') {
+    await sendTelegramMessage(chatId, `معنديش أصل اسمه "${assetName}" مسجّل في محفظتك، فمش قادر أخصمه تلقائيًا. سجّله الأول من شاشة المحفظة، أو وضّحلي اسم الأصل بالظبط.`);
+    return false;
+  }
+  if (sold.error) {
+    await sendTelegramMessage(chatId, `⚠️ ${sold.error}`);
+    return false;
+  }
+  const savedEvent = await recordFinancialEvent(
+    { type: 'income', amount: result.amount, currency_code: result.currency_code, category: 'بيع أصل استثماري', note: result.note || `بيع ${assetName}`, raw_text: result.raw_text, sourceText: text },
+    userId,
+  );
+  if (!savedEvent.ok) {
+    await sendTelegramMessage(chatId, `⚠️ ${savedEvent.error || 'حصل خطأ في تسجيل العملية.'}`);
+    return false;
+  }
+  const gain = sold.realizedGain;
+  const gainText = Number.isFinite(gain)
+    ? (gain >= 0 ? `📈 مكسبت من الصفقة دي حوالي ${Math.round(gain)} جنيه.` : `📉 خسرت من الصفقة دي حوالي ${Math.round(Math.abs(gain))} جنيه.`)
+    : '';
+  await sendTelegramMessage(chatId, `✅ سجلت بيع ${assetName} بقيمة ${result.amount} ${result.currency_code || 'EGP'} كدخل.${sold.deleted ? ' اتشال الأصل من محفظتك خالص.' : ''}${gainText ? '\n' + gainText : ''}`);
+  return true;
+}
+
 // ============ التصنيف الذكي لأي رسالة (مصروف / دين / تسوية) — بيتنادى بس لو الرسالة مش أمر معروف ============
 async function handleIncomingText(text, userId, chatId, { fromVoice = false } = {}) {
   if (!text) {
@@ -711,6 +767,7 @@ async function handleIncomingText(text, userId, chatId, { fromVoice = false } = 
     if (deterministicExpense) transactions = [deterministicExpense];
   }
   let successCount = 0;
+  let hadPortfolioAttempt = false;
   const expenseCount = transactions.filter((t) => t.type === 'expense' && t.amount).length;
 
   for (const result of transactions) {
@@ -734,10 +791,14 @@ async function handleIncomingText(text, userId, chatId, { fromVoice = false } = 
         await sendTelegramMessage(chatId, `✅ سجلت ${savedEvent.label} بقيمة ${savedEvent.record.amount} ${savedEvent.record.currency_code || 'EGP'}${result.item ? ` — ${result.item}` : ''}.`);
         successCount++;
       }
+    } else if ((result.type === 'portfolio_buy' || result.type === 'portfolio_sell') && result.amount) {
+      hadPortfolioAttempt = true;
+      const handled = await handlePortfolioTransaction(result, text, userId, chatId);
+      if (handled) successCount++;
     }
   }
 
-  if (successCount === 0) {
+  if (successCount === 0 && !hadPortfolioAttempt) {
     // --- قبل ما نقول "معرفتش أفهم"، نجرب نشوف لو الرسالة سؤال عن بياناته (زي "صرفت كام على الأكل؟") ---
     const answered = await tryAnswerAsDataQuestion(text, userId, chatId);
     if (!answered) {

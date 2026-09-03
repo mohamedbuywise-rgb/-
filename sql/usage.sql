@@ -22,6 +22,7 @@ create table if not exists usage_counters (
 );
 
 alter table usage_counters add column if not exists text_count int not null default 0;
+alter table usage_counters add column if not exists statement_count int not null default 0;
 
 create unique index if not exists idx_usage_counters_user_period
   on usage_counters (telegram_user_id, period_key);
@@ -65,6 +66,11 @@ begin
       set text_count = text_count + 1, updated_at = now()
       where telegram_user_id = p_user_id and period_key = p_period and text_count < p_limit
       returning text_count into v_new_count;
+  elsif p_kind = 'statement' then
+    update usage_counters
+      set statement_count = statement_count + 1, updated_at = now()
+      where telegram_user_id = p_user_id and period_key = p_period and statement_count < p_limit
+      returning statement_count into v_new_count;
   else
     raise exception 'unknown usage kind: %', p_kind;
   end if;
@@ -77,6 +83,8 @@ begin
       select ocr_count into v_new_count from usage_counters where telegram_user_id = p_user_id and period_key = p_period;
     elsif p_kind = 'chat' then
       select chat_count into v_new_count from usage_counters where telegram_user_id = p_user_id and period_key = p_period;
+    elsif p_kind = 'statement' then
+      select statement_count into v_new_count from usage_counters where telegram_user_id = p_user_id and period_key = p_period;
     else
       select text_count into v_new_count from usage_counters where telegram_user_id = p_user_id and period_key = p_period;
     end if;
@@ -112,6 +120,10 @@ begin
   elsif p_kind = 'text' then
     update usage_counters
       set text_count = greatest(text_count - 1, 0), updated_at = now()
+      where telegram_user_id = p_user_id and period_key = p_period;
+  elsif p_kind = 'statement' then
+    update usage_counters
+      set statement_count = greatest(statement_count - 1, 0), updated_at = now()
       where telegram_user_id = p_user_id and period_key = p_period;
   else
     raise exception 'unknown usage kind: %', p_kind;

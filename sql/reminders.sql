@@ -6,12 +6,15 @@ create table if not exists reminders (
   telegram_user_id bigint not null,
   title text not null,
   due_date date not null,
+  amount numeric(14, 2),
   notified_2d boolean not null default false,
   notified_1d boolean not null default false,
   notified_due boolean not null default false,
   done boolean not null default false,
   created_at timestamptz not null default now()
 );
+
+alter table reminders add column if not exists amount numeric(14, 2);
 
 create index if not exists reminders_user_idx
   on reminders (telegram_user_id, due_date);

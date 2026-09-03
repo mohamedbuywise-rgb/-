@@ -38,11 +38,9 @@ export default async function handler(req, res) {
       enabled: data.sms_webhook_enabled,
       banks: EGYPT_BANK_WALLET_SENDERS.map((b) => ({ key: b.key, label: b.label })),
       webhookUrl: `${baseUrl}/api/sms-webhook`,
-      // ============ تطبيق دبّر SMS Helper (APK) — حل MacroDroid ============
-      // apkDownloadUrl: ملف الـ APK الموقّع، بيتحدّث تلقائي مع كل إصدار جديد (شوف
-      // android-helper/.github/workflows/build-apk.yml — بيبني وينشر النسخة الأحدث
-      // على GitHub Releases، ولازم يتحدّث الرابط هنا لو غيّرت اسم المستودع/التاجات).
-      apkDownloadUrl: process.env.SMS_HELPER_APK_URL || '/app/dabbar-sms-helper.apk',
+      // ============ MacroDroid — تنزيل ماكرو مخصص لكل مستخدم ============
+      macroDownloadUrl: `${baseUrl}/api?route=macrodroid-macro`,
+      playStoreUrl: 'https://play.google.com/store/apps/details?id=com.arlosoft.macrodroid',
       // deepLink: التوكن مدموج فيه عشان التطبيق يملأه أوتوماتيك أول ما يتفتح من الرابط ده
       deepLink: `dabbar://setup?token=${data.sms_webhook_token}`,
     });

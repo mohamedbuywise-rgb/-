@@ -8,7 +8,7 @@
 // تلقائي مع صف الـ profile بتاعه (شوف sql/sms-webhook.sql)، وهو اللي بيربط
 // الرسالة بحساب المستخدم الصح من غير ما يحتاج تسجيل دخول Supabase من الموبايل.
 //
-// POST body: { token: string, sender: string, text: string }
+// POST body: { token: string, sender?: string, bank?: string, text: string }
 // ============================================================================
 
 import { supabase } from '../../lib/supabaseClient.js';
@@ -56,7 +56,7 @@ export default async function handler(req, res) {
     return res.status(405).json({ ok: false, error: 'POST only' });
   }
 
-  const { token, sender, text } = req.body || {};
+  const { token, sender, bank, text } = req.body || {};
   if (!token || !text) {
     return res.status(400).json({ ok: false, error: 'محتاجين token و text.' });
   }
@@ -71,7 +71,7 @@ export default async function handler(req, res) {
 
   // فلترة: لازم اسم المرسل يكون واحد من البنوك/المحافظ المصرية المعروفة، وإلا نتجاهل الرسالة
   // (بيحمينا من استهلاك Groq API على رسايل عادية/سبام).
-  const bankMatch = matchBankSender(sender);
+  const bankMatch = matchBankSender(sender || bank);
   if (!bankMatch) {
     return res.status(200).json({ ok: true, skipped: true, reason: 'مرسل غير معروف كبنك/محفظة، اتجاهلت.' });
   }
@@ -101,11 +101,11 @@ export default async function handler(req, res) {
     let recorded = 0;
     for (const item of transactions) {
       if (item.type === 'expense' || item.type === 'purchase' || item.type === 'asset' || item.type === 'refund') {
-        await recordExpense(item, text, telegramUserId, chatId, `\n\n🏦 اتسجلت أوتوماتيك من رسالة ${bankMatch.label}`, { source: 'sms', bank_key: bankMatch.key, bank_label: bankMatch.label, bank_sender: sender });
+        await recordExpense(item, text, telegramUserId, chatId, `\n\n🏦 اتسجلت أوتوماتيك من رسالة ${bankMatch.label}`, { source: 'sms', bank_key: bankMatch.key, bank_label: bankMatch.label, bank_sender: sender || bank });
         recorded += 1;
       } else if (item.type === 'income') {
         // الدخل البنكي يجب أن يذهب إلى financial_events، وليس expenses.
-        await recordFinancialEvent({ ...item, bank_key: bankMatch.key, bank_label: bankMatch.label, bank_sender: sender, source: 'sms' }, telegramUserId);
+        await recordFinancialEvent({ ...item, bank_key: bankMatch.key, bank_label: bankMatch.label, bank_sender: sender || bank, source: 'sms' }, telegramUserId);
         recorded += 1;
       } else if (item.type === 'debt') {
         await recordDebt(item, telegramUserId, chatId);
@@ -113,7 +113,7 @@ export default async function handler(req, res) {
       } else if (item.type === 'withdrawal' || item.type === 'deposit' || item.type === 'transfer') {
         // حركة بنكية محايدة (سحب/إيداع/تحويل) — بتتسجل في "الحركات البنكية" ومتدخلش إجمالي المصروفات.
         // لو غامضة (تحويل لشخص/رقم موبايل بدون سياق تجاري) بتتحط needs_review عشان المستخدم يراجعها بنفسه.
-        await recordFinancialEvent({ ...item, bank_key: bankMatch.key, bank_label: bankMatch.label, bank_sender: sender, source: 'sms' }, telegramUserId);
+        await recordFinancialEvent({ ...item, bank_key: bankMatch.key, bank_label: bankMatch.label, bank_sender: sender || bank, source: 'sms' }, telegramUserId);
         recorded += 1;
       }
       // settlement/unknown بنتجاهلها هنا عشان منسجلش حاجة غلط أوتوماتيك بدون مراجعة المستخدم

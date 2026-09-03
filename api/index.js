@@ -12,6 +12,7 @@ import archiveMonthPdfHandler from '../backend/api-handlers/archive-month-pdf.js
 import pushHandler from '../backend/api-handlers/push.js';
 import reportsHandler from '../backend/api-handlers/reports.js';
 import remindersHandler from '../backend/api-handlers/reminders.js';
+import macrodroidMacroHandler from '../backend/api-handlers/macrodroid-macro.js';
 import setupHandler from '../backend/api-handlers/setup.js';
 import smsWebhookHandler from '../backend/api-handlers/sms-webhook.js';
 import supportMessageHandler from '../backend/api-handlers/support-message.js';
@@ -34,6 +35,7 @@ const handlers = {
   push: pushHandler,
   reports: reportsHandler,
   reminders: remindersHandler,
+  'macrodroid-macro': macrodroidMacroHandler,
   setup: setupHandler,
   'sms-webhook': smsWebhookHandler,
   'support-message': supportMessageHandler,

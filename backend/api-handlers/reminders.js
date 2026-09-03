@@ -22,10 +22,12 @@ export default async function handler(req, res) {
     }
 
     if (req.method === 'POST') {
-      const { title, due_date: dueDate } = req.body || {};
+      const { title, due_date: dueDate, amount: rawAmount } = req.body || {};
+      const amount = rawAmount === null || rawAmount === undefined || rawAmount === '' ? null : Number(rawAmount);
       if (!title || !String(title).trim()) return res.status(400).json({ error: 'اكتب عنوان التذكير.' });
       if (!dueDate || !/^\d{4}-\d{2}-\d{2}$/.test(dueDate)) return res.status(400).json({ error: 'اختار تاريخ صحيح.' });
-      const reminder = await createReminder(dataUserId, String(title).trim(), dueDate);
+      if (rawAmount !== null && rawAmount !== undefined && rawAmount !== '' && (!Number.isFinite(amount) || amount < 0)) return res.status(400).json({ error: 'اكتب مبلغ صحيح.' });
+      const reminder = await createReminder(dataUserId, String(title).trim(), dueDate, amount);
       return res.status(200).json({ reminder });
     }
 

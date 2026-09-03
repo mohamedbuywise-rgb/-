@@ -2320,7 +2320,7 @@
                 </div>
             </details>
 
-            <button type="button" id="bank-movements-card" class="hidden w-full flex items-center justify-between gap-3 rounded-2xl border border-emerald-500/25 bg-emerald-500/[0.06] px-4 py-3 text-right transition hover:bg-emerald-500/10">
+            <button type="button" id="bank-movements-card" class="w-full flex items-center justify-between gap-3 rounded-2xl border border-emerald-500/25 bg-emerald-500/[0.06] px-4 py-3 text-right transition hover:bg-emerald-500/10">
                 <div class="flex items-center gap-3 min-w-0">
                     <span class="shrink-0 flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500/15 text-lg">🏦</span>
                     <div class="min-w-0">
@@ -2624,17 +2624,32 @@
                 <button type="button" id="reminders-link-telegram-btn" class="shrink-0 rounded-xl bg-amber-500 px-3 py-2 text-[11px] font-black text-slate-950">اربط تليجرام</button>
             </div>
 
-            <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-2.5">
-                <h4 class="text-xs font-bold text-slate-300">تذكير جديد</h4>
-                <input type="text" id="reminder-title-input" maxlength="200" placeholder="تذكير بإيه؟ مثال: دفع قسط العربية" class="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2.5 text-xs text-slate-100 outline-none">
-                <input type="date" id="reminder-date-input" class="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2.5 text-xs text-slate-100 outline-none">
-                <button type="button" id="reminder-save-btn" class="w-full rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950">حفظ التذكير</button>
-                <p id="reminder-form-status" class="min-h-4 text-center text-[11px] text-rose-400"></p>
+            <div class="rounded-3xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 to-slate-950/40 p-4 flex items-center justify-between gap-3 shadow-sm">
+                <div><p class="text-base font-black text-slate-100">خليك سابق مواعيدك</p><p class="text-[11px] leading-relaxed text-slate-400 mt-1">كل تذكيراتك المهمة في مكان واحد، من غير ما تنسى أي التزام.</p></div>
+                <span class="w-11 h-11 shrink-0 rounded-2xl bg-emerald-500/15 border border-emerald-500/20 flex items-center justify-center text-xl">🔔</span>
             </div>
 
-            <div class="rounded-3xl p-4">
-                <h4 class="text-xs font-bold text-slate-300 mb-2">القادمة</h4>
-                <div id="reminders-list" class="space-y-2"><p class="text-xs text-slate-500 text-center py-3">بيتحمّل...</p></div>
+            <div class="flex items-center justify-between px-1">
+                <h4 class="text-xs font-black text-slate-200">التذكيرات القادمة</h4>
+                <span id="reminders-count" class="rounded-full bg-emerald-500/10 px-2.5 py-1 text-[10px] font-black text-emerald-400"></span>
+            </div>
+            <div id="reminders-list" class="space-y-2"><p class="text-xs text-slate-500 text-center py-3">بيتحمّل...</p></div>
+
+            <div class="rounded-3xl border border-slate-800 bg-slate-950/50 overflow-hidden">
+                <button type="button" id="reminder-form-toggle" aria-expanded="false" class="w-full flex items-center justify-between gap-3 p-4 text-right">
+                    <span class="text-xs font-black text-slate-200">إضافة تذكير جديد</span><span id="reminder-form-chevron" class="text-xl leading-none text-emerald-400">⌄</span>
+                </button>
+                <div id="reminder-form-panel" class="hidden border-t border-slate-800 p-4 space-y-2.5">
+                    <label class="block text-[10px] font-bold text-slate-400" for="reminder-title-input">اسم التذكير</label>
+                    <input type="text" id="reminder-title-input" maxlength="200" placeholder="مثال: دفع قسط العربية" class="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2.5 text-xs text-slate-100 outline-none focus:border-emerald-400">
+                    <label class="block text-[10px] font-bold text-slate-400" for="reminder-date-input">التاريخ</label>
+                    <input type="date" id="reminder-date-input" class="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2.5 text-xs text-slate-100 outline-none focus:border-emerald-400">
+                    <label class="block text-[10px] font-bold text-slate-400" for="reminder-amount-input">المبلغ <span class="text-slate-500 font-normal">(اختياري)</span></label>
+                    <input type="number" id="reminder-amount-input" min="0" step="0.01" inputmode="decimal" placeholder="اكتب المبلغ لو حابب" class="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2.5 text-xs text-slate-100 outline-none focus:border-emerald-400">
+                    <button type="button" id="reminder-save-btn" class="w-full rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950">حفظ التذكير</button>
+                    <p id="reminder-form-status" class="min-h-4 text-center text-[11px] text-rose-400"></p>
+                    <p class="text-center text-[10px] text-slate-500">المبلغ اختياري، تقدر تضيف التذكير من غيره.</p>
+                </div>
             </div>
         </div>
 
@@ -2947,11 +2962,11 @@
                 </div>
             </div>
 
-            <button type="button" id="bank-accounts-card" class="hidden w-full bg-gradient-to-br from-emerald-500/10 to-teal-500/5 border border-emerald-500/25 rounded-3xl p-4 flex items-center gap-3 text-right">
+            <button type="button" id="bank-accounts-card" class="w-full bg-gradient-to-br from-emerald-500/10 to-teal-500/5 border border-emerald-500/25 rounded-3xl p-4 flex items-center gap-3 text-right">
                 <span class="w-9 h-9 shrink-0 rounded-xl bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center text-base">🏦</span>
                 <div class="flex-1 min-w-0">
                     <p class="text-xs font-bold text-slate-200">البنوك والمحافظ</p>
-                    <p class="text-[11px] text-slate-400 leading-relaxed">تسجيل البنك والمحفظة تلقائيًا من SMS — Android فقط</p>
+                    <p class="text-[11px] text-slate-400 leading-relaxed">تسجيل رسائل البنوك والمحافظ تلقائيًا — Android و iPhone</p>
                 </div>
                 <span class="bg-amber-500/15 text-amber-400 text-[10px] font-bold px-2 py-0.5 rounded-full">جديد</span>
             </button>
@@ -2975,8 +2990,8 @@
                         <div class="rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.06] p-3 mb-4">
                             <div class="flex items-center justify-between mb-2"><p class="text-[12px] font-black text-slate-100">معاينة خطوات التفعيل</p><span class="text-[10px] text-emerald-300">Android</span></div>
                             <div class="grid grid-cols-2 gap-2 text-[10px]">
-                                <div class="rounded-xl bg-slate-900/70 p-2 text-slate-300"><b class="text-emerald-300">1</b> حمّل تطبيق دبّر</div>
-                                <div class="rounded-xl bg-slate-900/70 p-2 text-slate-300"><b class="text-emerald-300">2</b> ثبّت APK</div>
+                                <div class="rounded-xl bg-slate-900/70 p-2 text-slate-300"><b class="text-emerald-300">1</b> ثبّت MacroDroid من Google Play</div>
+                                <div class="rounded-xl bg-slate-900/70 p-2 text-slate-300"><b class="text-emerald-300">2</b> افتح MacroDroid</div>
                                 <div class="rounded-xl bg-slate-900/70 p-2 text-slate-300"><b class="text-emerald-300">3</b> احفظ التوكن</div>
                                 <div class="rounded-xl bg-slate-900/70 p-2 text-slate-300"><b class="text-emerald-300">4</b> فعّل الإشعارات</div>
                                 <div class="rounded-xl bg-slate-900/70 p-2 text-slate-300"><b class="text-emerald-300">5</b> فعّل الاستقبال</div>
@@ -2986,8 +3001,8 @@
 
                         <p class="text-[11px] font-bold text-emerald-400 mb-2">تجربة Android: هيحصل إيه بالظبط لما تدوس "حمّل التطبيق"</p>
                         <div class="space-y-1 mb-4">
-                            <div class="flex items-start gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">1</span><span class="text-[12px] text-slate-300">على هاتف Android، هيتحمّل تطبيق "دبّر — تتبع البنك" (حوالي 2 ميجا، من دبّر نفسه)</span></div>
-                            <div class="flex items-start gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">2</span><span class="text-[12px] text-slate-300">افتح ملف الـ APK من الإشعار/مجلد التنزيلات ودوس "تثبيت" (لو ظهرلك تحذير "مصادر غير معروفة"، دوس "السماح لهذه المرة" — عادي، لأننا مش بنوزّع من Google Play)</span></div>
+                            <div class="flex items-start gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">1</span><span class="text-[12px] text-slate-300">على هاتف Android، هيتحمّل تطبيق "دبّر — تتبع البنك" (من متجر Google Play الرسمي)</span></div>
+                            <div class="flex items-start gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">2</span><span class="text-[12px] text-slate-300">افتح MacroDroid واسمح باستيراد الماكرو عند ظهور رسالة التأكيد</span></div>
                             <div class="flex items-start gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">3</span><span class="text-[12px] text-slate-300">افتح التطبيق — توكنك هيتملى لوحده تلقائي (جاي من دبّر)، دوس "حفظ التوكن"</span></div>
                             <div class="flex items-start gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">4</span><span class="text-[12px] text-slate-300">دوس "تفعيل إذن الإشعارات"، ولاقي "دبّر — تتبع البنك" في القائمة وفعّلها</span></div>
                             <div class="flex items-start gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">5</span><span class="text-[12px] text-slate-300">ارجع لدبّر ودوس "تفعيل الاستقبال" تحت</span></div>
@@ -3004,10 +3019,11 @@
                             </button>
                         </div>
 
-                        <a href="#" id="bank-accounts-download-apk" target="_blank" rel="noopener" class="w-full flex items-center justify-center gap-2 bg-emerald-500 text-slate-950 font-black text-[12px] py-2.5 rounded-xl mb-2">⬇️ حمّل تطبيق دبّر لـ Android (APK)</a>
+                        <a href="#" id="bank-accounts-macro-link" target="_blank" rel="noopener" class="w-full flex items-center justify-center gap-2 bg-emerald-500 text-slate-950 font-black text-[12px] py-2.5 rounded-xl mb-2">⬇️ فعّل أتمتة الرسائل عبر MacroDroid</a><a href="https://play.google.com/store/apps/details?id=com.arlosoft.macrodroid" target="_blank" rel="noopener" class="w-full flex items-center justify-center gap-2 bg-slate-800 border border-slate-700 text-slate-200 font-bold text-[11px] py-2.5 rounded-xl mb-2">▶️ تثبيت MacroDroid من Google Play</a>
                         <a href="#" id="bank-accounts-open-setup" class="w-full flex items-center justify-center gap-2 bg-slate-800 border border-slate-700 text-slate-200 font-bold text-[12px] py-2.5 rounded-xl">🔗 عندك التطبيق فعلًا؟ افتح إعداد التوكن مباشرة</a>
 
-                        <p class="text-[10px] text-slate-500 mt-3 leading-relaxed">التطبيق من دبّر مباشرة ومجاني بالكامل، مفيش إعلانات ولا صلاحيات زيادة عن اللزوم — بياخد إذن قراءة الإشعارات بس (مش صلاحية SMS)، ودبّر بيحدد بنكك/محفظتك تلقائي من اسم مرسل الرسالة.</p>
+                        <div class="rounded-2xl border border-sky-500/20 bg-sky-500/[0.06] p-3 mb-3"><p class="text-[12px] font-black text-sky-300 mb-1">iPhone — اختصار إرسال آمن</p><p class="text-[11px] text-slate-400 leading-relaxed">الآيفون لا يسمح لتطبيق خارجي بقراءة كل SMS البنكية بصمت مثل Android. تقدر تعمل Automation عند وصول رسالة، وتبعت النص للـWebhook بعد تفعيلها من Shortcuts.</p><a href="./ios-shortcut-setup.html" target="_blank" rel="noopener" class="w-full mt-2 flex items-center justify-center gap-2 bg-sky-500/15 border border-sky-500/30 text-sky-300 font-black text-[12px] py-2.5 rounded-xl">📱 افتح إعداد اختصار iPhone</a></div>
+                        <p class="text-[10px] text-slate-500 mt-3 leading-relaxed">MacroDroid متاح من Google Play. بعد التثبيت يحتاج إذن قراءة الإشعارات حسب إعدادات جهازك، ودبّر بيحدد بنكك/محفظتك تلقائي من اسم مرسل الرسالة.</p>
 
                         <button type="button" id="bank-accounts-troubleshoot-open" class="w-full flex items-center justify-center gap-1.5 text-[11px] font-bold text-emerald-400 mt-4 py-2">
                             🛠️ مش شغال معايا؟
@@ -3963,7 +3979,7 @@
             const iosLink = document.getElementById('quick-add-ios-install-link');
             if (!card || !modal) return;
             // ============ حط هنا رابط الـ iCloud Shortcut بتاعك بعد ما تعمله ============
-            iosLink.href = 'https://www.icloud.com/shortcuts/REPLACE_WITH_YOUR_SHORTCUT_ID';
+            iosLink.href = './ios-shortcut-setup.html';
             const activeTabClasses = ['border-emerald-500/40', 'bg-emerald-500/15', 'text-emerald-400'];
             const inactiveTabClasses = ['border-slate-700', 'text-slate-400'];
             function setTab(target) {
@@ -3998,7 +4014,7 @@
             const toggleDot = document.getElementById('bank-accounts-toggle-dot');
             const enabledLabel = document.getElementById('bank-accounts-enabled-label');
             const supportedList = document.getElementById('bank-accounts-supported-list');
-            const downloadLink = document.getElementById('bank-accounts-download-apk');
+            const downloadLink = document.getElementById('bank-accounts-macro-link');
             const setupLink = document.getElementById('bank-accounts-open-setup');
             if (!card || !modal) return;
 
@@ -4009,7 +4025,7 @@
                 toggleBtn?.closest('.flex.items-center')?.classList.add('hidden');
             }
 
-            let bankState = { enabled: false, token: null, webhookUrl: null, banks: [], apkDownloadUrl: null, deepLink: null };
+            let bankState = { enabled: false, token: null, webhookUrl: null, banks: [], macroDownloadUrl: null, playStoreUrl: null, deepLink: null };
 
             function renderToggle() {
                 toggleBtn.style.background = bankState.enabled ? '#10b981' : '';
@@ -4024,10 +4040,26 @@
             }
 
             function renderLinks() {
-                if (bankState.apkDownloadUrl) downloadLink.href = bankState.apkDownloadUrl;
+                if (bankState.macroDownloadUrl) downloadLink.href = bankState.macroDownloadUrl;
                 // deepLink فيه توكن المستخدم مدموج، فبيفتح التطبيق (لو مثبّت) ويملأ الحقل أوتوماتيك
                 if (bankState.deepLink) setupLink.href = bankState.deepLink;
             }
+            downloadLink?.addEventListener('click', async (event) => {
+                event.preventDefault();
+                if (!bankState.macroDownloadUrl) return;
+                try {
+                    const { data: { session } } = await sb.auth.getSession();
+                    if (!session) return;
+                    downloadLink.textContent = 'بنجهّز الماكرو...';
+                    const res = await fetch(bankState.macroDownloadUrl, { headers: { Authorization: `Bearer ${session.access_token}` } });
+                    if (!res.ok) throw new Error();
+                    const blobUrl = URL.createObjectURL(await res.blob());
+                    const a = document.createElement('a'); a.href = blobUrl; a.download = 'daber-bank-automation.macro'; document.body.appendChild(a); a.click(); a.remove();
+                    setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+                } catch (e) {
+                    window.open(bankState.playStoreUrl || 'https://play.google.com/store/apps/details?id=com.arlosoft.macrodroid', '_blank', 'noopener');
+                } finally { downloadLink.textContent = '⬇️ فعّل أتمتة الرسائل عبر MacroDroid'; }
+            });
 
             async function loadBankAccounts() {
                 try {
@@ -4038,7 +4070,7 @@
                     });
                     const data = await res.json();
                     if (!data.ok) return;
-                    bankState = { enabled: data.enabled, token: data.token, webhookUrl: data.webhookUrl, banks: data.banks || [], apkDownloadUrl: data.apkDownloadUrl, deepLink: data.deepLink };
+                    bankState = { enabled: data.enabled, token: data.token, webhookUrl: data.webhookUrl, banks: data.banks || [], macroDownloadUrl: data.macroDownloadUrl, playStoreUrl: data.playStoreUrl, deepLink: data.deepLink };
                     renderToggle();
                     renderBanks();
                     renderLinks();
@@ -4087,7 +4119,7 @@
                     rows: [
                         ['where', 'دوّر على أيقونة "دبّر — تتبع البنك" في قائمة تطبيقات جهازك.'],
                         ['cause', 'بعض الأجهزة (خصوصًا سامسونج/شاومي) بتوقف التثبيت لو "مصادر غير معروفة" مش مفعّلة لمتصفحك.'],
-                        ['fix', 'لو مش لاقيه: ارجع لدبّر ودوس "حمّل تطبيق دبّر لتتبع البنك" تاني، وبعد التحميل اختار "السماح لهذه المرة" لو ظهر تحذير.']
+                        ['fix', 'لو مش لاقيه: ارجع لدبّر واضغط زر تفعيل أتمتة الرسائل مرة ثانية، ثم اختر MacroDroid لفتح ملف الماكرو.']
                     ]
                 },
                 {
@@ -4360,16 +4392,20 @@
                 if (subtitle) subtitle.textContent = 'ملخصات واقتراحات بسيطة تساعدك تفضل قريب من خطتك.';
                 return;
             }
-            const unread = notifications.filter((item) => !read[item.id]).length;
-            updateAccountNotificationBadge(unread);
-            if (subtitle) subtitle.textContent = unread ? `${unread} رسالة مفيدة مستنياك.` : 'أنت متابع كل الرسائل الحالية.';
-            list.innerHTML = notifications.map((item) => `<article class="flex items-start gap-3 rounded-2xl border ${read[item.id] ? 'border-slate-800 bg-slate-900/20 opacity-70' : 'border-emerald-500/20 bg-emerald-500/5'} p-3"><span class="text-base">${item.icon}</span><div class="min-w-0"><p class="text-[11px] font-bold text-slate-200">${item.title}</p><p class="mt-1 text-[10px] leading-relaxed text-slate-400">${item.body}</p></div></article>`).join('');
+            const unreadItems = notifications.filter((item) => !read[item.id]);
+            updateAccountNotificationBadge(unreadItems.length);
+            if (subtitle) subtitle.textContent = unreadItems.length ? `${unreadItems.length} رسالة مفيدة مستنياك.` : 'أنت متابع كل الرسائل الحالية.';
+            list.innerHTML = unreadItems.length ? unreadItems.map((item) => `<article class="flex items-start gap-3 rounded-2xl border border-emerald-500/20 bg-emerald-500/5 p-3"><span class="text-base">${item.icon}</span><div class="min-w-0"><p class="text-[11px] font-bold text-slate-200">${item.title}</p><p class="mt-1 text-[10px] leading-relaxed text-slate-400">${item.body}</p></div></article>`).join('') : '<div class="notification-empty rounded-2xl border p-3 text-[11px] leading-relaxed"><strong>هنا هتظهر لك الفايدة أول بأول</strong><br>مفيش إشعارات جديدة دلوقتي.</div>';
+            window.__inAppNotifications = notifications;
         }
 
         function inAppNotificationsClearedAtKey() { return `dabbar-notifications-cleared-at-${currentUser?.id || 'guest'}`; }
         function markInAppNotificationsRead() {
             const list = document.getElementById('in-app-notifications-list');
             if (!list) return;
+            const read = (() => { try { return JSON.parse(localStorage.getItem(inAppNotificationsKey()) || '{}'); } catch (e) { return {}; } })();
+            (window.__inAppNotifications || []).forEach((item) => { read[item.id] = true; });
+            localStorage.setItem(inAppNotificationsKey(), JSON.stringify(read));
             localStorage.setItem(inAppNotificationsClearedAtKey(), new Date().toISOString());
             if (typeof updateAccountNotificationBadge === 'function') updateAccountNotificationBadge(0);
             list.innerHTML = '<div class="notification-empty rounded-2xl border p-3 text-[11px] leading-relaxed" style="color:var(--slate-400, #94a3b8)"><strong>هنا هتظهر لك الفايدة أول بأول</strong><br>هتلاقي ملخصًا لمتابعتك، وتنبيهًا لطيفًا لما تقترب من حد فئة، واقتراحًا صغيرًا يساعدك تكمل خطتك براحة.</div>';
@@ -5791,64 +5827,49 @@
         async function loadReminders() {
             const listEl = document.getElementById('reminders-list');
             const badge = document.getElementById('reminders-notification-badge');
+            const countEl = document.getElementById('reminders-count');
             try {
                 const res = await fetch('/api/reminders', { headers: { Authorization: `Bearer ${accessToken}` } });
                 const data = await res.json();
                 const reminders = data.reminders || [];
-
                 const urgentCount = reminders.filter((r) => {
                     const days = Math.round((new Date(r.due_date + 'T00:00:00') - new Date(new Date().toDateString())) / (24 * 60 * 60 * 1000));
                     return days <= 2;
                 }).length;
-                if (badge) {
-                    badge.textContent = urgentCount > 0 ? String(urgentCount) : '';
-                    badge.style.display = urgentCount > 0 ? 'grid' : 'none';
-                }
-
-                listEl.innerHTML = reminders.length ? reminders.map((r) => `
-                    <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-2.5 flex items-center justify-between gap-2">
-                        <div class="flex items-center gap-2.5 min-w-0"><span class="text-base shrink-0">🔔</span><div class="min-w-0"><p class="text-xs font-semibold text-slate-200 truncate">${debtEscape(r.title)}</p><p class="text-[10px] text-slate-500">${new Date(r.due_date + 'T00:00:00').toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' })}</p></div></div>
-                        <div class="flex items-center gap-2 shrink-0">
-                            <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 rounded-full px-2 py-1">${reminderDaysLabel(r.due_date)}</span>
-                            <button type="button" class="text-slate-400 hover:text-rose-400 text-lg" data-delete-reminder="${debtEscape(r.id)}" aria-label="حذف التذكير">×</button>
-                        </div>
-                    </div>
-                `).join('') : '<p class="text-xs text-slate-500 text-center p-3">مفيش تذكيرات قادمة، ضيف واحد فوق.</p>';
-
+                if (badge) { badge.textContent = urgentCount > 0 ? String(urgentCount) : ''; badge.style.display = urgentCount > 0 ? 'grid' : 'none'; }
+                if (countEl) countEl.textContent = reminders.length ? `${reminders.length} تذكيرات` : '';
+                listEl.innerHTML = reminders.length ? reminders.map((r) => {
+                    const amount = r.amount !== null && r.amount !== undefined && r.amount !== '' ? `<div class="text-[10px] font-black text-amber-400 mt-1">${fmt(r.amount)} ج.م</div>` : '';
+                    return `<div class="rounded-2xl border border-slate-800 bg-slate-950/60 p-3 flex items-center gap-2.5">
+                        <span class="w-9 h-9 shrink-0 rounded-xl bg-emerald-500/10 border border-emerald-500/15 flex items-center justify-center text-base">🔔</span>
+                        <div class="min-w-0 flex-1"><p class="text-xs font-bold text-slate-200 truncate">${debtEscape(r.title)}</p><p class="text-[10px] text-slate-500 mt-0.5">${new Date(r.due_date + 'T00:00:00').toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'short' })}</p></div>
+                        <div class="text-left shrink-0"><span class="text-[10px] font-black text-emerald-400 bg-emerald-500/10 rounded-full px-2 py-1">${reminderDaysLabel(r.due_date)}</span>${amount}</div>
+                        <button type="button" class="text-slate-500 hover:text-rose-400 text-lg leading-none" data-delete-reminder="${debtEscape(r.id)}" aria-label="حذف التذكير">×</button>
+                    </div>`;
+                }).join('') : '<div class="rounded-2xl border border-dashed border-slate-800 p-5 text-xs text-slate-500 text-center">مفيش تذكيرات قادمة، ضيف واحد من الزرار فوق.</div>';
                 listEl.querySelectorAll('[data-delete-reminder]').forEach((btn) => btn.addEventListener('click', () => {
-                    const id = btn.getAttribute('data-delete-reminder');
-                    const row = btn.closest('div.bg-slate-950\\/60');
-                    const title = row?.querySelector('p.truncate')?.textContent || 'التذكير';
-                    row.style.display = 'none';
-                    showUndoToast(
-                        `اتمسح "${title}"`,
-                        async () => { try { await fetch(`/api/reminders?id=${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${accessToken}` } }); } catch (e) { /* اتمسح بصريًا برضو */ } loadReminders(); },
-                        () => { row.style.display = ''; }
-                    );
+                    const id = btn.getAttribute('data-delete-reminder'); const row = btn.closest('[data-delete-reminder]')?.parentElement;
+                    const title = row?.querySelector('p.truncate')?.textContent || 'التذكير'; row.style.display = 'none';
+                    showUndoToast(`اتمسح "${title}"`, async () => { try { await fetch(`/api/reminders?id=${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${accessToken}` } }); } catch (e) {} loadReminders(); }, () => { row.style.display = ''; });
                 }));
-            } catch (e) {
-                listEl.innerHTML = '<p class="text-xs text-rose-400 text-center p-4">تعذر تحميل التذكيرات.</p>';
-            }
+            } catch (e) { listEl.innerHTML = '<p class="text-xs text-rose-400 text-center p-4">تعذر تحميل التذكيرات.</p>'; }
         }
 
+        document.getElementById('reminder-form-toggle')?.addEventListener('click', () => {
+            const panel = document.getElementById('reminder-form-panel'); const toggle = document.getElementById('reminder-form-toggle'); const chevron = document.getElementById('reminder-form-chevron');
+            const isOpen = !panel.classList.contains('hidden'); panel.classList.toggle('hidden', isOpen); toggle.setAttribute('aria-expanded', String(!isOpen)); chevron.textContent = isOpen ? '⌄' : '⌃';
+        });
         document.getElementById('reminder-save-btn')?.addEventListener('click', async () => {
-            const titleInput = document.getElementById('reminder-title-input');
-            const dateInput = document.getElementById('reminder-date-input');
-            const statusEl = document.getElementById('reminder-form-status');
-            const title = titleInput.value.trim();
-            const dueDate = dateInput.value;
+            const titleInput = document.getElementById('reminder-title-input'); const dateInput = document.getElementById('reminder-date-input'); const amountInput = document.getElementById('reminder-amount-input'); const statusEl = document.getElementById('reminder-form-status');
+            const title = titleInput.value.trim(); const dueDate = dateInput.value; const rawAmount = amountInput.value.trim(); const amount = rawAmount === '' ? null : Number(rawAmount);
             if (!title) { statusEl.textContent = 'اكتب عنوان التذكير الأول.'; return; }
             if (!dueDate) { statusEl.textContent = 'اختار تاريخ.'; return; }
+            if (rawAmount !== '' && (!Number.isFinite(amount) || amount < 0)) { statusEl.textContent = 'اكتب مبلغ صحيح أو سيبه فاضي.'; return; }
             statusEl.textContent = '';
             try {
-                const res = await fetch('/api/reminders', {
-                    method: 'POST',
-                    headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ title, due_date: dueDate }),
-                });
+                const res = await fetch('/api/reminders', { method: 'POST', headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ title, due_date: dueDate, amount }) });
                 if (!res.ok) { const err = await res.json(); statusEl.textContent = err.error || 'حصل خطأ.'; return; }
-                titleInput.value = ''; dateInput.value = '';
-                loadReminders();
+                titleInput.value = ''; dateInput.value = ''; amountInput.value = ''; document.getElementById('reminder-form-toggle')?.click(); loadReminders();
             } catch (e) { statusEl.textContent = 'حصل خطأ، حاول تاني.'; }
         });
 

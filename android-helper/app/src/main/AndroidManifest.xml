@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- مفيش أي permission حساس هنا (READ_SMS/RECEIVE_SMS) — بنعتمد على -->
+    <!-- BIND_NOTIFICATION_LISTENER_SERVICE اللي المستخدم بيوافق عليه من إعدادات النظام. -->
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+
+    <application
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="دبّر — تتبع البنك"
+        android:theme="@style/Theme.DabbarSmsHelper">
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <!-- رابط عميق: dabbar://setup?token=XXXX يتفتح من زرار "فعّل تتبع رسائل البنك" في الداشبورد -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="dabbar" android:host="setup" />
+            </intent-filter>
+        </activity>
+
+        <service
+            android:name=".BankNotificationListenerService"
+            android:exported="true"
+            android:label="دبّر — رصد رسائل البنك"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+
+    </application>
+</manifest>

@@ -691,22 +691,22 @@
 
         /* وضوح البطاقات والنموذج في الوضعين: ألوان سطحية ثابتة تمنع تداخل الأرقام مع التدرج */
         html[data-theme="light"] #monthly-total-card {
-            background: #f0faf5 !important; border-color: #b7d9c6 !important; box-shadow: 0 10px 24px rgba(24, 92, 62, .08) !important;
+            background: #ffffff !important; border-color: #e2e8f0 !important; box-shadow: 0 8px 20px rgba(15,23,42,.06) !important;
         }
         html[data-theme="light"] #monthly-total-card #monthly-total-label { color: #176b49 !important; }
         html[data-theme="light"] #monthly-total-card #monthly-total { color: #0b5f3f !important; }
-        html[data-theme="light"] #monthly-total-card #monthly-compare { color: #587367 !important; }
+        html[data-theme="light"] #monthly-total-card #monthly-compare { color: #64748b !important; }
         html[data-theme="light"] #monthly-income-toggle {
-            background: #eff9fa !important; border-color: #b3d9d7 !important; box-shadow: 0 10px 24px rgba(18, 95, 94, .08) !important;
+            background: #ffffff !important; border-color: #e2e8f0 !important; box-shadow: 0 8px 20px rgba(15,23,42,.06) !important;
         }
         html[data-theme="light"] #monthly-income-toggle .text-teal-700 { color: #176b6b !important; }
         html[data-theme="light"] #monthly-income-toggle #monthly-income { color: #075d5d !important; }
-        html[data-theme="light"] #monthly-income-toggle #monthly-income-compare { color: #3f7773 !important; }
+        html[data-theme="light"] #monthly-income-toggle #monthly-income-compare { color: #64748b !important; }
         html[data-theme="dark"] #monthly-total-card {
-            background: #102a22 !important; border-color: rgba(52,211,153,.34) !important; box-shadow: none !important;
+            background: #0b1220 !important; border-color: rgba(148,163,184,.22) !important; box-shadow: none !important;
         }
         html[data-theme="dark"] #monthly-income-toggle {
-            background: #102730 !important; border-color: rgba(45,212,191,.34) !important; box-shadow: none !important;
+            background: #0b1220 !important; border-color: rgba(148,163,184,.22) !important; box-shadow: none !important;
         }
         /* كارت صافي الثروة: هوية دهبية مميزة عن كارتي الدخل/المصروف عشان يبان إنه ملخص شامل مش رقم شهري */
         html[data-theme="light"] #net-worth-card {
@@ -732,6 +732,9 @@
         html[data-theme="light"] .subscription-row.price-up .subscription-meta { color: #b4232f !important; }
         html[data-theme="dark"] #subscriptions-card { background: #0d1117 !important; border: 1px solid #1e293b !important; }
         html[data-theme="dark"] #subscriptions-title { color: #94a3b8 !important; }
+        #subscriptions-card > summary::-webkit-details-marker { display: none; }
+        #subscriptions-card[open] .subscriptions-chevron { transform: rotate(180deg); }
+        #subscriptions-count { background: rgba(16,185,129,.15); color: #10b981; }
         html[data-theme="dark"] .subscription-row { border-color: #1e293b !important; }
         html[data-theme="dark"] .subscription-row .subscription-name { color: #e2e8f0 !important; }
         html[data-theme="dark"] .subscription-row .subscription-meta { color: #64748b !important; }
@@ -1181,6 +1184,18 @@
         .planning-summary-grid strong { font-size:.9rem; line-height:1.25; font-weight:900; white-space:nowrap; }
         .planning-summary-note { margin-top:.6rem; font-size:.62rem; line-height:1.55; text-align:center; opacity:.7; }
         .planning-empty-note { font-size:.72rem; font-weight:800; text-align:center; }
+        .planning-hero { display:flex; flex-direction:column; align-items:center; gap:.15rem; text-align:center; }
+        .planning-hero-label { font-size:.68rem; font-weight:700; opacity:.75; }
+        .planning-hero-value { font-size:1.55rem; font-weight:900; line-height:1.2; }
+        .planning-subrow { margin-top:.5rem; display:flex; flex-wrap:wrap; justify-content:center; gap:.6rem; font-size:.65rem; opacity:.85; text-align:center; }
+        .planning-subrow b { font-weight:900; }
+        .planning-progress-wrap { margin-top:.6rem; display:flex; flex-direction:column; align-items:center; gap:.3rem; }
+        .planning-progress-track { width:100%; height:.4rem; border-radius:999px; background:rgba(16,185,129,.15); overflow:hidden; }
+        .planning-progress-fill { height:100%; border-radius:999px; background:linear-gradient(90deg,#10b981,#f4c648); }
+        .planning-progress-pct { font-size:.62rem; font-weight:700; opacity:.75; }
+        .planning-forecast { margin-top:.65rem; padding-top:.6rem; border-top:1px dashed rgba(127,127,127,.35); display:flex; flex-direction:column; align-items:center; gap:.2rem; text-align:center; }
+        .planning-forecast span { font-size:.64rem; opacity:.8; }
+        .planning-forecast strong { font-size:1rem; font-weight:900; }
         html[data-theme="light"] #quick-entry-card { border-color:#a8dec4 !important; box-shadow:0 12px 28px rgba(22,128,82,.12) !important; }
         html[data-theme="light"] #quick-entry-card .quick-entry-eyebrow { color:#087b50 !important; font-weight:900; }
         html[data-theme="light"] #quick-entry-card h3 { color:#092d20 !important; font-size:1.05rem !important; }
@@ -2020,13 +2035,14 @@
                 <canvas id="dabbar-celebrate-canvas" aria-hidden="true"></canvas>
                 <div class="flex items-center justify-between"><div><span class="quick-entry-eyebrow">ابدأ من هنا</span><h3 class="text-base font-black text-slate-900 dark:text-slate-100">سجّل عمليتك الآن</h3><p class="text-[11px] text-slate-600 dark:text-slate-400">صوت أو كتابة أو صوّر الفاتورة — في ثواني</p></div><span class="text-2xl" aria-hidden="true">✨</span></div>
                 <div id="quick-entry-subscription-lock" class="hidden items-center justify-between gap-3 rounded-2xl border px-3 py-2.5 text-[11px]"><div><strong class="block">انتهت تجربتك المجانية</strong><span>اشترك عشان تقدر تسجّل عملياتك تاني.</span></div><button id="quick-entry-open-subscription" type="button" class="shrink-0 rounded-xl px-3 py-2 text-[10px] font-black">شوف الاشتراك</button></div>
-                <p class="text-center text-[10px] text-slate-500 dark:text-slate-400">اختار نوع العملية بوضوح، ودبّر هيسجّلها في القسم الصحيح.</p>
+                <p class="text-center text-[10px] text-slate-500 dark:text-slate-400">اختار نوع العملية الأول، وهتفضل شغالة لحد ما تغيّرها بنفسك.</p>
+                <div id="quick-entry-type-toggle" class="grid grid-cols-2 gap-2 rounded-xl bg-slate-100 p-1 dark:bg-slate-800" role="group" aria-label="نوع العملية"><button type="button" id="quick-entry-type-expense" data-entry-type="expense" class="rounded-lg bg-white px-3 py-2 text-xs font-black text-rose-600 shadow-sm dark:bg-slate-700 dark:text-rose-300">🔴 مصروف</button><button type="button" id="quick-entry-type-income" data-entry-type="income" class="rounded-lg px-3 py-2 text-xs font-bold text-slate-500 dark:text-slate-400">🟢 دخل</button></div>
                 <div class="grid grid-cols-3 gap-2"><button id="quick-entry-voice" class="rounded-2xl border border-emerald-200 bg-white/80 px-2 py-3 text-center shadow-sm transition hover:-translate-y-0.5 dark:bg-slate-900" type="button"><span class="mx-auto mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/15 text-xl">🎙</span><span class="block text-[11px] font-bold text-slate-700 dark:text-slate-200">صوت</span></button><button id="quick-entry-text" class="rounded-2xl border border-emerald-200 bg-white/80 px-2 py-3 text-center shadow-sm transition hover:-translate-y-0.5 dark:bg-slate-900" type="button"><span class="mx-auto mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/15 text-xl">✍️</span><span class="block text-[11px] font-bold text-slate-700 dark:text-slate-200">كتابة</span></button><button id="quick-entry-invoice" class="rounded-2xl border border-emerald-200 bg-white/80 px-2 py-3 text-center shadow-sm transition hover:-translate-y-0.5 dark:bg-slate-900" type="button"><span class="mx-auto mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/15 text-xl">📸</span><span class="block text-[11px] font-bold text-slate-700 dark:text-slate-200">فاتورة</span></button></div><p class="text-center text-[10px] text-slate-500">ملاحظة مهمة: أقل مدة لتسجيل الصوت هي <b class="quick-voice-minimum text-emerald-600 dark:text-emerald-300">5 ثواني</b> عشان دبّر يسمعه ويفهمه بدقة.</p>
                 <input type="file" id="quick-entry-invoice-input" accept="image/*" class="hidden">
                 <div id="quick-entry-scanning" class="hidden rounded-2xl border border-blue-200 bg-blue-50 p-3 text-center dark:border-blue-500/30 dark:bg-blue-500/10"><div class="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-white text-xl shadow-sm dark:bg-slate-900"><span style="display:inline-block;animation:dabbar-scan-spin 1s linear infinite">⟳</span></div><p class="text-xs font-bold text-blue-700 dark:text-blue-200">بنقرأ الفاتورة...</p><p class="mt-1 text-[10px] text-blue-600/70 dark:text-blue-200/70">دبّر بيستخرج المبلغ والأصناف</p></div>
-                <div id="quick-entry-form" class="hidden space-y-2"><div class="grid grid-cols-2 gap-2 rounded-xl bg-slate-100 p-1 dark:bg-slate-800" role="group" aria-label="نوع العملية"><button type="button" id="quick-entry-type-expense" data-entry-type="expense" class="rounded-lg bg-white px-3 py-2 text-xs font-black text-rose-600 shadow-sm dark:bg-slate-700 dark:text-rose-300">مصروف</button><button type="button" id="quick-entry-type-income" data-entry-type="income" class="rounded-lg px-3 py-2 text-xs font-bold text-slate-500 dark:text-slate-400">دخل</button></div><p class="text-[10px] text-slate-500">اختار النوع أولًا، ثم اكتب مثلًا: «قبضت 5000 جنيه مرتب» أو «صرفت 75 جنيه أكل».</p><textarea id="quick-entry-input" rows="2" maxlength="2500" placeholder="مثال: صرفت 75 جنيه أكل" class="w-full resize-none rounded-2xl border border-emerald-200 bg-white px-3 py-2.5 text-xs outline-none dark:bg-slate-900 dark:text-slate-100"></textarea><div class="flex gap-2"><button id="quick-entry-analyze" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950" type="button">فهم وتجهيز</button><button id="quick-entry-cancel" class="rounded-xl border border-slate-300 px-3 py-2.5 text-xs text-slate-500 dark:border-slate-700" type="button">إلغاء</button></div></div>
-                <div id="quick-entry-recording" class="hidden rounded-2xl border border-rose-200 bg-rose-50 p-3 text-center text-xs text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200"><div class="flex items-center justify-between gap-2"><span class="font-black">جاري التسجيل...</span><button id="quick-entry-recording-cancel" class="flex h-7 w-7 items-center justify-center rounded-full bg-white/70 text-sm font-black text-rose-500 transition hover:bg-white" type="button" aria-label="إلغاء التسجيل">✕</button></div><div id="quick-entry-recording-time" class="mt-1 font-black">00:00</div><div class="mt-2 flex gap-2"><button id="quick-entry-stop" class="flex-1 rounded-xl bg-rose-500 px-4 py-2 font-bold text-white" type="button">إيقاف وتحليل</button><button id="quick-entry-recording-cancel-bottom" class="rounded-xl bg-white/70 px-3 py-2 font-bold text-rose-500 transition hover:bg-white" type="button">إلغاء</button></div></div>
-                <div id="quick-entry-voice-preview" class="hidden rounded-2xl border border-emerald-200 bg-white p-3 dark:bg-slate-900 dark:border-slate-700 space-y-2"><div class="flex items-center justify-between gap-2"><p class="text-[11px] text-slate-500">سمّع تسجيلك للتأكد إنه واضح قبل ما نبعته</p><button id="quick-entry-voice-cancel" class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-black text-slate-500 transition hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700" type="button" aria-label="إلغاء التسجيل">✕</button></div><audio id="quick-entry-voice-audio" controls class="w-full"></audio><div class="flex gap-2"><button id="quick-entry-voice-send" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950" type="button">ابعت للتحليل</button><button id="quick-entry-voice-retry" class="rounded-xl border border-slate-300 px-3 py-2.5 text-xs text-slate-500 dark:border-slate-700" type="button">سجّل تاني</button><button id="quick-entry-voice-cancel-bottom" class="rounded-xl border border-rose-200 px-3 py-2.5 text-xs font-bold text-rose-500 dark:border-rose-500/30" type="button">إلغاء</button></div></div>
+                <div id="quick-entry-form" class="hidden space-y-2"><p class="text-[10px] text-slate-500">اكتب مثلًا: «قبضت 5000 جنيه مرتب» أو «صرفت 75 جنيه أكل».</p><textarea id="quick-entry-input" rows="2" maxlength="2500" placeholder="مثال: صرفت 75 جنيه أكل" class="w-full resize-none rounded-2xl border border-emerald-200 bg-white px-3 py-2.5 text-xs outline-none dark:bg-slate-900 dark:text-slate-100"></textarea><div class="flex gap-2"><button id="quick-entry-analyze" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950" type="button">فهم وتجهيز</button><button id="quick-entry-cancel" class="rounded-xl border border-slate-300 px-3 py-2.5 text-xs text-slate-500 dark:border-slate-700" type="button">إلغاء</button></div></div>
+                <div id="quick-entry-recording" class="hidden rounded-2xl border border-rose-200 bg-rose-50 p-3 text-center text-xs text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200"><div class="flex items-center justify-between gap-2"><span class="font-black">جاري التسجيل... <span id="quick-entry-recording-type-label" class="font-bold"></span></span><button id="quick-entry-recording-cancel" class="flex h-7 w-7 items-center justify-center rounded-full bg-white/70 text-sm font-black text-rose-500 transition hover:bg-white" type="button" aria-label="إلغاء التسجيل">✕</button></div><div id="quick-entry-recording-time" class="mt-1 font-black">00:00</div><div class="mt-2 flex gap-2"><button id="quick-entry-stop" class="flex-1 rounded-xl bg-rose-500 px-4 py-2 font-bold text-white" type="button">إيقاف وتحليل</button><button id="quick-entry-recording-cancel-bottom" class="rounded-xl bg-white/70 px-3 py-2 font-bold text-rose-500 transition hover:bg-white" type="button">إلغاء</button></div></div>
+                <div id="quick-entry-voice-preview" class="hidden rounded-2xl border border-emerald-200 bg-white p-3 dark:bg-slate-900 dark:border-slate-700 space-y-2"><div class="flex items-center justify-between gap-2"><p class="text-[11px] text-slate-500">سمّع تسجيلك للتأكد إنه واضح قبل ما نبعته — هيتسجّل كـ<span id="quick-entry-voice-preview-type-label" class="font-black"></span></p><button id="quick-entry-voice-cancel" class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-black text-slate-500 transition hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700" type="button" aria-label="إلغاء التسجيل">✕</button></div><audio id="quick-entry-voice-audio" controls class="w-full"></audio><div class="flex gap-2"><button id="quick-entry-voice-send" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950" type="button">ابعت للتحليل</button><button id="quick-entry-voice-retry" class="rounded-xl border border-slate-300 px-3 py-2.5 text-xs text-slate-500 dark:border-slate-700" type="button">سجّل تاني</button><button id="quick-entry-voice-cancel-bottom" class="rounded-xl border border-rose-200 px-3 py-2.5 text-xs font-bold text-rose-500 dark:border-rose-500/30" type="button">إلغاء</button></div></div>
                 <div id="quick-entry-draft" class="hidden rounded-2xl border border-emerald-200 bg-white p-3 dark:bg-slate-900"><div class="flex items-center justify-between gap-2"><p id="quick-entry-draft-title" class="text-[11px] text-slate-500">راجع قبل الحفظ</p><button id="quick-entry-draft-close" type="button" aria-label="اقفل" class="shrink-0 w-6 h-6 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition text-sm font-bold">✕</button></div><div id="quick-entry-draft-list" class="mt-1 space-y-2"></div><div id="quick-entry-draft-actions" class="mt-3 flex gap-2"><button id="quick-entry-confirm" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950" type="button">تأكيد التسجيل</button><button id="quick-entry-edit" class="rounded-xl border border-slate-300 px-3 py-2.5 text-xs text-slate-500 dark:border-slate-700" type="button">تعديل</button></div></div><p id="quick-entry-status" class="min-h-4 text-center text-[11px] text-slate-500"></p>
             </section>
 
@@ -2038,16 +2054,17 @@
                     <span id="net-worth-owed">🤝 ليك: —</span>
                     <span id="net-worth-owe">📤 عليك: —</span>
                 </div>
+                <p class="mt-1 text-[9.5px] leading-relaxed opacity-70">= كاش (دخلك ناقص مصاريفك) + فلوس ليك عند الناس − فلوس عليك للناس</p>
             </div>
 
             <div class="grid grid-cols-2 gap-3">
-                <div id="monthly-total-card" class="bg-gradient-to-br from-emerald-50 via-white to-emerald-100 dark:from-emerald-950/60 dark:to-slate-900 border border-emerald-300 dark:border-emerald-500/30 rounded-3xl p-4 shadow-lg dark:shadow-none">
+                <div id="monthly-total-card" class="bg-white dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 shadow-sm dark:shadow-none">
                     <div class="text-center space-y-1 pb-3">
                         <span class="text-xs text-emerald-700 dark:text-emerald-400 font-semibold block" id="monthly-total-label">إجمالي صرفك الشهر ده</span>
                         <h3 class="text-2xl font-black text-emerald-800 dark:text-emerald-300" id="monthly-total">—</h3>
                         <p class="text-[11px] text-slate-600 dark:text-slate-400" id="monthly-compare">سجّل شوية عمليات كمان وهنقارنلك بالشهر اللي فات.</p>
                     </div>
-                    <div class="grid grid-cols-2 divide-x divide-x-reverse divide-emerald-300 dark:divide-emerald-500/20 border-t border-emerald-300 dark:border-emerald-500/20 pt-3">
+                    <div class="grid grid-cols-2 divide-x divide-x-reverse divide-slate-200 dark:divide-slate-800 border-t border-slate-200 dark:border-slate-800 pt-3">
                         <div class="text-center">
                             <span class="block text-[10px] text-slate-500 dark:text-slate-400 mb-0.5">عدد العمليات الشهر ده</span>
                             <span class="block text-base font-black text-slate-800 dark:text-slate-100" id="monthly-count">—</span>
@@ -2058,7 +2075,7 @@
                         </div>
                     </div>
                 </div>
-                <button type="button" id="monthly-income-toggle" class="bg-gradient-to-br from-teal-50 via-white to-teal-100 dark:from-teal-950/60 dark:to-slate-900 border border-teal-300 dark:border-teal-500/30 rounded-3xl p-4 shadow-lg dark:shadow-none flex flex-col justify-center text-right w-full" aria-expanded="false">
+                <button type="button" id="monthly-income-toggle" class="bg-white dark:bg-slate-950/60 border border-slate-200 dark:border-slate-800 rounded-3xl p-4 shadow-sm dark:shadow-none flex flex-col justify-center text-right w-full" aria-expanded="false">
                     <div class="text-center space-y-1">
                         <span class="text-xs text-teal-700 dark:text-teal-400 font-semibold block">💰 دخلك الشهر ده</span>
                         <h3 class="text-2xl font-black text-teal-800 dark:text-teal-300" id="monthly-income">—</h3>
@@ -2253,15 +2270,15 @@
                 <p class="text-[11px] text-rose-400 font-semibold" id="top-category-detail"></p>
             </div>
 
-            <div id="subscriptions-card" class="rounded-3xl p-4 space-y-3">
-                <h4 class="text-xs font-bold flex items-center gap-1.5" id="subscriptions-title">🔁 اشتراكاتك المتكررة</h4>
-                <div class="space-y-1" id="subscriptions-list">
-                    <p class="text-xs" id="subscriptions-empty">لسه دبّر ما لاقاش اشتراكات متكررة — هتظهر هنا أول ما تتكرر عملية بنفس الاسم شهرين ورا بعض.</p>
+            <details id="subscriptions-card" class="rounded-3xl p-4">
+                <summary class="text-xs font-bold flex items-center justify-between gap-1.5 cursor-pointer list-none" id="subscriptions-title"><span class="flex items-center gap-1.5">🔁 اشتراكاتك المتكررة <span id="subscriptions-count" class="hidden text-[10px] font-bold rounded-full px-1.5 py-0.5"></span></span><span class="subscriptions-chevron text-slate-500 transition-transform">⌄</span></summary>
+                <div class="space-y-1 pt-3" id="subscriptions-list">
+                    <p class="text-xs" id="subscriptions-empty">لسه دبّر ما لاقاش حاجة متكررة — لما تسجّل نفس الاسم بنفسك شهرين متتاليين (اشتراك أو حتى أساسيات زي الرز والزيت)، هتظهر هنا كتنبيه بس، مش تسجيل تلقائي.</p>
                 </div>
-            </div>
+            </details>
 
             <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-4">
-                <h4 class="text-xs font-bold text-slate-300">كل الفئات بالتفصيل:</h4>
+                <div class="flex items-center justify-between gap-2"><h4 class="text-xs font-bold text-slate-300">كل الفئات بالتفصيل:</h4><span class="text-[10px] text-slate-500">اضغط ع أي فئة ‹</span></div>
                 <div class="space-y-2.5 text-xs" id="all-categories-list">
                     <p class="text-slate-500">سجّل أول عملية وهتلاقي هنا أكتر فئة بتصرف فيها.</p>
                 </div>
@@ -2381,9 +2398,9 @@
                 <p id="reminder-form-status" class="min-h-4 text-center text-[11px] text-rose-400"></p>
             </div>
 
-            <div>
+            <div class="rounded-3xl p-4">
                 <h4 class="text-xs font-bold text-slate-300 mb-2">القادمة</h4>
-                <div id="reminders-list" class="space-y-2"><p class="text-xs text-slate-500 text-center py-4">بيتحمّل...</p></div>
+                <div id="reminders-list" class="space-y-2"><p class="text-xs text-slate-500 text-center py-3">بيتحمّل...</p></div>
             </div>
         </div>
 
@@ -4608,11 +4625,14 @@
             wrap.id = 'planning-card';
             wrap.className = 'bg-slate-950/50 border border-emerald-500/15 rounded-3xl p-4 space-y-3';
             wrap.innerHTML = `<div class="flex items-center justify-between gap-2"><div><span class="text-[10px] text-emerald-400 font-bold">وضعك المالي</span><h3 class="text-sm font-black text-slate-100">الدخل والميزانية</h3></div><span class="text-lg">🎯</span></div>
-                <div class="grid grid-cols-2 gap-2"><label class="text-[10px] text-slate-400">دخلك الشهري<input id="planning-income" type="number" min="0" inputmode="numeric" placeholder="مثال: 12000" class="mt-1 w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-100 outline-none focus:border-emerald-400"></label><label class="text-[10px] text-slate-400">ميزانيتك الشهرية<input id="planning-budget" type="number" min="0" inputmode="numeric" placeholder="مثال: 9000" class="mt-1 w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-100 outline-none focus:border-emerald-400"></label></div>
-                <div id="planning-summary" class="rounded-2xl bg-emerald-500/10 px-3 py-2 text-[11px] text-emerald-200"></div>
-                <div><div class="mb-1 flex items-center justify-between"><span class="text-[10px] font-bold text-slate-400">حدود أهم الفئات</span><span class="text-[9px] text-slate-600">اختياري</span></div><div class="rounded-2xl border border-emerald-500/15 bg-emerald-500/5 px-3 py-2.5 text-[10px] leading-relaxed text-slate-400"><p class="font-bold text-emerald-300">إيه فايدة الرقم ده؟</p><p class="mt-1">ده حد تخطيطي للصرف، مش مصروف بيتسجل. دبّر يقارن مصروفاتك الفعلية بيه وينبهك داخل التطبيق عند وصولك لـ <b class="text-amber-300">80%</b> منه.</p></div><div id="category-budgets-list" class="mt-2 space-y-1.5"></div><div class="mt-2 flex gap-2"><input id="category-budget-custom-name" type="text" maxlength="40" placeholder="اكتب أي فئة: قهوة، سفر، حيوانات..." class="min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-900 px-2.5 py-2 text-[10px] text-slate-300 outline-none focus:border-emerald-400"><button id="category-budget-add" type="button" class="rounded-xl border border-emerald-500/25 px-3 py-2 text-[10px] font-bold text-emerald-300">إضافة</button></div><p class="mt-1 text-[9px] text-slate-600">دبّر يقترح الفئات التي تصرف عليها أكثر، وأنت تقدر تكتب أي فئة من عندك وتعدّل أو تسيب أي فئة بدون حد. وبعد أي إضافة أو تعديل، اضغط «حفظ خطتي» عشان تتحفظ التغييرات.</p></div>
+                <p class="text-[10px] text-slate-500 leading-relaxed">اكتب دخلك و/أو سقف صرفك الشهري، ودبّر يحسبلك المتاح تلقائيًا في الكارت اللي تحت.</p>
+                <div class="grid grid-cols-2 gap-2"><label class="text-[10px] text-slate-400">💰 دخلك الشهري<input id="planning-income" type="number" min="0" inputmode="numeric" placeholder="مثال: 12000" class="mt-1 w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-100 outline-none focus:border-emerald-400"></label><label class="text-[10px] text-slate-400">🎯 ميزانيتك الشهرية<input id="planning-budget" type="number" min="0" inputmode="numeric" placeholder="مثال: 9000" class="mt-1 w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-100 outline-none focus:border-emerald-400"></label></div>
+                <div id="planning-summary" class="rounded-2xl bg-emerald-500/10 px-3 py-3 text-[11px] text-emerald-200"></div>
+                <details class="group"><summary class="flex cursor-pointer list-none items-center justify-between rounded-xl bg-slate-900/60 px-3 py-2 text-[10px] font-bold text-slate-400"><span>حدود مصروف لكل فئة (اختياري)</span><span class="text-slate-600 transition group-open:rotate-180">⌄</span></summary>
+                <div class="mt-2 space-y-2"><p class="text-[9.5px] leading-relaxed text-slate-500">حد تخطيطي بس، مش مصروف بيتسجل — دبّر ينبهك لما توصل لـ <b class="text-amber-300">80%</b> منه.</p><div id="category-budgets-list" class="space-y-1.5"></div><div class="flex gap-2"><input id="category-budget-custom-name" type="text" maxlength="40" placeholder="اكتب أي فئة: قهوة، سفر..." class="min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-900 px-2.5 py-2 text-[10px] text-slate-300 outline-none focus:border-emerald-400"><button id="category-budget-add" type="button" class="rounded-xl border border-emerald-500/25 px-3 py-2 text-[10px] font-bold text-emerald-300">إضافة</button></div></div></details>
                 <div class="flex gap-2"><button id="planning-save" type="button" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950">حفظ خطتي</button><button id="planning-reset" type="button" title="إدارة ومسح خطة الدخل والميزانية" class="rounded-xl border border-slate-700/60 px-3 py-2.5 text-xs text-slate-500">إدارة</button></div>
-                <div class="border-t border-slate-800 pt-3"><div class="flex items-center justify-between"><div><h4 class="text-xs font-bold text-slate-300">التزامات شهرية متوقعة</h4><p class="mt-0.5 text-[9px] text-slate-500">للتخطيط فقط — لا تُضاف للصرف الفعلي إلا عند تسجيلها</p></div><span class="text-[10px] text-slate-500">إيجار / اشتراكات</span></div><div class="mt-2 grid grid-cols-[1fr_5rem_2.5rem] gap-2"><input id="recurring-name" placeholder="إيجار / اشتراك" class="rounded-xl border border-slate-700 bg-slate-900 px-2.5 py-2 text-[10px] text-slate-100 outline-none"><input id="recurring-amount" type="number" min="0" placeholder="المبلغ" class="rounded-xl border border-slate-700 bg-slate-900 px-2.5 py-2 text-[10px] text-slate-100 outline-none"><button id="recurring-add" type="button" class="rounded-xl bg-slate-800 text-lg text-emerald-400">+</button></div><div id="recurring-list" class="mt-2 space-y-1.5"></div></div>`;
+                <details class="group border-t border-slate-800 pt-3"><summary class="flex cursor-pointer list-none items-center justify-between text-[10px] font-bold text-slate-400"><span>📌 التزامات شهرية متوقعة (إيجار / اشتراكات)</span><span class="text-slate-600 transition group-open:rotate-180">⌄</span></summary>
+                <div class="mt-2 space-y-2"><p class="text-[9px] text-slate-500">للتخطيط فقط — لا تُضاف للصرف الفعلي إلا عند تسجيلها.</p><div class="grid grid-cols-[1fr_5rem_2.5rem] gap-2"><input id="recurring-name" placeholder="إيجار / اشتراك" class="rounded-xl border border-slate-700 bg-slate-900 px-2.5 py-2 text-[10px] text-slate-100 outline-none"><input id="recurring-amount" type="number" min="0" placeholder="المبلغ" class="rounded-xl border border-slate-700 bg-slate-900 px-2.5 py-2 text-[10px] text-slate-100 outline-none"><button id="recurring-add" type="button" class="rounded-xl bg-slate-800 text-lg text-emerald-400">+</button></div><div id="recurring-list" class="mt-2 space-y-1.5"></div></div></details>`;
             monthly.insertBefore(wrap, quick.nextSibling);
             const ledger = document.createElement('section');
             ledger.id = 'expense-ledger-card';
@@ -4665,7 +4685,19 @@
             const summary = document.getElementById('planning-summary');
             const recurringTotal = (settings.recurringExpenses || []).reduce((sum, item) => sum + Number(item.amount || 0), 0);
             const afterExpected = Math.max(0, remaining - recurringTotal);
-            if (summary) summary.innerHTML = incomeOrBudget ? `<div class="planning-summary-grid"><div><span>المتاح بعد الصرف الفعلي</span><strong>${fmt(remaining)}</strong></div>${recurringTotal ? `<div><span>بعد الالتزامات المتوقعة</span><strong>${fmt(afterExpected)}</strong></div>` : ''}${income && budget ? `<div><span>استهلاك الميزانية</span><strong>${Math.min(100, Math.round((total / budget) * 100))}%</strong></div>` : ''}</div><p class="planning-summary-note">الأول للصرف الذي سجّلته فعلًا، والثاني بعد حساب الالتزامات التي أضفتها للتخطيط.</p>` : '<p class="planning-empty-note">أدخل دخلك أو حد مصروفاتك عشان دبّر يحسبلك المتاح.</p><p class="planning-summary-note">الالتزامات المتكررة للتخطيط فقط، ولا تُخصم تلقائيًا.</p>';
+            if (summary) {
+                if (incomeOrBudget) {
+                    const pct = (income && budget) ? Math.min(100, Math.round((total / budget) * 100)) : null;
+                    summary.innerHTML = `
+                        <div class="planning-hero"><span class="planning-hero-label">المتاح لك دلوقتي</span><strong class="planning-hero-value">${fmt(remaining)} ج.م</strong></div>
+                        <div class="planning-subrow"><span>💸 صرفت فعليًا: <b>${fmt(total)}</b></span></div>
+                        ${pct !== null ? `<div class="planning-progress-wrap"><div class="planning-progress-track"><div class="planning-progress-fill" style="width:${pct}%"></div></div><span class="planning-progress-pct">${pct}% من ميزانيتك اتصرف</span></div>` : ''}
+                        <p class="planning-summary-note">"المتاح" = دخلك أو ميزانيتك، ناقص اللي صرفته فعلًا بس.</p>
+                        ${recurringTotal ? `<div class="planning-forecast"><span>🔮 لو دفعت التزاماتك المتوقعة (${fmt(recurringTotal)})، هيفضلّلك</span><strong>${fmt(afterExpected)} ج.م</strong></div>` : ''}`;
+                } else {
+                    summary.innerHTML = '<p class="planning-empty-note">أدخل دخلك أو حد مصروفاتك عشان دبّر يحسبلك المتاح.</p><p class="planning-summary-note">الالتزامات المتكررة للتخطيط فقط، ولا تُخصم تلقائيًا.</p>';
+                }
+            }
             const categoryBudgetList = document.getElementById('category-budgets-list');
             const topCategories = Array.isArray(data?.month?.byCategory) ? data.month.byCategory.slice(0, 3).map((item) => item.name) : [];
             const selectedCategories = [...new Set([...topCategories, ...Object.keys(settings.categoryBudgets || {})])];
@@ -5080,15 +5112,20 @@
 
         function renderSubscriptions(subscriptions) {
             const listEl = document.getElementById('subscriptions-list');
+            const countEl = document.getElementById('subscriptions-count');
             if (!listEl) return;
             const items = subscriptions || [];
+            if (countEl) {
+                if (items.length) { countEl.textContent = items.length; countEl.classList.remove('hidden'); }
+                else countEl.classList.add('hidden');
+            }
             if (!items.length) {
-                listEl.innerHTML = '<p class="text-xs" id="subscriptions-empty">لسه دبّر ما لاقاش اشتراكات متكررة — هتظهر هنا أول ما تتكرر عملية بنفس الاسم شهرين ورا بعض.</p>';
+                listEl.innerHTML = '<p class="text-xs" id="subscriptions-empty">لسه دبّر ما لاقاش حاجة متكررة — لما تسجّل نفس الاسم بنفسك شهرين متتاليين (اشتراك أو حتى أساسيات زي الرز والزيت)، هتظهر هنا كتنبيه بس، مش تسجيل تلقائي.</p>';
                 return;
             }
             listEl.innerHTML = items.map((s, i) => {
                 const isUp = s.priceChangePercent > 5;
-                const metaText = isUp ? `زاد ${s.priceChangePercent}% عن الشهر اللي فات` : `تكرر ${s.monthsRecurring} ${s.monthsRecurring === 2 ? 'شهرين' : 'شهور'}`;
+                const metaText = isUp ? `زاد ${s.priceChangePercent}% عن الشهر اللي فات` : `بتسجّله بنفسك بقاله ${s.monthsRecurring} ${s.monthsRecurring === 2 ? 'شهرين متتاليين' : 'شهور متتالية'}`;
                 const borderClass = i < items.length - 1 ? 'border-b' : '';
                 return `<div class="subscription-row flex items-center justify-between py-2 ${borderClass} ${isUp ? 'price-up' : ''}">
                     <div class="min-w-0">
@@ -5405,14 +5442,14 @@
                 }
 
                 listEl.innerHTML = reminders.length ? reminders.map((r) => `
-                    <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-3 flex items-center justify-between gap-2">
+                    <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-2.5 flex items-center justify-between gap-2">
                         <div class="flex items-center gap-2.5 min-w-0"><span class="text-base shrink-0">🔔</span><div class="min-w-0"><p class="text-xs font-semibold text-slate-200 truncate">${debtEscape(r.title)}</p><p class="text-[10px] text-slate-500">${new Date(r.due_date + 'T00:00:00').toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' })}</p></div></div>
                         <div class="flex items-center gap-2 shrink-0">
                             <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 rounded-full px-2 py-1">${reminderDaysLabel(r.due_date)}</span>
                             <button type="button" class="text-slate-400 hover:text-rose-400 text-lg" data-delete-reminder="${debtEscape(r.id)}" aria-label="حذف التذكير">×</button>
                         </div>
                     </div>
-                `).join('') : '<p class="text-xs text-slate-500 text-center p-4">مفيش تذكيرات قادمة، ضيف واحد فوق.</p>';
+                `).join('') : '<p class="text-xs text-slate-500 text-center p-3">مفيش تذكيرات قادمة، ضيف واحد فوق.</p>';
 
                 listEl.querySelectorAll('[data-delete-reminder]').forEach((btn) => btn.addEventListener('click', () => {
                     const id = btn.getAttribute('data-delete-reminder');
@@ -5691,6 +5728,12 @@
                 incomeBtn.className = quickEntrySelectedType === 'income' ? `${active} text-teal-600 dark:bg-slate-700 dark:text-teal-300` : `${inactive}`;
                 incomeBtn.setAttribute('aria-pressed', String(quickEntrySelectedType === 'income'));
             }
+            // ============ نفس النوع المختار بيتعرض واضح أثناء التسجيل ومراجعة الصوت، عشان محدش يفاجأ إنها اتسجلت دخل بدل مصروف أو العكس ============
+            const typeLabel = quickEntrySelectedType === 'income' ? 'دخل 🟢' : 'مصروف 🔴';
+            const recLabel = document.getElementById('quick-entry-recording-type-label');
+            if (recLabel) recLabel.textContent = `(${typeLabel})`;
+            const previewLabel = document.getElementById('quick-entry-voice-preview-type-label');
+            if (previewLabel) previewLabel.textContent = ` ${typeLabel}`;
         }
         let quickStatusTimer = null;
         function quickStatus(message, kind = 'normal') {
@@ -5859,7 +5902,7 @@
 
         // اختيار النوع هنا فعلي، وليس مجرد تغيير لون: requestedType يُرسل مع الكتابة والصوت
         // ويجعل الخادم يحفظ العملية في جدول المصروفات أو جدول الدخل الصحيح.
-        document.getElementById('quick-entry-confirm')?.addEventListener('click', async () => { if (!requireQuickEntryAccess() || !quickEntryDrafts.length) return; const btn = document.getElementById('quick-entry-confirm'); btn.disabled = true; quickStatus('جاري حفظ العملية...'); try { const result = await asstApi('entry_confirm', { drafts: quickEntryDrafts }); celebrateSave(btn); document.getElementById('quick-entry-input').value = ''; quickShow('quick-entry-draft', false); quickStatus(result.message || 'تم التسجيل بنجاح.', 'success'); await loadDashboard(); } catch (e) { quickStatus(e.message || 'تعذر الحفظ.', 'error'); } finally { btn.disabled = false; } });
+        document.getElementById('quick-entry-confirm')?.addEventListener('click', async () => { if (!requireQuickEntryAccess() || !quickEntryDrafts.length) return; const btn = document.getElementById('quick-entry-confirm'); btn.disabled = true; quickStatus('جاري حفظ العملية...'); try { const result = await asstApi('entry_confirm', { drafts: quickEntryDrafts }); celebrateSave(btn); document.getElementById('quick-entry-input').value = ''; quickShow('quick-entry-draft', false); quickStatus(result.message || 'تم التسجيل بنجاح.', 'success'); setQuickEntryType('expense'); await loadDashboard(); } catch (e) { quickStatus(e.message || 'تعذر الحفظ.', 'error'); } finally { btn.disabled = false; } });
         document.getElementById('quick-entry-invoice')?.addEventListener('click', () => { if (!requireQuickEntryAccess()) return; document.getElementById('quick-entry-invoice-input')?.click(); });
         document.getElementById('quick-entry-draft-close')?.addEventListener('click', () => { quickShow('quick-entry-draft', false); quickStatus(''); document.getElementById('quick-entry-input').value = ''; });
         // ============ فاتورة سريعة: نفس بالظبط سلوك "امسح فاتورة" — بتستخرج كل صنف بسعره وتتسجل أوتوماتيك من غير خطوة تأكيد إضافية ============

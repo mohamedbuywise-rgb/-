@@ -1,6 +1,6 @@
 import { supabase } from '../../lib/supabaseClient.js';
 import { getDashboardUserFromRequest } from '../../lib/dashboardAuth.js';
-import { getMonthRange, getExpensesBetween, buildCategoryBreakdown } from '../../lib/expenses.js';
+import { getMonthRange, getExpensesBetween, buildCategoryBreakdown, detectRecurringSubscriptions, getLifetimeCashPosition } from '../../lib/expenses.js';
 import { computeNetByPerson } from '../../lib/debts.js';
 import { getInvoicesList, getInvoiceDetail } from '../../lib/invoices.js';
 import { MONTH_NAMES, CATEGORY_EMOJI, SUBSCRIPTION_PRICE_EGP, INSTAPAY_LINK } from '../../lib/config.js';
@@ -254,6 +254,13 @@ export default async function handler(req, res) {
     const owedToYouTotal = owedToYou.reduce((sum, v) => sum + v.net, 0);
     const youOweTotal = youOwe.reduce((sum, v) => sum + Math.abs(v.net), 0);
 
+    // ---- صافي الثروة: كاش (دخل - مصروف من أول ما بدأ) + صافي الديون ----
+    const lifetimeCash = await getLifetimeCashPosition(dataUserId);
+    const netWorth = lifetimeCash.cash + (owedToYouTotal - youOweTotal);
+
+    // ---- كاشف الاشتراكات المتكررة ----
+    const recurringSubscriptions = await detectRecurringSubscriptions(dataUserId);
+
     // ---- سلف مستلَفة الشهر ده — بتتحسب ضمن "الدخل" برضو لأن فلوس دخلت إيدك فعليًا، حتى لو دين ----
     const { data: monthBorrowedDebts } = await supabase
       .from('debts')
@@ -429,6 +436,13 @@ export default async function handler(req, res) {
         owedToYou: owedToYou.map((v) => ({ name: v.displayName, amount: v.net })),
         youOwe: youOwe.map((v) => ({ name: v.displayName, amount: Math.abs(v.net) })),
       },
+      netWorth: {
+        total: netWorth,
+        cash: lifetimeCash.cash,
+        owedToYouTotal,
+        youOweTotal,
+      },
+      recurringSubscriptions,
       flow: {
         in: flowIn,
         out: flowOut,

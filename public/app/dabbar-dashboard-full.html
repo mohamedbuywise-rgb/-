@@ -15,6 +15,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
     <script src="/vendor/modern-screenshot.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
     <!-- بنحدد الوضع (فاتح/غامق) بدري قبل ما الصفحة تترسم. الافتراضي دلوقتي "فاتح" -->
@@ -75,6 +76,99 @@
         }
         @media (prefers-reduced-motion: reduce) {
             .modal-screen-surface { transition: none !important; }
+        }
+
+        /* ============ بطاقة الحساب الجديدة — تصميم نهاري/ليلي ============ */
+        .profile-design-card {
+            position: relative;
+            overflow: hidden;
+            isolation: isolate;
+            aspect-ratio: 2.32 / 1;
+            border-radius: 1.55rem;
+            border: 1px solid var(--pm-hairline-soft);
+            box-shadow: 0 16px 34px rgba(15, 23, 42, .18);
+            background: #101918 center / cover no-repeat;
+        }
+        .profile-design-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: 0;
+            background: var(--profile-card-image) center / cover no-repeat;
+        }
+        .profile-design-card::after {
+            content: '';
+            position: absolute;
+            z-index: 0;
+            inset: 14% 29% 4%;
+            border-radius: 1.2rem;
+            background: rgba(13, 24, 24, .78);
+            box-shadow: 0 0 34px rgba(4, 12, 12, .22);
+        }
+        html[data-theme="light"] .profile-design-card {
+            --profile-card-image: url('./assets/profile-card-light.jpg');
+            background: #f7faf7;
+            box-shadow: 0 16px 34px rgba(40, 70, 58, .16);
+        }
+        html[data-theme="light"] .profile-design-card::after {
+            background: rgba(255, 255, 255, .89);
+            box-shadow: 0 0 34px rgba(255, 255, 255, .30);
+        }
+        .profile-design-card-content {
+            position: relative;
+            z-index: 1;
+            height: 100%;
+            padding: 1.15rem .8rem .95rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: .45rem;
+            text-align: center;
+        }
+        .profile-design-avatar-wrap { position: relative; }
+        .profile-design-avatar {
+            width: 5.7rem;
+            height: 5.7rem;
+            border-radius: 999px;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(145deg, #263b38, #0b1414);
+            border: 3px solid rgba(231, 194, 91, .78);
+            color: #f9fafb;
+            font-size: 1.8rem;
+            font-weight: 900;
+            box-shadow: 0 7px 18px rgba(0, 0, 0, .30);
+        }
+        html[data-theme="light"] .profile-design-avatar { background: #e8eeea; color: #073d32; border-color: #c79835; }
+        .profile-design-avatar img { width: 100%; height: 100%; object-fit: cover; }
+        .profile-design-camera {
+            position: absolute;
+            inset-inline-start: -.15rem;
+            bottom: -.2rem;
+            width: 2rem;
+            height: 2rem;
+            display: grid;
+            place-items: center;
+            border-radius: 999px;
+            border: 2px solid #152321;
+            background: #152321;
+            font-size: .9rem;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, .28);
+        }
+        html[data-theme="light"] .profile-design-camera { border-color: #fff; background: #fffaf0; }
+        .profile-design-name { margin-top: .2rem; color: #f8fafc; font-size: 1.45rem; line-height: 1.2; font-weight: 900; text-shadow: 0 2px 8px rgba(0,0,0,.24); }
+        .profile-design-email { max-width: 100%; overflow-wrap: anywhere; color: #d1d5db; font-size: .82rem; line-height: 1.4; }
+        html[data-theme="light"] .profile-design-name { color: #063d32; text-shadow: none; }
+        html[data-theme="light"] .profile-design-email { color: #49635a; }
+        @media (max-width: 420px) {
+            .profile-design-card-content { padding: .65rem .55rem .55rem; }
+            .profile-design-avatar { width: 4.25rem; height: 4.25rem; }
+            .profile-design-camera { width: 1.65rem; height: 1.65rem; font-size: .75rem; }
+            .profile-design-name { font-size: 1.25rem; }
+            .profile-design-email { font-size: .75rem; }
         }
 
         /* ============ Account nested pages — صفحات كاملة بدل Bottom Sheets ============ */
@@ -279,6 +373,54 @@
         html:not([data-theme="light"]) .active-days-badge { color:#4ade80; background:rgba(74,222,128,.15); border-color:rgba(74,222,128,.25); }
         html:not([data-theme="light"]) .active-days-dot-mark { background:#252d2f; border-color:#374144; }
         html:not([data-theme="light"]) .active-days-dot { color:#6e7d78; }
+
+        /* صفحة التذكيرات — هرمية أوضح وترتيب عملي */
+        .reminders-page-heading { display:flex; align-items:center; gap:.75rem; padding:.2rem .15rem .35rem; }
+        .reminders-heading-icon { width:3rem; height:3rem; display:grid; place-items:center; border-radius:1rem; background:color-mix(in srgb, var(--pm-gold) 16%, var(--pm-surface-hi)); border:1px solid color-mix(in srgb, var(--pm-gold) 38%, transparent); font-size:1.35rem; box-shadow:0 8px 18px rgba(0,0,0,.12); }
+        .reminders-page-heading h3 { margin:0; color:var(--pm-ink); font-size:1.25rem; font-weight:900; }
+        .reminders-page-heading p { margin:.15rem 0 0; color:var(--pm-muted); font-size:.7rem; }
+        .reminders-telegram-banner { align-items:center; justify-content:space-between; gap:.75rem; padding:.8rem; border-radius:1rem; background:color-mix(in srgb, var(--pm-gold) 10%, var(--pm-surface-hi)); border:1px solid color-mix(in srgb, var(--pm-gold) 38%, transparent); }
+        #reminders-notification-badge { background:var(--pm-gold) !important; color:#17120a !important; border-color:var(--pm-surface) !important; box-shadow:0 3px 10px color-mix(in srgb, var(--pm-gold) 35%, transparent) !important; }
+        html[data-theme="light"] #reminders-notification-badge { background:#16a878 !important; color:#fff !important; border-color:#fffdf8 !important; box-shadow:0 3px 10px rgba(22,168,120,.32) !important; }
+        .reminders-alert-card { display:flex; align-items:center; gap:.7rem; padding:.8rem; border:1px solid color-mix(in srgb, var(--pm-gold) 52%, transparent); border-radius:1.1rem; background:linear-gradient(135deg,color-mix(in srgb, var(--pm-gold) 15%, var(--pm-surface-hi)),var(--pm-surface-hi)); box-shadow:0 9px 20px rgba(0,0,0,.1); }
+        .reminders-alert-icon { width:2.6rem; height:2.6rem; display:grid; place-items:center; flex:none; border-radius:50%; background:color-mix(in srgb, var(--pm-gold) 25%, var(--pm-surface)); font-size:1.25rem; }
+        .reminders-alert-copy { min-width:0; flex:1; }
+        .reminders-alert-copy strong { display:block; color:var(--pm-ink); font-size:.78rem; font-weight:900; }
+        .reminders-alert-copy span { display:block; margin-top:.15rem; color:var(--pm-muted); font-size:.65rem; line-height:1.5; }
+        .reminders-alert-stage { flex:none; padding:.3rem .45rem; border-radius:.55rem; color:var(--pm-gold-bright); background:color-mix(in srgb, var(--pm-gold) 20%, transparent); font-size:.6rem; font-weight:900; }
+        .reminders-stats-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:.55rem; padding:.15rem; }
+        .reminders-stat { min-width:0; display:flex; flex-direction:column; align-items:center; gap:.12rem; padding:.7rem .35rem; border:1px solid var(--pm-hairline-soft); border-radius:1rem; background:var(--pm-surface-hi); }
+        .reminders-stat-icon { color:var(--pm-gold-bright); font-size:.9rem; line-height:1; }
+        .reminders-stat strong { color:var(--pm-ink); font:700 1.25rem/1 'Fraunces','Cairo',sans-serif; }
+        .reminders-stat small { color:var(--pm-muted); font-size:.62rem; }
+        .reminders-create-card { padding:1rem; border:1px solid var(--pm-gold); border-radius:1.35rem; background:linear-gradient(145deg,color-mix(in srgb, var(--pm-gold) 7%, var(--pm-surface-hi)),var(--pm-surface-hi)); box-shadow:0 12px 28px rgba(0,0,0,.12); }
+        .reminders-section-heading { display:flex; align-items:center; gap:.6rem; margin-bottom:.85rem; }
+        .reminders-section-icon { width:2rem; height:2rem; display:grid; place-items:center; border-radius:.7rem; color:#17120a; background:linear-gradient(135deg,var(--pm-gold-bright),var(--pm-gold)); font-size:1.3rem; font-weight:900; }
+        .reminders-section-heading h4 { margin:0; color:var(--pm-ink); font-size:.9rem; font-weight:900; }
+        .reminders-section-heading p { margin:.1rem 0 0; color:var(--pm-muted); font-size:.65rem; }
+        .reminders-field-label { display:block; margin:.55rem 0 .3rem; color:var(--pm-muted); font-size:.65rem; font-weight:700; }
+        .reminders-input { width:100%; box-sizing:border-box; border:1px solid var(--pm-hairline-soft); border-radius:.8rem; background:var(--pm-surface); color:var(--pm-ink); padding:.72rem .8rem; outline:none; font:600 .75rem 'Cairo',sans-serif; }
+        .reminders-input:focus { border-color:var(--pm-gold); box-shadow:0 0 0 3px color-mix(in srgb, var(--pm-gold) 14%, transparent); }
+        .reminders-primary-btn { width:100%; margin-top:.85rem; padding:.78rem; border:0; border-radius:.85rem; background:linear-gradient(135deg,var(--pm-gold-bright),var(--pm-gold)); color:#17120a; font:900 .78rem 'Cairo',sans-serif; cursor:pointer; }
+        .reminders-list-section { padding:.15rem .1rem; }
+        .reminders-list-heading { display:flex; align-items:baseline; justify-content:space-between; gap:.5rem; margin-bottom:.65rem; }
+        .reminders-list-heading h4 { margin:0; color:var(--pm-ink); font-size:.85rem; font-weight:900; }
+        .reminders-list-heading span { color:var(--pm-muted); font-size:.62rem; }
+        .reminders-featured:empty { display:none; }
+        .reminder-featured-card { display:flex; align-items:center; gap:.7rem; padding:.85rem; margin-bottom:.65rem; border:1px solid color-mix(in srgb, var(--pm-gold) 42%, transparent); border-radius:1.1rem; background:color-mix(in srgb, var(--pm-gold) 8%, var(--pm-surface-hi)); }
+        .reminder-featured-icon { width:2.65rem; height:2.65rem; flex:none; display:grid; place-items:center; border-radius:50%; background:color-mix(in srgb, var(--pm-gold) 18%, var(--pm-surface)); font-size:1.3rem; }
+        .reminder-featured-main { min-width:0; flex:1; }
+        .reminder-featured-main strong { display:block; color:var(--pm-ink); font-size:.78rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .reminder-featured-main small { display:block; margin-top:.15rem; color:var(--pm-muted); font-size:.63rem; }
+        .reminder-featured-badge { flex:none; padding:.28rem .45rem; border-radius:.55rem; background:color-mix(in srgb, var(--pm-gold) 22%, transparent); color:var(--pm-gold-bright); font-size:.62rem; font-weight:900; }
+        .reminder-row { display:flex; align-items:center; gap:.65rem; padding:.72rem .7rem; border:1px solid var(--pm-hairline-soft); border-radius:.95rem; background:var(--pm-surface-hi); }
+        .reminder-row-icon { flex:none; width:2rem; height:2rem; display:grid; place-items:center; border-radius:.65rem; background:color-mix(in srgb, var(--pm-gold) 12%, var(--pm-surface)); font-size:1rem; }
+        .reminder-row-main { min-width:0; flex:1; }
+        .reminder-row-main strong { display:block; color:var(--pm-ink); font-size:.72rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .reminder-row-main small { display:block; color:var(--pm-muted); font-size:.6rem; margin-top:.12rem; }
+        .reminder-row-badge { flex:none; color:var(--pm-gold-bright); font-size:.6rem; font-weight:800; }
+        .reminder-delete-btn { flex:none; color:var(--pm-muted); background:none; border:0; font-size:1.1rem; cursor:pointer; }
+        @media (max-width:390px) { .reminders-stat { padding-inline:.2rem; } .reminders-page-heading h3 { font-size:1.1rem; } }
 
         .daily-reminder-card {
             direction: rtl;
@@ -765,35 +907,87 @@
         html[data-theme="dark"] .available-count-badge.gold { background: rgba(244,198,72,.14); border: 1px solid rgba(244,198,72,.3); color: #f4c648; }
         html[data-theme="light"] .available-count-badge.gold { background: rgba(138,109,10,.1); border: 1px solid rgba(138,109,10,.25); color: #8a6d0a; }
 
-        /* ===== المحفظة الاستثمارية القابلة للطي ===== */
-        #portfolio-collapsible { border-radius: 1.6rem; margin-top: .75rem; overflow: hidden; box-shadow: 0 10px 24px rgba(0,0,0,.12); }
-        html[data-theme="dark"] #portfolio-collapsible { background: #0f1c17; border: 1px solid rgba(16,185,129,.28); }
-        html[data-theme="light"] #portfolio-collapsible { background: #e7f7ef; border: 1px solid #bfe6d3; }
-        #portfolio-summary { list-style: none; cursor: pointer; padding: 1.05rem 1.1rem; display: flex; justify-content: space-between; align-items: center; }
+        /* ===== المحفظة الاستثمارية — واجهة بريميوم متوافقة مع الوضعين ===== */
+        #portfolio-collapsible {
+            --portfolio-accent: #16a879;
+            --portfolio-accent-strong: #085041;
+            --portfolio-surface: #f7fffb;
+            --portfolio-card: rgba(255,255,255,.82);
+            --portfolio-line: rgba(15,110,86,.18);
+            --portfolio-ink: #102a22;
+            --portfolio-muted: #5b766d;
+            border-radius: 1.6rem; margin-top: .75rem; overflow: visible;
+            border: 1px solid var(--portfolio-line);
+            background: var(--portfolio-surface);
+            box-shadow: 0 16px 34px rgba(8,80,65,.10);
+        }
+        html[data-theme="dark"] #portfolio-collapsible {
+            --portfolio-accent: #46d7a5;
+            --portfolio-accent-strong: #b8f2dc;
+            --portfolio-surface: #0d1c17;
+            --portfolio-card: rgba(18,45,37,.74);
+            --portfolio-line: rgba(70,215,165,.22);
+            --portfolio-ink: #ecfff7;
+            --portfolio-muted: #9bb8ad;
+            box-shadow: 0 16px 34px rgba(0,0,0,.22);
+        }
+        html[data-theme="light"] #portfolio-collapsible { background: linear-gradient(135deg, #f5fffa, #e7f7ef); }
+        #portfolio-summary { list-style: none; cursor: pointer; padding: 1.05rem 1.1rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
         #portfolio-summary::-webkit-details-marker { display: none; }
-        .portfolio-eyebrow { font-size: .62rem; font-weight: 800; color: #10b981; display: block; }
-        .portfolio-title { font-size: .85rem; font-weight: 900; margin-top: .15rem; display: block; }
-        .portfolio-right { display: flex; align-items: center; gap: .55rem; }
-        .portfolio-total-quick { font-size: .95rem; font-weight: 900; }
-        html[data-theme="dark"] .portfolio-total-quick { color: #fbe7a8; }
-        html[data-theme="light"] .portfolio-total-quick { color: #0e655b; }
-        .portfolio-chev { transition: transform .2s; opacity: .6; }
+        .portfolio-summary-copy { min-width: 0; }
+        .portfolio-eyebrow { display: inline-flex; align-items: center; gap: .35rem; font-size: .61rem; font-weight: 900; color: var(--portfolio-accent); letter-spacing: .01em; }
+        .portfolio-live-dot { width: .38rem; height: .38rem; border-radius: 50%; background: var(--portfolio-accent); box-shadow: 0 0 0 .2rem color-mix(in srgb, var(--portfolio-accent) 14%, transparent); }
+        .portfolio-title { display: flex; align-items: center; gap: .4rem; color: var(--portfolio-ink); font-size: .88rem; font-weight: 900; margin-top: .28rem; }
+        .portfolio-title-icon { width: 1.8rem; height: 1.8rem; display: inline-flex; align-items: center; justify-content: center; border-radius: .65rem; color: var(--portfolio-accent-strong); background: color-mix(in srgb, var(--portfolio-accent) 14%, transparent); font-size: 1.15rem; }
+        .portfolio-right { display: flex; align-items: center; gap: .7rem; }
+        .portfolio-summary-total { display: flex; flex-direction: column; align-items: flex-start; gap: .05rem; }
+        .portfolio-total-caption { color: var(--portfolio-muted); font-size: .55rem; font-weight: 800; }
+        .portfolio-total-quick { color: var(--portfolio-accent-strong); font-size: 1.12rem; line-height: 1.2; font-weight: 900; white-space: nowrap; }
+        .portfolio-chev { color: var(--portfolio-muted); transition: transform .2s; font-size: 1.1rem; }
         #portfolio-collapsible[open] .portfolio-chev { transform: rotate(180deg); }
-        .portfolio-body { padding: 0 1.1rem 1.15rem; border-top: 1px dashed rgba(16,185,129,.25); }
-        html[data-theme="light"] .portfolio-body { border-top-color: #bfe6d3; }
+        .portfolio-body { padding: .9rem 1.1rem 1.15rem; border-top: 1px dashed var(--portfolio-line); }
         .portfolio-change { text-align: center; font-size: .64rem; opacity: .75; margin: .75rem 0; }
-        .portfolio-asset { display: flex; justify-content: space-between; align-items: center; border-radius: 1rem; padding: .6rem .7rem; margin-top: .5rem; }
-        html[data-theme="dark"] .portfolio-asset { background: rgba(0,0,0,.2); }
-        html[data-theme="light"] .portfolio-asset { background: rgba(255,255,255,.65); }
-        .portfolio-asset .portfolio-asset-name { font-size: .78rem; font-weight: 800; }
-        .portfolio-asset .portfolio-asset-sub { font-size: .6rem; opacity: .65; }
-        .portfolio-asset .portfolio-asset-val strong { font-size: .85rem; display: block; text-align: left; }
-        .portfolio-asset-val .up { color: #34d399; font-size: .64rem; }
-        html[data-theme="light"] .portfolio-asset-val .up { color: #0a9463; }
-        .portfolio-asset-val .down { color: #fb7185; font-size: .64rem; }
-        html[data-theme="light"] .portfolio-asset-val .down { color: #c73a52; }
-        .portfolio-add-btn { margin-top: .7rem; width: 100%; border: 1px dashed rgba(16,185,129,.45); background: transparent; color: #10b981; border-radius: 1rem; padding: .65rem; font-size: .75rem; font-weight: 800; cursor: pointer; }
-        .portfolio-note { font-size: .6rem; opacity: .6; margin-top: .6rem; text-align: center; line-height: 1.8; }
+        .portfolio-asset-list { display: grid; gap: .55rem; }
+        .portfolio-asset { position: relative; display: flex; justify-content: space-between; align-items: center; gap: .7rem; border-radius: 1.15rem; padding: .68rem .72rem; background: var(--portfolio-card); border: 1px solid var(--portfolio-line); box-shadow: 0 6px 16px rgba(8,80,65,.06); }
+        .portfolio-asset-main { display: flex; align-items: center; gap: .65rem; min-width: 0; }
+        .portfolio-asset-icon { width: 40px; height: 40px; flex: 0 0 40px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 1.58rem; color: #07533f; background: #d4f1e5; border: 1px solid rgba(8,80,65,.24); box-shadow: inset 0 0 0 1px rgba(255,255,255,.45), 0 3px 8px rgba(8,80,65,.10); }
+        .portfolio-asset[data-tone="gold"] .portfolio-asset-icon { color: #704900; background: #ffe9a3; border-color: rgba(112,73,0,.28); }
+        .portfolio-asset[data-tone="silver"] .portfolio-asset-icon { color: #3b5368; background: #dceaf2; border-color: rgba(59,83,104,.27); }
+        .portfolio-asset[data-tone="crypto-btc"] .portfolio-asset-icon { color: #a64e00; background: #ffe2bd; border-color: rgba(166,78,0,.27); }
+        .portfolio-asset[data-tone="crypto-eth"] .portfolio-asset-icon { color: #435bbd; background: #e0e6ff; border-color: rgba(67,91,189,.27); }
+        .portfolio-asset[data-tone="crypto"] .portfolio-asset-icon { color: #463bb2; background: #e4e1ff; border-color: rgba(70,59,178,.27); }
+        .portfolio-asset[data-tone="realestate"] .portfolio-asset-icon { color: #0a5d49; background: #d4f1e5; border-color: rgba(10,93,73,.24); }
+        html[data-theme="dark"] .portfolio-asset-icon { color: #7de4bd; background: rgba(70,215,165,.14); }
+        html[data-theme="dark"] .portfolio-asset[data-tone="gold"] .portfolio-asset-icon { color: #f4ce62; background: rgba(244,198,72,.14); }
+        html[data-theme="dark"] .portfolio-asset[data-tone="silver"] .portfolio-asset-icon { color: #b6c9d8; background: rgba(182,201,216,.14); }
+        html[data-theme="dark"] .portfolio-asset[data-tone="crypto-btc"] .portfolio-asset-icon { color: #ffad4a; background: rgba(247,147,26,.14); }
+        html[data-theme="dark"] .portfolio-asset[data-tone="crypto-eth"] .portfolio-asset-icon { color: #9aaaff; background: rgba(98,126,234,.16); }
+        html[data-theme="dark"] .portfolio-asset[data-tone="crypto"] .portfolio-asset-icon { color: #b3adff; background: rgba(99,91,255,.16); }
+        .portfolio-asset-copy { min-width: 0; }
+        .portfolio-asset .portfolio-asset-name { color: var(--portfolio-ink); font-size: .78rem; font-weight: 900; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .portfolio-asset .portfolio-asset-sub { color: var(--portfolio-muted); font-size: .6rem; margin-top: .13rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .portfolio-asset .portfolio-asset-val { display: flex; align-items: center; gap: .45rem; flex-shrink: 0; }
+        .portfolio-asset .portfolio-asset-val strong { color: var(--portfolio-accent-strong); font-size: .84rem; display: block; text-align: left; white-space: nowrap; }
+        .portfolio-asset-menu { width: 2rem; height: 2rem; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: .65rem; color: var(--portfolio-muted); background: transparent; cursor: pointer; font-size: 1.1rem; }
+        .portfolio-asset-menu:hover, .portfolio-asset-menu[aria-expanded="true"] { color: var(--portfolio-accent-strong); background: color-mix(in srgb, var(--portfolio-accent) 12%, transparent); }
+        .portfolio-asset-menu-popover { position: absolute; z-index: 8; top: 2.8rem; inset-inline-end: .65rem; display: none; min-width: 9.5rem; padding: .3rem; border: 1px solid var(--portfolio-line); border-radius: .85rem; background: var(--portfolio-surface); box-shadow: 0 14px 28px rgba(0,0,0,.16); }
+        .portfolio-asset-menu-popover.open { display: grid; gap: .15rem; }
+        .portfolio-asset-menu-action { display: flex; align-items: center; gap: .45rem; width: 100%; border: 0; border-radius: .6rem; padding: .55rem .6rem; background: transparent; color: var(--portfolio-ink); font-family: inherit; font-size: .68rem; font-weight: 800; text-align: right; cursor: pointer; }
+        .portfolio-asset-menu-action:hover { background: color-mix(in srgb, var(--portfolio-accent) 10%, transparent); }
+        .portfolio-asset-menu-action.edit { color: var(--portfolio-accent-strong); }
+        .portfolio-asset-menu-action.delete { color: #a32d2d; }
+        html[data-theme="dark"] .portfolio-asset-menu-action.delete { color: #ff8e8e; }
+        .portfolio-add-btn { display: flex; align-items: center; justify-content: center; gap: .4rem; margin-top: .8rem; width: 100%; border: 1px dashed color-mix(in srgb, var(--portfolio-accent) 62%, transparent); background: transparent; color: var(--portfolio-accent-strong); border-radius: 1rem; padding: .72rem; font-size: .72rem; font-weight: 900; cursor: pointer; transition: background .2s, border-color .2s; }
+        .portfolio-add-btn:hover { background: color-mix(in srgb, var(--portfolio-accent) 9%, transparent); border-color: var(--portfolio-accent); }
+        .portfolio-note { color: var(--portfolio-muted); font-size: .6rem; opacity: .9; margin-top: .6rem; text-align: center; line-height: 1.8; }
+        .portfolio-form-title { color: var(--portfolio-ink); font-size: .72rem; font-weight: 900; }
+        .portfolio-form-input { width: 100%; box-sizing: border-box; border: 1px solid var(--portfolio-line); border-radius: .75rem; padding: .65rem .72rem; background: var(--portfolio-card); color: var(--portfolio-ink); font: inherit; font-size: .68rem; outline: none; }
+        .portfolio-form-input::placeholder { color: var(--portfolio-muted); opacity: .85; }
+        .portfolio-form-input:focus { border-color: var(--portfolio-accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--portfolio-accent) 13%, transparent); }
+        .portfolio-form-cancel { border: 1px solid var(--portfolio-line); border-radius: .75rem; padding: .58rem .8rem; background: transparent; color: var(--portfolio-muted); font: inherit; font-size: .68rem; font-weight: 800; cursor: pointer; }
+        .portfolio-form-submit { flex: 1; border: 0; border-radius: .75rem; padding: .62rem .8rem; background: var(--portfolio-accent); color: #062a21; font: inherit; font-size: .68rem; font-weight: 900; cursor: pointer; }
+        .portfolio-form-submit:disabled { opacity: .6; cursor: wait; }
+        @media (max-width: 420px) { #portfolio-summary { padding-inline: .85rem; } .portfolio-body { padding-inline: .85rem; } .portfolio-total-quick { font-size: .95rem; } .portfolio-asset { padding-inline: .58rem; } }
         /* كارت الاشتراكات المتكررة: سطح محايد في الوضعين + ألوان واضحة لصف زاد سعره vs صف مستقر */
         html[data-theme="light"] #subscriptions-card { background: var(--day-card, #fff) !important; border: 1px solid var(--day-line, #e2e8f0) !important; }
         html[data-theme="light"] #subscriptions-title { color: #176b49 !important; }
@@ -2028,6 +2222,65 @@
         .personalized-insight-card.share-capture-dark .personalized-insight-share { border-color: #f4c648 !important; color: #fff4c2 !important; }
         .personalized-insight-card.share-capture-dark .personalized-insight-more { background: #f4c648 !important; color: #241b05 !important; }
 
+        /* فصل بصري بين خانات تبويب "حسابي" في الوضع الليلي فقط — خلفية أفتح شوية بدل حدود إضافية */
+        html:not([data-theme="light"]) #account-telegram-card,
+        html:not([data-theme="light"]) #data-import-card,
+        html:not([data-theme="light"]) #bank-statement-import-card {
+            background-color: #11221B !important;
+        }
+
+        /* تحسين تباين قسم "هدفك المالي" في الوضع النهاري */
+        html[data-theme="light"] .asst-goal-item {
+            background-color: #ffffff !important;
+            border-color: #d9e3dc !important;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+        }
+        html[data-theme="light"] .asst-goal-icon {
+            background-color: #d1f5e6 !important;
+            color: #047857 !important;
+        }
+        html[data-theme="light"] .asst-goal-title-label {
+            color: #0f172a !important;
+        }
+        html[data-theme="light"] .asst-goal-percent {
+            color: #047857 !important;
+        }
+        html[data-theme="light"] .asst-goal-item .w-full.h-2 {
+            background-color: #e2e8ee !important;
+        }
+        html[data-theme="light"] .asst-goal-bar {
+            background-image: linear-gradient(to left, #10b981, #14b8a6) !important;
+        }
+        html[data-theme="light"] .asst-goal-saved,
+        html[data-theme="light"] .asst-goal-target {
+            color: #1e293b !important;
+        }
+        html[data-theme="light"] .asst-goal-daily-line {
+            color: #64748b !important;
+        }
+        html[data-theme="light"] .asst-goal-item label.flex {
+            background-color: #f1f5f9 !important;
+            border-color: #d9e3dc !important;
+            color: #405a4d !important;
+        }
+        html[data-theme="light"] #asst-goal-max-reached {
+            background-color: #fef3c7 !important;
+            border-color: #fbbf24 !important;
+            color: #92400e !important;
+        }
+        html[data-theme="light"] #asst-goal-empty-hint {
+            color: #64748b !important;
+        }
+        html[data-theme="light"] #asst-goal-title,
+        html[data-theme="light"] #asst-goal-amount,
+        html[data-theme="light"] #asst-goal-date,
+        html[data-theme="light"] .asst-goal-contribute-amount,
+        html[data-theme="light"] .asst-goal-date-edit {
+            background-color: #ffffff !important;
+            border-color: #d9e3dc !important;
+            color: #0f172a !important;
+        }
+
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col overflow-hidden">
@@ -2156,39 +2409,50 @@
             <!-- المحفظة الاستثمارية: بيانات حقيقية بيدخلها العميل بنفسه (ذهب/صناديق/عملات رقمية/أي أصل) -->
             <details id="portfolio-collapsible">
                 <summary id="portfolio-summary">
-                    <div>
-                        <span class="portfolio-eyebrow">محفظتك (بياناتك الحقيقية)</span>
-                        <span class="portfolio-title">💼 محفظتك الاستثمارية</span>
+                    <div class="portfolio-summary-copy">
+                        <span class="portfolio-eyebrow"><span class="portfolio-live-dot" aria-hidden="true"></span> بياناتك الحقيقية</span>
+                        <span class="portfolio-title"><span class="portfolio-title-icon" aria-hidden="true"><iconify-icon icon="ph:briefcase-duotone"></iconify-icon></span> محفظتك الاستثمارية</span>
                     </div>
                     <div class="portfolio-right">
-                        <span class="portfolio-total-quick" id="portfolio-total-quick">—</span>
-                        <span class="portfolio-chev">⌄</span>
+                        <div class="portfolio-summary-total">
+                            <span class="portfolio-total-caption">الإجمالي الحالي</span>
+                            <span class="portfolio-total-quick" id="portfolio-total-quick">—</span>
+                        </div>
+                        <span class="portfolio-chev" aria-hidden="true">⌄</span>
                     </div>
                 </summary>
                 <div class="portfolio-body">
                     <div id="portfolio-empty" class="hidden portfolio-note" style="text-align:center;padding:.5rem 0;">مفيش أصول مسجلة لسه. ضيف أول أصل (ذهب، صناديق استثمار، عملات رقمية... إلخ) وهنجمّعلك إجمالي محفظتك تلقائيًا.</div>
-                    <div id="portfolio-asset-list"></div>
+                    <div id="portfolio-asset-list" class="portfolio-asset-list"></div>
                     <template id="portfolio-asset-template">
                         <div class="portfolio-asset">
-                            <div><div class="portfolio-asset-name"></div><div class="portfolio-asset-sub"></div></div>
-                            <div class="portfolio-asset-val" style="display:flex;align-items:center;gap:.5rem;">
+                            <div class="portfolio-asset-main">
+                                <span class="portfolio-asset-icon" aria-hidden="true"></span>
+                                <div class="portfolio-asset-copy"><div class="portfolio-asset-name"></div><div class="portfolio-asset-sub"></div></div>
+                            </div>
+                            <div class="portfolio-asset-val">
                                 <strong></strong>
-                                <button type="button" class="portfolio-asset-delete" style="background:none;border:none;color:#fb7185;font-size:1rem;cursor:pointer;padding:0 .2rem;">✕</button>
+                                <button type="button" class="portfolio-asset-menu" aria-label="إجراءات الأصل" aria-expanded="false"><iconify-icon icon="ph:dots-three-vertical-bold"></iconify-icon></button>
+                                <div class="portfolio-asset-menu-popover" role="menu">
+                                    <button type="button" class="portfolio-asset-menu-action edit" role="menuitem"><iconify-icon icon="ph:pencil-simple-duotone"></iconify-icon><span>تعديل القيمة</span></button>
+                                    <button type="button" class="portfolio-asset-menu-action delete" role="menuitem"><iconify-icon icon="ph:trash-duotone"></iconify-icon><span>حذف الأصل</span></button>
+                                </div>
                             </div>
                         </div>
                     </template>
 
-                    <div id="portfolio-add-form" class="hidden" style="margin-top:.7rem;display:flex;flex-direction:column;gap:.5rem;">
-                        <input id="portfolio-add-name" type="text" placeholder="اسم الأصل (مثلاً: ذهب، صناديق بنك مصر)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 placeholder-slate-500 outline-none focus:border-emerald-500/50">
-                        <input id="portfolio-add-sub" type="text" placeholder="وصف اختياري (مثلاً: 120 جرام)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 placeholder-slate-500 outline-none focus:border-emerald-500/50">
-                        <input id="portfolio-add-amount" type="number" inputmode="numeric" placeholder="القيمة الحالية بالجنيه" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 placeholder-slate-500 outline-none focus:border-emerald-500/50">
+                    <div id="portfolio-add-form" class="hidden" style="margin-top:.8rem;display:flex;flex-direction:column;gap:.5rem;">
+                        <span id="portfolio-form-title" class="portfolio-form-title">إضافة أصل جديد</span>
+                        <input id="portfolio-add-name" type="text" placeholder="اسم الأصل (مثلاً: ذهب، صناديق بنك مصر)" class="portfolio-form-input">
+                        <input id="portfolio-add-sub" type="text" placeholder="وصف اختياري (مثلاً: 120 جرام أو عيار 24)" class="portfolio-form-input">
+                        <input id="portfolio-add-amount" type="number" inputmode="numeric" placeholder="القيمة الحالية بالجنيه" class="portfolio-form-input">
                         <div style="display:flex;gap:.5rem;">
-                            <button type="button" id="portfolio-add-confirm" class="flex-1 bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold py-2 rounded-xl text-xs transition">حفظ الأصل</button>
-                            <button type="button" id="portfolio-add-cancel" class="rounded-xl border border-slate-700 px-4 py-2 text-xs text-slate-300">إلغاء</button>
+                            <button type="button" id="portfolio-add-confirm" class="portfolio-form-submit">حفظ الأصل</button>
+                            <button type="button" id="portfolio-add-cancel" class="portfolio-form-cancel">إلغاء</button>
                         </div>
                         <p id="portfolio-add-error" class="hidden text-[11px] text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-lg p-2 text-center"></p>
                     </div>
-                    <button type="button" class="portfolio-add-btn" id="portfolio-add-btn">+ أضف أصل جديد يدويًا</button>
+                    <button type="button" class="portfolio-add-btn" id="portfolio-add-btn"><iconify-icon icon="ph:plus-bold" aria-hidden="true"></iconify-icon> أضف أصلًا جديدًا</button>
                     <p class="portfolio-note">القيمة اللي بتدخلها هي آخر تقييم حقيقي للأصل عندك، وإنت اللي بتحدّثها وقت ما تحب.</p>
                 </div>
             </details>
@@ -2492,23 +2756,43 @@
 
         <!-- ===================== TAB: REMINDERS ===================== -->
         <div class="tab-content p-5 space-y-4" id="tab-reminders">
-            <div id="reminders-telegram-banner" class="hidden bg-amber-500/10 border border-amber-500/30 rounded-2xl p-3.5 flex items-center justify-between gap-3">
+            <div class="reminders-page-heading">
+                <div class="reminders-heading-icon">🔔</div>
+                <div class="min-w-0"><h3>تذكيراتي</h3><p>فاكرك بمواعيدك المهمة قبل ما تفوتك</p></div>
+            </div>
+
+            <div id="reminders-telegram-banner" class="hidden reminders-telegram-banner">
                 <div class="min-w-0"><p class="text-xs font-bold text-amber-300">التذكيرات هتوصلك رسالة تليجرام في وقتها</p><p class="text-[10.5px] text-amber-400/80 mt-0.5">لسه مربوطش تليجرام — اربطه عشان توصلك برة التطبيق</p></div>
                 <button type="button" id="reminders-link-telegram-btn" class="shrink-0 rounded-xl bg-amber-500 px-3 py-2 text-[11px] font-black text-slate-950">اربط تليجرام</button>
             </div>
 
-            <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-2.5">
-                <h4 class="text-xs font-bold text-slate-300">تذكير جديد</h4>
-                <input type="text" id="reminder-title-input" maxlength="200" placeholder="تذكير بإيه؟ مثال: دفع قسط العربية" class="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2.5 text-xs text-slate-100 outline-none">
-                <input type="date" id="reminder-date-input" class="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2.5 text-xs text-slate-100 outline-none">
-                <button type="button" id="reminder-save-btn" class="w-full rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950">حفظ التذكير</button>
-                <p id="reminder-form-status" class="min-h-4 text-center text-[11px] text-rose-400"></p>
+            <div id="reminders-alert-card" class="reminders-alert-card hidden" role="status" aria-live="polite"></div>
+
+            <div class="reminders-stats-grid" aria-label="ملخص التذكيرات">
+                <div class="reminders-stat"><span class="reminders-stat-icon">🔔</span><strong id="reminders-count-upcoming">—</strong><small>القادمة</small></div>
+                <div class="reminders-stat"><span class="reminders-stat-icon">📅</span><strong id="reminders-count-month">—</strong><small>هذا الشهر</small></div>
+                <div class="reminders-stat"><span class="reminders-stat-icon">✓</span><strong id="reminders-count-done">0</strong><small>منجزة</small></div>
             </div>
 
-            <div class="rounded-3xl p-4">
-                <h4 class="text-xs font-bold text-slate-300 mb-2">القادمة</h4>
+            <section class="reminders-create-card" aria-labelledby="reminder-create-title">
+                <div class="reminders-section-heading"><span class="reminders-section-icon">＋</span><div><h4 id="reminder-create-title">تذكير جديد</h4><p>اكتب الموعد، وأنا هفكّرك بيه</p></div></div>
+                <label class="reminders-field-label" for="reminder-title-input">إيه اللي تحب تفتكره؟</label>
+                <input type="text" id="reminder-title-input" maxlength="200" placeholder="مثال: دفع قسط العربية" class="reminders-input">
+                <label class="reminders-field-label" for="reminder-date-input">إمتى؟</label>
+                <input type="date" id="reminder-date-input" class="reminders-input">
+                <button type="button" id="reminder-save-btn" class="reminders-primary-btn">حفظ التذكير</button>
+                <p id="reminder-form-status" class="min-h-4 text-center text-[11px] text-rose-400"></p>
+            </section>
+
+            <section class="reminders-list-section" aria-labelledby="reminders-upcoming-title">
+                <div class="reminders-list-heading"><h4 id="reminders-upcoming-title">أقرب المواعيد</h4><span id="reminders-next-label">—</span></div>
+                <div id="reminders-featured" class="reminders-featured"></div>
+            </section>
+
+            <section class="reminders-list-section" aria-labelledby="reminders-all-title">
+                <div class="reminders-list-heading"><h4 id="reminders-all-title">كل التذكيرات</h4><span>مرتبة حسب الموعد</span></div>
                 <div id="reminders-list" class="space-y-2"><p class="text-xs text-slate-500 text-center py-3">بيتحمّل...</p></div>
-            </div>
+            </section>
         </div>
 
         <!-- ===================== TAB: ASSISTANT (دبّر الذكي) ===================== -->
@@ -2561,7 +2845,7 @@
 
                 <!-- تمبلت هدف واحد — بينسخه JS لكل هدف نشط في asst-goal-list -->
                 <template id="asst-goal-item-template">
-                    <details class="asst-goal-item group bg-slate-900/40 border border-slate-800 rounded-2xl px-3 py-2.5" open>
+                    <details class="asst-goal-item group bg-slate-900/40 border border-slate-800 rounded-2xl px-3 py-2.5">
                         <summary class="flex items-center gap-3 cursor-pointer list-none">
                             <span class="asst-goal-icon shrink-0 flex h-9 w-9 items-center justify-center rounded-full bg-emerald-500/10 text-emerald-500 dark:text-emerald-400"></span>
                             <div class="min-w-0 flex-1">
@@ -2692,18 +2976,18 @@
         <!-- ===================== TAB: ACCOUNT ===================== -->
         <div class="tab-content p-5 space-y-4" id="tab-account">
 
-            <div class="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-5 flex flex-col items-center text-center gap-3 shadow-lg">
-                <div class="relative">
-                    <button id="avatar-btn" class="w-20 h-20 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-slate-950 font-black text-2xl overflow-hidden border-2 border-slate-800 shadow-lg" title="غيّر صورتك">
-                        <img id="account-avatar-img" class="w-full h-full object-cover hidden" alt="صورة البروفايل">
-                        <span id="account-avatar-initial">—</span>
-                    </button>
-                    <span class="absolute -bottom-1 -left-1 w-7 h-7 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs">📷</span>
-                    <input type="file" id="avatar-file-input" accept="image/*" class="hidden">
-                </div>
-                <div>
-                    <h3 class="text-base font-bold text-slate-100" id="account-name">—</h3>
-                    <p class="text-xs text-slate-400" id="account-email">—</p>
+            <div class="profile-design-card" style="--profile-card-image: url('./assets/profile-card-dark.jpg');">
+                <div class="profile-design-card-content">
+                    <div class="profile-design-avatar-wrap">
+                        <button id="avatar-btn" class="profile-design-avatar" title="غيّر صورتك" aria-label="غيّر صورة البروفايل">
+                            <img id="account-avatar-img" class="hidden" alt="صورة البروفايل">
+                            <span id="account-avatar-initial">—</span>
+                        </button>
+                        <span class="profile-design-camera" aria-hidden="true">📷</span>
+                        <input type="file" id="avatar-file-input" accept="image/*" class="hidden">
+                    </div>
+                    <h3 class="profile-design-name" id="account-name">—</h3>
+                    <p class="profile-design-email" id="account-email">—</p>
                 </div>
             </div>
 
@@ -4221,6 +4505,8 @@
                 notifications.push({ id: `daily-pace-${new Date().toISOString().slice(0, 10)}`, icon: '🌱', title: 'وثّقت يومك النهاردة', body: `سجّلت ${today.count} عملية بإجمالي ${fmt(today.total)} النهاردة${streakLine}. كل يوم بتسجّله بيقربك أكتر من صورة كاملة وواضحة لفلوسك.`, tone: 'emerald' });
             }
 
+            // نحتفظ بمعرّفات الإشعارات الحالية حتى يستطيع زر "تحديد الكل كمقروء" حفظها فعلياً.
+            window.__inAppNotificationIds = notifications.map((item) => item.id);
             let read = {};
             try { read = JSON.parse(localStorage.getItem(inAppNotificationsKey()) || '{}'); } catch {}
             if (!notifications.length) {
@@ -4239,6 +4525,12 @@
         function markInAppNotificationsRead() {
             const list = document.getElementById('in-app-notifications-list');
             if (!list) return;
+            const notificationIds = Array.isArray(window.__inAppNotificationIds) ? window.__inAppNotificationIds : [];
+            let read = {};
+            try { read = JSON.parse(localStorage.getItem(inAppNotificationsKey()) || '{}'); } catch {}
+            notificationIds.forEach((id) => { read[id] = true; });
+            localStorage.setItem(inAppNotificationsKey(), JSON.stringify(read));
+            // نترك وقت المسح للتوافق مع النسخ السابقة، لكن مصدر الحالة الأساسي هو خريطة المعرّفات.
             localStorage.setItem(inAppNotificationsClearedAtKey(), new Date().toISOString());
             if (typeof updateAccountNotificationBadge === 'function') updateAccountNotificationBadge(0);
             list.innerHTML = '<div class="notification-empty rounded-2xl border p-3 text-[11px] leading-relaxed" style="color:var(--slate-400, #94a3b8)"><strong>هنا هتظهر لك الفايدة أول بأول</strong><br>هتلاقي ملخصًا لمتابعتك، وتنبيهًا لطيفًا لما تقترب من حد فئة، واقتراحًا صغيرًا يساعدك تكمل خطتك براحة.</div>';
@@ -4543,6 +4835,8 @@
                 await loadDashboard(true); // أول تحميل — الربط اختياري والداش تفتح للحساب المستقل عادي
                 await loadPlanningSettings();
                 await loadAccountTab();
+                // تحديث شارة التذكيرات من البداية، وليس فقط عند فتح تبويب التذكيرات.
+                loadReminders();
                 loadInvoicesCount();
                 setupAutoRefresh();
             } catch (e) {
@@ -5195,7 +5489,7 @@
 
             const incomeDetails = document.getElementById('monthly-income-details');
             incomeDetails.innerHTML = incomeItems.length ? incomeItems.map((it) => `
-                <div class="flex items-center justify-between py-1.5 border-b border-slate-200 dark:border-slate-800/60 last:border-0">
+                <div class="flex items-center justify-between py-2 border-b border-slate-200 dark:border-slate-700/80 last:border-0">
                     <div class="min-w-0">
                         <p class="text-[11px] text-slate-700 dark:text-slate-300 truncate">${it.isDebt ? '🤝 ' : ''}${it.desc}</p>
                         <p class="text-[10px] text-slate-500">${new Date(it.date).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' })}</p>
@@ -5659,41 +5953,57 @@
 
         async function loadReminders() {
             const listEl = document.getElementById('reminders-list');
+            const featuredEl = document.getElementById('reminders-featured');
             const badge = document.getElementById('reminders-notification-badge');
             try {
                 const res = await fetch('/api/reminders', { headers: { Authorization: `Bearer ${accessToken}` } });
                 const data = await res.json();
                 const reminders = data.reminders || [];
-
-                const urgentCount = reminders.filter((r) => {
-                    const days = Math.round((new Date(r.due_date + 'T00:00:00') - new Date(new Date().toDateString())) / (24 * 60 * 60 * 1000));
-                    return days <= 2;
-                }).length;
+                const today = new Date(); today.setHours(0, 0, 0, 0);
+                const withDays = reminders.map((r) => ({ ...r, days: Math.round((new Date(r.due_date + 'T00:00:00') - today) / (24 * 60 * 60 * 1000)) }));
+                const upcoming = withDays.filter((r) => r.days >= 0);
+                const monthKey = today.toISOString().slice(0, 7);
+                const monthCount = upcoming.filter((r) => String(r.due_date).slice(0, 7) === monthKey).length;
+                const countUpcoming = document.getElementById('reminders-count-upcoming');
+                const countMonth = document.getElementById('reminders-count-month');
+                if (countUpcoming) countUpcoming.textContent = upcoming.length;
+                if (countMonth) countMonth.textContent = monthCount;
+                // الشارة لا تظهر للتذكيرات البعيدة؛ هي فقط لعدد المواعيد التي تحتاج تنبيهاً الآن (خلال يومين أو أقل).
+                const nearDue = upcoming.filter((r) => r.days <= 2);
                 if (badge) {
-                    badge.textContent = urgentCount > 0 ? String(urgentCount) : '';
-                    badge.style.display = urgentCount > 0 ? 'grid' : 'none';
+                    badge.textContent = nearDue.length > 9 ? '9+' : (nearDue.length ? String(nearDue.length) : '');
+                    badge.style.display = nearDue.length ? 'grid' : 'none';
                 }
 
-                listEl.innerHTML = reminders.length ? reminders.map((r) => `
-                    <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-2.5 flex items-center justify-between gap-2">
-                        <div class="flex items-center gap-2.5 min-w-0"><span class="text-base shrink-0">🔔</span><div class="min-w-0"><p class="text-xs font-semibold text-slate-200 truncate">${debtEscape(r.title)}</p><p class="text-[10px] text-slate-500">${new Date(r.due_date + 'T00:00:00').toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' })}</p></div></div>
-                        <div class="flex items-center gap-2 shrink-0">
-                            <span class="text-[10px] font-bold text-emerald-400 bg-emerald-500/10 rounded-full px-2 py-1">${reminderDaysLabel(r.due_date)}</span>
-                            <button type="button" class="text-slate-400 hover:text-rose-400 text-lg" data-delete-reminder="${debtEscape(r.id)}" aria-label="حذف التذكير">×</button>
-                        </div>
-                    </div>
-                `).join('') : '<p class="text-xs text-slate-500 text-center p-3">مفيش تذكيرات قادمة، ضيف واحد فوق.</p>';
+                // تنبيه داخل الصفحة يظهر فقط في نافذة المتابعة الأخيرة: يومين، يوم، أو يوم الموعد.
+                const alertEl = document.getElementById('reminders-alert-card');
+                const alertReminder = [...upcoming].filter((r) => r.days <= 2).sort((a, b) => a.days - b.days)[0];
+                if (alertEl) {
+                    if (alertReminder) {
+                        const stage = alertReminder.days === 0 ? 'اليوم' : alertReminder.days === 1 ? 'بكرة' : 'بعد يومين';
+                        const title = alertReminder.days === 0 ? 'موعدك النهاردة' : alertReminder.days === 1 ? 'موعدك بكرة' : 'فاضل يومين على الموعد';
+                        const detail = alertReminder.days === 0 ? 'خد بالك، ده ميعاد التذكير اللي سجلته.' : `لسه فاكرينك بموعد «${debtEscape(alertReminder.title)}» قبل ما ييجي.`;
+                        alertEl.innerHTML = `<div class="reminders-alert-icon">🔔</div><div class="reminders-alert-copy"><strong>${title}</strong><span>${detail}</span></div><span class="reminders-alert-stage">${stage}</span>`;
+                        alertEl.classList.remove('hidden');
+                    } else {
+                        alertEl.classList.add('hidden');
+                        alertEl.innerHTML = '';
+                    }
+                }
 
-                listEl.querySelectorAll('[data-delete-reminder]').forEach((btn) => btn.addEventListener('click', () => {
+                const [featured, ...rest] = upcoming;
+                const dateLabel = (r) => new Date(r.due_date + 'T00:00:00').toLocaleDateString('ar-EG', { day: 'numeric', month: 'long' });
+                const nextLabel = document.getElementById('reminders-next-label');
+                if (nextLabel) nextLabel.textContent = featured ? reminderDaysLabel(featured.due_date) : 'مفيش مواعيد قريبة';
+                if (featuredEl) featuredEl.innerHTML = featured ? `<div class="reminder-featured-card"><div class="reminder-featured-icon">🔔</div><div class="reminder-featured-main"><strong>${debtEscape(featured.title)}</strong><small>${dateLabel(featured)}</small></div><span class="reminder-featured-badge">${reminderDaysLabel(featured.due_date)}</span><button type="button" class="reminder-delete-btn" data-delete-reminder="${debtEscape(featured.id)}" aria-label="حذف التذكير">×</button></div>` : '<p class="text-xs text-slate-500 text-center p-3">مفيش تذكيرات قادمة دلوقتي.</p>';
+                listEl.innerHTML = rest.length ? rest.map((r) => `<div class="reminder-row"><span class="reminder-row-icon">🔔</span><div class="reminder-row-main"><strong>${debtEscape(r.title)}</strong><small>${dateLabel(r)}</small></div><span class="reminder-row-badge">${reminderDaysLabel(r.due_date)}</span><button type="button" class="reminder-delete-btn" data-delete-reminder="${debtEscape(r.id)}" aria-label="حذف التذكير">×</button></div>`).join('') : (featured ? '<p class="text-xs text-slate-500 text-center p-3">ده كل اللي عندك حالياً.</p>' : '');
+
+                document.querySelectorAll('#reminders-featured [data-delete-reminder], #reminders-list [data-delete-reminder]').forEach((btn) => btn.addEventListener('click', () => {
                     const id = btn.getAttribute('data-delete-reminder');
-                    const row = btn.closest('div.bg-slate-950\\/60');
-                    const title = row?.querySelector('p.truncate')?.textContent || 'التذكير';
-                    row.style.display = 'none';
-                    showUndoToast(
-                        `اتمسح "${title}"`,
-                        async () => { try { await fetch(`/api/reminders?id=${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${accessToken}` } }); } catch (e) { /* اتمسح بصريًا برضو */ } loadReminders(); },
-                        () => { row.style.display = ''; }
-                    );
+                    const row = btn.closest('.reminder-featured-card, .reminder-row');
+                    const title = row?.querySelector('strong')?.textContent || 'التذكير';
+                    if (row) row.style.display = 'none';
+                    showUndoToast(`اتمسح "${title}"`, async () => { try { await fetch(`/api/reminders?id=${id}`, { method: 'DELETE', headers: { Authorization: `Bearer ${accessToken}` } }); } catch (e) {} loadReminders(); }, () => { if (row) row.style.display = ''; });
                 }));
             } catch (e) {
                 listEl.innerHTML = '<p class="text-xs text-rose-400 text-center p-4">تعذر تحميل التذكيرات.</p>';
@@ -5816,8 +6126,40 @@
         }
 
         // ============================================================
-        // ============ المحفظة الاستثمارية — بيانات حقيقية من portfolio_assets ============
+        // ============ المحفظة الاستثمارية — بيانات حقيقية من portfolio_assets ==========
         // ============================================================
+        const PORTFOLIO_ASSET_ICONS = {
+            gold: 'ph:coins-duotone',
+            silver: 'ph:coins-duotone',
+            bitcoin: 'cryptocurrency:btc',
+            ethereum: 'cryptocurrency:eth',
+            crypto: 'ph:currency-circle-dollar-duotone',
+            cash: 'ph:money-duotone',
+            realestate: 'ph:buildings-duotone',
+            default: 'ph:briefcase-duotone',
+        };
+
+        function getPortfolioAssetPresentation(asset) {
+            const searchable = `${asset?.name || ''} ${asset?.sub_label || ''}`.trim().toLowerCase();
+            if (/بيتكوين|bitcoin|btc/.test(searchable)) return { tone: 'crypto-btc', icon: PORTFOLIO_ASSET_ICONS.bitcoin };
+            if (/ايثيريوم|إيثيريوم|ethereum|eth/.test(searchable)) return { tone: 'crypto-eth', icon: PORTFOLIO_ASSET_ICONS.ethereum };
+            if (/كريبتو|crypto|عملة رقمية|عملات رقمية|usdt|عملة مشفرة/.test(searchable)) return { tone: 'crypto', icon: PORTFOLIO_ASSET_ICONS.crypto };
+            if (/ذهب|دهب|gold/.test(searchable)) return { tone: 'gold', icon: PORTFOLIO_ASSET_ICONS.gold };
+            if (/فضة|silver/.test(searchable)) return { tone: 'silver', icon: PORTFOLIO_ASSET_ICONS.silver };
+            if (/عقار|عقارات|شقة|شقق|أرض|ارض|real estate|property/.test(searchable)) return { tone: 'realestate', icon: PORTFOLIO_ASSET_ICONS.realestate };
+            if (/كاش|نقد|سيولة|فلوس|cash|money/.test(searchable)) return { tone: 'cash', icon: PORTFOLIO_ASSET_ICONS.cash };
+            return { tone: 'default', icon: PORTFOLIO_ASSET_ICONS.default };
+        }
+
+        function closePortfolioMenus(except = null) {
+            document.querySelectorAll('.portfolio-asset-menu-popover.open').forEach((menu) => {
+                if (menu !== except) {
+                    menu.classList.remove('open');
+                    menu.parentElement?.querySelector('.portfolio-asset-menu')?.setAttribute('aria-expanded', 'false');
+                }
+            });
+        }
+
         window.__portfolioState = { assets: [], total: 0 };
 
         function renderPortfolio(portfolio) {
@@ -5828,30 +6170,101 @@
             const listEl = document.getElementById('portfolio-asset-list');
             const emptyEl = document.getElementById('portfolio-empty');
             const template = document.getElementById('portfolio-asset-template');
+            if (!listEl || !template) return;
 
             if (totalEl) totalEl.textContent = fmt(data.total || 0);
-
             listEl.innerHTML = '';
             if (!data.assets || data.assets.length === 0) {
-                emptyEl.classList.remove('hidden');
-            } else {
-                emptyEl.classList.add('hidden');
-                data.assets.forEach((asset) => {
-                    const node = template.content.firstElementChild.cloneNode(true);
-                    node.querySelector('.portfolio-asset-name').textContent = asset.name;
-                    node.querySelector('.portfolio-asset-sub').textContent = asset.sub_label || '';
-                    node.querySelector('strong').textContent = fmt(asset.amount);
-                    node.querySelector('.portfolio-asset-delete').addEventListener('click', async (e) => {
-                        e.preventDefault();
-                        if (!confirm(`متأكد عايز تحذف "${asset.name}" من محفظتك؟`)) return;
-                        try {
-                            await asstApi('portfolio_asset_delete', { assetId: asset.id });
-                            await loadDashboard();
-                        } catch (err) { alert(err.message); }
-                    });
-                    listEl.appendChild(node);
-                });
+                emptyEl?.classList.remove('hidden');
+                return;
             }
+
+            emptyEl?.classList.add('hidden');
+            data.assets.forEach((asset) => {
+                const node = template.content.firstElementChild.cloneNode(true);
+                const presentation = getPortfolioAssetPresentation(asset);
+                node.dataset.tone = presentation.tone;
+                node.querySelector('.portfolio-asset-icon').setAttribute('icon', presentation.icon);
+                node.querySelector('.portfolio-asset-name').textContent = asset.name || 'أصل استثماري';
+                node.querySelector('.portfolio-asset-sub').textContent = asset.sub_label || 'قيمة حالية';
+                node.querySelector('strong').textContent = fmt(asset.amount);
+
+                const menuBtn = node.querySelector('.portfolio-asset-menu');
+                const menu = node.querySelector('.portfolio-asset-menu-popover');
+                const editBtn = node.querySelector('.portfolio-asset-menu-action.edit');
+                const deleteBtn = node.querySelector('.portfolio-asset-menu-action.delete');
+
+                menuBtn.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    const willOpen = !menu.classList.contains('open');
+                    closePortfolioMenus(menu);
+                    menu.classList.toggle('open', willOpen);
+                    menuBtn.setAttribute('aria-expanded', String(willOpen));
+                });
+                editBtn.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    closePortfolioMenus();
+                    openPortfolioForm(asset);
+                });
+                deleteBtn.addEventListener('click', async (event) => {
+                    event.preventDefault();
+                    closePortfolioMenus();
+                    if (!confirm(`متأكد عايز تحذف "${asset.name}" من محفظتك؟`)) return;
+                    try {
+                        await asstApi('portfolio_asset_delete', { assetId: asset.id });
+                        await loadDashboard();
+                    } catch (err) { alert(err.message); }
+                });
+                listEl.appendChild(node);
+            });
+        }
+
+        document.addEventListener('click', (event) => {
+            if (!event.target.closest('.portfolio-asset')) closePortfolioMenus();
+        });
+
+        let portfolioEditingId = null;
+
+        function openPortfolioForm(asset = null) {
+            const form = document.getElementById('portfolio-add-form');
+            const addBtn = document.getElementById('portfolio-add-btn');
+            const titleEl = document.getElementById('portfolio-form-title');
+            const confirmBtn = document.getElementById('portfolio-add-confirm');
+            const nameInput = document.getElementById('portfolio-add-name');
+            const subInput = document.getElementById('portfolio-add-sub');
+            const amountInput = document.getElementById('portfolio-add-amount');
+            const errEl = document.getElementById('portfolio-add-error');
+            if (!form || !addBtn) return;
+
+            portfolioEditingId = asset?.id || null;
+            titleEl.textContent = asset ? 'تعديل قيمة الأصل' : 'إضافة أصل جديد';
+            confirmBtn.textContent = asset ? 'حفظ التعديل' : 'حفظ الأصل';
+            nameInput.value = asset?.name || '';
+            subInput.value = asset?.sub_label || '';
+            amountInput.value = asset?.amount ?? '';
+            errEl.classList.add('hidden');
+            form.classList.remove('hidden');
+            addBtn.classList.add('hidden');
+            nameInput.focus();
+        }
+
+        function resetPortfolioForm() {
+            portfolioEditingId = null;
+            document.getElementById('portfolio-add-form')?.classList.add('hidden');
+            document.getElementById('portfolio-add-btn')?.classList.remove('hidden');
+            const titleEl = document.getElementById('portfolio-form-title');
+            const confirmBtn = document.getElementById('portfolio-add-confirm');
+            if (titleEl) titleEl.textContent = 'إضافة أصل جديد';
+            if (confirmBtn) confirmBtn.textContent = 'حفظ الأصل';
+            const errEl = document.getElementById('portfolio-add-error');
+            errEl?.classList.add('hidden');
+            const nameInput = document.getElementById('portfolio-add-name');
+            const subInput = document.getElementById('portfolio-add-sub');
+            const amountInput = document.getElementById('portfolio-add-amount');
+            if (nameInput) nameInput.value = '';
+            if (subInput) subInput.value = '';
+            if (amountInput) amountInput.value = '';
         }
 
         (function bindPortfolioAddForm() {
@@ -5865,17 +6278,8 @@
             const errEl = document.getElementById('portfolio-add-error');
             if (!addBtn || !form) return;
 
-            addBtn.addEventListener('click', () => {
-                form.classList.remove('hidden');
-                addBtn.classList.add('hidden');
-                nameInput.focus();
-            });
-            cancelBtn.addEventListener('click', () => {
-                form.classList.add('hidden');
-                addBtn.classList.remove('hidden');
-                errEl.classList.add('hidden');
-                nameInput.value = ''; subInput.value = ''; amountInput.value = '';
-            });
+            addBtn.addEventListener('click', () => openPortfolioForm());
+            cancelBtn.addEventListener('click', resetPortfolioForm);
             confirmBtn.addEventListener('click', async () => {
                 errEl.classList.add('hidden');
                 const name = nameInput.value.trim();
@@ -5888,10 +6292,11 @@
                 }
                 confirmBtn.disabled = true;
                 try {
-                    await asstApi('portfolio_asset_add', { name, subLabel, amount });
-                    nameInput.value = ''; subInput.value = ''; amountInput.value = '';
-                    form.classList.add('hidden');
-                    addBtn.classList.remove('hidden');
+                    const isEditing = Boolean(portfolioEditingId);
+                    const payload = { name, subLabel, amount };
+                    if (isEditing) payload.assetId = portfolioEditingId;
+                    await asstApi(isEditing ? 'portfolio_asset_update' : 'portfolio_asset_add', payload);
+                    resetPortfolioForm();
                     await loadDashboard();
                 } catch (e) {
                     errEl.textContent = e.message;
@@ -5980,6 +6385,9 @@
         }
 
         const ASST_MAX_GOALS = 3;
+        // بيحفظ مين الأهداف اللي المستخدم فتحها بإيده، عشان ما تتقفلش/تتفتحش
+        // تلقائي كل مرة بنعيد رسم القائمة (مثلاً بعد إضافة مبلغ أو تعديل تاريخ).
+        const asstGoalOpenState = new Set();
 
         // بيرندر كل الأهداف النشطة (لحد 3) في asst-goal-list، وبيتحكم في ظهور فورم
         // الإضافة ورسالة "وصلت للحد الأقصى" على حسب عدد الأهداف الحالي.
@@ -6009,6 +6417,12 @@
         function buildGoalCard(goal, template) {
             const node = template.content.firstElementChild.cloneNode(true);
             node.dataset.goalId = goal.id;
+            // كل هدف بيتفتح/يتقفل لوحده بس، من غير ما يأثر على باقي الأهداف
+            node.open = asstGoalOpenState.has(goal.id);
+            node.addEventListener('toggle', () => {
+                if (node.open) asstGoalOpenState.add(goal.id);
+                else asstGoalOpenState.delete(goal.id);
+            });
 
             node.querySelector('.asst-goal-title-label').textContent = goal.title;
             node.querySelector('.asst-goal-percent').textContent = `${goal.percent}%`;

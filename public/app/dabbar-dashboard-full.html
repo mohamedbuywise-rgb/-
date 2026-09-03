@@ -691,6 +691,47 @@
             }
         }
 
+        /* وضوح البطاقات والنموذج في الوضعين: ألوان سطحية ثابتة تمنع تداخل الأرقام مع التدرج */
+        html[data-theme="light"] #monthly-total-card {
+            background: #f0faf5 !important; border-color: #b7d9c6 !important; box-shadow: 0 10px 24px rgba(24, 92, 62, .08) !important;
+        }
+        html[data-theme="light"] #monthly-total-card #monthly-total-label { color: #176b49 !important; }
+        html[data-theme="light"] #monthly-total-card #monthly-total { color: #0b5f3f !important; }
+        html[data-theme="light"] #monthly-total-card #monthly-compare { color: #587367 !important; }
+        html[data-theme="light"] #monthly-income-toggle {
+            background: #eff9fa !important; border-color: #b3d9d7 !important; box-shadow: 0 10px 24px rgba(18, 95, 94, .08) !important;
+        }
+        html[data-theme="light"] #monthly-income-toggle .text-teal-700 { color: #176b6b !important; }
+        html[data-theme="light"] #monthly-income-toggle #monthly-income { color: #075d5d !important; }
+        html[data-theme="light"] #monthly-income-toggle #monthly-income-compare { color: #3f7773 !important; }
+        html[data-theme="dark"] #monthly-total-card {
+            background: #102a22 !important; border-color: rgba(52,211,153,.34) !important; box-shadow: none !important;
+        }
+        html[data-theme="dark"] #monthly-income-toggle {
+            background: #102730 !important; border-color: rgba(45,212,191,.34) !important; box-shadow: none !important;
+        }
+        html[data-theme="light"] #quick-entry-card {
+            background: #fffdf8 !important; border-color: #c9d9ce !important; box-shadow: 0 12px 30px rgba(39, 57, 48, .10) !important;
+        }
+        html[data-theme="dark"] #quick-entry-card {
+            background: #151a1b !important; border-color: rgba(52,211,153,.24) !important; box-shadow: none !important;
+        }
+        html[data-theme="light"] #quick-entry-card #quick-entry-form,
+        html[data-theme="light"] #quick-entry-card #quick-entry-draft,
+        html[data-theme="light"] #quick-entry-card #quick-entry-voice-preview { background: #ffffff !important; border-color: #cbd9d0 !important; }
+        html[data-theme="light"] #quick-entry-card .text-slate-500 { color: #5b6f64 !important; }
+        html[data-theme="dark"] #quick-entry-card #quick-entry-form,
+        html[data-theme="dark"] #quick-entry-card #quick-entry-draft,
+        html[data-theme="dark"] #quick-entry-card #quick-entry-voice-preview { background: #101516 !important; border-color: rgba(154,172,159,.24) !important; }
+        #quick-entry-type-expense, #quick-entry-type-income { min-height: 38px; transition: background-color .18s ease, color .18s ease, box-shadow .18s ease; }
+        html[data-theme="light"] #quick-entry-type-expense { background: #fff1f1 !important; color: #b4232f !important; }
+        html[data-theme="light"] #quick-entry-type-income { background: #edf8f2 !important; color: #176b49 !important; }
+        html[data-theme="light"] #quick-entry-type-expense[aria-pressed="true"] { background: #ffe1e3 !important; color: #a61d2b !important; box-shadow: 0 2px 8px rgba(180, 35, 47, .10) !important; }
+        html[data-theme="light"] #quick-entry-type-income[aria-pressed="true"] { background: #d9f1e3 !important; color: #0f6a45 !important; box-shadow: 0 2px 8px rgba(15, 106, 69, .10) !important; }
+        html[data-theme="light"] #quick-add-ios-install-link { display: flex !important; background: #0f8f68 !important; color: #ffffff !important; border: 1px solid #087654 !important; box-shadow: 0 6px 14px rgba(15, 143, 104, .18) !important; }
+        html[data-theme="light"] .debt-history-badge.settled { background: #eef1ef !important; color: #66736c !important; border: 1px solid #cbd4ce !important; }
+        html[data-theme="dark"] .debt-history-badge.settled { background: rgba(154,172,159,.12) !important; color: #aebbb2 !important; border: 1px solid rgba(154,172,159,.24) !important; }
+
         @media (prefers-reduced-motion: reduce) {
             *, *::before, *::after {
                 animation-duration: .01ms !important;
@@ -1668,7 +1709,7 @@
         .debt-history-badge.active { background: rgba(16,185,129,.15); color: #34d399; }
         .debt-history-badge.settled { background: rgba(51,65,85,.4); color: #94a3b8; }
         html[data-theme="light"] .debt-history-badge.active { background: #d1fae5 !important; color: #047857 !important; }
-        html[data-theme="light"] .debt-history-badge.settled { background: #e2e8f0 !important; color: #64748b !important; }
+        html[data-theme="light"] .debt-history-badge.settled { background: #eef1ef !important; color: #66736c !important; border: 1px solid #cbd4ce !important; }
 
         /* Final lock: هوية دبّر يقرأك لا تتأثر بسطح الوضع النهاري العام */
         html[data-theme="light"] #tab-monthly > #personalized-insight-card,
@@ -1952,7 +1993,7 @@
             </section>
 
             <div class="grid grid-cols-2 gap-3">
-                <div class="bg-gradient-to-br from-emerald-50 via-white to-emerald-100 dark:from-emerald-950/60 dark:to-slate-900 border border-emerald-300 dark:border-emerald-500/30 rounded-3xl p-4 shadow-lg dark:shadow-none">
+                <div id="monthly-total-card" class="bg-gradient-to-br from-emerald-50 via-white to-emerald-100 dark:from-emerald-950/60 dark:to-slate-900 border border-emerald-300 dark:border-emerald-500/30 rounded-3xl p-4 shadow-lg dark:shadow-none">
                     <div class="text-center space-y-1 pb-3">
                         <span class="text-xs text-emerald-700 dark:text-emerald-400 font-semibold block" id="monthly-total-label">إجمالي صرفك الشهر ده</span>
                         <h3 class="text-2xl font-black text-emerald-800 dark:text-emerald-300" id="monthly-total">—</h3>

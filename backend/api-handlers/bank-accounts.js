@@ -42,7 +42,7 @@ export default async function handler(req, res) {
       // apkDownloadUrl: ملف الـ APK الموقّع، بيتحدّث تلقائي مع كل إصدار جديد (شوف
       // android-helper/.github/workflows/build-apk.yml — بيبني وينشر النسخة الأحدث
       // على GitHub Releases، ولازم يتحدّث الرابط هنا لو غيّرت اسم المستودع/التاجات).
-      apkDownloadUrl: process.env.SMS_HELPER_APK_URL || 'https://github.com/dabbar-app/dabbar/releases/latest/download/dabbar-sms-helper.apk',
+      apkDownloadUrl: process.env.SMS_HELPER_APK_URL || '/app/dabbar-sms-helper.apk',
       // deepLink: التوكن مدموج فيه عشان التطبيق يملأه أوتوماتيك أول ما يتفتح من الرابط ده
       deepLink: `dabbar://setup?token=${data.sms_webhook_token}`,
     });

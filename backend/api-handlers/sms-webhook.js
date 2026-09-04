@@ -113,8 +113,9 @@ export default async function handler(req, res) {
   }
 
   try {
-    const result = await classifyMessage(text);
-    const transactions = Array.isArray(result?.transactions) ? result.transactions : [];
+    // ============ classifyMessage بترجع أراي المعاملات مباشرة (مش كائن فيه property اسمها transactions) — ============
+    // ده كان الباج الحقيقي اللي بيخلي "recorded" يطلع 0 دايمًا حتى لو التصنيف نجح فعلاً (شوف telegram-webhook.js اللي بيستخدمها صح كأراي مباشرة)
+    const transactions = await classifyMessage(text);
     let recorded = 0;
     for (const item of transactions) {
       if (item.type === 'expense' || item.type === 'purchase' || item.type === 'asset' || item.type === 'refund') {

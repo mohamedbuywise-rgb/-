@@ -22,6 +22,11 @@ import { standaloneDataUserId, ensureStandaloneUser } from '../../lib/dashboardA
 
 const DAILY_SMS_LIMIT = 80; // حد أقصى يومي للحماية من استهلاك API غير متوقع لكل مستخدم
 
+// لازم النص يحتوي مبلغ رقمي واضح + رمز/اسم عملة، وإلا نتجاهل الرسالة قبل ما توصل لـ Groq خالص
+// (توفيرًا لتكلفة الـ AI، وتفاديًا لتسجيل رسائل ترويجية أو تنبيهات عامة من نفس رقم البنك).
+const AMOUNT_PATTERN = /\d/;
+const CURRENCY_PATTERN = /(EGP|USD|EUR|SAR|AED|جنيه|ج\s*\.?\s*م|دولار|يورو|ريال|درهم)/i;
+
 async function getProfileByToken(token) {
   const { data, error } = await supabase
     .from('profiles')
@@ -76,11 +81,16 @@ export default async function handler(req, res) {
     return res.status(403).json({ ok: false, error: 'الميزة دي متوقفة على حسابك.' });
   }
 
-  // فلترة: لازم اسم المرسل يكون واحد من البنوك/المحافظ المصرية المعروفة، وإلا نتجاهل الرسالة
-  // (بيحمينا من استهلاك Groq API على رسايل عادية/سبام).
+  // فلترة على 3 مستويات قبل أي استدعاء لـ Groq (توفيرًا للتكلفة):
+  // 1) اسم المرسل لازم يكون بنك/محفظة مصرية معروفة من القايمة.
+  // 2) النص لازم يحتوي رقم (مبلغ).
+  // 3) النص لازم يحتوي اسم/رمز عملة صريح.
   const bankMatch = matchBankSender(sender || bank);
   if (!bankMatch) {
     return res.status(200).json({ ok: true, skipped: true, reason: 'مرسل غير معروف كبنك/محفظة، اتجاهلت.' });
+  }
+  if (!AMOUNT_PATTERN.test(text) || !CURRENCY_PATTERN.test(text)) {
+    return res.status(200).json({ ok: true, skipped: true, reason: 'الرسالة مفيهاش مبلغ وعملة واضحين، اتجاهلت.' });
   }
 
   const dailyCount = await bumpDailyCounter(profile);

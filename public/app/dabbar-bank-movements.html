@@ -146,8 +146,7 @@
 
   <div id="empty-state" class="empty-state hidden">
     <div class="empty-icon">🏦</div>
-    <div id="empty-state-message" class="empty-sub" style="color: var(--db-muted); font-size: 13px; line-height: 1.6; max-width: 320px; margin: 0 auto 16px;">لم تقم بربط أي حسابات أو محافظ حتى الآن.</div>
-    <button class="cta-btn" id="go-account-btn" style="background: var(--db-accent); color: var(--db-canvas); border: none; padding: 10px 20px; border-radius: 10px; font-weight: 700; cursor: pointer;">ربط الحسابات والمحافظ</button>
+    <div id="empty-state-message" class="empty-sub" style="color: var(--db-muted); font-size: 13px; line-height: 1.6; max-width: 320px; margin: 0 auto 16px;">لم تقم بأي عمليات مالية.</div>
   </div>
 </div>
 
@@ -229,7 +228,7 @@
     $('content').classList.add('hidden');
     $('empty-state').classList.remove('hidden');
     const message = $('empty-state-message');
-    if (message) message.textContent = 'لم تقم بربط أي حسابات أو محافظ حتى الآن.';
+    if (message) message.textContent = 'لم تقم بأي عمليات مالية.';
   }
 
   function renderList() {
@@ -334,7 +333,6 @@
   });
 
   $('close-btn').addEventListener('click', () => { window.location.href = './dabbar-dashboard-full.html'; });
-  $('go-account-btn')?.addEventListener('click', () => { window.location.href = './dabbar-dashboard-full.html?accountSubpage=%2Faccount%2Fbanks'; });
 
   boot();
 </script>

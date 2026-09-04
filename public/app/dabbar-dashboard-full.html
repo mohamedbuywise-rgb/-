@@ -5092,12 +5092,57 @@
                 clearTimeout(timeoutId);
             }
         }
+        // ============ كاش محلي لبيانات الداشبورد — بيتفادى تصفير الشاشة لحظة الرجوع من صفحات زي
+        // "الحركات البنكية" اللي بتعمل window.location.href (تحميل صفحة كامل من جديد). بنعرض آخر
+        // نسخة محفوظة فورًا من sessionStorage وقت التحميل الأول، وبعدين بنجيب نسخة حديثة في الخلفية
+        // ونحدّث بيها لما توصل، من غير ما المستخدم يشوف الأرقام بترجع صفر أو الشاشة تفضى لحظيًا. ============
+        const DASHBOARD_CACHE_KEY = 'dabbar_dashboard_cache_v1';
+        function saveDashboardCache(data) {
+            try { sessionStorage.setItem(DASHBOARD_CACHE_KEY, JSON.stringify({ data, savedAt: Date.now() })); } catch (e) { /* تجاهل لو sessionStorage غير متاح */ }
+        }
+        function readDashboardCache() {
+            try {
+                const raw = sessionStorage.getItem(DASHBOARD_CACHE_KEY);
+                if (!raw) return null;
+                const parsed = JSON.parse(raw);
+                // نتجاهل كاش أقدم من ساعة عشان منعرضش بيانات قديمة جدًا كأنها حديثة
+                if (!parsed?.data || (Date.now() - (parsed.savedAt || 0)) > 60 * 60 * 1000) return null;
+                return parsed.data;
+            } catch (e) { return null; }
+        }
+        function renderDashboardData(data) {
+            window.__dashboardData = data;
+            renderActiveDays(data.activeDays);
+            renderMonthly(data.month);
+            renderNetWorth(data.netWorth);
+            renderPlanning(data);
+            renderInAppNotifications(data);
+            renderDaily(data.today, data.flow);
+            renderDailyReminder(data.today);
+            renderCategories(data.month);
+            renderSubscriptions(data.recurringSubscriptions);
+            renderTips(data.month);
+            renderDebts(data.debts);
+            renderRemindersTelegramBanner(data.linked);
+            renderArchive(data.history);
+            renderSubscription(data.subscription);
+            renderAssistant(data);
+            renderPortfolio(data.portfolio, data.portfolioDigest);
+            applyStreak(data.streak);
+            updateHeaderForTab(document.querySelector('.tab-btn.active-tab').dataset.tab, data);
+        }
         async function loadDashboard(isInitialLoad = false, attempt = 1) {
             const MAX_ATTEMPTS = 3;
             const TIMEOUT_MS = attempt === 1 ? 12000 : 20000; // أول محاولة أسرع عشان نحس بالمشكلة بدري ونعيد المحاولة، الباقي أطول احتياطًا لشبكة بطيئة
             clearTimeout(__dashboardRetryTimer);
             const syncNote = document.getElementById('dashboard-sync-note');
             const syncNoteText = document.getElementById('dashboard-sync-note-text');
+            // أول تحميل فقط: لو فيه نسخة محفوظة في الكاش، اعرضها فورًا من غير أي فلاش فاضي/أصفار،
+            // وسيبها تتحدث لما الفتش الحقيقي يخلص تحت.
+            if (isInitialLoad && attempt === 1 && !window.__dashboardData) {
+                const cached = readDashboardCache();
+                if (cached) renderDashboardData(cached);
+            }
             let data;
             try {
                 data = await fetchDashboardOnce(TIMEOUT_MS);
@@ -5112,7 +5157,9 @@
                     return;
                 }
                 // منسيبش الخطأ ده يودّي المستخدم لصفحة onboarding خالص، بس نوريله رسالة واضحة مع زرار "حاول تاني"
+                // لو عندنا بيانات كاش أو بيانات معروضة بالفعل، سيبها زي ما هي وميظهرش شاشة خطأ كاملة تحجب الداش.
                 if (syncNote) syncNote.classList.add('hidden');
+                if (window.__dashboardData) return;
                 const message = isTimeoutOrNetwork ? 'في تأخير في تحميل بياناتك دلوقتي. جرب تاني أو اتأكد من الإنترنت.' : (e.message || 'مقدرناش نجيب بياناتك دلوقتي.');
                 const errorEl = document.getElementById('dashboard-load-error');
                 const errorText = document.getElementById('dashboard-load-error-text');
@@ -5132,26 +5179,8 @@
             const dashboardError = document.getElementById('dashboard-load-error');
             if (dashboardError) dashboardError.classList.add('hidden');
 
-            window.__dashboardData = data;
-
-            renderActiveDays(data.activeDays);
-            renderMonthly(data.month);
-            renderNetWorth(data.netWorth);
-            renderPlanning(data);
-            renderInAppNotifications(data);
-            renderDaily(data.today, data.flow);
-            renderDailyReminder(data.today);
-            renderCategories(data.month);
-            renderSubscriptions(data.recurringSubscriptions);
-            renderTips(data.month);
-            renderDebts(data.debts);
-            renderRemindersTelegramBanner(data.linked);
-            renderArchive(data.history);
-            renderSubscription(data.subscription);
-            renderAssistant(data);
-            renderPortfolio(data.portfolio, data.portfolioDigest);
-            applyStreak(data.streak);
-            updateHeaderForTab(document.querySelector('.tab-btn.active-tab').dataset.tab, data);
+            renderDashboardData(data);
+            saveDashboardCache(data);
 
             const label = document.getElementById('last-updated-label');
             if (label) {
@@ -7202,7 +7231,7 @@
             }
         }
         document.getElementById('quick-entry-invoice-input')?.addEventListener('change', (event) => { const file = event.target.files?.[0]; analyzeQuickInvoice(file); event.target.value = ''; });
-        document.getElementById('bank-movements-card')?.addEventListener('click', () => { window.location.href = './dabbar-bank-movements.html'; });
+        document.getElementById('bank-movements-card')?.addEventListener('click', () => { window.location.href = '/app/dabbar-bank-movements.html'; });
         // ============ نطلب آخر chunk قبل stop؛ على بعض أجهزة Android حدث stop يصل قبل اكتمال تسليم
         // آخر dataavailable، فتطلع المعاينة بملف صغير جدًا (رأس WebM فقط) رغم أن مدتها ظاهرة وصوتها مسموع. ============
         function stopQuickEntryRecording(reason = 'user') {

@@ -6868,10 +6868,17 @@
             if (duration) duration.textContent = '00:00';
             drawQuickWave(document.getElementById('quick-entry-voice-waveform'));
         }
+        // ============ فحص حقيقي للصمت: بيتنفذ بعد فك تشفير الصوت الفعلي، مش بس على حجم الملف — لأن ملف webm/opus ممكن يطلع بحجم "طبيعي ظاهريًا" (فوق 200 بايت) وهو فاضي من الصوت تمامًا بسبب bug معالجة الميكروفون على بعض الأجهزة ============
+        function isQuickWaveSilent(peaks) {
+            if (!peaks.length) return false; // فشل فك التشفير نفسه؛ ما نحكمش بالصمت في الحالة دي
+            const maxPeak = Math.max(...peaks);
+            return maxPeak < 0.015; // عتبة واقعية: أي كلام حقيقي بيدّي peak أعلى بكتير من كده
+        }
         async function buildQuickWavePreview(blob) {
             const audio = document.getElementById('quick-entry-voice-audio');
-            if (!audio) return;
+            if (!audio) return true;
             quickWavePreview = [];
+            let decodedOk = false;
             try {
                 const context = new (window.AudioContext || window.webkitAudioContext)();
                 const buffer = await context.decodeAudioData(await blob.arrayBuffer());
@@ -6886,19 +6893,21 @@
                     quickWavePreview.push(peak);
                 }
                 await context.close();
+                decodedOk = true;
             } catch (error) {
                 console.warn('QUICK_ENTRY_WAVE_DECODE_FAILED', error);
                 quickWavePreview = Array.from({ length: 150 }, (_, i) => .13 + Math.abs(Math.sin(i * .62)) * .22);
             }
             drawQuickWave(document.getElementById('quick-entry-voice-waveform'), quickWavePreview, audio.duration ? audio.currentTime / audio.duration : 0);
+            return !decodedOk || !isQuickWaveSilent(quickWavePreview);
         }
-        function setQuickWavePreview(blob) {
+        function setQuickWavePreview(blob, onChecked) {
             const audio = document.getElementById('quick-entry-voice-audio');
             if (!audio) return;
             clearQuickWavePreview();
             quickWavePreviewUrl = URL.createObjectURL(blob);
             audio.src = quickWavePreviewUrl;
-            buildQuickWavePreview(blob);
+            buildQuickWavePreview(blob).then((hasRealSound) => { if (onChecked) onChecked(hasRealSound); });
         }
         function updateQuickWaveProgress() {
             const audio = document.getElementById('quick-entry-voice-audio');
@@ -7215,7 +7224,14 @@
             if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) return quickStatus('المتصفح لا يدعم التسجيل الصوتي.', 'error');
             if (quickEntryRecorder?.state === 'recording') return;
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
+                // ============ بعض أجهزة أندرويد/كروم عندها bug معروف: تفعيل echoCancellation + autoGainControl مع بعض بيخلي الـ track يطلع صامت بالكامل من غير أي خطأ ظاهر (المتصفح بيسجل ملف سليم الحجم لكن فاضي من الصوت فعليًا) ============
+                // بنجرب الأول إعدادات خفيفة (noiseSuppression بس) وبنعمل fallback لو اتقفلت، بدل ما نفرض الثلاثة مع بعض دايمًا.
+                let stream;
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, noiseSuppression: true, echoCancellation: false, autoGainControl: false } });
+                } catch (innerError) {
+                    stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                }
                 const audioTracks = stream.getAudioTracks();
                 const audioTrack = audioTracks[0];
                 if (!audioTrack || audioTrack.readyState !== 'live') {
@@ -7300,10 +7316,18 @@
                     }
                     // ============ بنسمّع التسجيل للمستخدم مباشرة قبل إرساله للتحويل الصوتي ============
                     quickEntryVoiceBlob = blob;
-                    setQuickWavePreview(blob);
                     const audioEl = document.getElementById('quick-entry-voice-audio');
-                    quickStatus(`تسجيل ${quickEntrySeconds} ثانية (${(blob.size / 1024).toFixed(1)} كيلوبايت) — اسمعه واتأكد.`);
-                    quickShow('quick-entry-voice-preview', true);
+                    quickStatus(`تسجيل ${quickEntrySeconds} ثانية (${(blob.size / 1024).toFixed(1)} كيلوبايت) — بنتأكد إن الصوت واضح...`);
+                    setQuickWavePreview(blob, (hasRealSound) => {
+                        if (!hasRealSound) {
+                            quickEntryVoiceBlob = null;
+                            quickShow('quick-entry-voice-preview', false);
+                            quickStatus('التسجيل طلع صامت رغم إنه اتسجل — جرّب تقرّب من الميكروفون وتتكلم بصوت أعلى شوية وسجّل تاني.', 'error');
+                            return;
+                        }
+                        quickStatus(`تسجيل ${quickEntrySeconds} ثانية (${(blob.size / 1024).toFixed(1)} كيلوبايت) — اسمعه واتأكد.`);
+                        quickShow('quick-entry-voice-preview', true);
+                    });
                     }, 180);
                 };
                 // ============ بنجمع الصوت كل ثانية بدل ما ننتظر chunk واحد آخر التسجيل — أضمن ومتوافق مع أجهزة أكتر ============

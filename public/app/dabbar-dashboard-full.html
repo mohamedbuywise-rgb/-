@@ -3144,26 +3144,17 @@
                             <p id="bank-accounts-status-line" class="text-[11px] text-slate-400 leading-relaxed">نظام دبّر بيوفر لك طريقة ذكية وسريعة لتسجيل مصاريفك وبنوكك أوتوماتيكيًا في الخلفية أول بأول، من غير ما تضطر تدخل أي بيانات يدويًا. اختر نظام تشغيل هاتفك تحت وابدأ.</p>
                         </div>
 
-                        <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-3.5 mb-4">
-                            <div class="flex items-center justify-between mb-2.5">
-                                <p class="text-xs font-bold text-slate-200">تفعيل الاستقبال التلقائي</p>
-                                <button type="button" id="bank-accounts-toggle" class="w-11 h-6 rounded-full bg-slate-700 relative transition shrink-0" aria-label="تفعيل الاستقبال التلقائي">
-                                    <span id="bank-accounts-toggle-dot" class="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-white transition-transform"></span>
-                                </button>
-                            </div>
-                            <p class="text-[11px] text-slate-400" id="bank-accounts-enabled-label">متوقف</p>
-                        </div>
-
                         <!-- Android -->
                         <div class="rounded-2xl border border-emerald-500/25 bg-emerald-500/[0.05] p-3.5 mb-4">
                             <p class="text-[12px] font-black text-emerald-300 mb-2.5">أولًا: نظام أندرويد (تلقائي بالكامل عبر MacroDroid)</p>
                             <div class="space-y-1 mb-3">
                                 <div class="flex items-start gap-2.5 py-1.5 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">1</span><span class="text-[12px] text-slate-300">ثبّت تطبيق MacroDroid الرسمي من Google Play</span></div>
-                                <div class="flex items-start gap-2.5 py-1.5 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">2</span><span class="text-[12px] text-slate-300">حمّل ملف التفعيل المخصص بتاعك (فيه التوكن ورابط الويب هوك جاهزين)</span></div>
+                                <div class="flex items-start gap-2.5 py-1.5 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">2</span><span class="text-[12px] text-slate-300">حمّل ملف التوكن الخاص بيك (فيه التوكن ورابط الويب هوك جاهزين)</span></div>
                                 <div class="flex items-start gap-2.5 py-1.5 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">3</span><span class="text-[12px] text-slate-300">افتح الملف ليتم استيراده تلقائيًا داخل MacroDroid، ثم دوس "تفعيل" وامنح إذن قراءة الإشعارات مرة واحدة</span></div>
                                 <div class="flex items-start gap-2.5 py-1.5"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">4</span><span class="text-[12px] text-slate-300">من هذه اللحظة، أي رسالة أو إشعار بنكي يتسجل في دبّر أوتوماتيك وفوري في الخلفية</span></div>
                             </div>
-                            <a href="#" id="bank-accounts-macro-link" target="_blank" rel="noopener" class="w-full flex items-center justify-center gap-2 bg-emerald-500 text-slate-950 font-black text-[12px] py-2.5 rounded-xl mb-2">⬇️ تحميل ملف التفعيل المخصص</a>
+                            <a href="#" id="bank-accounts-macro-link" target="_blank" rel="noopener" class="w-full flex items-center justify-center gap-2 bg-emerald-500 text-slate-950 font-black text-[12px] py-2.5 rounded-xl mb-2">⬇️ حمّل ملف التوكن الخاص</a>
+                            <p id="bank-accounts-macro-error" class="hidden text-[11px] text-rose-400 leading-relaxed mb-2"></p>
                             <a href="https://play.google.com/store/apps/details?id=com.arlosoft.macrodroid" target="_blank" rel="noopener" class="w-full flex items-center justify-center gap-2 bg-slate-800 border border-slate-700 text-slate-200 font-bold text-[11px] py-2.5 rounded-xl mb-2">▶️ تثبيت MacroDroid من Google Play</a>
                             <a href="#" id="bank-accounts-open-setup" class="w-full flex items-center justify-center gap-2 bg-slate-800 border border-slate-700 text-slate-200 font-bold text-[12px] py-2.5 rounded-xl">🔗 عندك التطبيق فعلًا؟ افتح إعداد التوكن مباشرة</a>
                             <p class="text-[10px] text-slate-500 mt-3 leading-relaxed">MacroDroid متاح من Google Play. بعد التثبيت يحتاج إذن قراءة الإشعارات حسب إعدادات جهازك، ودبّر بيحدد بنكك/محفظتك تلقائي من اسم مرسل الرسالة.</p>
@@ -4199,11 +4190,9 @@
             const card = document.getElementById('bank-accounts-card');
             const modal = document.getElementById('bank-accounts-page');
             const closeBtn = document.getElementById('bank-accounts-close');
-            const toggleBtn = document.getElementById('bank-accounts-toggle');
-            const toggleDot = document.getElementById('bank-accounts-toggle-dot');
-            const enabledLabel = document.getElementById('bank-accounts-enabled-label');
             const supportedList = document.getElementById('bank-accounts-supported-list');
             const downloadLink = document.getElementById('bank-accounts-macro-link');
+            const macroErrorEl = document.getElementById('bank-accounts-macro-error');
             const setupLink = document.getElementById('bank-accounts-open-setup');
             if (!card || !modal) return;
 
@@ -4211,16 +4200,9 @@
             if (isIOSDevice) {
                 downloadLink?.classList.add('hidden');
                 setupLink?.classList.add('hidden');
-                toggleBtn?.closest('.flex.items-center')?.classList.add('hidden');
             }
 
-            let bankState = { enabled: false, token: null, webhookUrl: null, banks: [], macroDownloadUrl: null, playStoreUrl: null, deepLink: null };
-
-            function renderToggle() {
-                toggleBtn.style.background = bankState.enabled ? '#10b981' : '';
-                toggleDot.style.transform = bankState.enabled ? 'translateX(-20px)' : 'translateX(0)';
-                enabledLabel.textContent = bankState.enabled ? 'شغال' : 'متوقف';
-            }
+            let bankState = { token: null, webhookUrl: null, banks: [], macroDownloadUrl: null, playStoreUrl: null, deepLink: null };
 
             function renderBanks() {
                 supportedList.innerHTML = bankState.banks.map((b) =>
@@ -4236,18 +4218,26 @@
             downloadLink?.addEventListener('click', async (event) => {
                 event.preventDefault();
                 if (!bankState.macroDownloadUrl) return;
+                macroErrorEl?.classList.add('hidden');
+                const originalLabel = '⬇️ حمّل ملف التوكن الخاص';
                 try {
                     const { data: { session } } = await sb.auth.getSession();
                     if (!session) return;
-                    downloadLink.textContent = 'بنجهّز الماكرو...';
+                    downloadLink.textContent = 'بنجهّز الملف...';
                     const res = await fetch(bankState.macroDownloadUrl, { headers: { Authorization: `Bearer ${session.access_token}` } });
-                    if (!res.ok) throw new Error();
+                    if (!res.ok) {
+                        // ============ التوكن مش موجود لسه على السيرفر (409) أو أي خطأ تاني — بنوري رسالة واضحة، من غير ما نفتح جوجل بلاي تلقائي زي زرار التثبيت المنفصل تحته ============
+                        let message = 'الملف مش جاهز دلوقتي، جرّب تاني كمان شوية. لو استمرت المشكلة كلّم الدعم الفني.';
+                        try { const body = await res.json(); if (body?.error) message = body.error; } catch (_) {}
+                        if (macroErrorEl) { macroErrorEl.textContent = `⚠️ ${message}`; macroErrorEl.classList.remove('hidden'); }
+                        return;
+                    }
                     const blobUrl = URL.createObjectURL(await res.blob());
                     const a = document.createElement('a'); a.href = blobUrl; a.download = 'daber-bank-automation.macro'; document.body.appendChild(a); a.click(); a.remove();
                     setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
                 } catch (e) {
-                    window.open(bankState.playStoreUrl || 'https://play.google.com/store/apps/details?id=com.arlosoft.macrodroid', '_blank', 'noopener');
-                } finally { downloadLink.textContent = '⬇️ فعّل أتمتة الرسائل عبر MacroDroid'; }
+                    if (macroErrorEl) { macroErrorEl.textContent = '⚠️ حصل خطأ في الاتصال، جرّب تاني.'; macroErrorEl.classList.remove('hidden'); }
+                } finally { downloadLink.textContent = originalLabel; }
             });
 
             async function loadBankAccounts() {
@@ -4259,8 +4249,7 @@
                     });
                     const data = await res.json();
                     if (!data.ok) return;
-                    bankState = { enabled: data.enabled, token: data.token, webhookUrl: data.webhookUrl, banks: data.banks || [], macroDownloadUrl: data.macroDownloadUrl, playStoreUrl: data.playStoreUrl, deepLink: data.deepLink };
-                    renderToggle();
+                    bankState = { token: data.token, webhookUrl: data.webhookUrl, banks: data.banks || [], macroDownloadUrl: data.macroDownloadUrl, playStoreUrl: data.playStoreUrl, deepLink: data.deepLink };
                     renderBanks();
                     renderLinks();
                 } catch (e) { /* صامت — الكارت لسه بيفتح حتى لو فشل التحميل */ }
@@ -4272,21 +4261,6 @@
                 loadBankAccounts();
             });
             closeBtn?.addEventListener('click', () => closeAccountSubpage(modal));
-
-            toggleBtn?.addEventListener('click', async () => {
-                const next = !bankState.enabled;
-                try {
-                    const { data: { session } } = await sb.auth.getSession();
-                    if (!session) return;
-                    const res = await fetch('/api/bank-accounts', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session.access_token}` },
-                        body: JSON.stringify({ enabled: next }),
-                    });
-                    const data = await res.json();
-                    if (data.ok) { bankState.enabled = data.enabled; renderToggle(); }
-                } catch (e) { /* تجاهل */ }
-            });
         })();
 
         // ============ شاشة "مش شغال معايا؟" (استكشاف أخطاء ربط البنوك) ============

@@ -3160,13 +3160,10 @@
                                     <span class="text-[10px] text-slate-500">80 ثانية</span>
                                 </summary>
                                 <div class="px-3 pb-3 pt-1">
-                                    <video id="bank-accounts-video-android" class="w-full rounded-lg bg-black" controls playsinline preload="metadata" poster="/app/videos/bank-automation-android-poster.jpg">
-                                        <source id="bank-accounts-video-android-source" src="/app/videos/bank-automation-android.mp4" type="video/mp4">
-                                        متصفحك مش بيدعم عرض الفيديو، حمّل الملف مباشرة من <a id="bank-accounts-video-android-dl" href="/app/videos/bank-automation-android.mp4" class="underline">هنا</a>.
+                                    <video id="bank-accounts-video-android" class="w-full rounded-lg bg-black" controls playsinline preload="none" poster="/app/videos/bank-automation-android-poster.jpg">
+                                        <source src="/app/videos/bank-automation-android.mp4" type="video/mp4">
+                                        متصفحك مش بيدعم عرض الفيديو، حمّل الملف مباشرة من <a href="/app/videos/bank-automation-android.mp4" class="underline">هنا</a>.
                                     </video>
-                                    <div id="bank-accounts-video-android-error" class="hidden mt-2 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2 text-[11px] text-amber-300 leading-relaxed">
-                                        ⚠️ الفيديو معرفش يتحمّل دلوقتي (تأكد إن ملف <code>bank-automation-android.mp4</code> مرفوع في نفس المسار على السيرفر). جرّب تقفل الشاشة وتفتحها تاني، أو دوس <a id="bank-accounts-video-android-error-link" href="#" class="underline" target="_blank" rel="noopener">هنا</a>.
-                                    </div>
                                     <button type="button" id="bank-accounts-video-android-pip" class="mt-2 w-full flex items-center justify-center gap-2 bg-slate-800 border border-slate-700 text-slate-200 font-bold text-[11px] py-2 rounded-lg">🔲 شغّل عائم (تقدر تتابعه وانت بتطبّق الخطوات في MacroDroid)</button>
                                 </div>
                             </details>
@@ -4215,39 +4212,6 @@
             const androidVideoPipBtn = document.getElementById('bank-accounts-video-android-pip');
             if (!card || !modal) return;
 
-            // ============ الفيديو ما بيشتغلش: مسار الملف غالبًا غلط أو الملف مش موجود على السيرفر ============
-            // بنجرب مسارات بديلة شائعة أوتوماتيك (بدل ما نسيب الفيديو معلّق بصمت من غير أي رسالة للمستخدم)،
-            // ولو كلهم فشلوا بنعرض تنبيه واضح فيه رابط تحميل مباشر بدل صفحة فاضية.
-            if (androidVideo) {
-                const videoSource = document.getElementById('bank-accounts-video-android-source');
-                const videoDlLink = document.getElementById('bank-accounts-video-android-dl');
-                const videoErrorBox = document.getElementById('bank-accounts-video-android-error');
-                const videoErrorLink = document.getElementById('bank-accounts-video-android-error-link');
-                const FALLBACK_VIDEO_PATHS = [
-                    '/app/videos/bank-automation-android.mp4',
-                    '/videos/bank-automation-android.mp4',
-                    '/public/videos/bank-automation-android.mp4',
-                    './videos/bank-automation-android.mp4',
-                ];
-                let videoPathAttempt = 0;
-                function tryNextVideoPath() {
-                    if (videoPathAttempt >= FALLBACK_VIDEO_PATHS.length) {
-                        // كل المسارات فشلت — نوضح المشكلة للمستخدم بدل الصمت
-                        videoErrorBox?.classList.remove('hidden');
-                        if (videoErrorLink) videoErrorLink.href = FALLBACK_VIDEO_PATHS[0];
-                        return;
-                    }
-                    const path = FALLBACK_VIDEO_PATHS[videoPathAttempt];
-                    videoPathAttempt += 1;
-                    if (videoSource) videoSource.src = path;
-                    if (videoDlLink) videoDlLink.href = path;
-                    androidVideo.load();
-                }
-                androidVideo.addEventListener('error', tryNextVideoPath);
-                // لو أول مصدر (اللي في الـ HTML الأصلي) فشل تحميله، onerror على الـ <video> بيتفعّل تلقائي
-                // ونبدأ نجرب البدائل من غير ما نحتاج تدخل يدوي.
-            }
-
             // ============ نافذة عائمة (Picture-in-Picture) — تسيب الفيديو طافي فوق أي تطبيق تاني (زي MacroDroid) عشان المستخدم يقدر يتابع الشرح وهو بيطبّق الخطوات ============
             if (androidVideoPipBtn && androidVideo) {
                 if (!document.pictureInPictureEnabled) {
@@ -4955,24 +4919,6 @@
                 setupLocalSecurityUI();
                 await gateLocalSecurity();
                 await refreshPushUI();
-                // ============ Stale-While-Revalidate: نعرض آخر بيانات محفوظة فورًا (لو موجودة) ============
-                // قبل ما ننتظر الشبكة خالص، عشان الشاشة تبان مليانة على طول بدل ما تفضل فاضية وهي بتحمّل،
-                // وبعدين بنجيب نسخة محدّثة من السيرفر في نفس اللحظة (loadDashboard تحت) وتستبدلها بهدوء.
-                const cached = readDashboardCache();
-                if (cached && cached.data) {
-                    window.__dashboardData = cached.data;
-                    try {
-                        renderActiveDays(cached.data.activeDays);
-                        renderMonthly(cached.data.month);
-                        renderNetWorth(cached.data.netWorth);
-                        renderPlanning(cached.data);
-                        renderDaily(cached.data.today, cached.data.flow);
-                        renderCategories(cached.data.month);
-                        renderDebts(cached.data.debts);
-                        renderSubscription(cached.data.subscription);
-                        renderPortfolio(cached.data.portfolio, cached.data.portfolioDigest);
-                    } catch (e) { /* لو شكل البيانات القديمة اختلف، مبنوقفش — الفتح الحقيقي هيصحح كل حاجة */ }
-                }
                 await loadDashboard(true); // أول تحميل — الربط اختياري والداش تفتح للحساب المستقل عادي
                 await loadPlanningSettings();
                 await loadAccountTab();
@@ -5135,22 +5081,6 @@
         // كل وظائف الداش تعتمد على dataUserId الداخلي الذي يرجعه السيرفر.
         let __consecutiveUnlinked = 0;
         let __dashboardRetryTimer = null;
-
-        // ============ Stale-While-Revalidate: بنخزن آخر رد ناجح في sessionStorage ============
-        // عشان أول ما المستخدم يفتح الشاشة (أو يرجع من تطبيق تاني)، يشوف بياناته فورًا من الكاش
-        // من غير ما يستنى الشبكة، وفي نفس الوقت بنجيب نسخة محدّثة في الخلفية بهدوء.
-        const DASHBOARD_CACHE_KEY = 'dabbar-dashboard-cache-v1';
-        function saveDashboardCache(data) {
-            try { sessionStorage.setItem(DASHBOARD_CACHE_KEY, JSON.stringify({ data, savedAt: Date.now() })); } catch (e) {}
-        }
-        function readDashboardCache() {
-            try {
-                const raw = sessionStorage.getItem(DASHBOARD_CACHE_KEY);
-                if (!raw) return null;
-                return JSON.parse(raw);
-            } catch (e) { return null; }
-        }
-
         // ============ محاولة واحدة بمهلة زمنية معينة، بترجع النتيجة أو تطلع Error ============
         async function fetchDashboardOnce(timeoutMs) {
             const controller = new AbortController();
@@ -5168,14 +5098,9 @@
                 clearTimeout(timeoutId);
             }
         }
-        // isInitialLoad=true فقط أول ما الصفحة تتفتح (أو أول مرة تتفتح فيها الجلسة). أي نداء تاني بعد كده
-        // (visibilitychange، focus، الـ setInterval الدوري، زرار التحديث) بيتعامل كـ "تحديث خلفي هادي":
-        // البيانات القديمة تفضل ظاهرة زي ما هي، وأي فشل مؤقت في التحديث الخلفي بيتجاهل بصمت تمامًا
-        // (من غير ما نظهر أي رسالة خطأ مزعجة) طالما عندنا بيانات سابقة على الشاشة بالفعل.
         async function loadDashboard(isInitialLoad = false, attempt = 1) {
             const MAX_ATTEMPTS = 3;
             const TIMEOUT_MS = attempt === 1 ? 12000 : 20000; // أول محاولة أسرع عشان نحس بالمشكلة بدري ونعيد المحاولة، الباقي أطول احتياطًا لشبكة بطيئة
-            const isBackgroundRefresh = !isInitialLoad && !!window.__dashboardData;
             clearTimeout(__dashboardRetryTimer);
             const syncNote = document.getElementById('dashboard-sync-note');
             const syncNoteText = document.getElementById('dashboard-sync-note-text');
@@ -5185,25 +5110,16 @@
             } catch (e) {
                 console.error(`dashboard-data fetch failed (attempt ${attempt}/${MAX_ATTEMPTS}):`, e);
                 const isTimeoutOrNetwork = e.name === 'AbortError' || e.message === 'Failed to fetch';
-
-                // ============ تحديث خلفي (المستخدم رجع من تطبيق تاني مثلاً) فشل مؤقتًا: نسيب البيانات القديمة ============
-                // ظاهرة زي ما هي بهدوء تام، من غير أي رسالة خطأ، وبنجرب تاني في المرة الجاية بس (مفيش إزعاج للمستخدم).
-                if (isBackgroundRefresh) {
-                    if (syncNote) syncNote.classList.add('hidden');
-                    return;
-                }
-
-                // خطأ شبكة/تايم آوت عابر أثناء أول تحميل: نعيد المحاولة تلقائيًا بتأخير بسيط، مع رسالة خفيفة جدًا وغير مقلقة
+                // خطأ شبكة/تايم آوت عابر: نعيد المحاولة تلقائيًا بتأخير بسيط، مع مؤشر تحميل هادي مش تنبيه مقلق
                 if (isTimeoutOrNetwork && attempt < MAX_ATTEMPTS) {
                     const delay = attempt * 900;
-                    if (syncNote && syncNoteText) { syncNoteText.textContent = 'جاري تحديث البيانات...'; syncNote.classList.remove('hidden'); }
+                    if (syncNote && syncNoteText) { syncNoteText.textContent = 'بنكمّل تحميل بياناتك...'; syncNote.classList.remove('hidden'); }
                     __dashboardRetryTimer = setTimeout(() => loadDashboard(isInitialLoad, attempt + 1), delay);
                     return;
                 }
                 // منسيبش الخطأ ده يودّي المستخدم لصفحة onboarding خالص، بس نوريله رسالة واضحة مع زرار "حاول تاني"
-                // (ده بيحصل بس لو أول تحميل فشل نهائيًا ومفيش أي بيانات سابقة نعرضها بدلًا منه)
                 if (syncNote) syncNote.classList.add('hidden');
-                const message = isTimeoutOrNetwork ? 'جاري تحديث البيانات، ممكن ياخد ثانية إضافية.' : (e.message || 'مقدرناش نجيب بياناتك دلوقتي.');
+                const message = isTimeoutOrNetwork ? 'في تأخير في تحميل بياناتك دلوقتي. جرب تاني أو اتأكد من الإنترنت.' : (e.message || 'مقدرناش نجيب بياناتك دلوقتي.');
                 const errorEl = document.getElementById('dashboard-load-error');
                 const errorText = document.getElementById('dashboard-load-error-text');
                 const retryBtn = document.getElementById('dashboard-load-retry-btn');
@@ -5223,7 +5139,6 @@
             if (dashboardError) dashboardError.classList.add('hidden');
 
             window.__dashboardData = data;
-            saveDashboardCache(data); // نحدّث الكاش المحلي بأحدث نسخة ناجحة عشان تفتح فورًا المرة الجاية
 
             renderActiveDays(data.activeDays);
             renderMonthly(data.month);
@@ -5853,18 +5768,23 @@
             if (today.items.length === 0) {
                 listEl.innerHTML = '<p class="text-xs text-slate-500">سجّل أول عملية النهاردة وهتظهر هنا.</p>';
             } else {
-                listEl.innerHTML = today.items.map((it, i) => `
+                listEl.innerHTML = today.items.map((it, i) => {
+                    const bankTag = it.source === 'sms' && it.source_bank_label
+                        ? `<p class="text-[9px] font-bold text-emerald-400/90 mt-0.5">🏦 أوتوماتيك: ${it.source_bank_label}</p>`
+                        : '';
+                    return `
                     <div class="flex items-center justify-between gap-2 py-2 ${i < today.items.length - 1 ? 'border-b border-slate-800/60' : ''}">
                         <div class="flex min-w-0 items-center gap-2.5">
                             <span class="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-sm">${getCategoryEmoji(it.category)}</span>
                             <div class="min-w-0">
                                 <p class="truncate text-xs font-semibold text-slate-200">${(it.description && it.description.trim()) || it.category}</p>
                                 <p class="text-[10px] text-slate-500">${it.category} · ${new Date(it.created_at).toLocaleTimeString('ar-EG', { hour: 'numeric', minute: '2-digit' })}</p>
+                                ${bankTag}
                             </div>
                         </div>
                         <div class="flex shrink-0 items-center gap-1.5"><span class="text-xs font-bold text-rose-400">-${fmt(it.amount, it.currency_code)}</span><button type="button" data-expense-edit="${it.id}" data-expense-amount="${it.amount}" data-expense-description="${(it.description || '').replace(/"/g, '&quot;')}" class="text-[11px] text-slate-500 hover:text-emerald-400" aria-label="تعديل العملية">✎</button><button type="button" data-expense-delete="${it.id}" class="text-[11px] text-slate-500 hover:text-rose-400" aria-label="حذف العملية">✕</button></div>
                     </div>
-                `).join('');
+                `;}).join('');
             }
             listEl?.querySelectorAll('[data-expense-edit]').forEach((btn) => btn.addEventListener('click', () => editExpense(btn.dataset.expenseEdit, btn.dataset.expenseAmount, btn.dataset.expenseDescription)));
             listEl?.querySelectorAll('[data-expense-delete]').forEach((btn) => btn.addEventListener('click', () => deleteExpense(btn.dataset.expenseDelete)));
@@ -6670,12 +6590,6 @@
             renderAsstSuggestion(data.smart, goals[0] || null);
             renderAsstProjection(data.smart, data.month);
             renderAsstGoal(goals);
-            // بنجيب تاريخ الشات مرة واحدة بس (أول مرة الداشبورد يفتح)، مش في كل تحديث خلفي —
-            // عشان منمسحش أو نكرر رسايل شات المستخدم وهو بيكتب
-            if (!window.__chatHistoryLoaded) {
-                window.__chatHistoryLoaded = true;
-                loadChatHistory();
-            }
         }
 
         function renderAsstSuggestion(smart, goal) {
@@ -8044,32 +7958,8 @@
             }
         });
 
-        // ============ اسأل دبّر — شات (مع تاريخ محفوظ في قاعدة البيانات) ============
+        // ============ اسأل دبّر — شات ============
         const asstChatLog = document.getElementById('asst-chat-log');
-        // sessionId ثابت لكل جهاز/متصفح عشان يفضل يجيب نفس تاريخ المحادثة القديم دايمًا
-        function getChatSessionId() {
-            try {
-                let id = localStorage.getItem('dabbar-chat-session-id');
-                if (!id) { id = 'default'; localStorage.setItem('dabbar-chat-session-id', id); }
-                return id;
-            } catch (e) { return 'default'; }
-        }
-
-        // ============ بيتنادى مرة واحدة بس أول ما الداشبورد يفتح: يجيب آخر رسائل الشات المحفوظة ============
-        // ويعرضها في نفس الشكل، عشان المحادثة تبان مستمرة حتى لو المستخدم قفل التطبيق ورجع تاني (زي ChatGPT)
-        async function loadChatHistory() {
-            try {
-                const result = await asstApi('chat_history', { sessionId: getChatSessionId() });
-                const messages = Array.isArray(result.messages) ? result.messages : [];
-                if (!messages.length) return;
-                asstChatLog.innerHTML = ''; // نمسح رسالة الترحيب الافتراضية (لو موجودة) ونحط المحادثة الحقيقية
-                messages.forEach((m) => appendChatBubble(m.text, m.role === 'user' ? 'user' : 'bot'));
-            } catch (e) {
-                // فشل جلب التاريخ مش المفروض يمنع المستخدم من الكتابة؛ بنسيب الشات يبدأ فاضي بصمت
-                console.error('loadChatHistory failed:', e);
-            }
-        }
-
         function appendChatBubble(text, from) {
             const wrap = document.createElement('div');
             if (from === 'user') {
@@ -8094,7 +7984,7 @@
             const sendBtn = document.getElementById('asst-chat-send');
             sendBtn.disabled = true;
             try {
-                const result = await asstApi('ask', { question, sessionId: getChatSessionId() });
+                const result = await asstApi('ask', { question });
                 typingBubble.lastElementChild.textContent = result.answer;
                 updateUsageBadge('asst-chat-usage', result.usage);
             } catch (e) {

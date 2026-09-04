@@ -7010,15 +7010,17 @@
                     const blob = new Blob(quickEntryChunks, { type: quickEntryRecorder.mimeType || mimeType || 'audio/webm' });
                     console.warn('DABBAR_VOICE_DEBUG', { size: blob.size, chunks: quickEntryChunks.length, mime: blob.type, seconds: quickEntrySeconds, hadSound: quickEntryHadSound });
                     if (!blob.size) { quickStatus('مسجلناش أي صوت خالص — جرّب تسمح للمتصفح بالميكروفون من إعدادات الموقع وحاول تاني.', 'error'); return; }
-                    // ============ المراقبة اللحظية (quickEntryHadSound) هي الفحص الأدق — بتمسك الصمت حتى لو الملف طلع بحجم طبيعي. حجم الملف فحص احتياطي تاني لو المراقبة فشلت لأي سبب ============
-                    const minExpectedBytes = Math.min(quickEntrySeconds * 1500, 3000);
-                    if (!quickEntryHadSound || blob.size < minExpectedBytes) {
+                    // ============ لا نعتمد على AudioContext أو حجم متوقع للصوت في رفض التسجيل ============
+                    // بعض متصفحات الموبايل ترجع مستوى صوت صفريًا من الـ analyser رغم أن MediaRecorder
+                    // سجّل ملفًا سليمًا. التفريغ الصوتي نفسه هو الحكم النهائي؛ الواجهة تعرض التسجيل
+                    // للمستخدم وتمنع الرفض الكاذب، مع الإبقاء على فحص الملف الفارغ فقط.
+                    if (blob.size < 200) {
                         quickEntryVoiceBlob = null;
                         quickShow('quick-entry-voice-preview', false);
-                        quickStatus('مسجلناش صوت واضح — تأكد إن المايك شغال وسجّل تاني.', 'error');
+                        quickStatus('مسجلناش أي صوت خالص — تأكد من إذن الميكروفون وحاول تاني.', 'error');
                         return;
                     }
-                    // ============ بدل ما نحكم على الصوت من حجمه، بنسمّعه للمستخدم مباشرة عشان يتأكد بنفسه إنه اتسجل صح قبل ما نبعته لـ Groq ============
+                    // ============ بنسمّع التسجيل للمستخدم مباشرة قبل إرساله للتحويل الصوتي ============
                     quickEntryVoiceBlob = blob;
                     const audioEl = document.getElementById('quick-entry-voice-audio');
                     audioEl.src = URL.createObjectURL(blob);

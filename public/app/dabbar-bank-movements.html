@@ -187,6 +187,34 @@
   let currentFilter = 'all';
   let accessToken = null;
 
+  // ============ Stale-While-Revalidate: كاش محلي للحركات البنكية (sessionStorage) ============
+  // ده اللي بيحل مشكلة "البيانات بتتصفر وتتحمل من الأول" لما تدخل تخرج وترجع تاني —
+  // بنعرض آخر نسخة محفوظة فورًا، وفي نفس الوقت بنجيب نسخة جديدة في الخلفية بهدوء تام.
+  const MOVEMENTS_CACHE_KEY = 'dabbar-bank-movements-cache-v1';
+  function saveMovementsCache(payload) {
+    try { sessionStorage.setItem(MOVEMENTS_CACHE_KEY, JSON.stringify(payload)); } catch (e) {}
+  }
+  function readMovementsCache() {
+    try {
+      const raw = sessionStorage.getItem(MOVEMENTS_CACHE_KEY);
+      return raw ? JSON.parse(raw) : null;
+    } catch (e) { return null; }
+  }
+  function renderFromPayload(data) {
+    allMovements = data.movements || [];
+    $('status').classList.add('hidden');
+    if (!allMovements.length) {
+      showNoAccountsState();
+      return;
+    }
+    $('empty-state').classList.add('hidden');
+    $('content').classList.remove('hidden');
+    $('stat-withdrawal').textContent = `${fmt(data.totals.withdrawal)} ج.م`;
+    $('stat-deposit').textContent = `${fmt(data.totals.deposit)} ج.م`;
+    $('stat-transfer').textContent = `${fmt(data.totals.transfer)} ج.م`;
+    renderList();
+  }
+
   async function boot() {
     const { data: { session } } = await sb.auth.getSession();
     if (!session) {
@@ -194,31 +222,55 @@
       return;
     }
     accessToken = session.access_token;
-    await loadMovements();
+
+    // ============ نعرض الكاش القديم فورًا (لو موجود) قبل ما ننتظر الشبكة خالص ============
+    const cached = readMovementsCache();
+    if (cached) {
+      renderFromPayload(cached);
+    } else {
+      $('status').textContent = 'بنجيب حركاتك...';
+    }
+    // وبعدين دايمًا نجيب نسخة محدّثة من السيرفر (سواء كان فيه كاش أو لأ)
+    await loadMovements(!!cached);
   }
 
-  async function loadMovements() {
+  // ============ جلب الحركات مع إعادة محاولة تلقائية على أخطاء 404/شبكة عابرة (مشكلة Vercel المتقطعة) ============
+  async function fetchMovementsOnce() {
+    const res = await fetch('/api?route=bank-movements&period=month', {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      cache: 'no-store',
+    });
+    if (res.status === 404) {
+      throw new Error('TRANSIENT_404');
+    }
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || !data.ok) {
+      throw new Error(data.error || 'FAILED');
+    }
+    return data;
+  }
+
+  async function loadMovements(isBackgroundRefresh = false, attempt = 1) {
+    const MAX_ATTEMPTS = 3;
     try {
-      const res = await fetch('/api?route=bank-movements&period=month', {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
-      const data = await res.json();
-      if (!res.ok || !data.ok) {
-        showNoAccountsState();
-        return;
-      }
-      allMovements = data.movements || [];
-      $('status').classList.add('hidden');
-      if (!allMovements.length) {
-        showNoAccountsState();
-        return;
-      }
-      $('content').classList.remove('hidden');
-      $('stat-withdrawal').textContent = `${fmt(data.totals.withdrawal)} ج.م`;
-      $('stat-deposit').textContent = `${fmt(data.totals.deposit)} ج.م`;
-      $('stat-transfer').textContent = `${fmt(data.totals.transfer)} ج.م`;
-      renderList();
+      const data = await fetchMovementsOnce();
+      renderFromPayload(data);
+      saveMovementsCache(data); // نحدّث الكاش بأحدث نسخة ناجحة
     } catch (e) {
+      const isTransient = e.message === 'TRANSIENT_404' || e.message === 'Failed to fetch';
+      // ============ لو فيه بيانات ظاهرة بالفعل (كاش أو تحديث خلفي) وفشل التحديث، نسيبها زي ما هي بهدوء ============
+      // من غير ما نظهر أي رسالة خطأ مزعجة — بالظبط نفس منطق الداشبورد الرئيسي
+      if (isBackgroundRefresh || allMovements.length) {
+        if (isTransient && attempt < MAX_ATTEMPTS) {
+          setTimeout(() => loadMovements(true, attempt + 1), attempt * 800);
+        }
+        return;
+      }
+      // خطأ 404/شبكة عابر أثناء أول تحميل: نعيد المحاولة تلقائيًا كذا مرة قبل ما نعرض حالة فاضية
+      if (isTransient && attempt < MAX_ATTEMPTS) {
+        setTimeout(() => loadMovements(false, attempt + 1), attempt * 800);
+        return;
+      }
       showNoAccountsState();
     }
   }
@@ -256,7 +308,14 @@
       const today = new Date(); today.setHours(0, 0, 0, 0);
       const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
       const dateOnly = new Date(movementDate); dateOnly.setHours(0, 0, 0, 0);
-      const date = dateOnly.getTime() === today.getTime() ? 'اليوم' : (dateOnly.getTime() === yesterday.getTime() ? 'أمس' : movementDate.toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' }));
+      // بنضيف الوقت بجانب اليوم/التاريخ دايمًا (مطلوب: "السبت، 10:07 ص" أو "اليوم، 10:07 ص")
+      const timeLabel = movementDate.toLocaleTimeString('ar-EG', { hour: 'numeric', minute: '2-digit', hour12: true });
+      const dayLabel = dateOnly.getTime() === today.getTime()
+        ? 'اليوم'
+        : (dateOnly.getTime() === yesterday.getTime()
+          ? 'أمس'
+          : movementDate.toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'short' }));
+      const date = `${dayLabel}، ${timeLabel}`;
       row.innerHTML = `
         <div class="movement-main">
           <span class="bank-logo${brand.wallet ? ' wallet' : ''}" aria-label="${brand.label || 'حركة بنكية'}">${brand.mark}</span>

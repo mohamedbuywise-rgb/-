@@ -121,3 +121,19 @@ create index if not exists idx_financial_events_user_date
   on financial_events (telegram_user_id, created_at desc);
 create index if not exists idx_financial_events_user_type
   on financial_events (telegram_user_id, event_type);
+
+-- ============ جدول تاريخ محادثات "اسأل دبّر" ============
+-- بيحفظ كل رسالة (من المستخدم أو من الرد) عشان المحادثة تفضل مستمرة حتى لو المستخدم قفل التطبيق ورجع تاني.
+-- session_id بيسمح مستقبلًا نفصل كذا محادثة لنفس المستخدم لو احتجنا، دلوقتي بنستخدم قيمة ثابتة ('default') لكل مستخدم.
+create table if not exists chat_messages (
+  id bigint generated always as identity primary key,
+  user_id bigint not null,           -- نفس dataUserId المستخدم في باقي الجداول (telegram_user_id أو الحساب المستقل)
+  session_id text not null default 'default',
+  role text not null check (role in ('user', 'assistant')),
+  message text not null,
+  created_at timestamptz not null default now()
+);
+
+-- index يسرّع جلب آخر رسائل المستخدم بترتيب زمني عكسي (أهم استعلام هيتعمل: آخر N رسالة لكل مستخدم/جلسة)
+create index if not exists idx_chat_messages_user_session
+  on chat_messages (user_id, session_id, created_at desc);

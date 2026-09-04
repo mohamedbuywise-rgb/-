@@ -253,8 +253,47 @@ async function handleReceiptScan(userId, body, res) {
   });
 }
 
+// ============ تاريخ محادثة "اسأل دبّر" (chat_messages) ============
+// بنحتفظ بآخر 20 رسالة بس كـ context عشان منبعتش نص ضخم لـ Groq في كل سؤال، ونفضل سريعين ورخاص.
+const CHAT_HISTORY_CONTEXT_LIMIT = 20;
+const CHAT_HISTORY_FETCH_LIMIT = 50; // اللي بيتعرض في الواجهة أول ما تتفتح
+const DEFAULT_SESSION_ID = 'default';
+
+async function fetchRecentChatMessages(userId, sessionId, limit) {
+  const { data, error } = await supabase
+    .from('chat_messages')
+    .select('role, message, created_at')
+    .eq('user_id', userId)
+    .eq('session_id', sessionId)
+    .order('created_at', { ascending: false })
+    .limit(limit);
+  if (error) {
+    console.error('fetchRecentChatMessages error:', JSON.stringify(error));
+    return [];
+  }
+  return (data || []).reverse(); // نرجعهم بترتيب زمني عادي (الأقدم الأول)
+}
+
+async function saveChatMessage(userId, sessionId, role, message) {
+  const { error } = await supabase
+    .from('chat_messages')
+    .insert({ user_id: userId, session_id: sessionId, role, message: String(message || '').slice(0, 4000) });
+  if (error) console.error('saveChatMessage error:', JSON.stringify(error));
+}
+
+// action = "chat_history"  { sessionId? } — بيتنادى عند فتح شاشة "اسأل دبّر" عشان يعرض المحادثة القديمة
+async function handleChatHistory(userId, body, res) {
+  const sessionId = String(body.sessionId || DEFAULT_SESSION_ID).slice(0, 80);
+  const messages = await fetchRecentChatMessages(userId, sessionId, CHAT_HISTORY_FETCH_LIMIT);
+  return res.status(200).json({
+    ok: true,
+    messages: messages.map((m) => ({ role: m.role, text: m.message, createdAt: m.created_at })),
+  });
+}
+
 async function handleAsk(userId, body, res) {
   const question = (body.question || '').trim();
+  const sessionId = String(body.sessionId || DEFAULT_SESSION_ID).slice(0, 80);
   if (!question) return res.status(400).json({ error: 'اكتب سؤالك الأول.' });
   if (question.length > 500) return res.status(400).json({ error: 'السؤال طويل أوي، اختصره شوية.' });
 
@@ -268,7 +307,7 @@ async function handleAsk(userId, body, res) {
   }
 
   // كل مصدر بيانات مستقل؛ لو مصدر واحد فشل لا نمنع المساعد من الرد على السؤال.
-  const [expensesResult, debtsResult, goalResult] = await Promise.allSettled([
+  const [expensesResult, debtsResult, goalResult, historyResult] = await Promise.allSettled([
     getRecentExpensesSummaryText(userId),
     getDebtsSummaryText(userId),
     supabase
@@ -277,6 +316,7 @@ async function handleAsk(userId, body, res) {
       .eq('telegram_user_id', userId)
       .eq('is_active', true)
       .order('created_at', { ascending: true }),
+    fetchRecentChatMessages(userId, sessionId, CHAT_HISTORY_CONTEXT_LIMIT),
   ]);
 
   const expensesText = expensesResult.status === 'fulfilled'
@@ -291,12 +331,24 @@ async function handleAsk(userId, body, res) {
       goalRows.map((g) => `- ${g.title} — وفّر ${Number(g.saved_amount)} من ${Number(g.target_amount)} جنيه`).join('\n')
     : 'مفيش هدف مالي مسجل دلوقتي.';
 
-  const dataContext = `${expensesText}\n\n${debtsText}\n\n${goalText}`;
+  // نبني نص المحادثة القديمة (لو موجودة) عشان الموديل يفتكر الكلام اللي فات ويكمل بطبيعية
+  const historyRows = historyResult.status === 'fulfilled' ? historyResult.value : [];
+  const historyText = historyRows.length > 0
+    ? `آخر المحادثة بينك وبين المستخدم (للسياق فقط، ما تكررش الرد عليها):\n` +
+      historyRows.map((m) => `${m.role === 'user' ? 'المستخدم' : 'دبّر'}: ${m.message}`).join('\n')
+    : '';
+
+  const dataContext = `${expensesText}\n\n${debtsText}\n\n${goalText}${historyText ? `\n\n${historyText}` : ''}`;
   const answer = await askDabbarChat(question, dataContext);
 
   // askDabbarChat يرجع نصًا بديلًا عند الفشل؛ لا نردّ العداد إذا وصل رد حقيقي.
-  if (!answer || answer.startsWith('معلش، حصل خطأ بسيط')) {
+  const failed = !answer || answer.startsWith('معلش، حصل خطأ بسيط');
+  if (failed) {
     await refundUsage(userId, 'chat');
+  } else {
+    // بنحفظ السؤال والرد في الخلفية بصمت — من غير ما ننتظرهم قبل ما نرجّع الرد للمستخدم (أسرع للواجهة)
+    saveChatMessage(userId, sessionId, 'user', question).catch(() => {});
+    saveChatMessage(userId, sessionId, 'assistant', answer).catch(() => {});
   }
   return res.status(200).json({
     answer,
@@ -599,6 +651,8 @@ export default async function handler(req, res) {
         return await handleEntryConfirm(userId, body, res);
       case 'ask':
         return await handleAsk(userId, body, res);
+      case 'chat_history':
+        return await handleChatHistory(userId, body, res);
       default:
         return res.status(400).json({ error: 'action غير معروف.' });
     }

@@ -63,15 +63,11 @@ export default async function handler(req, res) {
     }
 
 
-    // ---- مصاريف النهاردة ----
+    // ---- تجهيز نطاقات التواريخ الأول (بدون أي استعلام) عشان نقدر نبعت كل الطلبات المستقلة مرة واحدة تحت ----
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);
     const endOfDay = new Date(startOfDay);
     endOfDay.setDate(endOfDay.getDate() + 1);
-    const todayExpenses = await getExpensesBetween(dataUserId, startOfDay, endOfDay);
-    const todayByCurrency = sumByCurrency(todayExpenses);
-    // يظل today.total متوافقًا مع الواجهة القديمة (جنيه مصري)، بينما تعرض today.byCurrency كل العملات بدقة.
-    const todayTotal = todayByCurrency.EGP || 0;
 
     // ---- توزيع صرف "الأسبوع الحالي" حسب الأيام (سبت -> جمعة)، مش الشهر كله ----
     // كل أسبوع بيتحدث لوحده (مش تراكمي)، والأيام اللي لسه ما جتش (بعد النهاردة) بترجع null
@@ -86,11 +82,39 @@ export default async function handler(req, res) {
     weekStart.setDate(weekStart.getDate() - daysSinceSaturday);
     const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekEnd.getDate() + 7);
-
-    const weekExpenses = await getExpensesBetween(dataUserId, weekStart, weekEnd);
     const previousWeekStart = new Date(weekStart);
     previousWeekStart.setDate(previousWeekStart.getDate() - 7);
-    const previousWeekExpenses = await getExpensesBetween(dataUserId, previousWeekStart, weekStart);
+
+    // ---- الشهر الحالي (النطاق بس، الاستعلام الفعلي هيتبعت مع الباقي تحت) ----
+    const { start, end, label } = getMonthRange(0);
+
+    // ============ كل الاستعلامات المستقلة دي بتتبعت مع بعض دفعة واحدة (Promise.all) بدل التوالي ============
+    // ده أهم تحسين في سرعة فتح الداشبورد لأول مرة: بدل ما كل استعلام يستنى اللي قبله يخلص،
+    // كلهم بيتبعتوا لـ Supabase في نفس اللحظة والوقت الكلي = أبطأ استعلام بس، مش مجموعهم.
+    const [
+      todayExpenses,
+      weekExpenses,
+      previousWeekExpenses,
+      monthExpenses,
+      monthFinancialEventsResult,
+    ] = await Promise.all([
+      getExpensesBetween(dataUserId, startOfDay, endOfDay),
+      getExpensesBetween(dataUserId, weekStart, weekEnd),
+      getExpensesBetween(dataUserId, previousWeekStart, weekStart),
+      getExpensesBetween(dataUserId, start, end),
+      supabase
+        .from('financial_events')
+        .select('id, event_type, amount, currency_code, category, description, raw_text, direction, created_at')
+        .eq('telegram_user_id', dataUserId)
+        .gte('created_at', start.toISOString())
+        .lt('created_at', end.toISOString())
+        .order('created_at', { ascending: false }),
+    ]);
+
+    const todayByCurrency = sumByCurrency(todayExpenses);
+    // يظل today.total متوافقًا مع الواجهة القديمة (جنيه مصري)، بينما تعرض today.byCurrency كل العملات بدقة.
+    const todayTotal = todayByCurrency.EGP || 0;
+
     const weekByCategory = buildCategoryBreakdown(weekExpenses).map(({ name, amount, percent }) => ({ name, amount: Number(amount), percent: Number(percent) }));
     const previousWeekByCategory = buildCategoryBreakdown(previousWeekExpenses).map(({ name, amount, percent }) => ({ name, amount: Number(amount), percent: Number(percent) }));
 
@@ -128,20 +152,11 @@ export default async function handler(req, res) {
     });
     const weekTotal = weekdayTotals.reduce((sum, v) => sum + v, 0);
 
-    // ---- مصاريف الشهر الحالي ----
-    const { start, end, label } = getMonthRange(0);
-    const monthExpenses = await getExpensesBetween(dataUserId, start, end);
+    // ---- مصاريف الشهر الحالي (monthExpenses اتجاب فوق مع باقي الاستعلامات المتوازية) ----
     const monthByCurrency = sumByCurrency(monthExpenses);
     const monthTotal = monthByCurrency.EGP || 0;
-    const { data: monthFinancialEvents, error: eventsError } = await supabase
-      .from('financial_events')
-      .select('id, event_type, amount, currency_code, category, description, raw_text, direction, created_at')
-      .eq('telegram_user_id', dataUserId)
-      .gte('created_at', start.toISOString())
-      .lt('created_at', end.toISOString())
-      .order('created_at', { ascending: false });
-    if (eventsError) console.error('dashboard-data financial_events lookup error:', JSON.stringify(eventsError));
-    const financialEvents = monthFinancialEvents || [];
+    if (monthFinancialEventsResult.error) console.error('dashboard-data financial_events lookup error:', JSON.stringify(monthFinancialEventsResult.error));
+    const financialEvents = monthFinancialEventsResult.data || [];
     const incomeEvents = financialEvents.filter((event) => event.event_type === 'income');
     const incomeByCurrency = sumByCurrency(incomeEvents);
     const breakdown = buildCategoryBreakdown(monthExpenses); // [{name, amount, percent, items}]

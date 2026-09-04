@@ -122,7 +122,17 @@
   .rec-timer { font-size: 22px; font-weight: 800; letter-spacing: 1px; margin: 2px 0 10px; font-variant-numeric: tabular-nums; }
 
   .voice-preview { width: 100%; padding-top: 4px; }
-  .voice-preview audio { width: 100%; margin-bottom: 10px; border-radius: 10px; }
+  .voice-preview audio { width: 1px; height: 1px; position: absolute; opacity: 0; pointer-events: none; }
+  .voice-wave-shell { width: 100%; display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid rgba(255,255,255,.14); border-radius: 14px; background: rgba(0,0,0,.12); }
+  .voice-wave-shell.live { border-color: rgba(255,90,90,.35); background: rgba(255,90,90,.08); }
+  .voice-wave-canvas { display: block; width: 100%; height: 58px; min-width: 0; cursor: pointer; touch-action: none; }
+  .voice-wave-canvas.live-canvas { cursor: default; }
+  .voice-wave-play { flex: 0 0 38px; width: 38px; height: 38px; border: 0; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: #fff; color: #0E655B; font-size: 15px; font-weight: 800; cursor: pointer; transition: transform .15s ease, background .2s ease; }
+  .voice-wave-play:active { transform: scale(.94); }
+  .voice-wave-play.is-playing { background: #FFC96B; }
+  .voice-wave-meta { display: flex; justify-content: space-between; gap: 8px; margin-top: 3px; padding-inline: 2px; font-size: 10px; font-variant-numeric: tabular-nums; opacity: .72; }
+  .voice-wave-live-dot { flex: 0 0 7px; width: 7px; height: 7px; border-radius: 50%; background: #FF5A5A; box-shadow: 0 0 0 5px rgba(255,90,90,.12); animation: liveDot 1.1s ease-in-out infinite; }
+  @keyframes liveDot { 0%,100% { opacity: .45; transform: scale(.82); } 50% { opacity: 1; transform: scale(1.08); } }
   .btn-row { display: flex; gap: 8px; }
   .btn-row button { margin-top: 0; }
 </style>
@@ -181,11 +191,22 @@
             </button>
           </div>
           <p class="rec-timer" id="rec-timer">00:00</p>
+          <div class="voice-wave-shell live" aria-label="موجة الصوت أثناء التسجيل">
+            <span class="voice-wave-live-dot" aria-hidden="true"></span>
+            <canvas id="voice-live-waveform" class="voice-wave-canvas live-canvas" height="58"></canvas>
+          </div>
           <p class="voice-hint">بيسمع دلوقتي... اضغط تاني عشان توقف</p>
         </div>
 
         <div id="voice-preview" class="voice-preview hidden">
-          <audio id="voice-audio" controls></audio>
+          <div class="voice-wave-shell" aria-label="مشغل التسجيل الصوتي">
+            <button type="button" id="voice-wave-play" class="voice-wave-play" aria-label="تشغيل التسجيل">▶</button>
+            <div style="min-width:0;flex:1;">
+              <canvas id="voice-preview-waveform" class="voice-wave-canvas" height="58" aria-label="الموجة الصوتية؛ اضغط عليها للانتقال داخل التسجيل"></canvas>
+              <div class="voice-wave-meta"><span id="voice-wave-current">00:00</span><span id="voice-wave-duration">00:00</span></div>
+            </div>
+          </div>
+          <audio id="voice-audio" preload="metadata"></audio>
           <div class="btn-row">
             <button class="btn-secondary" id="voice-retry-btn">إعادة التسجيل</button>
             <button class="btn-primary" id="voice-send-btn">تحليل الصوت</button>
@@ -417,6 +438,176 @@
   let seconds = 0;
   let timerHandle = null;
   let recordedBlob = null;
+  let liveAudioContext = null;
+  let liveAnalyser = null;
+  let liveAnimationId = null;
+  let previewWaveform = [];
+  let previewObjectUrl = null;
+  let previewWaveformRaf = null;
+
+  function formatAudioTime(value) {
+    const total = Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0;
+    return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`;
+  }
+
+  function drawVoiceWave(canvas, values = [], progress = 0, live = false) {
+    if (!canvas) return;
+    const width = Math.max(160, canvas.clientWidth || 320);
+    const height = 58;
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    if (canvas.width !== Math.floor(width * dpr) || canvas.height !== Math.floor(height * dpr)) {
+      canvas.width = Math.floor(width * dpr);
+      canvas.height = Math.floor(height * dpr);
+    }
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, width, height);
+    const bars = Math.max(36, Math.floor(width / 4));
+    const gap = 2;
+    const barWidth = Math.max(1.5, (width - gap * (bars - 1)) / bars);
+    const center = height / 2;
+    for (let i = 0; i < bars; i++) {
+      const position = bars === 1 ? 0 : i / (bars - 1);
+      let amplitude = values.length ? values[Math.min(values.length - 1, Math.floor(position * values.length))] : 0.08;
+      amplitude = Math.max(.055, Math.min(1, Number(amplitude) || 0));
+      const barHeight = Math.max(3, amplitude * (height - 9));
+      const x = i * (barWidth + gap);
+      const passed = !live && position <= progress;
+      ctx.fillStyle = live ? 'rgba(255,255,255,.82)' : (passed ? '#FFC96B' : 'rgba(79,216,196,.58)');
+      ctx.beginPath();
+      if (ctx.roundRect) ctx.roundRect(x, center - barHeight / 2, barWidth, barHeight, barWidth / 2);
+      else ctx.rect(x, center - barHeight / 2, barWidth, barHeight);
+      ctx.fill();
+    }
+  }
+
+  function stopLiveVoiceWave() {
+    if (liveAnimationId) cancelAnimationFrame(liveAnimationId);
+    liveAnimationId = null;
+    if (liveAudioContext) { liveAudioContext.close().catch(() => {}); liveAudioContext = null; }
+    liveAnalyser = null;
+  }
+
+  async function startLiveVoiceWave(stream) {
+    stopLiveVoiceWave();
+    try {
+      liveAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+      if (liveAudioContext.state !== 'running') await liveAudioContext.resume();
+      if (!liveAudioContext || liveAudioContext.state === 'closed') return;
+      liveAnalyser = liveAudioContext.createAnalyser();
+      liveAnalyser.fftSize = 256;
+      liveAudioContext.createMediaStreamSource(stream).connect(liveAnalyser);
+      const data = new Uint8Array(liveAnalyser.fftSize);
+      const draw = () => {
+        if (!liveAnalyser) return;
+        liveAnalyser.getByteTimeDomainData(data);
+        const values = [];
+        for (let i = 0; i < data.length; i += 3) values.push(Math.abs(data[i] - 128) / 42);
+        drawVoiceWave($('voice-live-waveform'), values, 0, true);
+        liveAnimationId = requestAnimationFrame(draw);
+      };
+      draw();
+    } catch (error) {
+      console.warn('VOICE_WAVE_MONITOR_FAILED', error);
+      drawVoiceWave($('voice-live-waveform'), [.12, .2, .15, .1], 0, true);
+    }
+  }
+
+  function clearVoicePreview() {
+    const audio = $('voice-audio');
+    if (audio) {
+      audio.pause();
+      if (previewObjectUrl) URL.revokeObjectURL(previewObjectUrl);
+      previewObjectUrl = null;
+      audio.removeAttribute('src');
+      audio.load();
+    }
+    previewWaveform = [];
+    if (previewWaveformRaf) cancelAnimationFrame(previewWaveformRaf);
+    previewWaveformRaf = null;
+    if ($('voice-wave-play')) { $('voice-wave-play').textContent = '▶'; $('voice-wave-play').classList.remove('is-playing'); }
+    if ($('voice-wave-current')) $('voice-wave-current').textContent = '00:00';
+    if ($('voice-wave-duration')) $('voice-wave-duration').textContent = '00:00';
+    drawVoiceWave($('voice-preview-waveform'));
+  }
+
+  async function buildVoicePreview(blob) {
+    const audio = $('voice-audio');
+    if (!audio) return;
+    previewWaveform = [];
+    try {
+      const context = new (window.AudioContext || window.webkitAudioContext)();
+      const buffer = await context.decodeAudioData(await blob.arrayBuffer());
+      const channel = buffer.getChannelData(0);
+      const bars = 150;
+      const block = Math.max(1, Math.floor(channel.length / bars));
+      for (let i = 0; i < bars; i++) {
+        let peak = 0;
+        const start = i * block;
+        const end = Math.min(channel.length, start + block);
+        for (let j = start; j < end; j++) peak = Math.max(peak, Math.abs(channel[j]));
+        previewWaveform.push(peak);
+      }
+      await context.close();
+    } catch (error) {
+      console.warn('VOICE_WAVE_DECODE_FAILED', error);
+      previewWaveform = Array.from({ length: 150 }, (_, i) => .13 + Math.abs(Math.sin(i * .62)) * .22);
+    }
+    drawVoiceWave($('voice-preview-waveform'), previewWaveform, audio.duration ? audio.currentTime / audio.duration : 0);
+  }
+
+  function setVoicePreview(blob) {
+    const audio = $('voice-audio');
+    if (!audio) return;
+    clearVoicePreview();
+    previewObjectUrl = URL.createObjectURL(blob);
+    audio.src = previewObjectUrl;
+    buildVoicePreview(blob);
+  }
+
+  function updateVoicePreviewProgress() {
+    const audio = $('voice-audio');
+    if (!audio) return;
+    const progress = audio.duration ? audio.currentTime / audio.duration : 0;
+    if ($('voice-wave-current')) $('voice-wave-current').textContent = formatAudioTime(audio.currentTime);
+    if ($('voice-wave-duration')) $('voice-wave-duration').textContent = formatAudioTime(audio.duration);
+    drawVoiceWave($('voice-preview-waveform'), previewWaveform, progress);
+    if (!audio.paused) previewWaveformRaf = requestAnimationFrame(updateVoicePreviewProgress);
+  }
+
+  $('voice-wave-play')?.addEventListener('click', async () => {
+    const audio = $('voice-audio');
+    if (!audio?.src) return;
+    if (audio.paused) await audio.play().catch(() => {}); else audio.pause();
+  });
+  $('voice-audio')?.addEventListener('play', () => {
+    $('voice-wave-play').textContent = '❚❚';
+    $('voice-wave-play').classList.add('is-playing');
+    updateVoicePreviewProgress();
+  });
+  $('voice-audio')?.addEventListener('pause', () => {
+    $('voice-wave-play').textContent = '▶';
+    $('voice-wave-play').classList.remove('is-playing');
+    if (previewWaveformRaf) cancelAnimationFrame(previewWaveformRaf);
+    updateVoicePreviewProgress();
+  });
+  $('voice-audio')?.addEventListener('ended', () => {
+    $('voice-wave-play').textContent = '▶';
+    $('voice-wave-play').classList.remove('is-playing');
+    updateVoicePreviewProgress();
+  });
+  $('voice-audio')?.addEventListener('loadedmetadata', updateVoicePreviewProgress);
+  $('voice-preview-waveform')?.addEventListener('click', (event) => {
+    const audio = $('voice-audio');
+    if (!audio?.duration) return;
+    const rect = event.currentTarget.getBoundingClientRect();
+    audio.currentTime = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width)) * audio.duration;
+    updateVoicePreviewProgress();
+  });
+  window.addEventListener('resize', () => {
+    drawVoiceWave($('voice-live-waveform'), [], 0, true);
+    drawVoiceWave($('voice-preview-waveform'), previewWaveform, $('voice-audio')?.duration ? $('voice-audio').currentTime / $('voice-audio').duration : 0);
+  });
 
   function pickVoiceMimeType() {
     const candidates = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus', 'audio/ogg'];
@@ -436,9 +627,11 @@
       seconds = 0;
       const mimeType = pickVoiceMimeType();
       recorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+      startLiveVoiceWave(stream);
       recorder.ondataavailable = (e) => { if (e.data && e.data.size) chunks.push(e.data); };
       recorder.onstop = () => {
         stream.getTracks().forEach((t) => t.stop());
+        stopLiveVoiceWave();
         clearInterval(timerHandle);
         show('voice-recording', false);
         if (seconds < 5) {
@@ -453,7 +646,7 @@
           return;
         }
         recordedBlob = blob;
-        $('voice-audio').src = URL.createObjectURL(blob);
+        setVoicePreview(blob);
         show('voice-preview', true);
       };
       recorder.start(1000);
@@ -477,12 +670,14 @@
   $('mic-stop-btn')?.addEventListener('click', stopRecording);
   $('voice-retry-btn')?.addEventListener('click', () => {
     recordedBlob = null;
+    clearVoicePreview();
     show('voice-preview', false);
     show('voice-idle', true);
     $('status').textContent = '';
   });
   $('voice-send-btn')?.addEventListener('click', () => {
     if (!recordedBlob) return;
+    $('voice-audio')?.pause();
     show('voice-preview', false);
     const reader = new FileReader();
     reader.onloadend = () => analyzeAudio(reader.result, recordedBlob.type, seconds);

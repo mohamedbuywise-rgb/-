@@ -1189,9 +1189,75 @@
         }
 
         #quick-entry-voice-audio {
-            height: 2.75rem;
-            accent-color: var(--db-accent);
+            width: 1px;
+            height: 1px;
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
         }
+
+        .quick-wave-shell {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: .6rem;
+            padding: .6rem .7rem;
+            border-radius: 1rem;
+            background: rgba(16,185,129,.06);
+            box-shadow: inset 0 0 0 1px rgba(16,185,129,.12);
+        }
+        .quick-wave-shell.live {
+            background: rgba(244,63,94,.07);
+            box-shadow: inset 0 0 0 1px rgba(244,63,94,.18);
+        }
+        .quick-wave-canvas {
+            display: block;
+            width: 100%;
+            height: 3.6rem;
+            min-width: 0;
+            cursor: pointer;
+            touch-action: none;
+        }
+        .quick-wave-canvas.live-canvas { cursor: default; }
+        .quick-wave-play {
+            flex: 0 0 2.35rem;
+            width: 2.35rem;
+            height: 2.35rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 0;
+            border-radius: 999px;
+            background: var(--db-accent);
+            color: #06231f;
+            font-size: .8rem;
+            font-weight: 900;
+            cursor: pointer;
+            transition: transform .15s ease, background .2s ease;
+        }
+        .quick-wave-play:hover { transform: translateY(-1px); }
+        .quick-wave-play:active { transform: scale(.94); }
+        .quick-wave-play.is-playing { background: #f0b93a; }
+        .quick-wave-meta {
+            display: flex;
+            justify-content: space-between;
+            gap: .5rem;
+            padding-inline: .15rem;
+            margin-top: .12rem;
+            color: var(--db-muted);
+            font-size: .62rem;
+            font-variant-numeric: tabular-nums;
+        }
+        .quick-wave-live-dot {
+            flex: 0 0 .42rem;
+            width: .42rem;
+            height: .42rem;
+            border-radius: 999px;
+            background: #f43f5e;
+            box-shadow: 0 0 0 .3rem rgba(244,63,94,.12);
+            animation: quickWaveLiveDot 1.1s ease-in-out infinite;
+        }
+        @keyframes quickWaveLiveDot { 0%,100% { opacity: .45; transform: scale(.82); } 50% { opacity: 1; transform: scale(1.08); } }
 
         @media (max-width: 420px) {
             #quick-entry-card {
@@ -2295,8 +2361,13 @@
                 <input type="file" id="quick-entry-invoice-input" accept="image/*" class="hidden">
                 <div id="quick-entry-scanning" class="hidden rounded-2xl border border-blue-200 bg-blue-50 p-3 text-center dark:border-blue-500/30 dark:bg-blue-500/10"><div class="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-white text-xl shadow-sm dark:bg-slate-900"><span style="display:inline-block;animation:dabbar-scan-spin 1s linear infinite">⟳</span></div><p class="text-xs font-bold text-blue-700 dark:text-blue-200">بنقرأ الفاتورة...</p><p class="mt-1 text-[10px] text-blue-600/70 dark:text-blue-200/70">دبّر بيستخرج المبلغ والأصناف</p></div>
                 <div id="quick-entry-form" class="hidden space-y-2"><p class="text-[10px] text-slate-500">اكتب مثلًا: «قبضت 5000 جنيه مرتب» أو «صرفت 75 جنيه أكل».</p><textarea id="quick-entry-input" rows="2" maxlength="2500" placeholder="مثال: صرفت 75 جنيه أكل" class="w-full resize-none rounded-2xl border border-emerald-200 bg-white px-3 py-2.5 text-xs outline-none dark:bg-slate-900 dark:text-slate-100"></textarea><div class="flex gap-2"><button id="quick-entry-analyze" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950" type="button">فهم وتجهيز</button><button id="quick-entry-cancel" class="rounded-xl border border-slate-300 px-3 py-2.5 text-xs text-slate-500 dark:border-slate-700" type="button">إلغاء</button></div></div>
-                <div id="quick-entry-recording" class="hidden rounded-2xl border border-rose-200 bg-rose-50 p-3 text-center text-xs text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200"><div class="flex items-center justify-between gap-2"><span class="font-black">جاري التسجيل... <span id="quick-entry-recording-type-label" class="font-bold"></span></span><button id="quick-entry-recording-cancel" class="flex h-7 w-7 items-center justify-center rounded-full bg-white/70 text-sm font-black text-rose-500 transition hover:bg-white" type="button" aria-label="إلغاء التسجيل">✕</button></div><div id="quick-entry-recording-time" class="mt-1 font-black">00:00</div><div class="mt-2 flex gap-2"><button id="quick-entry-stop" class="flex-1 rounded-xl bg-rose-500 px-4 py-2 font-bold text-white" type="button">إيقاف وتحليل</button><button id="quick-entry-recording-cancel-bottom" class="rounded-xl bg-white/70 px-3 py-2 font-bold text-rose-500 transition hover:bg-white" type="button">إلغاء</button></div></div>
-                <div id="quick-entry-voice-preview" class="hidden rounded-2xl border border-emerald-200 bg-white p-3 dark:bg-slate-900 dark:border-slate-700 space-y-2"><div class="flex items-center justify-between gap-2"><p class="text-[11px] text-slate-500">سمّع تسجيلك للتأكد إنه واضح قبل ما نبعته — هيتسجّل كـ<span id="quick-entry-voice-preview-type-label" class="font-black"></span></p><button id="quick-entry-voice-cancel" class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-black text-slate-500 transition hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700" type="button" aria-label="إلغاء التسجيل">✕</button></div><audio id="quick-entry-voice-audio" controls class="w-full"></audio><div class="flex gap-2"><button id="quick-entry-voice-send" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950" type="button">ابعت للتحليل</button><button id="quick-entry-voice-retry" class="rounded-xl border border-slate-300 px-3 py-2.5 text-xs text-slate-500 dark:border-slate-700" type="button">سجّل تاني</button><button id="quick-entry-voice-cancel-bottom" class="rounded-xl border border-rose-200 px-3 py-2.5 text-xs font-bold text-rose-500 dark:border-rose-500/30" type="button">إلغاء</button></div></div>
+                <div id="quick-entry-recording" class="hidden rounded-2xl border border-rose-200 bg-rose-50 p-3 text-center text-xs text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200">
+                    <div class="flex items-center justify-between gap-2"><span class="font-black">جاري التسجيل... <span id="quick-entry-recording-type-label" class="font-bold"></span></span><button id="quick-entry-recording-cancel" class="flex h-7 w-7 items-center justify-center rounded-full bg-white/70 text-sm font-black text-rose-500 transition hover:bg-white" type="button" aria-label="إلغاء التسجيل">✕</button></div>
+                    <div id="quick-entry-recording-time" class="mt-1 font-black">00:00</div>
+                    <div class="quick-wave-shell live mt-2" aria-label="موجة الصوت أثناء التسجيل"><span class="quick-wave-live-dot" aria-hidden="true"></span><canvas id="quick-entry-live-waveform" class="quick-wave-canvas live-canvas" height="58"></canvas></div>
+                    <div class="mt-2 flex gap-2"><button id="quick-entry-stop" class="flex-1 rounded-xl bg-rose-500 px-4 py-2 font-bold text-white" type="button">إيقاف وتحليل</button><button id="quick-entry-recording-cancel-bottom" class="rounded-xl bg-white/70 px-3 py-2 font-bold text-rose-500 transition hover:bg-white" type="button">إلغاء</button></div>
+                </div>
+                <div id="quick-entry-voice-preview" class="hidden rounded-2xl border border-emerald-200 bg-white p-3 dark:bg-slate-900 dark:border-slate-700 space-y-2"><div class="flex items-center justify-between gap-2"><p class="text-[11px] text-slate-500">سمّع تسجيلك للتأكد إنه واضح قبل ما نبعته — هيتسجّل كـ<span id="quick-entry-voice-preview-type-label" class="font-black"></span></p><button id="quick-entry-voice-cancel" class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-black text-slate-500 transition hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700" type="button" aria-label="إلغاء التسجيل">✕</button></div><div class="quick-wave-shell" aria-label="مشغل التسجيل الصوتي"><button type="button" id="quick-entry-wave-play" class="quick-wave-play" aria-label="تشغيل التسجيل">▶</button><div class="min-w-0 flex-1"><canvas id="quick-entry-voice-waveform" class="quick-wave-canvas" height="58" aria-label="الموجة الصوتية؛ اضغط عليها للانتقال داخل التسجيل"></canvas><div class="quick-wave-meta"><span id="quick-entry-wave-current">00:00</span><span id="quick-entry-wave-duration">00:00</span></div></div></div><audio id="quick-entry-voice-audio" preload="metadata"></audio><div class="flex gap-2"><button id="quick-entry-voice-send" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950" type="button">ابعت للتحليل</button><button id="quick-entry-voice-retry" class="rounded-xl border border-slate-300 px-3 py-2.5 text-xs text-slate-500 dark:border-slate-700" type="button">سجّل تاني</button><button id="quick-entry-voice-cancel-bottom" class="rounded-xl border border-rose-200 px-3 py-2.5 text-xs font-bold text-rose-500 dark:border-rose-500/30" type="button">إلغاء</button></div></div>
                 <div id="quick-entry-draft" class="hidden rounded-2xl border border-emerald-200 bg-white p-3 dark:bg-slate-900"><div class="flex items-center justify-between gap-2"><p id="quick-entry-draft-title" class="text-[11px] text-slate-500">راجع قبل الحفظ</p><button id="quick-entry-draft-close" type="button" aria-label="اقفل" class="shrink-0 w-6 h-6 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition text-sm font-bold">✕</button></div><div id="quick-entry-draft-list" class="mt-1 space-y-2"></div><div id="quick-entry-draft-actions" class="mt-3 flex gap-2"><button id="quick-entry-confirm" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950" type="button">تأكيد التسجيل</button><button id="quick-entry-edit" class="rounded-xl border border-slate-300 px-3 py-2.5 text-xs text-slate-500 dark:border-slate-700" type="button">تعديل</button></div></div><p id="quick-entry-status" class="min-h-4 text-center text-[11px] text-slate-500"></p>
             </section>
 
@@ -6713,8 +6784,169 @@
             return false;
         }
         let quickEntryDrafts = [], quickEntrySourceText = '', quickEntryRecorder = null, quickEntryChunks = [], quickEntryTimer = null, quickEntrySeconds = 0, quickEntryVoiceBlob = null, quickEntryVoiceCancelled = false;
+        let quickWaveAudioContext = null, quickWaveAnalyser = null, quickWaveAnimationId = null, quickWavePreview = [], quickWavePreviewUrl = null, quickWavePreviewRaf = null;
+        function quickWaveTime(value) {
+            const total = Number.isFinite(value) ? Math.max(0, Math.floor(value)) : 0;
+            return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`;
+        }
+        function drawQuickWave(canvas, values = [], progress = 0, live = false) {
+            if (!canvas) return;
+            const width = Math.max(160, canvas.clientWidth || 300);
+            const height = 58;
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            if (canvas.width !== Math.floor(width * dpr) || canvas.height !== Math.floor(height * dpr)) {
+                canvas.width = Math.floor(width * dpr);
+                canvas.height = Math.floor(height * dpr);
+            }
+            const ctx = canvas.getContext('2d');
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            ctx.clearRect(0, 0, width, height);
+            const bars = Math.max(36, Math.floor(width / 4));
+            const gap = 2;
+            const barWidth = Math.max(1.5, (width - gap * (bars - 1)) / bars);
+            const center = height / 2;
+            for (let i = 0; i < bars; i++) {
+                const position = bars === 1 ? 0 : i / (bars - 1);
+                let amplitude = values.length ? values[Math.min(values.length - 1, Math.floor(position * values.length))] : .08;
+                amplitude = Math.max(.055, Math.min(1, Number(amplitude) || 0));
+                const barHeight = Math.max(3, amplitude * (height - 9));
+                const x = i * (barWidth + gap);
+                const passed = !live && position <= progress;
+                ctx.fillStyle = live ? 'rgba(244,63,94,.78)' : (passed ? '#f0b93a' : 'rgba(22,168,120,.38)');
+                ctx.beginPath();
+                if (ctx.roundRect) ctx.roundRect(x, center - barHeight / 2, barWidth, barHeight, barWidth / 2);
+                else ctx.rect(x, center - barHeight / 2, barWidth, barHeight);
+                ctx.fill();
+            }
+        }
+        function stopQuickWaveMonitor() {
+            if (quickWaveAnimationId) cancelAnimationFrame(quickWaveAnimationId);
+            quickWaveAnimationId = null;
+            if (quickWaveAudioContext) { quickWaveAudioContext.close().catch(() => {}); quickWaveAudioContext = null; }
+            quickWaveAnalyser = null;
+        }
+        async function startQuickWaveMonitor(stream) {
+            stopQuickWaveMonitor();
+            try {
+                quickWaveAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+                if (quickWaveAudioContext.state !== 'running') await quickWaveAudioContext.resume();
+                quickWaveAnalyser = quickWaveAudioContext.createAnalyser();
+                quickWaveAnalyser.fftSize = 256;
+                quickWaveAudioContext.createMediaStreamSource(stream).connect(quickWaveAnalyser);
+                const data = new Uint8Array(quickWaveAnalyser.fftSize);
+                const draw = () => {
+                    if (!quickWaveAnalyser) return;
+                    quickWaveAnalyser.getByteTimeDomainData(data);
+                    const values = [];
+                    for (let i = 0; i < data.length; i += 3) values.push(Math.abs(data[i] - 128) / 42);
+                    drawQuickWave(document.getElementById('quick-entry-live-waveform'), values, 0, true);
+                    quickWaveAnimationId = requestAnimationFrame(draw);
+                };
+                draw();
+            } catch (error) {
+                console.warn('QUICK_ENTRY_WAVE_MONITOR_FAILED', error);
+                drawQuickWave(document.getElementById('quick-entry-live-waveform'), [.12, .2, .15, .1], 0, true);
+            }
+        }
+        function clearQuickWavePreview() {
+            const audio = document.getElementById('quick-entry-voice-audio');
+            if (audio) {
+                audio.pause();
+                if (quickWavePreviewUrl) URL.revokeObjectURL(quickWavePreviewUrl);
+                quickWavePreviewUrl = null;
+                audio.removeAttribute('src');
+                audio.load();
+            }
+            quickWavePreview = [];
+            if (quickWavePreviewRaf) cancelAnimationFrame(quickWavePreviewRaf);
+            quickWavePreviewRaf = null;
+            const play = document.getElementById('quick-entry-wave-play');
+            if (play) { play.textContent = '▶'; play.classList.remove('is-playing'); }
+            const current = document.getElementById('quick-entry-wave-current');
+            const duration = document.getElementById('quick-entry-wave-duration');
+            if (current) current.textContent = '00:00';
+            if (duration) duration.textContent = '00:00';
+            drawQuickWave(document.getElementById('quick-entry-voice-waveform'));
+        }
+        async function buildQuickWavePreview(blob) {
+            const audio = document.getElementById('quick-entry-voice-audio');
+            if (!audio) return;
+            quickWavePreview = [];
+            try {
+                const context = new (window.AudioContext || window.webkitAudioContext)();
+                const buffer = await context.decodeAudioData(await blob.arrayBuffer());
+                const channel = buffer.getChannelData(0);
+                const bars = 150;
+                const block = Math.max(1, Math.floor(channel.length / bars));
+                for (let i = 0; i < bars; i++) {
+                    let peak = 0;
+                    const start = i * block;
+                    const end = Math.min(channel.length, start + block);
+                    for (let j = start; j < end; j++) peak = Math.max(peak, Math.abs(channel[j]));
+                    quickWavePreview.push(peak);
+                }
+                await context.close();
+            } catch (error) {
+                console.warn('QUICK_ENTRY_WAVE_DECODE_FAILED', error);
+                quickWavePreview = Array.from({ length: 150 }, (_, i) => .13 + Math.abs(Math.sin(i * .62)) * .22);
+            }
+            drawQuickWave(document.getElementById('quick-entry-voice-waveform'), quickWavePreview, audio.duration ? audio.currentTime / audio.duration : 0);
+        }
+        function setQuickWavePreview(blob) {
+            const audio = document.getElementById('quick-entry-voice-audio');
+            if (!audio) return;
+            clearQuickWavePreview();
+            quickWavePreviewUrl = URL.createObjectURL(blob);
+            audio.src = quickWavePreviewUrl;
+            buildQuickWavePreview(blob);
+        }
+        function updateQuickWaveProgress() {
+            const audio = document.getElementById('quick-entry-voice-audio');
+            if (!audio) return;
+            const progress = audio.duration ? audio.currentTime / audio.duration : 0;
+            const current = document.getElementById('quick-entry-wave-current');
+            const duration = document.getElementById('quick-entry-wave-duration');
+            if (current) current.textContent = quickWaveTime(audio.currentTime);
+            if (duration) duration.textContent = quickWaveTime(audio.duration);
+            drawQuickWave(document.getElementById('quick-entry-voice-waveform'), quickWavePreview, progress);
+            if (!audio.paused) quickWavePreviewRaf = requestAnimationFrame(updateQuickWaveProgress);
+        }
+        document.getElementById('quick-entry-wave-play')?.addEventListener('click', async () => {
+            const audio = document.getElementById('quick-entry-voice-audio');
+            if (!audio?.src) return;
+            if (audio.paused) await audio.play().catch(() => {}); else audio.pause();
+        });
+        document.getElementById('quick-entry-voice-audio')?.addEventListener('play', () => {
+            const play = document.getElementById('quick-entry-wave-play');
+            if (play) { play.textContent = '❚❚'; play.classList.add('is-playing'); }
+            updateQuickWaveProgress();
+        });
+        document.getElementById('quick-entry-voice-audio')?.addEventListener('pause', () => {
+            const play = document.getElementById('quick-entry-wave-play');
+            if (play) { play.textContent = '▶'; play.classList.remove('is-playing'); }
+            if (quickWavePreviewRaf) cancelAnimationFrame(quickWavePreviewRaf);
+            updateQuickWaveProgress();
+        });
+        document.getElementById('quick-entry-voice-audio')?.addEventListener('ended', () => {
+            const play = document.getElementById('quick-entry-wave-play');
+            if (play) { play.textContent = '▶'; play.classList.remove('is-playing'); }
+            updateQuickWaveProgress();
+        });
+        document.getElementById('quick-entry-voice-audio')?.addEventListener('loadedmetadata', updateQuickWaveProgress);
+        document.getElementById('quick-entry-voice-waveform')?.addEventListener('click', (event) => {
+            const audio = document.getElementById('quick-entry-voice-audio');
+            if (!audio?.duration) return;
+            const rect = event.currentTarget.getBoundingClientRect();
+            audio.currentTime = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width)) * audio.duration;
+            updateQuickWaveProgress();
+        });
+        window.addEventListener('resize', () => {
+            drawQuickWave(document.getElementById('quick-entry-live-waveform'), [], 0, true);
+            const audio = document.getElementById('quick-entry-voice-audio');
+            drawQuickWave(document.getElementById('quick-entry-voice-waveform'), quickWavePreview, audio?.duration ? audio.currentTime / audio.duration : 0);
+        });
         // ============ حماية إضافية ضد تسجيل الصمت: بنراقب مستوى الصوت الفعلي لحظة بلحظة (مش بس حجم الملف بعد ما يخلص) وبنوقف التسجيل فورًا لو المايك اتقطع أو المستخدم غادر التاب ============
-        let quickEntryAudioCtx = null, quickEntryAnalyser = null, quickEntrySoundCheckId = null, quickEntryHadSound = false, quickEntryVisibilityHandler = null;
+        let quickEntryAudioCtx = null, quickEntryAnalyser = null, quickEntrySoundCheckId = null, quickEntryHadSound = false, quickEntryVisibilityHandler = null, quickEntryFinalizeTimer = null, quickEntryStopRequested = false, quickEntryStream = null;
         function stopQuickEntrySoundMonitor() {
             if (quickEntrySoundCheckId) cancelAnimationFrame(quickEntrySoundCheckId);
             quickEntrySoundCheckId = null;
@@ -6782,21 +7014,20 @@
         }
         function quickShow(id, show) { document.getElementById(id)?.classList.toggle('hidden', !show); }
         function clearQuickVoicePreview() {
-            const audioEl = document.getElementById('quick-entry-voice-audio');
-            if (!audioEl) return;
-            if (audioEl.src && audioEl.src.startsWith('blob:')) URL.revokeObjectURL(audioEl.src);
-            audioEl.pause();
-            audioEl.removeAttribute('src');
-            audioEl.load();
+            clearQuickWavePreview();
         }
         function cancelQuickVoice() {
             quickEntryVoiceCancelled = true;
             quickEntryVoiceBlob = null;
             clearQuickVoicePreview();
             if (quickEntryRecorder?.state === 'recording') {
-                quickEntryRecorder.stop();
+                stopQuickEntryRecording('cancel');
                 return;
             }
+            if (quickEntryFinalizeTimer) { clearTimeout(quickEntryFinalizeTimer); quickEntryFinalizeTimer = null; }
+            quickEntryStream?.getTracks().forEach((track) => track.stop());
+            quickEntryStream = null;
+            quickEntryStopRequested = false;
             quickShow('quick-entry-recording', false);
             quickShow('quick-entry-voice-preview', false);
             quickStatus('');
@@ -6955,6 +7186,24 @@
         }
         document.getElementById('quick-entry-invoice-input')?.addEventListener('change', (event) => { const file = event.target.files?.[0]; analyzeQuickInvoice(file); event.target.value = ''; });
         document.getElementById('bank-movements-card')?.addEventListener('click', () => { window.location.href = './dabbar-bank-movements.html'; });
+        // ============ نطلب آخر chunk قبل stop؛ على بعض أجهزة Android حدث stop يصل قبل اكتمال تسليم
+        // آخر dataavailable، فتطلع المعاينة بملف صغير جدًا (رأس WebM فقط) رغم أن مدتها ظاهرة وصوتها مسموع. ============
+        function stopQuickEntryRecording(reason = 'user') {
+            const activeRecorder = quickEntryRecorder;
+            if (!activeRecorder || activeRecorder.state !== 'recording' || quickEntryStopRequested) return;
+            quickEntryStopRequested = true;
+            console.info('DABBAR_VOICE_STOP_REQUESTED', { reason, state: activeRecorder.state, chunks: quickEntryChunks.length, seconds: quickEntrySeconds });
+            // اطلب إخراج البيانات الحالية أولًا، ثم أوقف المسجل بعد مهلة كافية لوصول dataavailable.
+            try { activeRecorder.requestData(); } catch (error) { console.warn('DABBAR_VOICE_REQUEST_DATA_FAILED', error); }
+            window.setTimeout(() => {
+                try {
+                    if (activeRecorder.state === 'recording') activeRecorder.stop();
+                } catch (error) {
+                    console.error('DABBAR_VOICE_STOP_FAILED', error);
+                    quickStatus('حصلت مشكلة وأنا بقفل التسجيل. جرّب تسجّل تاني.', 'error');
+                }
+            }, 350);
+        }
         // ============ اختيار كودك مدعوم صراحةً بدل الاعتماد على الافتراضي (بعض المتصفحات بترجع بيانات ناقصة/فاضية مع الافتراضي) ============
         function pickVoiceMimeType() {
             const candidates = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus', 'audio/ogg'];
@@ -6966,31 +7215,60 @@
             if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) return quickStatus('المتصفح لا يدعم التسجيل الصوتي.', 'error');
             if (quickEntryRecorder?.state === 'recording') return;
             try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1, echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
+                const audioTracks = stream.getAudioTracks();
+                const audioTrack = audioTracks[0];
+                if (!audioTrack || audioTrack.readyState !== 'live') {
+                    stream.getTracks().forEach((track) => track.stop());
+                    throw new Error('الميكروفون مش متاح حاليًا. تأكد إنه مش مستخدم في تطبيق تاني وحاول تاني.');
+                }
+                quickEntryStream = stream;
                 quickEntryChunks = [];
                 quickEntrySeconds = 0;
+                quickEntryStopRequested = false;
                 quickEntryVoiceCancelled = false;
                 startQuickEntrySoundMonitor(stream);
+                startQuickWaveMonitor(stream);
                 const mimeType = pickVoiceMimeType();
                 quickEntryRecorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
                 // ============ لو المايك اتقطع فعليًا وقت التسجيل (تعارض مع تطبيق تاني، مشكلة بلوتوث) المتصفح بيطلق mute/ended على الـ track من غير أي خطأ ظاهر — بنوقف التسجيل فورًا ونوضح للمستخدم بدل ما نسيبه يكمل يسجل صمت ============
-                const audioTrack = stream.getAudioTracks()[0];
                 if (audioTrack) {
-                    audioTrack.onmute = () => { if (quickEntryRecorder?.state === 'recording') { quickEntryVoiceCancelled = false; quickStatus('المايك اتقطع فجأة وقت التسجيل — جرّب تاني.', 'error'); quickEntryRecorder.stop(); } };
-                    audioTrack.onended = audioTrack.onmute;
+                    const handleTrackFailure = (eventName) => {
+                        if (quickEntryRecorder?.state === 'recording') {
+                            quickEntryVoiceCancelled = false;
+                            quickStatus(eventName === 'ended' ? 'مسار الميكروفون اتقفل — تأكد من إذن الميكروفون أو افصل البلوتوث وحاول تاني.' : 'الميكروفون اتكتم أثناء التسجيل — تأكد إن تطبيق تاني مش بيستخدمه.', 'error');
+                            stopQuickEntryRecording(`track-${eventName}`);
+                        }
+                    };
+                    audioTrack.onmute = () => handleTrackFailure('mute');
+                    audioTrack.onended = () => handleTrackFailure('ended');
                 }
                 // ============ لو المستخدم سرّح التاب (بدّل تطبيق، قفل الشاشة) وقت التسجيل، المتصفح بيكمل يسجل صمت من غير ما يعرّفنا — بنوقف التسجيل بنفسنا لحظة ما يرجع يفتح التاب ============
                 quickEntryVisibilityHandler = () => {
                     if (document.visibilityState === 'hidden' && quickEntryRecorder?.state === 'recording') {
                         quickEntryVoiceCancelled = false;
-                        quickEntryRecorder.stop();
+                        stopQuickEntryRecording();
                     }
                 };
                 document.addEventListener('visibilitychange', quickEntryVisibilityHandler);
-                quickEntryRecorder.ondataavailable = (e) => { if (e.data && e.data.size) quickEntryChunks.push(e.data); };
+                quickEntryRecorder.ondataavailable = (e) => {
+                    if (e.data && e.data.size) {
+                        quickEntryChunks.push(e.data);
+                        console.info('DABBAR_VOICE_DATA_AVAILABLE', { size: e.data.size, chunks: quickEntryChunks.length });
+                    }
+                };
+                quickEntryRecorder.onerror = (event) => {
+                    console.error('DABBAR_VOICE_RECORDER_ERROR', event?.error || event);
+                    quickStatus('المسجل الصوتي حصل له خطأ. جرّب تقفل أي تطبيق بيستخدم الميكروفون وتسجّل تاني.', 'error');
+                };
                 quickEntryRecorder.onstop = () => {
+                    // بعض أجهزة Android ترسل dataavailable متأخرًا بعد stop؛ نؤخر بناء الـ Blob قليلًا.
+                    quickEntryFinalizeTimer = window.setTimeout(() => {
                     stream.getTracks().forEach((t) => t.stop());
+                    quickEntryStream = null;
+                    quickEntryStopRequested = false;
                     stopQuickEntrySoundMonitor();
+                    stopQuickWaveMonitor();
                     clearInterval(quickEntryTimer);
                     quickShow('quick-entry-recording', false);
                     const wasCancelled = quickEntryVoiceCancelled;
@@ -7022,10 +7300,11 @@
                     }
                     // ============ بنسمّع التسجيل للمستخدم مباشرة قبل إرساله للتحويل الصوتي ============
                     quickEntryVoiceBlob = blob;
+                    setQuickWavePreview(blob);
                     const audioEl = document.getElementById('quick-entry-voice-audio');
-                    audioEl.src = URL.createObjectURL(blob);
                     quickStatus(`تسجيل ${quickEntrySeconds} ثانية (${(blob.size / 1024).toFixed(1)} كيلوبايت) — اسمعه واتأكد.`);
                     quickShow('quick-entry-voice-preview', true);
+                    }, 180);
                 };
                 // ============ بنجمع الصوت كل ثانية بدل ما ننتظر chunk واحد آخر التسجيل — أضمن ومتوافق مع أجهزة أكتر ============
                 quickEntryRecorder.start(1000);
@@ -7036,11 +7315,20 @@
                     quickEntrySeconds++;
                     const el = document.getElementById('quick-entry-recording-time');
                     if (el) el.textContent = `00:${String(quickEntrySeconds).padStart(2, '0')}`;
-                    if (quickEntrySeconds >= 30) quickEntryRecorder.stop();
+                    if (quickEntrySeconds >= 30) stopQuickEntryRecording();
                 }, 1000);
-            } catch { quickStatus('لازم تسمح للموقع باستخدام الميكروفون.', 'error'); }
+            } catch (error) {
+                console.error('DABBAR_VOICE_START_FAILED', error);
+                const name = error?.name;
+                const message = name === 'NotAllowedError' || name === 'SecurityError'
+                    ? 'إذن الميكروفون مرفوض. افتح إعدادات الموقع، اسمح بالميكروفون، ثم حاول تاني.'
+                    : name === 'NotReadableError' || name === 'TrackStartError'
+                        ? 'الميكروفون مستخدم أو غير متاح حاليًا. اقفل أي تطبيق بيستخدمه وحاول تاني.'
+                        : error?.message || 'مش قادرين نفتح الميكروفون دلوقتي. تأكد من الإذن وحاول تاني.';
+                quickStatus(message, 'error');
+            }
         });
-        document.getElementById('quick-entry-stop')?.addEventListener('click', () => { if (quickEntryRecorder?.state === 'recording') quickEntryRecorder.stop(); });
+        document.getElementById('quick-entry-stop')?.addEventListener('click', stopQuickEntryRecording);
         document.getElementById('quick-entry-recording-cancel')?.addEventListener('click', cancelQuickVoice);
         document.getElementById('quick-entry-recording-cancel-bottom')?.addEventListener('click', cancelQuickVoice);
         document.getElementById('quick-entry-voice-cancel')?.addEventListener('click', cancelQuickVoice);
@@ -7049,6 +7337,7 @@
         document.getElementById('quick-entry-voice-retry')?.addEventListener('click', () => { quickEntryVoiceCancelled = false; clearQuickVoicePreview(); quickShow('quick-entry-voice-preview', false); quickEntryVoiceBlob = null; quickStatus(''); document.getElementById('quick-entry-voice')?.click(); });
         document.getElementById('quick-entry-voice-send')?.addEventListener('click', () => {
             if (!quickEntryVoiceBlob) return;
+            document.getElementById('quick-entry-voice-audio')?.pause();
             quickShow('quick-entry-voice-preview', false);
             const reader = new FileReader();
             reader.onloadend = () => analyzeQuickEntry({ audioBase64: reader.result, mimeType: quickEntryVoiceBlob.type });

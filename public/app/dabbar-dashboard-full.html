@@ -4217,18 +4217,24 @@
             }
             downloadLink?.addEventListener('click', async (event) => {
                 event.preventDefault();
-                if (!bankState.macroDownloadUrl) return;
                 macroErrorEl?.classList.add('hidden');
                 const originalLabel = '⬇️ حمّل ملف التوكن الخاص';
+                // ============ لو الرابط لسه مجهزش من loadBankAccounts (فشل الاتصال، أو الصفحة اتفتحت بسرعة قبل ما يخلص) بنبني رابط احتياطي مباشر بدل ما نوقف الزرار بصمت ============
+                const targetUrl = bankState.macroDownloadUrl || `${window.location.origin}/api?route=macrodroid-macro`;
                 try {
-                    const { data: { session } } = await sb.auth.getSession();
-                    if (!session) return;
+                    const { data: { session }, error: sessionError } = await sb.auth.getSession();
+                    if (sessionError) console.error('BANK_ACCOUNTS_SESSION_ERROR', sessionError);
+                    if (!session) {
+                        if (macroErrorEl) { macroErrorEl.textContent = '⚠️ لازم تكون مسجّل دخول عشان تحمّل الملف. سجّل دخول وجرّب تاني.'; macroErrorEl.classList.remove('hidden'); }
+                        return;
+                    }
                     downloadLink.textContent = 'بنجهّز الملف...';
-                    const res = await fetch(bankState.macroDownloadUrl, { headers: { Authorization: `Bearer ${session.access_token}` } });
+                    const res = await fetch(targetUrl, { headers: { Authorization: `Bearer ${session.access_token}` } });
                     if (!res.ok) {
                         // ============ التوكن مش موجود لسه على السيرفر (409) أو أي خطأ تاني — بنوري رسالة واضحة، من غير ما نفتح جوجل بلاي تلقائي زي زرار التثبيت المنفصل تحته ============
                         let message = 'الملف مش جاهز دلوقتي، جرّب تاني كمان شوية. لو استمرت المشكلة كلّم الدعم الفني.';
                         try { const body = await res.json(); if (body?.error) message = body.error; } catch (_) {}
+                        console.error('BANK_ACCOUNTS_DOWNLOAD_FAILED', res.status, message);
                         if (macroErrorEl) { macroErrorEl.textContent = `⚠️ ${message}`; macroErrorEl.classList.remove('hidden'); }
                         return;
                     }
@@ -4236,23 +4242,26 @@
                     const a = document.createElement('a'); a.href = blobUrl; a.download = 'daber-bank-automation.macro'; document.body.appendChild(a); a.click(); a.remove();
                     setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
                 } catch (e) {
-                    if (macroErrorEl) { macroErrorEl.textContent = '⚠️ حصل خطأ في الاتصال، جرّب تاني.'; macroErrorEl.classList.remove('hidden'); }
+                    console.error('BANK_ACCOUNTS_DOWNLOAD_EXCEPTION', e);
+                    if (macroErrorEl) { macroErrorEl.textContent = `⚠️ حصل خطأ في الاتصال (${e?.message || 'غير معروف'}), جرّب تاني.`; macroErrorEl.classList.remove('hidden'); }
                 } finally { downloadLink.textContent = originalLabel; }
             });
 
             async function loadBankAccounts() {
                 try {
-                    const { data: { session } } = await sb.auth.getSession();
+                    const { data: { session }, error: sessionError } = await sb.auth.getSession();
+                    if (sessionError) console.error('BANK_ACCOUNTS_LOAD_SESSION_ERROR', sessionError);
                     if (!session) return;
                     const res = await fetch('/api/bank-accounts', {
                         headers: { Authorization: `Bearer ${session.access_token}` },
                     });
+                    if (!res.ok) { console.error('BANK_ACCOUNTS_LOAD_FAILED', res.status); return; }
                     const data = await res.json();
-                    if (!data.ok) return;
+                    if (!data.ok) { console.error('BANK_ACCOUNTS_LOAD_NOT_OK', data); return; }
                     bankState = { token: data.token, webhookUrl: data.webhookUrl, banks: data.banks || [], macroDownloadUrl: data.macroDownloadUrl, playStoreUrl: data.playStoreUrl, deepLink: data.deepLink };
                     renderBanks();
                     renderLinks();
-                } catch (e) { /* صامت — الكارت لسه بيفتح حتى لو فشل التحميل */ }
+                } catch (e) { console.error('BANK_ACCOUNTS_LOAD_EXCEPTION', e); }
             }
 
             card.addEventListener('click', () => {

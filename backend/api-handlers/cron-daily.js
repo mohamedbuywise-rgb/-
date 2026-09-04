@@ -6,6 +6,7 @@ import { getRemindersNeedingNotification, markReminderNotified, buildReminderMes
 import { generateFriendlyReminderIntro } from '../../lib/groq.js';
 import { getAllUsers } from '../../lib/users.js';
 import { claimCronSlot } from '../../lib/cronRuns.js';
+import { refreshPortfolioMarketPrices, savePortfolioSnapshot, getPortfolioDigest, buildPortfolioDigestMessage } from '../../lib/investments.js';
 import { CATEGORY_EMOJI, CRON_SECRET, ADMIN_TELEGRAM_ID, isModelsCheckOverdue } from '../../lib/config.js';
 import { claimPushRun, getNotificationPreferences, hasActivePushSubscription, sendPushToUser } from '../../lib/webPush.js';
 
@@ -66,6 +67,32 @@ async function sendOldDebtsReminder(userId, chatId) {
 
   // نسجّل إن التذكير اتبعت دلوقتي، عشان منكررهوش لنفس الأشخاص دول قبل ما تعدي 7 أيام
   await recordDebtReminders(userId, oldOnes.map((d) => d.displayName));
+}
+
+// ============ تسجيل صورة يومية من المحفظة الاستثمارية (لكل المستخدمين، بيانات فقط ومفيش رسالة) ============
+async function saveDailyPortfolioSnapshot(userId) {
+  const claimed = await claimCronSlot(userId, 'portfolio_snapshot', new Date().toISOString().slice(0, 10));
+  if (!claimed) return;
+  await savePortfolioSnapshot(userId).catch((error) => console.error(`Portfolio snapshot failed for user ${userId}:`, error));
+}
+
+// ============ ملخص حركة المحفظة كل 3 أيام (Telegram) — بس للمشتركين المرتبطين بتليجرام ============
+// بنستخدم يوم الإبوك (عدد الأيام من 1970) مقسوم على 3 كـ"دور" ثابت، فكل 3 أيام بالظبط بيتبعت ملخص واحد
+// لكل مستخدم، مهما كان وقت أول تسجيل بتاعه (مفيش حاجة مربوطة بتاريخ تسجيله شخصيًا).
+async function sendPortfolioDigestIfDue(userId, chatId) {
+  const epochDay = Math.floor(Date.now() / (24 * 60 * 60 * 1000));
+  const cycleKey = String(Math.floor(epochDay / 3));
+  const claimed = await claimCronSlot(userId, 'portfolio_digest', cycleKey);
+  if (!claimed) return;
+
+  const digest = await getPortfolioDigest(userId, 3).catch((error) => {
+    console.error(`getPortfolioDigest failed for user ${userId}:`, error);
+    return null;
+  });
+  if (!digest) return; // مفيش صورة قديمة كفاية للمقارنة لسه (مستخدم جديد على المحفظة)
+
+  const message = buildPortfolioDigestMessage(digest);
+  if (message) await sendTelegramMessage(chatId, message, 'HTML');
 }
 
 // ============ تشغيل مصفوفة من الدوال بالتوازي، بس بحد أقصى "limit" في نفس الوقت ============
@@ -184,6 +211,15 @@ async function processUser(user, { isFriday, isLastDayOfMonth, monthKey, reminde
   const isSubscribed = !!expiresAt && expiresAt.getTime() > Date.now();
 
   try {
+    // تحديث أسعار السوق (ذهب/عملات رقمية) في المحفظة الاستثمارية — مرة واحدة يوميًا، لكل المستخدمين
+    // (مش مربوط بالاشتراك، بيانات فقط ومفيش رسالة بتتبعت)
+    const claimedPriceSync = await claimCronSlot(userId, 'portfolio_price_sync', new Date().toISOString().slice(0, 10));
+    if (claimedPriceSync) {
+      await refreshPortfolioMarketPrices(userId).catch((error) => console.error(`Portfolio price sync failed for user ${userId}:`, error));
+    }
+    // تسجيل صورة يومية من المحفظة — بيانات فقط، لكل المستخدمين، مش مربوط بالاشتراك
+    await saveDailyPortfolioSnapshot(userId);
+
     // إشعارات الـ push (تذكير يومي، ملخص يومي/أسبوعي) بتتبعت لكل المستخدمين
     // (تجربة أو مشتركين) — مش مربوطة باشتراك مدفوع، عشان دي أهم أداة نحافظ بيها
     // على تفاعل المستخدم الجديد من أول يوم.
@@ -217,6 +253,7 @@ async function processUser(user, { isFriday, isLastDayOfMonth, monthKey, reminde
 
     await sendDailyReport(userId, chatId);
     await sendOldDebtsReminder(userId, chatId);
+    await sendPortfolioDigestIfDue(userId, chatId).catch((error) => console.error(`Portfolio digest failed for user ${userId}:`, error));
 
     // ---- تنبيهات التذكيرات (يومين قبل / يوم قبل / يوم الاستحقاق) — مفيش أي AI هنا، رسالة ثابتة بس ----
     const userReminders = remindersByUser?.[userId] || [];

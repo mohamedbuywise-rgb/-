@@ -191,6 +191,30 @@
            عنده specificity أعلى من كلاسات Tailwind العادية فبيكسبها دايمًا
            بغض النظر عن ترتيب التحميل.
            ============================================================ */
+        /* بطاقة البروفايل — بانر فاخر بلمسات ذهبية، بشكل مختلف للوضعين الليلي والنهاري */
+        .account-profile-card {
+            background:
+                radial-gradient(circle at 8% 12%, rgba(212,175,55,0.16) 0%, transparent 38%),
+                radial-gradient(circle at 92% 88%, rgba(212,175,55,0.14) 0%, transparent 42%),
+                linear-gradient(145deg, #0c1220 0%, #0a0e18 55%, #0b1018 100%);
+        }
+        .account-profile-avatar-btn { border-color: rgba(15,23,42,0.8); }
+        .account-profile-cam-btn { background-color: #020617; }
+        .account-profile-name { color: #f8fafc; }
+        .account-profile-email { color: #94a3b8; }
+        html[data-theme="light"] .account-profile-card {
+            border-color: #e9dfc4 !important;
+            background:
+                radial-gradient(circle at 8% 12%, rgba(180,140,40,0.10) 0%, transparent 40%),
+                radial-gradient(circle at 92% 88%, rgba(20,80,70,0.06) 0%, transparent 42%),
+                linear-gradient(145deg, #ffffff 0%, #f6f3ea 55%, #ffffff 100%);
+        }
+        html[data-theme="light"] .account-profile-deco circle[stroke] { stroke: rgba(180,140,40,0.28) !important; }
+        html[data-theme="light"] .account-profile-deco circle[fill]:not([stroke]) { fill: rgba(180,140,40,0.08) !important; }
+        html[data-theme="light"] .account-profile-avatar-btn { border-color: #ffffff !important; }
+        html[data-theme="light"] .account-profile-cam-btn { background-color: #ffffff !important; border-color: #e9dfc4 !important; }
+        html[data-theme="light"] .account-profile-name { color: #0f172a !important; }
+        html[data-theme="light"] .account-profile-email { color: #64748b !important; }
         html[data-theme="light"] body { background-color: #f8fafc; color: #0f172a; }
         ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
         html[data-theme="light"] ::-webkit-scrollbar-thumb { background: #cbd5e1; }
@@ -802,6 +826,20 @@
         .portfolio-summary-total { display: flex; flex-direction: column; align-items: flex-start; gap: .05rem; }
         .portfolio-total-caption { color: var(--portfolio-muted); font-size: .55rem; font-weight: 800; }
         .portfolio-total-quick { color: var(--portfolio-accent-strong); font-size: 1.12rem; line-height: 1.2; font-weight: 900; white-space: nowrap; }
+        .portfolio-digest-badge { display: inline-block; margin-top: .2rem; font-size: .62rem; font-weight: 900; border-radius: .5rem; padding: .1rem .42rem; white-space: nowrap; }
+        .portfolio-digest-badge.up { color: #0a7a52; background: rgba(16,163,110,.14); }
+        .portfolio-digest-badge.down { color: #c0362c; background: rgba(220,60,45,.12); }
+        html[data-theme="dark"] .portfolio-digest-badge.up { color: #6fe3b4; background: rgba(70,215,165,.14); }
+        html[data-theme="dark"] .portfolio-digest-badge.down { color: #ff8f85; background: rgba(255,90,75,.16); }
+        .portfolio-asset { cursor: pointer; }
+        .portfolio-asset-detail-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 200; display: flex; align-items: flex-end; justify-content: center; }
+        .portfolio-asset-detail-sheet { background: var(--surface-2, #fff); width: 100%; max-width: 480px; border-radius: 20px 20px 0 0; padding: 1.1rem 1.25rem 1.6rem; }
+        html[data-theme="dark"] .portfolio-asset-detail-sheet { background: #14181f; }
+        .portfolio-detail-close { border: none; background: rgba(120,120,120,.14); border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-size: 15px; cursor: pointer; }
+        .portfolio-detail-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; margin: .9rem 0; }
+        .portfolio-detail-stat { background: rgba(120,120,120,.08); border-radius: 10px; padding: .6rem .7rem; }
+        .portfolio-detail-stat span { display: block; font-size: .62rem; color: #8a8f98; margin-bottom: .2rem; }
+        .portfolio-detail-stat strong { font-size: .85rem; }
         .portfolio-chev { color: var(--portfolio-muted); transition: transform .2s; font-size: 1.1rem; }
         #portfolio-collapsible[open] .portfolio-chev { transform: rotate(180deg); }
         .portfolio-body { padding: .9rem 1.1rem 1.15rem; border-top: 1px dashed var(--portfolio-line); }
@@ -847,6 +885,16 @@
         .portfolio-form-submit { flex: 1; border: 0; border-radius: .75rem; padding: .62rem .8rem; background: var(--portfolio-accent); color: #062a21; font: inherit; font-size: .68rem; font-weight: 900; cursor: pointer; }
         .portfolio-form-submit:disabled { opacity: .6; cursor: wait; }
         @media (max-width: 420px) { #portfolio-summary { padding-inline: .85rem; } .portfolio-body { padding-inline: .85rem; } .portfolio-total-quick { font-size: .95rem; } .portfolio-asset { padding-inline: .58rem; } }
+        .portfolio-refresh-prices-btn { width: 1.9rem; height: 1.9rem; flex: 0 0 1.9rem; display: inline-flex; align-items: center; justify-content: center; border-radius: .6rem; border: 1px solid var(--portfolio-line); background: color-mix(in srgb, var(--portfolio-accent) 10%, transparent); color: var(--portfolio-accent-strong); font-size: .85rem; cursor: pointer; transition: transform .5s ease; }
+        .portfolio-refresh-prices-btn:active { transform: scale(.92); }
+        .portfolio-refresh-prices-btn.is-syncing { animation: portfolio-refresh-spin 1s linear infinite; }
+        @keyframes portfolio-refresh-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .portfolio-asset-figures { display: flex; flex-direction: column; align-items: flex-end; gap: .1rem; }
+        .portfolio-asset-change { font-size: .58rem; font-weight: 900; border-radius: .5rem; padding: .08rem .4rem; white-space: nowrap; }
+        .portfolio-asset-change.up { color: #0a7a52; background: rgba(16,163,110,.14); }
+        .portfolio-asset-change.down { color: #c0362c; background: rgba(220,60,45,.12); }
+        html[data-theme="dark"] .portfolio-asset-change.up { color: #6fe3b4; background: rgba(70,215,165,.14); }
+        html[data-theme="dark"] .portfolio-asset-change.down { color: #ff8f85; background: rgba(255,90,75,.16); }
         /* كارت الاشتراكات المتكررة: سطح محايد في الوضعين + ألوان واضحة لصف زاد سعره vs صف مستقر */
         html[data-theme="light"] #subscriptions-card { background: var(--day-card, #fff) !important; border: 1px solid var(--day-line, #e2e8f0) !important; }
         html[data-theme="light"] #subscriptions-title { color: #176b49 !important; }
@@ -2276,7 +2324,9 @@
                         <div class="portfolio-summary-total">
                             <span class="portfolio-total-caption">الإجمالي الحالي</span>
                             <span class="portfolio-total-quick" id="portfolio-total-quick">—</span>
+                            <span class="portfolio-digest-badge hidden" id="portfolio-digest-badge"></span>
                         </div>
+                        <button type="button" id="portfolio-refresh-prices-btn" class="portfolio-refresh-prices-btn" title="تحديث أسعار السوق (ذهب/عملات رقمية)" aria-label="تحديث أسعار السوق">🔄</button>
                         <span class="portfolio-chev" aria-hidden="true">⌄</span>
                     </div>
                 </summary>
@@ -2290,7 +2340,10 @@
                                 <div class="portfolio-asset-copy"><div class="portfolio-asset-name"></div><div class="portfolio-asset-sub"></div></div>
                             </div>
                             <div class="portfolio-asset-val">
-                                <strong></strong>
+                                <div class="portfolio-asset-figures">
+                                    <strong></strong>
+                                    <span class="portfolio-asset-change"></span>
+                                </div>
                                 <button type="button" class="portfolio-asset-menu" aria-label="إجراءات الأصل" aria-expanded="false"><iconify-icon icon="ph:dots-three-vertical-bold"></iconify-icon></button>
                                 <div class="portfolio-asset-menu-popover" role="menu">
                                     <button type="button" class="portfolio-asset-menu-action edit" role="menuitem"><iconify-icon icon="ph:pencil-simple-duotone"></iconify-icon><span>تعديل القيمة</span></button>
@@ -2838,18 +2891,28 @@
         <!-- ===================== TAB: ACCOUNT ===================== -->
         <div class="tab-content p-5 space-y-4" id="tab-account">
 
-            <div id="account-profile-card" class="account-profile-card bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-5 flex flex-col items-center text-center gap-3 shadow-lg">
-                <div class="relative">
-                    <button id="avatar-btn" class="w-20 h-20 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-slate-950 font-black text-2xl overflow-hidden border-2 border-slate-800 shadow-lg" title="غيّر صورتك">
-                        <img id="account-avatar-img" class="w-full h-full object-cover hidden" alt="صورة البروفايل">
-                        <span id="account-avatar-initial">—</span>
-                    </button>
-                    <span class="absolute -bottom-1 -left-1 w-7 h-7 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs">📷</span>
-                    <input type="file" id="avatar-file-input" accept="image/*" class="hidden">
-                </div>
-                <div>
-                    <h3 class="text-base font-bold text-slate-100" id="account-name">—</h3>
-                    <p class="text-xs text-slate-400" id="account-email">—</p>
+            <div id="account-profile-card" class="account-profile-card relative overflow-hidden rounded-3xl border border-slate-800 shadow-lg">
+                <svg class="account-profile-deco absolute inset-0 w-full h-full pointer-events-none opacity-60" viewBox="0 0 400 260" preserveAspectRatio="xMidYMid slice">
+                    <circle cx="30" cy="30" r="70" fill="none" stroke="rgba(212,175,55,0.25)" stroke-width="1"/>
+                    <circle cx="30" cy="30" r="46" fill="rgba(212,175,55,0.06)"/>
+                    <circle cx="378" cy="235" r="80" fill="none" stroke="rgba(212,175,55,0.22)" stroke-width="1"/>
+                    <circle cx="378" cy="235" r="52" fill="rgba(212,175,55,0.05)"/>
+                    <circle cx="18" cy="205" r="3" fill="rgba(212,175,55,0.55)"/>
+                    <circle cx="372" cy="34" r="3" fill="rgba(212,175,55,0.5)"/>
+                </svg>
+                <div class="relative flex flex-col items-center text-center gap-3 px-5 py-8">
+                    <div class="relative">
+                        <button id="avatar-btn" class="w-24 h-24 rounded-full bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-slate-950 font-black text-3xl overflow-hidden border-4 shadow-xl ring-1 ring-amber-400/20 account-profile-avatar-btn" title="غيّر صورتك">
+                            <img id="account-avatar-img" class="w-full h-full object-cover hidden" alt="صورة البروفايل">
+                            <span id="account-avatar-initial">—</span>
+                        </button>
+                        <span class="absolute -bottom-1 -left-1 w-8 h-8 rounded-full border border-amber-400/30 shadow flex items-center justify-center text-sm account-profile-cam-btn">📷</span>
+                        <input type="file" id="avatar-file-input" accept="image/*" class="hidden">
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-bold account-profile-name" id="account-name">—</h3>
+                        <p class="text-xs mt-0.5 account-profile-email" id="account-email">—</p>
+                    </div>
                 </div>
             </div>
 
@@ -2980,50 +3043,54 @@
                 </div>
                 <div class="modal-body-surface flex-1 overflow-y-auto px-5 py-5">
                     <div class="w-full max-w-md mx-auto">
-                        <div class="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-3 mb-4"><p class="text-[12px] font-black text-amber-300">ميزة SMS متاحة على Android فقط</p><p id="bank-accounts-status-line" class="text-[11px] text-amber-100/80 leading-relaxed mt-1">لو جهازك Android، نزّل تطبيق «دبّر — تتبع البنك» وفعّل إذن الإشعارات. أجهزة iPhone لا تدعم هذه الميزة التلقائية؛ استخدم التسجيل اليدوي أو اختصار iPhone.</p></div>
+                        <div class="rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.06] p-4 mb-4">
+                            <p class="text-[13px] font-black text-emerald-300 mb-1">💳 ربط الحركات البنكية التلقائية</p>
+                            <p id="bank-accounts-status-line" class="text-[11px] text-slate-400 leading-relaxed">نظام دبّر بيوفر لك طريقة ذكية وسريعة لتسجيل مصاريفك وبنوكك أوتوماتيكيًا في الخلفية أول بأول، من غير ما تضطر تدخل أي بيانات يدويًا. اختر نظام تشغيل هاتفك تحت وابدأ.</p>
+                        </div>
 
-                        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3 mb-4">
-                            <p class="text-[11px] font-bold text-emerald-400 mb-2">مدعومة حاليًا</p>
+                        <div class="rounded-2xl border border-slate-800 bg-slate-900/70 p-3.5 mb-4">
+                            <div class="flex items-center justify-between mb-2.5">
+                                <p class="text-xs font-bold text-slate-200">تفعيل الاستقبال التلقائي</p>
+                                <button type="button" id="bank-accounts-toggle" class="w-11 h-6 rounded-full bg-slate-700 relative transition shrink-0" aria-label="تفعيل الاستقبال التلقائي">
+                                    <span id="bank-accounts-toggle-dot" class="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-white transition-transform"></span>
+                                </button>
+                            </div>
+                            <p class="text-[11px] text-slate-400" id="bank-accounts-enabled-label">متوقف</p>
+                        </div>
+
+                        <!-- Android -->
+                        <div class="rounded-2xl border border-emerald-500/25 bg-emerald-500/[0.05] p-3.5 mb-4">
+                            <p class="text-[12px] font-black text-emerald-300 mb-2.5">أولًا: نظام أندرويد (تلقائي بالكامل عبر MacroDroid)</p>
+                            <div class="space-y-1 mb-3">
+                                <div class="flex items-start gap-2.5 py-1.5 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">1</span><span class="text-[12px] text-slate-300">ثبّت تطبيق MacroDroid الرسمي من Google Play</span></div>
+                                <div class="flex items-start gap-2.5 py-1.5 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">2</span><span class="text-[12px] text-slate-300">حمّل ملف التفعيل المخصص بتاعك (فيه التوكن ورابط الويب هوك جاهزين)</span></div>
+                                <div class="flex items-start gap-2.5 py-1.5 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">3</span><span class="text-[12px] text-slate-300">افتح الملف ليتم استيراده تلقائيًا داخل MacroDroid، ثم دوس "تفعيل" وامنح إذن قراءة الإشعارات مرة واحدة</span></div>
+                                <div class="flex items-start gap-2.5 py-1.5"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">4</span><span class="text-[12px] text-slate-300">من هذه اللحظة، أي رسالة أو إشعار بنكي يتسجل في دبّر أوتوماتيك وفوري في الخلفية</span></div>
+                            </div>
+                            <a href="#" id="bank-accounts-macro-link" target="_blank" rel="noopener" class="w-full flex items-center justify-center gap-2 bg-emerald-500 text-slate-950 font-black text-[12px] py-2.5 rounded-xl mb-2">⬇️ تحميل ملف التفعيل المخصص</a>
+                            <a href="https://play.google.com/store/apps/details?id=com.arlosoft.macrodroid" target="_blank" rel="noopener" class="w-full flex items-center justify-center gap-2 bg-slate-800 border border-slate-700 text-slate-200 font-bold text-[11px] py-2.5 rounded-xl mb-2">▶️ تثبيت MacroDroid من Google Play</a>
+                            <a href="#" id="bank-accounts-open-setup" class="w-full flex items-center justify-center gap-2 bg-slate-800 border border-slate-700 text-slate-200 font-bold text-[12px] py-2.5 rounded-xl">🔗 عندك التطبيق فعلًا؟ افتح إعداد التوكن مباشرة</a>
+                            <p class="text-[10px] text-slate-500 mt-3 leading-relaxed">MacroDroid متاح من Google Play. بعد التثبيت يحتاج إذن قراءة الإشعارات حسب إعدادات جهازك، ودبّر بيحدد بنكك/محفظتك تلقائي من اسم مرسل الرسالة.</p>
+                        </div>
+
+                        <!-- iOS -->
+                        <div class="rounded-2xl border border-sky-500/20 bg-sky-500/[0.06] p-3.5 mb-4">
+                            <p class="text-[12px] font-black text-sky-300 mb-2.5">ثانيًا: نظام آيفون (عبر اختصارات أبل)</p>
+                            <div class="space-y-1 mb-3">
+                                <div class="flex items-start gap-2.5 py-1.5 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-sky-500/15 text-sky-300 text-[11px] font-bold flex items-center justify-center shrink-0">1</span><span class="text-[12px] text-slate-300">دوس "تحميل اختصار دبّر" — هيفتح تطبيق الاختصارات ويحمّل الاختصار جاهز بالتوكن بتاعك</span></div>
+                                <div class="flex items-start gap-2.5 py-1.5 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-sky-500/15 text-sky-300 text-[11px] font-bold flex items-center justify-center shrink-0">2</span><span class="text-[12px] text-slate-300">من تطبيق الاختصارات ⬅️ التحكم الآلي ⬅️ (+) ⬅️ اختر مشغل "رسالة" أو "إشعار"</span></div>
+                                <div class="flex items-start gap-2.5 py-1.5 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-sky-500/15 text-sky-300 text-[11px] font-bold flex items-center justify-center shrink-0">3</span><span class="text-[12px] text-slate-300">حدد كلمة مفتاحية زي EGP أو جنيه أو اسم بنكك، واختر تشغيل اختصار "دبّر"</span></div>
+                                <div class="flex items-start gap-2.5 py-1.5"><span class="w-5 h-5 mt-0.5 rounded-full bg-sky-500/15 text-sky-300 text-[11px] font-bold flex items-center justify-center shrink-0">4</span><span class="text-[12px] text-slate-300">عطّل "السؤال قبل التشغيل" عشان يشتغل في الخلفية من غير إزعاج</span></div>
+                            </div>
+                            <p class="text-[11px] text-slate-400 leading-relaxed mb-2">الآيفون لا يسمح لتطبيق خارجي بقراءة كل SMS البنكية بصمت مثل Android — بس بالأتمتة دي هاتفك يبعت رسائل بنوكك لدبّر بأمان فور استلامها.</p>
+                            <a href="./ios-shortcut-setup.html" target="_blank" rel="noopener" class="w-full flex items-center justify-center gap-2 bg-sky-500/15 border border-sky-500/30 text-sky-300 font-black text-[12px] py-2.5 rounded-xl">📱 تحميل اختصار دبّر المباشر</a>
+                        </div>
+
+                        <!-- 🏦 البنوك المدعومة -->
+                        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 mb-4">
+                            <p class="text-[12px] font-black text-slate-100 mb-2">🏦 البنوك والمحافظ المدعومة حاليًا</p>
                             <div id="bank-accounts-supported-list" class="flex flex-wrap gap-1.5"></div>
                         </div>
-
-                        <div class="rounded-2xl border border-emerald-500/20 bg-emerald-500/[0.06] p-3 mb-4">
-                            <div class="flex items-center justify-between mb-2"><p class="text-[12px] font-black text-slate-100">معاينة خطوات التفعيل</p><span class="text-[10px] text-emerald-300">Android</span></div>
-                            <div class="grid grid-cols-2 gap-2 text-[10px]">
-                                <div class="rounded-xl bg-slate-900/70 p-2 text-slate-300"><b class="text-emerald-300">1</b> ثبّت MacroDroid من Google Play</div>
-                                <div class="rounded-xl bg-slate-900/70 p-2 text-slate-300"><b class="text-emerald-300">2</b> افتح MacroDroid</div>
-                                <div class="rounded-xl bg-slate-900/70 p-2 text-slate-300"><b class="text-emerald-300">3</b> احفظ التوكن</div>
-                                <div class="rounded-xl bg-slate-900/70 p-2 text-slate-300"><b class="text-emerald-300">4</b> فعّل الإشعارات</div>
-                                <div class="rounded-xl bg-slate-900/70 p-2 text-slate-300"><b class="text-emerald-300">5</b> فعّل الاستقبال</div>
-                                <div class="rounded-xl bg-slate-900/70 p-2 text-slate-300"><b class="text-emerald-300">6</b> تظهر الحركة هنا</div>
-                            </div>
-                        </div>
-
-                        <p class="text-[11px] font-bold text-emerald-400 mb-2">تجربة Android: هيحصل إيه بالظبط لما تدوس "حمّل التطبيق"</p>
-                        <div class="space-y-1 mb-4">
-                            <div class="flex items-start gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">1</span><span class="text-[12px] text-slate-300">على هاتف Android، هيتحمّل تطبيق "دبّر — تتبع البنك" (من متجر Google Play الرسمي)</span></div>
-                            <div class="flex items-start gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">2</span><span class="text-[12px] text-slate-300">افتح MacroDroid واسمح باستيراد الماكرو عند ظهور رسالة التأكيد</span></div>
-                            <div class="flex items-start gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">3</span><span class="text-[12px] text-slate-300">افتح التطبيق — توكنك هيتملى لوحده تلقائي (جاي من دبّر)، دوس "حفظ التوكن"</span></div>
-                            <div class="flex items-start gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">4</span><span class="text-[12px] text-slate-300">دوس "تفعيل إذن الإشعارات"، ولاقي "دبّر — تتبع البنك" في القائمة وفعّلها</span></div>
-                            <div class="flex items-start gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">5</span><span class="text-[12px] text-slate-300">ارجع لدبّر ودوس "تفعيل الاستقبال" تحت</span></div>
-                            <div class="flex items-start gap-2.5 py-2"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">6</span><span class="text-[12px] text-slate-300">من ساعتها، أي SMS بنكي حقيقي يوصلك، بيتسجل في دبّر تلقائي وصامت في الخلفية — مفيش أي تطبيق تاني تفتحه</span></div>
-                        </div>
-
-                        <div class="flex items-center justify-between bg-slate-900 border border-slate-800 rounded-2xl p-3.5 mb-3">
-                            <div>
-                                <p class="text-xs font-bold text-slate-200">تفعيل الاستقبال التلقائي</p>
-                                <p class="text-[11px] text-slate-400" id="bank-accounts-enabled-label">متوقف</p>
-                            </div>
-                            <button type="button" id="bank-accounts-toggle" class="w-11 h-6 rounded-full bg-slate-700 relative transition" aria-label="تفعيل الاستقبال التلقائي">
-                                <span id="bank-accounts-toggle-dot" class="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-white transition-transform"></span>
-                            </button>
-                        </div>
-
-                        <a href="#" id="bank-accounts-macro-link" target="_blank" rel="noopener" class="w-full flex items-center justify-center gap-2 bg-emerald-500 text-slate-950 font-black text-[12px] py-2.5 rounded-xl mb-2">⬇️ فعّل أتمتة الرسائل عبر MacroDroid</a><a href="https://play.google.com/store/apps/details?id=com.arlosoft.macrodroid" target="_blank" rel="noopener" class="w-full flex items-center justify-center gap-2 bg-slate-800 border border-slate-700 text-slate-200 font-bold text-[11px] py-2.5 rounded-xl mb-2">▶️ تثبيت MacroDroid من Google Play</a>
-                        <a href="#" id="bank-accounts-open-setup" class="w-full flex items-center justify-center gap-2 bg-slate-800 border border-slate-700 text-slate-200 font-bold text-[12px] py-2.5 rounded-xl">🔗 عندك التطبيق فعلًا؟ افتح إعداد التوكن مباشرة</a>
-
-                        <div class="rounded-2xl border border-sky-500/20 bg-sky-500/[0.06] p-3 mb-3"><p class="text-[12px] font-black text-sky-300 mb-1">iPhone — اختصار إرسال آمن</p><p class="text-[11px] text-slate-400 leading-relaxed">الآيفون لا يسمح لتطبيق خارجي بقراءة كل SMS البنكية بصمت مثل Android. تقدر تعمل Automation عند وصول رسالة، وتبعت النص للـWebhook بعد تفعيلها من Shortcuts.</p><a href="./ios-shortcut-setup.html" target="_blank" rel="noopener" class="w-full mt-2 flex items-center justify-center gap-2 bg-sky-500/15 border border-sky-500/30 text-sky-300 font-black text-[12px] py-2.5 rounded-xl">📱 افتح إعداد اختصار iPhone</a></div>
-                        <p class="text-[10px] text-slate-500 mt-3 leading-relaxed">MacroDroid متاح من Google Play. بعد التثبيت يحتاج إذن قراءة الإشعارات حسب إعدادات جهازك، ودبّر بيحدد بنكك/محفظتك تلقائي من اسم مرسل الرسالة.</p>
 
                         <button type="button" id="bank-accounts-troubleshoot-open" class="w-full flex items-center justify-center gap-1.5 text-[11px] font-bold text-emerald-400 mt-4 py-2">
                             🛠️ مش شغال معايا؟
@@ -3077,7 +3144,8 @@
                             <div id="ts-support-sent" class="hidden text-center">
                                 <p class="text-3xl mb-1.5">✅</p>
                                 <p class="text-[12.5px] font-bold text-slate-100 mb-1">وصلت رسالتك!</p>
-                                <p class="text-[11px] text-slate-400">هنرد عليك في أقرب وقت — تابع تليجرام البوت.</p>
+                                <p class="text-[11px] text-slate-400 mb-3">هنرد عليك على تليجرام — تقدر تكمل الكلام هناك بصوت أو صور أو فيديو براحتك.</p>
+                                <a href="https://t.me/Masaaref_bot" target="_blank" rel="noopener" class="block w-full bg-emerald-500 text-slate-950 font-black text-[12.5px] py-3 rounded-xl">💬 افتح شات تليجرام</a>
                             </div>
                         </div>
 
@@ -4704,6 +4772,15 @@
                 if (!session) { window.location.href = ONBOARDING_URL; return; }
                 accessToken = session.access_token;
                 currentUser = session.user;
+                // بيحدّث accessToken أوتوماتيك لما Supabase يجدد الجلسة في الخلفية (كل ما الجلسة تتجدد يبعت TOKEN_REFRESHED)
+                // من غير ده، كانت التوكن بتفضل قديمة وبيظهر "انتهت صلاحية الجلسة" غلط حتى لو المستخدم لسه فاتح الصفحة
+                sb.auth.onAuthStateChange((event, newSession) => {
+                    if (event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN') {
+                        if (newSession) { accessToken = newSession.access_token; currentUser = newSession.user; }
+                    } else if (event === 'SIGNED_OUT') {
+                        window.location.href = ONBOARDING_URL;
+                    }
+                });
                 setupLocalSecurityUI();
                 await gateLocalSecurity();
                 await refreshPushUI();
@@ -4722,10 +4799,18 @@
         // (2) polling كل 20 ثانية طول ما الصفحة فاتحة وظاهرة قدامه، عشان يبقى شبه لايف
         // (3) زرار تحديث يدوي 🔄 لو عايز يتأكد فورًا ============
         function setupAutoRefresh() {
+            // قبل أي تحديث بعد رجوع المستخدم للصفحة، نتأكد إن الجلسة لسه سليمة (وده بيجدد التوكن لو خلصت صلاحيتها)
+            async function ensureFreshSessionThenLoad() {
+                try {
+                    const { data: { session } } = await sb.auth.getSession();
+                    if (session) { accessToken = session.access_token; currentUser = session.user; }
+                } catch (e) {}
+                loadDashboard();
+            }
             document.addEventListener('visibilitychange', () => {
-                if (document.visibilityState === 'visible') loadDashboard();
+                if (document.visibilityState === 'visible') ensureFreshSessionThenLoad();
             });
-            window.addEventListener('focus', () => loadDashboard());
+            window.addEventListener('focus', () => ensureFreshSessionThenLoad());
 
             setInterval(() => {
                 if (document.visibilityState === 'visible') loadDashboard();
@@ -4734,7 +4819,7 @@
             document.getElementById('refresh-btn').addEventListener('click', async (e) => {
                 const btn = e.currentTarget;
                 btn.classList.add('animate-spin');
-                await loadDashboard();
+                await ensureFreshSessionThenLoad();
                 setTimeout(() => btn.classList.remove('animate-spin'), 300);
             });
         }
@@ -4938,7 +5023,7 @@
             renderArchive(data.history);
             renderSubscription(data.subscription);
             renderAssistant(data);
-            renderPortfolio(data.portfolio);
+            renderPortfolio(data.portfolio, data.portfolioDigest);
             applyStreak(data.streak);
             updateHeaderForTab(document.querySelector('.tab-btn.active-tab').dataset.tab, data);
 
@@ -5839,7 +5924,7 @@
                 if (badge) { badge.textContent = urgentCount > 0 ? String(urgentCount) : ''; badge.style.display = urgentCount > 0 ? 'grid' : 'none'; }
                 if (countEl) countEl.textContent = reminders.length ? `${reminders.length} تذكيرات` : '';
                 listEl.innerHTML = reminders.length ? reminders.map((r) => {
-                    const amount = r.amount !== null && r.amount !== undefined && r.amount !== '' ? `<div class="text-[10px] font-black text-amber-400 mt-1">${fmt(r.amount)} ج.م</div>` : '';
+                    const amount = r.amount !== null && r.amount !== undefined && r.amount !== '' ? `<div class="text-[10px] font-black text-amber-400 mt-1">${fmt(r.amount)}</div>` : '';
                     return `<div class="rounded-2xl border border-slate-800 bg-slate-950/60 p-3 flex items-center gap-2.5">
                         <span class="w-9 h-9 shrink-0 rounded-xl bg-emerald-500/10 border border-emerald-500/15 flex items-center justify-center text-base">🔔</span>
                         <div class="min-w-0 flex-1"><p class="text-xs font-bold text-slate-200 truncate">${debtEscape(r.title)}</p><p class="text-[10px] text-slate-500 mt-0.5">${new Date(r.due_date + 'T00:00:00').toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'short' })}</p></div>
@@ -6008,10 +6093,76 @@
         }
 
         window.__portfolioState = { assets: [], total: 0 };
+        window.__portfolioDigest = null;
 
-        function renderPortfolio(portfolio) {
+        // ============ Badge حركة المحفظة آخر 3 أيام (فوق، جنب الإجمالي) ============
+        function renderPortfolioDigestBadge(digest) {
+            const badge = document.getElementById('portfolio-digest-badge');
+            if (!badge) return;
+            if (digest === undefined) return; // مفيش بيانات digest جاية مع النداء ده (زي refresh الأسعار) — سيب الـ badge زي ما هو
+            window.__portfolioDigest = digest;
+            if (!digest) { badge.classList.add('hidden'); return; }
+
+            const pct = Number(digest.changePct || 0);
+            const isUp = pct >= 0;
+            badge.classList.remove('hidden', 'up', 'down');
+            badge.classList.add(isUp ? 'up' : 'down');
+            badge.textContent = `${isUp ? '▲' : '▼'} ${isUp ? '+' : ''}${pct}% آخر 3 أيام`;
+        }
+
+        // ============ شاشة تفاصيل أصل واحد (تفتح عند الضغط على أي أصل في المحفظة) ============
+        function openPortfolioAssetDetail(asset) {
+            const presentation = getPortfolioAssetPresentation(asset);
+            const costBasis = Number(asset.cost_basis);
+            const currentAmount = Number(asset.amount);
+            const hasCostBasis = Number.isFinite(costBasis) && costBasis > 0;
+            const gainAmount = hasCostBasis ? Math.round((currentAmount - costBasis) * 100) / 100 : null;
+            const gainPct = hasCostBasis ? Math.round(((currentAmount - costBasis) / costBasis) * 1000) / 10 : null;
+
+            const digestAsset = (window.__portfolioDigest?.perAsset || []).find((a) => a.id === asset.id);
+
+            const overlay = document.createElement('div');
+            overlay.className = 'portfolio-asset-detail-overlay';
+            overlay.innerHTML = `
+                <div class="portfolio-asset-detail-sheet">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
+                        <div style="display:flex;align-items:center;gap:.6rem;">
+                            <span style="font-size:1.4rem;"><iconify-icon icon="${presentation.icon}"></iconify-icon></span>
+                            <div>
+                                <div style="font-weight:800;font-size:.95rem;">${asset.name || 'أصل استثماري'}</div>
+                                <div style="font-size:.72rem;color:#8a8f98;">${asset.sub_label || 'قيمة حالية'}</div>
+                            </div>
+                        </div>
+                        <button type="button" class="portfolio-detail-close" aria-label="إغلاق">✕</button>
+                    </div>
+
+                    <div style="font-size:1.55rem;font-weight:900;">${fmt(currentAmount)}</div>
+                    ${hasCostBasis ? `<div style="margin-top:.25rem;font-size:.8rem;color:${gainAmount >= 0 ? '#0a7a52' : '#c0362c'};">${gainAmount >= 0 ? '▲' : '▼'} ${gainAmount >= 0 ? '+' : ''}${gainPct}% (${gainAmount >= 0 ? '+' : ''}${fmt(gainAmount)}) منذ الشراء</div>` : ''}
+
+                    <div class="portfolio-detail-stat-grid">
+                        <div class="portfolio-detail-stat">
+                            <span>قيمة الشراء</span>
+                            <strong>${hasCostBasis ? fmt(costBasis) : '—'}</strong>
+                        </div>
+                        <div class="portfolio-detail-stat">
+                            <span>آخر 3 أيام</span>
+                            <strong style="color:${digestAsset?.changePct == null ? 'inherit' : (digestAsset.changePct >= 0 ? '#0a7a52' : '#c0362c')};">
+                                ${digestAsset?.changePct == null ? '—' : `${digestAsset.changePct >= 0 ? '▲' : '▼'} ${digestAsset.changePct >= 0 ? '+' : ''}${digestAsset.changePct}%`}
+                            </strong>
+                        </div>
+                    </div>
+                    ${digestAsset?.changeAmount != null ? `<p style="font-size:.72rem;color:#8a8f98;margin-top:-.5rem;">يعني ${digestAsset.changeAmount >= 0 ? 'زيادة' : 'نقصان'} قدره ${fmt(Math.abs(digestAsset.changeAmount))} خلال آخر 3 أيام</p>` : ''}
+                </div>`;
+
+            overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+            overlay.querySelector('.portfolio-detail-close').addEventListener('click', () => overlay.remove());
+            document.body.appendChild(overlay);
+        }
+
+        function renderPortfolio(portfolio, digest) {
             const data = portfolio || { assets: [], total: 0 };
             window.__portfolioState = data;
+            renderPortfolioDigestBadge(digest);
 
             const totalEl = document.getElementById('portfolio-total-quick');
             const listEl = document.getElementById('portfolio-asset-list');
@@ -6036,10 +6187,29 @@
                 node.querySelector('.portfolio-asset-sub').textContent = asset.sub_label || 'قيمة حالية';
                 node.querySelector('strong').textContent = fmt(asset.amount);
 
+                const changeEl = node.querySelector('.portfolio-asset-change');
+                const costBasis = Number(asset.cost_basis);
+                const currentAmount = Number(asset.amount);
+                if (changeEl) {
+                    if (Number.isFinite(costBasis) && costBasis > 0 && Number.isFinite(currentAmount)) {
+                        const pct = ((currentAmount - costBasis) / costBasis) * 100;
+                        const rounded = Math.round(pct * 10) / 10;
+                        if (Math.abs(rounded) < 0.1) { changeEl.remove(); }
+                        else {
+                            changeEl.classList.add(rounded > 0 ? 'up' : 'down');
+                            changeEl.textContent = `${rounded > 0 ? '▲' : '▼'} ${Math.abs(rounded)}%`;
+                        }
+                    } else {
+                        changeEl.remove();
+                    }
+                }
+
                 const menuBtn = node.querySelector('.portfolio-asset-menu');
                 const menu = node.querySelector('.portfolio-asset-menu-popover');
                 const editBtn = node.querySelector('.portfolio-asset-menu-action.edit');
                 const deleteBtn = node.querySelector('.portfolio-asset-menu-action.delete');
+
+                node.addEventListener('click', () => openPortfolioAssetDetail(asset));
 
                 menuBtn.addEventListener('click', (event) => {
                     event.preventDefault();
@@ -6051,11 +6221,13 @@
                 });
                 editBtn.addEventListener('click', (event) => {
                     event.preventDefault();
+                    event.stopPropagation();
                     closePortfolioMenus();
                     openPortfolioForm(asset);
                 });
                 deleteBtn.addEventListener('click', async (event) => {
                     event.preventDefault();
+                    event.stopPropagation();
                     closePortfolioMenus();
                     if (!confirm(`متأكد عايز تحذف "${asset.name}" من محفظتك؟`)) return;
                     try {
@@ -6069,6 +6241,25 @@
 
         document.addEventListener('click', (event) => {
             if (!event.target.closest('.portfolio-asset')) closePortfolioMenus();
+        });
+
+        document.getElementById('portfolio-refresh-prices-btn')?.addEventListener('click', async (event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            const btn = event.currentTarget;
+            if (btn.classList.contains('is-syncing')) return;
+            btn.classList.add('is-syncing');
+            try {
+                const data = await asstApi('portfolio_refresh_prices', {});
+                if (data.portfolio) renderPortfolio(data.portfolio);
+                if (!data.updatedCount) {
+                    showUndoToast('مفيش أصول (ذهب/عملات رقمية) بكمية محددة عشان نحدّث سعرها دلوقتي', () => {}, null);
+                }
+            } catch (err) {
+                alert(err.message || 'تعذر تحديث الأسعار، جرب تاني.');
+            } finally {
+                btn.classList.remove('is-syncing');
+            }
         });
 
         let portfolioEditingId = null;

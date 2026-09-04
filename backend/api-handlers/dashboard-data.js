@@ -6,7 +6,7 @@ import { getInvoicesList, getInvoiceDetail } from '../../lib/invoices.js';
 import { MONTH_NAMES, CATEGORY_EMOJI, SUBSCRIPTION_PRICE_EGP, INSTAPAY_LINK } from '../../lib/config.js';
 import { hasActiveSubscription, getSubscriptionExpiry, isInTrial, getTrialDaysLeft } from '../../lib/users.js';
 import { getActiveDays } from '../../lib/activeDays.js';
-import { getPortfolio } from '../../lib/investments.js';
+import { getPortfolio, getPortfolioDigest } from '../../lib/investments.js';
 
 function sumByCurrency(rows = []) {
   return rows.reduce((acc, row) => {
@@ -37,7 +37,7 @@ export default async function handler(req, res) {
   try {
     const dashboardUser = await getDashboardUserFromRequest(req);
     if (!dashboardUser) {
-      return res.status(401).json({ error: 'انتهت صلاحية الجلسة، سجل دخول تاني.' });
+      return res.status(401).json({ error: 'نورت من تاني! جلستك خلصت، سجّل دخولك تاني عشان نكمل سوا.' });
     }
 
     const { dataUserId, telegramUserId, linked } = dashboardUser;
@@ -231,6 +231,11 @@ export default async function handler(req, res) {
 
     // ---- محفظة الاستثمار الحقيقية للعميل (بيانات حقيقية بيدخلها بنفسه، مفيش mock هنا) ----
     const portfolio = await getPortfolio(dataUserId);
+    // ---- حركة المحفظة آخر 3 أيام (null لو المستخدم لسه جديد على الميزة ومفيش صورة قديمة كفاية) ----
+    const portfolioDigest = await getPortfolioDigest(dataUserId, 3).catch((error) => {
+      console.error('getPortfolioDigest error:', error);
+      return null;
+    });
 
     // ---- توقّع نهاية الشهر + اقتراح ذكي (كله محسوب من أرقام حقيقية فوق، صفر أرقام مختلقة) ----
     const daysInMonth = new Date(start.getFullYear(), start.getMonth() + 1, 0).getDate();
@@ -456,6 +461,7 @@ export default async function handler(req, res) {
       goal,
       goals,
       portfolio,
+      portfolioDigest,
       smart,
       wrapped,
     });

@@ -9,7 +9,7 @@ import { normalizeDigits, extractDeterministicExpense, correctDebtDirections, de
 import { maybeSendBudgetAlert } from '../../lib/webPush.js';
 import { getDashboardUserFromRequest } from '../../lib/dashboardAuth.js';
 import { isFinancialEventType, recordFinancialEvent } from '../../lib/financialEvents.js';
-import { getPortfolio, addPortfolioAsset, updatePortfolioAsset, deletePortfolioAsset, buyIntoPortfolio, sellFromPortfolio } from '../../lib/investments.js';
+import { getPortfolio, addPortfolioAsset, updatePortfolioAsset, deletePortfolioAsset, buyIntoPortfolio, sellFromPortfolio, refreshPortfolioMarketPrices } from '../../lib/investments.js';
 
 // ============ Router: POST /api/assistant  { action: ... } ============
 // كل ميزات "دبّر الذكي" الجديدة (الأهداف، امسح فاتورة، اسأل دبّر) اتلمّت هنا في endpoint واحد،
@@ -27,7 +27,7 @@ import { getPortfolio, addPortfolioAsset, updatePortfolioAsset, deletePortfolioA
 async function requireLink(req, res) {
   const user = await getDashboardUserFromRequest(req);
   if (!user) {
-    res.status(401).json({ error: 'انتهت صلاحية الجلسة، سجل دخول تاني.' });
+    res.status(401).json({ error: 'نورت من تاني! جلستك خلصت، سجّل دخولك تاني عشان نكمل سوا.' });
     return null;
   }
 
@@ -509,6 +509,12 @@ async function handlePortfolioDelete(userId, body, res) {
   return res.status(200).json({ ok: true, portfolio });
 }
 
+async function handlePortfolioRefreshPrices(userId, body, res) {
+  const result = await refreshPortfolioMarketPrices(userId);
+  const portfolio = await getPortfolio(userId);
+  return res.status(200).json({ ok: true, updatedCount: result.updatedCount, skippedCount: result.skippedCount, portfolio });
+}
+
 async function handleEntryConfirm(userId, body, res) {
   // بيقبل معاملة واحدة (body.draft، للتوافق مع أي نداء قديم) أو أكتر من معاملة مع بعض (body.drafts)،
   // بالظبط زي تليجرام لما رسالة واحدة فيها أكتر من مصروف/دين مع بعض.
@@ -569,6 +575,8 @@ export default async function handler(req, res) {
         return await handlePortfolioUpdate(userId, body, res);
       case 'portfolio_asset_delete':
         return await handlePortfolioDelete(userId, body, res);
+      case 'portfolio_refresh_prices':
+        return await handlePortfolioRefreshPrices(userId, body, res);
       case 'receipt_scan':
         return await handleReceiptScan(userId, body, res);
       case 'invoice_delete':

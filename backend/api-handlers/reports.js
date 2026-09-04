@@ -18,7 +18,7 @@ import { getDashboardUserFromRequest } from '../../lib/dashboardAuth.js';
 async function requireLink(req, res) {
   const user = await getDashboardUserFromRequest(req);
   if (!user) {
-    res.status(401).json({ error: 'انتهت صلاحية الجلسة، سجل دخول تاني.' });
+    res.status(401).json({ error: 'نورت من تاني! جلستك خلصت، سجّل دخولك تاني عشان نكمل سوا.' });
     return null;
   }
   return user;

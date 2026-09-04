@@ -16,7 +16,7 @@ export default async function handler(req, res) {
 
     const { data: userData, error: authError } = await supabase.auth.getUser(token);
     if (authError || !userData?.user) {
-      return res.status(401).json({ ok: false, error: 'انتهت صلاحية الجلسة، سجل دخول تاني.' });
+      return res.status(401).json({ ok: false, error: 'نورت من تاني! جلستك خلصت، سجّل دخولك تاني عشان نكمل سوا.' });
     }
 
     const code = String(req.body?.code || '').trim();

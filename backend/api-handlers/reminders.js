@@ -11,7 +11,7 @@ export default async function handler(req, res) {
 
   const dashboardUser = await getDashboardUserFromRequest(req);
   if (!dashboardUser) {
-    return res.status(401).json({ error: 'انتهت صلاحية الجلسة، سجل دخول تاني.' });
+    return res.status(401).json({ error: 'نورت من تاني! جلستك خلصت، سجّل دخولك تاني عشان نكمل سوا.' });
   }
   const { dataUserId } = dashboardUser;
 

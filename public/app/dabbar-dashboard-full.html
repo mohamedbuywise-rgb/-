@@ -3153,6 +3153,20 @@
                                 <div class="flex items-start gap-2.5 py-1.5 border-b border-slate-800"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">3</span><span class="text-[12px] text-slate-300">افتح الملف ليتم استيراده تلقائيًا داخل MacroDroid، ثم دوس "تفعيل" وامنح إذن قراءة الإشعارات مرة واحدة</span></div>
                                 <div class="flex items-start gap-2.5 py-1.5"><span class="w-5 h-5 mt-0.5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">4</span><span class="text-[12px] text-slate-300">من هذه اللحظة، أي رسالة أو إشعار بنكي يتسجل في دبّر أوتوماتيك وفوري في الخلفية</span></div>
                             </div>
+                            <!-- ============ فيديو شرح قابل للفتح/القفل — الفيديو نفسه ما بيتحملش من السيرفر إلا لما المستخدم يدوس يفتحه (بيبقى فاضي preload="none") عشان مايبطأش تحميل الصفحة الأساسية ============ -->
+                            <details class="mb-3 rounded-xl border border-emerald-500/25 bg-emerald-500/[0.04] overflow-hidden">
+                                <summary class="cursor-pointer select-none px-3 py-2.5 text-[12px] font-black text-emerald-300 flex items-center justify-between">
+                                    <span>🎬 شوف الشرح بالفيديو (خطوة بخطوة)</span>
+                                    <span class="text-[10px] text-slate-500">80 ثانية</span>
+                                </summary>
+                                <div class="px-3 pb-3 pt-1">
+                                    <video id="bank-accounts-video-android" class="w-full rounded-lg bg-black" controls playsinline preload="none" poster="/app/videos/bank-automation-android-poster.jpg">
+                                        <source src="/app/videos/bank-automation-android.mp4" type="video/mp4">
+                                        متصفحك مش بيدعم عرض الفيديو، حمّل الملف مباشرة من <a href="/app/videos/bank-automation-android.mp4" class="underline">هنا</a>.
+                                    </video>
+                                    <button type="button" id="bank-accounts-video-android-pip" class="mt-2 w-full flex items-center justify-center gap-2 bg-slate-800 border border-slate-700 text-slate-200 font-bold text-[11px] py-2 rounded-lg">🔲 شغّل عائم (تقدر تتابعه وانت بتطبّق الخطوات في MacroDroid)</button>
+                                </div>
+                            </details>
                             <a href="#" id="bank-accounts-macro-link" target="_blank" rel="noopener" class="w-full flex items-center justify-center gap-2 bg-emerald-500 text-slate-950 font-black text-[12px] py-2.5 rounded-xl mb-2">⬇️ حمّل ملف التوكن الخاص</a>
                             <p id="bank-accounts-macro-error" class="hidden text-[11px] text-rose-400 leading-relaxed mb-2"></p>
                             <a href="https://play.google.com/store/apps/details?id=com.arlosoft.macrodroid" target="_blank" rel="noopener" class="w-full flex items-center justify-center gap-2 bg-slate-800 border border-slate-700 text-slate-200 font-bold text-[11px] py-2.5 rounded-xl mb-2">▶️ تثبيت MacroDroid من Google Play</a>
@@ -4194,7 +4208,24 @@
             const downloadLink = document.getElementById('bank-accounts-macro-link');
             const macroErrorEl = document.getElementById('bank-accounts-macro-error');
             const setupLink = document.getElementById('bank-accounts-open-setup');
+            const androidVideo = document.getElementById('bank-accounts-video-android');
+            const androidVideoPipBtn = document.getElementById('bank-accounts-video-android-pip');
             if (!card || !modal) return;
+
+            // ============ نافذة عائمة (Picture-in-Picture) — تسيب الفيديو طافي فوق أي تطبيق تاني (زي MacroDroid) عشان المستخدم يقدر يتابع الشرح وهو بيطبّق الخطوات ============
+            if (androidVideoPipBtn && androidVideo) {
+                if (!document.pictureInPictureEnabled) {
+                    androidVideoPipBtn.classList.add('hidden'); // مش مدعومة في المتصفح ده (زي بعض متصفحات الآيفون)
+                } else {
+                    androidVideoPipBtn.addEventListener('click', async () => {
+                        try {
+                            if (androidVideo.paused) await androidVideo.play();
+                            if (document.pictureInPictureElement) { await document.exitPictureInPicture(); return; }
+                            await androidVideo.requestPictureInPicture();
+                        } catch (e) { console.error('BANK_ACCOUNTS_VIDEO_PIP_FAILED', e); }
+                    });
+                }
+            }
 
             const isIOSDevice = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
             if (isIOSDevice) {
@@ -4215,37 +4246,12 @@
                 // deepLink فيه توكن المستخدم مدموج، فبيفتح التطبيق (لو مثبّت) ويملأ الحقل أوتوماتيك
                 if (bankState.deepLink) setupLink.href = bankState.deepLink;
             }
-            setupLink?.addEventListener('click', async (event) => {
-                event.preventDefault();
-                macroErrorEl?.classList.add('hidden');
-                try {
-                    // قد يضغط المستخدم الزر قبل انتهاء تحميل بيانات الحساب.
-                    if (!bankState.deepLink) await loadBankAccounts();
-                    if (!bankState.deepLink) {
-                        if (macroErrorEl) {
-                            macroErrorEl.textContent = '⚠️ لم نتمكن من تجهيز رابط التطبيق. تأكد من تسجيل الدخول ثم جرّب مرة أخرى.';
-                            macroErrorEl.classList.remove('hidden');
-                        }
-                        return;
-                    }
-                    // deep link مسجل في AndroidManifest باسم dabbar://setup.
-                    // تغيير location هو الأكثر توافقاً مع Chrome على Android لفتح التطبيق.
-                    window.location.href = bankState.deepLink;
-                } catch (e) {
-                    console.error('BANK_ACCOUNTS_SETUP_EXCEPTION', e);
-                    if (macroErrorEl) {
-                        macroErrorEl.textContent = '⚠️ تعذر فتح التطبيق. ثبّت MacroDroid/تطبيق دبّر أولاً ثم جرّب مرة أخرى.';
-                        macroErrorEl.classList.remove('hidden');
-                    }
-                }
-            });
-
             downloadLink?.addEventListener('click', async (event) => {
                 event.preventDefault();
                 macroErrorEl?.classList.add('hidden');
                 const originalLabel = '⬇️ حمّل ملف التوكن الخاص';
                 // ============ لو الرابط لسه مجهزش من loadBankAccounts (فشل الاتصال، أو الصفحة اتفتحت بسرعة قبل ما يخلص) بنبني رابط احتياطي مباشر بدل ما نوقف الزرار بصمت ============
-                const targetUrl = bankState.macroDownloadUrl || `${window.location.origin}/api/macrodroid-macro`;
+                const targetUrl = bankState.macroDownloadUrl || `${window.location.origin}/api?route=macrodroid-macro`;
                 try {
                     const { data: { session }, error: sessionError } = await sb.auth.getSession();
                     if (sessionError) console.error('BANK_ACCOUNTS_SESSION_ERROR', sessionError);
@@ -5092,57 +5098,12 @@
                 clearTimeout(timeoutId);
             }
         }
-        // ============ كاش محلي لبيانات الداشبورد — بيتفادى تصفير الشاشة لحظة الرجوع من صفحات زي
-        // "الحركات البنكية" اللي بتعمل window.location.href (تحميل صفحة كامل من جديد). بنعرض آخر
-        // نسخة محفوظة فورًا من sessionStorage وقت التحميل الأول، وبعدين بنجيب نسخة حديثة في الخلفية
-        // ونحدّث بيها لما توصل، من غير ما المستخدم يشوف الأرقام بترجع صفر أو الشاشة تفضى لحظيًا. ============
-        const DASHBOARD_CACHE_KEY = 'dabbar_dashboard_cache_v1';
-        function saveDashboardCache(data) {
-            try { sessionStorage.setItem(DASHBOARD_CACHE_KEY, JSON.stringify({ data, savedAt: Date.now() })); } catch (e) { /* تجاهل لو sessionStorage غير متاح */ }
-        }
-        function readDashboardCache() {
-            try {
-                const raw = sessionStorage.getItem(DASHBOARD_CACHE_KEY);
-                if (!raw) return null;
-                const parsed = JSON.parse(raw);
-                // نتجاهل كاش أقدم من ساعة عشان منعرضش بيانات قديمة جدًا كأنها حديثة
-                if (!parsed?.data || (Date.now() - (parsed.savedAt || 0)) > 60 * 60 * 1000) return null;
-                return parsed.data;
-            } catch (e) { return null; }
-        }
-        function renderDashboardData(data) {
-            window.__dashboardData = data;
-            renderActiveDays(data.activeDays);
-            renderMonthly(data.month);
-            renderNetWorth(data.netWorth);
-            renderPlanning(data);
-            renderInAppNotifications(data);
-            renderDaily(data.today, data.flow);
-            renderDailyReminder(data.today);
-            renderCategories(data.month);
-            renderSubscriptions(data.recurringSubscriptions);
-            renderTips(data.month);
-            renderDebts(data.debts);
-            renderRemindersTelegramBanner(data.linked);
-            renderArchive(data.history);
-            renderSubscription(data.subscription);
-            renderAssistant(data);
-            renderPortfolio(data.portfolio, data.portfolioDigest);
-            applyStreak(data.streak);
-            updateHeaderForTab(document.querySelector('.tab-btn.active-tab').dataset.tab, data);
-        }
         async function loadDashboard(isInitialLoad = false, attempt = 1) {
             const MAX_ATTEMPTS = 3;
             const TIMEOUT_MS = attempt === 1 ? 12000 : 20000; // أول محاولة أسرع عشان نحس بالمشكلة بدري ونعيد المحاولة، الباقي أطول احتياطًا لشبكة بطيئة
             clearTimeout(__dashboardRetryTimer);
             const syncNote = document.getElementById('dashboard-sync-note');
             const syncNoteText = document.getElementById('dashboard-sync-note-text');
-            // أول تحميل فقط: لو فيه نسخة محفوظة في الكاش، اعرضها فورًا من غير أي فلاش فاضي/أصفار،
-            // وسيبها تتحدث لما الفتش الحقيقي يخلص تحت.
-            if (isInitialLoad && attempt === 1 && !window.__dashboardData) {
-                const cached = readDashboardCache();
-                if (cached) renderDashboardData(cached);
-            }
             let data;
             try {
                 data = await fetchDashboardOnce(TIMEOUT_MS);
@@ -5157,9 +5118,7 @@
                     return;
                 }
                 // منسيبش الخطأ ده يودّي المستخدم لصفحة onboarding خالص، بس نوريله رسالة واضحة مع زرار "حاول تاني"
-                // لو عندنا بيانات كاش أو بيانات معروضة بالفعل، سيبها زي ما هي وميظهرش شاشة خطأ كاملة تحجب الداش.
                 if (syncNote) syncNote.classList.add('hidden');
-                if (window.__dashboardData) return;
                 const message = isTimeoutOrNetwork ? 'في تأخير في تحميل بياناتك دلوقتي. جرب تاني أو اتأكد من الإنترنت.' : (e.message || 'مقدرناش نجيب بياناتك دلوقتي.');
                 const errorEl = document.getElementById('dashboard-load-error');
                 const errorText = document.getElementById('dashboard-load-error-text');
@@ -5179,8 +5138,26 @@
             const dashboardError = document.getElementById('dashboard-load-error');
             if (dashboardError) dashboardError.classList.add('hidden');
 
-            renderDashboardData(data);
-            saveDashboardCache(data);
+            window.__dashboardData = data;
+
+            renderActiveDays(data.activeDays);
+            renderMonthly(data.month);
+            renderNetWorth(data.netWorth);
+            renderPlanning(data);
+            renderInAppNotifications(data);
+            renderDaily(data.today, data.flow);
+            renderDailyReminder(data.today);
+            renderCategories(data.month);
+            renderSubscriptions(data.recurringSubscriptions);
+            renderTips(data.month);
+            renderDebts(data.debts);
+            renderRemindersTelegramBanner(data.linked);
+            renderArchive(data.history);
+            renderSubscription(data.subscription);
+            renderAssistant(data);
+            renderPortfolio(data.portfolio, data.portfolioDigest);
+            applyStreak(data.streak);
+            updateHeaderForTab(document.querySelector('.tab-btn.active-tab').dataset.tab, data);
 
             const label = document.getElementById('last-updated-label');
             if (label) {
@@ -7231,7 +7208,7 @@
             }
         }
         document.getElementById('quick-entry-invoice-input')?.addEventListener('change', (event) => { const file = event.target.files?.[0]; analyzeQuickInvoice(file); event.target.value = ''; });
-        document.getElementById('bank-movements-card')?.addEventListener('click', () => { window.location.href = '/app/dabbar-bank-movements.html'; });
+        document.getElementById('bank-movements-card')?.addEventListener('click', () => { window.location.href = './dabbar-bank-movements.html'; });
         // ============ نطلب آخر chunk قبل stop؛ على بعض أجهزة Android حدث stop يصل قبل اكتمال تسليم
         // آخر dataavailable، فتطلع المعاينة بملف صغير جدًا (رأس WebM فقط) رغم أن مدتها ظاهرة وصوتها مسموع. ============
         function stopQuickEntryRecording(reason = 'user') {

@@ -125,7 +125,7 @@ export default async function handler(req, res) {
       m_isOrCondition: false,
       m_name: 'دبّر - استيراد SMS تلقائي',
       m_triggerList: [{
-        enableRegex: false,
+        enableRegex: true,
         enableRegexPhoneNumber: false,
         ignoreCase: true,
         isExcludeContact: false,
@@ -134,7 +134,7 @@ export default async function handler(req, res) {
         m_groupIdList: [],
         m_groupNameList: [],
         m_option: 3,
-        m_smsContent: '',
+        m_smsContent: 'EGP|جنيه|ج\\.م|USD|دولار|EUR|يورو|SAR|ريال|AED|درهم',
         m_smsFromList: [],
         m_smsNumberExclude: false,
         subscriptionId: -1,
@@ -149,7 +149,7 @@ export default async function handler(req, res) {
     macroExportVersion: 1,
   };
 
-  res.setHeader('Content-Type', 'application/json; charset=utf-8');
+  res.setHeader('Content-Type', 'application/octet-stream');
   res.setHeader('Content-Disposition', 'attachment; filename="dabbar-sms-import.macro"');
   return res.status(200).send(JSON.stringify(macro));
 }

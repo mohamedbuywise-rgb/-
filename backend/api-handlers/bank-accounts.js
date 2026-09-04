@@ -39,7 +39,7 @@ export default async function handler(req, res) {
       banks: EGYPT_BANK_WALLET_SENDERS.map((b) => ({ key: b.key, label: b.label })),
       webhookUrl: `${baseUrl}/api/sms-webhook`,
       // ============ MacroDroid — تنزيل ماكرو مخصص لكل مستخدم ============
-      macroDownloadUrl: `${baseUrl}/api?route=macrodroid-macro`,
+      macroDownloadUrl: `${baseUrl}/api/macrodroid-macro`,
       playStoreUrl: 'https://play.google.com/store/apps/details?id=com.arlosoft.macrodroid',
       // deepLink: التوكن مدموج فيه عشان التطبيق يملأه أوتوماتيك أول ما يتفتح من الرابط ده
       deepLink: `dabbar://setup?token=${data.sms_webhook_token}`,

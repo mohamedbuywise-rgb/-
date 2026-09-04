@@ -4215,12 +4215,37 @@
                 // deepLink فيه توكن المستخدم مدموج، فبيفتح التطبيق (لو مثبّت) ويملأ الحقل أوتوماتيك
                 if (bankState.deepLink) setupLink.href = bankState.deepLink;
             }
+            setupLink?.addEventListener('click', async (event) => {
+                event.preventDefault();
+                macroErrorEl?.classList.add('hidden');
+                try {
+                    // قد يضغط المستخدم الزر قبل انتهاء تحميل بيانات الحساب.
+                    if (!bankState.deepLink) await loadBankAccounts();
+                    if (!bankState.deepLink) {
+                        if (macroErrorEl) {
+                            macroErrorEl.textContent = '⚠️ لم نتمكن من تجهيز رابط التطبيق. تأكد من تسجيل الدخول ثم جرّب مرة أخرى.';
+                            macroErrorEl.classList.remove('hidden');
+                        }
+                        return;
+                    }
+                    // deep link مسجل في AndroidManifest باسم dabbar://setup.
+                    // تغيير location هو الأكثر توافقاً مع Chrome على Android لفتح التطبيق.
+                    window.location.href = bankState.deepLink;
+                } catch (e) {
+                    console.error('BANK_ACCOUNTS_SETUP_EXCEPTION', e);
+                    if (macroErrorEl) {
+                        macroErrorEl.textContent = '⚠️ تعذر فتح التطبيق. ثبّت MacroDroid/تطبيق دبّر أولاً ثم جرّب مرة أخرى.';
+                        macroErrorEl.classList.remove('hidden');
+                    }
+                }
+            });
+
             downloadLink?.addEventListener('click', async (event) => {
                 event.preventDefault();
                 macroErrorEl?.classList.add('hidden');
                 const originalLabel = '⬇️ حمّل ملف التوكن الخاص';
                 // ============ لو الرابط لسه مجهزش من loadBankAccounts (فشل الاتصال، أو الصفحة اتفتحت بسرعة قبل ما يخلص) بنبني رابط احتياطي مباشر بدل ما نوقف الزرار بصمت ============
-                const targetUrl = bankState.macroDownloadUrl || `${window.location.origin}/api?route=macrodroid-macro`;
+                const targetUrl = bankState.macroDownloadUrl || `${window.location.origin}/api/macrodroid-macro`;
                 try {
                     const { data: { session }, error: sessionError } = await sb.auth.getSession();
                     if (sessionError) console.error('BANK_ACCOUNTS_SESSION_ERROR', sessionError);

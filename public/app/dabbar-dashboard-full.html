@@ -6722,10 +6722,14 @@
             quickEntryAnalyser = null;
             if (quickEntryVisibilityHandler) { document.removeEventListener('visibilitychange', quickEntryVisibilityHandler); quickEntryVisibilityHandler = null; }
         }
-        function startQuickEntrySoundMonitor(stream) {
+        async function startQuickEntrySoundMonitor(stream) {
             quickEntryHadSound = false;
             try {
                 quickEntryAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                // ============ لما الـ AudioContext بيتعمل بعد await (زي await getUserMedia) بعض متصفحات الموبايل بتسيبه "suspended" ============
+                // من غير ما يدّي أي خطأ ظاهر — يعني المراقبة كانت بترجع صفر تذبذب طول الوقت حتى مع كلام حقيقي وواضح، وده اللي كان بيطلع رسالة "مسجلناش صوت واضح" غلط. لازم resume صريح.
+                if (quickEntryAudioCtx.state !== 'running') { try { await quickEntryAudioCtx.resume(); } catch (e) {} }
+                if (quickEntryAudioCtx.state !== 'running') { quickEntryHadSound = true; return; } // معرفناش نشغّل المراقبة فعليًا — منمنعش التسجيل بسببها، نعتمد على فحص الحجم بس
                 const source = quickEntryAudioCtx.createMediaStreamSource(stream);
                 quickEntryAnalyser = quickEntryAudioCtx.createAnalyser();
                 quickEntryAnalyser.fftSize = 512;
@@ -6736,7 +6740,7 @@
                     quickEntryAnalyser.getByteTimeDomainData(data);
                     let maxDeviation = 0;
                     for (let i = 0; i < data.length; i++) maxDeviation = Math.max(maxDeviation, Math.abs(data[i] - 128));
-                    if (maxDeviation > 6) quickEntryHadSound = true; // عتبة بسيطة بتتجاوز ضوضاء الخلفية الرقمية الشبه صفرية
+                    if (maxDeviation > 3) quickEntryHadSound = true; // عتبة منخفضة عشان محدش صوته الطبيعي ينضرب غلط
                     quickEntrySoundCheckId = requestAnimationFrame(check);
                 };
                 check();

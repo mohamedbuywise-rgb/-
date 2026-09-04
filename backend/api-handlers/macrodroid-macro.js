@@ -1,5 +1,6 @@
+import { createClient } from '@supabase/supabase-js';
 import { getDashboardUserFromRequest } from '../../lib/dashboardAuth.js';
-import { supabase } from '../../lib/supabaseClient.js';
+import { SUPABASE_ANON_KEY, SUPABASE_URL } from '../../lib/config.js';
 
 const uid = () => -Math.floor(Math.random() * 9000000000000000) - 1;
 
@@ -13,10 +14,17 @@ export default async function handler(req, res) {
   // استخدام user.id هنا كان يمرر undefined إلى استعلام profiles، لذلك كان
   // التنزيل ينتهي برسالة أن التوكن غير جاهز حتى للمستخدم الذي لديه profile.
   const profileId = user.authUserId;
+  const accessToken = (req.headers.authorization || '').replace(/^Bearer\s+/i, '').trim();
+  // نستخدم access token في عميل خاص بالطلب حتى ترى RLS المستخدم الحقيقي
+  // عند إنشاء/قراءة profile، بدلاً من تنفيذ upsert بسياق anon فارغ.
+  const userDb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: { autoRefreshToken: false, persistSession: false },
+    global: { headers: { Authorization: `Bearer ${accessToken}` } },
+  });
 
   // نفس ضمان bank-accounts: لو كان هذا أول طلب للمستخدم، ينشئ Supabase
   // صف profile ويولّد sms_webhook_token من default في قاعدة البيانات.
-  const { error: profileUpsertError } = await supabase
+  const { error: profileUpsertError } = await userDb
     .from('profiles')
     .upsert({ id: profileId }, { onConflict: 'id', ignoreDuplicates: true });
   if (profileUpsertError) {
@@ -24,7 +32,7 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'تعذر تجهيز إعدادات الأتمتة على الخادم. جرّب مرة أخرى.' });
   }
 
-  const { data: profile, error: profileError } = await supabase
+  const { data: profile, error: profileError } = await userDb
     .from('profiles')
     .select('sms_webhook_token')
     .eq('id', profileId)

@@ -13,9 +13,7 @@ export default async function handler(req, res) {
   // استخدام user.id هنا كان يمرر undefined إلى استعلام profiles، لذلك كان
   // التنزيل ينتهي برسالة أن التوكن غير جاهز حتى للمستخدم الذي لديه profile.
   const profileId = user.authUserId;
-  // هذا endpoint يعمل على الخادم، وعميل Supabase هنا يستخدم service-role key
-  // من إعدادات الخادم، لذلك لا يتعطل بسبب RLS أثناء إنشاء profile لأول مرة.
-  // لا نستخدم access token الخاص بالمتصفح في عمليات قاعدة البيانات الخادمية.
+
   // نفس ضمان bank-accounts: لو كان هذا أول طلب للمستخدم، ينشئ Supabase
   // صف profile ويولّد sms_webhook_token من default في قاعدة البيانات.
   const { error: profileUpsertError } = await supabase
@@ -43,16 +41,16 @@ export default async function handler(req, res) {
     });
   }
 
-  const baseUrl = (process.env.PUBLIC_BASE_URL || 'https://www.dabbar.online').replace(/\/$/, '');
   const payload = JSON.stringify({
     token: String(profile.sms_webhook_token),
-    sender: '[sms_sender]',
-    text: '[sms_message]',
+    sender: '{sms_number}',
+    text: '{sms_message}',
   });
   const macro = {
     globalVariables: [],
-    macroExportVersion: 1,
     macro: {
+      aiGenerated: 0,
+      breakpoints: [],
       disabledTimestamp: 0,
       exportedActionBlocks: [],
       forceEvenIfNotEnabledTimestamp: 0,
@@ -62,14 +60,16 @@ export default async function handler(req, res) {
       lastEditedTimestamp: Date.now(),
       localVariables: [],
       localVarsAlphabetical: true,
+      loggingLevel: 0,
       m_GUID: uid(),
       m_actionList: [{
         requestConfig: {
+          allFilesAccessPath: '',
           allowAnyCertificate: false,
           basicAuthEnabled: false,
           basicAuthPassword: '',
           basicAuthUsername: '',
-          blockNextAction: true,
+          blockNextAction: false,
           clientCertEnabled: false,
           clientCertKeyStoreDisplayName: '',
           clientCertKeyStoreUri: '',
@@ -83,20 +83,27 @@ export default async function handler(req, res) {
           contentBodyText: payload,
           contentType: 'application/json',
           followRedirects: true,
-          headerParams: [{ paramName: 'Content-Type', paramValue: 'application/json' }],
+          headerParams: [],
           localFileUri: '',
-          prettifyJson: true,
+          maxTotalDurationSeconds: 3600,
+          prettifyJson: false,
+          proxyEnabled: false,
+          proxyHost: '',
+          proxyPort: 8080,
+          proxyType: 0,
           queryParams: [],
           requestTimeOutSeconds: 30,
-          responseVariableName: 'responseBody',
-          returnCodeVariableName: 'responseCode',
+          requestType: 1,
+          saveResponseAllFilesAccessPath: '',
           saveResponseFileName: '',
           saveResponseFolderPathDisplayName: '',
           saveResponseFolderPathUri: '',
           saveResponseType: 0,
-          saveReturnCodeToVariable: true,
+          saveResponseUseAllFilesAccess: false,
+          saveReturnCodeToVariable: false,
           saveReturnHeadersToVariable: false,
-          urlToOpen: `${baseUrl}/api/sms-webhook`,
+          urlToOpen: 'https://www.dabbar.online/api/sms-webhook',
+          useAllFilesAccess: false,
           useLocalFileUri: false,
           useStaticContentBodyFile: true,
         },
@@ -107,17 +114,18 @@ export default async function handler(req, res) {
         m_isDisabled: false,
         m_isOrCondition: false,
       }],
-      m_category: 'دبّر',
+      m_category: 'Uncategorized',
+      m_completed: true,
       m_constraintList: [],
-      m_description: 'يرسل رسائل البنوك والمحافظ إلى دبّر. فعّل الماكرو وامنح MacroDroid إذن الإشعارات.',
-      m_descriptionOpen: false,
-      m_enabled: false,
+      m_description: '',
+      m_descriptionOpen: true,
+      m_enabled: true,
       m_excludeLog: false,
-      m_headingColor: -16711936,
+      m_headingColor: 0,
       m_isOrCondition: false,
-      m_name: 'دبّر — أتمتة رسائل البنوك',
+      m_name: 'دبّر - استيراد SMS تلقائي',
       m_triggerList: [{
-        enableRegex: true,
+        enableRegex: false,
         enableRegexPhoneNumber: false,
         ignoreCase: true,
         isExcludeContact: false,
@@ -126,22 +134,22 @@ export default async function handler(req, res) {
         m_groupIdList: [],
         m_groupNameList: [],
         m_option: 3,
-        m_smsContent: 'EGP|جنيه|ج\\.م|USD|دولار|EUR|يورو|SAR|ريال|AED|درهم',
+        m_smsContent: '',
         m_smsFromList: [],
         m_smsNumberExclude: false,
         subscriptionId: -1,
         disableLogging: false,
         m_SIGUID: uid(),
         m_classType: 'IncomingSMSTrigger',
-        m_comment: 'رسائل البنوك والمحافظ فقط',
         m_constraintList: [],
         m_isDisabled: false,
         m_isOrCondition: false,
       }],
     },
+    macroExportVersion: 1,
   };
 
   res.setHeader('Content-Type', 'application/json; charset=utf-8');
-  res.setHeader('Content-Disposition', 'attachment; filename="daber-bank-automation.macro"');
+  res.setHeader('Content-Disposition', 'attachment; filename="dabbar-sms-import.macro"');
   return res.status(200).send(JSON.stringify(macro));
 }

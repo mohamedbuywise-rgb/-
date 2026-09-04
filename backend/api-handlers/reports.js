@@ -1,5 +1,5 @@
 import { supabase } from '../../lib/supabaseClient.js';
-import { getPersonDebtDetail, getFullDebtReportData, getDebtHistoryData, deleteDebtById } from '../../lib/debts.js';
+import { getPersonDebtDetail, getFullDebtReportData, getDebtHistoryData, deleteDebtById, deletePersonDebtHistory } from '../../lib/debts.js';
 import { buildFullDebtReportHtml } from '../../lib/debtReportTemplate.js';
 import { getMonthRange, getExpensesBetween, buildCategoryBreakdown } from '../../lib/expenses.js';
 import { buildReportHtml } from '../../lib/reportTemplate.js';
@@ -65,6 +65,15 @@ async function handleDeleteDebt(req, res, telegramUserId) {
   if (!debtId) return res.status(400).json({ error: 'معرّف المعاملة مطلوب.' });
   const deleted = await deleteDebtById(debtId, telegramUserId);
   if (!deleted) return res.status(404).json({ error: 'المعاملة غير موجودة أو لا تخص حسابك.' });
+  return res.status(200).json({ ok: true });
+}
+
+// ---- type=delete-person-statement: حذف كشف حساب شخص متصفّي بالكامل ----
+async function handleDeletePersonStatement(req, res, telegramUserId) {
+  const personName = String(req.body?.personName || '').trim();
+  if (!personName) return res.status(400).json({ error: 'اسم الشخص مطلوب.' });
+  const result = await deletePersonDebtHistory(telegramUserId, personName);
+  if (!result.ok) return res.status(422).json({ error: result.error });
   return res.status(200).json({ ok: true });
 }
 
@@ -204,6 +213,11 @@ export default async function handler(req, res) {
     const auth = await requireLink(req, res);
     if (!auth) return;
     return await handleDeleteDebt(req, res, auth.dataUserId);
+  }
+  if (req.method === 'POST' && type === 'delete-person-statement') {
+    const auth = await requireLink(req, res);
+    if (!auth) return;
+    return await handleDeletePersonStatement(req, res, auth.dataUserId);
   }
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });

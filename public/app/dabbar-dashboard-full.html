@@ -3483,6 +3483,31 @@
         </div>
     </div>
 
+    <!-- Expense Edit Overlay -->
+    <div id="expense-edit-overlay" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+        <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col">
+            <div class="bg-slate-900/90 border-b border-slate-800/80 p-5 flex items-center justify-between">
+                <h2 class="font-bold text-base text-slate-100">تعديل العملية</h2>
+                <button id="expense-edit-close" type="button" class="w-9 h-9 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-sm">✕</button>
+            </div>
+            <div class="p-5 space-y-3">
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-400 mb-1.5">المبلغ</label>
+                    <input id="expense-edit-amount" type="number" inputmode="decimal" step="0.01" class="w-full rounded-xl bg-slate-800 border border-slate-700 text-slate-100 text-sm font-bold px-3.5 py-2.5 focus:outline-none focus:border-emerald-500" placeholder="0">
+                </div>
+                <div>
+                    <label class="block text-[11px] font-bold text-slate-400 mb-1.5">الوصف</label>
+                    <input id="expense-edit-description" type="text" class="w-full rounded-xl bg-slate-800 border border-slate-700 text-slate-100 text-sm px-3.5 py-2.5 focus:outline-none focus:border-emerald-500" placeholder="وصف العملية">
+                </div>
+                <p id="expense-edit-error" class="hidden text-[11px] font-bold text-rose-400"></p>
+                <div class="flex items-center gap-2.5 pt-1">
+                    <button id="expense-edit-save" type="button" class="flex-1 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 text-sm font-black py-2.5 transition">حفظ التعديل</button>
+                    <button id="expense-edit-cancel" type="button" class="flex-1 rounded-xl bg-slate-800 border border-slate-700 text-slate-300 text-sm font-bold py-2.5">إلغاء</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Avatar Crop Overlay -->
     <div id="avatar-crop-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
         <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-[2rem] shadow-2xl overflow-hidden flex flex-col">
@@ -5221,12 +5246,70 @@
             list?.querySelectorAll('[data-expense-edit]').forEach((btn) => btn.addEventListener('click', () => editExpense(btn.dataset.expenseEdit, btn.dataset.expenseAmount, btn.dataset.expenseDescription)));
             list?.querySelectorAll('[data-expense-delete]').forEach((btn) => btn.addEventListener('click', () => deleteExpense(btn.dataset.expenseDelete)));
         }
-        async function editExpense(id, oldAmount, oldDescription) {
-            const amount = Number(prompt('المبلغ الجديد؟', oldAmount));
-            if (!amount || amount <= 0) return;
-            const description = prompt('الوصف الجديد؟', oldDescription || '') ?? oldDescription;
-            try { const res = await fetch(`/api/financial-actions?id=${encodeURIComponent(id)}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({ amount, description }) }); if (!res.ok) throw new Error(); await loadDashboard(); quickStatus('اتعدلت العملية.', 'success'); } catch { quickStatus('معرفناش نعدّل العملية دلوقتي.', 'error'); }
+        // ============ بدل ما نستخدم اتنين prompt() منفصلين (مبلغ لوحده، وصف لوحده) بشكل مبعثر — بنفتح فورم واحد مرتب فيه الحقلين مع بعض ============
+        let __expenseEditId = null;
+        function openExpenseEditModal(id, oldAmount, oldDescription) {
+            __expenseEditId = id;
+            const overlay = document.getElementById('expense-edit-overlay');
+            const amountInput = document.getElementById('expense-edit-amount');
+            const descInput = document.getElementById('expense-edit-description');
+            const errEl = document.getElementById('expense-edit-error');
+            if (!overlay || !amountInput || !descInput) return;
+            amountInput.value = oldAmount ?? '';
+            descInput.value = oldDescription || '';
+            errEl.classList.add('hidden');
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+            amountInput.focus();
         }
+        function closeExpenseEditModal() {
+            __expenseEditId = null;
+            const overlay = document.getElementById('expense-edit-overlay');
+            overlay?.classList.add('hidden');
+            overlay?.classList.remove('flex');
+        }
+        async function editExpense(id, oldAmount, oldDescription) {
+            openExpenseEditModal(id, oldAmount, oldDescription);
+        }
+        (function bindExpenseEditModal() {
+            const overlay = document.getElementById('expense-edit-overlay');
+            const saveBtn = document.getElementById('expense-edit-save');
+            const cancelBtn = document.getElementById('expense-edit-cancel');
+            const closeBtn = document.getElementById('expense-edit-close');
+            const amountInput = document.getElementById('expense-edit-amount');
+            const descInput = document.getElementById('expense-edit-description');
+            const errEl = document.getElementById('expense-edit-error');
+            if (!overlay || !saveBtn) return;
+            overlay.addEventListener('click', (e) => { if (e.target === overlay) closeExpenseEditModal(); });
+            cancelBtn?.addEventListener('click', closeExpenseEditModal);
+            closeBtn?.addEventListener('click', closeExpenseEditModal);
+            saveBtn.addEventListener('click', async () => {
+                const amount = Number(amountInput.value);
+                const description = descInput.value.trim();
+                if (!amount || amount <= 0) {
+                    errEl.textContent = 'اكتب مبلغ صحيح أكبر من صفر.';
+                    errEl.classList.remove('hidden');
+                    return;
+                }
+                errEl.classList.add('hidden');
+                saveBtn.disabled = true;
+                const original = saveBtn.textContent;
+                saveBtn.textContent = 'جاري الحفظ...';
+                try {
+                    const res = await fetch(`/api/financial-actions?id=${encodeURIComponent(__expenseEditId)}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({ amount, description }) });
+                    if (!res.ok) throw new Error();
+                    closeExpenseEditModal();
+                    await loadDashboard();
+                    quickStatus('اتعدلت العملية.', 'success');
+                } catch {
+                    errEl.textContent = 'معرفناش نعدّل العملية دلوقتي.';
+                    errEl.classList.remove('hidden');
+                } finally {
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = original;
+                }
+            });
+        })();
         async function loadPlanningSettings() {
 
             let settings = null;
@@ -6014,8 +6097,26 @@
             const root = document.getElementById('debts-statement-list'); if (!root) return;
             const q = String(document.getElementById('debts-statement-search')?.value || '').trim().toLocaleLowerCase('ar');
             const people = (__debtHistory.people || []).filter((p) => !q || p.name.toLocaleLowerCase('ar').includes(q));
-            root.innerHTML = people.length ? people.map((p) => `<button type="button" class="w-full bg-slate-950/60 border border-slate-800 rounded-2xl p-3 flex items-center justify-between text-right" data-history-person="${debtEscape(p.name)}"><span class="text-xs font-semibold text-slate-200">${debtEscape(p.name)}</span><span class="debt-history-badge ${p.active ? 'active' : 'settled'} rounded-full px-2 py-1 text-[10px] font-bold">${p.active ? 'نشط' : 'متصفى'}</span></button>`).join('') : '<div class="text-xs text-slate-500 text-center p-5">مفيش أشخاص في كشف الحساب</div>';
+            const rowHtml = (p) => `<button type="button" class="w-full bg-slate-950/60 border border-slate-800 rounded-2xl p-3 flex items-center justify-between text-right" data-history-person="${debtEscape(p.name)}"><span class="text-xs font-semibold text-slate-200">${debtEscape(p.name)}</span><span class="flex items-center gap-2"><span class="debt-history-badge ${p.active ? 'active' : 'settled'} rounded-full px-2 py-1 text-[10px] font-bold">${p.active ? 'نشط' : 'متصفى'}</span>${p.active ? '' : `<span role="button" tabindex="0" class="statement-delete-btn w-6 h-6 rounded-full flex items-center justify-center text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 text-sm" data-delete-statement-person="${debtEscape(p.name)}" aria-label="حذف كشف الحساب">🗑</span>`}</span></button>`;
+            // ============ فصل النشط عن المتصفّي في مجموعتين منفصلتين بدل ما يكونوا مخلوطين مع بعض ============
+            const activePeople = people.filter((p) => p.active);
+            const settledPeople = people.filter((p) => !p.active);
+            const sectionHtml = (title, list) => list.length ? `<div class="px-1 pt-2 pb-1 text-[10px] font-black text-slate-500">${title}</div>${list.map(rowHtml).join('')}` : '';
+            root.innerHTML = people.length
+                ? sectionHtml('نشط', activePeople) + sectionHtml('متصفى', settledPeople)
+                : '<div class="text-xs text-slate-500 text-center p-5">مفيش أشخاص في كشف الحساب</div>';
             root.querySelectorAll('[data-history-person]').forEach((row) => row.addEventListener('click', () => openPersonDebtDetail(row.dataset.historyPerson, true)));
+            root.querySelectorAll('[data-delete-statement-person]').forEach((btn) => btn.addEventListener('click', async (event) => {
+                event.stopPropagation();
+                const personName = btn.dataset.deleteStatementPerson;
+                if (!confirm(`متأكد عايز تحذف كشف الحساب بتاع "${personName}" نهائيًا؟ الخطوة دي مش هترجع.`)) return;
+                try {
+                    const res = await fetch('/api/reports?type=delete-person-statement', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({ personName }) });
+                    const body = await res.json().catch(() => ({}));
+                    if (!res.ok) throw new Error(body.error || 'معرفناش نحذف كشف الحساب دلوقتي.');
+                    await loadDebtHistory();
+                } catch (err) { alert(err.message); }
+            }));
         }
         async function openPersonDebtDetail(personName, eternal = false) {
             const overlay = document.getElementById('person-debt-overlay'), nameEl = document.getElementById('person-debt-name'), netLineEl = document.getElementById('person-debt-net-line'), listEl = document.getElementById('person-debt-list');
@@ -6116,6 +6217,8 @@
 
         window.__portfolioState = { assets: [], total: 0 };
         window.__portfolioDigest = null;
+        // ============ التحديث التلقائي بيعمل renderPortfolio() تاني كل 20 ثانية، وده بيمسح الكارت ويبنيه من جديد فيقفل أي أصل مفتوح لوحده — بنحفظ آي دي الأصل المفتوح هنا عشان نرجّعه مفتوح تلقائيًا بعد كل تحديث، والقفل يفضل بإيد المستخدم بس ============
+        let __expandedPortfolioAssetId = null;
 
         // ============ Badge حركة المحفظة آخر 3 أيام (فوق، جنب الإجمالي) ============
         function renderPortfolioDigestBadge(digest) {
@@ -6153,8 +6256,9 @@
                 if (w !== wrapEl) { w.classList.remove('open'); const d = w.querySelector('.portfolio-asset-detail'); if (d) { d.hidden = true; d.innerHTML = ''; } }
             });
             const detailEl = wrapEl.querySelector('.portfolio-asset-detail');
-            if (isOpen) { wrapEl.classList.remove('open'); detailEl.hidden = true; detailEl.innerHTML = ''; return; }
+            if (isOpen) { wrapEl.classList.remove('open'); detailEl.hidden = true; detailEl.innerHTML = ''; __expandedPortfolioAssetId = null; return; }
 
+            __expandedPortfolioAssetId = asset.id;
             wrapEl.classList.add('open');
             detailEl.hidden = false;
             detailEl.innerHTML = `<div class="portfolio-detail-loading">بنجيب سعر السوق دلوقتي...</div>`;
@@ -6243,6 +6347,8 @@
                 const deleteBtn = node.querySelector('.portfolio-asset-menu-action.delete');
 
                 node.addEventListener('click', () => openPortfolioAssetDetail(asset, wrap));
+                // ============ لو الأصل ده كان مفتوح قبل التحديث التلقائي، نرجّعه مفتوح تاني بنفس الكارت الجديد بدل ما يتقفل من غير ما المستخدم يعمل حاجة ============
+                if (asset.id === __expandedPortfolioAssetId) openPortfolioAssetDetail(asset, wrap);
 
                 menuBtn.addEventListener('click', (event) => {
                     event.preventDefault();
@@ -6607,6 +6713,35 @@
             return false;
         }
         let quickEntryDrafts = [], quickEntrySourceText = '', quickEntryRecorder = null, quickEntryChunks = [], quickEntryTimer = null, quickEntrySeconds = 0, quickEntryVoiceBlob = null, quickEntryVoiceCancelled = false;
+        // ============ حماية إضافية ضد تسجيل الصمت: بنراقب مستوى الصوت الفعلي لحظة بلحظة (مش بس حجم الملف بعد ما يخلص) وبنوقف التسجيل فورًا لو المايك اتقطع أو المستخدم غادر التاب ============
+        let quickEntryAudioCtx = null, quickEntryAnalyser = null, quickEntrySoundCheckId = null, quickEntryHadSound = false, quickEntryVisibilityHandler = null;
+        function stopQuickEntrySoundMonitor() {
+            if (quickEntrySoundCheckId) cancelAnimationFrame(quickEntrySoundCheckId);
+            quickEntrySoundCheckId = null;
+            if (quickEntryAudioCtx) { quickEntryAudioCtx.close().catch(() => {}); quickEntryAudioCtx = null; }
+            quickEntryAnalyser = null;
+            if (quickEntryVisibilityHandler) { document.removeEventListener('visibilitychange', quickEntryVisibilityHandler); quickEntryVisibilityHandler = null; }
+        }
+        function startQuickEntrySoundMonitor(stream) {
+            quickEntryHadSound = false;
+            try {
+                quickEntryAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const source = quickEntryAudioCtx.createMediaStreamSource(stream);
+                quickEntryAnalyser = quickEntryAudioCtx.createAnalyser();
+                quickEntryAnalyser.fftSize = 512;
+                source.connect(quickEntryAnalyser);
+                const data = new Uint8Array(quickEntryAnalyser.frequencyBinCount);
+                const check = () => {
+                    if (!quickEntryAnalyser) return;
+                    quickEntryAnalyser.getByteTimeDomainData(data);
+                    let maxDeviation = 0;
+                    for (let i = 0; i < data.length; i++) maxDeviation = Math.max(maxDeviation, Math.abs(data[i] - 128));
+                    if (maxDeviation > 6) quickEntryHadSound = true; // عتبة بسيطة بتتجاوز ضوضاء الخلفية الرقمية الشبه صفرية
+                    quickEntrySoundCheckId = requestAnimationFrame(check);
+                };
+                check();
+            } catch (e) { console.warn('QUICK_ENTRY_SOUND_MONITOR_FAILED', e); quickEntryHadSound = true; /* لو فشلت المراقبة، منمنعش التسجيل بسببها */ }
+        }
         // ============ دبّر بيصنّف دخل/مصروف من كلام العميل نفسه (classifyMessage)، من غير ما يختار نوع مقدمًا ============
         function setQuickEntryType() {
             const recLabel = document.getElementById('quick-entry-recording-type-label');
@@ -6831,11 +6966,27 @@
                 quickEntryChunks = [];
                 quickEntrySeconds = 0;
                 quickEntryVoiceCancelled = false;
+                startQuickEntrySoundMonitor(stream);
                 const mimeType = pickVoiceMimeType();
                 quickEntryRecorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+                // ============ لو المايك اتقطع فعليًا وقت التسجيل (تعارض مع تطبيق تاني، مشكلة بلوتوث) المتصفح بيطلق mute/ended على الـ track من غير أي خطأ ظاهر — بنوقف التسجيل فورًا ونوضح للمستخدم بدل ما نسيبه يكمل يسجل صمت ============
+                const audioTrack = stream.getAudioTracks()[0];
+                if (audioTrack) {
+                    audioTrack.onmute = () => { if (quickEntryRecorder?.state === 'recording') { quickEntryVoiceCancelled = false; quickStatus('المايك اتقطع فجأة وقت التسجيل — جرّب تاني.', 'error'); quickEntryRecorder.stop(); } };
+                    audioTrack.onended = audioTrack.onmute;
+                }
+                // ============ لو المستخدم سرّح التاب (بدّل تطبيق، قفل الشاشة) وقت التسجيل، المتصفح بيكمل يسجل صمت من غير ما يعرّفنا — بنوقف التسجيل بنفسنا لحظة ما يرجع يفتح التاب ============
+                quickEntryVisibilityHandler = () => {
+                    if (document.visibilityState === 'hidden' && quickEntryRecorder?.state === 'recording') {
+                        quickEntryVoiceCancelled = false;
+                        quickEntryRecorder.stop();
+                    }
+                };
+                document.addEventListener('visibilitychange', quickEntryVisibilityHandler);
                 quickEntryRecorder.ondataavailable = (e) => { if (e.data && e.data.size) quickEntryChunks.push(e.data); };
                 quickEntryRecorder.onstop = () => {
                     stream.getTracks().forEach((t) => t.stop());
+                    stopQuickEntrySoundMonitor();
                     clearInterval(quickEntryTimer);
                     quickShow('quick-entry-recording', false);
                     const wasCancelled = quickEntryVoiceCancelled;
@@ -6853,8 +7004,16 @@
                         return;
                     }
                     const blob = new Blob(quickEntryChunks, { type: quickEntryRecorder.mimeType || mimeType || 'audio/webm' });
-                    console.warn('DABBAR_VOICE_DEBUG', { size: blob.size, chunks: quickEntryChunks.length, mime: blob.type, seconds: quickEntrySeconds });
+                    console.warn('DABBAR_VOICE_DEBUG', { size: blob.size, chunks: quickEntryChunks.length, mime: blob.type, seconds: quickEntrySeconds, hadSound: quickEntryHadSound });
                     if (!blob.size) { quickStatus('مسجلناش أي صوت خالص — جرّب تسمح للمتصفح بالميكروفون من إعدادات الموقع وحاول تاني.', 'error'); return; }
+                    // ============ المراقبة اللحظية (quickEntryHadSound) هي الفحص الأدق — بتمسك الصمت حتى لو الملف طلع بحجم طبيعي. حجم الملف فحص احتياطي تاني لو المراقبة فشلت لأي سبب ============
+                    const minExpectedBytes = Math.min(quickEntrySeconds * 1500, 3000);
+                    if (!quickEntryHadSound || blob.size < minExpectedBytes) {
+                        quickEntryVoiceBlob = null;
+                        quickShow('quick-entry-voice-preview', false);
+                        quickStatus('مسجلناش صوت واضح — تأكد إن المايك شغال وسجّل تاني.', 'error');
+                        return;
+                    }
                     // ============ بدل ما نحكم على الصوت من حجمه، بنسمّعه للمستخدم مباشرة عشان يتأكد بنفسه إنه اتسجل صح قبل ما نبعته لـ Groq ============
                     quickEntryVoiceBlob = blob;
                     const audioEl = document.getElementById('quick-entry-voice-audio');

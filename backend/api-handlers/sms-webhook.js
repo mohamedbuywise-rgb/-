@@ -18,6 +18,7 @@ import { recordDebt } from '../../lib/debts.js';
 import { recordFinancialEvent } from '../../lib/financialEvents.js';
 import { matchBankSender } from '../../lib/bank-senders.js';
 import { checkTextUsage } from '../../lib/rateLimits.js';
+import { standaloneDataUserId, ensureStandaloneUser } from '../../lib/dashboardAuth.js';
 
 const DAILY_SMS_LIMIT = 80; // حد أقصى يومي للحماية من استهلاك API غير متوقع لكل مستخدم
 
@@ -31,13 +32,19 @@ async function getProfileByToken(token) {
   return data;
 }
 
-async function getTelegramLink(authUserId) {
+// ============ نفس منطق dashboardAuth.js بالظبط: لو الحساب مرتبط بتليجرام نستخدم الـ id بتاعه، ============
+// وإلا (حساب إيميل/باسورد مستقل) بنشتق نفس الرقم السالب الثابت اللي الداشبورد بيستخدمه أصلًا.
+// كده أي حساب (مرتبط أو مستقل) بيقدر يستخدم أتمتة رسايل البنوك من غير أي شرط ربط إضافي.
+async function resolveDataUserId(authUserId) {
   const { data } = await supabase
     .from('user_links')
     .select('telegram_user_id')
     .eq('auth_user_id', authUserId)
     .maybeSingle();
-  return data?.telegram_user_id || null;
+  if (data?.telegram_user_id) return { userId: data.telegram_user_id, linked: true };
+  const standaloneId = standaloneDataUserId(authUserId);
+  await ensureStandaloneUser(standaloneId);
+  return { userId: standaloneId, linked: false };
 }
 
 async function bumpDailyCounter(profile) {
@@ -81,11 +88,11 @@ export default async function handler(req, res) {
     return res.status(429).json({ ok: false, error: 'وصلت للحد الأقصى اليومي لرسائل SMS.' });
   }
 
-  const telegramUserId = await getTelegramLink(profile.id);
-  if (!telegramUserId) {
-    return res.status(409).json({ ok: false, error: 'الحساب ده لسه مش مربوط بحساب تليجرام دبّر.' });
-  }
-  const chatId = telegramUserId; // في محادثات البوت الخاصة، chat.id == from.id في تليجرام
+  const { userId: telegramUserId, linked } = await resolveDataUserId(profile.id);
+  // chatId بيستخدم بس عشان نبعت رسالة تأكيد على تليجرام لو الحساب مرتبط فعلًا. للحسابات
+  // المستقلة (إيميل/باسورد) الـ id سالب صناعي، وأي نداء sendTelegramMessage بيه بيفشل بهدوء
+  // (متعالج جوه lib/telegram.js) من غير ما يوقف تسجيل الحركة نفسها في الداشبورد.
+  const chatId = telegramUserId;
 
   // SMS البنكية تستخدم نفس عداد التصنيف النصي الشهري، مع Telegram والداشبورد.
   const textUsage = await checkTextUsage(telegramUserId);
@@ -118,7 +125,7 @@ export default async function handler(req, res) {
       }
       // settlement/unknown بنتجاهلها هنا عشان منسجلش حاجة غلط أوتوماتيك بدون مراجعة المستخدم
     }
-    return res.status(200).json({ ok: true, recorded, bank: bankMatch.label });
+    return res.status(200).json({ ok: true, recorded, bank: bankMatch.label, linked });
   } catch (err) {
     console.error('sms-webhook classify/record error:', err);
     return res.status(500).json({ ok: false, error: 'تعذر معالجة الرسالة.' });

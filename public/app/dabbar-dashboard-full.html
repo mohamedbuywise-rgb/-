@@ -203,16 +203,17 @@
         .account-profile-name { color: #f8fafc; }
         .account-profile-email { color: #94a3b8; }
         html[data-theme="light"] .account-profile-card {
-            border-color: #e9dfc4 !important;
+            border: 1.5px solid #dcc98a !important;
+            box-shadow: 0 12px 30px rgba(180,140,40,0.16), 0 2px 8px rgba(15,23,42,0.06) !important;
             background:
-                radial-gradient(circle at 8% 12%, rgba(180,140,40,0.10) 0%, transparent 40%),
-                radial-gradient(circle at 92% 88%, rgba(20,80,70,0.06) 0%, transparent 42%),
-                linear-gradient(145deg, #ffffff 0%, #f6f3ea 55%, #ffffff 100%);
+                radial-gradient(circle at 8% 12%, rgba(212,175,55,0.22) 0%, transparent 42%),
+                radial-gradient(circle at 92% 88%, rgba(20,80,70,0.10) 0%, transparent 45%),
+                linear-gradient(145deg, #fdf8ea 0%, #f6ecc9 55%, #fbf5e3 100%);
         }
-        html[data-theme="light"] .account-profile-deco circle[stroke] { stroke: rgba(180,140,40,0.28) !important; }
-        html[data-theme="light"] .account-profile-deco circle[fill]:not([stroke]) { fill: rgba(180,140,40,0.08) !important; }
-        html[data-theme="light"] .account-profile-avatar-btn { border-color: #ffffff !important; }
-        html[data-theme="light"] .account-profile-cam-btn { background-color: #ffffff !important; border-color: #e9dfc4 !important; }
+        html[data-theme="light"] .account-profile-deco circle[stroke] { stroke: rgba(180,140,40,0.45) !important; }
+        html[data-theme="light"] .account-profile-deco circle[fill]:not([stroke]) { fill: rgba(180,140,40,0.14) !important; }
+        html[data-theme="light"] .account-profile-avatar-btn { border-color: #ffffff !important; box-shadow: 0 4px 14px rgba(180,140,40,0.25) !important; }
+        html[data-theme="light"] .account-profile-cam-btn { background-color: #ffffff !important; border-color: #dcc98a !important; }
         html[data-theme="light"] .account-profile-name { color: #0f172a !important; }
         html[data-theme="light"] .account-profile-email { color: #64748b !important; }
         html[data-theme="light"] body { background-color: #f8fafc; color: #0f172a; }
@@ -832,14 +833,27 @@
         html[data-theme="dark"] .portfolio-digest-badge.up { color: #6fe3b4; background: rgba(70,215,165,.14); }
         html[data-theme="dark"] .portfolio-digest-badge.down { color: #ff8f85; background: rgba(255,90,75,.16); }
         .portfolio-asset { cursor: pointer; }
-        .portfolio-asset-detail-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 200; display: flex; align-items: flex-end; justify-content: center; }
-        .portfolio-asset-detail-sheet { background: var(--surface-2, #fff); width: 100%; max-width: 480px; border-radius: 20px 20px 0 0; padding: 1.1rem 1.25rem 1.6rem; }
-        html[data-theme="dark"] .portfolio-asset-detail-sheet { background: #14181f; }
-        .portfolio-detail-close { border: none; background: rgba(120,120,120,.14); border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; font-size: 15px; cursor: pointer; }
-        .portfolio-detail-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; margin: .9rem 0; }
-        .portfolio-detail-stat { background: rgba(120,120,120,.08); border-radius: 10px; padding: .6rem .7rem; }
-        .portfolio-detail-stat span { display: block; font-size: .62rem; color: #8a8f98; margin-bottom: .2rem; }
-        .portfolio-detail-stat strong { font-size: .85rem; }
+        /* ===== تفاصيل الأصل — بتفتح جوه المحفظة نفسها (مش بوب أب) تحت الأصل اللي اتدوس عليه ===== */
+        .portfolio-asset-wrap { display: contents; }
+        .portfolio-asset-expand-chev { color: var(--portfolio-muted); font-size: .9rem; transition: transform .2s; margin-inline-start: .1rem; }
+        .portfolio-asset-wrap.open .portfolio-asset-expand-chev { transform: rotate(180deg); }
+        .portfolio-asset-wrap.open .portfolio-asset { border-color: var(--portfolio-accent); }
+        .portfolio-asset-detail { grid-column: 1 / -1; margin-top: -.15rem; padding: .85rem .9rem 1rem; border: 1px solid var(--portfolio-line); border-top: none; border-radius: 0 0 1.15rem 1.15rem; background: color-mix(in srgb, var(--portfolio-card) 92%, transparent); }
+        .portfolio-detail-loading { text-align: center; font-size: .7rem; color: var(--portfolio-muted); padding: .6rem 0; }
+        .portfolio-detail-value { font-size: 1.35rem; font-weight: 900; color: var(--portfolio-ink); }
+        .portfolio-detail-badge { display: inline-flex; align-items: center; gap: .25rem; font-size: .68rem; font-weight: 900; padding: .15rem .5rem; border-radius: 8px; margin-top: .3rem; }
+        .portfolio-detail-badge.up { color: #0a7a52; background: rgba(16,163,110,.14); }
+        .portfolio-detail-badge.down { color: #c0362c; background: rgba(220,60,45,.12); }
+        html[data-theme="dark"] .portfolio-detail-badge.up { color: #6fe3b4; background: rgba(70,215,165,.14); }
+        html[data-theme="dark"] .portfolio-detail-badge.down { color: #ff8f85; background: rgba(255,90,75,.16); }
+        .portfolio-detail-chart { margin: .7rem 0 .5rem; height: 64px; }
+        .portfolio-detail-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; margin: .6rem 0; }
+        .portfolio-detail-stat { background: rgba(120,120,120,.08); border-radius: 10px; padding: .55rem .65rem; }
+        .portfolio-detail-stat span { display: block; font-size: .6rem; color: var(--portfolio-muted); margin-bottom: .2rem; }
+        .portfolio-detail-stat strong { font-size: .8rem; color: var(--portfolio-ink); }
+        .portfolio-detail-meta-row { display: flex; justify-content: space-between; font-size: .68rem; padding: .4rem 0; border-top: 1px dashed var(--portfolio-line); color: var(--portfolio-muted); }
+        .portfolio-detail-meta-row strong { color: var(--portfolio-ink); font-weight: 800; }
+        .portfolio-detail-edit-btn { width: 100%; margin-top: .6rem; padding: .55rem; border-radius: 10px; border: 1px solid var(--portfolio-line); background: transparent; color: var(--portfolio-accent-strong); font-family: inherit; font-size: .72rem; font-weight: 900; cursor: pointer; }
         .portfolio-chev { color: var(--portfolio-muted); transition: transform .2s; font-size: 1.1rem; }
         #portfolio-collapsible[open] .portfolio-chev { transform: rotate(180deg); }
         .portfolio-body { padding: .9rem 1.1rem 1.15rem; border-top: 1px dashed var(--portfolio-line); }
@@ -876,6 +890,9 @@
         html[data-theme="dark"] .portfolio-asset-menu-action.delete { color: #ff8e8e; }
         .portfolio-add-btn { display: flex; align-items: center; justify-content: center; gap: .4rem; margin-top: .8rem; width: 100%; border: 1px dashed color-mix(in srgb, var(--portfolio-accent) 62%, transparent); background: transparent; color: var(--portfolio-accent-strong); border-radius: 1rem; padding: .72rem; font-size: .72rem; font-weight: 900; cursor: pointer; transition: background .2s, border-color .2s; }
         .portfolio-add-btn:hover { background: color-mix(in srgb, var(--portfolio-accent) 9%, transparent); border-color: var(--portfolio-accent); }
+        .portfolio-add-form-panel { display: none; }
+        .portfolio-add-form-panel:not(.hidden) { display: flex; }
+        .portfolio-add-form-panel { border: 1px solid var(--portfolio-line); border-radius: 1.15rem; padding: .9rem .95rem; background: color-mix(in srgb, var(--portfolio-card) 92%, transparent); }
         .portfolio-note { color: var(--portfolio-muted); font-size: .6rem; opacity: .9; margin-top: .6rem; text-align: center; line-height: 1.8; }
         .portfolio-form-title { color: var(--portfolio-ink); font-size: .72rem; font-weight: 900; }
         .portfolio-form-input { width: 100%; box-sizing: border-box; border: 1px solid var(--portfolio-line); border-radius: .75rem; padding: .65rem .72rem; background: var(--portfolio-card); color: var(--portfolio-ink); font: inherit; font-size: .68rem; outline: none; }
@@ -2192,6 +2209,10 @@
 </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col overflow-hidden">
 
+    <div id="dashboard-sync-note" class="hidden mx-auto mt-3 w-[min(92%,56rem)] flex items-center justify-center gap-2 text-[11px] font-bold text-slate-400">
+        <span class="inline-block h-3 w-3 rounded-full border-2 border-slate-500 border-t-transparent animate-spin"></span>
+        <span id="dashboard-sync-note-text">بنكمّل تحميل بياناتك...</span>
+    </div>
     <div id="dashboard-load-error" class="hidden mx-auto mt-4 w-[min(92%,56rem)] rounded-2xl border border-red-300/40 bg-red-50 dark:bg-red-500/10 dark:border-red-500/30 px-4 py-3 text-center text-sm font-bold text-red-700 dark:text-red-300 space-y-2" role="alert">
         <p id="dashboard-load-error-text"></p>
         <button type="button" id="dashboard-load-retry-btn" class="mx-auto inline-flex items-center gap-1.5 rounded-xl bg-red-600 dark:bg-red-500/80 px-4 py-2 text-xs font-black text-white">🔄 <span>حاول تاني</span></button>
@@ -2334,26 +2355,30 @@
                     <div id="portfolio-empty" class="hidden portfolio-note" style="text-align:center;padding:.5rem 0;">مفيش أصول مسجلة لسه. ضيف أول أصل (ذهب، صناديق استثمار، عملات رقمية... إلخ) وهنجمّعلك إجمالي محفظتك تلقائيًا.</div>
                     <div id="portfolio-asset-list" class="portfolio-asset-list"></div>
                     <template id="portfolio-asset-template">
-                        <div class="portfolio-asset">
-                            <div class="portfolio-asset-main">
-                                <span class="portfolio-asset-icon" aria-hidden="true"></span>
-                                <div class="portfolio-asset-copy"><div class="portfolio-asset-name"></div><div class="portfolio-asset-sub"></div></div>
-                            </div>
-                            <div class="portfolio-asset-val">
-                                <div class="portfolio-asset-figures">
-                                    <strong></strong>
-                                    <span class="portfolio-asset-change"></span>
+                        <div class="portfolio-asset-wrap">
+                            <div class="portfolio-asset">
+                                <div class="portfolio-asset-main">
+                                    <span class="portfolio-asset-icon" aria-hidden="true"></span>
+                                    <div class="portfolio-asset-copy"><div class="portfolio-asset-name"></div><div class="portfolio-asset-sub"></div></div>
                                 </div>
-                                <button type="button" class="portfolio-asset-menu" aria-label="إجراءات الأصل" aria-expanded="false"><iconify-icon icon="ph:dots-three-vertical-bold"></iconify-icon></button>
-                                <div class="portfolio-asset-menu-popover" role="menu">
-                                    <button type="button" class="portfolio-asset-menu-action edit" role="menuitem"><iconify-icon icon="ph:pencil-simple-duotone"></iconify-icon><span>تعديل القيمة</span></button>
-                                    <button type="button" class="portfolio-asset-menu-action delete" role="menuitem"><iconify-icon icon="ph:trash-duotone"></iconify-icon><span>حذف الأصل</span></button>
+                                <div class="portfolio-asset-val">
+                                    <div class="portfolio-asset-figures">
+                                        <strong></strong>
+                                        <span class="portfolio-asset-change"></span>
+                                    </div>
+                                    <button type="button" class="portfolio-asset-menu" aria-label="إجراءات الأصل" aria-expanded="false"><iconify-icon icon="ph:dots-three-vertical-bold"></iconify-icon></button>
+                                    <div class="portfolio-asset-menu-popover" role="menu">
+                                        <button type="button" class="portfolio-asset-menu-action edit" role="menuitem"><iconify-icon icon="ph:pencil-simple-duotone"></iconify-icon><span>تعديل القيمة</span></button>
+                                        <button type="button" class="portfolio-asset-menu-action delete" role="menuitem"><iconify-icon icon="ph:trash-duotone"></iconify-icon><span>حذف الأصل</span></button>
+                                    </div>
+                                    <span class="portfolio-asset-expand-chev" aria-hidden="true">⌄</span>
                                 </div>
                             </div>
+                            <div class="portfolio-asset-detail" hidden></div>
                         </div>
                     </template>
 
-                    <div id="portfolio-add-form" class="hidden" style="margin-top:.8rem;display:flex;flex-direction:column;gap:.5rem;">
+                    <div id="portfolio-add-form" class="hidden portfolio-add-form-panel" style="margin-top:.8rem;flex-direction:column;gap:.5rem;">
                         <span id="portfolio-form-title" class="portfolio-form-title">إضافة أصل جديد</span>
                         <input id="portfolio-add-name" type="text" placeholder="اسم الأصل (مثلاً: ذهب، صناديق بنك مصر)" class="portfolio-form-input">
                         <input id="portfolio-add-sub" type="text" placeholder="وصف اختياري (مثلاً: 120 جرام أو عيار 24)" class="portfolio-form-input">
@@ -4965,30 +4990,26 @@
         }
         async function loadDashboard(isInitialLoad = false, attempt = 1) {
             const MAX_ATTEMPTS = 3;
-            const TIMEOUT_MS = 20000; // 20 ثانية لكل محاولة بدل 30 ثابتة، عشان نقدر نعيد المحاولة أسرع
+            const TIMEOUT_MS = attempt === 1 ? 12000 : 20000; // أول محاولة أسرع عشان نحس بالمشكلة بدري ونعيد المحاولة، الباقي أطول احتياطًا لشبكة بطيئة
             clearTimeout(__dashboardRetryTimer);
+            const syncNote = document.getElementById('dashboard-sync-note');
+            const syncNoteText = document.getElementById('dashboard-sync-note-text');
             let data;
             try {
                 data = await fetchDashboardOnce(TIMEOUT_MS);
             } catch (e) {
                 console.error(`dashboard-data fetch failed (attempt ${attempt}/${MAX_ATTEMPTS}):`, e);
                 const isTimeoutOrNetwork = e.name === 'AbortError' || e.message === 'Failed to fetch';
-                // خطأ شبكة/تايم آوت عابر: نعيد المحاولة تلقائيًا بتأخير متزايد (1.5s ثم 3s) قبل ما نوري رسالة خطأ للمستخدم
+                // خطأ شبكة/تايم آوت عابر: نعيد المحاولة تلقائيًا بتأخير بسيط، مع مؤشر تحميل هادي مش تنبيه مقلق
                 if (isTimeoutOrNetwork && attempt < MAX_ATTEMPTS) {
-                    const delay = attempt * 1500;
-                    const errorEl = document.getElementById('dashboard-load-error');
-                    const errorText = document.getElementById('dashboard-load-error-text');
-                    const retryBtn = document.getElementById('dashboard-load-retry-btn');
-                    if (errorEl && errorText) {
-                        errorText.textContent = `في تأخير بسيط في تحميل بياناتك... بنحاول تاني (${attempt}/${MAX_ATTEMPTS - 1})`;
-                        errorEl.classList.remove('hidden');
-                        if (retryBtn) retryBtn.classList.add('hidden');
-                    }
+                    const delay = attempt * 900;
+                    if (syncNote && syncNoteText) { syncNoteText.textContent = 'بنكمّل تحميل بياناتك...'; syncNote.classList.remove('hidden'); }
                     __dashboardRetryTimer = setTimeout(() => loadDashboard(isInitialLoad, attempt + 1), delay);
                     return;
                 }
                 // منسيبش الخطأ ده يودّي المستخدم لصفحة onboarding خالص، بس نوريله رسالة واضحة مع زرار "حاول تاني"
-                const message = isTimeoutOrNetwork ? 'تحميل البيانات أخد وقت أطول من اللازم. جرب تاني أو اتأكد من الإنترنت.' : (e.message || 'مقدرناش نجيب بياناتك دلوقتي.');
+                if (syncNote) syncNote.classList.add('hidden');
+                const message = isTimeoutOrNetwork ? 'في تأخير في تحميل بياناتك دلوقتي. جرب تاني أو اتأكد من الإنترنت.' : (e.message || 'مقدرناش نجيب بياناتك دلوقتي.');
                 const errorEl = document.getElementById('dashboard-load-error');
                 const errorText = document.getElementById('dashboard-load-error-text');
                 const retryBtn = document.getElementById('dashboard-load-retry-btn');
@@ -5000,6 +5021,7 @@
                 return;
             }
 
+            if (syncNote) syncNote.classList.add('hidden');
             // linked=false معناها أن الحساب مستقل فقط؛ البيانات تُعرض بشكل طبيعي،
             // والربط يظل خيارًا من تاب "حسابي" ولا يوقف أي وظيفة في الداش.
             __consecutiveUnlinked = 0;
@@ -6110,53 +6132,63 @@
             badge.textContent = `${isUp ? '▲' : '▼'} ${isUp ? '+' : ''}${pct}% آخر 3 أيام`;
         }
 
-        // ============ شاشة تفاصيل أصل واحد (تفتح عند الضغط على أي أصل في المحفظة) ============
-        function openPortfolioAssetDetail(asset) {
-            const presentation = getPortfolioAssetPresentation(asset);
+        // ============ رسم شارت بسيط (SVG) لتاريخ قيمة الأصل ============
+        function buildPortfolioSparkline(points, isUp) {
+            if (!points || points.length < 2) return '';
+            const w = 280, h = 64, pad = 4;
+            const values = points.map((p) => p.amount);
+            const max = Math.max(...values), min = Math.min(...values);
+            const range = (max - min) || 1;
+            const nx = (i) => pad + (i / (points.length - 1)) * (w - pad * 2);
+            const ny = (v) => h - pad - ((v - min) / range) * (h - pad * 2);
+            const d = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${nx(i).toFixed(1)},${ny(p.amount).toFixed(1)}`).join(' ');
+            const color = isUp ? '#3ecb8f' : '#ff6a5c';
+            return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="100%" preserveAspectRatio="none"><path d="${d}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+        }
+
+        // ============ فتح/قفل تفاصيل أصل جوه المحفظة نفسها (بدون بوب أب) — بيجيب سعر السوق اللحظي وتاريخ القيمة أوتوماتيك ============
+        async function openPortfolioAssetDetail(asset, wrapEl) {
+            const isOpen = wrapEl.classList.contains('open');
+            document.querySelectorAll('.portfolio-asset-wrap.open').forEach((w) => {
+                if (w !== wrapEl) { w.classList.remove('open'); const d = w.querySelector('.portfolio-asset-detail'); if (d) { d.hidden = true; d.innerHTML = ''; } }
+            });
+            const detailEl = wrapEl.querySelector('.portfolio-asset-detail');
+            if (isOpen) { wrapEl.classList.remove('open'); detailEl.hidden = true; detailEl.innerHTML = ''; return; }
+
+            wrapEl.classList.add('open');
+            detailEl.hidden = false;
+            detailEl.innerHTML = `<div class="portfolio-detail-loading">بنجيب سعر السوق دلوقتي...</div>`;
+
             const costBasis = Number(asset.cost_basis);
             const currentAmount = Number(asset.amount);
             const hasCostBasis = Number.isFinite(costBasis) && costBasis > 0;
             const gainAmount = hasCostBasis ? Math.round((currentAmount - costBasis) * 100) / 100 : null;
             const gainPct = hasCostBasis ? Math.round(((currentAmount - costBasis) / costBasis) * 1000) / 10 : null;
-
             const digestAsset = (window.__portfolioDigest?.perAsset || []).find((a) => a.id === asset.id);
 
-            const overlay = document.createElement('div');
-            overlay.className = 'portfolio-asset-detail-overlay';
-            overlay.innerHTML = `
-                <div class="portfolio-asset-detail-sheet">
-                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
-                        <div style="display:flex;align-items:center;gap:.6rem;">
-                            <span style="font-size:1.4rem;"><iconify-icon icon="${presentation.icon}"></iconify-icon></span>
-                            <div>
-                                <div style="font-weight:800;font-size:.95rem;">${asset.name || 'أصل استثماري'}</div>
-                                <div style="font-size:.72rem;color:#8a8f98;">${asset.sub_label || 'قيمة حالية'}</div>
-                            </div>
-                        </div>
-                        <button type="button" class="portfolio-detail-close" aria-label="إغلاق">✕</button>
-                    </div>
+            let unitPriceEgp = null, history = [];
+            try {
+                const data = await asstApi('portfolio_asset_detail', { assetId: asset.id });
+                unitPriceEgp = data.unitPriceEgp;
+                history = data.history || [];
+            } catch (err) { /* هنعرض التفاصيل المتاحة عندنا محليًا حتى لو فشل الجلب */ }
 
-                    <div style="font-size:1.55rem;font-weight:900;">${fmt(currentAmount)}</div>
-                    ${hasCostBasis ? `<div style="margin-top:.25rem;font-size:.8rem;color:${gainAmount >= 0 ? '#0a7a52' : '#c0362c'};">${gainAmount >= 0 ? '▲' : '▼'} ${gainAmount >= 0 ? '+' : ''}${gainPct}% (${gainAmount >= 0 ? '+' : ''}${fmt(gainAmount)}) منذ الشراء</div>` : ''}
+            if (!wrapEl.classList.contains('open')) return; // المستخدم قفلها وهو مستني الرد
 
-                    <div class="portfolio-detail-stat-grid">
-                        <div class="portfolio-detail-stat">
-                            <span>قيمة الشراء</span>
-                            <strong>${hasCostBasis ? fmt(costBasis) : '—'}</strong>
-                        </div>
-                        <div class="portfolio-detail-stat">
-                            <span>آخر 3 أيام</span>
-                            <strong style="color:${digestAsset?.changePct == null ? 'inherit' : (digestAsset.changePct >= 0 ? '#0a7a52' : '#c0362c')};">
-                                ${digestAsset?.changePct == null ? '—' : `${digestAsset.changePct >= 0 ? '▲' : '▼'} ${digestAsset.changePct >= 0 ? '+' : ''}${digestAsset.changePct}%`}
-                            </strong>
-                        </div>
-                    </div>
-                    ${digestAsset?.changeAmount != null ? `<p style="font-size:.72rem;color:#8a8f98;margin-top:-.5rem;">يعني ${digestAsset.changeAmount >= 0 ? 'زيادة' : 'نقصان'} قدره ${fmt(Math.abs(digestAsset.changeAmount))} خلال آخر 3 أيام</p>` : ''}
-                </div>`;
+            const isUp = gainAmount == null ? true : gainAmount >= 0;
+            detailEl.innerHTML = `
+                <div class="portfolio-detail-value">${fmt(currentAmount)}</div>
+                ${hasCostBasis ? `<span class="portfolio-detail-badge ${isUp ? 'up' : 'down'}">${isUp ? '▲' : '▼'} ${Math.abs(gainPct)}% (${isUp ? '+' : '-'}${fmt(Math.abs(gainAmount))} منذ الشراء)</span>` : ''}
+                <div class="portfolio-detail-chart">${buildPortfolioSparkline(history, isUp)}</div>
+                <div class="portfolio-detail-stat-grid">
+                    <div class="portfolio-detail-stat"><span>قيمة الشراء</span><strong>${hasCostBasis ? fmt(costBasis) : '—'}</strong></div>
+                    <div class="portfolio-detail-stat"><span>آخر 3 أيام</span><strong style="color:${digestAsset?.changePct == null ? 'inherit' : (digestAsset.changePct >= 0 ? '#0a7a52' : '#c0362c')};">${digestAsset?.changePct == null ? '—' : `${digestAsset.changePct >= 0 ? '▲' : '▼'} ${digestAsset.changePct >= 0 ? '+' : ''}${digestAsset.changePct}%`}</strong></div>
+                </div>
+                ${unitPriceEgp ? `<div class="portfolio-detail-meta-row"><span>سعر الوحدة دلوقتي من السوق</span><strong>${fmt(unitPriceEgp)} / ${asset.unit || 'وحدة'}</strong></div>` : ''}
+                <div class="portfolio-detail-meta-row"><span>تاريخ آخر تحديث</span><strong>${new Date(asset.updated_at || asset.created_at).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}</strong></div>
+                <button type="button" class="portfolio-detail-edit-btn">تعديل القيمة</button>`;
 
-            overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
-            overlay.querySelector('.portfolio-detail-close').addEventListener('click', () => overlay.remove());
-            document.body.appendChild(overlay);
+            detailEl.querySelector('.portfolio-detail-edit-btn')?.addEventListener('click', () => openPortfolioForm(asset));
         }
 
         function renderPortfolio(portfolio, digest) {
@@ -6179,7 +6211,8 @@
 
             emptyEl?.classList.add('hidden');
             data.assets.forEach((asset) => {
-                const node = template.content.firstElementChild.cloneNode(true);
+                const wrap = template.content.firstElementChild.cloneNode(true);
+                const node = wrap.querySelector('.portfolio-asset');
                 const presentation = getPortfolioAssetPresentation(asset);
                 node.dataset.tone = presentation.tone;
                 node.querySelector('.portfolio-asset-icon').innerHTML = `<iconify-icon icon=\"${presentation.icon}\"></iconify-icon>`;
@@ -6209,7 +6242,7 @@
                 const editBtn = node.querySelector('.portfolio-asset-menu-action.edit');
                 const deleteBtn = node.querySelector('.portfolio-asset-menu-action.delete');
 
-                node.addEventListener('click', () => openPortfolioAssetDetail(asset));
+                node.addEventListener('click', () => openPortfolioAssetDetail(asset, wrap));
 
                 menuBtn.addEventListener('click', (event) => {
                     event.preventDefault();
@@ -6235,7 +6268,7 @@
                         await loadDashboard();
                     } catch (err) { alert(err.message); }
                 });
-                listEl.appendChild(node);
+                listEl.appendChild(wrap);
             });
         }
 

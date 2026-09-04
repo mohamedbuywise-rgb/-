@@ -515,6 +515,51 @@
   // لسه المستخدم مش مثبّت التطبيق → نوريله شاشة التثبيت بس، ومش بنعرض شاشة الحساب خالص لحد ما يثبّت.
   // بعد ما يثبّت ويفتح دبّر من الأيقونة (standalone)، هناك بس بيتعرض عليه تسجيل الدخول / إنشاء الحساب.
 
+  // ---- شاشة تسجيل الدخول / إنشاء حساب + شاشة التثبيت + بار التقدم ----
+  // ⚠️ لازم التعريفات دي تكون فوق الـ IIFE اللي تحت (بيستدعي showInstallScreen/showAuthScreen
+  // بشكل متزامن أول ما الصفحة تفتح). قبل كده كانت التعريفات دي تحت في الملف، وبما إنها معرّفة
+  // بـ const، كان أي استدعاء ليها قبل السطر بتاعها بيرمي ReferenceError (Temporal Dead Zone)
+  // ويوقف تنفيذ الكود بالكامل من غير أي رسالة واضحة — النتيجة شاشة فاضية تمامًا غير الـ progress card.
+  const authScreen = document.getElementById('authScreen');
+  const linkScreen = document.getElementById('linkScreen');
+
+  const PROGRESS_STAGES = ['install', 'account', 'done'];
+  const progressFill = document.getElementById('progressFill');
+  const progressPct = document.getElementById('progressPct');
+  function setProgressStage(stageKey) {
+    const idx = PROGRESS_STAGES.indexOf(stageKey);
+    if (idx === -1) return;
+    const pct = Math.round(((idx + 1) / PROGRESS_STAGES.length) * 100);
+    progressFill.style.width = pct + '%';
+    progressPct.textContent = pct + '%';
+    PROGRESS_STAGES.forEach((key, i) => {
+      const el = document.getElementById('stage-' + key);
+      if (!el) return;
+      el.classList.remove('current', 'done');
+      const mascotImg = el.querySelector('.stage-mascot');
+      mascotImg.classList.remove('mascot-blink');
+      if (i < idx) el.classList.add('done');
+      else if (i === idx) {
+        el.classList.add('current');
+        mascotImg.classList.add('mascot-blink');
+        mascotImg.classList.remove('mascot-bounce-once');
+        void mascotImg.offsetWidth; // بنعمل reflow عشان الحركة تتكرر لو نفس المرحلة اتفعّلت تاني
+        mascotImg.classList.add('mascot-bounce-once');
+      }
+    });
+  }
+
+  function showInstallScreen() {
+    authScreen.classList.remove('active');
+    linkScreen.classList.add('active');
+    setProgressStage('install');
+  }
+  function showAuthScreen() {
+    linkScreen.classList.remove('active');
+    authScreen.classList.add('active');
+    setProgressStage('account');
+  }
+
   // ---- لو المستخدم عنده جلسة شغالة أصلاً (رجع تاني على onboarding بالغلط) ----
   (async () => {
     try {
@@ -589,47 +634,6 @@
   })();
 
   // ---- شاشة تسجيل الدخول / إنشاء حساب (إيميل + باسورد + اسم) ----
-  const authScreen = document.getElementById('authScreen');
-  const linkScreen = document.getElementById('linkScreen');
-
-  // ---- بار التقدم بالنار (Streak): 3 مراحل (التثبيت → بياناتك → تم) ----
-  const PROGRESS_STAGES = ['install', 'account', 'done'];
-  const progressFill = document.getElementById('progressFill');
-  const progressPct = document.getElementById('progressPct');
-  function setProgressStage(stageKey) {
-    const idx = PROGRESS_STAGES.indexOf(stageKey);
-    if (idx === -1) return;
-    const pct = Math.round(((idx + 1) / PROGRESS_STAGES.length) * 100);
-    progressFill.style.width = pct + '%';
-    progressPct.textContent = pct + '%';
-    PROGRESS_STAGES.forEach((key, i) => {
-      const el = document.getElementById('stage-' + key);
-      if (!el) return;
-      el.classList.remove('current', 'done');
-      const mascotImg = el.querySelector('.stage-mascot');
-      mascotImg.classList.remove('mascot-blink');
-      if (i < idx) el.classList.add('done');
-      else if (i === idx) {
-        el.classList.add('current');
-        mascotImg.classList.add('mascot-blink');
-        mascotImg.classList.remove('mascot-bounce-once');
-        void mascotImg.offsetWidth; // بنعمل reflow عشان الحركة تتكرر لو نفس المرحلة اتفعّلت تاني
-        mascotImg.classList.add('mascot-bounce-once');
-      }
-    });
-  }
-
-  function showInstallScreen() {
-    authScreen.classList.remove('active');
-    linkScreen.classList.add('active');
-    setProgressStage('install');
-  }
-  function showAuthScreen() {
-    linkScreen.classList.remove('active');
-    authScreen.classList.add('active');
-    setProgressStage('account');
-  }
-
   const tabLogin = document.getElementById('tabLogin');
   const tabSignup = document.getElementById('tabSignup');
   const nameField = document.getElementById('nameField');

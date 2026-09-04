@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>بريفيو — تفاصيل الأصل في المحفظة الاستثمارية</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root { --bg:#07110f; --card:#0d1c17; --line:rgba(70,215,165,.22); --ink:#ecfff7; --muted:#9bb8ad; --accent:#46d7a5; --strong:#b8f2dc; --up:#3ecb8f; --down:#ff6a5c; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--ink); font-family:Cairo, sans-serif; min-height:100vh; }
+  .page { max-width:420px; margin:0 auto; padding:20px 16px 60px; }
+  .hint { text-align:center; color:var(--muted); font-size:12px; margin-bottom:16px; line-height:1.7; }
+  .portfolio { border:1px solid var(--line); border-radius:24px; background:linear-gradient(135deg,var(--card),#0a1712); overflow:hidden; }
+  .summary { padding:18px 18px 14px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px dashed var(--line); }
+  .eyebrow { display:flex; align-items:center; gap:6px; color:var(--accent); font-size:10px; font-weight:900; }
+  .dot { width:6px; height:6px; border-radius:50%; background:var(--accent); }
+  .title { display:flex; align-items:center; gap:8px; margin-top:8px; font-size:16px; font-weight:900; }
+  .total strong { display:block; color:var(--strong); font-size:22px; font-weight:900; }
+  .total label { display:block; color:var(--muted); font-size:9px; font-weight:700; text-align:left; }
+  .list { padding:14px; display:grid; gap:10px; }
+  .asset { cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:10px; padding:11px 12px; border:1px solid var(--line); border-radius:16px; background:rgba(255,255,255,.03); transition:background .15s; }
+  .asset:active { background:rgba(70,215,165,.1); }
+  .asset-main { display:flex; align-items:center; gap:10px; min-width:0; }
+  .asset-icon { width:38px; height:38px; flex:0 0 38px; border-radius:50%; display:grid; place-items:center; font-size:20px; background:rgba(244,198,72,.14); color:#f4ce62; }
+  .asset[data-tone="btc"] .asset-icon { background:rgba(247,147,26,.14); color:#ffad4a; }
+  .asset-name { font-size:13px; font-weight:900; }
+  .asset-sub { color:var(--muted); font-size:10px; margin-top:2px; }
+  .asset-value strong { font-size:13px; font-weight:900; color:var(--strong); }
+  .chev { color:var(--muted); font-size:14px; }
+
+  .overlay { position:fixed; inset:0; background:rgba(0,0,0,.6); display:none; align-items:flex-end; justify-content:center; z-index:50; }
+  .overlay.open { display:flex; }
+  .sheet { width:100%; max-width:420px; background:var(--card); border-radius:22px 22px 0 0; padding:18px 20px 26px; border-top:1px solid var(--line); animation:up .22s ease; }
+  @keyframes up { from{ transform:translateY(24px); opacity:0 } to{ transform:translateY(0); opacity:1 } }
+  .sheet-top { display:flex; justify-content:space-between; align-items:flex-start; }
+  .sheet-asset { display:flex; align-items:center; gap:10px; }
+  .sheet-icon { width:40px; height:40px; border-radius:50%; display:grid; place-items:center; font-size:22px; background:rgba(244,198,72,.14); color:#f4ce62; }
+  .sheet-name { font-size:15px; font-weight:900; }
+  .sheet-sub { color:var(--muted); font-size:11px; margin-top:2px; }
+  .close-btn { width:28px; height:28px; border-radius:50%; border:none; background:rgba(255,255,255,.08); color:var(--ink); font-size:14px; cursor:pointer; }
+  .sheet-value { font-size:30px; font-weight:900; margin:16px 0 4px; }
+  .badge { display:inline-flex; align-items:center; gap:4px; font-size:12px; font-weight:900; padding:3px 10px; border-radius:8px; }
+  .badge.up { color:var(--up); background:rgba(62,203,143,.14); }
+  .badge.down { color:var(--down); background:rgba(255,106,92,.14); }
+  .chart-wrap { margin:18px 0 14px; height:90px; }
+  .stat-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:14px; }
+  .stat { background:rgba(255,255,255,.04); border-radius:10px; padding:9px 10px; }
+  .stat span { display:block; color:var(--muted); font-size:10px; margin-bottom:3px; }
+  .stat strong { font-size:14px; font-weight:900; }
+  .meta-row { display:flex; justify-content:space-between; font-size:12px; padding:8px 0; border-top:1px dashed var(--line); color:var(--muted); }
+  .meta-row strong { color:var(--ink); font-weight:800; }
+  .edit-btn { width:100%; margin-top:12px; padding:12px; border-radius:12px; border:1px solid var(--line); background:transparent; color:var(--strong); font-family:inherit; font-size:13px; font-weight:900; cursor:pointer; }
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="hint">دوس على أي أصل عشان تشوف شكل التفاصيل بالظبط زي اللي بعتهولك</div>
+  <div class="portfolio">
+    <div class="summary">
+      <div>
+        <div class="eyebrow"><span class="dot"></span>بياناتك الحقيقية</div>
+        <div class="title">💼 محفظتك الاستثمارية</div>
+      </div>
+      <div class="total"><label>الإجمالي الحالي</label><strong>248,650 ج.م</strong></div>
+    </div>
+    <div class="list">
+      <div class="asset" data-tone="btc" onclick="openAsset('btc')">
+        <div class="asset-main">
+          <div class="asset-icon">₿</div>
+          <div><div class="asset-name">بيتكوين</div><div class="asset-sub">12 عملة</div></div>
+        </div>
+        <div class="asset-value"><strong>190,000 ج.م</strong></div>
+      </div>
+      <div class="asset" data-tone="gold" onclick="openAsset('gold')">
+        <div class="asset-main">
+          <div class="asset-icon">🪙</div>
+          <div><div class="asset-name">دهب عيار 21</div><div class="asset-sub">15 جرام</div></div>
+        </div>
+        <div class="asset-value"><strong>28,650 ج.م</strong></div>
+      </div>
+      <div class="asset" data-tone="gold24" onclick="openAsset('gold24')">
+        <div class="asset-main">
+          <div class="asset-icon">🪙</div>
+          <div><div class="asset-name">دهب عيار 24</div><div class="asset-sub">5 جرام</div></div>
+        </div>
+        <div class="asset-value"><strong>30,000 ج.م</strong></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay" onclick="if(event.target===this) closeAsset()">
+  <div class="sheet">
+    <div class="sheet-top">
+      <div class="sheet-asset">
+        <div class="sheet-icon" id="d-icon">🪙</div>
+        <div><div class="sheet-name" id="d-name">دهب عيار 21</div><div class="sheet-sub" id="d-sub">15 جرام</div></div>
+      </div>
+      <button class="close-btn" onclick="closeAsset()">✕</button>
+    </div>
+    <div class="sheet-value" id="d-value">28,650 ج.م</div>
+    <span class="badge up" id="d-badge">▲ 12.4% (+3,160 ج.م منذ الشراء)</span>
+    <div class="chart-wrap"><svg viewBox="0 0 300 90" width="100%" height="100%" id="d-chart"></svg></div>
+    <div class="stat-grid">
+      <div class="stat"><span>قيمة الشراء</span><strong id="d-buy">25,490 ج.م</strong></div>
+      <div class="stat"><span>آخر 3 أيام</span><strong id="d-3d" style="color:var(--up)">▲ 3.1%</strong></div>
+    </div>
+    <div class="meta-row"><span>سعر جرام العيار دلوقتي</span><strong id="d-price">1,910 ج.م</strong></div>
+    <div class="meta-row"><span>تاريخ الإضافة</span><strong id="d-date">12 يونيو 2026</strong></div>
+    <button class="edit-btn">تعديل القيمة</button>
+  </div>
+</div>
+
+<script>
+const data = {
+  gold: { icon:'🪙', name:'دهب عيار 21', sub:'15 جرام', value:'28,650 ج.م', pct:'12.4%', diff:'+3,160 ج.م منذ الشراء', up:true, buy:'25,490 ج.م', d3:'3.1%', d3up:true, price:'1,910 ج.م', date:'12 يونيو 2026', points:[20,28,24,34,30,40,36,48,52,50,60] },
+  gold24: { icon:'🪙', name:'دهب عيار 24', sub:'5 جرام', value:'30,000 ج.م', pct:'8.2%', diff:'+2,280 ج.م منذ الشراء', up:true, buy:'27,720 ج.م', d3:'1.4%', d3up:true, price:'2,180 ج.م', date:'2 يوليو 2026', points:[30,32,28,35,33,38,40,37,44,46,50] },
+  btc: { icon:'₿', name:'بيتكوين', sub:'12 عملة', value:'190,000 ج.م', pct:'6.7%', diff:'-13,600 ج.م منذ الشراء', up:false, buy:'203,600 ج.م', d3:'2.9%', d3up:false, price:'15,833 ج.م', date:'3 مارس 2026', points:[58,50,54,46,50,42,38,34,40,30,26] }
+};
+function buildPath(points){
+  const w=300,h=90,max=Math.max(...points),min=Math.min(...points);
+  const nx = i => (i/(points.length-1))*w;
+  const ny = v => h - ((v-min)/(max-min||1))*(h-10) - 5;
+  return points.map((p,i)=> (i===0?'M':'L')+nx(i).toFixed(1)+','+ny(p).toFixed(1)).join(' ');
+}
+function openAsset(key){
+  const d = data[key];
+  document.getElementById('d-icon').textContent = d.icon;
+  document.getElementById('d-name').textContent = d.name;
+  document.getElementById('d-sub').textContent = d.sub;
+  document.getElementById('d-value').textContent = d.value;
+  const badge = document.getElementById('d-badge');
+  badge.className = 'badge ' + (d.up?'up':'down');
+  badge.textContent = (d.up?'▲ ':'▼ ') + d.pct + ' (' + d.diff + ')';
+  document.getElementById('d-buy').textContent = d.buy;
+  const d3 = document.getElementById('d-3d');
+  d3.textContent = (d.d3up?'▲ ':'▼ ') + d.d3;
+  d3.style.color = d.d3up ? 'var(--up)' : 'var(--down)';
+  document.getElementById('d-price').textContent = d.price;
+  document.getElementById('d-date').textContent = d.date;
+  const svg = document.getElementById('d-chart');
+  svg.innerHTML = '<path d="'+buildPath(d.points)+'" fill="none" stroke="'+(d.up?'#3ecb8f':'#ff6a5c')+'" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>';
+  document.getElementById('overlay').classList.add('open');
+}
+function closeAsset(){ document.getElementById('overlay').classList.remove('open'); }
+</script>
+</body>
+</html>

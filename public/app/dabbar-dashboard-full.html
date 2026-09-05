@@ -2272,6 +2272,12 @@
         }
 
     </style>
+    <style>
+        #bank-movements-sheet.flex { display: flex; }
+        .bm-filter-btn { background: rgba(30,41,59,.6); color: #94a3b8; border: 1px solid rgba(148,163,184,.18); }
+        .bm-filter-btn.active { background: rgba(16,185,129,.12); color: #34d399; border-color: rgba(52,211,153,.4); }
+        .bm-review-badge { color: #f2b90c; }
+    </style>
 </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col overflow-hidden">
 
@@ -2454,7 +2460,7 @@
                         <input id="portfolio-add-name" type="text" placeholder="اسم الأصل (مثلاً: ذهب، صناديق بنك مصر)" class="portfolio-form-input">
                         <input id="portfolio-add-sub" type="text" placeholder="وصف اختياري (مثلاً: 120 جرام أو عيار 24)" class="portfolio-form-input">
                         <input id="portfolio-add-amount" type="number" inputmode="numeric" placeholder="القيمة الحالية بالجنيه" class="portfolio-form-input">
-
+                        <input id="portfolio-add-alert" type="number" inputmode="numeric" min="0" placeholder="نبهني لو تحرك أكثر من % في اليوم (اختياري)" class="portfolio-form-input">
 
 
                         <div class="icon-library-row" id="portfolio-icon-picker" aria-label="اختار أيقونة الأصل"></div>
@@ -2478,6 +2484,45 @@
                     </div>
                 </div>
                 <span class="shrink-0 text-slate-400">‹</span>
+            </button>
+
+            <!-- Bottom Sheet: الحركات البنكية — بدل ما تفتح صفحة منفصلة (كانت بتعمل بطء وأخطاء 404) -->
+            <div id="bank-movements-sheet" class="fixed inset-0 z-50 hidden items-end justify-center bg-black/70 backdrop-blur-sm">
+                <div class="w-full max-w-lg max-h-[88vh] overflow-y-auto rounded-t-3xl bg-slate-950 border-t border-slate-800 px-4 pt-4 pb-6">
+                    <div class="flex items-center justify-between gap-3 mb-3">
+                        <h3 class="text-sm font-black text-slate-100">الحركات البنكية</h3>
+                        <button id="bank-movements-close" type="button" class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-800 text-slate-300">✕</button>
+                    </div>
+                    <details class="rounded-xl bg-emerald-500/[0.06] border border-emerald-500/20 mb-3">
+                        <summary class="cursor-pointer list-none px-3 py-2.5 text-[11px] font-bold text-emerald-300 flex items-center justify-between">دليل تصنيف الحركات البنكية <span>▾</span></summary>
+                        <ul class="px-3 pb-3 pt-0 text-[10.5px] text-slate-400 leading-relaxed space-y-1.5">
+                            <li>السحب والإيداع والتحويل بين حساباتك بتتسجل هنا للمتابعة بس، من غير ما تدخل في إجمالي مصروفاتك.</li>
+                            <li>الاشتراكات والمشتريات بتتحسب مصروف حقيقي ومباشر زي أي حاجة تانية.</li>
+                            <li>⚠️ أي حركة مبهمة هتتحط تحت "تحتاج مراجعة" لحد ما تحددها بنفسك.</li>
+                        </ul>
+                    </details>
+                    <div id="bank-movements-status" class="text-center text-[12px] text-slate-500 py-6">بنجيب حركاتك...</div>
+                    <div id="bank-movements-empty" class="hidden text-center py-10">
+                        <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-slate-900 flex items-center justify-center text-xl">🏦</div>
+                        <p id="bank-movements-empty-msg" class="text-[12.5px] text-slate-400 leading-relaxed">لم تقم بأي عمليات مالية.</p>
+                    </div>
+                    <div id="bank-movements-content" class="hidden">
+                        <div class="grid grid-cols-3 gap-2 mb-3">
+                            <div class="rounded-xl bg-rose-500/10 p-2.5 text-center"><div class="text-[10px] text-rose-300 mb-1">سحب</div><div id="bm-stat-withdrawal" class="text-[13px] font-bold text-rose-300">0 ج.م</div></div>
+                            <div class="rounded-xl bg-emerald-500/10 p-2.5 text-center"><div class="text-[10px] text-emerald-300 mb-1">إيداع</div><div id="bm-stat-deposit" class="text-[13px] font-bold text-emerald-300">0 ج.م</div></div>
+                            <div class="rounded-xl bg-slate-800/60 p-2.5 text-center"><div class="text-[10px] text-slate-400 mb-1">تحويل</div><div id="bm-stat-transfer" class="text-[13px] font-bold text-slate-200">0 ج.م</div></div>
+                        </div>
+                        <div class="flex gap-1.5 overflow-x-auto mb-3 pb-1" id="bank-movements-filters">
+                            <button class="bm-filter-btn active shrink-0 rounded-full px-3 py-1.5 text-[11px] font-bold" data-filter="all">الكل</button>
+                            <button class="bm-filter-btn shrink-0 rounded-full px-3 py-1.5 text-[11px] font-bold" data-filter="withdrawal">سحب / مشتريات</button>
+                            <button class="bm-filter-btn shrink-0 rounded-full px-3 py-1.5 text-[11px] font-bold" data-filter="deposit">إيداع / وارد</button>
+                            <button class="bm-filter-btn shrink-0 rounded-full px-3 py-1.5 text-[11px] font-bold" data-filter="review">تحتاج مراجعة ⚠️</button>
+                        </div>
+                        <div id="bank-movements-list" class="rounded-2xl bg-slate-900/60 border border-slate-800 divide-y divide-slate-800"></div>
+                    </div>
+                </div>
+            </div>
+            <div id="bank-movements-review-root"></div>
             </button>
 
             <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3" id="monthly-categories-card">
@@ -3066,7 +3111,7 @@
                     </div>
                 </div>
                 <button type="button" id="account-referral-copy-btn" class="w-full flex items-center justify-between gap-2 bg-slate-950/60 border border-slate-800 rounded-xl px-3 py-2.5">
-                    <span class="font-mono text-xs text-slate-200 select-all truncate" dir="ltr">https://buypilot-team.vercel.app</span>
+                    <span class="font-mono text-xs text-slate-200 select-all truncate" dir="ltr">https://dabbar.online</span>
                     <span id="account-referral-copy-label" class="text-[10px] font-bold text-emerald-400 shrink-0">نسخ 📋</span>
                 </button>
             </div>
@@ -4919,10 +4964,17 @@
                 });
                 setupLocalSecurityUI();
                 await gateLocalSecurity();
-                await refreshPushUI();
+                // refreshPushUI مستقلة تمامًا عن بيانات الداشبورد (بتاعة إعدادات الإشعارات بس)، فبنشغّلها بالتوازي بدل ما نستنّاها الأول
+                const pushUIPromise = refreshPushUI();
                 await loadDashboard(true); // أول تحميل — الربط اختياري والداش تفتح للحساب المستقل عادي
-                await loadPlanningSettings();
-                await loadAccountTab();
+                // البنود دي مش محتاجة بعضها البعض، فبنشغّلها بالتوازي بدل التتابع عشان الصفحة تفتح أسرع
+                await Promise.allSettled([
+                    pushUIPromise,
+                    loadPlanningSettings(),
+                    loadAccountTab(),
+                    loadReminders(),
+                    loadAsstChatHistory(),
+                ]);
                 loadInvoicesCount();
                 setupAutoRefresh();
             } catch (e) {
@@ -5399,9 +5451,30 @@
         async function loadPlanningSettings() {
 
             let settings = null;
-            try { const res = await fetch('/api/financial-actions', { headers: { Authorization: `Bearer ${accessToken}` }, cache: 'no-store' }); if (res.ok) settings = (await res.json()).settings; } catch {}
-            if (!settings) { try { settings = JSON.parse(localStorage.getItem(planningSettingsKey()) || 'null'); } catch {} }
+            let serverReachable = false;
+            try { const res = await fetch('/api/financial-actions', { headers: { Authorization: `Bearer ${accessToken}` }, cache: 'no-store' }); if (res.ok) { settings = (await res.json()).settings; serverReachable = true; } } catch {}
+
+            let local = null;
+            try { local = JSON.parse(localStorage.getItem(planningSettingsKey()) || 'null'); } catch {}
+
+            // لو السيرفر مش راجع حاجة خالص (مقطوع/فشل)، استخدم النسخة المحلية.
+            if (!settings) settings = local;
+
+            // Self-heal: لو السيرفر شغال ورجّع بيانات، لكن النسخة المحلية فيها حدود فئات (categoryBudgets)
+            // مش موجودة في نسخة السيرفر — يبقى الحفظ فشل قبل كده وضاع. نفضّل النسخة المحلية الأحدث
+            // ونحاول نبعتها تاني للسيرفر عشان الباج متتكررش.
+            if (serverReachable && local?.categoryBudgets && Object.keys(local.categoryBudgets).length) {
+                const serverKeys = Object.keys(settings?.categoryBudgets || {});
+                const localKeys = Object.keys(local.categoryBudgets);
+                const missingFromServer = localKeys.some((k) => !serverKeys.includes(k));
+                if (missingFromServer) {
+                    settings = { ...(settings || defaultPlanningSettings()), categoryBudgets: { ...(settings?.categoryBudgets || {}), ...local.categoryBudgets } };
+                    fetch('/api/financial-actions', { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` }, body: JSON.stringify(settings) }).catch(() => {});
+                }
+            }
+
             window.__financialSettings = settings || defaultPlanningSettings();
+            localStorage.setItem(planningSettingsKey(), JSON.stringify(window.__financialSettings));
             renderPlanning(window.__dashboardData || {});
             renderBalanceCard(window.__dashboardData?.month || {});
             renderInAppNotifications(window.__dashboardData || {});
@@ -5413,8 +5486,22 @@
             const settings = { ...current, monthlyIncome: Math.max(0, Number(document.getElementById('planning-income')?.value || 0)), monthlyBudget: Math.max(0, Number(document.getElementById('planning-budget')?.value || 0)), categoryBudgets };
             window.__financialSettings = settings;
             localStorage.setItem(planningSettingsKey(), JSON.stringify(settings));
-            try { const res = await fetch('/api/financial-actions', { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` }, body: JSON.stringify(settings) }); if (res.ok) window.__financialSettings = (await res.json()).settings; } catch {}
-            renderPlanning(window.__dashboardData || {}); renderBalanceCard(window.__dashboardData?.month || {}); renderInAppNotifications(window.__dashboardData || {}); quickStatus('اتحفظت خطتك المالية.', 'success');
+            let saveSucceeded = false;
+            try {
+                const res = await fetch('/api/financial-actions', { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` }, body: JSON.stringify(settings) });
+                if (res.ok) {
+                    window.__financialSettings = (await res.json()).settings;
+                    saveSucceeded = true;
+                }
+            } catch {}
+            renderPlanning(window.__dashboardData || {}); renderBalanceCard(window.__dashboardData?.month || {}); renderInAppNotifications(window.__dashboardData || {});
+            if (saveSucceeded) {
+                quickStatus('اتحفظت خطتك المالية.', 'success');
+            } else {
+                // الحفظ فشل فعليًا — منقولش "اتحفظت" وهي متحفظتش. النسخة المحلية (localStorage) هتفضل موجودة
+                // وهنحاول نبعتها تاني لما لودّبلانينج سيتينجز يفتح، بدل ما نمسحها ونضلل المستخدم.
+                quickStatus('حصلت مشكلة في حفظ الخطة على السيرفر. اتحفظت مؤقتًا على جهازك بس وهنحاول تاني.', 'error');
+            }
         }
         function addRecurringExpense() { const name = document.getElementById('recurring-name')?.value.trim(); const amount = Number(document.getElementById('recurring-amount')?.value || 0); if (!name || amount <= 0) return quickStatus('اكتب اسم ومبلغ المصروف المتكرر.', 'error'); const settings = planningSettings(); settings.recurringExpenses = [...(settings.recurringExpenses || []), { id: crypto.randomUUID(), name, amount, day: 1, category: 'أخرى', active: true }]; document.getElementById('recurring-name').value = ''; document.getElementById('recurring-amount').value = ''; savePlanningSettings(); }
         async function deleteExpense(id) { if (!id || !confirm('هل أنت متأكد إنك عايز تحذف العملية دي؟\nبعد الحذف هتتخصم من إجمالي اليوم والشهر، ومش هتقدر ترجعها.')) return; try { const res = await fetch(`/api/financial-actions?id=${encodeURIComponent(id)}`, { method: 'DELETE', headers: { Authorization: `Bearer ${accessToken}` } }); const body = await res.json().catch(() => ({})); if (!res.ok) throw new Error(body.error || 'معرفناش نحذف العملية دلوقتي.'); await loadDashboard(); quickStatus('اتحذفت العملية واتخصمت من إجمالياتك.', 'success'); } catch (error) { quickStatus(error.message || 'معرفناش نحذف العملية دلوقتي.', 'error'); } }
@@ -6155,6 +6242,7 @@
         });
 
         document.querySelector('.tab-btn[data-tab="reminders"]')?.addEventListener('click', loadReminders);
+        document.querySelector('.tab-btn[data-tab="assistant"]')?.addEventListener('click', loadAsstChatHistory);
 
         function initDebtsTabs() {
             if (__debtTabInitialized) return;
@@ -6512,6 +6600,8 @@
             nameInput.value = asset?.name || '';
             subInput.value = asset?.sub_label || '';
             amountInput.value = asset?.amount ?? '';
+            const alertInput = document.getElementById('portfolio-add-alert');
+            if (alertInput) alertInput.value = asset?.alert_threshold_pct ?? '';
             const picker = document.getElementById('portfolio-icon-picker');
             if (picker) { const saved = asset?.name ? localStorage.getItem(`dabbar-portfolio-icon:${asset.name.trim().toLowerCase()}`) : null; picker.dataset.selected = saved || ''; picker.querySelectorAll('.selected').forEach((x) => x.classList.toggle('selected', x.dataset.iconValue === saved)); }
             errEl.classList.add('hidden');
@@ -6533,9 +6623,11 @@
             const nameInput = document.getElementById('portfolio-add-name');
             const subInput = document.getElementById('portfolio-add-sub');
             const amountInput = document.getElementById('portfolio-add-amount');
+            const alertInput = document.getElementById('portfolio-add-alert');
             if (nameInput) nameInput.value = '';
             if (subInput) subInput.value = '';
             if (amountInput) amountInput.value = '';
+            if (alertInput) alertInput.value = '';
         }
 
         (function bindPortfolioAddForm() {
@@ -6556,6 +6648,8 @@
                 const name = nameInput.value.trim();
                 const subLabel = subInput.value.trim();
                 const amount = Number(amountInput.value);
+                const alertInput = document.getElementById('portfolio-add-alert');
+                const alertThresholdPct = alertInput && alertInput.value !== '' ? Number(alertInput.value) : null;
                 const selectedIcon = document.getElementById('portfolio-icon-picker')?.dataset.selected;
                 if (!name || !amount || amount <= 0) {
                     errEl.textContent = 'محتاج اسم الأصل وقيمة صحيحة أكبر من صفر.';
@@ -6565,7 +6659,7 @@
                 confirmBtn.disabled = true;
                 try {
                     const isEditing = Boolean(portfolioEditingId);
-                    const payload = { name, subLabel, amount };
+                    const payload = { name, subLabel, amount, alertThresholdPct };
                     if (isEditing) payload.assetId = portfolioEditingId;
                     await asstApi(isEditing ? 'portfolio_asset_update' : 'portfolio_asset_add', payload);
                     if (selectedIcon) localStorage.setItem(`dabbar-portfolio-icon:${name.toLowerCase()}`, selectedIcon);
@@ -7214,7 +7308,142 @@
             }
         }
         document.getElementById('quick-entry-invoice-input')?.addEventListener('change', (event) => { const file = event.target.files?.[0]; analyzeQuickInvoice(file); event.target.value = ''; });
-        document.getElementById('bank-movements-card')?.addEventListener('click', () => { window.location.href = './dabbar-bank-movements.html'; });
+        // ============ الحركات البنكية — Bottom Sheet جوه نفس الداشبورد (بدل صفحة منفصلة كانت بتعمل بطء وأخطاء 404) ============
+        const BM_TYPE_LABELS = { withdrawal: 'سحب', deposit: 'إيداع', transfer: 'تحويل', expense: 'مصروف', income: 'دخل', purchase: 'شراء', asset: 'أصل', refund: 'استرداد' };
+        const BM_BANK_BRANDS = {
+            cib: { mark: 'CIB', label: 'CIB' }, nbe: { mark: 'NBE', label: 'البنك الأهلي المصري' }, banque_misr: { mark: 'BM', label: 'بنك مصر' },
+            qnb: { mark: 'QNB', label: 'QNB الأهلي' }, hsbc: { mark: 'HSBC', label: 'HSBC' }, aaib: { mark: 'AAIB', label: 'AAIB' },
+            vodafone_cash: { mark: 'VF', label: 'فودافون كاش', wallet: true }, etisalat_cash: { mark: 'ET', label: 'اتصالات كاش', wallet: true },
+            orange_cash: { mark: 'OC', label: 'أورنج كاش', wallet: true }, we_pay: { mark: 'WE', label: 'WE Pay', wallet: true },
+            instapay: { mark: 'IP', label: 'إنستاباي', wallet: true }, fawry: { mark: 'FW', label: 'فوري', wallet: true },
+        };
+        function bmGetBankBrand(m) {
+            const metadata = m?.metadata && typeof m.metadata === 'object' ? m.metadata : {};
+            const key = String(metadata.bank_key || m.source_bank_key || '').trim();
+            const known = BM_BANK_BRANDS[key];
+            const label = String(metadata.bank_label || m.source_bank_label || '').trim();
+            if (known) return { ...known, label: label || known.label };
+            if (label) return { mark: label.slice(0, 4), label, wallet: /كاش|pay|فوري|إنستاباي/i.test(label) };
+            return { mark: '🏦', label: '' };
+        }
+        let bmMovements = [];
+        let bmFilter = 'all';
+        let bmLoadedOnce = false;
+        const bmFmt = (n) => Number(n || 0).toLocaleString('ar-EG', { maximumFractionDigits: 0 });
+
+        function openBankMovementsSheet() {
+            document.getElementById('bank-movements-sheet').classList.remove('hidden');
+            document.getElementById('bank-movements-sheet').classList.add('flex');
+            if (!bmLoadedOnce) { loadBankMovements(); bmLoadedOnce = true; }
+        }
+        function closeBankMovementsSheet() {
+            document.getElementById('bank-movements-sheet').classList.add('hidden');
+            document.getElementById('bank-movements-sheet').classList.remove('flex');
+        }
+        async function loadBankMovements() {
+            const statusEl = document.getElementById('bank-movements-status');
+            const emptyEl = document.getElementById('bank-movements-empty');
+            const contentEl = document.getElementById('bank-movements-content');
+            statusEl.classList.remove('hidden'); statusEl.textContent = 'بنجيب حركاتك...';
+            emptyEl.classList.add('hidden'); contentEl.classList.add('hidden');
+            try {
+                const res = await fetch('/api?route=bank-movements&period=month', { headers: { Authorization: `Bearer ${accessToken}` } });
+                const data = await res.json().catch(() => ({}));
+                if (!res.ok || !data.ok) { statusEl.classList.add('hidden'); emptyEl.classList.remove('hidden'); return; }
+                bmMovements = data.movements || [];
+                statusEl.classList.add('hidden');
+                if (!bmMovements.length) { emptyEl.classList.remove('hidden'); return; }
+                contentEl.classList.remove('hidden');
+                document.getElementById('bm-stat-withdrawal').textContent = `${bmFmt(data.totals.withdrawal)} ج.م`;
+                document.getElementById('bm-stat-deposit').textContent = `${bmFmt(data.totals.deposit)} ج.م`;
+                document.getElementById('bm-stat-transfer').textContent = `${bmFmt(data.totals.transfer)} ج.م`;
+                bmRenderList();
+            } catch (e) {
+                statusEl.classList.add('hidden'); emptyEl.classList.remove('hidden');
+            }
+        }
+        function bmIsExpenseLike(m) {
+            return ['withdrawal', 'expense', 'purchase', 'asset', 'refund', 'subscription'].includes(String(m.event_type || '').toLowerCase())
+                || ['expense', 'purchase', 'subscription'].includes(String(m.category || m.event_category || m.type || '').toLowerCase());
+        }
+        function bmRenderList() {
+            const list = document.getElementById('bank-movements-list');
+            list.innerHTML = '';
+            const filtered = bmMovements.filter((m) => {
+                if (bmFilter === 'all') return true;
+                if (bmFilter === 'review') return m.needs_review;
+                if (bmFilter === 'withdrawal') return bmIsExpenseLike(m);
+                return m.event_type === bmFilter;
+            });
+            if (!filtered.length) { list.innerHTML = '<div class="py-6 text-center text-[12px] text-slate-500">مفيش حركات في التصنيف ده.</div>'; return; }
+            filtered.forEach((m) => {
+                const row = document.createElement('div');
+                row.className = 'flex items-center justify-between gap-3 px-3 py-3';
+                const isExpenseLike = bmIsExpenseLike(m);
+                const amountClass = isExpenseLike ? 'text-rose-400' : (m.event_type === 'deposit' ? 'text-emerald-400' : 'text-slate-200');
+                const sign = isExpenseLike ? '-' : (m.event_type === 'deposit' ? '+' : '');
+                const desc = m.description || m.counterparty || BM_TYPE_LABELS[m.event_type] || m.label;
+                const brand = bmGetBankBrand(m);
+                const movementDate = new Date(m.created_at);
+                const today = new Date(); today.setHours(0, 0, 0, 0);
+                const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
+                const dateOnly = new Date(movementDate); dateOnly.setHours(0, 0, 0, 0);
+                const date = dateOnly.getTime() === today.getTime() ? 'اليوم' : (dateOnly.getTime() === yesterday.getTime() ? 'أمس' : movementDate.toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' }));
+                row.innerHTML = `
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        <span class="shrink-0 w-9 h-9 rounded-xl flex items-center justify-center text-[10px] font-bold ${brand.wallet ? 'bg-amber-500/15 text-amber-300 border border-amber-500/30' : 'bg-emerald-500/15 text-emerald-300 border border-emerald-500/25'}">${brand.mark}</span>
+                        <div class="min-w-0">
+                            <div class="text-[12.5px] font-semibold text-slate-100 truncate">${m.needs_review ? '<span class="bm-review-badge">⚠️</span> ' : ''}${desc}</div>
+                            <div class="text-[10.5px] text-slate-500">${BM_TYPE_LABELS[m.event_type] || m.label} · ${date}${brand.label ? ` · ${brand.label}` : ''}</div>
+                        </div>
+                    </div>
+                    <div class="text-left shrink-0">
+                        <div class="text-[13px] font-bold ${amountClass}">${sign}${bmFmt(m.amount)} ج.م</div>
+                        ${m.needs_review ? `<button class="bm-review-btn text-[10.5px] font-bold text-emerald-400" data-id="${m.id}">حدد نوعها</button>` : ''}
+                    </div>`;
+                list.appendChild(row);
+            });
+            list.querySelectorAll('.bm-review-btn').forEach((btn) => btn.addEventListener('click', () => bmOpenReviewModal(btn.dataset.id)));
+        }
+        document.getElementById('bank-movements-filters')?.querySelectorAll('.bm-filter-btn').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.bm-filter-btn').forEach((b) => b.classList.remove('active'));
+                btn.classList.add('active');
+                bmFilter = btn.dataset.filter;
+                bmRenderList();
+            });
+        });
+        function bmOpenReviewModal(eventId) {
+            const movement = bmMovements.find((m) => String(m.id) === String(eventId));
+            if (!movement) return;
+            const root = document.getElementById('bank-movements-review-root');
+            root.innerHTML = `
+                <div id="bm-review-backdrop" class="fixed inset-0 z-[60] flex items-end justify-center bg-black/70">
+                    <div class="w-full max-w-lg rounded-t-3xl bg-slate-950 border-t border-slate-800 px-4 pt-4 pb-6">
+                        <h3 class="text-sm font-black text-slate-100 mb-1.5">الحركة دي إيه فعليًا؟</h3>
+                        <p class="text-[11.5px] text-slate-400 leading-relaxed mb-4">${movement.description || movement.counterparty || 'تحويل'} — ${bmFmt(movement.amount)} ج.م. حدد نوعها عشان تتسجل في مكانها الصح.</p>
+                        <div class="flex flex-col gap-2">
+                            <button data-r="debt_lent" class="rounded-xl border border-slate-700 px-3 py-2.5 text-[12.5px] text-slate-200 text-right">ليّا عند الشخص ده (دين ليك)</button>
+                            <button data-r="debt_borrowed" class="rounded-xl border border-slate-700 px-3 py-2.5 text-[12.5px] text-slate-200 text-right">عليّا للشخص ده (دين عليك)</button>
+                            <button data-r="expense" class="rounded-xl border border-slate-700 px-3 py-2.5 text-[12.5px] text-slate-200 text-right">كان مصروف / دفعت مقابل حاجة</button>
+                            <button data-r="income" class="rounded-xl border border-slate-700 px-3 py-2.5 text-[12.5px] text-slate-200 text-right">دخل جاني</button>
+                            <button data-r="keep_transfer" class="rounded-xl border border-slate-700 px-3 py-2.5 text-[12.5px] text-slate-200 text-right">لأ، سيبها حركة بنكية عادية</button>
+                        </div>
+                    </div>
+                </div>`;
+            root.querySelectorAll('[data-r]').forEach((btn) => btn.addEventListener('click', () => bmResolveMovement(eventId, btn.dataset.r)));
+            document.getElementById('bm-review-backdrop').addEventListener('click', (e) => { if (e.target.id === 'bm-review-backdrop') root.innerHTML = ''; });
+        }
+        async function bmResolveMovement(eventId, resolution) {
+            document.getElementById('bank-movements-review-root').innerHTML = '';
+            try {
+                await fetch('/api?route=bank-movements', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({ action: 'resolve', eventId, resolution }) });
+                await loadBankMovements();
+            } catch (e) { /* متبقاش تفشل الواجهة لو فشل التحديث؛ المستخدم يقدر يحاول تاني */ }
+        }
+        document.getElementById('bank-movements-card')?.addEventListener('click', openBankMovementsSheet);
+        document.getElementById('bank-movements-close')?.addEventListener('click', closeBankMovementsSheet);
+        document.getElementById('bank-movements-sheet')?.addEventListener('click', (e) => { if (e.target.id === 'bank-movements-sheet') closeBankMovementsSheet(); });
         // ============ نطلب آخر chunk قبل stop؛ على بعض أجهزة Android حدث stop يصل قبل اكتمال تسليم
         // آخر dataavailable، فتطلع المعاينة بملف صغير جدًا (رأس WebM فقط) رغم أن مدتها ظاهرة وصوتها مسموع. ============
         function stopQuickEntryRecording(reason = 'user') {
@@ -7717,7 +7946,7 @@
 
         // ============ إحالة — رابط قابل للنسخ/المشاركة ============
         (function setupReferral() {
-            const REFERRAL_URL = 'https://buypilot-team.vercel.app';
+            const REFERRAL_URL = 'https://dabbar.online';
             const REFERRAL_TEXT = `دبّر خلاني أخيرًا أعرف فلوسي رايحة فين 🌱 جربه، هيفرق معاك: ${REFERRAL_URL}`;
             const btn = document.getElementById('account-referral-copy-btn');
             const label = document.getElementById('account-referral-copy-label');
@@ -7976,6 +8205,22 @@
             asstChatLog.appendChild(wrap);
             asstChatLog.scrollTop = asstChatLog.scrollHeight;
             return wrap;
+        }
+
+        let asstHistoryLoaded = false;
+        async function loadAsstChatHistory() {
+            if (asstHistoryLoaded) return; // نجيبها مرة واحدة بس لحد ما الصفحة تتعمل ريفريش
+            try {
+                const result = await asstApi('chat_history', {});
+                const messages = Array.isArray(result.messages) ? result.messages : [];
+                if (messages.length) {
+                    asstChatLog.innerHTML = '';
+                    messages.forEach((m) => appendChatBubble(m.text, m.role === 'user' ? 'user' : 'bot'));
+                }
+                asstHistoryLoaded = true;
+            } catch (e) {
+                // فشل تحميل الـ history مش لازم يمنع المستخدم من الكتابة في الشات، فبنسكت هنا بهدوء ونجرب تاني بعدين
+            }
         }
 
         async function sendAsstChat(question, { roast = false } = {}) {

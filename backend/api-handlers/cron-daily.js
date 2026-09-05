@@ -6,7 +6,7 @@ import { getRemindersNeedingNotification, markReminderNotified, buildReminderMes
 import { generateFriendlyReminderIntro } from '../../lib/groq.js';
 import { getAllUsers } from '../../lib/users.js';
 import { claimCronSlot } from '../../lib/cronRuns.js';
-import { refreshPortfolioMarketPrices, savePortfolioSnapshot, getPortfolioDigest, buildPortfolioDigestMessage } from '../../lib/investments.js';
+import { refreshPortfolioMarketPrices, savePortfolioSnapshot, getPortfolioDigest, buildPortfolioDigestMessage, checkPortfolioPriceAlerts, buildPortfolioAlertTelegramMessage, buildPortfolioAlertPushPayload } from '../../lib/investments.js';
 import { CATEGORY_EMOJI, CRON_SECRET, ADMIN_TELEGRAM_ID, isModelsCheckOverdue } from '../../lib/config.js';
 import { claimPushRun, getNotificationPreferences, hasActivePushSubscription, sendPushToUser } from '../../lib/webPush.js';
 
@@ -74,6 +74,27 @@ async function saveDailyPortfolioSnapshot(userId) {
   const claimed = await claimCronSlot(userId, 'portfolio_snapshot', new Date().toISOString().slice(0, 10));
   if (!claimed) return;
   await savePortfolioSnapshot(userId).catch((error) => console.error(`Portfolio snapshot failed for user ${userId}:`, error));
+}
+
+// ============ تنبيهات حركة سعر أصل استثماري (يوميًا) — Push لكل المستخدمين، وتليجرام للمرتبطين المشتركين بس ============
+async function sendPortfolioPriceAlerts(userId, chatId, telegramLinked, isSubscribed) {
+  const claimed = await claimCronSlot(userId, 'portfolio_price_alerts', new Date().toISOString().slice(0, 10));
+  if (!claimed) return;
+
+  const alerts = await checkPortfolioPriceAlerts(userId).catch((error) => {
+    console.error(`checkPortfolioPriceAlerts failed for user ${userId}:`, error);
+    return [];
+  });
+  if (!alerts.length) return;
+
+  for (const alert of alerts) {
+    if (await hasActivePushSubscription(userId)) {
+      await sendPushToUser(userId, buildPortfolioAlertPushPayload(alert)).catch((error) => console.error(`Portfolio alert push failed for user ${userId}:`, error));
+    }
+    if (telegramLinked && isSubscribed) {
+      await sendTelegramMessage(chatId, buildPortfolioAlertTelegramMessage(alert), 'HTML').catch((error) => console.error(`Portfolio alert telegram failed for user ${userId}:`, error));
+    }
+  }
 }
 
 // ============ ملخص حركة المحفظة كل 3 أيام (Telegram) — بس للمشتركين المرتبطين بتليجرام ============
@@ -218,6 +239,9 @@ async function processUser(user, { isFriday, isLastDayOfMonth, monthKey, reminde
       await refreshPortfolioMarketPrices(userId).catch((error) => console.error(`Portfolio price sync failed for user ${userId}:`, error));
     }
     // تسجيل صورة يومية من المحفظة — بيانات فقط، لكل المستخدمين، مش مربوط بالاشتراك
+    // ملحوظة: بنجيب تنبيهات حركة الأسعار الأول (بيقارن بأمس) قبل ما نكتب صورة النهاردة فوقها
+    const telegramLinkedEarly = Number(userId) > 0 && Number(chatId) > 0;
+    await sendPortfolioPriceAlerts(userId, chatId, telegramLinkedEarly, isSubscribed).catch((error) => console.error(`Portfolio price alerts failed for user ${userId}:`, error));
     await saveDailyPortfolioSnapshot(userId);
 
     // إشعارات الـ push (تذكير يومي، ملخص يومي/أسبوعي) بتتبعت لكل المستخدمين
@@ -236,7 +260,7 @@ async function processUser(user, { isFriday, isLastDayOfMonth, monthKey, reminde
 
     // الحساب المستقل يستفيد من كل إشعارات المتصفح، لكن لا نرسل له أي رسالة
     // عبر Telegram لأن chat_id هنا placeholder سالب وليس Chat حقيقيًا.
-    const telegramLinked = Number(userId) > 0 && Number(chatId) > 0;
+    const telegramLinked = telegramLinkedEarly;
     if (!telegramLinked) return { ok: true, pushOnly: true };
 
     // تذكير قبل انتهاء الاشتراك بـ 3 أيام أو أقل (مرة واحدة يوميًا لحد ما يجدد)

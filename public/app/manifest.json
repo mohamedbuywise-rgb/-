@@ -1,0 +1,86 @@
+{
+  "name": "دبّر — تتبع مصاريفك وديونك",
+  "short_name": "دبّر",
+  "id": "./",
+  "description": "تتبع مصاريفك وديونك بالصوت، وشوف تقاريرك أول بأول",
+  "start_url": "./dabbar-dashboard-full.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F6F1E7",
+  "theme_color": "#0E655B",
+  "dir": "rtl",
+  "lang": "ar",
+  "icons": [
+    {
+      "src": "./icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "share_target": {
+    "action": "./dabbar-quick-add.html",
+    "method": "POST",
+    "enctype": "multipart/form-data",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url",
+      "files": [
+        {
+          "name": "audio",
+          "accept": [
+            "audio/*",
+            ".ogg",
+            ".oga",
+            ".opus",
+            ".mp3",
+            ".m4a",
+            ".wav",
+            ".amr",
+            ".aac",
+            ".3gp",
+            ".flac",
+            ".caf",
+            ".mka",
+            "audio/ogg",
+            "audio/opus",
+            "audio/x-opus+ogg",
+            "audio/x-m4a",
+            "audio/x-wav",
+            "audio/3gpp",
+            "application/ogg"
+          ]
+        },
+        {
+          "name": "image",
+          "accept": [
+            "image/*",
+            ".jpg",
+            ".jpeg",
+            ".png",
+            ".webp",
+            ".heic"
+          ]
+        }
+      ]
+    }
+  },
+  "shortcuts": [
+    {
+      "name": "إدخال سريع",
+      "short_name": "إدخال سريع",
+      "url": "./dabbar-quick-add.html",
+      "icons": [
+        { "src": "./icons/icon-192.png", "sizes": "192x192" }
+      ]
+    }
+  ]
+}

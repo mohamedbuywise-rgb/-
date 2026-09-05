@@ -1,7 +1,7 @@
 import { supabase } from '../../lib/supabaseClient.js';
 import { getRecentExpensesSummaryText } from '../../lib/expenses.js';
 import { getDebtsSummaryText } from '../../lib/debts.js';
-import { extractItemizedReceiptFromImageBase64, askDabbarChat, classifyMessage, transcribeAudioBase64 } from '../../lib/groq.js';
+import { extractItemizedReceiptFromImageBase64, askDabbarChat, askDabbarRoast, classifyMessage, transcribeAudioBase64 } from '../../lib/groq.js';
 import { saveInvoiceRecord, deleteInvoiceById } from '../../lib/invoices.js';
 import { hasActiveSubscription, isInTrial } from '../../lib/users.js';
 import { checkOcrUsage, checkChatUsage, checkVoiceUsage, checkTextUsage, refundOcrUsage, refundUsage } from '../../lib/rateLimits.js';
@@ -292,9 +292,11 @@ async function handleChatHistory(userId, body, res) {
 }
 
 async function handleAsk(userId, body, res) {
-  const question = (body.question || '').trim();
+  // mode: "roast" -> زرار "هزقني بدم خفيف" — مفيش سؤال مكتوب من المستخدم، بيتسجل كأنه طلب ثابت في الشات.
+  const isRoast = body.mode === 'roast';
+  const question = isRoast ? 'هزقني بدم خفيف 😂' : (body.question || '').trim();
   const sessionId = String(body.sessionId || DEFAULT_SESSION_ID).slice(0, 80);
-  if (!question) return res.status(400).json({ error: 'اكتب سؤالك الأول.' });
+  if (!isRoast && !question) return res.status(400).json({ error: 'اكتب سؤالك الأول.' });
   if (question.length > 500) return res.status(400).json({ error: 'السؤال طويل أوي، اختصره شوية.' });
 
   // فحص حد "اسأل دبّر" الشهري (أو حد التجربة) قبل ما نستدعي Groq خالص
@@ -339,10 +341,10 @@ async function handleAsk(userId, body, res) {
     : '';
 
   const dataContext = `${expensesText}\n\n${debtsText}\n\n${goalText}${historyText ? `\n\n${historyText}` : ''}`;
-  const answer = await askDabbarChat(question, dataContext);
+  const answer = isRoast ? await askDabbarRoast(dataContext) : await askDabbarChat(question, dataContext);
 
-  // askDabbarChat يرجع نصًا بديلًا عند الفشل؛ لا نردّ العداد إذا وصل رد حقيقي.
-  const failed = !answer || answer.startsWith('معلش، حصل خطأ بسيط');
+  // كلا الدالتين بترجع نص بديل لطيف عند الفشل؛ لا نردّ العداد إذا وصل رد حقيقي.
+  const failed = !answer || answer.startsWith('معلش');
   if (failed) {
     await refundUsage(userId, 'chat');
   } else {

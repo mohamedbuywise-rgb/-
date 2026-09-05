@@ -2972,6 +2972,7 @@
                     </div>
                 </div>
                 <div class="flex gap-1.5 flex-wrap" id="asst-chat-suggestions">
+                    <button class="asst-chip asst-chip-roast text-[10.5px] font-bold bg-amber-500/10 border border-amber-500/40 text-amber-400 px-2.5 py-1.5 rounded-full" data-roast="1">😂 هزقني بدم خفيف</button>
                     <button class="asst-chip text-[10.5px] bg-slate-900 border border-slate-800 text-slate-400 px-2.5 py-1.5 rounded-full">صرفت زيادة ليه الشهر ده؟</button>
                     <button class="asst-chip text-[10.5px] bg-slate-900 border border-slate-800 text-slate-400 px-2.5 py-1.5 rounded-full">إزاي أوفر أكتر؟</button>
                     <button class="asst-chip text-[10.5px] bg-slate-900 border border-slate-800 text-slate-400 px-2.5 py-1.5 rounded-full">أقدر أشتري حاجة بـ 1000 جنيه؟</button>
@@ -7977,14 +7978,14 @@
             return wrap;
         }
 
-        async function sendAsstChat(question) {
+        async function sendAsstChat(question, { roast = false } = {}) {
             if (!question) return;
             appendChatBubble(question, 'user');
-            const typingBubble = appendChatBubble('بيكتب...', 'bot');
+            const typingBubble = appendChatBubble(roast ? 'بدبّر بحسبلك... 😏' : 'بيكتب...', 'bot');
             const sendBtn = document.getElementById('asst-chat-send');
             sendBtn.disabled = true;
             try {
-                const result = await asstApi('ask', { question });
+                const result = await asstApi('ask', roast ? { mode: 'roast' } : { question });
                 typingBubble.lastElementChild.textContent = result.answer;
                 updateUsageBadge('asst-chat-usage', result.usage);
             } catch (e) {
@@ -8006,7 +8007,7 @@
             if (e.key === 'Enter') document.getElementById('asst-chat-send').click();
         });
         document.querySelectorAll('.asst-chip').forEach((chip) => {
-            chip.addEventListener('click', () => sendAsstChat(chip.textContent));
+            chip.addEventListener('click', () => sendAsstChat(chip.textContent, { roast: chip.dataset.roast === '1' }));
         });
 
         // بيانات ديناميكية للـ badge والعنوان اللي فوق حسب التاب المفتوح، بدل نص ثابت في data-* attributes

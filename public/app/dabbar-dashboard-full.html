@@ -2459,7 +2459,13 @@
                         <span id="portfolio-form-title" class="portfolio-form-title">إضافة أصل جديد</span>
                         <input id="portfolio-add-name" type="text" placeholder="اسم الأصل (مثلاً: ذهب، صناديق بنك مصر)" class="portfolio-form-input">
                         <input id="portfolio-add-sub" type="text" placeholder="وصف اختياري (مثلاً: 120 جرام أو عيار 24)" class="portfolio-form-input">
+                        <div style="display:flex;gap:.5rem;">
+                            <input id="portfolio-add-quantity" type="number" inputmode="decimal" min="0" step="any" placeholder="الكمية (اختياري)" class="portfolio-form-input" style="flex:1;">
+                            <input id="portfolio-add-unit" type="text" placeholder="الوحدة/الرمز — جرام، BTC، أو رمز سهم زي COMI.CA" class="portfolio-form-input" style="flex:1.4;">
+                        </div>
+                        <p class="text-[10px] text-slate-500 -mt-1">لو حطيت كمية ورمز مدعوم (ذهب، عملة رقمية، أو سهم بالتيكر بتاعه) هنحدّثلك القيمة تلقائيًا كل يوم من سعر السوق.</p>
                         <input id="portfolio-add-amount" type="number" inputmode="numeric" placeholder="القيمة الحالية بالجنيه" class="portfolio-form-input">
+                        <input id="portfolio-add-cost" type="number" inputmode="numeric" min="0" placeholder="قيمة الشراء بالجنيه (اختياري — عشان نحسبلك الربح/الخسارة)" class="portfolio-form-input">
                         <input id="portfolio-add-alert" type="number" inputmode="numeric" min="0" placeholder="نبهني لو تحرك أكثر من % في اليوم (اختياري)" class="portfolio-form-input">
 
 
@@ -2486,44 +2492,7 @@
                 <span class="shrink-0 text-slate-400">‹</span>
             </button>
 
-            <!-- Bottom Sheet: الحركات البنكية — بدل ما تفتح صفحة منفصلة (كانت بتعمل بطء وأخطاء 404) -->
-            <div id="bank-movements-sheet" class="fixed inset-0 z-50 hidden items-end justify-center bg-black/70 backdrop-blur-sm">
-                <div class="w-full max-w-lg max-h-[88vh] overflow-y-auto rounded-t-3xl bg-slate-950 border-t border-slate-800 px-4 pt-4 pb-6">
-                    <div class="flex items-center justify-between gap-3 mb-3">
-                        <h3 class="text-sm font-black text-slate-100">الحركات البنكية</h3>
-                        <button id="bank-movements-close" type="button" class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-800 text-slate-300">✕</button>
-                    </div>
-                    <details class="rounded-xl bg-emerald-500/[0.06] border border-emerald-500/20 mb-3">
-                        <summary class="cursor-pointer list-none px-3 py-2.5 text-[11px] font-bold text-emerald-300 flex items-center justify-between">دليل تصنيف الحركات البنكية <span>▾</span></summary>
-                        <ul class="px-3 pb-3 pt-0 text-[10.5px] text-slate-400 leading-relaxed space-y-1.5">
-                            <li>السحب والإيداع والتحويل بين حساباتك بتتسجل هنا للمتابعة بس، من غير ما تدخل في إجمالي مصروفاتك.</li>
-                            <li>الاشتراكات والمشتريات بتتحسب مصروف حقيقي ومباشر زي أي حاجة تانية.</li>
-                            <li>⚠️ أي حركة مبهمة هتتحط تحت "تحتاج مراجعة" لحد ما تحددها بنفسك.</li>
-                        </ul>
-                    </details>
-                    <div id="bank-movements-status" class="text-center text-[12px] text-slate-500 py-6">بنجيب حركاتك...</div>
-                    <div id="bank-movements-empty" class="hidden text-center py-10">
-                        <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-slate-900 flex items-center justify-center text-xl">🏦</div>
-                        <p id="bank-movements-empty-msg" class="text-[12.5px] text-slate-400 leading-relaxed">لم تقم بأي عمليات مالية.</p>
-                    </div>
-                    <div id="bank-movements-content" class="hidden">
-                        <div class="grid grid-cols-3 gap-2 mb-3">
-                            <div class="rounded-xl bg-rose-500/10 p-2.5 text-center"><div class="text-[10px] text-rose-300 mb-1">سحب</div><div id="bm-stat-withdrawal" class="text-[13px] font-bold text-rose-300">0 ج.م</div></div>
-                            <div class="rounded-xl bg-emerald-500/10 p-2.5 text-center"><div class="text-[10px] text-emerald-300 mb-1">إيداع</div><div id="bm-stat-deposit" class="text-[13px] font-bold text-emerald-300">0 ج.م</div></div>
-                            <div class="rounded-xl bg-slate-800/60 p-2.5 text-center"><div class="text-[10px] text-slate-400 mb-1">تحويل</div><div id="bm-stat-transfer" class="text-[13px] font-bold text-slate-200">0 ج.م</div></div>
-                        </div>
-                        <div class="flex gap-1.5 overflow-x-auto mb-3 pb-1" id="bank-movements-filters">
-                            <button class="bm-filter-btn active shrink-0 rounded-full px-3 py-1.5 text-[11px] font-bold" data-filter="all">الكل</button>
-                            <button class="bm-filter-btn shrink-0 rounded-full px-3 py-1.5 text-[11px] font-bold" data-filter="withdrawal">سحب / مشتريات</button>
-                            <button class="bm-filter-btn shrink-0 rounded-full px-3 py-1.5 text-[11px] font-bold" data-filter="deposit">إيداع / وارد</button>
-                            <button class="bm-filter-btn shrink-0 rounded-full px-3 py-1.5 text-[11px] font-bold" data-filter="review">تحتاج مراجعة ⚠️</button>
-                        </div>
-                        <div id="bank-movements-list" class="rounded-2xl bg-slate-900/60 border border-slate-800 divide-y divide-slate-800"></div>
-                    </div>
-                </div>
-            </div>
-            <div id="bank-movements-review-root"></div>
-            </button>
+            <!-- الحركات البنكية Bottom Sheet + مودال المراجعة اتنقلوا لآخر الصفحة (قبل </body>) عشان يبقوا برة أي كونتينر عنده overflow/transform ممكن يكسر الـ position:fixed بتاعهم -->
 
             <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3" id="monthly-categories-card">
                 <div id="balance-card" class="hidden rounded-[1.35rem] border border-emerald-500/20 bg-emerald-500/[0.045] p-3.5 space-y-3">
@@ -3819,6 +3788,45 @@
             </button>
         </div>
     </div>
+
+    <!-- الحركات البنكية Bottom Sheet — متعمّدين نحطها هنا (برة الكونتينر المقيّد اللي فوق، وقبل السكريبت الرئيسي
+         عشان الـ getElementById بتاعته يلاقيها موجودة وقت التنفيذ) -->
+    <div id="bank-movements-sheet" class="fixed inset-0 z-50 hidden items-end justify-center bg-black/70 backdrop-blur-sm">
+        <div class="w-full max-w-lg max-h-[88vh] overflow-y-auto rounded-t-3xl bg-slate-950 border-t border-slate-800 px-4 pt-4 pb-6">
+            <div class="flex items-center justify-between gap-3 mb-3">
+                <h3 class="text-sm font-black text-slate-100">الحركات البنكية</h3>
+                <button id="bank-movements-close" type="button" class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-800 text-slate-300">✕</button>
+            </div>
+            <details class="rounded-xl bg-emerald-500/[0.06] border border-emerald-500/20 mb-3">
+                <summary class="cursor-pointer list-none px-3 py-2.5 text-[11px] font-bold text-emerald-300 flex items-center justify-between">دليل تصنيف الحركات البنكية <span>▾</span></summary>
+                <ul class="px-3 pb-3 pt-0 text-[10.5px] text-slate-400 leading-relaxed space-y-1.5">
+                    <li>السحب والإيداع والتحويل بين حساباتك بتتسجل هنا للمتابعة بس، من غير ما تدخل في إجمالي مصروفاتك.</li>
+                    <li>الاشتراكات والمشتريات بتتحسب مصروف حقيقي ومباشر زي أي حاجة تانية.</li>
+                    <li>⚠️ أي حركة مبهمة هتتحط تحت "تحتاج مراجعة" لحد ما تحددها بنفسك.</li>
+                </ul>
+            </details>
+            <div id="bank-movements-status" class="text-center text-[12px] text-slate-500 py-6">بنجيب حركاتك...</div>
+            <div id="bank-movements-empty" class="hidden text-center py-10">
+                <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-slate-900 flex items-center justify-center text-xl">🏦</div>
+                <p id="bank-movements-empty-msg" class="text-[12.5px] text-slate-400 leading-relaxed">لم تقم بأي عمليات مالية.</p>
+            </div>
+            <div id="bank-movements-content" class="hidden">
+                <div class="grid grid-cols-3 gap-2 mb-3">
+                    <div class="rounded-xl bg-rose-500/10 p-2.5 text-center"><div class="text-[10px] text-rose-300 mb-1">سحب</div><div id="bm-stat-withdrawal" class="text-[13px] font-bold text-rose-300">0 ج.م</div></div>
+                    <div class="rounded-xl bg-emerald-500/10 p-2.5 text-center"><div class="text-[10px] text-emerald-300 mb-1">إيداع</div><div id="bm-stat-deposit" class="text-[13px] font-bold text-emerald-300">0 ج.م</div></div>
+                    <div class="rounded-xl bg-slate-800/60 p-2.5 text-center"><div class="text-[10px] text-slate-400 mb-1">تحويل</div><div id="bm-stat-transfer" class="text-[13px] font-bold text-slate-200">0 ج.م</div></div>
+                </div>
+                <div class="flex gap-1.5 overflow-x-auto mb-3 pb-1" id="bank-movements-filters">
+                    <button class="bm-filter-btn active shrink-0 rounded-full px-3 py-1.5 text-[11px] font-bold" data-filter="all">الكل</button>
+                    <button class="bm-filter-btn shrink-0 rounded-full px-3 py-1.5 text-[11px] font-bold" data-filter="withdrawal">سحب / مشتريات</button>
+                    <button class="bm-filter-btn shrink-0 rounded-full px-3 py-1.5 text-[11px] font-bold" data-filter="deposit">إيداع / وارد</button>
+                    <button class="bm-filter-btn shrink-0 rounded-full px-3 py-1.5 text-[11px] font-bold" data-filter="review">تحتاج مراجعة ⚠️</button>
+                </div>
+                <div id="bank-movements-list" class="rounded-2xl bg-slate-900/60 border border-slate-800 divide-y divide-slate-800"></div>
+            </div>
+        </div>
+    </div>
+    <div id="bank-movements-review-root"></div>
 
     <script>
         /* ===== Supabase auth guard + logout =====
@@ -5478,6 +5486,7 @@
             renderPlanning(window.__dashboardData || {});
             renderBalanceCard(window.__dashboardData?.month || {});
             renderInAppNotifications(window.__dashboardData || {});
+            if (window.__dashboardData?.month) renderCategories(window.__dashboardData.month); // نعيد رسم التصنيفات عشان تظهر حدود الفئات لو وصلت متأخرة عن بيانات الداشبورد
         }
         async function savePlanningSettings() {
             const current = planningSettings();
@@ -5495,6 +5504,7 @@
                 }
             } catch {}
             renderPlanning(window.__dashboardData || {}); renderBalanceCard(window.__dashboardData?.month || {}); renderInAppNotifications(window.__dashboardData || {});
+            if (window.__dashboardData?.month) renderCategories(window.__dashboardData.month);
             if (saveSucceeded) {
                 quickStatus('اتحفظت خطتك المالية.', 'success');
             } else {
@@ -5915,13 +5925,34 @@
             }
 
             const listEl = document.getElementById('all-categories-list');
+            // بنفتكر اسم الفئة المفتوحة والفلتر المختار قبل ما نعيد الرسم، عشان التحديث التلقائي (كل 20 ثانية)
+            // ميقفلش الفئة اللي المستخدم فاتحها لوحده من غير ما يحس — كان ده الباج.
+            const prevOpenIdx = listEl.querySelector('.category-items:not(.hidden)')?.getAttribute('data-category-items');
+            const prevOpenName = prevOpenIdx !== undefined && prevOpenIdx !== null ? listEl.querySelector(`.category-toggle[data-category-idx="${prevOpenIdx}"] [data-cat-name]`)?.getAttribute('data-cat-name') : null;
+            const prevActiveRangeBtn = prevOpenIdx !== null ? listEl.querySelector(`.cat-filter-btn[data-cat-idx="${prevOpenIdx}"].bg-emerald-500`) : null;
+            const prevRange = prevActiveRangeBtn ? prevActiveRangeBtn.getAttribute('data-range') : 'all';
+
             if (month.byCategory.length === 0) {
                 listEl.innerHTML = '<p class="text-slate-500">سجّل أول عملية وهتلاقي هنا أكتر فئة بتصرف فيها.</p>';
             } else {
                 listEl.innerHTML = month.byCategory.map((c, idx) => {
                     const items = Array.isArray(c.items) ? c.items : [];
+                    // حد الفئة (Category Limit) — لو المستخدم حاطط ليمت للفئة دي من "خطتي المالية"
+                    const limit = Number(window.__financialSettings?.categoryBudgets?.[c.name] || 0);
+                    const hasLimit = limit > 0;
+                    const limitPercent = hasLimit ? Math.min(Math.round((c.amount / limit) * 100), 999) : 0;
+                    const nearOrOverLimit = hasLimit && limitPercent >= 80; // من 80% وفوق بيبقى أحمر (تحذير)، تحت كده أخضر عادي
+                    const overLimit = hasLimit && c.amount > limit;
+                    const remaining = hasLimit ? Math.max(limit - c.amount, 0) : 0;
+                    const limitBoxHtml = hasLimit ? `
+                        <div class="rounded-xl border ${nearOrOverLimit ? 'bg-rose-500/10 border-rose-500/30' : 'bg-emerald-500/10 border-emerald-500/25'} px-2.5 py-2 mt-2 mb-1.5 flex items-center justify-between">
+                            <span class="text-[10.5px] font-bold ${nearOrOverLimit ? 'text-rose-400' : 'text-emerald-400'}">${overLimit ? `⚠️ عديت حد الفئة بـ ${fmt(c.amount - limit)}` : `باقي ${fmt(remaining)} من الحد`}</span>
+                            <span class="text-[10px] ${nearOrOverLimit ? 'text-rose-400' : 'text-emerald-400'}">${fmt(c.amount)} / ${fmt(limit)}</span>
+                        </div>
+                    ` : '';
                     const itemsHtml = items.length ? `
-                        <div class="flex gap-1.5 pt-2 pb-1">
+                        ${limitBoxHtml}
+                        <div class="flex gap-1.5 pt-1 pb-1">
                             <button type="button" class="cat-filter-btn flex-1 rounded-lg py-1 text-[10px] font-bold bg-emerald-500 text-slate-950" data-cat-idx="${idx}" data-range="all">الشهر كله</button>
                             <button type="button" class="cat-filter-btn flex-1 rounded-lg py-1 text-[10px] font-bold bg-slate-800 text-slate-400" data-cat-idx="${idx}" data-range="7">آخر 7 أيام</button>
                         </div>
@@ -5934,12 +5965,12 @@
                                 <span class="shrink-0 text-[11px] font-bold text-slate-200">${fmt(it.amount)}</span>
                             </div>
                         `).join('')}</div>
-                    ` : '<p class="text-[10px] text-slate-500 py-2">مفيش تفاصيل متاحة لهذه الفئة.</p>';
+                    ` : `${limitBoxHtml}<p class="text-[10px] text-slate-500 py-2">مفيش تفاصيل متاحة لهذه الفئة.</p>`;
                     return `
                     <div>
                         <button type="button" class="category-toggle w-full text-right" data-category-idx="${idx}" aria-expanded="false">
                             <div class="flex justify-between mb-1 text-slate-300 items-center">
-                                <span>${getCategoryEmoji(c.name)} ${c.name} <span class="category-toggle-arrow inline-block transition-transform text-[9px] text-slate-500">‹</span></span>
+                                <span data-cat-name="${c.name}">${getCategoryEmoji(c.name)} ${c.name} <span class="category-toggle-arrow inline-block transition-transform text-[9px] text-slate-500">‹</span></span>
                                 <span class="font-bold text-slate-200">${fmt(c.amount)} (${c.percent}%)</span>
                             </div>
                             <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
@@ -5982,6 +6013,23 @@
                         });
                     });
                 });
+
+                // نرجّع نفس الفئة (بالاسم مش بالرقم، عشان الترتيب ممكن يتغيّر بين تحديث وتاني) والفلتر اللي كانوا مفتوحين قبل إعادة الرسم
+                if (prevOpenName) {
+                    const restoredToggle = Array.from(listEl.querySelectorAll('.category-toggle')).find((btn) => btn.querySelector('[data-cat-name]')?.getAttribute('data-cat-name') === prevOpenName);
+                    if (restoredToggle) {
+                        const idx = restoredToggle.getAttribute('data-category-idx');
+                        const panel = listEl.querySelector(`[data-category-items="${idx}"]`);
+                        const arrow = restoredToggle.querySelector('.category-toggle-arrow');
+                        panel.classList.remove('hidden');
+                        restoredToggle.setAttribute('aria-expanded', 'true');
+                        if (arrow) arrow.style.transform = 'rotate(-90deg)';
+                        if (prevRange === '7') {
+                            const rangeBtn = listEl.querySelector(`.cat-filter-btn[data-cat-idx="${idx}"][data-range="7"]`);
+                            if (rangeBtn) rangeBtn.click();
+                        }
+                    }
+                }
             }
         }
 
@@ -6600,8 +6648,18 @@
             nameInput.value = asset?.name || '';
             subInput.value = asset?.sub_label || '';
             amountInput.value = asset?.amount ?? '';
+            const quantityInput = document.getElementById('portfolio-add-quantity');
+            const unitInput = document.getElementById('portfolio-add-unit');
+            if (quantityInput) quantityInput.value = asset?.quantity ?? '';
+            if (unitInput) unitInput.value = asset?.unit ?? '';
             const alertInput = document.getElementById('portfolio-add-alert');
             if (alertInput) alertInput.value = asset?.alert_threshold_pct ?? '';
+            // قيمة الشراء بتتدخل مرة واحدة بس وقت الإضافة الأولى للأصل، مش وقت تعديل القيمة الحالية بعد كده
+            const costInput = document.getElementById('portfolio-add-cost');
+            if (costInput) {
+                costInput.classList.toggle('hidden', Boolean(asset));
+                costInput.value = '';
+            }
             const picker = document.getElementById('portfolio-icon-picker');
             if (picker) { const saved = asset?.name ? localStorage.getItem(`dabbar-portfolio-icon:${asset.name.trim().toLowerCase()}`) : null; picker.dataset.selected = saved || ''; picker.querySelectorAll('.selected').forEach((x) => x.classList.toggle('selected', x.dataset.iconValue === saved)); }
             errEl.classList.add('hidden');
@@ -6623,11 +6681,17 @@
             const nameInput = document.getElementById('portfolio-add-name');
             const subInput = document.getElementById('portfolio-add-sub');
             const amountInput = document.getElementById('portfolio-add-amount');
+            const quantityInput = document.getElementById('portfolio-add-quantity');
+            const unitInput = document.getElementById('portfolio-add-unit');
             const alertInput = document.getElementById('portfolio-add-alert');
+            const costInput = document.getElementById('portfolio-add-cost');
             if (nameInput) nameInput.value = '';
             if (subInput) subInput.value = '';
             if (amountInput) amountInput.value = '';
+            if (quantityInput) quantityInput.value = '';
+            if (unitInput) unitInput.value = '';
             if (alertInput) alertInput.value = '';
+            if (costInput) { costInput.value = ''; costInput.classList.remove('hidden'); }
         }
 
         (function bindPortfolioAddForm() {
@@ -6648,8 +6712,14 @@
                 const name = nameInput.value.trim();
                 const subLabel = subInput.value.trim();
                 const amount = Number(amountInput.value);
+                const quantityInput = document.getElementById('portfolio-add-quantity');
+                const unitInput = document.getElementById('portfolio-add-unit');
+                const quantity = quantityInput && quantityInput.value !== '' ? Number(quantityInput.value) : null;
+                const unit = unitInput ? unitInput.value.trim() : '';
                 const alertInput = document.getElementById('portfolio-add-alert');
                 const alertThresholdPct = alertInput && alertInput.value !== '' ? Number(alertInput.value) : null;
+                const costInput = document.getElementById('portfolio-add-cost');
+                const costBasis = costInput && !costInput.classList.contains('hidden') && costInput.value !== '' ? Number(costInput.value) : null;
                 const selectedIcon = document.getElementById('portfolio-icon-picker')?.dataset.selected;
                 if (!name || !amount || amount <= 0) {
                     errEl.textContent = 'محتاج اسم الأصل وقيمة صحيحة أكبر من صفر.';
@@ -6659,7 +6729,8 @@
                 confirmBtn.disabled = true;
                 try {
                     const isEditing = Boolean(portfolioEditingId);
-                    const payload = { name, subLabel, amount, alertThresholdPct };
+                    const payload = { name, subLabel, amount, alertThresholdPct, quantity, unit };
+                    if (!isEditing && costBasis) payload.costBasis = costBasis; // قيمة الشراء بتتبعت مرة واحدة بس وقت الإضافة الأولى
                     if (isEditing) payload.assetId = portfolioEditingId;
                     await asstApi(isEditing ? 'portfolio_asset_update' : 'portfolio_asset_add', payload);
                     if (selectedIcon) localStorage.setItem(`dabbar-portfolio-icon:${name.toLowerCase()}`, selectedIcon);

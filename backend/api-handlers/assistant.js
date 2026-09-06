@@ -539,7 +539,7 @@ async function saveOneDraft(userId, draft) {
 }
 
 async function handlePortfolioAdd(userId, body, res) {
-  const result = await addPortfolioAsset(userId, { name: body.name, subLabel: body.subLabel, amount: body.amount, alertThresholdPct: body.alertThresholdPct });
+  const result = await addPortfolioAsset(userId, { name: body.name, subLabel: body.subLabel, amount: body.amount, alertThresholdPct: body.alertThresholdPct, costBasis: body.costBasis, quantity: body.quantity, unit: body.unit });
   if (result.error) return res.status(400).json({ error: result.error });
   const portfolio = await getPortfolio(userId);
   return res.status(200).json({ asset: result.asset, portfolio });
@@ -548,7 +548,7 @@ async function handlePortfolioAdd(userId, body, res) {
 async function handlePortfolioUpdate(userId, body, res) {
   const assetId = body.assetId;
   if (!assetId) return res.status(400).json({ error: 'مفيش رقم أصل اتبعت.' });
-  const result = await updatePortfolioAsset(userId, assetId, { name: body.name, subLabel: body.subLabel, amount: body.amount, alertThresholdPct: body.alertThresholdPct });
+  const result = await updatePortfolioAsset(userId, assetId, { name: body.name, subLabel: body.subLabel, amount: body.amount, alertThresholdPct: body.alertThresholdPct, quantity: body.quantity, unit: body.unit });
   if (result.error) return res.status(400).json({ error: result.error });
   const portfolio = await getPortfolio(userId);
   return res.status(200).json({ asset: result.asset, portfolio });

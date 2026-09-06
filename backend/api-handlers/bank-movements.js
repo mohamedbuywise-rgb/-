@@ -48,10 +48,15 @@ export default async function handler(req, res) {
       label: financialEventLabel(m.event_type),
     }));
 
+    // ملحوظة: "سحب/إيداع" هنا بيشملوا أي حركة خصم/إضافة حقيقية (مصروف، شراء، اشتراك...) مش بس
+    // الأنواع البنكية المحايدة (withdrawal/deposit) — عشان مشتريات زي كارفور (اللي بتتسجل كـ "مصروف"
+    // من رسائل SMS) تظهر في الإحصائية بدل ما تفضل صفر مع إنها ظاهرة في القايمة.
+    const OUTFLOW_LIKE = new Set(['withdrawal', 'expense', 'purchase', 'asset', 'subscription']);
+    const INFLOW_LIKE = new Set(['deposit', 'income', 'refund']);
     const totals = movements.reduce((acc, m) => {
-      if (m.event_type === 'withdrawal') acc.withdrawal += Number(m.amount);
-      if (m.event_type === 'deposit') acc.deposit += Number(m.amount);
-      if (m.event_type === 'transfer') acc.transfer += Number(m.amount);
+      if (OUTFLOW_LIKE.has(m.event_type)) acc.withdrawal += Number(m.amount);
+      else if (INFLOW_LIKE.has(m.event_type)) acc.deposit += Number(m.amount);
+      else if (m.event_type === 'transfer') acc.transfer += Number(m.amount);
       return acc;
     }, { withdrawal: 0, deposit: 0, transfer: 0 });
 

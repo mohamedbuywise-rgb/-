@@ -218,6 +218,36 @@
         html[data-theme="light"] .account-profile-cam-btn { background-color: #ffffff !important; border-color: #dcc98a !important; }
         html[data-theme="light"] .account-profile-name { color: #0f172a !important; }
         html[data-theme="light"] .account-profile-email { color: #64748b !important; }
+        /* كارت لوحة الشرف — نفس روح البانر الذهبي بتاع البروفايل */
+        .honor-card {
+            background:
+                radial-gradient(circle at 8% 10%, rgba(212,175,55,.18) 0%, transparent 40%),
+                radial-gradient(circle at 92% 90%, rgba(212,175,55,.14) 0%, transparent 42%),
+                linear-gradient(150deg, #14100a 0%, #0b0e18 55%, #0a0e18 100%);
+        }
+        html[data-theme="light"] .honor-card {
+            border-color: #dcc98a !important;
+            box-shadow: 0 12px 30px rgba(180,140,40,.14), 0 2px 8px rgba(15,23,42,.06) !important;
+            background:
+                radial-gradient(circle at 8% 10%, rgba(212,175,55,.22) 0%, transparent 42%),
+                radial-gradient(circle at 92% 90%, rgba(20,80,70,.10) 0%, transparent 45%),
+                linear-gradient(150deg, #fdf8ea 0%, #f6ecc9 55%, #fbf5e3 100%);
+        }
+        .honor-name-chip {
+            border: 1px solid rgba(212,175,55,.22);
+            background:
+                radial-gradient(circle at 15% 0%, rgba(212,175,55,.08) 0%, transparent 55%),
+                linear-gradient(150deg, #14100a 0%, #0d0f18 60%, #0b0e18 100%);
+        }
+        html[data-theme="light"] .honor-name-chip {
+            border-color: rgba(180,140,40,.28) !important;
+            background:
+                radial-gradient(circle at 15% 0%, rgba(212,175,55,.14) 0%, transparent 55%),
+                linear-gradient(150deg, #fdf8ea 0%, #f6ecc9 60%, #fbf5e3 100%) !important;
+        }
+        .honor-mini-avatar { background: rgba(212,175,55,.12); border: 1px solid rgba(212,175,55,.35); color: #d4af37; }
+        html[data-theme="light"] .honor-mini-avatar { color: #8a6d16 !important; }
+        html[data-theme="light"] .honor-name-chip span { color: #4a3c10 !important; }
         html[data-theme="light"] body { background-color: #f8fafc; color: #0f172a; }
         ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
         html[data-theme="light"] ::-webkit-scrollbar-thumb { background: #cbd5e1; }
@@ -2289,6 +2319,8 @@
         #bank-movements-sheet.flex { display: flex; }
         .bm-filter-btn { background: rgba(30,41,59,.6); color: #94a3b8; border: 1px solid rgba(148,163,184,.18); }
         .bm-filter-btn.active { background: rgba(16,185,129,.12); color: #34d399; border-color: rgba(52,211,153,.4); }
+        .bm-source-filter-btn { background: rgba(30,41,59,.6); color: #94a3b8; border: 1px solid rgba(148,163,184,.18); }
+        .bm-source-filter-btn.active { background: rgba(245,158,11,.12); color: #fbbf24; border-color: rgba(251,191,36,.4); }
         .bm-review-badge { color: #f2b90c; }
     </style>
 </head>
@@ -2590,6 +2622,48 @@
                 <div class="personalized-insight-actions"><button type="button" id="personalized-insight-share-daily" class="personalized-insight-share">شارك الرؤية</button><button type="button" id="personalized-insight-more-daily" class="personalized-insight-more">شوف كل مصاريف اليوم</button></div>
             </section>
 
+            <!-- عداد "المرتب لسه فاضل كام" — بيظهر بس لو المستخدم مسجل ميزانية شهرية -->
+            <div id="salary-countdown-card" class="hidden bg-gradient-to-br from-emerald-500/[0.08] to-slate-950 border border-emerald-500/25 rounded-2xl p-3.5 space-y-2 shadow-lg">
+                <div class="flex justify-between items-center text-[11px] font-semibold text-emerald-300">
+                    <span>💰 المرتب لسه فاضل كام؟</span>
+                    <span id="salary-countdown-days" class="text-slate-400"></span>
+                </div>
+                <div class="flex items-end justify-between gap-2">
+                    <div>
+                        <p class="text-[10px] text-slate-500">باقيلك</p>
+                        <h3 id="salary-countdown-remaining" class="text-lg font-black text-slate-100">—</h3>
+                    </div>
+                    <div class="text-left">
+                        <p class="text-[10px] text-slate-500">تقدر تصرف يوميًا</p>
+                        <h3 id="salary-countdown-daily" class="text-lg font-black text-emerald-400">—</h3>
+                    </div>
+                </div>
+                <div class="w-full bg-slate-800/60 h-1.5 rounded-full overflow-hidden">
+                    <div id="salary-countdown-bar" class="h-full rounded-full bg-emerald-500" style="width:0%"></div>
+                </div>
+            </div>
+            <div id="salary-countdown-empty" class="hidden bg-slate-950/40 border border-slate-800 rounded-2xl p-3.5 text-center">
+                <p class="text-[11px] text-slate-400">حط ميزانيتك الشهرية عشان نوريك تقدر تصرف كام يوميًا لحد آخر الشهر.</p>
+                <button type="button" id="salary-countdown-setup-btn" class="mt-2 text-[11px] font-bold text-emerald-400">حط ميزانيتك من هنا ←</button>
+            </div>
+
+            <!-- الحصالة اليومية — تسجيل/تتبع فقط، بدون أي تحويل فعلي -->
+            <div id="piggybank-card" class="hidden bg-gradient-to-br from-amber-500/[0.08] to-slate-950 border border-amber-500/25 rounded-2xl p-3.5 space-y-2 shadow-lg">
+                <div class="flex justify-between items-center text-[11px] font-semibold text-amber-300">
+                    <span>🐷 حصالة يوم بيوم</span>
+                    <span id="piggybank-streak" class="text-slate-400"></span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <h3 id="piggybank-saved" class="text-lg font-black text-slate-100">—</h3>
+                    <button type="button" id="piggybank-contribute-btn" class="rounded-xl bg-amber-500 px-3 py-1.5 text-[11px] font-black text-slate-950">+ قرش النهاردة</button>
+                </div>
+                <p id="piggybank-status" class="text-[10px] text-slate-500">رقم افتراضي للتحفيز بس، مش خصم حقيقي من أي حساب.</p>
+            </div>
+            <div id="piggybank-empty" class="hidden bg-slate-950/40 border border-slate-800 rounded-2xl p-3.5 flex items-center justify-between gap-2">
+                <p class="text-[11px] text-slate-400">جرّب حصالة "قرش اليوم" — مبلغ بسيط بيتجمّع كل يوم.</p>
+                <button type="button" id="piggybank-create-btn" class="shrink-0 rounded-xl bg-amber-500/15 border border-amber-500/30 px-3 py-1.5 text-[11px] font-black text-amber-300">ابدأ</button>
+            </div>
+
             <div class="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-2xl p-3 space-y-1.5 shadow-lg">
                 <div class="flex justify-between items-center">
                     <span class="text-[11px] text-slate-400 font-semibold">صرف النهاردة</span>
@@ -2787,11 +2861,16 @@
             </div>
             <div class="flex gap-2 bg-slate-950/60 border border-slate-800 rounded-2xl p-1.5" id="debts-tabs">
                 <button class="debts-tab-btn flex-1 text-xs font-bold py-2 rounded-xl transition active" data-tab="active">الديون النشطة</button>
+                <button class="debts-tab-btn flex-1 text-xs font-bold py-2 rounded-xl transition" data-tab="social">الجمعية والمناسبات</button>
                 <button class="debts-tab-btn flex-1 text-xs font-bold py-2 rounded-xl transition" data-tab="settlement">رسالة التصفية</button>
                 <button class="debts-tab-btn flex-1 text-xs font-bold py-2 rounded-xl transition" data-tab="statement">كشف الحساب</button>
             </div>
             <div id="debts-panel-active" class="space-y-3">
                 <input id="debts-active-search" type="search" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-100 outline-none focus:border-emerald-400" placeholder="دوّر على اسم..." autocomplete="off">
+                <div class="flex gap-2">
+                    <button type="button" id="debts-filter-all" class="flex-1 rounded-xl py-2 text-[11px] font-bold bg-emerald-500 text-slate-950">الكل</button>
+                    <button type="button" id="debts-filter-overdue" class="flex-1 rounded-xl py-2 text-[11px] font-bold bg-slate-800 text-slate-400">⏰ متأخرة</button>
+                </div>
                 <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3" id="debts-owed-to-you-card" style="display:none;"><h4 class="text-xs font-bold text-slate-300 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> ليك عند الناس</h4><div class="space-y-1" id="debts-owed-to-you-list"></div></div>
                 <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3" id="debts-you-owe-card" style="display:none;"><h4 class="text-xs font-bold text-slate-300 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-rose-400"></span> عليك للناس</h4><div class="space-y-1" id="debts-you-owe-list"></div></div>
                 <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-3.5 flex items-start gap-3"><div class="w-8 h-8 rounded-full bg-slate-700/50 text-slate-300 flex items-center justify-center text-xs font-bold shrink-0 border border-slate-700">ℹ️</div><div class="text-xs text-slate-300 leading-relaxed">عشان تسجل سلفة جديدة، ابعت رسالة زي "عطيت محمد 200 جنيه" أو "استلفت من سارة 100 جنيه".</div></div>
@@ -2799,6 +2878,70 @@
             </div>
             <div id="debts-panel-settlement" class="space-y-3 hidden"><div id="debts-settlement-list" class="space-y-3"></div></div>
             <div id="debts-panel-statement" class="space-y-3 hidden"><input id="debts-statement-search" type="search" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-100 outline-none focus:border-emerald-400" placeholder="دوّر على اسم..." autocomplete="off"><div id="debts-statement-list" class="space-y-2"></div></div>
+
+            <!-- ===== قسم الجمعية والمناسبات ===== -->
+            <div id="debts-panel-social" class="space-y-4 hidden">
+                <!-- الجمعية -->
+                <div class="flex items-center justify-between px-1">
+                    <h4 class="text-xs font-black text-slate-200">الجمعيات النشطة</h4>
+                    <button type="button" id="gameya-add-btn" class="text-[11px] font-bold text-emerald-400">+ جمعية جديدة</button>
+                </div>
+                <div id="gameya-list" class="space-y-3"><p class="text-[11px] text-slate-500 text-center py-2">مفيش جمعيات مسجلة لسه.</p></div>
+
+                <div id="gameya-form" class="hidden rounded-3xl border border-slate-800 bg-slate-950/50 p-4 space-y-2.5">
+                    <label class="block text-[10px] font-bold text-slate-400">اسم الجمعية</label>
+                    <input type="text" id="gameya-name-input" placeholder="مثال: جمعية الشغل" class="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2.5 text-xs text-slate-100 outline-none focus:border-emerald-400">
+                    <div class="grid grid-cols-2 gap-2">
+                        <div><label class="block text-[10px] font-bold text-slate-400">عدد الأفراد</label><input type="number" id="gameya-size-input" min="2" placeholder="6" class="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2.5 text-xs text-slate-100 outline-none focus:border-emerald-400"></div>
+                        <div><label class="block text-[10px] font-bold text-slate-400">دورك رقم كام</label><input type="number" id="gameya-turn-input" min="1" placeholder="4" class="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2.5 text-xs text-slate-100 outline-none focus:border-emerald-400"></div>
+                    </div>
+                    <label class="block text-[10px] font-bold text-slate-400">القسط الشهري</label>
+                    <input type="number" id="gameya-installment-input" min="0" placeholder="1200" class="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2.5 text-xs text-slate-100 outline-none focus:border-emerald-400">
+                    <label class="block text-[10px] font-bold text-slate-400">تاريخ بداية الجمعية</label>
+                    <input type="date" id="gameya-start-input" class="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2.5 text-xs text-slate-100 outline-none focus:border-emerald-400">
+                    <label class="block text-[10px] font-bold text-slate-400">أسماء الأفراد <span class="text-slate-500 font-normal">(اختياري، مفصولة بفاصلة)</span></label>
+                    <input type="text" id="gameya-members-input" placeholder="محمد سعيد, أنا, سارة حسن" class="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2.5 text-xs text-slate-100 outline-none focus:border-emerald-400">
+                    <div class="flex gap-2">
+                        <button type="button" id="gameya-cancel-btn" class="flex-1 rounded-xl bg-slate-800 py-2.5 text-xs font-black text-slate-300">إلغاء</button>
+                        <button type="button" id="gameya-save-btn" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950">حفظ الجمعية</button>
+                    </div>
+                    <p id="gameya-form-status" class="min-h-4 text-center text-[11px] text-rose-400"></p>
+                </div>
+
+                <div class="border-t border-slate-800 pt-4"></div>
+
+                <!-- المناسبات -->
+                <div class="flex items-center justify-between px-1">
+                    <h4 class="text-xs font-black text-slate-200">المناسبات (أفراح وعزومات)</h4>
+                    <button type="button" id="occasion-add-btn" class="text-[11px] font-bold text-emerald-400">+ نقطة جديدة</button>
+                </div>
+                <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-3.5 flex items-center justify-between">
+                    <span class="text-[11px] text-slate-400">إجمالي اللي إديته في مناسبات</span>
+                    <span id="occasions-total" class="text-sm font-black text-slate-100">—</span>
+                </div>
+                <div id="occasions-list" class="space-y-2"><p class="text-[11px] text-slate-500 text-center py-2">مفيش مناسبات مسجلة لسه.</p></div>
+
+                <div id="occasion-form" class="hidden rounded-3xl border border-slate-800 bg-slate-950/50 p-4 space-y-2.5">
+                    <label class="block text-[10px] font-bold text-slate-400">اسم الشخص</label>
+                    <input type="text" id="occasion-name-input" placeholder="مثال: أحمد علي" class="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2.5 text-xs text-slate-100 outline-none focus:border-emerald-400">
+                    <label class="block text-[10px] font-bold text-slate-400">المبلغ</label>
+                    <input type="number" id="occasion-amount-input" min="0" placeholder="500" class="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2.5 text-xs text-slate-100 outline-none focus:border-emerald-400">
+                    <label class="block text-[10px] font-bold text-slate-400">نوع المناسبة</label>
+                    <select id="occasion-type-input" class="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2.5 text-xs text-slate-100 outline-none focus:border-emerald-400">
+                        <option value="فرح">فرح</option>
+                        <option value="خطوبة">خطوبة</option>
+                        <option value="سبوع">سبوع</option>
+                        <option value="عزومة">عزومة</option>
+                        <option value="تاني">تاني</option>
+                    </select>
+                    <label class="flex items-center gap-2 text-[11px] text-slate-400 pt-1"><input type="checkbox" id="occasion-as-debt-input" class="rounded"> اعتبرها دين هيرجعلي (تدخل في حساب الديون)</label>
+                    <div class="flex gap-2">
+                        <button type="button" id="occasion-cancel-btn" class="flex-1 rounded-xl bg-slate-800 py-2.5 text-xs font-black text-slate-300">إلغاء</button>
+                        <button type="button" id="occasion-save-btn" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950">حفظ</button>
+                    </div>
+                    <p id="occasion-form-status" class="min-h-4 text-center text-[11px] text-rose-400"></p>
+                </div>
+            </div>
         </div>
 
         <!-- ===================== TAB: REMINDERS ===================== -->
@@ -2812,6 +2955,11 @@
                 <div><p class="text-base font-black text-slate-100">خليك سابق مواعيدك</p><p class="text-[11px] leading-relaxed text-slate-400 mt-1">كل تذكيراتك المهمة في مكان واحد، من غير ما تنسى أي التزام.</p></div>
                 <span class="w-11 h-11 shrink-0 rounded-2xl bg-emerald-500/15 border border-emerald-500/20 flex items-center justify-center text-xl">🔔</span>
             </div>
+
+            <div class="flex items-center justify-between px-1">
+                <h4 class="text-xs font-black text-slate-200">📆 الأقساط الثابتة</h4>
+            </div>
+            <div id="installments-list" class="space-y-2"><p class="text-[11px] text-slate-500 text-center py-2">بيتحمّل...</p></div>
 
             <div class="flex items-center justify-between px-1">
                 <h4 class="text-xs font-black text-slate-200">التذكيرات القادمة</h4>
@@ -2830,6 +2978,11 @@
                     <input type="date" id="reminder-date-input" class="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2.5 text-xs text-slate-100 outline-none focus:border-emerald-400">
                     <label class="block text-[10px] font-bold text-slate-400" for="reminder-amount-input">المبلغ <span class="text-slate-500 font-normal">(اختياري)</span></label>
                     <input type="number" id="reminder-amount-input" min="0" step="0.01" inputmode="decimal" placeholder="اكتب المبلغ لو حابب" class="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2.5 text-xs text-slate-100 outline-none focus:border-emerald-400">
+                    <label class="flex items-center gap-2 text-[11px] text-slate-400 pt-1"><input type="checkbox" id="reminder-installment-toggle" class="rounded"> ده قسط ثابت (مش تذكير عادي)</label>
+                    <div id="reminder-installment-fields" class="hidden space-y-2">
+                        <label class="block text-[10px] font-bold text-slate-400">عدد الأقساط المتبقية</label>
+                        <input type="number" id="reminder-installments-remaining-input" min="1" placeholder="12" class="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2.5 text-xs text-slate-100 outline-none focus:border-emerald-400">
+                    </div>
                     <button type="button" id="reminder-save-btn" class="w-full rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950">حفظ التذكير</button>
                     <p id="reminder-form-status" class="min-h-4 text-center text-[11px] text-rose-400"></p>
                     <p class="text-center text-[10px] text-slate-500">المبلغ اختياري، تقدر تضيف التذكير من غيره.</p>
@@ -3046,6 +3199,23 @@
                         <p class="text-xs mt-0.5 account-profile-email" id="account-email">—</p>
                     </div>
                 </div>
+            </div>
+
+            <div id="honor-board-card" class="hidden">
+                <p class="text-[11px] text-slate-500 text-center mb-2" id="honor-board-subscribers-line">—</p>
+                <div id="honor-board-my-card" class="honor-card relative overflow-hidden rounded-3xl border border-slate-800 shadow-lg p-6 text-center space-y-3">
+                    <div class="w-16 h-16 rounded-full mx-auto flex items-center justify-center text-xl font-black honor-mini-avatar" id="honor-board-avatar">—</div>
+                    <div>
+                        <h3 class="text-base font-bold text-slate-100" id="honor-board-name">—</h3>
+                        <span class="inline-flex items-center gap-1 text-[11px] font-bold px-3 py-1 rounded-full mt-1.5 bg-amber-400/10 text-amber-300 border border-amber-400/30" id="honor-board-badge">—</span>
+                    </div>
+                    <p class="text-xs leading-7 text-slate-300" id="honor-board-message">—</p>
+                    <button type="button" id="honor-board-share-btn" class="inline-flex items-center gap-1.5 font-bold text-xs px-5 py-3 rounded-full bg-gradient-to-l from-amber-400 to-amber-300 text-amber-950">
+                        مشاركة شارتي <span aria-hidden="true">↗</span>
+                    </button>
+                </div>
+                <p class="text-[10px] text-slate-600 text-center mt-3 mb-2">مستمرين معانا</p>
+                <div class="grid grid-cols-2 gap-2.5" id="honor-board-names-grid"></div>
             </div>
 
             <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 flex items-center justify-between gap-3 cursor-pointer active:opacity-70 transition" id="account-telegram-card">
@@ -3843,6 +4013,8 @@
                     <button class="bm-filter-btn shrink-0 rounded-full px-3 py-1.5 text-[11px] font-bold" data-filter="deposit">إيداع / وارد</button>
                     <button class="bm-filter-btn shrink-0 rounded-full px-3 py-1.5 text-[11px] font-bold" data-filter="review">تحتاج مراجعة ⚠️</button>
                 </div>
+                <!-- فلتر ديناميكي حسب البنوك/المحافظ الفعلية المسجلة في حركاتك — بيتبني تلقائي، مش ثابت -->
+                <div class="hidden flex-wrap gap-1.5 mb-3" id="bank-movements-source-filters"></div>
                 <div id="bank-movements-list" class="rounded-2xl bg-slate-900/60 border border-slate-800 divide-y divide-slate-800"></div>
             </div>
         </div>
@@ -5228,6 +5400,7 @@
             renderPlanning(data);
             renderInAppNotifications(data);
             renderDaily(data.today, data.flow);
+            renderPiggybankCard(data.dailyPiggybank);
             renderDailyReminder(data.today);
             renderCategories(data.month);
             renderSubscriptions(data.recurringSubscriptions);
@@ -5508,6 +5681,7 @@
             renderBalanceCard(window.__dashboardData?.month || {});
             renderInAppNotifications(window.__dashboardData || {});
             if (window.__dashboardData?.month) renderCategories(window.__dashboardData.month); // نعيد رسم التصنيفات عشان تظهر حدود الفئات لو وصلت متأخرة عن بيانات الداشبورد
+            renderSalaryCountdown();
         }
         async function savePlanningSettings() {
             const current = planningSettings();
@@ -5526,6 +5700,7 @@
             } catch {}
             renderPlanning(window.__dashboardData || {}); renderBalanceCard(window.__dashboardData?.month || {}); renderInAppNotifications(window.__dashboardData || {});
             if (window.__dashboardData?.month) renderCategories(window.__dashboardData.month);
+            renderSalaryCountdown();
             if (saveSucceeded) {
                 quickStatus('اتحفظت خطتك المالية.', 'success');
             } else {
@@ -5862,6 +6037,91 @@
         setupInsightCardActions('');
         setupInsightCardActions('-daily', { moreAction: () => document.getElementById('daily-items-list')?.scrollIntoView({ behavior: 'smooth', block: 'center' }) });
         setupInsightCardActions('-newmonth', { moreAction: () => document.getElementById('open-archive')?.click() });
+
+        // ============ عداد "المرتب لسه فاضل كام" — بيتنادى من loadPlanningSettings (محتاج monthlyBudget) ============
+        function renderSalaryCountdown() {
+            const card = document.getElementById('salary-countdown-card');
+            const emptyEl = document.getElementById('salary-countdown-empty');
+            const budget = Number(window.__financialSettings?.monthlyBudget || 0);
+            const monthTotal = Number(window.__dashboardData?.month?.total || 0);
+            if (!budget || budget <= 0) {
+                card.classList.add('hidden');
+                emptyEl.classList.remove('hidden');
+                return;
+            }
+            emptyEl.classList.add('hidden');
+            card.classList.remove('hidden');
+
+            const now = new Date();
+            const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+            const daysRemaining = Math.max(daysInMonth - now.getDate() + 1, 1); // شامل النهاردة
+            const remaining = budget - monthTotal;
+            const daysLabel = document.getElementById('salary-countdown-days');
+            const remainingEl = document.getElementById('salary-countdown-remaining');
+            const dailyEl = document.getElementById('salary-countdown-daily');
+            const barEl = document.getElementById('salary-countdown-bar');
+            daysLabel.textContent = `باقي ${daysRemaining} يوم على آخر الشهر`;
+
+            if (remaining < 0) {
+                remainingEl.textContent = `عديت بـ ${fmt(Math.abs(remaining))}`;
+                remainingEl.className = 'text-lg font-black text-rose-400';
+                dailyEl.textContent = '0 ج.م';
+                barEl.style.width = '100%'; barEl.className = 'h-full rounded-full bg-rose-500';
+                card.classList.add('border-rose-500/30'); card.classList.remove('border-emerald-500/25');
+                return;
+            }
+            card.classList.remove('border-rose-500/30'); card.classList.add('border-emerald-500/25');
+            const dailyAllowance = remaining / daysRemaining;
+            remainingEl.textContent = fmt(remaining);
+            remainingEl.className = 'text-lg font-black text-slate-100';
+            dailyEl.textContent = `${fmt(Math.floor(dailyAllowance))} ج.م/يوم`;
+            const spentPercent = budget > 0 ? Math.min((monthTotal / budget) * 100, 100) : 0;
+            const daysPassedPercent = ((daysInMonth - daysRemaining + 1) / daysInMonth) * 100;
+            barEl.style.width = `${spentPercent}%`;
+            // لو نسبة الفلوس المصروفة أعلى من نسبة الأيام اللي عدت، معناه بيصرف أسرع من المفروض — نلوّنه تحذيري
+            barEl.className = `h-full rounded-full ${spentPercent > daysPassedPercent ? 'bg-amber-500' : 'bg-emerald-500'}`;
+        }
+        document.getElementById('salary-countdown-setup-btn')?.addEventListener('click', () => {
+            document.querySelector('.tab-btn[data-tab="monthly"]')?.click();
+        });
+
+        // ============ كارت الحصالة اليومية — بيتنادى من loadDashboard (البيانات جاية في data.dailyPiggybank) ============
+        function renderPiggybankCard(piggybank) {
+            const card = document.getElementById('piggybank-card');
+            const emptyEl = document.getElementById('piggybank-empty');
+            if (!piggybank) {
+                card.classList.add('hidden');
+                emptyEl.classList.remove('hidden');
+                return;
+            }
+            emptyEl.classList.add('hidden');
+            card.classList.remove('hidden');
+            window.__piggybank = piggybank;
+            document.getElementById('piggybank-saved').textContent = `${fmt(piggybank.saved_amount || 0)} ج.م`;
+            const today = new Date().toISOString().slice(0, 10);
+            const doneToday = piggybank.last_contribution_date === today;
+            const btn = document.getElementById('piggybank-contribute-btn');
+            btn.textContent = doneToday ? '✓ اتضاف النهاردة' : '+ قرش النهاردة';
+            btn.disabled = doneToday;
+            btn.classList.toggle('opacity-50', doneToday);
+        }
+        document.getElementById('piggybank-create-btn')?.addEventListener('click', async () => {
+            const dailyAmount = prompt('هتوفر كام في اليوم؟ (مثلاً 10)');
+            if (!dailyAmount || Number(dailyAmount) <= 0) return;
+            try {
+                const res = await asstApi('piggybank_create', { title: 'حصالة يوم بيوم', dailyAmount: Number(dailyAmount) });
+                renderPiggybankCard(res.piggybank);
+            } catch (e) { quickStatus('حصل خطأ، جرب تاني.', 'error'); }
+        });
+        document.getElementById('piggybank-contribute-btn')?.addEventListener('click', async () => {
+            if (!window.__piggybank) return;
+            try {
+                const res = await asstApi('piggybank_contribute', { piggybankId: window.__piggybank.id });
+                if (res.error) { quickStatus(res.error, res.alreadyDone ? 'info' : 'error'); return; }
+                renderPiggybankCard(res.piggybank);
+                quickStatus('اتسجل قرش النهاردة! 🐷', 'success');
+            } catch (e) { quickStatus('حصل خطأ، جرب تاني.', 'error'); }
+        });
 
         function renderDaily(today, flow) {
             window.__todayData = today;
@@ -6229,16 +6489,53 @@
             noteEl.textContent = debts.net === 0 && debts.owedToYouTotal === 0 && debts.youOweTotal === 0 ? 'لسه معندكش ديون مسجلة.' : (debts.net >= 0 ? `ليك أكتر مما عليك بـ ${fmt(Math.abs(debts.net))}` : `عليك أكتر مما ليك بـ ${fmt(Math.abs(debts.net))}`);
             document.getElementById('debts-owed-to-you-total').textContent = fmt(debts.owedToYouTotal);
             document.getElementById('debts-you-owe-total').textContent = fmt(debts.youOweTotal);
-            const makeRows = (items, color, sign) => items.map((p, i) => `<div class="flex items-center justify-between py-2 cursor-pointer active:opacity-70 ${i < items.length - 1 ? 'border-b border-slate-800/60' : ''}" data-person-name="${debtEscape(p.name)}"><div class="flex items-center gap-2.5"><span class="w-8 h-8 rounded-xl bg-${color}-500/10 border border-${color}-500/20 flex items-center justify-center text-sm">🧑</span><p class="text-xs font-semibold text-slate-200">${debtEscape(p.name)}</p></div><span class="text-xs font-bold text-${color}-400">${sign}${fmt(p.amount)}</span></div>`).join('');
+            // تاريخ الاستحقاق/التأخير تحت كل اسم — بيستخدم نفس فكرة reminderDaysLabel بس بصياغة "متأخر" لو فات المعاد
+            const dueDateLabel = (dueDate) => {
+                if (!dueDate) return '';
+                const today = new Date(); today.setHours(0, 0, 0, 0);
+                const due = new Date(dueDate + 'T00:00:00');
+                const diffDays = Math.round((due - today) / (24 * 60 * 60 * 1000));
+                if (diffDays < 0) return `<span class="text-rose-400 font-bold">⏰ متأخر ${Math.abs(diffDays)} يوم</span>`;
+                if (diffDays === 0) return `<span class="text-amber-400 font-bold">⏰ مستحق النهاردة</span>`;
+                return `<span class="text-slate-500">مستحق بعد ${diffDays} يوم</span>`;
+            };
+            const isOverdue = (p) => p.dueDate && new Date(p.dueDate + 'T00:00:00') < new Date(new Date().toDateString());
+            const makeRows = (items, color, sign) => items.map((p, i) => `<div class="debt-person-row flex items-center justify-between py-2 cursor-pointer active:opacity-70 ${i < items.length - 1 ? 'border-b border-slate-800/60' : ''}" data-person-name="${debtEscape(p.name)}" data-overdue="${isOverdue(p) ? '1' : '0'}"><div class="flex items-center gap-2.5"><span class="w-8 h-8 rounded-xl bg-${color}-500/10 border border-${color}-500/20 flex items-center justify-center text-sm">🧑</span><div><p class="text-xs font-semibold text-slate-200">${debtEscape(p.name)}</p>${p.dueDate ? `<p class="text-[10px] mt-0.5">${dueDateLabel(p.dueDate)}</p>` : ''}</div></div><span class="text-xs font-bold text-${color}-400">${sign}${fmt(p.amount)}</span></div>`).join('');
             const owedCard = document.getElementById('debts-owed-to-you-card'), owedList = document.getElementById('debts-owed-to-you-list');
             const oweCard = document.getElementById('debts-you-owe-card'), oweList = document.getElementById('debts-you-owe-list');
+            // ألوان أقوى وأوضح لكل كارت عشان "ليك" و"عليك" يبقوا متمايزين بصريًا من أول نظرة، مش بس أيقونة صغيرة ملونة
+            owedCard.className = 'bg-emerald-500/[0.06] border border-emerald-500/25 rounded-3xl p-4 space-y-3';
+            oweCard.className = 'bg-rose-500/[0.06] border border-rose-500/25 rounded-3xl p-4 space-y-3';
             owedCard.style.display = debts.owedToYou.length ? 'block' : 'none'; owedList.innerHTML = makeRows(debts.owedToYou, 'emerald', '+');
             oweCard.style.display = debts.youOwe.length ? 'block' : 'none'; oweList.innerHTML = makeRows(debts.youOwe, 'rose', '-');
             document.querySelectorAll('#debts-owed-to-you-list [data-person-name], #debts-you-owe-list [data-person-name]').forEach((row) => row.addEventListener('click', () => openPersonDebtDetail(row.dataset.personName)));
+            applyDebtOverdueFilter();
             initDebtsTabs();
             applyDebtActiveSearch();
             loadDebtHistory();
         }
+
+        // ============ فلتر "الكل / متأخرة" فوق قايمة الديون النشطة ============
+        let debtOverdueFilterOnly = false;
+        function applyDebtOverdueFilter() {
+            document.querySelectorAll('.debt-person-row').forEach((row) => {
+                row.classList.toggle('hidden', debtOverdueFilterOnly && row.dataset.overdue !== '1');
+            });
+        }
+        document.getElementById('debts-filter-all')?.addEventListener('click', function () {
+            debtOverdueFilterOnly = false;
+            this.classList.add('bg-emerald-500', 'text-slate-950'); this.classList.remove('bg-slate-800', 'text-slate-400');
+            document.getElementById('debts-filter-overdue')?.classList.add('bg-slate-800', 'text-slate-400');
+            document.getElementById('debts-filter-overdue')?.classList.remove('bg-rose-500', 'text-slate-950');
+            applyDebtOverdueFilter();
+        });
+        document.getElementById('debts-filter-overdue')?.addEventListener('click', function () {
+            debtOverdueFilterOnly = true;
+            this.classList.add('bg-rose-500', 'text-slate-950'); this.classList.remove('bg-slate-800', 'text-slate-400');
+            document.getElementById('debts-filter-all')?.classList.add('bg-slate-800', 'text-slate-400');
+            document.getElementById('debts-filter-all')?.classList.remove('bg-emerald-500', 'text-slate-950');
+            applyDebtOverdueFilter();
+        });
 
         // ============ التذكيرات — إدخال يدوي بالكامل، مفيش AI هنا خالص ============
         function renderRemindersTelegramBanner(linked) {
@@ -6263,18 +6560,36 @@
 
         async function loadReminders() {
             const listEl = document.getElementById('reminders-list');
+            const installmentsListEl = document.getElementById('installments-list');
             const badge = document.getElementById('reminders-notification-badge');
             const countEl = document.getElementById('reminders-count');
             try {
                 const res = await fetch('/api/reminders', { headers: { Authorization: `Bearer ${accessToken}` } });
                 const data = await res.json();
-                const reminders = data.reminders || [];
-                const urgentCount = reminders.filter((r) => {
+                const allReminders = data.reminders || [];
+                const installments = allReminders.filter((r) => r.installment_type === 'installment');
+                const reminders = allReminders.filter((r) => r.installment_type !== 'installment');
+                const urgentCount = allReminders.filter((r) => {
                     const days = Math.round((new Date(r.due_date + 'T00:00:00') - new Date(new Date().toDateString())) / (24 * 60 * 60 * 1000));
                     return days <= 2;
                 }).length;
                 if (badge) { badge.textContent = urgentCount > 0 ? String(urgentCount) : ''; badge.style.display = urgentCount > 0 ? 'grid' : 'none'; }
                 if (countEl) countEl.textContent = reminders.length ? `${reminders.length} تذكيرات` : '';
+                // ============ الأقساط الثابتة — قسم منفصل مع زرار "دفعت القسط" بينقص العداد أوتوماتيك ============
+                if (installmentsListEl) {
+                    installmentsListEl.innerHTML = installments.length ? installments.map((r) => `
+                        <div class="rounded-2xl border border-amber-500/20 bg-amber-500/[0.05] p-3 flex items-center gap-2.5">
+                            <span class="w-9 h-9 shrink-0 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-base">📆</span>
+                            <div class="min-w-0 flex-1"><p class="text-xs font-bold text-slate-200 truncate">${debtEscape(r.title)}</p><p class="text-[10px] text-slate-500 mt-0.5">باقي ${r.installments_remaining} قسط · ${fmt(r.amount || 0)} ج.م/شهر</p></div>
+                            <button type="button" class="pay-installment-btn shrink-0 rounded-lg bg-amber-500 px-2.5 py-1.5 text-[10px] font-black text-slate-950" data-reminder-id="${debtEscape(r.id)}">دفعت القسط</button>
+                        </div>`).join('') : '<p class="text-[11px] text-slate-500 text-center py-2">مفيش أقساط ثابتة مسجلة.</p>';
+                    installmentsListEl.querySelectorAll('.pay-installment-btn').forEach((btn) => btn.addEventListener('click', async () => {
+                        try {
+                            const r = await fetch('/api/reminders', { method: 'PATCH', headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ id: btn.dataset.reminderId, action: 'pay_installment' }) });
+                            if (r.ok) { quickStatus('اتسجل القسط!', 'success'); loadReminders(); }
+                        } catch (e) {}
+                    }));
+                }
                 listEl.innerHTML = reminders.length ? reminders.map((r) => {
                     const amount = r.amount !== null && r.amount !== undefined && r.amount !== '' ? `<div class="text-[10px] font-black text-amber-400 mt-1">${fmt(r.amount)}</div>` : '';
                     return `<div class="rounded-2xl border border-slate-800 bg-slate-950/60 p-3 flex items-center gap-2.5">
@@ -6296,17 +6611,25 @@
             const panel = document.getElementById('reminder-form-panel'); const toggle = document.getElementById('reminder-form-toggle'); const chevron = document.getElementById('reminder-form-chevron');
             const isOpen = !panel.classList.contains('hidden'); panel.classList.toggle('hidden', isOpen); toggle.setAttribute('aria-expanded', String(!isOpen)); chevron.textContent = isOpen ? '⌄' : '⌃';
         });
+        document.getElementById('reminder-installment-toggle')?.addEventListener('change', function () {
+            document.getElementById('reminder-installment-fields')?.classList.toggle('hidden', !this.checked);
+        });
         document.getElementById('reminder-save-btn')?.addEventListener('click', async () => {
             const titleInput = document.getElementById('reminder-title-input'); const dateInput = document.getElementById('reminder-date-input'); const amountInput = document.getElementById('reminder-amount-input'); const statusEl = document.getElementById('reminder-form-status');
+            const isInstallment = document.getElementById('reminder-installment-toggle')?.checked;
+            const installmentsRemainingInput = document.getElementById('reminder-installments-remaining-input');
             const title = titleInput.value.trim(); const dueDate = dateInput.value; const rawAmount = amountInput.value.trim(); const amount = rawAmount === '' ? null : Number(rawAmount);
             if (!title) { statusEl.textContent = 'اكتب عنوان التذكير الأول.'; return; }
             if (!dueDate) { statusEl.textContent = 'اختار تاريخ.'; return; }
             if (rawAmount !== '' && (!Number.isFinite(amount) || amount < 0)) { statusEl.textContent = 'اكتب مبلغ صحيح أو سيبه فاضي.'; return; }
+            if (isInstallment && !Number(installmentsRemainingInput?.value)) { statusEl.textContent = 'اكتب عدد الأقساط المتبقية.'; return; }
             statusEl.textContent = '';
             try {
-                const res = await fetch('/api/reminders', { method: 'POST', headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' }, body: JSON.stringify({ title, due_date: dueDate, amount }) });
+                const payload = { title, due_date: dueDate, amount };
+                if (isInstallment) { payload.installment_type = 'installment'; payload.installments_remaining = Number(installmentsRemainingInput.value); }
+                const res = await fetch('/api/reminders', { method: 'POST', headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
                 if (!res.ok) { const err = await res.json(); statusEl.textContent = err.error || 'حصل خطأ.'; return; }
-                titleInput.value = ''; dateInput.value = ''; amountInput.value = ''; document.getElementById('reminder-form-toggle')?.click(); loadReminders();
+                titleInput.value = ''; dateInput.value = ''; amountInput.value = ''; document.getElementById('reminder-installment-toggle').checked = false; document.getElementById('reminder-installment-fields')?.classList.add('hidden'); if (installmentsRemainingInput) installmentsRemainingInput.value = ''; document.getElementById('reminder-form-toggle')?.click(); loadReminders();
             } catch (e) { statusEl.textContent = 'حصل خطأ، حاول تاني.'; }
         });
 
@@ -6318,11 +6641,107 @@
             __debtTabInitialized = true;
             document.querySelectorAll('.debts-tab-btn').forEach((btn) => btn.addEventListener('click', () => {
                 document.querySelectorAll('.debts-tab-btn').forEach((b) => b.classList.toggle('active', b === btn));
-                ['active','settlement','statement'].forEach((tab) => document.getElementById(`debts-panel-${tab}`).classList.toggle('hidden', tab !== btn.dataset.tab));
+                ['active','social','settlement','statement'].forEach((tab) => document.getElementById(`debts-panel-${tab}`).classList.toggle('hidden', tab !== btn.dataset.tab));
+                if (btn.dataset.tab === 'social') { renderGameyaList(window.__dashboardData?.gameyaList || []); renderOccasionsList(window.__dashboardData?.occasionsSummary || { total: 0, items: [] }); }
             }));
             document.getElementById('debts-active-search')?.addEventListener('input', applyDebtActiveSearch);
             document.getElementById('debts-statement-search')?.addEventListener('input', renderDebtStatementList);
         }
+        // ============ الجمعية — رندر القايمة + الفورم ============
+        function renderGameyaList(gameyaList) {
+            window.__gameyaList = gameyaList || [];
+            const listEl = document.getElementById('gameya-list');
+            if (!gameyaList || !gameyaList.length) { listEl.innerHTML = '<p class="text-[11px] text-slate-500 text-center py-2">مفيش جمعيات مسجلة لسه.</p>'; return; }
+            listEl.innerHTML = gameyaList.map((g) => {
+                const turnDateLabel = new Date(g.turnDate).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long' });
+                const progressPercent = g.groupSize ? Math.min(((g.myTurn - g.monthsRemaining) / g.myTurn) * 100, 100) : 0;
+                const membersHtml = (g.memberNames || []).map((name) => {
+                    const isMe = name.trim() === 'أنا';
+                    const paid = (g.paidThisMonth || []).includes(name);
+                    return `<div class="flex items-center justify-between py-1.5 border-b border-slate-800/50 last:border-0"><span class="text-[11px] text-slate-300">${isMe ? '👤' : ''} ${debtEscape(name)}</span>${isMe ? '' : `<button type="button" class="gameya-member-toggle text-[10px] font-bold px-2.5 py-1 rounded-lg ${paid ? 'bg-emerald-500/15 text-emerald-400' : 'bg-amber-500/15 text-amber-400'}" data-gameya-id="${g.id}" data-member="${debtEscape(name)}">${paid ? 'دفع' : 'لسه'}</button>`}</div>`;
+                }).join('');
+                return `
+                <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div><p class="text-[10px] text-slate-500">جمعية</p><h4 class="text-sm font-black text-slate-100">${debtEscape(g.groupName)} - ${g.groupSize} أفراد</h4></div>
+                        <button type="button" class="gameya-delete-btn text-slate-500 text-xs" data-gameya-id="${g.id}">🗑</button>
+                    </div>
+                    <div><span class="text-xl font-black text-emerald-400">${fmt(g.installment)}</span> <span class="text-[11px] text-slate-500">ج.م القسط الشهري</span></div>
+                    <div class="flex items-center justify-between text-[10px] text-slate-500">
+                        <span>دورك رقم ${g.myTurn} من ${g.groupSize}</span>
+                        <span>${g.hasReceivedTurn ? 'استلمت دورك ✅' : `باقي ${g.monthsRemaining} شهر`}</span>
+                    </div>
+                    <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden"><div class="bg-emerald-500 h-full rounded-full" style="width:${progressPercent}%"></div></div>
+                    ${!g.hasReceivedTurn ? `<div class="bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-3 py-2 flex items-center justify-between"><span class="text-[11px] text-emerald-300">📅 دورك جاي في ${turnDateLabel}</span><span class="text-[11px] font-bold text-emerald-300">هتستلم ${fmt(g.totalReceiveAmount)}</span></div>` : ''}
+                    ${membersHtml ? `<div class="pt-1"><p class="text-[10px] text-slate-500 mb-1">أعضاء الجمعية - الشهر ده</p>${membersHtml}</div>` : ''}
+                </div>`;
+            }).join('');
+            listEl.querySelectorAll('.gameya-member-toggle').forEach((btn) => btn.addEventListener('click', async () => {
+                try { const res = await asstApi('gameya_mark_paid', { gameyaId: Number(btn.dataset.gameyaId), memberName: btn.dataset.member }); renderGameyaList(res.gameyaList); } catch (e) {}
+            }));
+            listEl.querySelectorAll('.gameya-delete-btn').forEach((btn) => btn.addEventListener('click', async () => {
+                if (!confirm('متأكد عايز تمسح الجمعية دي؟')) return;
+                try { const res = await asstApi('gameya_delete', { gameyaId: Number(btn.dataset.gameyaId) }); renderGameyaList(res.gameyaList); } catch (e) {}
+            }));
+        }
+        document.getElementById('gameya-add-btn')?.addEventListener('click', () => document.getElementById('gameya-form')?.classList.toggle('hidden'));
+        document.getElementById('gameya-cancel-btn')?.addEventListener('click', () => document.getElementById('gameya-form')?.classList.add('hidden'));
+        document.getElementById('gameya-save-btn')?.addEventListener('click', async () => {
+            const statusEl = document.getElementById('gameya-form-status');
+            const groupName = document.getElementById('gameya-name-input').value.trim();
+            const groupSize = Number(document.getElementById('gameya-size-input').value);
+            const myTurn = Number(document.getElementById('gameya-turn-input').value);
+            const installment = Number(document.getElementById('gameya-installment-input').value);
+            const startDate = document.getElementById('gameya-start-input').value;
+            const memberNames = document.getElementById('gameya-members-input').value.split(',').map((s) => s.trim()).filter(Boolean);
+            if (!groupName || !groupSize || !myTurn || !installment || !startDate) { statusEl.textContent = 'كمّل كل الحقول الأساسية الأول.'; return; }
+            statusEl.textContent = '';
+            try {
+                const res = await asstApi('gameya_create', { groupName, groupSize, myTurn, installment, startDate, memberNames });
+                if (res.error) { statusEl.textContent = res.error; return; }
+                renderGameyaList(res.gameyaList);
+                document.getElementById('gameya-form').classList.add('hidden');
+                ['gameya-name-input','gameya-size-input','gameya-turn-input','gameya-installment-input','gameya-start-input','gameya-members-input'].forEach((id) => { document.getElementById(id).value = ''; });
+                quickStatus('اتضافت الجمعية!', 'success');
+            } catch (e) { statusEl.textContent = 'حصل خطأ، حاول تاني.'; }
+        });
+
+        // ============ المناسبات — رندر القايمة + الفورم ============
+        function renderOccasionsList(summary) {
+            document.getElementById('occasions-total').textContent = fmt(summary.total || 0);
+            const listEl = document.getElementById('occasions-list');
+            if (!summary.items || !summary.items.length) { listEl.innerHTML = '<p class="text-[11px] text-slate-500 text-center py-2">مفيش مناسبات مسجلة لسه.</p>'; return; }
+            listEl.innerHTML = summary.items.map((it) => `
+                <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-3 flex items-center justify-between">
+                    <div><p class="text-xs font-semibold text-slate-200">${debtEscape(it.personName)}</p><p class="text-[10px] text-slate-500">${debtEscape(it.occasionType)} · ${new Date(it.date).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' })}${it.linkedToDebt ? ' · مربوطة بدين' : ''}</p></div>
+                    <div class="flex items-center gap-2"><span class="text-xs font-bold text-emerald-400">${fmt(it.amount)}</span><button type="button" class="occasion-delete-btn text-slate-500 text-xs" data-occasion-id="${it.id}">🗑</button></div>
+                </div>`).join('');
+            listEl.querySelectorAll('.occasion-delete-btn').forEach((btn) => btn.addEventListener('click', async () => {
+                if (!confirm('متأكد عايز تمسح المناسبة دي؟')) return;
+                try { const res = await asstApi('occasion_delete', { occasionId: Number(btn.dataset.occasionId) }); renderOccasionsList(res.occasionsSummary); } catch (e) {}
+            }));
+        }
+        document.getElementById('occasion-add-btn')?.addEventListener('click', () => document.getElementById('occasion-form')?.classList.toggle('hidden'));
+        document.getElementById('occasion-cancel-btn')?.addEventListener('click', () => document.getElementById('occasion-form')?.classList.add('hidden'));
+        document.getElementById('occasion-save-btn')?.addEventListener('click', async () => {
+            const statusEl = document.getElementById('occasion-form-status');
+            const personName = document.getElementById('occasion-name-input').value.trim();
+            const amount = Number(document.getElementById('occasion-amount-input').value);
+            const occasionType = document.getElementById('occasion-type-input').value;
+            const asDebt = document.getElementById('occasion-as-debt-input').checked;
+            if (!personName || !amount) { statusEl.textContent = 'اكتب اسم الشخص والمبلغ.'; return; }
+            statusEl.textContent = '';
+            try {
+                const res = await asstApi('occasion_create', { personName, amount, occasionType, asDebt, direction: 'lent' });
+                if (res.error) { statusEl.textContent = res.error; return; }
+                renderOccasionsList(res.occasionsSummary);
+                document.getElementById('occasion-form').classList.add('hidden');
+                document.getElementById('occasion-name-input').value = ''; document.getElementById('occasion-amount-input').value = ''; document.getElementById('occasion-as-debt-input').checked = false;
+                quickStatus('اتسجلت المناسبة!', 'success');
+                if (asDebt) loadDashboard(); // عشان صافي الديون يتحدث فورًا لو المستخدم اعتبرها دين
+            } catch (e) { statusEl.textContent = 'حصل خطأ، حاول تاني.'; }
+        });
+
         function applyDebtActiveSearch() {
             const q = String(document.getElementById('debts-active-search')?.value || '').trim().toLocaleLowerCase('ar');
             document.querySelectorAll('#debts-owed-to-you-list [data-person-name], #debts-you-owe-list [data-person-name]').forEach((row) => row.classList.toggle('hidden', q && !row.dataset.personName.toLocaleLowerCase('ar').includes(q)));
@@ -7499,6 +7918,7 @@
                 document.getElementById('bm-stat-withdrawal').textContent = `${bmFmt(data.totals.withdrawal)} ج.م`;
                 document.getElementById('bm-stat-deposit').textContent = `${bmFmt(data.totals.deposit)} ج.م`;
                 document.getElementById('bm-stat-transfer').textContent = `${bmFmt(data.totals.transfer)} ج.م`;
+                bmRenderSourceFilters();
                 bmRenderList();
             } catch (e) {
                 statusEl.classList.add('hidden'); emptyEl.classList.remove('hidden');
@@ -7508,10 +7928,41 @@
             return ['withdrawal', 'expense', 'purchase', 'asset', 'refund', 'subscription'].includes(String(m.event_type || '').toLowerCase())
                 || ['expense', 'purchase', 'subscription'].includes(String(m.category || m.event_category || m.type || '').toLowerCase());
         }
+        // ============ فلتر ديناميكي حسب البنوك/المحافظ الفعلية — بيتبني من نفس الحركات المحمّلة، مش قايمة ثابتة ============
+        let bmSourceFilter = 'all';
+        function bmRenderSourceFilters() {
+            const wrap = document.getElementById('bank-movements-source-filters');
+            if (!wrap) return;
+            // بنجمع كل مصدر فريد (بنك أو محفظة) موجود فعليًا في حركات المستخدم، بمفتاح ثابت (bank_key لو موجود، وإلا الاسم نفسه)
+            const sources = new Map();
+            bmMovements.forEach((m) => {
+                const brand = bmGetBankBrand(m);
+                const key = String(m?.metadata?.bank_key || m.source_bank_key || brand.label || 'أخرى').trim();
+                if (!sources.has(key)) sources.set(key, { key, label: brand.label || key, wallet: brand.wallet, count: 0 });
+                sources.get(key).count += 1;
+            });
+            if (sources.size <= 1) { wrap.classList.add('hidden'); wrap.classList.remove('flex'); bmSourceFilter = 'all'; return; } // لو بنك/محفظة واحدة بس، مفيش داعي للفلتر ده خالص
+            wrap.classList.remove('hidden'); wrap.classList.add('flex');
+            const pills = [`<button type="button" class="bm-source-filter-btn active shrink-0 rounded-full px-3 py-1.5 text-[10.5px] font-bold" data-source="all">كل البنوك والمحافظ</button>`];
+            Array.from(sources.values()).sort((a, b) => b.count - a.count).forEach((s) => {
+                pills.push(`<button type="button" class="bm-source-filter-btn shrink-0 rounded-full px-3 py-1.5 text-[10.5px] font-bold" data-source="${debtEscape(s.key)}">${s.wallet ? '📱' : '🏦'} ${debtEscape(s.label)} (${s.count})</button>`);
+            });
+            wrap.innerHTML = pills.join('');
+            wrap.querySelectorAll('.bm-source-filter-btn').forEach((btn) => btn.addEventListener('click', () => {
+                wrap.querySelectorAll('.bm-source-filter-btn').forEach((b) => b.classList.toggle('active', b === btn));
+                bmSourceFilter = btn.dataset.source;
+                bmRenderList();
+            }));
+        }
         function bmRenderList() {
             const list = document.getElementById('bank-movements-list');
             list.innerHTML = '';
             const filtered = bmMovements.filter((m) => {
+                if (bmSourceFilter !== 'all') {
+                    const brand = bmGetBankBrand(m);
+                    const key = String(m?.metadata?.bank_key || m.source_bank_key || brand.label || 'أخرى').trim();
+                    if (key !== bmSourceFilter) return false;
+                }
                 if (bmFilter === 'all') return true;
                 if (bmFilter === 'review') return m.needs_review;
                 if (bmFilter === 'withdrawal') return bmIsExpenseLike(m);
@@ -8646,6 +9097,59 @@
             });
         })();
 
+        // ============ لوحة شرف عائلة دبّر ============
+        // أسماء تمثيلية بس (مش مستخدمين حقيقيين) — هدفها إحساس الانتماء لمجتمع، من غير كشف بيانات أي حد.
+        const HONOR_BOARD_PLACEHOLDER_NAMES = ['كريم منصور', 'مي عبد الرحمن', 'عمر الشريف', 'سارة يوسف', 'منة الله طارق', 'يحيى الجندي'];
+
+        function renderHonorBoard(displayName, initial) {
+            const wrap = document.getElementById('honor-board-card');
+            const sub = window.__dashboardData?.subscription;
+            if (!wrap || !sub?.active) { wrap?.classList.add('hidden'); return; }
+
+            document.getElementById('honor-board-avatar').textContent = initial || (displayName.trim().charAt(0).toUpperCase() || '👤');
+            document.getElementById('honor-board-name').textContent = displayName;
+            document.getElementById('honor-board-badge').textContent = sub.inTrial ? '🌱 مشترك تجربة' : '👑 مشترك نشط';
+
+            const activeDaysCount = window.__dashboardData?.activeDays?.totalActiveDays || 0;
+            const total = sub.totalActiveSubscribers;
+            document.getElementById('honor-board-subscribers-line').textContent = total
+                ? `🏅 من ضمن ${total.toLocaleString('ar-EG')} مشترك نشط بيدعمون دبّر`
+                : '🏅 من مشتركين دبّر النشطين';
+            document.getElementById('honor-board-message').innerHTML =
+                `شكرًا يا <b>${displayName}</b> 🙏 استمرارك معانا (${activeDaysCount} يوم نشط لحد دلوقتي) هو اللي بيخلينا نكمل ونطوّر أكتر.<br>جدد اشتراكك واحتفظ بمكانك بين الداعمين 🚀`;
+
+            const grid = document.getElementById('honor-board-names-grid');
+            grid.innerHTML = HONOR_BOARD_PLACEHOLDER_NAMES.map((name) => {
+                const initials = name.trim().split(' ').map((p) => p.charAt(0)).slice(0, 2).join('');
+                return `<div class="honor-name-chip flex items-center gap-2.5 rounded-2xl px-3 py-3">
+                    <span class="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-black shrink-0 honor-mini-avatar">${initials}</span>
+                    <span class="text-[13px] font-bold text-amber-100">${name}</span>
+                </div>`;
+            }).join('');
+
+            wrap.classList.remove('hidden');
+        }
+
+        document.getElementById('honor-board-share-btn')?.addEventListener('click', async (e) => {
+            const btn = e.currentTarget;
+            const original = btn.innerHTML;
+            btn.disabled = true;
+            btn.textContent = 'جاري التجهيز...';
+            try {
+                await shareWrappedCard({
+                    cacheKey: 'honor-board',
+                    cardId: 'honor-board-my-card',
+                    filename: 'كارت-لوحة-الشرف-دبر.png',
+                    text: 'أنا من مشتركي دبّر النشطين 🏅',
+                });
+            } catch (err) {
+                if (err?.name !== 'AbortError') alert(err.message || 'حصل خطأ، جرب تاني.');
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = original;
+            }
+        });
+
         async function loadAccountTab() {
             if (!currentUser) return;
 
@@ -8687,6 +9191,8 @@
                 initialEl.classList.remove('hidden');
                 navAvatarWrap.textContent = '👤';
             }
+
+            renderHonorBoard(displayName, profile.avatar_url ? null : initialEl.textContent);
 
             // حالة ربط تليجرام — بتيجي من نفس استجابة /api/dashboard-data.
             // غياب الربط لا يمنع الداش أو التسجيل أو الفواتير أو الإشعارات.

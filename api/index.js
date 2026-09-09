@@ -10,6 +10,7 @@ import importDataHandler from '../backend/api-handlers/import-data.js';
 import bankStatementImportHandler from '../backend/api-handlers/bank-statement-import.js';
 import archiveMonthPdfHandler from '../backend/api-handlers/archive-month-pdf.js';
 import pushHandler from '../backend/api-handlers/push.js';
+import quickAddWebhookHandler from '../backend/api-handlers/quick-add-webhook.js';
 import reportsHandler from '../backend/api-handlers/reports.js';
 import remindersHandler from '../backend/api-handlers/reminders.js';
 import macrodroidMacroHandler from '../backend/api-handlers/macrodroid-macro.js';
@@ -33,6 +34,7 @@ const handlers = {
   'bank-statement-import': bankStatementImportHandler,
   'archive-month-pdf': archiveMonthPdfHandler,
   push: pushHandler,
+  'quick-add-webhook': quickAddWebhookHandler,
   reports: reportsHandler,
   reminders: remindersHandler,
   'macrodroid-macro': macrodroidMacroHandler,

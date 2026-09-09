@@ -1,10 +1,11 @@
 import { supabase } from '../../lib/supabaseClient.js';
 import { getDashboardUserFromRequest } from '../../lib/dashboardAuth.js';
 import { getMonthRange, getExpensesBetween, buildCategoryBreakdown, detectRecurringSubscriptions, getLifetimeCashPosition } from '../../lib/expenses.js';
-import { computeNetByPerson } from '../../lib/debts.js';
+import { computeNetByPerson, getGameyaList, getOccasionsSummary } from '../../lib/debts.js';
+import { getDailyPiggybank } from '../../lib/goals.js';
 import { getInvoicesList, getInvoiceDetail } from '../../lib/invoices.js';
 import { MONTH_NAMES, CATEGORY_EMOJI, SUBSCRIPTION_PRICE_EGP, INSTAPAY_LINK } from '../../lib/config.js';
-import { hasActiveSubscription, getSubscriptionExpiry, isInTrial, getTrialDaysLeft } from '../../lib/users.js';
+import { hasActiveSubscription, getSubscriptionExpiry, isInTrial, getTrialDaysLeft, getActiveSubscribersCount } from '../../lib/users.js';
 import { getActiveDays } from '../../lib/activeDays.js';
 import { getPortfolio, getPortfolioDigest } from '../../lib/investments.js';
 
@@ -199,6 +200,7 @@ export default async function handler(req, res) {
         .select('*')
         .eq('telegram_user_id', dataUserId)
         .eq('is_active', true)
+        .eq('is_daily_piggybank', false)
         .order('created_at', { ascending: true }),
       getPortfolio(dataUserId),
       getPortfolioDigest(dataUserId, 3).catch((error) => {
@@ -227,6 +229,23 @@ export default async function handler(req, res) {
       hasActiveSubscription(dataUserId),
       getSubscriptionExpiry(dataUserId),
     ]);
+
+    // ---- الجمعية + المناسبات + الحصالة اليومية + الأقساط الثابتة — استعلامات مستقلة، مش جوه الدفعة الكبيرة فوق عشان أي تعديل هنا منعملش mismatch في الترتيب ----
+    const [gameyaList, occasionsSummary, dailyPiggybank, installmentReminders, activeSubscribersCount] = await Promise.all([
+      getGameyaList(dataUserId),
+      getOccasionsSummary(dataUserId),
+      getDailyPiggybank(dataUserId),
+      supabase
+        .from('reminders')
+        .select('id, title, amount, due_date, installments_remaining, last_installment_date')
+        .eq('telegram_user_id', dataUserId)
+        .eq('installment_type', 'installment')
+        .eq('done', false)
+        .order('due_date', { ascending: true })
+        .then(({ data }) => data || []),
+      getActiveSubscribersCount(),
+    ]);
+    const installmentsMonthlyTotal = installmentReminders.reduce((sum, r) => sum + Number(r.amount || 0), 0);
 
     // ---- الاشتراك/التجربة: subInTrial محتاج نتيجة subActive الأول، فبيفضل استعلام إضافي واحد بس لو لازم ----
     const subInTrial = !subActive && (await isInTrial(dataUserId));
@@ -393,6 +412,7 @@ export default async function handler(req, res) {
         trialDaysLeft: subTrialDaysLeft,
         priceEgp: SUBSCRIPTION_PRICE_EGP,
         instapayNumber: INSTAPAY_LINK,
+        totalActiveSubscribers: activeSubscribersCount,
       },
       activeDays,
       today: {
@@ -443,8 +463,8 @@ export default async function handler(req, res) {
         net: owedToYouTotal - youOweTotal,
         owedToYouTotal,
         youOweTotal,
-        owedToYou: owedToYou.map((v) => ({ name: v.displayName, amount: v.net })),
-        youOwe: youOwe.map((v) => ({ name: v.displayName, amount: Math.abs(v.net) })),
+        owedToYou: owedToYou.map((v) => ({ name: v.displayName, amount: v.net, dueDate: v.nearestDueDate || null })),
+        youOwe: youOwe.map((v) => ({ name: v.displayName, amount: Math.abs(v.net), dueDate: v.nearestDueDate || null })),
       },
       netWorth: {
         total: netWorth,
@@ -461,6 +481,11 @@ export default async function handler(req, res) {
       history,
       goal,
       goals,
+      gameyaList,
+      occasionsSummary,
+      dailyPiggybank,
+      installmentReminders,
+      installmentsMonthlyTotal,
       portfolio,
       portfolioDigest,
       smart,

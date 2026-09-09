@@ -1,6 +1,7 @@
 import { supabase } from '../../lib/supabaseClient.js';
 import { getRecentExpensesSummaryText } from '../../lib/expenses.js';
-import { getDebtsSummaryText } from '../../lib/debts.js';
+import { getDebtsSummaryText, createGameya, getGameyaList, toggleGameyaMemberPaid, deleteGameya, createOccasion, getOccasionsSummary, deleteOccasion, updateDebtById } from '../../lib/debts.js';
+import { createDailyPiggybank, getDailyPiggybank, contributeDailyPiggybank, deleteDailyPiggybank } from '../../lib/goals.js';
 import { extractItemizedReceiptFromImageBase64, askDabbarChat, askDabbarRoast, classifyMessage, transcribeAudioBase64 } from '../../lib/groq.js';
 import { saveInvoiceRecord, deleteInvoiceById } from '../../lib/invoices.js';
 import { hasActiveSubscription, isInTrial } from '../../lib/users.js';
@@ -610,6 +611,94 @@ async function handleInvoiceDelete(userId, body, res) {
   return res.status(200).json({ ok: true });
 }
 
+// ============================================================================
+// ============ الجمعية (Gam3eya) ============
+// ============================================================================
+async function handleGameyaCreate(userId, body, res) {
+  const result = await createGameya({
+    groupName: (body.groupName || '').trim(),
+    installment: body.installment,
+    groupSize: body.groupSize,
+    myTurn: body.myTurn,
+    startDate: body.startDate,
+    memberNames: body.memberNames,
+  }, userId);
+  if (result.error) return res.status(400).json({ error: result.error });
+  const gameyaList = await getGameyaList(userId);
+  return res.status(200).json({ gameya: result.gameya, gameyaList });
+}
+
+async function handleGameyaMarkPaid(userId, body, res) {
+  if (!body.gameyaId || !body.memberName) return res.status(400).json({ error: 'محتاجين رقم الجمعية واسم العضو.' });
+  const result = await toggleGameyaMemberPaid(body.gameyaId, body.memberName, userId);
+  if (result.error) return res.status(400).json({ error: result.error });
+  const gameyaList = await getGameyaList(userId);
+  return res.status(200).json({ ok: true, gameyaList });
+}
+
+async function handleGameyaDelete(userId, body, res) {
+  if (!body.gameyaId) return res.status(400).json({ error: 'مفيش رقم جمعية.' });
+  await deleteGameya(body.gameyaId, userId);
+  const gameyaList = await getGameyaList(userId);
+  return res.status(200).json({ ok: true, gameyaList });
+}
+
+// ============================================================================
+// ============ المناسبات الاجتماعية (أفراح/عزومات) ============
+// ============================================================================
+async function handleOccasionCreate(userId, body, res) {
+  const result = await createOccasion({
+    personName: (body.personName || '').trim(),
+    amount: body.amount,
+    occasionType: body.occasionType,
+    note: body.note,
+    asDebt: Boolean(body.asDebt),
+    direction: body.direction,
+  }, userId);
+  if (result.error) return res.status(400).json({ error: result.error });
+  const occasionsSummary = await getOccasionsSummary(userId);
+  return res.status(200).json({ occasion: result.occasion, occasionsSummary });
+}
+
+async function handleOccasionDelete(userId, body, res) {
+  if (!body.occasionId) return res.status(400).json({ error: 'مفيش رقم مناسبة.' });
+  await deleteOccasion(body.occasionId, userId);
+  const occasionsSummary = await getOccasionsSummary(userId);
+  return res.status(200).json({ ok: true, occasionsSummary });
+}
+
+// ============================================================================
+// ============ تعديل دين موجود (لإضافة/تغيير تاريخ الاستحقاق من الواجهة) ============
+// ============================================================================
+async function handleDebtUpdate(userId, body, res) {
+  if (!body.debtId) return res.status(400).json({ error: 'مفيش رقم دين.' });
+  const updated = await updateDebtById(body.debtId, userId, { due_date: body.dueDate });
+  if (!updated) return res.status(400).json({ error: 'حصل خطأ، جرب تاني.' });
+  return res.status(200).json({ ok: true, debt: updated });
+}
+
+// ============================================================================
+// ============ الحصالة اليومية ============
+// ============================================================================
+async function handlePiggybankCreate(userId, body, res) {
+  const result = await createDailyPiggybank({ title: (body.title || '').trim(), dailyAmount: body.dailyAmount }, userId);
+  if (result.error) return res.status(400).json({ error: result.error });
+  return res.status(200).json({ piggybank: result.piggybank });
+}
+
+async function handlePiggybankContribute(userId, body, res) {
+  if (!body.piggybankId) return res.status(400).json({ error: 'مفيش رقم حصالة.' });
+  const result = await contributeDailyPiggybank(body.piggybankId, userId);
+  if (result.error) return res.status(result.alreadyDone ? 200 : 400).json({ error: result.error, alreadyDone: result.alreadyDone || false });
+  return res.status(200).json({ piggybank: result.piggybank });
+}
+
+async function handlePiggybankDelete(userId, body, res) {
+  if (!body.piggybankId) return res.status(400).json({ error: 'مفيش رقم حصالة.' });
+  await deleteDailyPiggybank(body.piggybankId, userId);
+  return res.status(200).json({ ok: true });
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -655,6 +744,24 @@ export default async function handler(req, res) {
         return await handleAsk(userId, body, res);
       case 'chat_history':
         return await handleChatHistory(userId, body, res);
+      case 'gameya_create':
+        return await handleGameyaCreate(userId, body, res);
+      case 'gameya_mark_paid':
+        return await handleGameyaMarkPaid(userId, body, res);
+      case 'gameya_delete':
+        return await handleGameyaDelete(userId, body, res);
+      case 'occasion_create':
+        return await handleOccasionCreate(userId, body, res);
+      case 'occasion_delete':
+        return await handleOccasionDelete(userId, body, res);
+      case 'debt_update':
+        return await handleDebtUpdate(userId, body, res);
+      case 'piggybank_create':
+        return await handlePiggybankCreate(userId, body, res);
+      case 'piggybank_contribute':
+        return await handlePiggybankContribute(userId, body, res);
+      case 'piggybank_delete':
+        return await handlePiggybankDelete(userId, body, res);
       default:
         return res.status(400).json({ error: 'action غير معروف.' });
     }

@@ -226,28 +226,57 @@
                 linear-gradient(150deg, #14100a 0%, #0b0e18 55%, #0a0e18 100%);
         }
         html[data-theme="light"] .honor-card {
-            border-color: #dcc98a !important;
-            box-shadow: 0 12px 30px rgba(180,140,40,.14), 0 2px 8px rgba(15,23,42,.06) !important;
+            border-color: #b9d9cf !important;
+            box-shadow: 0 12px 30px rgba(14,101,91,.12), 0 2px 8px rgba(15,23,42,.05) !important;
             background:
-                radial-gradient(circle at 8% 10%, rgba(212,175,55,.22) 0%, transparent 42%),
-                radial-gradient(circle at 92% 90%, rgba(20,80,70,.10) 0%, transparent 45%),
-                linear-gradient(150deg, #fdf8ea 0%, #f6ecc9 55%, #fbf5e3 100%);
+                radial-gradient(circle at 8% 10%, rgba(14,101,91,.14) 0%, transparent 42%),
+                radial-gradient(circle at 92% 90%, rgba(201,162,75,.16) 0%, transparent 45%),
+                linear-gradient(150deg, #fdfaf2 0%, #eef6f1 55%, #fdfaf2 100%);
         }
-        .honor-name-chip {
-            border: 1px solid rgba(212,175,55,.22);
-            background:
-                radial-gradient(circle at 15% 0%, rgba(212,175,55,.08) 0%, transparent 55%),
-                linear-gradient(150deg, #14100a 0%, #0d0f18 60%, #0b0e18 100%);
-        }
-        html[data-theme="light"] .honor-name-chip {
-            border-color: rgba(180,140,40,.28) !important;
-            background:
-                radial-gradient(circle at 15% 0%, rgba(212,175,55,.14) 0%, transparent 55%),
-                linear-gradient(150deg, #fdf8ea 0%, #f6ecc9 60%, #fbf5e3 100%) !important;
-        }
+        html[data-theme="light"] #honor-board-name { color: #17322e !important; }
+        html[data-theme="light"] #honor-board-message { color: #31514a !important; }
+        html[data-theme="light"] #honor-board-subscribers-line { color: #5d716a !important; }
+        html[data-theme="light"] #honor-board-badge { background: rgba(14,101,91,.10) !important; color: #0e655b !important; border-color: rgba(14,101,91,.30) !important; }
+        html[data-theme="light"] #honor-board-share-btn { background: linear-gradient(150deg,#0e655b,#0a4b45) !important; color: #fdfaf2 !important; }
         .honor-mini-avatar { background: rgba(212,175,55,.12); border: 1px solid rgba(212,175,55,.35); color: #d4af37; }
-        html[data-theme="light"] .honor-mini-avatar { color: #8a6d16 !important; }
-        html[data-theme="light"] .honor-name-chip span { color: #4a3c10 !important; }
+        html[data-theme="light"] .honor-mini-avatar { background: rgba(14,101,91,.10) !important; border-color: rgba(14,101,91,.30) !important; color: #0e655b !important; }
+
+        /* كارتي "باقيلك من الميزانية" و"الحصالة اليومية" — تصميم أغنى بدل الجراديانت البدائي القديم */
+        .dabbar-metric-card {
+            border: 1px solid var(--pm-hairline, rgba(16,185,129,.25));
+            background: linear-gradient(160deg, color-mix(in srgb, var(--pm-gold, #10b981) 8%, var(--pm-surface-hi, #0b0e18)) 0%, var(--pm-surface-hi, #0b0e18) 65%);
+        }
+        .dabbar-metric-glow { position:absolute; inset:-40% -30% auto auto; width:9rem; height:9rem; border-radius:999px; background: radial-gradient(circle, color-mix(in srgb, var(--pm-gold, #10b981) 30%, transparent) 0%, transparent 70%); pointer-events:none; }
+        .dabbar-metric-glow--piggy { background: radial-gradient(circle, color-mix(in srgb, var(--pm-clay, #d36a56) 30%, transparent) 0%, transparent 70%); }
+        .dabbar-metric-icon { display:inline-flex; align-items:center; justify-content:center; width:1.9rem; height:1.9rem; border-radius:.85rem; font-size:1rem; background: color-mix(in srgb, var(--pm-gold, #10b981) 16%, transparent); border:1px solid var(--pm-hairline); }
+        .dabbar-metric-icon--piggy { background: color-mix(in srgb, var(--pm-clay, #d36a56) 16%, transparent); }
+        .dabbar-metric-title { color: var(--pm-ink, #f6f1e5); }
+        .dabbar-metric-pill { font-size:.62rem; font-weight:700; color: var(--pm-muted, #aaa39b); background: var(--pm-surface-soft, rgba(0,0,0,.2)); border-radius:999px; padding:.2rem .55rem; }
+        .dabbar-metric-pill--piggy { color: var(--pm-clay, #d36a56); }
+        .dabbar-metric-label { color: var(--pm-muted, #aaa39b); }
+        .dabbar-metric-value { color: var(--pm-ink, #f6f1e5); }
+        .dabbar-metric-value-accent { color: var(--pm-gold-bright, #10b981); }
+        .dabbar-metric-track { background: color-mix(in srgb, var(--pm-gold, #10b981) 14%, transparent); }
+        .dabbar-metric-empty { border:1px dashed var(--pm-hairline); background: color-mix(in srgb, var(--pm-gold, #10b981) 5%, var(--pm-surface-hi, transparent)); }
+        .dabbar-metric-empty--piggy { background: color-mix(in srgb, var(--pm-clay, #d36a56) 5%, var(--pm-surface-hi, transparent)); }
+        .dabbar-metric-cta { color: var(--pm-gold-bright, #10b981); }
+        .dabbar-metric-cta-btn { border-radius:.85rem; padding:.4rem .85rem; font-size:.68rem; font-weight:900; background: var(--pm-gold, #10b981); color: var(--pm-surface, #06271a); }
+        .dabbar-metric-cta-btn--ghost { background: color-mix(in srgb, var(--pm-clay, #d36a56) 16%, transparent); color: var(--pm-clay, #d36a56); }
+
+        /* أنيميشن سطر الحالة أثناء المعالجة (صوت/كتابة/فاتورة) — كل رسالة بتتمسح وتتغير بسرعة عالية بدل انتظار طويل */
+        @keyframes dabbarStatusWipe {
+            0% { opacity: 0; clip-path: inset(0 100% 0 0); transform: translateY(1px); }
+            55% { opacity: 1; }
+            100% { opacity: 1; clip-path: inset(0 0 0 0); transform: translateY(0); }
+        }
+        .dabbar-status-wipe { display: inline-block; animation: dabbarStatusWipe .4s cubic-bezier(.22,.68,.32,1) both; }
+        .dabbar-status-processing { color: var(--pm-gold-bright, #10b981) !important; font-weight: 800; }
+
+        /* كارت "بنقرأ الفاتورة" — بألوان الموقع بدل الأزرق الغريب، ومتماشي مع الوضعين */
+        .dabbar-scan-box { border: 1px solid var(--pm-hairline); background: color-mix(in srgb, var(--pm-gold, #10b981) 8%, var(--pm-surface-hi, transparent)); }
+        .dabbar-scan-box-icon { background: var(--pm-surface-hi, #fff); }
+        .dabbar-scan-box-title { color: var(--pm-gold-bright, #0e9f6e); }
+        .dabbar-scan-box-sub { color: var(--pm-muted, #7d8e87); }
         html[data-theme="light"] body { background-color: #f8fafc; color: #0f172a; }
         ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
         html[data-theme="light"] ::-webkit-scrollbar-thumb { background: #cbd5e1; }
@@ -2410,7 +2439,7 @@
                 
                 <div class="grid grid-cols-3 gap-2"><button id="quick-entry-voice" class="rounded-2xl border border-emerald-200 bg-white/80 px-2 py-3 text-center shadow-sm transition hover:-translate-y-0.5 dark:bg-slate-900" type="button"><span class="mx-auto mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/15 text-xl">🎙</span><span class="block text-[11px] font-bold text-slate-700 dark:text-slate-200">صوت</span></button><button id="quick-entry-text" class="rounded-2xl border border-emerald-200 bg-white/80 px-2 py-3 text-center shadow-sm transition hover:-translate-y-0.5 dark:bg-slate-900" type="button"><span class="mx-auto mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/15 text-xl">✍️</span><span class="block text-[11px] font-bold text-slate-700 dark:text-slate-200">كتابة</span></button><button id="quick-entry-invoice" class="rounded-2xl border border-emerald-200 bg-white/80 px-2 py-3 text-center shadow-sm transition hover:-translate-y-0.5 dark:bg-slate-900" type="button"><span class="mx-auto mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/15 text-xl">📸</span><span class="block text-[11px] font-bold text-slate-700 dark:text-slate-200">فاتورة</span></button></div><p class="text-center text-[10px] text-slate-500">ملاحظة مهمة: أقل مدة لتسجيل الصوت هي <b class="quick-voice-minimum text-emerald-600 dark:text-emerald-300">5 ثواني</b> عشان دبّر يسمعه ويفهمه بدقة.</p>
                 <input type="file" id="quick-entry-invoice-input" accept="image/*" class="hidden">
-                <div id="quick-entry-scanning" class="hidden rounded-2xl border border-blue-200 bg-blue-50 p-3 text-center dark:border-blue-500/30 dark:bg-blue-500/10"><div class="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl bg-white text-xl shadow-sm dark:bg-slate-900"><span style="display:inline-block;animation:dabbar-scan-spin 1s linear infinite">⟳</span></div><p class="text-xs font-bold text-blue-700 dark:text-blue-200">بنقرأ الفاتورة...</p><p class="mt-1 text-[10px] text-blue-600/70 dark:text-blue-200/70">دبّر بيستخرج المبلغ والأصناف</p></div>
+                <div id="quick-entry-scanning" class="hidden dabbar-scan-box rounded-2xl p-3 text-center"><div class="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl dabbar-scan-box-icon text-xl shadow-sm"><span style="display:inline-block;animation:dabbar-scan-spin 1s linear infinite">⟳</span></div><p class="text-xs font-bold dabbar-scan-box-title">بنقرأ الفاتورة...</p><p class="mt-1 text-[10px] dabbar-scan-box-sub">دبّر بيستخرج المبلغ والأصناف</p></div>
                 <div id="quick-entry-form" class="hidden space-y-2"><p class="text-[10px] text-slate-500">اكتب مثلًا: «قبضت 5000 جنيه مرتب» أو «صرفت 75 جنيه أكل».</p><textarea id="quick-entry-input" rows="2" maxlength="2500" placeholder="مثال: صرفت 75 جنيه أكل" class="w-full resize-none rounded-2xl border border-emerald-200 bg-white px-3 py-2.5 text-xs outline-none dark:bg-slate-900 dark:text-slate-100"></textarea><div class="flex gap-2"><button id="quick-entry-analyze" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950" type="button">فهم وتجهيز</button><button id="quick-entry-cancel" class="rounded-xl border border-slate-300 px-3 py-2.5 text-xs text-slate-500 dark:border-slate-700" type="button">إلغاء</button></div></div>
                 <div id="quick-entry-recording" class="hidden rounded-2xl border border-rose-200 bg-rose-50 p-3 text-center text-xs text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200">
                     <div class="flex items-center justify-between gap-2"><span class="font-black">جاري التسجيل... <span id="quick-entry-recording-type-label" class="font-bold"></span></span><button id="quick-entry-recording-cancel" class="flex h-7 w-7 items-center justify-center rounded-full bg-white/70 text-sm font-black text-rose-500 transition hover:bg-white" type="button" aria-label="إلغاء التسجيل">✕</button></div>
@@ -2623,45 +2652,54 @@
             </section>
 
             <!-- عداد "المرتب لسه فاضل كام" — بيظهر بس لو المستخدم مسجل ميزانية شهرية -->
-            <div id="salary-countdown-card" class="hidden bg-gradient-to-br from-emerald-500/[0.08] to-slate-950 border border-emerald-500/25 rounded-2xl p-3.5 space-y-2 shadow-lg">
-                <div class="flex justify-between items-center text-[11px] font-semibold text-emerald-300">
-                    <span>💰 المرتب لسه فاضل كام؟</span>
-                    <span id="salary-countdown-days" class="text-slate-400"></span>
+            <div id="salary-countdown-card" class="hidden dabbar-metric-card relative overflow-hidden rounded-3xl p-4 space-y-3 shadow-lg">
+                <div class="dabbar-metric-glow" aria-hidden="true"></div>
+                <div class="relative flex justify-between items-center gap-2">
+                    <div class="flex items-center gap-2">
+                        <span class="dabbar-metric-icon">💰</span>
+                        <span class="text-[12px] font-bold dabbar-metric-title">باقيلك من ميزانية الشهر؟</span>
+                    </div>
+                    <span id="salary-countdown-days" class="dabbar-metric-pill"></span>
                 </div>
-                <div class="flex items-end justify-between gap-2">
+                <div class="relative flex items-end justify-between gap-2">
                     <div>
-                        <p class="text-[10px] text-slate-500">باقيلك</p>
-                        <h3 id="salary-countdown-remaining" class="text-lg font-black text-slate-100">—</h3>
+                        <p class="text-[10px] dabbar-metric-label">الباقي من الميزانية</p>
+                        <h3 id="salary-countdown-remaining" class="text-xl font-black dabbar-metric-value">—</h3>
                     </div>
                     <div class="text-left">
-                        <p class="text-[10px] text-slate-500">تقدر تصرف يوميًا</p>
-                        <h3 id="salary-countdown-daily" class="text-lg font-black text-emerald-400">—</h3>
+                        <p class="text-[10px] dabbar-metric-label">تقدر تصرف يوميًا</p>
+                        <h3 id="salary-countdown-daily" class="text-xl font-black dabbar-metric-value-accent">—</h3>
                     </div>
                 </div>
-                <div class="w-full bg-slate-800/60 h-1.5 rounded-full overflow-hidden">
+                <div class="relative w-full dabbar-metric-track h-2 rounded-full overflow-hidden">
                     <div id="salary-countdown-bar" class="h-full rounded-full bg-emerald-500" style="width:0%"></div>
                 </div>
             </div>
-            <div id="salary-countdown-empty" class="hidden bg-slate-950/40 border border-slate-800 rounded-2xl p-3.5 text-center">
-                <p class="text-[11px] text-slate-400">حط ميزانيتك الشهرية عشان نوريك تقدر تصرف كام يوميًا لحد آخر الشهر.</p>
-                <button type="button" id="salary-countdown-setup-btn" class="mt-2 text-[11px] font-bold text-emerald-400">حط ميزانيتك من هنا ←</button>
+            <div id="salary-countdown-empty" class="hidden dabbar-metric-empty rounded-3xl p-4 text-center space-y-1.5">
+                <span class="dabbar-metric-icon mx-auto">💰</span>
+                <p class="text-[11px] dabbar-metric-label">حط ميزانيتك الشهرية عشان نوريك تقدر تصرف كام يوميًا لحد آخر الشهر.</p>
+                <button type="button" id="salary-countdown-setup-btn" class="mt-1 text-[11px] font-bold dabbar-metric-cta">حط ميزانيتك من هنا ←</button>
             </div>
 
             <!-- الحصالة اليومية — تسجيل/تتبع فقط، بدون أي تحويل فعلي -->
-            <div id="piggybank-card" class="hidden bg-gradient-to-br from-amber-500/[0.08] to-slate-950 border border-amber-500/25 rounded-2xl p-3.5 space-y-2 shadow-lg">
-                <div class="flex justify-between items-center text-[11px] font-semibold text-amber-300">
-                    <span>🐷 حصالة يوم بيوم</span>
-                    <span id="piggybank-streak" class="text-slate-400"></span>
+            <div id="piggybank-card" class="hidden dabbar-metric-card dabbar-metric-card--piggy relative overflow-hidden rounded-3xl p-4 space-y-3 shadow-lg">
+                <div class="dabbar-metric-glow dabbar-metric-glow--piggy" aria-hidden="true"></div>
+                <div class="relative flex justify-between items-center gap-2">
+                    <div class="flex items-center gap-2">
+                        <span class="dabbar-metric-icon dabbar-metric-icon--piggy">🐷</span>
+                        <span class="text-[12px] font-bold dabbar-metric-title">حصالة يوم بيوم</span>
+                    </div>
+                    <span id="piggybank-streak" class="dabbar-metric-pill dabbar-metric-pill--piggy"></span>
                 </div>
-                <div class="flex items-center justify-between">
-                    <h3 id="piggybank-saved" class="text-lg font-black text-slate-100">—</h3>
-                    <button type="button" id="piggybank-contribute-btn" class="rounded-xl bg-amber-500 px-3 py-1.5 text-[11px] font-black text-slate-950">+ قرش النهاردة</button>
+                <div class="relative flex items-center justify-between gap-2">
+                    <h3 id="piggybank-saved" class="text-xl font-black dabbar-metric-value">—</h3>
+                    <button type="button" id="piggybank-contribute-btn" class="dabbar-metric-cta-btn">+ قرش النهاردة</button>
                 </div>
-                <p id="piggybank-status" class="text-[10px] text-slate-500">رقم افتراضي للتحفيز بس، مش خصم حقيقي من أي حساب.</p>
+                <p id="piggybank-status" class="text-[10px] dabbar-metric-label">رقم افتراضي للتحفيز بس، مش خصم حقيقي من أي حساب.</p>
             </div>
-            <div id="piggybank-empty" class="hidden bg-slate-950/40 border border-slate-800 rounded-2xl p-3.5 flex items-center justify-between gap-2">
-                <p class="text-[11px] text-slate-400">جرّب حصالة "قرش اليوم" — مبلغ بسيط بيتجمّع كل يوم.</p>
-                <button type="button" id="piggybank-create-btn" class="shrink-0 rounded-xl bg-amber-500/15 border border-amber-500/30 px-3 py-1.5 text-[11px] font-black text-amber-300">ابدأ</button>
+            <div id="piggybank-empty" class="hidden dabbar-metric-empty dabbar-metric-empty--piggy rounded-3xl p-4 flex items-center justify-between gap-3">
+                <div class="flex items-center gap-2.5"><span class="dabbar-metric-icon dabbar-metric-icon--piggy">🐷</span><p class="text-[11px] dabbar-metric-label">جرّب حصالة "قرش اليوم" — مبلغ بسيط بيتجمّع كل يوم.</p></div>
+                <button type="button" id="piggybank-create-btn" class="shrink-0 dabbar-metric-cta-btn dabbar-metric-cta-btn--ghost">ابدأ</button>
             </div>
 
             <div class="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-2xl p-3 space-y-1.5 shadow-lg">
@@ -2867,10 +2905,6 @@
             </div>
             <div id="debts-panel-active" class="space-y-3">
                 <input id="debts-active-search" type="search" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-100 outline-none focus:border-emerald-400" placeholder="دوّر على اسم..." autocomplete="off">
-                <div class="flex gap-2">
-                    <button type="button" id="debts-filter-all" class="flex-1 rounded-xl py-2 text-[11px] font-bold bg-emerald-500 text-slate-950">الكل</button>
-                    <button type="button" id="debts-filter-overdue" class="flex-1 rounded-xl py-2 text-[11px] font-bold bg-slate-800 text-slate-400">⏰ متأخرة</button>
-                </div>
                 <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3" id="debts-owed-to-you-card" style="display:none;"><h4 class="text-xs font-bold text-slate-300 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> ليك عند الناس</h4><div class="space-y-1" id="debts-owed-to-you-list"></div></div>
                 <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3" id="debts-you-owe-card" style="display:none;"><h4 class="text-xs font-bold text-slate-300 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-rose-400"></span> عليك للناس</h4><div class="space-y-1" id="debts-you-owe-list"></div></div>
                 <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-3.5 flex items-start gap-3"><div class="w-8 h-8 rounded-full bg-slate-700/50 text-slate-300 flex items-center justify-center text-xs font-bold shrink-0 border border-slate-700">ℹ️</div><div class="text-xs text-slate-300 leading-relaxed">عشان تسجل سلفة جديدة، ابعت رسالة زي "عطيت محمد 200 جنيه" أو "استلفت من سارة 100 جنيه".</div></div>
@@ -3214,8 +3248,6 @@
                         مشاركة شارتي <span aria-hidden="true">↗</span>
                     </button>
                 </div>
-                <p class="text-[10px] text-slate-600 text-center mt-3 mb-2">مستمرين معانا</p>
-                <div class="grid grid-cols-2 gap-2.5" id="honor-board-names-grid"></div>
             </div>
 
             <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 flex items-center justify-between gap-3 cursor-pointer active:opacity-70 transition" id="account-telegram-card">
@@ -6074,7 +6106,7 @@
             const dailyAllowance = remaining / daysRemaining;
             remainingEl.textContent = fmt(remaining);
             remainingEl.className = 'text-lg font-black text-slate-100';
-            dailyEl.textContent = `${fmt(Math.floor(dailyAllowance))} ج.م/يوم`;
+            dailyEl.textContent = `${fmt(Math.floor(dailyAllowance))}/يوم`;
             const spentPercent = budget > 0 ? Math.min((monthTotal / budget) * 100, 100) : 0;
             const daysPassedPercent = ((daysInMonth - daysRemaining + 1) / daysInMonth) * 100;
             barEl.style.width = `${spentPercent}%`;
@@ -6097,7 +6129,7 @@
             emptyEl.classList.add('hidden');
             card.classList.remove('hidden');
             window.__piggybank = piggybank;
-            document.getElementById('piggybank-saved').textContent = `${fmt(piggybank.saved_amount || 0)} ج.م`;
+            document.getElementById('piggybank-saved').textContent = `${fmt(piggybank.saved_amount || 0)}`;
             const today = new Date().toISOString().slice(0, 10);
             const doneToday = piggybank.last_contribution_date === today;
             const btn = document.getElementById('piggybank-contribute-btn');
@@ -6515,27 +6547,10 @@
             loadDebtHistory();
         }
 
-        // ============ فلتر "الكل / متأخرة" فوق قايمة الديون النشطة ============
-        let debtOverdueFilterOnly = false;
+        // ============ فلتر "متأخرة" اتشال بناءً على طلب المستخدم — الديون النشطة بتتعرض كلها دايمًا ============
         function applyDebtOverdueFilter() {
-            document.querySelectorAll('.debt-person-row').forEach((row) => {
-                row.classList.toggle('hidden', debtOverdueFilterOnly && row.dataset.overdue !== '1');
-            });
+            document.querySelectorAll('.debt-person-row').forEach((row) => row.classList.remove('hidden'));
         }
-        document.getElementById('debts-filter-all')?.addEventListener('click', function () {
-            debtOverdueFilterOnly = false;
-            this.classList.add('bg-emerald-500', 'text-slate-950'); this.classList.remove('bg-slate-800', 'text-slate-400');
-            document.getElementById('debts-filter-overdue')?.classList.add('bg-slate-800', 'text-slate-400');
-            document.getElementById('debts-filter-overdue')?.classList.remove('bg-rose-500', 'text-slate-950');
-            applyDebtOverdueFilter();
-        });
-        document.getElementById('debts-filter-overdue')?.addEventListener('click', function () {
-            debtOverdueFilterOnly = true;
-            this.classList.add('bg-rose-500', 'text-slate-950'); this.classList.remove('bg-slate-800', 'text-slate-400');
-            document.getElementById('debts-filter-all')?.classList.add('bg-slate-800', 'text-slate-400');
-            document.getElementById('debts-filter-all')?.classList.remove('bg-emerald-500', 'text-slate-950');
-            applyDebtOverdueFilter();
-        });
 
         // ============ التذكيرات — إدخال يدوي بالكامل، مفيش AI هنا خالص ============
         function renderRemindersTelegramBanner(linked) {
@@ -7670,14 +7685,31 @@
             if (previewLabel) previewLabel.textContent = '';
         }
         let quickStatusTimer = null;
+        let quickStatusCycleTimer = null;
         function quickStatus(message, kind = 'normal') {
             const el = document.getElementById('quick-entry-status');
             if (!el) return;
-            el.textContent = message || '';
-            el.className = `min-h-4 text-center text-[11px] ${kind === 'error' ? 'text-rose-500' : kind === 'success' ? 'text-emerald-600' : 'text-slate-500'}`;
+            if (kind !== 'processing') { clearInterval(quickStatusCycleTimer); quickStatusCycleTimer = null; }
+            el.className = `min-h-4 text-center text-[11px] ${kind === 'error' ? 'text-rose-500' : kind === 'success' ? 'text-emerald-600' : kind === 'processing' ? 'dabbar-status-processing' : 'text-slate-500'}`;
+            // ============ أنيميشن "سطر بيتمسح ويتغير بسرعة" أثناء المعالجة — كل رسالة عنصر DOM جديد فبتتحرك تلقائي كل مرة ============
+            if (kind === 'processing' && message) {
+                el.innerHTML = `<span class="dabbar-status-wipe">${message}</span>`;
+            } else {
+                el.textContent = message || '';
+            }
             clearTimeout(quickStatusTimer);
             // ============ رسالة النجاح مش المفروض تفضل ظاهرة على طول — تختفي لوحدها بعد 10 ثواني ============
             if (kind === 'success' && message) quickStatusTimer = setTimeout(() => { if (el.textContent === message) el.textContent = ''; }, 10000);
+        }
+        // ============ تدوير رسائل المعالجة بسرعة (نفس الروح في الصوت/الكتابة/الفاتورة) ============
+        function quickStatusCycle(messages, ms = 550) {
+            clearInterval(quickStatusCycleTimer);
+            let i = 0;
+            quickStatus(messages[0], 'processing');
+            quickStatusCycleTimer = setInterval(() => {
+                i = (i + 1) % messages.length;
+                quickStatus(messages[i], 'processing');
+            }, ms);
         }
 
         // ============ Undo toast عام: بيتفتح بعد أي حذف، ولو محدش دوس "تراجع" خلال 5 ثواني ينفّذ الحذف الفعلي ============
@@ -7824,7 +7856,7 @@
             }
             quickStatus(quickEntryDrafts.length > 1 ? `فهمنا ${quickEntryDrafts.length} معاملة — راجعهم ثم أكد التسجيل.` : 'راجع المبلغ والفئة ثم أكد التسجيل.');
         }
-        async function analyzeQuickEntry(payload) { if (!requireQuickEntryAccess()) return; quickStatus('دبّر بيفهم العملية...'); try { const result = await asstApi(payload.imageBase64 ? 'entry_invoice_draft' : 'entry_draft', payload); quickDraft(result.drafts, result.transcript); } catch (e) { quickStatus(e.message || 'تعذر فهم العملية.', 'error'); } }
+        async function analyzeQuickEntry(payload) { if (!requireQuickEntryAccess()) return; const cycleMsgs = payload.audioBase64 ? ['🎙️ بنسمع كلامك', '🧠 بنفهم العملية', '📝 بنجهز المراجعة'] : payload.imageBase64 ? ['📸 بنقرأ الفاتورة', '🔎 بنفصّل الأصناف', '🧮 بنجهز الإجمالي'] : ['🧠 بنفهم كلامك', '🏷️ بنحدد الفئة', '📝 بنجهز المراجعة']; quickStatusCycle(cycleMsgs); try { const result = await asstApi(payload.imageBase64 ? 'entry_invoice_draft' : 'entry_draft', payload); quickDraft(result.drafts, result.transcript); } catch (e) { quickStatus(e.message || 'تعذر فهم العملية.', 'error'); } }
         setQuickEntryType();
         document.getElementById('quick-entry-text')?.addEventListener('click', () => { if (!requireQuickEntryAccess()) return; document.getElementById('quick-entry-input').value = ''; quickShow('quick-entry-form', true); document.getElementById('quick-entry-input')?.focus(); });
         document.getElementById('quick-entry-cancel')?.addEventListener('click', () => { quickShow('quick-entry-form', false); quickShow('quick-entry-draft', false); quickStatus(''); document.getElementById('quick-entry-input').value = ''; });
@@ -7849,7 +7881,7 @@
             document.getElementById('quick-entry-draft-actions')?.classList.add('hidden');
             list.innerHTML = '<div class="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 py-1"><span class="w-4 h-4 rounded-full border-2 border-emerald-400 border-t-transparent animate-spin shrink-0"></span><span>دبّر بيقرا الفاتورة...</span></div>';
             quickShow('quick-entry-draft', true);
-            quickStatus('');
+            quickStatusCycle(['📸 بنقرأ الفاتورة', '🔎 بنفصّل الأصناف', '🧮 بنجهز الإجمالي']);
             try {
                 const base64 = await new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = reject; reader.readAsDataURL(file); });
                 const result = await asstApi('receipt_scan', { imageBase64: base64 });
@@ -9098,9 +9130,6 @@
         })();
 
         // ============ لوحة شرف عائلة دبّر ============
-        // أسماء تمثيلية بس (مش مستخدمين حقيقيين) — هدفها إحساس الانتماء لمجتمع، من غير كشف بيانات أي حد.
-        const HONOR_BOARD_PLACEHOLDER_NAMES = ['كريم منصور', 'مي عبد الرحمن', 'عمر الشريف', 'سارة يوسف', 'منة الله طارق', 'يحيى الجندي'];
-
         function renderHonorBoard(displayName, initial) {
             const wrap = document.getElementById('honor-board-card');
             const sub = window.__dashboardData?.subscription;
@@ -9117,15 +9146,6 @@
                 : '🏅 من مشتركين دبّر النشطين';
             document.getElementById('honor-board-message').innerHTML =
                 `شكرًا يا <b>${displayName}</b> 🙏 استمرارك معانا (${activeDaysCount} يوم نشط لحد دلوقتي) هو اللي بيخلينا نكمل ونطوّر أكتر.<br>جدد اشتراكك واحتفظ بمكانك بين الداعمين 🚀`;
-
-            const grid = document.getElementById('honor-board-names-grid');
-            grid.innerHTML = HONOR_BOARD_PLACEHOLDER_NAMES.map((name) => {
-                const initials = name.trim().split(' ').map((p) => p.charAt(0)).slice(0, 2).join('');
-                return `<div class="honor-name-chip flex items-center gap-2.5 rounded-2xl px-3 py-3">
-                    <span class="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-black shrink-0 honor-mini-avatar">${initials}</span>
-                    <span class="text-[13px] font-bold text-amber-100">${name}</span>
-                </div>`;
-            }).join('');
 
             wrap.classList.remove('hidden');
         }

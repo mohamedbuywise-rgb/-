@@ -688,7 +688,7 @@ async function handlePiggybankCreate(userId, body, res) {
 
 async function handlePiggybankContribute(userId, body, res) {
   if (!body.piggybankId) return res.status(400).json({ error: 'مفيش رقم حصالة.' });
-  const result = await contributeDailyPiggybank(body.piggybankId, userId);
+  const result = await contributeDailyPiggybank(body.piggybankId, userId, body.amount);
   if (result.error) return res.status(result.alreadyDone ? 200 : 400).json({ error: result.error, alreadyDone: result.alreadyDone || false });
   return res.status(200).json({ piggybank: result.piggybank });
 }

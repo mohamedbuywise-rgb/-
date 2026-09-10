@@ -277,6 +277,24 @@
         .dabbar-scan-box-icon { background: var(--pm-surface-hi, #fff); }
         .dabbar-scan-box-title { color: var(--pm-gold-bright, #0e9f6e); }
         .dabbar-scan-box-sub { color: var(--pm-muted, #7d8e87); }
+
+        /* محفظة يوم بيوم — كارت وأزرار ومبالغ سريعة */
+        .dabbar-wallet-card {
+            border: 1px solid var(--pm-hairline, rgba(211,106,86,.3));
+            background: linear-gradient(160deg, color-mix(in srgb, var(--pm-clay, #d36a56) 8%, var(--pm-surface-hi, #0b0e18)) 0%, var(--pm-surface-hi, #0b0e18) 65%);
+        }
+        .dabbar-wallet-chip {
+            border: 1px solid var(--pm-hairline); border-radius: .7rem; padding: .45rem 0; text-align:center;
+            font-size: .74rem; font-weight: 800; color: var(--pm-ink-dim, #d7d0c3); background: var(--pm-surface-soft, rgba(0,0,0,.18));
+        }
+        .dabbar-wallet-chip.active { background: color-mix(in srgb, var(--pm-clay, #d36a56) 20%, transparent); color: var(--pm-clay, #d36a56); border-color: color-mix(in srgb, var(--pm-clay, #d36a56) 45%, transparent); }
+        .dabbar-wallet-chip--custom { padding: 0; display:flex; align-items:center; justify-content:center; }
+        .dabbar-wallet-chip--custom input { width: 100%; background: transparent; border: none; outline: none; text-align: center; font-size: .7rem; font-weight: 800; color: var(--pm-ink-dim, #d7d0c3); padding: .45rem .2rem; }
+        .dabbar-wallet-chip--custom input::placeholder { color: var(--pm-muted, #7d8e87); font-weight: 700; }
+        .dabbar-wallet-reset-btn { border: 1px solid var(--pm-hairline); border-radius: .85rem; padding: .4rem .75rem; font-size: .68rem; font-weight: 800; color: var(--pm-muted, #aaa39b); background: transparent; }
+        .dabbar-wallet-sheet-backdrop { background: rgba(8,9,10,.55); }
+        .dabbar-wallet-sheet { background: var(--pm-surface-hi, #181a1c); border: 1px solid var(--pm-hairline); border-bottom: none; }
+        .dabbar-wallet-reset-confirm-btn { border-radius: .85rem; padding: .55rem 0; font-size: .74rem; font-weight: 900; background: #b3432f; color: #fff; }
         html[data-theme="light"] body { background-color: #f8fafc; color: #0f172a; }
         ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
         html[data-theme="light"] ::-webkit-scrollbar-thumb { background: #cbd5e1; }
@@ -2681,26 +2699,55 @@
                 <button type="button" id="salary-countdown-setup-btn" class="mt-1 text-[11px] font-bold dabbar-metric-cta">حط ميزانيتك من هنا ←</button>
             </div>
 
-            <!-- الحصالة اليومية — تسجيل/تتبع فقط، بدون أي تحويل فعلي -->
-            <div id="piggybank-card" class="hidden dabbar-metric-card dabbar-metric-card--piggy relative overflow-hidden rounded-3xl p-4 space-y-3 shadow-lg">
+            <!-- الحصالة اليومية (محفظة يوم بيوم) — تسجيل/تتبع فقط، بدون أي تحويل فعلي -->
+            <div id="piggybank-card" class="hidden dabbar-wallet-card relative overflow-hidden rounded-3xl p-4 shadow-lg">
                 <div class="dabbar-metric-glow dabbar-metric-glow--piggy" aria-hidden="true"></div>
                 <div class="relative flex justify-between items-center gap-2">
                     <div class="flex items-center gap-2">
                         <span class="dabbar-metric-icon dabbar-metric-icon--piggy">🐷</span>
-                        <span class="text-[12px] font-bold dabbar-metric-title">حصالة يوم بيوم</span>
+                        <span class="text-[12px] font-bold dabbar-metric-title">محفظة يوم بيوم</span>
                     </div>
                     <span id="piggybank-streak" class="dabbar-metric-pill dabbar-metric-pill--piggy"></span>
                 </div>
-                <div class="relative flex items-center justify-between gap-2">
-                    <h3 id="piggybank-saved" class="text-xl font-black dabbar-metric-value">—</h3>
-                    <button type="button" id="piggybank-contribute-btn" class="dabbar-metric-cta-btn">+ قرش النهاردة</button>
+                <div class="relative flex items-center gap-3 mt-3">
+                    <h3 id="piggybank-saved" class="text-2xl font-black dabbar-metric-value">—</h3>
                 </div>
-                <p id="piggybank-status" class="text-[10px] dabbar-metric-label">رقم افتراضي للتحفيز بس، مش خصم حقيقي من أي حساب.</p>
+                <p id="piggybank-status" class="relative text-[10px] dabbar-metric-label mt-0.5">رقم افتراضي للتحفيز بس، مش خصم حقيقي من أي حساب.</p>
+
+                <div class="relative mt-3">
+                    <p class="text-[10px] font-bold dabbar-metric-label mb-1.5">ضيف قرش النهاردة</p>
+                    <div class="grid grid-cols-4 gap-1.5" id="piggybank-chip-row">
+                        <button type="button" class="dabbar-wallet-chip" data-amt="50">50</button>
+                        <button type="button" class="dabbar-wallet-chip" data-amt="100">100</button>
+                        <button type="button" class="dabbar-wallet-chip" data-amt="200">200</button>
+                        <div class="dabbar-wallet-chip dabbar-wallet-chip--custom">
+                            <input type="number" inputmode="numeric" id="piggybank-custom-amount" placeholder="مبلغ آخر" autocomplete="off">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="relative flex gap-2 mt-3">
+                    <button type="button" id="piggybank-contribute-btn" class="flex-1 dabbar-metric-cta-btn">+ إضافة للمحفظة</button>
+                    <button type="button" id="piggybank-reset-btn" class="dabbar-wallet-reset-btn">↺ ابدأ من جديد</button>
+                </div>
             </div>
             <div id="piggybank-empty" class="hidden dabbar-metric-empty dabbar-metric-empty--piggy rounded-3xl p-4 flex items-center justify-between gap-3">
-                <div class="flex items-center gap-2.5"><span class="dabbar-metric-icon dabbar-metric-icon--piggy">🐷</span><p class="text-[11px] dabbar-metric-label">جرّب حصالة "قرش اليوم" — مبلغ بسيط بيتجمّع كل يوم.</p></div>
+                <div class="flex items-center gap-2.5"><span class="dabbar-metric-icon dabbar-metric-icon--piggy">🐷</span><p class="text-[11px] dabbar-metric-label">جرّب محفظة "قرش اليوم" — مبلغ بسيط بيتجمّع كل يوم.</p></div>
                 <button type="button" id="piggybank-create-btn" class="shrink-0 dabbar-metric-cta-btn dabbar-metric-cta-btn--ghost">ابدأ</button>
             </div>
+
+            <!-- تأكيد "ابدأ من جديد" للمحفظة -->
+            <div id="piggybank-reset-sheet" class="hidden fixed inset-0 z-[70] flex items-end justify-center dabbar-wallet-sheet-backdrop">
+                <div class="w-full max-w-md dabbar-wallet-sheet rounded-t-3xl p-4">
+                    <h4 class="text-sm font-black dabbar-metric-title mb-1">تمسح المحفظة وتبدأ من جديد؟</h4>
+                    <p class="text-[11px] dabbar-metric-label leading-relaxed mb-3">هيتصفّر المبلغ المجمّع دلوقتي، وتقدر تبدأ محفظة جديدة على طول بمبلغ يومي جديد.</p>
+                    <div class="flex gap-2">
+                        <button type="button" id="piggybank-reset-cancel" class="flex-1 dabbar-metric-cta-btn dabbar-metric-cta-btn--ghost">رجوع</button>
+                        <button type="button" id="piggybank-reset-confirm" class="flex-1 dabbar-wallet-reset-confirm-btn">اتصفير وابدأ جديد</button>
+                    </div>
+                </div>
+            </div>
+
 
             <div class="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-2xl p-3 space-y-1.5 shadow-lg">
                 <div class="flex justify-between items-center">
@@ -6117,7 +6164,8 @@
             document.querySelector('.tab-btn[data-tab="monthly"]')?.click();
         });
 
-        // ============ كارت الحصالة اليومية — بيتنادى من loadDashboard (البيانات جاية في data.dailyPiggybank) ============
+        // ============ كارت المحفظة اليومية — بيتنادى من loadDashboard (البيانات جاية في data.dailyPiggybank) ============
+        let piggybankSelectedAmount = 0;
         function renderPiggybankCard(piggybank) {
             const card = document.getElementById('piggybank-card');
             const emptyEl = document.getElementById('piggybank-empty');
@@ -6133,10 +6181,35 @@
             const today = new Date().toISOString().slice(0, 10);
             const doneToday = piggybank.last_contribution_date === today;
             const btn = document.getElementById('piggybank-contribute-btn');
-            btn.textContent = doneToday ? '✓ اتضاف النهاردة' : '+ قرش النهاردة';
+            btn.textContent = doneToday ? '✓ اتضاف النهاردة' : '+ إضافة للمحفظة';
             btn.disabled = doneToday;
             btn.classList.toggle('opacity-50', doneToday);
+            document.querySelectorAll('#piggybank-chip-row .dabbar-wallet-chip[data-amt]').forEach((c) => c.classList.toggle('hidden', doneToday));
+            document.getElementById('piggybank-custom-amount').closest('.dabbar-wallet-chip--custom').classList.toggle('hidden', doneToday);
+            // ============ إيه عدد الأيام اللي المحفظة دي شغالة من ساعة ما اتعملت — رقم حقيقي مش مختلق ============
+            if (piggybank.created_at) {
+                const days = Math.max(1, Math.round((Date.now() - new Date(piggybank.created_at).getTime()) / 86400000) + 1);
+                document.getElementById('piggybank-streak').textContent = `📅 من ${days} يوم`;
+            }
+            // ============ افتراضي المبلغ المختار هو آخر مبلغ يومي متسجل ============
+            piggybankSelectedAmount = Number(piggybank.daily_amount || 0);
+            document.querySelectorAll('#piggybank-chip-row .dabbar-wallet-chip[data-amt]').forEach((chip) => {
+                chip.classList.toggle('active', Number(chip.dataset.amt) === piggybankSelectedAmount);
+            });
+            document.getElementById('piggybank-custom-amount').value = '';
         }
+        document.querySelectorAll('#piggybank-chip-row .dabbar-wallet-chip[data-amt]').forEach((chip) => {
+            chip.addEventListener('click', () => {
+                document.querySelectorAll('#piggybank-chip-row .dabbar-wallet-chip[data-amt]').forEach((c) => c.classList.remove('active'));
+                chip.classList.add('active');
+                piggybankSelectedAmount = Number(chip.dataset.amt);
+                document.getElementById('piggybank-custom-amount').value = '';
+            });
+        });
+        document.getElementById('piggybank-custom-amount')?.addEventListener('input', function () {
+            document.querySelectorAll('#piggybank-chip-row .dabbar-wallet-chip[data-amt]').forEach((c) => c.classList.remove('active'));
+            piggybankSelectedAmount = Number(this.value) || 0;
+        });
         document.getElementById('piggybank-create-btn')?.addEventListener('click', async () => {
             const dailyAmount = prompt('هتوفر كام في اليوم؟ (مثلاً 10)');
             if (!dailyAmount || Number(dailyAmount) <= 0) return;
@@ -6147,12 +6220,30 @@
         });
         document.getElementById('piggybank-contribute-btn')?.addEventListener('click', async () => {
             if (!window.__piggybank) return;
+            if (!piggybankSelectedAmount || piggybankSelectedAmount <= 0) { quickStatus('اختار أو اكتب مبلغ أول.', 'error'); return; }
             try {
-                const res = await asstApi('piggybank_contribute', { piggybankId: window.__piggybank.id });
+                const res = await asstApi('piggybank_contribute', { piggybankId: window.__piggybank.id, amount: piggybankSelectedAmount });
                 if (res.error) { quickStatus(res.error, res.alreadyDone ? 'info' : 'error'); return; }
                 renderPiggybankCard(res.piggybank);
                 quickStatus('اتسجل قرش النهاردة! 🐷', 'success');
             } catch (e) { quickStatus('حصل خطأ، جرب تاني.', 'error'); }
+        });
+        // ============ ابدأ من جديد: يمسح المحفظة الحالية ويرجّع كارت "ابدأ" فاضي بدل ما يعمل reload ============
+        document.getElementById('piggybank-reset-btn')?.addEventListener('click', () => {
+            document.getElementById('piggybank-reset-sheet')?.classList.remove('hidden');
+        });
+        document.getElementById('piggybank-reset-cancel')?.addEventListener('click', () => {
+            document.getElementById('piggybank-reset-sheet')?.classList.add('hidden');
+        });
+        document.getElementById('piggybank-reset-confirm')?.addEventListener('click', async () => {
+            if (!window.__piggybank) { document.getElementById('piggybank-reset-sheet')?.classList.add('hidden'); return; }
+            try {
+                await asstApi('piggybank_delete', { piggybankId: window.__piggybank.id });
+                window.__piggybank = null;
+                renderPiggybankCard(null);
+                quickStatus('اتصفّرت المحفظة، ابدأ من جديد وقت ما تحب 🐷', 'success');
+            } catch (e) { quickStatus('حصل خطأ، جرب تاني.', 'error'); }
+            document.getElementById('piggybank-reset-sheet')?.classList.add('hidden');
         });
 
         function renderDaily(today, flow) {

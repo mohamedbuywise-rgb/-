@@ -18,7 +18,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
-    <script src="../vendor/modern-screenshot.js"></script>
+    <script>window.modernScreenshot = window.modernScreenshot || null;</script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
     <!-- بنحدد الوضع (فاتح/غامق) بدري قبل ما الصفحة تترسم. الافتراضي دلوقتي "فاتح" -->
     <script>
@@ -2447,8 +2447,6 @@
 .dabbar-switch-btn small{display:block;font-size:9px;font-weight:600;color:#64748b;margin-top:.15rem}
 .dabbar-switch-btn.active{color:#06261d;background:linear-gradient(135deg,#6ee7b7,#34d399);box-shadow:0 5px 18px rgba(16,185,129,.2)}
 .dabbar-switch-btn.active small{color:#166534}
-html[data-theme="dark"] .dabbar-switch-btn.active{color:#241b05;background:linear-gradient(135deg,#f4c648,#b8860b);box-shadow:0 5px 18px rgba(201,162,75,.22)}
-html[data-theme="dark"] .dabbar-switch-btn.active small{color:#5c430c}
 .dabbar-switch-panel{display:none;animation:fadeUp .25s ease both}
 .dabbar-switch-panel.active{display:block}
 .dabbar-compact-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;gap:.7rem;padding:.8rem 1rem;border:1px solid rgba(52,211,153,.25);border-radius:1.25rem;background:linear-gradient(135deg,rgba(16,185,129,.12),rgba(15,23,42,.58));text-align:right;cursor:pointer}
@@ -2475,6 +2473,60 @@ html[data-theme="light"] .dabbar-compact-toggle strong{color:#17322e}
 html[data-preview-mode="standalone"] body{overflow:hidden}
 html[data-preview-mode="standalone"] #dashboard-sync-note,html[data-preview-mode="standalone"] #dashboard-load-error{display:none!important}
 </style>
+
+<style data-dabbar-ui-v3>
+/* V3: gold navigation in dark mode, green remains for light mode */
+html:not([data-theme="light"]) .dabbar-switch-btn.active {
+    color: #241b05 !important;
+    background: linear-gradient(135deg, #f8df8a, #c9a227 58%, #a77d16) !important;
+    border-color: rgba(255,224,125,.72) !important;
+    box-shadow: 0 6px 20px rgba(201,162,39,.24), inset 0 1px 0 rgba(255,255,255,.35) !important;
+}
+html:not([data-theme="light"]) .dabbar-switch-btn.active small { color: #5d4611 !important; }
+html:not([data-theme="light"]) .tab-btn.active-tab { color: #e8c765 !important; }
+html:not([data-theme="light"]) .tab-btn.active-tab .tab-icon-wrap {
+    background: rgba(201,162,39,.16) !important;
+    border-color: rgba(232,199,101,.42) !important;
+    box-shadow: 0 0 14px rgba(201,162,39,.12);
+}
+html:not([data-theme="light"]) .tab-btn.active-tab iconify-icon,
+html:not([data-theme="light"]) .tab-btn.active-tab svg { color: #e8c765 !important; }
+html:not([data-theme="light"]) .dabbar-compact-toggle { border-color: rgba(201,162,39,.32); }
+html:not([data-theme="light"]) .dabbar-compact-toggle i { color: #e8c765; }
+html:not([data-theme="light"]) .dabbar-assistant-shell .dabbar-premium-switch,
+html:not([data-theme="light"]) .dabbar-monthly-tools .dabbar-premium-switch,
+html:not([data-theme="light"]) .dabbar-daily-tools .dabbar-premium-switch { border-color: rgba(201,162,39,.25); }
+/* Make the assistant categories panel unmistakably visible and premium */
+#dabbar-asst-cats > #tab-categories { display: flex !important; flex-direction: column; gap: 1rem; padding: 0 !important; }
+#dabbar-asst-cats > #tab-categories > .dabbar-moved-section { margin-top: 0; }
+.dabbar-assistant-shell .dabbar-switch-btn[data-target="dabbar-asst-cats"]::before { content: '🧾 '; }
+/* Daily switch stays a single compact choice row */
+#dabbar-daily-switch-label { display: block; font-size: 10px; color: #94a3b8; margin: 0 .2rem .25rem; }
+<style data-dabbar-ui-v4>
+html:not([data-theme="light"]) .tab-btn.active-tab{color:#e8c765!important}
+html:not([data-theme="light"]) .tab-btn.active-tab .tab-icon-wrap{background:rgba(201,162,39,.16)!important;border-color:rgba(232,199,101,.42)!important}
+html:not([data-theme="light"]) .dabbar-switch-btn.active{color:#241b05!important;background:linear-gradient(135deg,#f8df8a,#c9a227 58%,#a77d16)!important;border-color:rgba(255,224,125,.72)!important;box-shadow:0 6px 20px rgba(201,162,39,.24)!important}
+html:not([data-theme="light"]) .dabbar-switch-btn.active small{color:#5d4611!important}
+</style><style data-dabbar-ui-v5>
+#tab-assistant .dabbar-assistant-panel.active > .tab-content,
+#tab-assistant .dabbar-assistant-panel.active > #tab-categories,
+#tab-assistant .dabbar-assistant-panel.active > #tab-reminders,
+#tab-assistant .dabbar-assistant-panel.active > #tab-tips { display:flex!important; flex-direction:column; gap:1rem; padding:0!important; }
+#tab-assistant .dabbar-assistant-panel.active > #tab-categories > .dabbar-moved-section { display:block!important; }
+#tab-assistant .dabbar-assistant-panel.active > #tab-categories > * { flex-shrink:0; }
+html:not([data-theme="light"]) .dabbar-assistant-switch-v4 .dabbar-switch-btn.active { color:#241b05!important; background:linear-gradient(135deg,#f8df8a,#c9a227 58%,#a77d16)!important; }
+</style><style data-dabbar-ui-v6>
+#tab-assistant .dabbar-assistant-panel[data-v4-panel="categories"].active { display:block!important; visibility:visible!important; opacity:1!important; }
+#tab-assistant .dabbar-assistant-panel[data-v4-panel="categories"].active #tab-categories { display:block!important; visibility:visible!important; opacity:1!important; height:auto!important; max-height:none!important; }
+#tab-assistant .dabbar-assistant-panel[data-v4-panel="categories"].active #tab-categories > * { display:block!important; visibility:visible!important; }
+</style><style id="dabbar-requested-ui-overrides">
+.dabbar-premium-switch{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.45rem;margin:.15rem 0 .8rem;padding:.35rem;border-radius:1.15rem;background:rgba(148,163,184,.08);border:1px solid rgba(148,163,184,.18)}
+.dabbar-switch-btn{border:1px solid transparent;border-radius:.9rem;padding:.68rem .55rem;font:inherit;font-size:.68rem;font-weight:900;color:var(--pm-muted,#94a3b8);background:transparent;cursor:pointer;transition:all .2s ease}.dabbar-switch-btn small{display:block;margin-top:.12rem;font-size:.56rem;font-weight:700;opacity:.78}.dabbar-switch-btn.active{color:#80651a;background:linear-gradient(145deg,#fff8d8,#f1d77a);border-color:#d4af37;box-shadow:0 5px 15px rgba(180,140,40,.18)}
+html[data-theme="dark"] .dabbar-premium-switch{background:rgba(212,175,55,.08);border-color:rgba(212,175,55,.28)}html[data-theme="dark"] .dabbar-switch-btn{color:#c7bfae}html[data-theme="dark"] .dabbar-switch-btn.active{color:#241b05;background:linear-gradient(145deg,#f7e7a1,#c49a2e);border-color:#e4bf53;box-shadow:0 0 0 1px rgba(228,191,83,.2),0 7px 18px rgba(212,175,55,.2)}
+.dabbar-switch-panel{display:none;animation:dabbarPanelIn .22s ease both}.dabbar-switch-panel.active{display:block}@keyframes dabbarPanelIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+.dabbar-compact-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;gap:.7rem;border:1px solid rgba(212,175,55,.35);border-radius:1rem;padding:.72rem .85rem;text-align:right;font:inherit;color:var(--pm-ink,#f6f1e5);background:linear-gradient(145deg,rgba(212,175,55,.13),rgba(16,185,129,.06));cursor:pointer}.dabbar-compact-toggle strong,.dabbar-compact-toggle span span{display:block}.dabbar-compact-toggle span span{margin-top:.18rem;font-size:.6rem;color:var(--pm-muted,#94a3b8)}.dabbar-compact-toggle i{font-style:normal;font-size:1.1rem;transition:transform .2s ease}.dabbar-compact-toggle.open i{transform:rotate(180deg)}.dabbar-collapsed-body{display:none;padding-top:.65rem}.dabbar-collapsed-body.open{display:block}
+.dabbar-assistant-shell{display:flex;flex-direction:column;gap:.35rem}.dabbar-assistant-shell .dabbar-premium-switch{grid-template-columns:repeat(2,minmax(0,1fr))}.dabbar-assistant-shell .dabbar-premium-switch .dabbar-switch-btn:last-child{grid-column:span 2}@media (min-width:520px){.dabbar-assistant-shell .dabbar-premium-switch{grid-template-columns:repeat(5,minmax(0,1fr))}.dabbar-assistant-shell .dabbar-premium-switch .dabbar-switch-btn:last-child{grid-column:auto}}
+</style>
 </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col overflow-hidden">
 
@@ -2493,7 +2545,7 @@ html[data-preview-mode="standalone"] #dashboard-sync-note,html[data-preview-mode
         <!-- Brand Bar -->
         <div class="bg-slate-900/90 px-5 pt-4 pb-1 flex items-center justify-between">
             <div class="flex items-center gap-2">
-                <img src="./icons/icon-192.png" alt="دبّر" class="w-8 h-8 rounded-xl">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Crect width='64' height='64' rx='18' fill='%23059669'/%3E%3Ctext x='32' y='41' text-anchor='middle' font-family='Arial' font-size='28' font-weight='700' fill='white'%3Eد%3C/text%3E%3C/svg%3E" alt="دبّر" class="w-8 h-8 rounded-xl">
                 <span class="text-2xl font-black" style="font-family:'Cairo',sans-serif; letter-spacing:-0.5px; background:linear-gradient(90deg,var(--pm-gold-bright),var(--pm-gold)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;">دبّر</span>
                 <span id="streak-badge" class="hidden items-center gap-1 bg-amber-500/10 border border-amber-500/25 text-amber-400 text-xs font-black px-2 py-1 rounded-full">
                     <span>🔥</span><span id="streak-count">0</span>
@@ -2710,7 +2762,7 @@ html[data-preview-mode="standalone"] #dashboard-sync-note,html[data-preview-mode
     const wrap=document.createElement('div');wrap.className='space-y-3';
     const a=document.createElement('div');a.id='dabbar-wallet-panel';a.className='dabbar-switch-panel active';a.appendChild(portfolio);
     const b=document.createElement('div');b.id='dabbar-bank-panel';b.className='dabbar-switch-panel';b.appendChild(bank);
-    wrap.append(a,b);tools.append(nav,wrap);tab.insertBefore(tools,tab.children[0]);wireSwitch(nav,[a,b]);
+    wrap.append(a,b);tools.append(nav,wrap);const anchor=$('#quick-entry-card'); if(anchor && anchor.parentNode===tab) anchor.insertAdjacentElement('afterend',tools); else tab.append(tools); wireSwitch(nav,[a,b]);
     const available=$('#available-card'); if(available){
       const box=document.createElement('div');box.className='dabbar-available-wrap';
       const toggle=document.createElement('button');toggle.type='button';toggle.className='dabbar-compact-toggle';toggle.innerHTML='<span><strong>💰 الدخل والميزانية</strong><span>اضغط لعرض ملخص الشهر وتفاصيله</span></span><i>⌄</i>';
@@ -2724,7 +2776,7 @@ html[data-preview-mode="standalone"] #dashboard-sync-note,html[data-preview-mode
     const tab=$('#tab-daily'), salary=$('#salary-countdown-card'), salaryEmpty=$('#salary-countdown-empty'), pig=$('#piggybank-card'), pigEmpty=$('#piggybank-empty');if(!tab||!salary||!pig)return;
     const wrap=document.createElement('div');wrap.className='dabbar-daily-tools';const nav=mkSwitch([{id:'dabbar-piggy-panel',label:'🐷 الحصالة',sub:'قرش اليوم'},{id:'dabbar-remaining-panel',label:'💰 المتبقي',sub:'ميزانية الشهر'}]);
     const p1=document.createElement('div');p1.id='dabbar-piggy-panel';p1.className='dabbar-switch-panel active';p1.append(pig);if(pigEmpty)p1.append(pigEmpty);
-    const p2=document.createElement('div');p2.id='dabbar-remaining-panel';p3.className='dabbar-switch-panel';p3.append(salary);if(salaryEmpty)p3.append(salaryEmpty);
+    const p2=document.createElement('div');p2.id='dabbar-remaining-panel';p2.className='dabbar-switch-panel';p2.append(salary);if(salaryEmpty)p2.append(salaryEmpty);
     wrap.append(nav,p1,p2);tab.insertBefore(wrap,tab.children[1]);wireSwitch(nav,[p1,p2]);
   }
   function panelizeCategories(){
@@ -2747,7 +2799,40 @@ html[data-preview-mode="standalone"] #dashboard-sync-note,html[data-preview-mode
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
 </script>
-</body>) عشان يبقوا برة أي كونتينر عنده overflow/transform ممكن يكسر الـ position:fixed بتاعهم -->
+<script data-dabbar-ui-v4>
+(function(){
+ function run(){
+  try{
+   const A=document.getElementById('tab-assistant'), C=document.getElementById('tab-categories'), R=document.getElementById('tab-reminders'), T=document.getElementById('tab-tips');
+   if(!A||!C||!R||!T)return;
+   // Hide duplicate top-level routes while keeping their content inside Assistant.
+   ['categories','tips','reminders'].forEach(x=>{const b=document.querySelector('.tab-btn[data-tab="'+x+'"]');if(b){b.style.display='none';}});
+   if(A.querySelector('.dabbar-assistant-switch-v4'))return;
+   const nav=document.createElement('div');nav.className='dabbar-premium-switch dabbar-assistant-switch-v4';
+   const host=document.createElement('div');host.className='dabbar-assistant-panels';
+   const defs=[['goals','🎯 الأهداف','خطتك القادمة'],['bills','🔔 الفواتير','التذكيرات والأقساط'],['tips','💡 النصائح','اقتراحات دبّر'],['categories','🧾 التصنيفات','تحليل الصرف'],['chat','✨ اسأل دبّر','مساعدك الشخصي']];
+   defs.forEach((d,i)=>{const b=document.createElement('button');b.type='button';b.className='dabbar-switch-btn'+(i===0?' active':'');b.dataset.v4=d[0];b.innerHTML=d[1]+'<small>'+d[2]+'</small>';nav.appendChild(b);});
+   const get=(id)=>{const e=document.getElementById(id);const p=document.createElement('div');p.className='dabbar-assistant-panel';p.dataset.v4Panel=id;p.append(e);return p;};
+   const goals=document.createElement('div');goals.className='dabbar-assistant-panel';goals.dataset.v4Panel='goals';
+   [...A.children].filter(e=>!e.classList.contains('dabbar-assistant-shell')&&!e.classList.contains('dabbar-assistant-switch-v4')).forEach(e=>goals.append(e));
+   const panels=[goals,get('tab-reminders'),get('tab-tips'),get('tab-categories')];
+   const chat=document.createElement('div');chat.className='dabbar-assistant-panel';chat.dataset.v4Panel='chat';
+   [...A.children].filter(e=>e.querySelector?.('#asst-chat-log')||e.querySelector?.('#asst-wrapped-open')).forEach(e=>chat.append(e));panels.push(chat);
+   panels.forEach((p,i)=>{if(i===0)p.classList.add('active');host.append(p);});
+   A.append(nav,host);
+   [...nav.children].forEach(b=>b.addEventListener('click',()=>{[...nav.children].forEach(x=>x.classList.toggle('active',x===b));panels.forEach(p=>p.classList.toggle('active',p.dataset.v4Panel===b.dataset.v4));}));
+  }catch(e){console.warn('Dashboard V4 UI:',e)}
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run);else run();
+})();
+</script><script data-dabbar-ui-v6>
+(function(){
+ function run(){
+  document.querySelectorAll('.dabbar-assistant-switch-v4 [data-v4="categories"]').forEach(function(btn){btn.addEventListener('click',function(){var c=document.getElementById('tab-categories');if(c){c.classList.add('active');c.style.display='block';c.style.visibility='visible';}});});
+ }
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run);else run();
+})();
+</script></body>) عشان يبقوا برة أي كونتينر عنده overflow/transform ممكن يكسر الـ position:fixed بتاعهم -->
 
             <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3" id="monthly-categories-card">
                 <div id="balance-card" class="hidden rounded-[1.35rem] border border-emerald-500/20 bg-emerald-500/[0.045] p-3.5 space-y-3">
@@ -3799,7 +3884,7 @@ html[data-preview-mode="standalone"] #dashboard-sync-note,html[data-preview-mode
 
             <!-- كارت البريميوم — الماسكوت الحقيقي بحركة مستمرة (مش ثابت) عشان يشجّع على الاشتراك -->
             <div id="premium-hero-card" class="hidden bg-gradient-to-b from-[#052e22] to-[#031a14] border border-amber-500/25 rounded-3xl p-5 text-center overflow-hidden relative">
-                <img src="branding/dabbar-mascot.png" alt="دبّر بريميوم" class="w-36 h-auto mx-auto mb-2 mascot-float">
+                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Crect width='64' height='64' rx='18' fill='%23059669'/%3E%3Ctext x='32' y='41' text-anchor='middle' font-family='Arial' font-size='28' font-weight='700' fill='white'%3Eد%3C/text%3E%3C/svg%3E" alt="دبّر بريميوم" class="w-36 h-auto mx-auto mb-2 mascot-float">
                 <p class="text-[10px] tracking-widest text-amber-400 font-black mb-1">DABBAR PREMIUM</p>
                 <h3 class="text-lg font-black text-white mb-1">افتح كل قوة دبّر</h3>
                 <p class="text-[11px] text-slate-400 mb-4 leading-relaxed">تتبع ذكي، تقارير مفصلة، وأمان بنكي لبياناتك — من غير حدود شهرية.</p>
@@ -8863,7 +8948,7 @@ html[data-preview-mode="standalone"] #dashboard-sync-note,html[data-preview-mode
                     ? `<div class="pt-1 text-amber-300">📥 اتسجلت كمان كدين عليك لـ ${result.debtPerson}</div>` : '';
                 resultEl.innerHTML = `
                     <div class="flex items-center gap-2 font-bold">
-                        <img src="branding/dabbar-mascot-avatar.png" alt="دبّر" class="w-9 h-9 rounded-full object-cover shrink-0 mascot-wave">
+                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Crect width='64' height='64' rx='18' fill='%23059669'/%3E%3Ctext x='32' y='41' text-anchor='middle' font-family='Arial' font-size='28' font-weight='700' fill='white'%3Eد%3C/text%3E%3C/svg%3E" alt="دبّر" class="w-9 h-9 rounded-full object-cover shrink-0 mascot-wave">
                         <span class="flex-1">${result.merchant ? `فاتورة ${result.merchant}` : 'الفاتورة'} — اتسجلت (${result.items.length} صنف)</span>
                         <button type="button" id="asst-receipt-result-close" aria-label="اقفل" class="shrink-0 w-6 h-6 flex items-center justify-center rounded-full text-emerald-300 hover:bg-emerald-500/20 transition text-sm font-bold">✕</button>
                     </div>
@@ -9957,7 +10042,7 @@ html[data-preview-mode="standalone"] #dashboard-sync-note,html[data-preview-mode
     const tab=$('#tab-daily'), salary=$('#salary-countdown-card'), salaryEmpty=$('#salary-countdown-empty'), pig=$('#piggybank-card'), pigEmpty=$('#piggybank-empty');if(!tab||!salary||!pig)return;
     const wrap=document.createElement('div');wrap.className='dabbar-daily-tools';const nav=mkSwitch([{id:'dabbar-piggy-panel',label:'🐷 الحصالة',sub:'قرش اليوم'},{id:'dabbar-remaining-panel',label:'💰 المتبقي',sub:'ميزانية الشهر'}]);
     const p1=document.createElement('div');p1.id='dabbar-piggy-panel';p1.className='dabbar-switch-panel active';p1.append(pig);if(pigEmpty)p1.append(pigEmpty);
-    const p2=document.createElement('div');p2.id='dabbar-remaining-panel';p3.className='dabbar-switch-panel';p3.append(salary);if(salaryEmpty)p3.append(salaryEmpty);
+    const p2=document.createElement('div');p2.id='dabbar-remaining-panel';p2.className='dabbar-switch-panel';p2.append(salary);if(salaryEmpty)p2.append(salaryEmpty);
     wrap.append(nav,p1,p2);tab.insertBefore(wrap,tab.children[1]);wireSwitch(nav,[p1,p2]);
   }
   function panelizeCategories(){

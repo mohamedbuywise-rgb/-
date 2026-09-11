@@ -18,7 +18,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
-    <script>window.modernScreenshot = window.modernScreenshot || null;</script>
+    <script src="../vendor/modern-screenshot.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap" rel="stylesheet">
     <!-- بنحدد الوضع (فاتح/غامق) بدري قبل ما الصفحة تترسم. الافتراضي دلوقتي "فاتح" -->
     <script>
@@ -2437,96 +2437,168 @@
         .bm-source-filter-btn { background: rgba(30,41,59,.6); color: #94a3b8; border: 1px solid rgba(148,163,184,.18); }
         .bm-source-filter-btn.active { background: rgba(245,158,11,.12); color: #fbbf24; border-color: rgba(251,191,36,.4); }
         .bm-review-badge { color: #f2b90c; }
+
+        /* إعادة تنظيم لوحة دبّر: ألوان ذهبية واضحة في الليلي + مناطق تنقّل مدمجة */
+        .quick-workspace-switcher {
+            display:flex; gap:.4rem; overflow-x:auto; padding:.18rem; margin:.85rem 0 .35rem;
+            border-radius:1rem; background:rgba(16,185,129,.07); scrollbar-width:none;
+        }
+        .quick-workspace-switcher::-webkit-scrollbar { display:none; }
+        .quick-workspace-btn {
+            flex:1 0 auto; min-height:2.35rem; padding:.45rem .65rem; border:0; border-radius:.78rem;
+            background:transparent; color:var(--db-muted,#718078); font:800 .66rem/1.25 'Cairo',sans-serif;
+            cursor:pointer; transition:background .2s ease,color .2s ease,transform .2s ease; white-space:nowrap;
+        }
+        .quick-workspace-btn.active { background:var(--db-surface-strong,#fff); color:var(--db-accent,#16a878); box-shadow:0 5px 15px rgba(16,185,129,.1); }
+        .quick-workspace-btn:hover { transform:translateY(-1px); }
+        .quick-tool-panel { display:none; margin-top:.75rem; }
+        .quick-tool-panel.active { display:block; animation:fadeUp .25s ease both; }
+        #quick-expense-content > .grid { margin-top:.25rem; gap:.6rem !important; }
+        #quick-expense-content > .grid > button {
+            min-height:4.35rem; padding-block:.72rem !important; border-radius:1.05rem;
+            background:rgba(255,255,255,.7); box-shadow:0 7px 18px rgba(17,55,35,.06);
+        }
+        #quick-expense-content > .grid > button span:first-child { transition:transform .18s ease; }
+        #quick-expense-content > .grid > button:hover span:first-child { transform:scale(1.08) translateY(-1px); }
+        #quick-entry-card.is-subscription-locked #quick-expense-content > .grid { opacity:.42; filter:grayscale(.35); pointer-events:none; }
+        html:not([data-theme="light"]) #quick-expense-content > .grid > button {
+            background:rgba(255,255,255,.055); box-shadow:none;
+        }
+        html[data-theme="light"] #quick-expense-content > .grid > button {
+            background:#fff !important; border:1px solid #d3e2da !important; color:#24483a !important;
+            box-shadow:0 7px 18px rgba(23,74,50,.1) !important;
+        }
+        #quick-linked-tools .portfolio-asset-list { margin-top:.15rem; }
+        #quick-linked-tools #bank-movements-card { margin-top:0; }
+        html:not([data-theme="light"]) .quick-workspace-switcher { background:rgba(244,198,72,.08); }
+        html:not([data-theme="light"]) .quick-workspace-btn { color:#bdb39b; }
+        html:not([data-theme="light"]) .quick-workspace-btn.active {
+            background:linear-gradient(135deg,#f4c648,#b8860b); color:#241b05;
+            box-shadow:0 7px 18px rgba(244,198,72,.18);
+        }
+        html:not([data-theme="light"]) .tab-btn.active-tab { color:#f4c648 !important; }
+        html:not([data-theme="light"]) .tab-btn.active-tab .tab-icon-wrap { background:rgba(244,198,72,.13) !important; }
+        html:not([data-theme="light"]) .tab-btn:hover .tab-icon-wrap { background:rgba(244,198,72,.09) !important; }
+        html:not([data-theme="light"]) #daily-focus-carousel,
+        html:not([data-theme="light"]) #assistant-hub-nav { border-color:rgba(244,198,72,.24); }
+
+        #daily-focus-carousel { overflow:hidden; border-radius:1.35rem; }
+        .daily-focus-nav { display:flex; gap:.45rem; padding:.2rem; background:var(--db-surface-soft); border-radius:1rem; }
+        .daily-focus-btn {
+            flex:1; border:0; border-radius:.78rem; padding:.55rem .4rem; background:transparent;
+            color:var(--db-muted); font:800 .68rem/1.25 'Cairo',sans-serif; cursor:pointer;
+        }
+        .daily-focus-btn.active { background:var(--db-surface-strong); color:var(--db-accent); box-shadow:0 5px 15px rgba(17,55,35,.07); }
+        .daily-focus-viewport { overflow:hidden; margin-top:.55rem; }
+        .daily-focus-track { display:flex; direction:ltr; transition:transform .3s cubic-bezier(.22,.68,.32,1); }
+        .daily-focus-slide { direction:rtl; flex:0 0 100%; min-width:100%; }
+        .daily-focus-slide > * { margin-top:.7rem; }
+        .daily-focus-slide > *:first-child { margin-top:0; }
+        html:not([data-theme="light"]) .daily-focus-btn.active { background:linear-gradient(135deg,#f4c648,#b8860b); color:#241b05; }
+
+        .planning-card-collapsed .planning-body { display:none; }
+        .planning-reopen {
+            width:100%; border:0; border-radius:1rem; padding:.75rem 1rem; background:var(--db-surface-soft);
+            color:var(--db-accent); font:900 .72rem 'Cairo',sans-serif; cursor:pointer;
+        }
+        .planning-head-actions { display:flex; align-items:center; gap:.35rem; }
+        .planning-head-action {
+            width:1.8rem; height:1.8rem; border:0; border-radius:50%; background:var(--db-surface-soft);
+            color:var(--db-muted); font-weight:900; cursor:pointer;
+        }
+        html:not([data-theme="light"]) .planning-head-action { color:#f4c648; background:rgba(244,198,72,.1); }
+
+        #assistant-hub-nav {
+            display:flex; gap:.42rem; overflow-x:auto; padding:.25rem; border-radius:1.05rem;
+            background:var(--db-surface-soft); scrollbar-width:none;
+        }
+        #assistant-hub-nav::-webkit-scrollbar { display:none; }
+        .assistant-hub-btn {
+            flex:0 0 auto; border:0; border-radius:.8rem; padding:.55rem .7rem; background:transparent;
+            color:var(--db-muted); font:800 .66rem 'Cairo',sans-serif; white-space:nowrap; cursor:pointer;
+        }
+        .assistant-hub-btn.active { background:var(--db-surface-strong); color:var(--db-accent); }
+        html:not([data-theme="light"]) .assistant-hub-btn.active { background:linear-gradient(135deg,#f4c648,#b8860b); color:#241b05; }
+
+        /* نقل الأقسام الثانوية إلى "مساعد" يخفف ازدحام الشريط السفلي بدون حذف الوظائف */
+        .tab-btn[data-tab="categories"],
+        .tab-btn[data-tab="tips"],
+        .tab-btn[data-tab="reminders"] { display:none !important; }
+        .planning-header-summary {
+            display:block; margin-top:.2rem; color:var(--db-muted); font:800 .62rem 'Cairo',sans-serif;
+        }
+        html:not([data-theme="light"]) .planning-header-summary { color:#f4c648; }
+
+        /* شهري: الملخص أولًا، ثم التسجيل، ثم التفاصيل */
+        #tab-monthly.active > #available-card,
+        #tab-monthly.active > #available-empty { order:1; }
+        #tab-monthly.active > #quick-entry-card { order:2; }
+        #tab-monthly.active > #daily-reminder-card,
+        #tab-monthly.active > #active-days-card { order:3; }
+        #available-hero { min-height:8.5rem; display:flex; flex-direction:column; justify-content:center; }
+        #available-hero-value { letter-spacing:-.04em; }
+
+        /* يومي: رقم اليوم أولًا، والبيانات المتقدمة عند الطلب */
+        #tab-daily.active { display:flex !important; flex-direction:column; }
+        #tab-daily.active > #daily-spend-card { order:1; }
+        #tab-daily.active > #savings-opportunities-card { order:2; }
+        #tab-daily.active > #daily-focus-carousel { order:3; }
+        #tab-daily.active > #daily-wrapped-open { order:4; }
+        #tab-daily.active > #daily-details { order:5; }
+        #daily-spend-card { min-height:7.2rem; display:flex; flex-direction:column; justify-content:center; }
+        #daily-spend-card #daily-total { font-size:2rem; letter-spacing:-.04em; }
+        #daily-details {
+            border:1px solid rgba(148,163,184,.2); border-radius:1.35rem; background:var(--db-surface-soft);
+            overflow:hidden;
+        }
+        #daily-details > summary {
+            display:flex; align-items:center; justify-content:space-between; gap:.75rem; cursor:pointer;
+            list-style:none; padding:.9rem 1rem; color:var(--db-ink); font:900 .74rem 'Cairo',sans-serif;
+        }
+        #daily-details > summary::-webkit-details-marker { display:none; }
+        #daily-details > summary::after { content:'⌄'; color:var(--db-muted); font-size:1rem; transition:transform .2s ease; }
+        #daily-details[open] > summary::after { transform:rotate(180deg); }
+        .daily-details-body { display:grid; gap:.8rem; padding:0 1rem 1rem; }
+
+        /* حسابي: مجموعات مفهومة بدل قائمة طويلة من الكروت */
+        .account-organization-section {
+            border:1px solid rgba(148,163,184,.2); border-radius:1.35rem; background:var(--db-surface-soft);
+            overflow:hidden;
+        }
+        .account-organization-section > summary {
+            display:flex; align-items:center; gap:.75rem; cursor:pointer; list-style:none; padding:1rem;
+        }
+        .account-organization-section > summary::-webkit-details-marker { display:none; }
+        .account-organization-section > summary::after { content:'⌄'; margin-right:auto; color:var(--db-muted); font-size:1rem; transition:transform .2s ease; }
+        .account-organization-section[open] > summary::after { transform:rotate(180deg); }
+        .account-section-icon {
+            display:flex; align-items:center; justify-content:center; width:2.2rem; height:2.2rem;
+            border-radius:.8rem; background:rgba(244,198,72,.1); border:1px solid rgba(244,198,72,.2); font-size:1.05rem;
+        }
+        .account-section-title { color:var(--db-ink); font:900 .76rem 'Cairo',sans-serif; }
+        .account-section-subtitle { margin-top:.18rem; color:var(--db-muted); font:600 .62rem/1.4 'Cairo',sans-serif; }
+        .account-section-body { display:grid; gap:.8rem; padding:0 1rem 1rem; }
+        .account-section-body > * { margin:0 !important; }
+        .account-organization-section[open] > summary { border-bottom:1px solid rgba(148,163,184,.14); }
+        html:not([data-theme="light"]) .account-organization-section,
+        html:not([data-theme="light"]) #daily-details { border-color:rgba(244,198,72,.22); }
+        html:not([data-theme="light"]) .account-section-icon { background:rgba(244,198,72,.1); }
+
+        /* الديون: التبويبات تظل واضحة على الشاشات الصغيرة بدل أن تنضغط */
+        .debts-tabs-heading {
+            display:flex; align-items:center; justify-content:space-between; gap:.5rem;
+            padding:0 .25rem; color:var(--db-muted); font:800 .65rem 'Cairo',sans-serif;
+        }
+        #debts-tabs {
+            overflow-x:auto; justify-content:flex-start; scrollbar-width:none;
+            scroll-snap-type:x proximity;
+        }
+        #debts-tabs::-webkit-scrollbar { display:none; }
+        #debts-tabs .debts-tab-btn {
+            flex:0 0 auto; min-width:8rem; white-space:nowrap; scroll-snap-align:start;
+        }
+        html:not([data-theme="light"]) .debts-tabs-heading span:last-child { color:#f4c648; }
     </style>
-
-<style data-dabbar-ui-v2>
-/* Dashboard V2 — premium compact navigation */
-.dabbar-premium-switch{display:flex;gap:.4rem;padding:.35rem;border:1px solid rgba(148,163,184,.16);background:linear-gradient(135deg,rgba(15,23,42,.9),rgba(6,78,59,.22));border-radius:1.25rem;overflow:auto;scrollbar-width:none}
-.dabbar-premium-switch::-webkit-scrollbar{display:none}
-.dabbar-switch-btn{flex:1;min-width:7.2rem;border:1px solid transparent;border-radius:.95rem;padding:.65rem .7rem;color:#94a3b8;font-size:11px;font-weight:900;white-space:nowrap;transition:.22s ease}
-.dabbar-switch-btn small{display:block;font-size:9px;font-weight:600;color:#64748b;margin-top:.15rem}
-.dabbar-switch-btn.active{color:#06261d;background:linear-gradient(135deg,#6ee7b7,#34d399);box-shadow:0 5px 18px rgba(16,185,129,.2)}
-.dabbar-switch-btn.active small{color:#166534}
-.dabbar-switch-panel{display:none;animation:fadeUp .25s ease both}
-.dabbar-switch-panel.active{display:block}
-.dabbar-compact-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;gap:.7rem;padding:.8rem 1rem;border:1px solid rgba(52,211,153,.25);border-radius:1.25rem;background:linear-gradient(135deg,rgba(16,185,129,.12),rgba(15,23,42,.58));text-align:right;cursor:pointer}
-.dabbar-compact-toggle strong{display:block;font-size:12px;color:#e2e8f0}.dabbar-compact-toggle span{display:block;font-size:10px;color:#94a3b8;margin-top:.18rem}.dabbar-compact-toggle i{font-style:normal;color:#34d399;font-size:16px;transition:.2s}.dabbar-compact-toggle.open i{transform:rotate(180deg)}
-.dabbar-collapsed-body{display:none}.dabbar-collapsed-body.open{display:block;animation:fadeUp .25s ease both}
-#tab-monthly>#quick-entry-card{order:-10}
-#tab-monthly{display:flex;flex-direction:column}
-#tab-monthly>.dabbar-monthly-tools{order:-5}
-#tab-monthly>.dabbar-available-wrap{order:-4}
-#tab-monthly>#quick-entry-card{order:-6}
-.dabbar-moved-section{margin-top:.15rem}
-.dabbar-assistant-shell{display:flex;flex-direction:column;gap:.8rem}.dabbar-assistant-panels{min-height:5rem}
-#tab-assistant .dabbar-assistant-panel{display:none}.dabbar-assistant-panel.active{display:block;animation:fadeUp .28s ease both}
-#tab-assistant .dabbar-assistant-panel>.tab-content{display:flex!important;flex-direction:column;gap:1rem;padding:0!important}
-#tab-assistant .dabbar-assistant-panel>.tab-content>.dabbar-assistant-shell{display:none}
-html[data-theme="light"] .dabbar-premium-switch{background:linear-gradient(135deg,#fff,#ecfdf5);border-color:#cde8dc}
-html[data-theme="light"] .dabbar-switch-btn{color:#64748b}
-html[data-theme="light"] .dabbar-switch-btn.active{color:#064e3b}
-html[data-theme="light"] .dabbar-compact-toggle{background:linear-gradient(135deg,#ecfdf5,#fff);border-color:#b7e4d1}
-html[data-theme="light"] .dabbar-compact-toggle strong{color:#17322e}
-</style>
-
-<style data-preview-mode="standalone">
-html[data-preview-mode="standalone"] body{overflow:hidden}
-html[data-preview-mode="standalone"] #dashboard-sync-note,html[data-preview-mode="standalone"] #dashboard-load-error{display:none!important}
-</style>
-
-<style data-dabbar-ui-v3>
-/* V3: gold navigation in dark mode, green remains for light mode */
-html:not([data-theme="light"]) .dabbar-switch-btn.active {
-    color: #241b05 !important;
-    background: linear-gradient(135deg, #f8df8a, #c9a227 58%, #a77d16) !important;
-    border-color: rgba(255,224,125,.72) !important;
-    box-shadow: 0 6px 20px rgba(201,162,39,.24), inset 0 1px 0 rgba(255,255,255,.35) !important;
-}
-html:not([data-theme="light"]) .dabbar-switch-btn.active small { color: #5d4611 !important; }
-html:not([data-theme="light"]) .tab-btn.active-tab { color: #e8c765 !important; }
-html:not([data-theme="light"]) .tab-btn.active-tab .tab-icon-wrap {
-    background: rgba(201,162,39,.16) !important;
-    border-color: rgba(232,199,101,.42) !important;
-    box-shadow: 0 0 14px rgba(201,162,39,.12);
-}
-html:not([data-theme="light"]) .tab-btn.active-tab iconify-icon,
-html:not([data-theme="light"]) .tab-btn.active-tab svg { color: #e8c765 !important; }
-html:not([data-theme="light"]) .dabbar-compact-toggle { border-color: rgba(201,162,39,.32); }
-html:not([data-theme="light"]) .dabbar-compact-toggle i { color: #e8c765; }
-html:not([data-theme="light"]) .dabbar-assistant-shell .dabbar-premium-switch,
-html:not([data-theme="light"]) .dabbar-monthly-tools .dabbar-premium-switch,
-html:not([data-theme="light"]) .dabbar-daily-tools .dabbar-premium-switch { border-color: rgba(201,162,39,.25); }
-/* Make the assistant categories panel unmistakably visible and premium */
-#dabbar-asst-cats > #tab-categories { display: flex !important; flex-direction: column; gap: 1rem; padding: 0 !important; }
-#dabbar-asst-cats > #tab-categories > .dabbar-moved-section { margin-top: 0; }
-.dabbar-assistant-shell .dabbar-switch-btn[data-target="dabbar-asst-cats"]::before { content: '🧾 '; }
-/* Daily switch stays a single compact choice row */
-#dabbar-daily-switch-label { display: block; font-size: 10px; color: #94a3b8; margin: 0 .2rem .25rem; }
-<style data-dabbar-ui-v4>
-html:not([data-theme="light"]) .tab-btn.active-tab{color:#e8c765!important}
-html:not([data-theme="light"]) .tab-btn.active-tab .tab-icon-wrap{background:rgba(201,162,39,.16)!important;border-color:rgba(232,199,101,.42)!important}
-html:not([data-theme="light"]) .dabbar-switch-btn.active{color:#241b05!important;background:linear-gradient(135deg,#f8df8a,#c9a227 58%,#a77d16)!important;border-color:rgba(255,224,125,.72)!important;box-shadow:0 6px 20px rgba(201,162,39,.24)!important}
-html:not([data-theme="light"]) .dabbar-switch-btn.active small{color:#5d4611!important}
-</style><style data-dabbar-ui-v5>
-#tab-assistant .dabbar-assistant-panel.active > .tab-content,
-#tab-assistant .dabbar-assistant-panel.active > #tab-categories,
-#tab-assistant .dabbar-assistant-panel.active > #tab-reminders,
-#tab-assistant .dabbar-assistant-panel.active > #tab-tips { display:flex!important; flex-direction:column; gap:1rem; padding:0!important; }
-#tab-assistant .dabbar-assistant-panel.active > #tab-categories > .dabbar-moved-section { display:block!important; }
-#tab-assistant .dabbar-assistant-panel.active > #tab-categories > * { flex-shrink:0; }
-html:not([data-theme="light"]) .dabbar-assistant-switch-v4 .dabbar-switch-btn.active { color:#241b05!important; background:linear-gradient(135deg,#f8df8a,#c9a227 58%,#a77d16)!important; }
-</style><style data-dabbar-ui-v6>
-#tab-assistant .dabbar-assistant-panel[data-v4-panel="categories"].active { display:block!important; visibility:visible!important; opacity:1!important; }
-#tab-assistant .dabbar-assistant-panel[data-v4-panel="categories"].active #tab-categories { display:block!important; visibility:visible!important; opacity:1!important; height:auto!important; max-height:none!important; }
-#tab-assistant .dabbar-assistant-panel[data-v4-panel="categories"].active #tab-categories > * { display:block!important; visibility:visible!important; }
-</style><style id="dabbar-requested-ui-overrides">
-.dabbar-premium-switch{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.45rem;margin:.15rem 0 .8rem;padding:.35rem;border-radius:1.15rem;background:rgba(148,163,184,.08);border:1px solid rgba(148,163,184,.18)}
-.dabbar-switch-btn{border:1px solid transparent;border-radius:.9rem;padding:.68rem .55rem;font:inherit;font-size:.68rem;font-weight:900;color:var(--pm-muted,#94a3b8);background:transparent;cursor:pointer;transition:all .2s ease}.dabbar-switch-btn small{display:block;margin-top:.12rem;font-size:.56rem;font-weight:700;opacity:.78}.dabbar-switch-btn.active{color:#80651a;background:linear-gradient(145deg,#fff8d8,#f1d77a);border-color:#d4af37;box-shadow:0 5px 15px rgba(180,140,40,.18)}
-html[data-theme="dark"] .dabbar-premium-switch{background:rgba(212,175,55,.08);border-color:rgba(212,175,55,.28)}html[data-theme="dark"] .dabbar-switch-btn{color:#c7bfae}html[data-theme="dark"] .dabbar-switch-btn.active{color:#241b05;background:linear-gradient(145deg,#f7e7a1,#c49a2e);border-color:#e4bf53;box-shadow:0 0 0 1px rgba(228,191,83,.2),0 7px 18px rgba(212,175,55,.2)}
-.dabbar-switch-panel{display:none;animation:dabbarPanelIn .22s ease both}.dabbar-switch-panel.active{display:block}@keyframes dabbarPanelIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
-.dabbar-compact-toggle{width:100%;display:flex;align-items:center;justify-content:space-between;gap:.7rem;border:1px solid rgba(212,175,55,.35);border-radius:1rem;padding:.72rem .85rem;text-align:right;font:inherit;color:var(--pm-ink,#f6f1e5);background:linear-gradient(145deg,rgba(212,175,55,.13),rgba(16,185,129,.06));cursor:pointer}.dabbar-compact-toggle strong,.dabbar-compact-toggle span span{display:block}.dabbar-compact-toggle span span{margin-top:.18rem;font-size:.6rem;color:var(--pm-muted,#94a3b8)}.dabbar-compact-toggle i{font-style:normal;font-size:1.1rem;transition:transform .2s ease}.dabbar-compact-toggle.open i{transform:rotate(180deg)}.dabbar-collapsed-body{display:none;padding-top:.65rem}.dabbar-collapsed-body.open{display:block}
-.dabbar-assistant-shell{display:flex;flex-direction:column;gap:.35rem}.dabbar-assistant-shell .dabbar-premium-switch{grid-template-columns:repeat(2,minmax(0,1fr))}.dabbar-assistant-shell .dabbar-premium-switch .dabbar-switch-btn:last-child{grid-column:span 2}@media (min-width:520px){.dabbar-assistant-shell .dabbar-premium-switch{grid-template-columns:repeat(5,minmax(0,1fr))}.dabbar-assistant-shell .dabbar-premium-switch .dabbar-switch-btn:last-child{grid-column:auto}}
-</style>
 </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col overflow-hidden">
 
@@ -2545,7 +2617,7 @@ html[data-theme="dark"] .dabbar-premium-switch{background:rgba(212,175,55,.08);b
         <!-- Brand Bar -->
         <div class="bg-slate-900/90 px-5 pt-4 pb-1 flex items-center justify-between">
             <div class="flex items-center gap-2">
-                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Crect width='64' height='64' rx='18' fill='%23059669'/%3E%3Ctext x='32' y='41' text-anchor='middle' font-family='Arial' font-size='28' font-weight='700' fill='white'%3Eد%3C/text%3E%3C/svg%3E" alt="دبّر" class="w-8 h-8 rounded-xl">
+                <img src="./icons/icon-192.png" alt="دبّر" class="w-8 h-8 rounded-xl">
                 <span class="text-2xl font-black" style="font-family:'Cairo',sans-serif; letter-spacing:-0.5px; background:linear-gradient(90deg,var(--pm-gold-bright),var(--pm-gold)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;">دبّر</span>
                 <span id="streak-badge" class="hidden items-center gap-1 bg-amber-500/10 border border-amber-500/25 text-amber-400 text-xs font-black px-2 py-1 rounded-full">
                     <span>🔥</span><span id="streak-count">0</span>
@@ -2609,6 +2681,12 @@ html[data-theme="dark"] .dabbar-premium-switch{background:rgba(212,175,55,.08);b
             <section id="quick-entry-card" class="relative bg-gradient-to-br from-emerald-50 via-white to-teal-50 border border-emerald-200 rounded-[28px] p-4 space-y-3 shadow-[0_12px_35px_rgba(16,185,129,.14)] dark:bg-slate-950/60 dark:from-slate-950/60 dark:via-slate-950/60 dark:to-slate-900 dark:border-slate-800" aria-label="إضافة عملية مالية">
                 <div id="dabbar-celebrate-fx" aria-hidden="true"></div>
                 <div class="flex items-center justify-between"><div><span class="quick-entry-eyebrow">ابدأ من هنا</span><h3 class="text-base font-black text-slate-900 dark:text-slate-100">سجّل عمليتك الآن</h3><p class="text-[11px] text-slate-600 dark:text-slate-400">صوت أو كتابة أو صوّر الفاتورة — في ثواني</p></div><span class="text-2xl" aria-hidden="true">✨</span></div>
+                <div id="quick-workspace-switcher" class="quick-workspace-switcher" role="tablist" aria-label="أقسام التسجيل السريع">
+                    <button type="button" class="quick-workspace-btn active" data-quick-workspace="expense" role="tab" aria-selected="true">✍️ سجل مصروفك بسرعة</button>
+                    <button type="button" class="quick-workspace-btn" data-quick-workspace="portfolio" role="tab" aria-selected="false">📈 المحفظة الاستثمارية</button>
+                    <button type="button" class="quick-workspace-btn" data-quick-workspace="bank" role="tab" aria-selected="false">🏦 الحركات البنكية</button>
+                </div>
+                <div id="quick-expense-content">
                 <div id="quick-entry-subscription-lock" class="hidden items-center justify-between gap-3 rounded-2xl border px-3 py-2.5 text-[11px]"><div><strong class="block">انتهت تجربتك المجانية</strong><span>اشترك عشان تقدر تسجّل عملياتك تاني.</span></div><button id="quick-entry-open-subscription" type="button" class="shrink-0 rounded-xl px-3 py-2 text-[10px] font-black">شوف الاشتراك</button></div>
                 <p class="text-center text-[10px] text-slate-500 dark:text-slate-400">اختار نوع العملية الأول، وهتفضل شغالة لحد ما تغيّرها بنفسك.</p>
                 
@@ -2623,7 +2701,12 @@ html[data-theme="dark"] .dabbar-premium-switch{background:rgba(212,175,55,.08);b
                     <div class="mt-2 flex gap-2"><button id="quick-entry-stop" class="flex-1 rounded-xl bg-rose-500 px-4 py-2 font-bold text-white" type="button">إيقاف وتحليل</button><button id="quick-entry-recording-cancel-bottom" class="rounded-xl bg-white/70 px-3 py-2 font-bold text-rose-500 transition hover:bg-white" type="button">إلغاء</button></div>
                 </div>
                 <div id="quick-entry-voice-preview" class="hidden rounded-2xl border border-emerald-200 bg-white p-3 dark:bg-slate-900 dark:border-slate-700 space-y-2"><div class="flex items-center justify-between gap-2"><p class="text-[11px] text-slate-500">سمّع تسجيلك للتأكد إنه واضح قبل ما نبعته — هيتسجّل كـ<span id="quick-entry-voice-preview-type-label" class="font-black"></span></p><button id="quick-entry-voice-cancel" class="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-slate-100 text-sm font-black text-slate-500 transition hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700" type="button" aria-label="إلغاء التسجيل">✕</button></div><div class="quick-wave-shell" aria-label="مشغل التسجيل الصوتي"><button type="button" id="quick-entry-wave-play" class="quick-wave-play" aria-label="تشغيل التسجيل">▶</button><div class="min-w-0 flex-1"><canvas id="quick-entry-voice-waveform" class="quick-wave-canvas" height="58" aria-label="الموجة الصوتية؛ اضغط عليها للانتقال داخل التسجيل"></canvas><div class="quick-wave-meta"><span id="quick-entry-wave-current">00:00</span><span id="quick-entry-wave-duration">00:00</span></div></div></div><audio id="quick-entry-voice-audio" preload="metadata"></audio><div class="flex gap-2"><button id="quick-entry-voice-send" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950" type="button">ابعت للتحليل</button><button id="quick-entry-voice-retry" class="rounded-xl border border-slate-300 px-3 py-2.5 text-xs text-slate-500 dark:border-slate-700" type="button">سجّل تاني</button><button id="quick-entry-voice-cancel-bottom" class="rounded-xl border border-rose-200 px-3 py-2.5 text-xs font-bold text-rose-500 dark:border-rose-500/30" type="button">إلغاء</button></div></div>
-                <div id="quick-entry-draft" class="hidden rounded-2xl border border-emerald-200 bg-white p-3 dark:bg-slate-900"><div class="flex items-center justify-between gap-2"><p id="quick-entry-draft-title" class="text-[11px] text-slate-500">راجع قبل الحفظ</p><button id="quick-entry-draft-close" type="button" aria-label="اقفل" class="shrink-0 w-6 h-6 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition text-sm font-bold">✕</button></div><div id="quick-entry-draft-list" class="mt-1 space-y-2"></div><div id="quick-entry-draft-actions" class="mt-3 flex gap-2"><button id="quick-entry-confirm" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950" type="button">تأكيد التسجيل</button><button id="quick-entry-edit" class="rounded-xl border border-slate-300 px-3 py-2.5 text-xs text-slate-500 dark:border-slate-700" type="button">تعديل</button></div></div><p id="quick-entry-status" class="min-h-4 text-center text-[11px] text-slate-500"></p>
+                 <div id="quick-entry-draft" class="hidden rounded-2xl border border-emerald-200 bg-white p-3 dark:bg-slate-900"><div class="flex items-center justify-between gap-2"><p id="quick-entry-draft-title" class="text-[11px] text-slate-500">راجع قبل الحفظ</p><button id="quick-entry-draft-close" type="button" aria-label="اقفل" class="shrink-0 w-6 h-6 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition text-sm font-bold">✕</button></div><div id="quick-entry-draft-list" class="mt-1 space-y-2"></div><div id="quick-entry-draft-actions" class="mt-3 flex gap-2"><button id="quick-entry-confirm" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950" type="button">تأكيد التسجيل</button><button id="quick-entry-edit" class="rounded-xl border border-slate-300 px-3 py-2.5 text-xs text-slate-500 dark:border-slate-700" type="button">تعديل</button></div></div><p id="quick-entry-status" class="min-h-4 text-center text-[11px] text-slate-500"></p>
+                </div>
+                <div id="quick-linked-tools" class="space-y-3" aria-live="polite">
+                    <div class="quick-tool-panel" data-quick-tool-panel="portfolio"><div id="quick-portfolio-slot"></div></div>
+                    <div class="quick-tool-panel" data-quick-tool-panel="bank"><div id="quick-bank-slot"></div></div>
+                </div>
             </section>
 
             <!-- كارت "المتاح ليك تصرفه" الموحّد: بديل صافي ثروتك، بيظهر بس لما العميل يحدد دخله أو ميزانيته -->
@@ -2749,41 +2832,7 @@ html[data-theme="dark"] .dabbar-premium-switch{background:rgba(212,175,55,.08);b
                 <span class="shrink-0 text-slate-400">‹</span>
             </button>
 
-            <!-- الحركات البنكية Bottom Sheet + مودال المراجعة اتنقلوا لآخر الصفحة -->
-            <script data-dabbar-interactions>
-(function(){
-  const $=(q,r=document)=>r.querySelector(q), $$=(q,r=document)=>Array.from(r.querySelectorAll(q));
-  const switcher=(items, panels, cls='')=>{
-    const nav=document.createElement('div'); nav.className='dabbar-premium-switch '+cls; nav.setAttribute('role','tablist');
-    const show=id=>{ $$('button',nav).forEach(b=>{const on=b.dataset.target===id;b.classList.toggle('active',on);b.setAttribute('aria-selected',on)}); panels.forEach(p=>p.classList.toggle('active',p.id===id)); };
-    items.forEach((x,i)=>{const b=document.createElement('button'); b.type='button'; b.className='dabbar-switch-btn'+(i===0?' active':''); b.dataset.target=x.id; b.setAttribute('role','tab'); b.setAttribute('aria-selected',i===0?'true':'false'); b.innerHTML=x.label+(x.sub?'<small>'+x.sub+'</small>':''); b.addEventListener('click',()=>show(x.id)); nav.append(b);});
-    show(items[0].id); return nav;
-  };
-  const panel=(id,children,extra='')=>{const p=document.createElement('section');p.id=id;p.className='dabbar-switch-panel '+extra;children.filter(Boolean).forEach(e=>p.append(e));return p;};
-  function monthly(){
-    const tab=$('#tab-monthly'), quick=$('#quick-entry-card'), wallet=$('#portfolio-collapsible'), bank=$('#bank-movements-card'); if(!tab||!quick||!wallet||!bank||$('#dabbar-monthly-switch')) return;
-    const tools=document.createElement('section');tools.id='dabbar-monthly-switch';tools.className='dabbar-moved-section';
-    const p1=panel('dabbar-wallet-panel',[wallet],'active'), p2=panel('dabbar-bank-panel',[bank]);
-    const nav=switcher([{id:p1.id,label:'💼 المحفظة',sub:'استثماراتك'},{id:p2.id,label:'🏦 الحركات',sub:'بنوك ومحافظ'}],[p1,p2]);
-    const host=document.createElement('div');host.className='space-y-3';host.append(p1,p2);tools.append(nav,host);quick.insertAdjacentElement('afterend',tools);
-    const available=$('#available-card'); if(available&&!available.closest('.dabbar-available-wrap')){const box=document.createElement('section');box.className='dabbar-available-wrap';const toggle=document.createElement('button');toggle.type='button';toggle.className='dabbar-compact-toggle';toggle.setAttribute('aria-expanded','false');toggle.innerHTML='<span><strong>💰 الدخل والميزانية</strong><span>اضغط لعرض ملخص الشهر وتفاصيله</span></span><i>⌄</i>';const body=document.createElement('div');body.className='dabbar-collapsed-body';available.parentNode.insertBefore(box,available);body.append(available);const details=$('#monthly-income-details');if(details)body.append(details);box.append(toggle,body);toggle.addEventListener('click',()=>{const open=body.classList.toggle('open');toggle.classList.toggle('open',open);toggle.setAttribute('aria-expanded',String(open));});}
-  }
-  function daily(){
-    const tab=$('#tab-daily'), pig=$('#piggybank-card'), salary=$('#salary-countdown-card'); if(!tab||!pig||!salary||$('#dabbar-daily-switch')) return;
-    const tools=document.createElement('section');tools.id='dabbar-daily-switch';tools.className='dabbar-daily-tools';const p1=panel('dabbar-piggy-panel',[pig],'active'),p2=panel('dabbar-remaining-panel',[salary]);const nav=switcher([{id:p1.id,label:'🐷 الحصالة',sub:'حصالة اليوم'},{id:p2.id,label:'💰 المتبقي',sub:'من الشهر'}],[p1,p2]);tools.append(nav,p1,p2);tab.insertBefore(tools,tab.children[1]||null);
-  }
-  function assistant(){
-    const a=$('#tab-assistant'); if(!a||$('#dabbar-assistant-switch')) return;
-    const rem=$('#tab-reminders'),tips=$('#tab-tips'),cats=$('#tab-categories'); if(!rem||!tips||!cats)return;
-    ['reminders','tips','categories'].forEach(t=>{const b=$('.tab-btn[data-tab="'+t+'"]');if(b)b.style.display='none';});
-    const original=Array.from(a.children);const chat=original.filter(e=>e.querySelector?.('#asst-chat-log')||e.querySelector?.('#asst-wrapped-open'));const goals=original.filter(e=>!chat.includes(e));
-    const shell=document.createElement('section');shell.id='dabbar-assistant-switch';shell.className='dabbar-assistant-shell';const pGoals=panel('dabbar-asst-goals',goals,'active'),pBills=panel('dabbar-asst-bills',[rem]),pTips=panel('dabbar-asst-tips',[tips]),pCats=panel('dabbar-asst-cats',[cats]),pChat=panel('dabbar-asst-chat',chat);const panels=[pGoals,pBills,pTips,pCats,pChat];const nav=switcher([{id:pGoals.id,label:'🎯 الأهداف',sub:'خطتك القادمة'},{id:pBills.id,label:'🔔 التذكيرات',sub:'الفواتير والأقساط'},{id:pTips.id,label:'💡 النصائح',sub:'اقتراحات دبّر'},{id:pCats.id,label:'🧾 التصنيفات',sub:'تحليل الصرف'},{id:pChat.id,label:'✨ اسأل دبّر',sub:'مساعدك الشخصي'}],panels);const host=document.createElement('div');host.className='dabbar-assistant-panels';panels.forEach(p=>host.append(p));shell.append(nav,host);a.replaceChildren(shell);nav.querySelector('[data-target="dabbar-asst-bills"]')?.addEventListener('click',()=>window.loadReminders?.());
-  }
-  function init(){monthly();daily();assistant();}
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
-})();
-</script>
-</body>) عشان يبقوا برة أي كونتينر عنده overflow/transform ممكن يكسر الـ position:fixed بتاعهم -->
+            <!-- الحركات البنكية Bottom Sheet + مودال المراجعة اتنقلوا لآخر الصفحة (قبل </body>) عشان يبقوا برة أي كونتينر عنده overflow/transform ممكن يكسر الـ position:fixed بتاعهم -->
 
             <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3" id="monthly-categories-card">
                 <div id="balance-card" class="hidden rounded-[1.35rem] border border-emerald-500/20 bg-emerald-500/[0.045] p-3.5 space-y-3">
@@ -2936,7 +2985,7 @@ html[data-theme="dark"] .dabbar-premium-switch{background:rgba(212,175,55,.08);b
             </div>
 
 
-            <div class="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-2xl p-3 space-y-1.5 shadow-lg">
+            <div id="daily-spend-card" class="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-2xl p-3 space-y-1.5 shadow-lg">
                 <div class="flex justify-between items-center">
                     <span class="text-[11px] text-slate-400 font-semibold">صرف النهاردة</span>
                     <span class="text-[10px] text-slate-500" id="daily-date"></span>
@@ -2954,7 +3003,7 @@ html[data-theme="dark"] .dabbar-premium-switch{background:rgba(212,175,55,.08);b
                 <span class="text-slate-500 text-xs">‹</span>
             </button>
 
-            <div class="flex items-start gap-2 bg-slate-950/40 border border-slate-800/70 rounded-2xl p-3">
+            <div id="daily-explainer-card" class="flex items-start gap-2 bg-slate-950/40 border border-slate-800/70 rounded-2xl p-3">
                 <span class="text-sm leading-none mt-0.5">ℹ️</span>
                 <p class="text-[11px] text-slate-400 leading-relaxed">
                     دي مصاريف <b class="text-slate-300">النهاردة بس</b> وبتتصفّر يوميًا — عملياتك متمسحش، هتلاقيها كلها في تبويب
@@ -2962,7 +3011,7 @@ html[data-theme="dark"] .dabbar-premium-switch{background:rgba(212,175,55,.08);b
                 </p>
             </div>
 
-            <div class="grid grid-cols-2 gap-3">
+            <div id="daily-stats-grid" class="grid grid-cols-2 gap-3">
                 <div class="bg-slate-950/60 border border-slate-800 p-3.5 rounded-2xl">
                     <span class="text-[11px] text-slate-400 block mb-1">عدد العمليات</span>
                     <span class="text-lg font-bold text-slate-200" id="daily-count">—</span>
@@ -2974,7 +3023,7 @@ html[data-theme="dark"] .dabbar-premium-switch{background:rgba(212,175,55,.08);b
             </div>
 
             <!-- حركة السيولة اليومية (واصل من / واصل لـ) -->
-            <div class="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-4 space-y-3 shadow-lg">
+            <div id="daily-flow-card" class="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-4 space-y-3 shadow-lg">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2">
                         <div class="w-7 h-7 rounded-lg bg-emerald-500/15 flex items-center justify-center text-emerald-400 text-sm">⇄</div>
@@ -3011,7 +3060,7 @@ html[data-theme="dark"] .dabbar-premium-switch{background:rgba(212,175,55,.08);b
                 <p class="text-[9px] text-slate-500 text-center">الصافي = الداخل − الخارج خلال النهاردة بس</p>
             </div>
 
-            <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3">
+            <div id="daily-items-card" class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3">
                 <h4 class="text-xs font-bold text-slate-300">عمليات النهاردة:</h4>
                 <div class="space-y-1" id="daily-items-list">
                     <p class="text-xs text-slate-500">سجّل أول عملية النهاردة وهتظهر هنا.</p>
@@ -3021,7 +3070,7 @@ html[data-theme="dark"] .dabbar-premium-switch{background:rgba(212,175,55,.08);b
             <button id="download-daily-pdf" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold py-2.5 rounded-xl text-xs transition flex items-center justify-center gap-2">
                 <span id="download-daily-pdf-icon">📄</span> <span id="download-daily-pdf-label">تقرير PDF لليوم</span>
             </button>
-            <p class="text-[9px] text-slate-500 text-center">تقرير بكل عمليات النهاردة بس — تقدر تشاركه أو تحتفظ بيه.</p>
+            <p id="daily-pdf-note" class="text-[9px] text-slate-500 text-center">تقرير بكل عمليات النهاردة بس — تقدر تشاركه أو تحتفظ بيه.</p>
 
         </div>
 
@@ -3140,7 +3189,8 @@ html[data-theme="dark"] .dabbar-premium-switch{background:rgba(212,175,55,.08);b
                     <span class="text-lg font-bold text-rose-400" id="debts-you-owe-total">—</span>
                 </div>
             </div>
-            <div class="flex gap-2 bg-slate-950/60 border border-slate-800 rounded-2xl p-1.5" id="debts-tabs">
+            <div class="debts-tabs-heading"><span>📚 ملفات الديون</span><span>اسحب للتنقّل بين الأقسام ←</span></div>
+            <div class="flex gap-2 bg-slate-950/60 border border-slate-800 rounded-2xl p-1.5" id="debts-tabs" role="tablist" aria-label="أقسام الديون">
                 <button class="debts-tab-btn flex-1 text-xs font-bold py-2 rounded-xl transition active" data-tab="active">الديون النشطة</button>
                 <button class="debts-tab-btn flex-1 text-xs font-bold py-2 rounded-xl transition" data-tab="social">الجمعية والمناسبات</button>
                 <button class="debts-tab-btn flex-1 text-xs font-bold py-2 rounded-xl transition" data-tab="settlement">رسالة التصفية</button>
@@ -3287,6 +3337,13 @@ html[data-theme="dark"] .dabbar-premium-switch{background:rgba(212,175,55,.08);b
                 <h3 class="text-xl font-black text-slate-100">دبّر بيفكر معاك 🧠</h3>
                 <p class="text-[11px] text-slate-400">اقتراحات وتوقعات وشات مبني على بياناتك الحقيقية بس</p>
             </div>
+             <div id="assistant-hub-nav" role="tablist" aria-label="أقسام مساعد دبّر">
+                 <button type="button" class="assistant-hub-btn active" data-assistant-target="assistant-goals-card">🎯 الأهداف</button>
+                 <button type="button" class="assistant-hub-btn" data-assistant-target="assistant-chat-card">💬 اسأل دبّر</button>
+                 <button type="button" class="assistant-hub-btn" data-assistant-tab="categories">🧾 التصنيفات</button>
+                 <button type="button" class="assistant-hub-btn" data-assistant-tab="reminders">🔔 التذكيرات</button>
+                 <button type="button" class="assistant-hub-btn" data-assistant-tab="tips">💡 النصايح</button>
+             </div>
 
             <!-- اقتراح ذكي تلقائي -->
             <div id="asst-suggestion-card" class="hidden bg-gradient-to-br from-emerald-500/15 to-slate-900 border border-emerald-500/30 rounded-2xl p-4 flex items-start gap-3">
@@ -3305,7 +3362,7 @@ html[data-theme="dark"] .dabbar-premium-switch{background:rgba(212,175,55,.08);b
             </div>
 
             <!-- الهدف المالي -->
-            <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3">
+             <div id="assistant-goals-card" class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3">
                 <h4 class="text-xs font-bold text-slate-300 flex items-center gap-1.5">🎯 هدفك المالي</h4>
 
                 <!-- كروت الأهداف النشطة (لحد 3) بيتحقنوا هنا من renderAsstGoal -->
@@ -3435,7 +3492,7 @@ html[data-theme="dark"] .dabbar-premium-switch{background:rgba(212,175,55,.08);b
             </button>
 
             <!-- اسأل دبّر -->
-            <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3">
+             <div id="assistant-chat-card" class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3">
                 <h4 class="text-xs font-bold text-slate-300 flex items-center gap-1.5 justify-between">
                     <span class="flex items-center gap-1.5">💬 اسأل دبّر</span>
                     <span id="asst-chat-usage" class="hidden text-[9.5px] font-semibold text-slate-500 bg-slate-900 border border-slate-800 rounded-full px-2 py-0.5"></span>
@@ -3549,7 +3606,7 @@ html[data-theme="dark"] .dabbar-premium-switch{background:rgba(212,175,55,.08);b
                 <p class="text-[10px] text-slate-600 leading-relaxed">لازم يكون كشف حساب PDF نصي (مش صورة ممسوحة ضوئيًا) — الخيار موجود في كل تطبيقات البنوك المصرية تقريبًا تحت "كشف حساب" أو "Statement". لو عندك SMS بنكية مفعّلة، مش هنكرر أي عملية موجودة عندك بالفعل.</p>
             </div>
 
-            <div class="bg-gradient-to-br from-emerald-500/10 to-teal-500/5 border border-emerald-500/25 rounded-3xl p-4 space-y-3">
+            <div id="account-referral-card" class="bg-gradient-to-br from-emerald-500/10 to-teal-500/5 border border-emerald-500/25 rounded-3xl p-4 space-y-3">
                 <div class="flex items-center gap-3">
                     <span class="w-9 h-9 rounded-xl bg-emerald-500/15 border border-emerald-500/25 flex items-center justify-center text-base">🎁</span>
                     <div>
@@ -3835,7 +3892,7 @@ html[data-theme="dark"] .dabbar-premium-switch{background:rgba(212,175,55,.08);b
 
             <!-- كارت البريميوم — الماسكوت الحقيقي بحركة مستمرة (مش ثابت) عشان يشجّع على الاشتراك -->
             <div id="premium-hero-card" class="hidden bg-gradient-to-b from-[#052e22] to-[#031a14] border border-amber-500/25 rounded-3xl p-5 text-center overflow-hidden relative">
-                <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Crect width='64' height='64' rx='18' fill='%23059669'/%3E%3Ctext x='32' y='41' text-anchor='middle' font-family='Arial' font-size='28' font-weight='700' fill='white'%3Eد%3C/text%3E%3C/svg%3E" alt="دبّر بريميوم" class="w-36 h-auto mx-auto mb-2 mascot-float">
+                <img src="branding/dabbar-mascot.png" alt="دبّر بريميوم" class="w-36 h-auto mx-auto mb-2 mascot-float">
                 <p class="text-[10px] tracking-widest text-amber-400 font-black mb-1">DABBAR PREMIUM</p>
                 <h3 class="text-lg font-black text-white mb-1">افتح كل قوة دبّر</h3>
                 <p class="text-[11px] text-slate-400 mb-4 leading-relaxed">تتبع ذكي، تقارير مفصلة، وأمان بنكي لبياناتك — من غير حدود شهرية.</p>
@@ -4359,7 +4416,6 @@ html[data-theme="dark"] .dabbar-premium-switch{background:rgba(212,175,55,.08);b
         const SUPABASE_ANON_KEY = 'sb_publishable_yHiX1cnEMCVEcjQxiIrqig_DRBiuveQ';
         const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         const ONBOARDING_URL = 'dabbar-onboarding.html';
-        const IS_STANDALONE_PREVIEW = new URLSearchParams(window.location.search).get('preview') === '1';
 
         const CATEGORY_EMOJI = { 'أكل':'🍔', 'مواصلات':'🚕', 'فواتير':'🧾', 'تسوق':'🛍️', 'ترفيه':'🎬', 'صحة':'💊', 'تعليم':'📚', 'منزل وأثاث':'🏠', 'ملابس':'👕', 'اشتراكات':'🔁', 'هدايا وتبرعات':'🎁', 'شخصي وعناية':'🧴' };
         const CATEGORY_EMOJI_RULES = [
@@ -5482,11 +5538,6 @@ html[data-theme="dark"] .dabbar-premium-switch{background:rgba(212,175,55,.08);b
 
         (async () => {
             try {
-                if (IS_STANDALONE_PREVIEW) {
-                    document.documentElement.setAttribute('data-preview-mode', 'standalone');
-                    document.body.setAttribute('data-preview-mode', 'standalone');
-                    return;
-                }
                 const { data: { session } } = await sb.auth.getSession();
                 if (!session) { window.location.href = ONBOARDING_URL; return; }
                 accessToken = session.access_token;
@@ -5901,6 +5952,12 @@ html[data-theme="dark"] .dabbar-premium-switch{background:rgba(212,175,55,.08);b
                 } else {
                     summary.innerHTML = '<p class="planning-empty-note">أدخل دخلك أو حد مصروفاتك عشان دبّر يحسبلك المتاح.</p><p class="planning-summary-note">الالتزامات المتكررة للتخطيط فقط، ولا تُخصم تلقائيًا.</p>';
                 }
+            }
+            const planningHeaderSummary = document.getElementById('planning-header-summary');
+            if (planningHeaderSummary) {
+                planningHeaderSummary.textContent = incomeOrBudget
+                    ? `المتاح دلوقتي: ${fmt(remaining)}`
+                    : 'اضغط لإضافة دخلك أو ميزانيتك';
             }
             const categoryBudgetList = document.getElementById('category-budgets-list');
             const topCategories = Array.isArray(data?.month?.byCategory) ? data.month.byCategory.slice(0, 3).map((item) => item.name) : [];
@@ -7167,8 +7224,16 @@ html[data-theme="dark"] .dabbar-premium-switch{background:rgba(212,175,55,.08);b
         function initDebtsTabs() {
             if (__debtTabInitialized) return;
             __debtTabInitialized = true;
+            document.querySelectorAll('.debts-tab-btn').forEach((btn) => {
+                btn.setAttribute('role', 'tab');
+                btn.setAttribute('aria-selected', String(btn.classList.contains('active')));
+            });
             document.querySelectorAll('.debts-tab-btn').forEach((btn) => btn.addEventListener('click', () => {
-                document.querySelectorAll('.debts-tab-btn').forEach((b) => b.classList.toggle('active', b === btn));
+                document.querySelectorAll('.debts-tab-btn').forEach((b) => {
+                    const selected = b === btn;
+                    b.classList.toggle('active', selected);
+                    b.setAttribute('aria-selected', String(selected));
+                });
                 ['active','social','settlement','statement'].forEach((tab) => document.getElementById(`debts-panel-${tab}`).classList.toggle('hidden', tab !== btn.dataset.tab));
                 if (btn.dataset.tab === 'social') { renderGameyaList(window.__dashboardData?.gameyaList || []); renderOccasionsList(window.__dashboardData?.occasionsSummary || { total: 0, items: [] }); }
             }));
@@ -8899,7 +8964,7 @@ html[data-theme="dark"] .dabbar-premium-switch{background:rgba(212,175,55,.08);b
                     ? `<div class="pt-1 text-amber-300">📥 اتسجلت كمان كدين عليك لـ ${result.debtPerson}</div>` : '';
                 resultEl.innerHTML = `
                     <div class="flex items-center gap-2 font-bold">
-                        <img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='64'%3E%3Crect width='64' height='64' rx='18' fill='%23059669'/%3E%3Ctext x='32' y='41' text-anchor='middle' font-family='Arial' font-size='28' font-weight='700' fill='white'%3Eد%3C/text%3E%3C/svg%3E" alt="دبّر" class="w-9 h-9 rounded-full object-cover shrink-0 mascot-wave">
+                        <img src="branding/dabbar-mascot-avatar.png" alt="دبّر" class="w-9 h-9 rounded-full object-cover shrink-0 mascot-wave">
                         <span class="flex-1">${result.merchant ? `فاتورة ${result.merchant}` : 'الفاتورة'} — اتسجلت (${result.items.length} صنف)</span>
                         <button type="button" id="asst-receipt-result-close" aria-label="اقفل" class="shrink-0 w-6 h-6 flex items-center justify-center rounded-full text-emerald-300 hover:bg-emerald-500/20 transition text-sm font-bold">✕</button>
                     </div>
@@ -9965,5 +10030,264 @@ html[data-theme="dark"] .dabbar-premium-switch{background:rgba(212,175,55,.08);b
             overlay.classList.remove('flex');
         });
     </script>
+
+    <script>
+        /* ============================================================
+           تحسينات واجهة لوحة دبّر:
+           - نقل المحفظة والحركات البنكية داخل مساحة التسجيل السريع
+           - منزلق الحصالة / المتبقي من الشهر
+           - لوحة تنقّل مختصرة داخل مساعد دبّر
+           - دخل وميزانية قابلة للطي أو الإخفاء مع زر استرجاع
+           ============================================================ */
+        (function setupDabbarWorkspaceNavigation() {
+            function setupQuickWorkspace() {
+                const card = document.getElementById('quick-entry-card');
+                const portfolio = document.getElementById('portfolio-collapsible');
+                const bank = document.getElementById('bank-movements-card');
+                const portfolioSlot = document.getElementById('quick-portfolio-slot');
+                const bankSlot = document.getElementById('quick-bank-slot');
+                const buttons = [...document.querySelectorAll('[data-quick-workspace]')];
+                if (!card || !portfolioSlot || !bankSlot || !buttons.length) return false;
+
+                if (portfolio && portfolio.parentElement !== portfolioSlot) portfolioSlot.appendChild(portfolio);
+                if (bank && bank.parentElement !== bankSlot) bankSlot.appendChild(bank);
+
+                const expenseContent = document.getElementById('quick-expense-content');
+                const panels = [...card.querySelectorAll('[data-quick-tool-panel]')];
+                function setWorkspace(name) {
+                    buttons.forEach((button) => {
+                        const active = button.dataset.quickWorkspace === name;
+                        button.classList.toggle('active', active);
+                        button.setAttribute('aria-selected', String(active));
+                    });
+                    if (expenseContent) expenseContent.hidden = name !== 'expense';
+                    panels.forEach((panel) => panel.classList.toggle('active', panel.dataset.quickToolPanel === name));
+                }
+                if (!card.dataset.workspaceReady) {
+                    buttons.forEach((button) => button.addEventListener('click', () => setWorkspace(button.dataset.quickWorkspace)));
+                    card.dataset.workspaceReady = 'true';
+                }
+                setWorkspace(buttons.find((button) => button.classList.contains('active'))?.dataset.quickWorkspace || 'expense');
+                return true;
+            }
+
+            function setupDailyFocusCarousel() {
+                const daily = document.getElementById('tab-daily');
+                const salary = document.getElementById('salary-countdown-card');
+                const salaryEmpty = document.getElementById('salary-countdown-empty');
+                const piggy = document.getElementById('piggybank-card');
+                const piggyEmpty = document.getElementById('piggybank-empty');
+                if (!daily || !salary || !salaryEmpty || !piggy || !piggyEmpty || daily.dataset.focusReady) return;
+
+                const shell = document.createElement('section');
+                shell.id = 'daily-focus-carousel';
+                shell.setAttribute('aria-label', 'المتبقي من الشهر وحصالة اليوم');
+                shell.innerHTML = `
+                    <div class="daily-focus-nav" role="tablist" aria-label="تنقّل اليوم">
+                        <button type="button" class="daily-focus-btn active" data-focus-index="0" role="tab" aria-selected="true">💰 المتبقي من الشهر</button>
+                        <button type="button" class="daily-focus-btn" data-focus-index="1" role="tab" aria-selected="false">🐷 حصالة اليوم</button>
+                    </div>
+                    <div class="daily-focus-viewport">
+                        <div class="daily-focus-track">
+                            <div class="daily-focus-slide" data-focus-slide="0"></div>
+                            <div class="daily-focus-slide" data-focus-slide="1"></div>
+                        </div>
+                    </div>`;
+                daily.insertBefore(shell, salary);
+                const slides = [...shell.querySelectorAll('.daily-focus-slide')];
+                slides[0].append(salary, salaryEmpty);
+                slides[1].append(piggy, piggyEmpty);
+                const track = shell.querySelector('.daily-focus-track');
+                const buttons = [...shell.querySelectorAll('.daily-focus-btn')];
+                let index = 0;
+                const goTo = (next) => {
+                    index = Math.max(0, Math.min(1, next));
+                    track.style.transform = `translateX(-${index * 100}%)`;
+                    buttons.forEach((button, buttonIndex) => {
+                        const active = buttonIndex === index;
+                        button.classList.toggle('active', active);
+                        button.setAttribute('aria-selected', String(active));
+                    });
+                };
+                buttons.forEach((button) => button.addEventListener('click', () => goTo(Number(button.dataset.focusIndex))));
+                let startX = 0;
+                shell.addEventListener('touchstart', (event) => { startX = event.touches[0]?.clientX || 0; }, { passive: true });
+                shell.addEventListener('touchend', (event) => {
+                    const endX = event.changedTouches[0]?.clientX || startX;
+                    if (Math.abs(endX - startX) > 42) goTo(index + (endX < startX ? 1 : -1));
+                }, { passive: true });
+                daily.dataset.focusReady = 'true';
+            }
+
+            function setupPlanningCard() {
+                const card = document.getElementById('planning-card');
+                if (!card || card.dataset.navigationReady) return;
+                const header = card.children[0];
+                if (!header) return;
+                const body = document.createElement('div');
+                body.className = 'planning-body space-y-3';
+                while (card.children.length > 1) body.appendChild(card.children[1]);
+                card.appendChild(body);
+                const headerMain = header.firstElementChild;
+                if (headerMain && !document.getElementById('planning-header-summary')) {
+                    const headerSummary = document.createElement('span');
+                    headerSummary.id = 'planning-header-summary';
+                    headerSummary.className = 'planning-header-summary';
+                    const currentSettings = typeof planningSettings === 'function' ? planningSettings() : {};
+                    const currentBase = Number(currentSettings.monthlyIncome || currentSettings.monthlyBudget || 0);
+                    const currentTotal = Number(window.__dashboardData?.month?.total || 0);
+                    headerSummary.textContent = currentBase
+                        ? `المتاح دلوقتي: ${typeof fmt === 'function' ? fmt(Math.max(0, currentBase - currentTotal)) : Math.max(0, currentBase - currentTotal).toLocaleString('ar-EG')}`
+                        : 'اضغط لإضافة دخلك أو ميزانيتك';
+                    headerMain.appendChild(headerSummary);
+                }
+
+                const actions = document.createElement('div');
+                actions.className = 'planning-head-actions';
+                actions.innerHTML = `
+                    <button type="button" class="planning-head-action" data-planning-action="collapse" aria-label="طي الدخل والميزانية">⌃</button>
+                    <button type="button" class="planning-head-action" data-planning-action="close" aria-label="إخفاء الدخل والميزانية">×</button>`;
+                header.appendChild(actions);
+
+                const reopen = document.createElement('button');
+                reopen.type = 'button';
+                reopen.id = 'planning-reopen';
+                reopen.className = 'planning-reopen hidden';
+                reopen.textContent = '🎯 إظهار الدخل والميزانية';
+                card.after(reopen);
+
+                const collapseButton = actions.querySelector('[data-planning-action="collapse"]');
+                const savedState = localStorage.getItem('dabbar-planning-card-state');
+                if (savedState !== 'expanded') {
+                    card.classList.add('planning-card-collapsed');
+                    collapseButton.textContent = '⌄';
+                }
+                collapseButton.addEventListener('click', () => {
+                    card.classList.toggle('planning-card-collapsed');
+                    const collapsed = card.classList.contains('planning-card-collapsed');
+                    collapseButton.textContent = collapsed ? '⌄' : '⌃';
+                    localStorage.setItem('dabbar-planning-card-state', collapsed ? 'collapsed' : 'expanded');
+                });
+                actions.querySelector('[data-planning-action="close"]').addEventListener('click', () => {
+                    card.classList.add('hidden');
+                    reopen.classList.remove('hidden');
+                });
+                reopen.addEventListener('click', () => {
+                    card.classList.remove('hidden');
+                    reopen.classList.add('hidden');
+                });
+                card.dataset.navigationReady = 'true';
+            }
+
+            function setupAssistantHub() {
+                const nav = document.getElementById('assistant-hub-nav');
+                if (!nav || nav.dataset.ready) return;
+                nav.querySelectorAll('[data-assistant-target]').forEach((button) => {
+                    button.addEventListener('click', () => {
+                        nav.querySelectorAll('.assistant-hub-btn').forEach((item) => item.classList.remove('active'));
+                        button.classList.add('active');
+                        document.getElementById(button.dataset.assistantTarget)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    });
+                });
+                nav.querySelectorAll('[data-assistant-tab]').forEach((button) => {
+                    button.addEventListener('click', () => {
+                        document.querySelector(`.tab-btn[data-tab="${button.dataset.assistantTab}"]`)?.click();
+                    });
+                });
+                nav.dataset.ready = 'true';
+            }
+
+            function setupDailyDetails() {
+                const daily = document.getElementById('tab-daily');
+                const explainer = document.getElementById('daily-explainer-card');
+                const stats = document.getElementById('daily-stats-grid');
+                const flow = document.getElementById('daily-flow-card');
+                const items = document.getElementById('daily-items-card');
+                const pdf = document.getElementById('download-daily-pdf');
+                const pdfNote = document.getElementById('daily-pdf-note');
+                if (!daily || !explainer || !stats || !flow || !items || !pdf || !pdfNote || daily.dataset.detailsReady) return;
+
+                const details = document.createElement('details');
+                details.id = 'daily-details';
+                details.innerHTML = `
+                    <summary>📋 تفاصيل يومك</summary>
+                    <div class="daily-details-body"></div>`;
+                explainer.before(details);
+                const body = details.querySelector('.daily-details-body');
+                body.append(explainer, stats, flow, items, pdf, pdfNote);
+                daily.dataset.detailsReady = 'true';
+            }
+
+            function setupAccountOrganization() {
+                const account = document.getElementById('tab-account');
+                if (!account || account.dataset.organizationReady) return;
+
+                const makeSection = (id, icon, title, subtitle, memberIds) => {
+                    const members = memberIds.map((memberId) => document.getElementById(memberId)).filter(Boolean);
+                    if (!members.length || document.getElementById(id)) return;
+                    const section = document.createElement('details');
+                    section.id = id;
+                    section.className = 'account-organization-section';
+                    if (id === 'account-connections-section') section.open = true;
+                    section.innerHTML = `
+                        <summary>
+                            <span class="account-section-icon" aria-hidden="true">${icon}</span>
+                            <span>
+                                <span class="account-section-title">${title}</span>
+                                <span class="account-section-subtitle">${subtitle}</span>
+                            </span>
+                        </summary>
+                        <div class="account-section-body"></div>`;
+                    members[0].before(section);
+                    const body = section.querySelector('.account-section-body');
+                    members.forEach((member) => body.appendChild(member));
+                };
+
+                makeSection(
+                    'account-connections-section',
+                    '🏦',
+                    'البنوك والمحافظ والتسجيل السريع',
+                    'اربط بنكك أو سجّل مصروفك من خارج التطبيق',
+                    ['account-telegram-card', 'data-import-card', 'bank-statement-import-card', 'quick-add-feature-card', 'bank-accounts-card']
+                );
+                makeSection(
+                    'account-sharing-section',
+                    '🎁',
+                    'مشاركة دبّر',
+                    'شارك التطبيق مع أصحابك',
+                    ['account-referral-card']
+                );
+                makeSection(
+                    'account-preferences-section',
+                    '⚙️',
+                    'التفضيلات والتنبيهات',
+                    'المظهر، الإشعارات، والتثبيت',
+                    ['account-theme-toggle', 'push-notifications-card', 'in-app-notifications-card', 'install-notice']
+                );
+                makeSection(
+                    'account-security-section',
+                    '🔐',
+                    'الخصوصية والاشتراك',
+                    'الحماية، البريميوم، والتحكم في البيانات',
+                    ['premium-hero-card', 'account-subscription-card', 'account-privacy-card']
+                );
+                account.dataset.organizationReady = 'true';
+            }
+
+            setupQuickWorkspace();
+            setupDailyFocusCarousel();
+            setupDailyDetails();
+            setupAccountOrganization();
+            setupAssistantHub();
+            setupPlanningCard();
+            const observer = new MutationObserver(() => {
+                setupQuickWorkspace();
+                setupPlanningCard();
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
+            setTimeout(() => observer.disconnect(), 15000);
+        })();
+    </script>
+
 </body>
 </html>

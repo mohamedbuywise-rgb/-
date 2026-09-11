@@ -2749,90 +2749,41 @@ html[data-theme="dark"] .dabbar-premium-switch{background:rgba(212,175,55,.08);b
                 <span class="shrink-0 text-slate-400">‹</span>
             </button>
 
-            <!-- الحركات البنكية Bottom Sheet + مودال المراجعة اتنقلوا لآخر الصفحة (قبل 
-<script data-dabbar-ui-v2>
+            <!-- الحركات البنكية Bottom Sheet + مودال المراجعة اتنقلوا لآخر الصفحة -->
+            <script data-dabbar-interactions>
 (function(){
-  const $=(q,r=document)=>r.querySelector(q), $$=(q,r=document)=>[...r.querySelectorAll(q)];
-  const mkSwitch=(items, cls='')=>{const n=document.createElement('div');n.className='dabbar-premium-switch '+cls;items.forEach((x,i)=>{const b=document.createElement('button');b.type='button';b.className='dabbar-switch-btn'+(i===0?' active':'');b.dataset.target=x.id;b.innerHTML=x.label+(x.sub?`<small>${x.sub}</small>`:'');n.appendChild(b)});return n};
-  const wireSwitch=(nav,panels)=>{const buttons=$$('.dabbar-switch-btn',nav);const show=id=>{buttons.forEach(b=>b.classList.toggle('active',b.dataset.target===id));panels.forEach(p=>p.classList.toggle('active',p.id===id));};buttons.forEach(b=>b.addEventListener('click',()=>show(b.dataset.target)));show(buttons[0]?.dataset.target);};
-  function panelizeMonthly(){
-    const tab=$('#tab-monthly'), portfolio=$('#portfolio-collapsible'), bank=$('#bank-movements-card'); if(!tab||!portfolio||!bank)return;
-    const tools=document.createElement('div');tools.className='dabbar-monthly-tools dabbar-moved-section';
-    const nav=mkSwitch([{id:'dabbar-wallet-panel',label:'💼 المحفظة',sub:'استثماراتك'},{id:'dabbar-bank-panel',label:'🏦 الحركات',sub:'بنوك ومحافظ'}]);
-    const wrap=document.createElement('div');wrap.className='space-y-3';
-    const a=document.createElement('div');a.id='dabbar-wallet-panel';a.className='dabbar-switch-panel active';a.appendChild(portfolio);
-    const b=document.createElement('div');b.id='dabbar-bank-panel';b.className='dabbar-switch-panel';b.appendChild(bank);
-    wrap.append(a,b);tools.append(nav,wrap);const anchor=$('#quick-entry-card'); if(anchor && anchor.parentNode===tab) anchor.insertAdjacentElement('afterend',tools); else tab.append(tools); wireSwitch(nav,[a,b]);
-    const available=$('#available-card'); if(available){
-      const box=document.createElement('div');box.className='dabbar-available-wrap';
-      const toggle=document.createElement('button');toggle.type='button';toggle.className='dabbar-compact-toggle';toggle.innerHTML='<span><strong>💰 الدخل والميزانية</strong><span>اضغط لعرض ملخص الشهر وتفاصيله</span></span><i>⌄</i>';
-      const body=document.createElement('div');body.className='dabbar-collapsed-body';
-      available.parentNode.insertBefore(box,available);body.append(available);const details=$('#monthly-income-details');if(details)body.append(details);box.append(toggle,body);
-      toggle.addEventListener('click',()=>{const open=body.classList.toggle('open');toggle.classList.toggle('open',open);toggle.setAttribute('aria-expanded',open)});
-      const sync=()=>{const visible=!available.classList.contains('hidden');box.style.display=visible?'block':'none'};new MutationObserver(sync).observe(available,{attributes:true,attributeFilter:['class']});sync();
-    }
+  const $=(q,r=document)=>r.querySelector(q), $$=(q,r=document)=>Array.from(r.querySelectorAll(q));
+  const switcher=(items, panels, cls='')=>{
+    const nav=document.createElement('div'); nav.className='dabbar-premium-switch '+cls; nav.setAttribute('role','tablist');
+    const show=id=>{ $$('button',nav).forEach(b=>{const on=b.dataset.target===id;b.classList.toggle('active',on);b.setAttribute('aria-selected',on)}); panels.forEach(p=>p.classList.toggle('active',p.id===id)); };
+    items.forEach((x,i)=>{const b=document.createElement('button'); b.type='button'; b.className='dabbar-switch-btn'+(i===0?' active':''); b.dataset.target=x.id; b.setAttribute('role','tab'); b.setAttribute('aria-selected',i===0?'true':'false'); b.innerHTML=x.label+(x.sub?'<small>'+x.sub+'</small>':''); b.addEventListener('click',()=>show(x.id)); nav.append(b);});
+    show(items[0].id); return nav;
+  };
+  const panel=(id,children,extra='')=>{const p=document.createElement('section');p.id=id;p.className='dabbar-switch-panel '+extra;children.filter(Boolean).forEach(e=>p.append(e));return p;};
+  function monthly(){
+    const tab=$('#tab-monthly'), quick=$('#quick-entry-card'), wallet=$('#portfolio-collapsible'), bank=$('#bank-movements-card'); if(!tab||!quick||!wallet||!bank||$('#dabbar-monthly-switch')) return;
+    const tools=document.createElement('section');tools.id='dabbar-monthly-switch';tools.className='dabbar-moved-section';
+    const p1=panel('dabbar-wallet-panel',[wallet],'active'), p2=panel('dabbar-bank-panel',[bank]);
+    const nav=switcher([{id:p1.id,label:'💼 المحفظة',sub:'استثماراتك'},{id:p2.id,label:'🏦 الحركات',sub:'بنوك ومحافظ'}],[p1,p2]);
+    const host=document.createElement('div');host.className='space-y-3';host.append(p1,p2);tools.append(nav,host);quick.insertAdjacentElement('afterend',tools);
+    const available=$('#available-card'); if(available&&!available.closest('.dabbar-available-wrap')){const box=document.createElement('section');box.className='dabbar-available-wrap';const toggle=document.createElement('button');toggle.type='button';toggle.className='dabbar-compact-toggle';toggle.setAttribute('aria-expanded','false');toggle.innerHTML='<span><strong>💰 الدخل والميزانية</strong><span>اضغط لعرض ملخص الشهر وتفاصيله</span></span><i>⌄</i>';const body=document.createElement('div');body.className='dabbar-collapsed-body';available.parentNode.insertBefore(box,available);body.append(available);const details=$('#monthly-income-details');if(details)body.append(details);box.append(toggle,body);toggle.addEventListener('click',()=>{const open=body.classList.toggle('open');toggle.classList.toggle('open',open);toggle.setAttribute('aria-expanded',String(open));});}
   }
-  function panelizeDaily(){
-    const tab=$('#tab-daily'), salary=$('#salary-countdown-card'), salaryEmpty=$('#salary-countdown-empty'), pig=$('#piggybank-card'), pigEmpty=$('#piggybank-empty');if(!tab||!salary||!pig)return;
-    const wrap=document.createElement('div');wrap.className='dabbar-daily-tools';const nav=mkSwitch([{id:'dabbar-piggy-panel',label:'🐷 الحصالة',sub:'قرش اليوم'},{id:'dabbar-remaining-panel',label:'💰 المتبقي',sub:'ميزانية الشهر'}]);
-    const p1=document.createElement('div');p1.id='dabbar-piggy-panel';p1.className='dabbar-switch-panel active';p1.append(pig);if(pigEmpty)p1.append(pigEmpty);
-    const p2=document.createElement('div');p2.id='dabbar-remaining-panel';p2.className='dabbar-switch-panel';p2.append(salary);if(salaryEmpty)p2.append(salaryEmpty);
-    wrap.append(nav,p1,p2);tab.insertBefore(wrap,tab.children[1]);wireSwitch(nav,[p1,p2]);
+  function daily(){
+    const tab=$('#tab-daily'), pig=$('#piggybank-card'), salary=$('#salary-countdown-card'); if(!tab||!pig||!salary||$('#dabbar-daily-switch')) return;
+    const tools=document.createElement('section');tools.id='dabbar-daily-switch';tools.className='dabbar-daily-tools';const p1=panel('dabbar-piggy-panel',[pig],'active'),p2=panel('dabbar-remaining-panel',[salary]);const nav=switcher([{id:p1.id,label:'🐷 الحصالة',sub:'حصالة اليوم'},{id:p2.id,label:'💰 المتبقي',sub:'من الشهر'}],[p1,p2]);tools.append(nav,p1,p2);tab.insertBefore(tools,tab.children[1]||null);
   }
-  function panelizeCategories(){
-    const sub=$('#subscriptions-card'), pur=$('#recurring-purchases-card');if(!sub||!pur)return;
-    const tab=$('#tab-categories');const nav=mkSwitch([{id:'dabbar-subscriptions-panel',label:'🔁 اشتراكات',sub:'خدمات أونلاين'},{id:'dabbar-purchases-panel',label:'🛒 مشتريات',sub:'أكل وطلبات'}]);const wrap=document.createElement('div');wrap.className='dabbar-moved-section';const a=document.createElement('div');a.id='dabbar-subscriptions-panel';a.className='dabbar-switch-panel active';a.append(sub);const b=document.createElement('div');b.id='dabbar-purchases-panel';b.className='dabbar-switch-panel';b.append(pur);wrap.append(nav,a,b);tab.insertBefore(wrap,tab.children[1]);wireSwitch(nav,[a,b]);
+  function assistant(){
+    const a=$('#tab-assistant'); if(!a||$('#dabbar-assistant-switch')) return;
+    const rem=$('#tab-reminders'),tips=$('#tab-tips'),cats=$('#tab-categories'); if(!rem||!tips||!cats)return;
+    ['reminders','tips','categories'].forEach(t=>{const b=$('.tab-btn[data-tab="'+t+'"]');if(b)b.style.display='none';});
+    const original=Array.from(a.children);const chat=original.filter(e=>e.querySelector?.('#asst-chat-log')||e.querySelector?.('#asst-wrapped-open'));const goals=original.filter(e=>!chat.includes(e));
+    const shell=document.createElement('section');shell.id='dabbar-assistant-switch';shell.className='dabbar-assistant-shell';const pGoals=panel('dabbar-asst-goals',goals,'active'),pBills=panel('dabbar-asst-bills',[rem]),pTips=panel('dabbar-asst-tips',[tips]),pCats=panel('dabbar-asst-cats',[cats]),pChat=panel('dabbar-asst-chat',chat);const panels=[pGoals,pBills,pTips,pCats,pChat];const nav=switcher([{id:pGoals.id,label:'🎯 الأهداف',sub:'خطتك القادمة'},{id:pBills.id,label:'🔔 التذكيرات',sub:'الفواتير والأقساط'},{id:pTips.id,label:'💡 النصائح',sub:'اقتراحات دبّر'},{id:pCats.id,label:'🧾 التصنيفات',sub:'تحليل الصرف'},{id:pChat.id,label:'✨ اسأل دبّر',sub:'مساعدك الشخصي'}],panels);const host=document.createElement('div');host.className='dabbar-assistant-panels';panels.forEach(p=>host.append(p));shell.append(nav,host);a.replaceChildren(shell);nav.querySelector('[data-target="dabbar-asst-bills"]')?.addEventListener('click',()=>window.loadReminders?.());
   }
-  function panelizeAssistant(){
-    const asst=$('#tab-assistant'), rem=$('#tab-reminders'), tips=$('#tab-tips'), cat=$('#tab-categories');if(!asst||!rem||!tips||!cat)return;
-    const shell=document.createElement('div');shell.className='dabbar-assistant-shell';const nav=mkSwitch([{id:'dabbar-asst-goals',label:'🎯 الأهداف',sub:'خطتك القادمة'},{id:'dabbar-asst-bills',label:'🔔 الفواتير',sub:'التذكيرات والأقساط'},{id:'dabbar-asst-tips',label:'💡 النصائح',sub:'اقتراحات دبّر'},{id:'dabbar-asst-cats',label:'🧾 التصنيفات',sub:'تحليل الصرف'},{id:'dabbar-asst-chat',label:'✨ اسأل دبّر',sub:'مساعدك الشخصي'}]);
-    const panels=[];const mk=(id,content)=>{const p=document.createElement('div');p.id=id;p.className='dabbar-assistant-panel';p.append(content);panels.push(p);return p};
-    const goals=document.createElement('div');goals.className='dabbar-assistant-goals';$$('#tab-assistant>div').slice(0,4).forEach((e)=>goals.append(e));
-    const bills=document.createElement('div');bills.append(rem);const tip=document.createElement('div');tip.append(tips);const cats=document.createElement('div');cats.append(cat);
-    const chat=document.createElement('div');const chatIds=['asst-chat-log','asst-chat-input'];const chatSection=document.createElement('div');$$('#tab-assistant>div').forEach(e=>{if(e.querySelector?.('#asst-chat-log')||e.querySelector?.('#asst-wrapped-open'))chatSection.append(e)});chat.append(chatSection);
-    shell.append(nav,document.createElement('div'));const panelHost=shell.lastChild;panelHost.className='dabbar-assistant-panels';panelHost.append(mk('dabbar-asst-goals',goals),mk('dabbar-asst-bills',bills),mk('dabbar-asst-tips',tip),mk('dabbar-asst-cats',cats),mk('dabbar-asst-chat',chat));
-    asst.append(shell);wireSwitch(nav,panels);
-    ['reminders','tips','categories'].forEach(t=>{$(`.tab-btn[data-tab="${t}"]`)?.classList.add('hidden')});
-    const origClick=nav.querySelector('[data-target="dabbar-asst-bills"]');origClick?.addEventListener('click',()=>window.loadReminders?.());
-  }
-  function init(){panelizeMonthly();panelizeDaily();panelizeCategories();panelizeAssistant();}
+  function init(){monthly();daily();assistant();}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();
 </script>
-<script data-dabbar-ui-v4>
-(function(){
- function run(){
-  try{
-   const A=document.getElementById('tab-assistant'), C=document.getElementById('tab-categories'), R=document.getElementById('tab-reminders'), T=document.getElementById('tab-tips');
-   if(!A||!C||!R||!T)return;
-   // Hide duplicate top-level routes while keeping their content inside Assistant.
-   ['categories','tips','reminders'].forEach(x=>{const b=document.querySelector('.tab-btn[data-tab="'+x+'"]');if(b){b.style.display='none';}});
-   if(A.querySelector('.dabbar-assistant-switch-v4'))return;
-   const nav=document.createElement('div');nav.className='dabbar-premium-switch dabbar-assistant-switch-v4';
-   const host=document.createElement('div');host.className='dabbar-assistant-panels';
-   const defs=[['goals','🎯 الأهداف','خطتك القادمة'],['bills','🔔 الفواتير','التذكيرات والأقساط'],['tips','💡 النصائح','اقتراحات دبّر'],['categories','🧾 التصنيفات','تحليل الصرف'],['chat','✨ اسأل دبّر','مساعدك الشخصي']];
-   defs.forEach((d,i)=>{const b=document.createElement('button');b.type='button';b.className='dabbar-switch-btn'+(i===0?' active':'');b.dataset.v4=d[0];b.innerHTML=d[1]+'<small>'+d[2]+'</small>';nav.appendChild(b);});
-   const get=(id)=>{const e=document.getElementById(id);const p=document.createElement('div');p.className='dabbar-assistant-panel';p.dataset.v4Panel=id;p.append(e);return p;};
-   const goals=document.createElement('div');goals.className='dabbar-assistant-panel';goals.dataset.v4Panel='goals';
-   [...A.children].filter(e=>!e.classList.contains('dabbar-assistant-shell')&&!e.classList.contains('dabbar-assistant-switch-v4')).forEach(e=>goals.append(e));
-   const panels=[goals,get('tab-reminders'),get('tab-tips'),get('tab-categories')];
-   const chat=document.createElement('div');chat.className='dabbar-assistant-panel';chat.dataset.v4Panel='chat';
-   [...A.children].filter(e=>e.querySelector?.('#asst-chat-log')||e.querySelector?.('#asst-wrapped-open')).forEach(e=>chat.append(e));panels.push(chat);
-   panels.forEach((p,i)=>{if(i===0)p.classList.add('active');host.append(p);});
-   A.append(nav,host);
-   [...nav.children].forEach(b=>b.addEventListener('click',()=>{[...nav.children].forEach(x=>x.classList.toggle('active',x===b));panels.forEach(p=>p.classList.toggle('active',p.dataset.v4Panel===b.dataset.v4));}));
-  }catch(e){console.warn('Dashboard V4 UI:',e)}
- }
- if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run);else run();
-})();
-</script><script data-dabbar-ui-v6>
-(function(){
- function run(){
-  document.querySelectorAll('.dabbar-assistant-switch-v4 [data-v4="categories"]').forEach(function(btn){btn.addEventListener('click',function(){var c=document.getElementById('tab-categories');if(c){c.classList.add('active');c.style.display='block';c.style.visibility='visible';}});});
- }
- if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run);else run();
-})();
-</script></body>) عشان يبقوا برة أي كونتينر عنده overflow/transform ممكن يكسر الـ position:fixed بتاعهم -->
+</body>) عشان يبقوا برة أي كونتينر عنده overflow/transform ممكن يكسر الـ position:fixed بتاعهم -->
 
             <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3" id="monthly-categories-card">
                 <div id="balance-card" class="hidden rounded-[1.35rem] border border-emerald-500/20 bg-emerald-500/[0.045] p-3.5 space-y-3">
@@ -10014,56 +9965,5 @@ html[data-theme="dark"] .dabbar-premium-switch{background:rgba(212,175,55,.08);b
             overlay.classList.remove('flex');
         });
     </script>
-
-
-<script data-dabbar-ui-v2>
-(function(){
-  const $=(q,r=document)=>r.querySelector(q), $$=(q,r=document)=>[...r.querySelectorAll(q)];
-  const mkSwitch=(items, cls='')=>{const n=document.createElement('div');n.className='dabbar-premium-switch '+cls;items.forEach((x,i)=>{const b=document.createElement('button');b.type='button';b.className='dabbar-switch-btn'+(i===0?' active':'');b.dataset.target=x.id;b.innerHTML=x.label+(x.sub?`<small>${x.sub}</small>`:'');n.appendChild(b)});return n};
-  const wireSwitch=(nav,panels)=>{const buttons=$$('.dabbar-switch-btn',nav);const show=id=>{buttons.forEach(b=>b.classList.toggle('active',b.dataset.target===id));panels.forEach(p=>p.classList.toggle('active',p.id===id));};buttons.forEach(b=>b.addEventListener('click',()=>show(b.dataset.target)));show(buttons[0]?.dataset.target);};
-  function panelizeMonthly(){
-    const tab=$('#tab-monthly'), portfolio=$('#portfolio-collapsible'), bank=$('#bank-movements-card'); if(!tab||!portfolio||!bank)return;
-    const tools=document.createElement('div');tools.className='dabbar-monthly-tools dabbar-moved-section';
-    const nav=mkSwitch([{id:'dabbar-wallet-panel',label:'💼 المحفظة',sub:'استثماراتك'},{id:'dabbar-bank-panel',label:'🏦 الحركات',sub:'بنوك ومحافظ'}]);
-    const wrap=document.createElement('div');wrap.className='space-y-3';
-    const a=document.createElement('div');a.id='dabbar-wallet-panel';a.className='dabbar-switch-panel active';a.appendChild(portfolio);
-    const b=document.createElement('div');b.id='dabbar-bank-panel';b.className='dabbar-switch-panel';b.appendChild(bank);
-    wrap.append(a,b);tools.append(nav,wrap);tab.insertBefore(tools,tab.children[0]);wireSwitch(nav,[a,b]);
-    const available=$('#available-card'); if(available){
-      const box=document.createElement('div');box.className='dabbar-available-wrap';
-      const toggle=document.createElement('button');toggle.type='button';toggle.className='dabbar-compact-toggle';toggle.innerHTML='<span><strong>💰 الدخل والميزانية</strong><span>اضغط لعرض ملخص الشهر وتفاصيله</span></span><i>⌄</i>';
-      const body=document.createElement('div');body.className='dabbar-collapsed-body';
-      available.parentNode.insertBefore(box,available);body.append(available);const details=$('#monthly-income-details');if(details)body.append(details);box.append(toggle,body);
-      toggle.addEventListener('click',()=>{const open=body.classList.toggle('open');toggle.classList.toggle('open',open);toggle.setAttribute('aria-expanded',open)});
-      const sync=()=>{const visible=!available.classList.contains('hidden');box.style.display=visible?'block':'none'};new MutationObserver(sync).observe(available,{attributes:true,attributeFilter:['class']});sync();
-    }
-  }
-  function panelizeDaily(){
-    const tab=$('#tab-daily'), salary=$('#salary-countdown-card'), salaryEmpty=$('#salary-countdown-empty'), pig=$('#piggybank-card'), pigEmpty=$('#piggybank-empty');if(!tab||!salary||!pig)return;
-    const wrap=document.createElement('div');wrap.className='dabbar-daily-tools';const nav=mkSwitch([{id:'dabbar-piggy-panel',label:'🐷 الحصالة',sub:'قرش اليوم'},{id:'dabbar-remaining-panel',label:'💰 المتبقي',sub:'ميزانية الشهر'}]);
-    const p1=document.createElement('div');p1.id='dabbar-piggy-panel';p1.className='dabbar-switch-panel active';p1.append(pig);if(pigEmpty)p1.append(pigEmpty);
-    const p2=document.createElement('div');p2.id='dabbar-remaining-panel';p2.className='dabbar-switch-panel';p2.append(salary);if(salaryEmpty)p2.append(salaryEmpty);
-    wrap.append(nav,p1,p2);tab.insertBefore(wrap,tab.children[1]);wireSwitch(nav,[p1,p2]);
-  }
-  function panelizeCategories(){
-    const sub=$('#subscriptions-card'), pur=$('#recurring-purchases-card');if(!sub||!pur)return;
-    const tab=$('#tab-categories');const nav=mkSwitch([{id:'dabbar-subscriptions-panel',label:'🔁 اشتراكات',sub:'خدمات أونلاين'},{id:'dabbar-purchases-panel',label:'🛒 مشتريات',sub:'أكل وطلبات'}]);const wrap=document.createElement('div');wrap.className='dabbar-moved-section';const a=document.createElement('div');a.id='dabbar-subscriptions-panel';a.className='dabbar-switch-panel active';a.append(sub);const b=document.createElement('div');b.id='dabbar-purchases-panel';b.className='dabbar-switch-panel';b.append(pur);wrap.append(nav,a,b);tab.insertBefore(wrap,tab.children[1]);wireSwitch(nav,[a,b]);
-  }
-  function panelizeAssistant(){
-    const asst=$('#tab-assistant'), rem=$('#tab-reminders'), tips=$('#tab-tips'), cat=$('#tab-categories');if(!asst||!rem||!tips||!cat)return;
-    const shell=document.createElement('div');shell.className='dabbar-assistant-shell';const nav=mkSwitch([{id:'dabbar-asst-goals',label:'🎯 الأهداف',sub:'خطتك القادمة'},{id:'dabbar-asst-bills',label:'🔔 الفواتير',sub:'التذكيرات والأقساط'},{id:'dabbar-asst-tips',label:'💡 النصائح',sub:'اقتراحات دبّر'},{id:'dabbar-asst-cats',label:'🧾 التصنيفات',sub:'تحليل الصرف'},{id:'dabbar-asst-chat',label:'✨ اسأل دبّر',sub:'مساعدك الشخصي'}]);
-    const panels=[];const mk=(id,content)=>{const p=document.createElement('div');p.id=id;p.className='dabbar-assistant-panel';p.append(content);panels.push(p);return p};
-    const goals=document.createElement('div');goals.className='dabbar-assistant-goals';$$('#tab-assistant>div').slice(0,4).forEach((e)=>goals.append(e));
-    const bills=document.createElement('div');bills.append(rem);const tip=document.createElement('div');tip.append(tips);const cats=document.createElement('div');cats.append(cat);
-    const chat=document.createElement('div');const chatIds=['asst-chat-log','asst-chat-input'];const chatSection=document.createElement('div');$$('#tab-assistant>div').forEach(e=>{if(e.querySelector?.('#asst-chat-log')||e.querySelector?.('#asst-wrapped-open'))chatSection.append(e)});chat.append(chatSection);
-    shell.append(nav,document.createElement('div'));const panelHost=shell.lastChild;panelHost.className='dabbar-assistant-panels';panelHost.append(mk('dabbar-asst-goals',goals),mk('dabbar-asst-bills',bills),mk('dabbar-asst-tips',tip),mk('dabbar-asst-cats',cats),mk('dabbar-asst-chat',chat));
-    asst.append(shell);wireSwitch(nav,panels);
-    ['reminders','tips','categories'].forEach(t=>{$(`.tab-btn[data-tab="${t}"]`)?.classList.add('hidden')});
-    const origClick=nav.querySelector('[data-target="dabbar-asst-bills"]');origClick?.addEventListener('click',()=>window.loadReminders?.());
-  }
-  function init(){panelizeMonthly();panelizeDaily();panelizeCategories();panelizeAssistant();}
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
-})();
-</script>
 </body>
 </html>

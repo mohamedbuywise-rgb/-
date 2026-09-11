@@ -1,5 +1,5 @@
 import { supabase } from '../../lib/supabaseClient.js';
-import { getRecentExpensesSummaryText } from '../../lib/expenses.js';
+import { getRecentExpensesSummaryText, flagSubscriptionUnused, unflagSubscriptionUnused, getSavingsOpportunities } from '../../lib/expenses.js';
 import { getDebtsSummaryText, createGameya, getGameyaList, toggleGameyaMemberPaid, deleteGameya, createOccasion, getOccasionsSummary, deleteOccasion, updateDebtById } from '../../lib/debts.js';
 import { createDailyPiggybank, getDailyPiggybank, contributeDailyPiggybank, deleteDailyPiggybank } from '../../lib/goals.js';
 import { extractItemizedReceiptFromImageBase64, askDabbarChat, askDabbarRoast, classifyMessage, transcribeAudioBase64 } from '../../lib/groq.js';
@@ -699,6 +699,26 @@ async function handlePiggybankDelete(userId, body, res) {
   return res.status(200).json({ ok: true });
 }
 
+// ============================================================================
+// ============ صياد الاشتراكات 2.0 + فرص التوفير ============
+// ============================================================================
+async function handleSubscriptionFlag(userId, body, res) {
+  if (!body.key) return res.status(400).json({ error: 'مفيش اسم اشتراك.' });
+  const result = await flagSubscriptionUnused(userId, body.key, body.label, body.amount);
+  if (result.error) return res.status(400).json({ error: result.error });
+  return res.status(200).json({ ok: true });
+}
+async function handleSubscriptionUnflag(userId, body, res) {
+  if (!body.key) return res.status(400).json({ error: 'مفيش اسم اشتراك.' });
+  const result = await unflagSubscriptionUnused(userId, body.key);
+  if (result.error) return res.status(400).json({ error: result.error });
+  return res.status(200).json({ ok: true });
+}
+async function handleSavingsOpportunities(userId, body, res) {
+  const result = await getSavingsOpportunities(userId);
+  return res.status(200).json(result);
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -762,6 +782,12 @@ export default async function handler(req, res) {
         return await handlePiggybankContribute(userId, body, res);
       case 'piggybank_delete':
         return await handlePiggybankDelete(userId, body, res);
+      case 'subscription_flag':
+        return await handleSubscriptionFlag(userId, body, res);
+      case 'subscription_unflag':
+        return await handleSubscriptionUnflag(userId, body, res);
+      case 'savings_opportunities':
+        return await handleSavingsOpportunities(userId, body, res);
       default:
         return res.status(400).json({ error: 'action غير معروف.' });
     }

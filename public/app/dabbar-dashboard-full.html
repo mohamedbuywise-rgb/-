@@ -2482,25 +2482,51 @@
         html:not([data-theme="light"]) #daily-focus-carousel,
         html:not([data-theme="light"]) #assistant-hub-nav { border-color:rgba(244,198,72,.24); }
 
-        #daily-focus-carousel { overflow:hidden; border-radius:1.35rem; }
-        .daily-focus-nav { display:flex; gap:.45rem; padding:.2rem; background:var(--db-surface-soft); border-radius:1rem; }
-        .daily-focus-btn {
-            flex:1; border:0; border-radius:.78rem; padding:.55rem .4rem; background:transparent;
-            color:var(--db-muted); font:800 .68rem/1.25 'Cairo',sans-serif; cursor:pointer;
+        #daily-focus-carousel { display:grid; gap:.7rem; border-radius:1.35rem; }
+        .daily-focus-details {
+            overflow:hidden; border:1px solid rgba(148,163,184,.2); border-radius:1.35rem;
+            background:var(--db-surface-soft);
         }
-        .daily-focus-btn.active { background:var(--db-surface-strong); color:var(--db-accent); box-shadow:0 5px 15px rgba(17,55,35,.07); }
-        .daily-focus-viewport { overflow:hidden; margin-top:.55rem; }
-        .daily-focus-track { display:flex; direction:ltr; transition:transform .3s cubic-bezier(.22,.68,.32,1); }
-        .daily-focus-slide { direction:rtl; flex:0 0 100%; min-width:100%; }
-        .daily-focus-slide > * { margin-top:.7rem; }
-        .daily-focus-slide > *:first-child { margin-top:0; }
-        html:not([data-theme="light"]) .daily-focus-btn.active { background:linear-gradient(135deg,#f4c648,#b8860b); color:#241b05; }
+        .daily-focus-details > summary {
+            display:flex; align-items:center; justify-content:space-between; gap:.7rem;
+            list-style:none; cursor:pointer; padding:1rem; color:var(--db-ink);
+            font:900 .76rem 'Cairo',sans-serif;
+        }
+        .daily-focus-details > summary::-webkit-details-marker { display:none; }
+        .daily-focus-details > summary::after {
+            content:'⌄'; color:var(--db-muted); font-size:1rem; transition:transform .2s ease;
+        }
+        .daily-focus-details[open] > summary { border-bottom:1px solid rgba(148,163,184,.14); }
+        .daily-focus-details[open] > summary::after { transform:rotate(180deg); }
+        .daily-focus-details-body { display:grid; gap:.7rem; padding:0 .7rem .7rem; }
+        html:not([data-theme="light"]) .daily-focus-details { border-color:rgba(244,198,72,.22); }
+        html:not([data-theme="light"]) .daily-focus-details > summary::after { color:#f4c648; }
+
+        .savings-opportunities-details > summary { display:flex; align-items:center; gap:.4rem; list-style:none; cursor:pointer; }
+        .savings-opportunities-details > summary::-webkit-details-marker { display:none; }
+        .savings-opportunities-details > summary::after { content:'⌄'; margin-right:auto; font-size:1rem; transition:transform .2s ease; }
+        .savings-opportunities-details[open] > summary::after { transform:rotate(180deg); }
+        .savings-opportunities-body { display:grid; gap:.55rem; margin-top:.55rem; }
+
+        .balance-summary { display:flex; align-items:flex-start; justify-content:space-between; gap:.7rem; list-style:none; cursor:pointer; }
+        .balance-summary::-webkit-details-marker { display:none; }
+        .balance-summary::after { content:'⌄'; color:var(--db-muted); font-size:1rem; transition:transform .2s ease; }
+        #balance-card[open] .balance-summary::after { transform:rotate(180deg); }
+        .balance-summary-main { min-width:0; }
+        html:not([data-theme="light"]) .balance-summary::after { color:#f4c648; }
+
+        .honor-loyalty-section { border:1px solid rgba(148,163,184,.2); border-radius:1.35rem; overflow:hidden; }
+        .honor-loyalty-section > summary { display:flex; align-items:center; justify-content:space-between; gap:.6rem; list-style:none; cursor:pointer; padding:.9rem 1rem; background:var(--db-surface-soft); }
+        .honor-loyalty-section > summary::-webkit-details-marker { display:none; }
+        .honor-loyalty-section > summary::after { content:'⌄'; color:var(--db-muted); font-size:1rem; transition:transform .2s ease; }
+        .honor-loyalty-section[open] > summary::after { transform:rotate(180deg); }
+        .honor-loyalty-summary-title { color:var(--db-ink); font:900 .76rem 'Cairo',sans-serif; }
+        .honor-loyalty-summary-meta { display:block; margin-top:.15rem; color:var(--db-muted); font:600 .6rem/1.4 'Cairo',sans-serif; }
+        .honor-loyalty-body { padding:.7rem; }
+        html:not([data-theme="light"]) .honor-loyalty-section { border-color:rgba(244,198,72,.22); }
+        html:not([data-theme="light"]) .honor-loyalty-section > summary::after { color:#f4c648; }
 
         .planning-card-collapsed .planning-body { display:none; }
-        .planning-reopen {
-            width:100%; border:0; border-radius:1rem; padding:.75rem 1rem; background:var(--db-surface-soft);
-            color:var(--db-accent); font:900 .72rem 'Cairo',sans-serif; cursor:pointer;
-        }
         .planning-head-actions { display:flex; align-items:center; gap:.35rem; }
         .planning-head-action {
             width:1.8rem; height:1.8rem; border:0; border-radius:50%; background:var(--db-surface-soft);
@@ -2598,6 +2624,240 @@
             flex:0 0 auto; min-width:8rem; white-space:nowrap; scroll-snap-align:start;
         }
         html:not([data-theme="light"]) .debts-tabs-heading span:last-child { color:#f4c648; }
+
+        /* الهوية النهائية: كريمي/بترولي نهارًا، أونيكس/ذهبي ليلًا */
+        :root {
+            --db-canvas:#fbf8ef; --db-surface:#fffdf8; --db-surface-soft:#f2ece0;
+            --db-ink:#17322e; --db-muted:#64756f; --db-accent:#0e655b;
+            --db-accent-soft:rgba(14,101,91,.11);
+        }
+        html:not([data-theme="light"]) {
+            --db-canvas:#0b1415; --db-surface:#122322; --db-surface-soft:#18312d;
+            --db-ink:#f5f0e5; --db-muted:#a5b4b0; --db-accent:#f4c648;
+            --db-accent-soft:rgba(244,198,72,.13);
+        }
+
+        /* رأس الصفحات: نفس الهوية، لكن بارتفاع أصغر حتى يصل المستخدم للمحتوى بسرعة */
+        #brand-bar {
+            flex-shrink:0; padding:.55rem 1rem .12rem !important;
+            background:color-mix(in srgb, var(--pm-surface-hi) 72%, transparent) !important;
+            backdrop-filter:blur(16px) saturate(135%);
+            -webkit-backdrop-filter:blur(16px) saturate(135%);
+        }
+        #brand-bar img { width:2.2rem !important; height:2.2rem !important; box-shadow:0 4px 12px rgba(14,101,91,.16); }
+        #brand-bar > div:first-child > span:not(#streak-badge) { font-size:1.38rem !important; }
+        #page-header {
+            flex-shrink:0; padding:.62rem 1rem .62rem !important; border-bottom:0 !important;
+            background:transparent !important;
+        }
+        #page-header #header-icon { width:2.55rem !important; height:2.55rem !important; border-radius:.9rem !important; font-size:1.05rem !important; }
+        #page-header #header-title { font-size:.9rem !important; }
+        #page-header #header-sub { font-size:.64rem !important; }
+        #page-header #header-badge { padding:.28rem .62rem !important; font-size:.63rem !important; }
+        #last-updated-wrap { flex-shrink:0; padding:0 1rem .28rem !important; margin-top:-.15rem !important; }
+        #last-updated-label { font-size:.55rem !important; }
+
+        /* تقليل المساحات الداخلية في كل الصفحات بدون ضغط البطاقات نفسها */
+        #tab-monthly, #tab-daily, #tab-debts, #tab-assistant, #tab-account {
+            padding:.82rem !important;
+        }
+        #tab-monthly > *, #tab-daily > *, #tab-debts > *, #tab-assistant > *, #tab-account > * {
+            scroll-margin-top:.75rem;
+        }
+
+        /* Bottom navigation: زجاج شفاف، خفيف، وثابت بصريًا في الوضعين */
+        #bottom-tab-nav {
+            position:relative; z-index:30; flex-shrink:0; gap:.18rem;
+            padding:.38rem .55rem calc(.46rem + env(safe-area-inset-bottom)) !important;
+            background:color-mix(in srgb, var(--pm-surface-hi) 70%, transparent) !important;
+            border-top:1px solid color-mix(in srgb, var(--pm-mint) 24%, transparent) !important;
+            box-shadow:0 -10px 28px color-mix(in srgb, var(--pm-canvas) 22%, transparent) !important;
+            backdrop-filter:blur(18px) saturate(145%);
+            -webkit-backdrop-filter:blur(18px) saturate(145%);
+        }
+        #bottom-tab-nav .tab-btn {
+            position:relative; min-width:0 !important; flex:1 1 0 !important;
+            gap:.22rem !important; padding:.08rem .12rem !important;
+            color:var(--pm-muted) !important; font-size:.62rem !important;
+            line-height:1.15 !important; white-space:nowrap;
+        }
+        #bottom-tab-nav .tab-btn[data-tab="categories"],
+        #bottom-tab-nav .tab-btn[data-tab="tips"],
+        #bottom-tab-nav .tab-btn[data-tab="reminders"] { display:none !important; }
+        #bottom-tab-nav .tab-icon-wrap {
+            width:2.12rem !important; height:2.12rem !important; border-radius:.78rem !important;
+            border:1px solid color-mix(in srgb, var(--pm-mint) 22%, transparent) !important;
+            background:transparent !important; opacity:.86; font-size:.92rem !important;
+            box-shadow:none !important; transform:none !important;
+        }
+        #bottom-tab-nav .tab-icon-wrap iconify-icon { font-size:1.12rem; }
+        #bottom-tab-nav .tab-btn:hover .tab-icon-wrap,
+        #bottom-tab-nav .tab-btn.active-tab .tab-icon-wrap {
+            opacity:1; transform:translateY(-1px) !important;
+            background:color-mix(in srgb, var(--pm-mint) 13%, transparent) !important;
+            border-color:color-mix(in srgb, var(--pm-mint) 45%, transparent) !important;
+        }
+        #bottom-tab-nav .tab-btn.active-tab { color:var(--pm-mint) !important; font-weight:900 !important; }
+        html:not([data-theme="light"]) #bottom-tab-nav .tab-btn.active-tab { color:#f4c648 !important; }
+        html:not([data-theme="light"]) #bottom-tab-nav .tab-btn.active-tab .tab-icon-wrap {
+            background:rgba(244,198,72,.12) !important; border-color:rgba(244,198,72,.42) !important;
+        }
+        #bottom-tab-nav .tab-btn.active-tab::before {
+            content:''; position:absolute; top:-.42rem; left:50%; width:1.35rem; height:2px;
+            transform:translateX(-50%); border-radius:999px; background:var(--pm-mint);
+        }
+        html:not([data-theme="light"]) #bottom-tab-nav .tab-btn.active-tab::before { background:#f4c648; }
+        @media (max-width:360px) {
+            #bottom-tab-nav { padding-inline:.28rem !important; }
+            #bottom-tab-nav .tab-icon-wrap { width:1.95rem !important; height:1.95rem !important; }
+            #bottom-tab-nav .tab-btn { font-size:.57rem !important; }
+        }
+
+         /* Magic capture: تفاعل صغير حول التسجيل/الكتابة من غير ما يزاحم المحتوى */
+         #quick-entry-card {
+             overflow:hidden !important;
+             isolation:isolate;
+         }
+         #quick-entry-card > *:not(#dabbar-celebrate-fx):not(#dabbar-magic-fx) {
+             position:relative;
+             z-index:1;
+         }
+         #dabbar-magic-fx {
+             position:absolute;
+             inset:0;
+             z-index:0;
+             pointer-events:none;
+             overflow:hidden;
+             opacity:0;
+             transition:opacity .25s ease;
+         }
+         #dabbar-magic-fx::before,
+         #dabbar-magic-fx::after {
+             content:'';
+             position:absolute;
+             width:11rem;
+             height:11rem;
+             border-radius:50%;
+             border:1px solid color-mix(in srgb, var(--pm-gold-bright) 34%, transparent);
+             filter:blur(.2px);
+             opacity:.55;
+         }
+         #dabbar-magic-fx::before {
+             inset-inline-start:-5rem;
+             top:-5.5rem;
+             animation:dabbarMagicOrbit 4.2s linear infinite;
+         }
+         #dabbar-magic-fx::after {
+             inset-inline-end:-5rem;
+             bottom:-6rem;
+             width:8rem;
+             height:8rem;
+             opacity:.35;
+             animation:dabbarMagicOrbit 3.1s linear infinite reverse;
+         }
+         #quick-entry-card.is-magic-processing #dabbar-magic-fx,
+         #quick-entry-card.is-magic-recording #dabbar-magic-fx {
+             opacity:1;
+         }
+         #quick-entry-card.is-magic-processing::after,
+         #quick-entry-card.is-magic-recording::after {
+             content:'';
+             position:absolute;
+             inset:0;
+             z-index:0;
+             pointer-events:none;
+             background:linear-gradient(110deg, transparent 24%, color-mix(in srgb, var(--pm-gold-bright) 10%, transparent) 48%, transparent 72%);
+             transform:translateX(-110%);
+             animation:dabbarMagicSweep 1.7s ease-in-out infinite;
+         }
+         .dabbar-magic-chip {
+             display:inline-flex;
+             align-items:center;
+             gap:.35rem;
+             padding:.28rem .56rem;
+             border-radius:999px;
+             border:1px solid color-mix(in srgb, var(--pm-gold-bright) 32%, transparent);
+             background:color-mix(in srgb, var(--pm-gold-bright) 9%, var(--pm-surface-hi));
+             color:var(--pm-muted);
+             font-size:.58rem;
+             font-weight:900;
+             white-space:nowrap;
+             transition:color .2s ease, border-color .2s ease, background .2s ease, transform .2s ease;
+         }
+         .dabbar-magic-chip-dot {
+             width:.38rem;
+             height:.38rem;
+             flex:0 0 .38rem;
+             border-radius:50%;
+             background:var(--pm-gold-bright);
+             box-shadow:0 0 0 0 color-mix(in srgb, var(--pm-gold-bright) 35%, transparent);
+         }
+         .dabbar-magic-chip.is-active {
+             color:var(--pm-ink);
+             border-color:color-mix(in srgb, var(--pm-gold-bright) 62%, transparent);
+             transform:translateY(-1px);
+         }
+         .dabbar-magic-chip.is-active .dabbar-magic-chip-dot {
+             animation:dabbarMagicDot 1s ease-in-out infinite;
+         }
+         html:not([data-theme="light"]) .dabbar-magic-chip {
+             background:rgba(244,198,72,.08);
+             color:#d8cda9;
+         }
+         html:not([data-theme="light"]) .dabbar-magic-chip.is-active { color:#fff4c2; }
+         @keyframes dabbarMagicSweep { 0% { transform:translateX(-110%); opacity:0; } 22% { opacity:1; } 72% { opacity:1; } 100% { transform:translateX(110%); opacity:0; } }
+         @keyframes dabbarMagicOrbit { from { transform:rotate(0deg) scale(.94); } to { transform:rotate(360deg) scale(1.06); } }
+         @keyframes dabbarMagicDot { 0%,100% { box-shadow:0 0 0 0 color-mix(in srgb, var(--pm-gold-bright) 35%, transparent); } 50% { box-shadow:0 0 0 .32rem color-mix(in srgb, var(--pm-gold-bright) 18%, transparent); } }
+
+         /* عائلة التوبات الأساسية: خمسة عناصر واضحة بدل شريط مزدحم */
+         #bottom-tab-nav {
+             border-radius:1.35rem 1.35rem 0 0;
+         }
+         #bottom-tab-nav .tab-btn {
+             border-radius:1rem;
+             min-height:3.45rem;
+         }
+         #bottom-tab-nav .tab-btn.active-tab {
+             background:color-mix(in srgb, var(--pm-mint) 6%, transparent);
+         }
+         html:not([data-theme="light"]) #bottom-tab-nav .tab-btn.active-tab {
+             background:rgba(244,198,72,.06);
+         }
+         @media (max-width:420px) {
+             #bottom-tab-nav .tab-btn { min-height:3.2rem; }
+             .dabbar-magic-chip { font-size:.55rem; padding:.25rem .48rem; }
+         }
+
+         /* ============ الشريط السفلي الجديد: بار عائم (pill) بألوان الموقع في الوضعين ============ */
+         #bottom-tab-nav {
+             margin:0 .55rem calc(.55rem + env(safe-area-inset-bottom)) !important;
+             padding:.42rem .5rem .42rem !important;
+             border-radius:1.6rem !important;
+             border:1px solid color-mix(in srgb, var(--pm-gold-bright) 24%, transparent) !important;
+             background:color-mix(in srgb, var(--pm-surface-hi) 92%, transparent) !important;
+             box-shadow:0 10px 26px color-mix(in srgb, var(--pm-canvas) 45%, transparent), 0 0 0 1px color-mix(in srgb, var(--pm-gold-bright) 8%, transparent) inset !important;
+         }
+         #bottom-tab-nav .tab-btn.active-tab::before { display:none !important; }
+         #bottom-tab-nav .tab-icon-wrap {
+             width:2.3rem !important; height:2.3rem !important; border-radius:999px !important;
+             border:1px solid transparent !important; background:transparent !important;
+         }
+         #bottom-tab-nav .tab-btn:hover .tab-icon-wrap {
+             background:color-mix(in srgb, var(--pm-gold-bright) 10%, transparent) !important;
+             border-color:color-mix(in srgb, var(--pm-gold-bright) 30%, transparent) !important;
+         }
+         #bottom-tab-nav .tab-btn.active-tab .tab-icon-wrap {
+             background:linear-gradient(145deg, var(--pm-gold-bright), var(--pm-gold)) !important;
+             border-color:transparent !important;
+             box-shadow:0 4px 12px color-mix(in srgb, var(--pm-gold-bright) 45%, transparent) !important;
+             transform:translateY(-1px) !important;
+         }
+         html:not([data-theme="light"]) #bottom-tab-nav .tab-icon-wrap { color:var(--pm-muted) !important; }
+         html:not([data-theme="light"]) #bottom-tab-nav .tab-btn.active-tab .tab-icon-wrap { color:#1a1406 !important; }
+         html[data-theme="light"] #bottom-tab-nav .tab-btn.active-tab .tab-icon-wrap { color:#f4fbf8 !important; }
+         #bottom-tab-nav .tab-btn.active-tab { background:transparent !important; }
+         html:not([data-theme="light"]) #bottom-tab-nav .tab-btn.active-tab { color:var(--pm-gold-bright) !important; }
+         html[data-theme="light"] #bottom-tab-nav .tab-btn.active-tab { color:var(--pm-gold-bright) !important; }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col overflow-hidden">
@@ -2615,7 +2875,7 @@
     <div class="w-full max-w-4xl mx-auto bg-slate-900 flex-1 flex flex-col shadow-2xl overflow-hidden md:my-4 md:rounded-3xl md:border md:border-slate-800">
 
         <!-- Brand Bar -->
-        <div class="bg-slate-900/90 px-5 pt-4 pb-1 flex items-center justify-between">
+        <div id="brand-bar" class="bg-slate-900/90 px-5 pt-4 pb-1 flex items-center justify-between">
             <div class="flex items-center gap-2">
                 <img src="./icons/icon-192.png" alt="دبّر" class="w-8 h-8 rounded-xl">
                 <span class="text-2xl font-black" style="font-family:'Cairo',sans-serif; letter-spacing:-0.5px; background:linear-gradient(90deg,var(--pm-gold-bright),var(--pm-gold)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;">دبّر</span>
@@ -2627,7 +2887,7 @@
         </div>
 
         <!-- Header Bar -->
-        <div class="bg-slate-900/90 border-b border-slate-800/80 p-5 flex items-center justify-between">
+        <div id="page-header" class="bg-slate-900/90 border-b border-slate-800/80 p-5 flex items-center justify-between">
             <div class="flex items-center gap-3">
                 <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-slate-950 font-black text-xl shadow-lg shadow-emerald-500/20" id="header-icon">📊</div>
                 <div>
@@ -2642,7 +2902,7 @@
                 </div>
             </div>
         </div>
-        <div class="px-5 -mt-1 pb-1 text-left">
+        <div id="last-updated-wrap" class="px-5 -mt-1 pb-1 text-left">
             <span class="text-[9px] text-slate-600" id="last-updated-label"></span>
         </div>
 
@@ -2680,7 +2940,8 @@
 
             <section id="quick-entry-card" class="relative bg-gradient-to-br from-emerald-50 via-white to-teal-50 border border-emerald-200 rounded-[28px] p-4 space-y-3 shadow-[0_12px_35px_rgba(16,185,129,.14)] dark:bg-slate-950/60 dark:from-slate-950/60 dark:via-slate-950/60 dark:to-slate-900 dark:border-slate-800" aria-label="إضافة عملية مالية">
                 <div id="dabbar-celebrate-fx" aria-hidden="true"></div>
-                <div class="flex items-center justify-between"><div><span class="quick-entry-eyebrow">ابدأ من هنا</span><h3 class="text-base font-black text-slate-900 dark:text-slate-100">سجّل عمليتك الآن</h3><p class="text-[11px] text-slate-600 dark:text-slate-400">صوت أو كتابة أو صوّر الفاتورة — في ثواني</p></div><span class="text-2xl" aria-hidden="true">✨</span></div>
+                <div id="dabbar-magic-fx" aria-hidden="true"></div>
+                <div class="flex items-center justify-between gap-3"><div><span class="quick-entry-eyebrow">ابدأ من هنا</span><div class="flex items-center gap-2"><h3 class="text-base font-black text-slate-900 dark:text-slate-100">سجّل عمليتك الآن</h3><span id="dabbar-magic-chip" class="dabbar-magic-chip"><span class="dabbar-magic-chip-dot"></span><span id="dabbar-magic-label">جاهز يفهمها</span></span></div><p class="text-[11px] text-slate-600 dark:text-slate-400">صوت أو كتابة أو صوّر الفاتورة — في ثواني</p></div><span class="text-2xl" aria-hidden="true">✨</span></div>
                 <div id="quick-workspace-switcher" class="quick-workspace-switcher" role="tablist" aria-label="أقسام التسجيل السريع">
                     <button type="button" class="quick-workspace-btn active" data-quick-workspace="expense" role="tab" aria-selected="true">✍️ سجل مصروفك بسرعة</button>
                     <button type="button" class="quick-workspace-btn" data-quick-workspace="portfolio" role="tab" aria-selected="false">📈 المحفظة الاستثمارية</button>
@@ -2835,19 +3096,19 @@
             <!-- الحركات البنكية Bottom Sheet + مودال المراجعة اتنقلوا لآخر الصفحة (قبل </body>) عشان يبقوا برة أي كونتينر عنده overflow/transform ممكن يكسر الـ position:fixed بتاعهم -->
 
             <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3" id="monthly-categories-card">
-                <div id="balance-card" class="hidden rounded-[1.35rem] border border-emerald-500/20 bg-emerald-500/[0.045] p-3.5 space-y-3">
-                    <div class="flex items-start justify-between gap-3">
-                        <div class="min-w-0">
+                <details id="balance-card" class="hidden rounded-[1.35rem] border border-emerald-500/20 bg-emerald-500/[0.045] p-3.5 space-y-3">
+                    <summary class="balance-summary">
+                        <div class="balance-summary-main">
                             <div class="flex items-center gap-1.5"><span class="text-sm">⚖️</span><h4 class="text-sm font-black text-slate-100">توازن مصاريفك</h4></div>
-                            <p class="mt-1 text-[10px] leading-relaxed text-slate-400">كل رقم قدامه المستهدف بتاعه</p>
+                            <p class="mt-1 text-[10px] leading-relaxed text-slate-400">اضغط لعرض مقارنة احتياجاتك ورغباتك وادخارك</p>
                         </div>
                         <div class="shrink-0 rounded-xl bg-emerald-500/10 px-2.5 py-1.5 text-left"><span class="block text-[9px] text-slate-500">دخلك الشهري</span><strong id="balance-income" class="text-xs font-black text-emerald-300">—</strong></div>
-                    </div>
+                    </summary>
                     <div id="balance-bars" class="space-y-2.5"></div>
                     <div id="balance-insight" class="rounded-xl border border-emerald-500/15 bg-emerald-500/10 px-3 py-2 text-[10px] font-bold leading-relaxed text-emerald-300">الحسبة ببساطة: المستهدف = نسبة من دخلك، والفعلي = اللي صرفته</div>
 
                     <p class="text-center text-[9px] text-slate-500">غيّر أي فئة من احتياجات لرغبات أو العكس</p>
-                </div>
+                </details>
                 <h4 class="text-xs font-bold text-slate-300">أكثر فئات تم الصرف فيها:</h4>
                 <div class="space-y-2.5 text-xs" id="monthly-categories-list">
                     <p class="text-slate-500">سجّل أول عملية وهتلاقي هنا أكتر فئة بتصرف فيها.</p>
@@ -2911,12 +3172,14 @@
 
             <!-- عداد "المرتب لسه فاضل كام" — بيظهر بس لو المستخدم مسجل ميزانية شهرية -->
             <!-- كارت فرص التوفير — بيتحمّل لوحده أول ما تفتح تبويب يومي -->
-            <div id="savings-opportunities-card" class="hidden relative overflow-hidden rounded-3xl p-4 shadow-lg dabbar-savings-card">
+            <details id="savings-opportunities-card" class="hidden relative overflow-hidden rounded-3xl p-4 shadow-lg dabbar-savings-card savings-opportunities-details">
                 <div class="dabbar-metric-glow" aria-hidden="true"></div>
-                <div class="relative flex items-center gap-1.5 text-[11px] font-bold dabbar-metric-label"><span>💡</span><span>فرص التوفير الشهر ده</span></div>
-                <p class="relative text-base font-black dabbar-metric-title mt-1.5 leading-relaxed">دَبّر لقى لك <span id="savings-total" class="dabbar-metric-value-accent">—</span> ممكن توفرهم</p>
-                <div id="savings-breakdown" class="relative mt-2.5 space-y-1.5"></div>
-            </div>
+                <summary class="relative text-[11px] font-bold dabbar-metric-label"><span>💡</span><span>فرص التوفير الشهر ده</span></summary>
+                <div class="relative savings-opportunities-body">
+                    <p class="text-base font-black dabbar-metric-title leading-relaxed">دَبّر لقى لك <span id="savings-total" class="dabbar-metric-value-accent">—</span> ممكن توفرهم</p>
+                    <div id="savings-breakdown" class="space-y-1.5"></div>
+                </div>
+            </details>
 
             <div id="salary-countdown-card" class="hidden dabbar-metric-card relative overflow-hidden rounded-3xl p-4 space-y-3 shadow-lg">
                 <div class="dabbar-metric-glow" aria-hidden="true"></div>
@@ -3547,20 +3810,27 @@
                 </div>
             </div>
 
-            <div id="honor-board-card" class="hidden">
-                <p class="text-[11px] text-slate-500 text-center mb-2" id="honor-board-subscribers-line">—</p>
-                <div id="honor-board-my-card" class="honor-card relative overflow-hidden rounded-3xl border border-slate-800 shadow-lg p-6 text-center space-y-3">
-                    <div class="w-16 h-16 rounded-full mx-auto flex items-center justify-center text-xl font-black honor-mini-avatar" id="honor-board-avatar">—</div>
-                    <div>
-                        <h3 class="text-base font-bold text-slate-100" id="honor-board-name">—</h3>
-                        <span class="inline-flex items-center gap-1 text-[11px] font-bold px-3 py-1 rounded-full mt-1.5 bg-amber-400/10 text-amber-300 border border-amber-400/30" id="honor-board-badge">—</span>
+            <details id="honor-board-card" class="hidden honor-loyalty-section">
+                <summary>
+                    <span>
+                        <span class="honor-loyalty-summary-title">🏅 الولاء</span>
+                        <span class="honor-loyalty-summary-meta" id="honor-board-subscribers-line">—</span>
+                    </span>
+                </summary>
+                <div class="honor-loyalty-body">
+                    <div id="honor-board-my-card" class="honor-card relative overflow-hidden rounded-3xl border border-slate-800 shadow-lg p-6 text-center space-y-3">
+                        <div class="w-16 h-16 rounded-full mx-auto flex items-center justify-center text-xl font-black honor-mini-avatar" id="honor-board-avatar">—</div>
+                        <div>
+                            <h3 class="text-base font-bold text-slate-100" id="honor-board-name">—</h3>
+                            <span class="inline-flex items-center gap-1 text-[11px] font-bold px-3 py-1 rounded-full mt-1.5 bg-amber-400/10 text-amber-300 border border-amber-400/30" id="honor-board-badge">—</span>
+                        </div>
+                        <p class="text-xs leading-7 text-slate-300" id="honor-board-message">—</p>
+                        <button type="button" id="honor-board-share-btn" class="inline-flex items-center gap-1.5 font-bold text-xs px-5 py-3 rounded-full bg-gradient-to-l from-amber-400 to-amber-300 text-amber-950">
+                            مشاركة شارتي <span aria-hidden="true">↗</span>
+                        </button>
                     </div>
-                    <p class="text-xs leading-7 text-slate-300" id="honor-board-message">—</p>
-                    <button type="button" id="honor-board-share-btn" class="inline-flex items-center gap-1.5 font-bold text-xs px-5 py-3 rounded-full bg-gradient-to-l from-amber-400 to-amber-300 text-amber-950">
-                        مشاركة شارتي <span aria-hidden="true">↗</span>
-                    </button>
                 </div>
-            </div>
+            </details>
 
             <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 flex items-center justify-between gap-3 cursor-pointer active:opacity-70 transition" id="account-telegram-card">
                 <div class="flex items-center gap-3">
@@ -4002,13 +4272,13 @@
         </div>
 
         <!-- Bottom Tab Navigation -->
-        <div class="bg-slate-900 border-t border-slate-800/80 px-2 pt-2 pb-3 flex items-center justify-around">
+        <div id="bottom-tab-nav" class="bg-slate-900 border-t border-slate-800/80 px-2 pt-2 pb-3 flex items-center justify-around" role="navigation" aria-label="التنقل الرئيسي">
             <button class="tab-btn active-tab flex flex-col items-center gap-1 px-3 py-1 text-slate-500 text-[10px] font-semibold" data-tab="monthly" data-title="تقرير نهاية الشهر" data-sub="● تقييم أداء الشهر" data-icon="📊" data-badge="—">
-                <span class="tab-icon-wrap w-9 h-9 rounded-xl border border-transparent flex items-center justify-center text-base">📊</span>
+                <span class="tab-icon-wrap w-9 h-9 rounded-xl border border-transparent flex items-center justify-center text-base"><iconify-icon icon="ph:chart-bar-duotone" aria-hidden="true"></iconify-icon></span>
                 شهري
             </button>
             <button class="tab-btn flex flex-col items-center gap-1 px-3 py-1 text-slate-500 text-[10px] font-semibold" data-tab="daily" data-title="تقرير اليوم" data-sub="● النهاردة" data-icon="🗓️" data-badge="—">
-                <span class="tab-icon-wrap w-9 h-9 rounded-xl border border-transparent flex items-center justify-center text-base">🗓️</span>
+                <span class="tab-icon-wrap w-9 h-9 rounded-xl border border-transparent flex items-center justify-center text-base"><iconify-icon icon="ph:calendar-blank-duotone" aria-hidden="true"></iconify-icon></span>
                 يومي
             </button>
             <button class="tab-btn flex flex-col items-center gap-1 px-3 py-1 text-slate-500 text-[10px] font-semibold" data-tab="categories" data-title="التصنيفات" data-sub="● صرف الشهر بالتفصيل" data-icon="🧾" data-badge="—">
@@ -4020,7 +4290,7 @@
                 نصايح
             </button>
             <button class="tab-btn flex flex-col items-center gap-1 px-3 py-1 text-slate-500 text-[10px] font-semibold" data-tab="debts" data-title="الديون والسلف" data-sub="● متابعة اللي ليك واللي عليك" data-icon="🤝" data-badge="—">
-                <span class="tab-icon-wrap w-9 h-9 rounded-xl border border-transparent flex items-center justify-center text-base">🤝</span>
+                <span class="tab-icon-wrap w-9 h-9 rounded-xl border border-transparent flex items-center justify-center text-base"><iconify-icon icon="ph:handshake-duotone" aria-hidden="true"></iconify-icon></span>
                 ديون
             </button>
             <button class="tab-btn relative flex flex-col items-center gap-1 px-3 py-1 text-slate-500 text-[10px] font-semibold" data-tab="reminders" data-title="تذكيراتي" data-sub="● فاكرك بمواعيدك المهمة" data-icon="🔔" data-badge="—">
@@ -4029,7 +4299,7 @@
                 تذكيرات
             </button>
             <button class="tab-btn flex flex-col items-center gap-1 px-3 py-1 text-slate-500 text-[10px] font-semibold" data-tab="assistant" data-title="دبّر الذكي" data-sub="● مساعدك المالي الشخصي" data-icon="✨" data-badge="جديد">
-                <span class="tab-icon-wrap w-9 h-9 rounded-xl border border-transparent flex items-center justify-center text-base">✨</span>
+                <span class="tab-icon-wrap w-9 h-9 rounded-xl border border-transparent flex items-center justify-center text-base"><iconify-icon icon="ph:sparkle-duotone" aria-hidden="true"></iconify-icon></span>
                 مساعد
             </button>
             <button class="tab-btn relative flex flex-col items-center gap-1 px-3 py-1 text-slate-500 text-[10px] font-semibold" data-tab="account" data-title="حسابي" data-sub="● بياناتك وإعداداتك" data-icon="👤" data-badge="حسابي">
@@ -8264,9 +8534,20 @@
         }
         let quickStatusTimer = null;
         let quickStatusCycleTimer = null;
+        function setQuickMagic(state = 'idle') {
+            const card = document.getElementById('quick-entry-card');
+            const chip = document.getElementById('dabbar-magic-chip');
+            const label = document.getElementById('dabbar-magic-label');
+            if (!card || !chip || !label) return;
+            card.classList.toggle('is-magic-processing', state === 'processing');
+            card.classList.toggle('is-magic-recording', state === 'recording');
+            chip.classList.toggle('is-active', state === 'processing' || state === 'recording');
+            label.textContent = state === 'processing' ? 'بيفهمها...' : state === 'recording' ? 'سامعك...' : state === 'success' ? 'اتحفظت' : 'جاهز يفهمها';
+        }
         function quickStatus(message, kind = 'normal') {
             const el = document.getElementById('quick-entry-status');
             if (!el) return;
+            setQuickMagic(kind === 'processing' ? 'processing' : kind === 'success' ? 'success' : 'idle');
             if (kind !== 'processing') { clearInterval(quickStatusCycleTimer); quickStatusCycleTimer = null; }
             el.className = `min-h-4 text-center text-[11px] ${kind === 'error' ? 'text-rose-500' : kind === 'success' ? 'text-emerald-600' : kind === 'processing' ? 'dabbar-status-processing' : 'text-slate-500'}`;
             // ============ أنيميشن "سطر بيتمسح ويتغير بسرعة" أثناء المعالجة — كل رسالة عنصر DOM جديد فبتتحرك تلقائي كل مرة ============
@@ -8799,6 +9080,7 @@
                 quickShow('quick-entry-voice-preview', false);
                 quickShow('quick-entry-recording', true);
                 quickStatus('اتكلم بوضوح: المبلغ ثم الفئة.');
+                setQuickMagic('recording');
                 quickEntryTimer = setInterval(() => {
                     quickEntrySeconds++;
                     const el = document.getElementById('quick-entry-recording-time');
@@ -10035,9 +10317,9 @@
         /* ============================================================
            تحسينات واجهة لوحة دبّر:
            - نقل المحفظة والحركات البنكية داخل مساحة التسجيل السريع
-           - منزلق الحصالة / المتبقي من الشهر
+           - بطاقات يومي القابلة للضغط (المتبقي من الشهر والحصالة)
            - لوحة تنقّل مختصرة داخل مساعد دبّر
-           - دخل وميزانية قابلة للطي أو الإخفاء مع زر استرجاع
+           - دخل وميزانية قابلة للطي بدون حذف أو إخفاء
            ============================================================ */
         (function setupDabbarWorkspaceNavigation() {
             function setupQuickWorkspace() {
@@ -10083,39 +10365,17 @@
                 shell.id = 'daily-focus-carousel';
                 shell.setAttribute('aria-label', 'المتبقي من الشهر وحصالة اليوم');
                 shell.innerHTML = `
-                    <div class="daily-focus-nav" role="tablist" aria-label="تنقّل اليوم">
-                        <button type="button" class="daily-focus-btn active" data-focus-index="0" role="tab" aria-selected="true">💰 المتبقي من الشهر</button>
-                        <button type="button" class="daily-focus-btn" data-focus-index="1" role="tab" aria-selected="false">🐷 حصالة اليوم</button>
-                    </div>
-                    <div class="daily-focus-viewport">
-                        <div class="daily-focus-track">
-                            <div class="daily-focus-slide" data-focus-slide="0"></div>
-                            <div class="daily-focus-slide" data-focus-slide="1"></div>
-                        </div>
-                    </div>`;
+                    <details class="daily-focus-details">
+                        <summary>💰 المتبقي من الشهر</summary>
+                        <div class="daily-focus-details-body" data-focus-panel="salary"></div>
+                    </details>
+                    <details class="daily-focus-details">
+                        <summary>🐷 حصالة اليوم</summary>
+                        <div class="daily-focus-details-body" data-focus-panel="piggy"></div>
+                    </details>`;
                 daily.insertBefore(shell, salary);
-                const slides = [...shell.querySelectorAll('.daily-focus-slide')];
-                slides[0].append(salary, salaryEmpty);
-                slides[1].append(piggy, piggyEmpty);
-                const track = shell.querySelector('.daily-focus-track');
-                const buttons = [...shell.querySelectorAll('.daily-focus-btn')];
-                let index = 0;
-                const goTo = (next) => {
-                    index = Math.max(0, Math.min(1, next));
-                    track.style.transform = `translateX(-${index * 100}%)`;
-                    buttons.forEach((button, buttonIndex) => {
-                        const active = buttonIndex === index;
-                        button.classList.toggle('active', active);
-                        button.setAttribute('aria-selected', String(active));
-                    });
-                };
-                buttons.forEach((button) => button.addEventListener('click', () => goTo(Number(button.dataset.focusIndex))));
-                let startX = 0;
-                shell.addEventListener('touchstart', (event) => { startX = event.touches[0]?.clientX || 0; }, { passive: true });
-                shell.addEventListener('touchend', (event) => {
-                    const endX = event.changedTouches[0]?.clientX || startX;
-                    if (Math.abs(endX - startX) > 42) goTo(index + (endX < startX ? 1 : -1));
-                }, { passive: true });
+                shell.querySelector('[data-focus-panel="salary"]').append(salary, salaryEmpty);
+                shell.querySelector('[data-focus-panel="piggy"]').append(piggy, piggyEmpty);
                 daily.dataset.focusReady = 'true';
             }
 
@@ -10145,36 +10405,24 @@
                 const actions = document.createElement('div');
                 actions.className = 'planning-head-actions';
                 actions.innerHTML = `
-                    <button type="button" class="planning-head-action" data-planning-action="collapse" aria-label="طي الدخل والميزانية">⌃</button>
-                    <button type="button" class="planning-head-action" data-planning-action="close" aria-label="إخفاء الدخل والميزانية">×</button>`;
+                    <button type="button" class="planning-head-action" data-planning-action="collapse" aria-label="طي أو فتح الدخل والميزانية">⌃</button>`;
                 header.appendChild(actions);
-
-                const reopen = document.createElement('button');
-                reopen.type = 'button';
-                reopen.id = 'planning-reopen';
-                reopen.className = 'planning-reopen hidden';
-                reopen.textContent = '🎯 إظهار الدخل والميزانية';
-                card.after(reopen);
 
                 const collapseButton = actions.querySelector('[data-planning-action="collapse"]');
                 const savedState = localStorage.getItem('dabbar-planning-card-state');
                 if (savedState !== 'expanded') {
                     card.classList.add('planning-card-collapsed');
                     collapseButton.textContent = '⌄';
+                    collapseButton.setAttribute('aria-expanded', 'false');
+                } else {
+                    collapseButton.setAttribute('aria-expanded', 'true');
                 }
                 collapseButton.addEventListener('click', () => {
                     card.classList.toggle('planning-card-collapsed');
                     const collapsed = card.classList.contains('planning-card-collapsed');
                     collapseButton.textContent = collapsed ? '⌄' : '⌃';
+                    collapseButton.setAttribute('aria-expanded', String(!collapsed));
                     localStorage.setItem('dabbar-planning-card-state', collapsed ? 'collapsed' : 'expanded');
-                });
-                actions.querySelector('[data-planning-action="close"]').addEventListener('click', () => {
-                    card.classList.add('hidden');
-                    reopen.classList.remove('hidden');
-                });
-                reopen.addEventListener('click', () => {
-                    card.classList.remove('hidden');
-                    reopen.classList.add('hidden');
                 });
                 card.dataset.navigationReady = 'true';
             }

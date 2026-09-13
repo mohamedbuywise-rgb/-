@@ -762,16 +762,19 @@ async function handleIncomingText(text, userId, chatId, { fromVoice = false } = 
   const parsedTransactions = (await classifyMessage(text)).map((item) => normalizeFinancialTransaction(item, text));
   let transactions = reconcileSingleTransaction(correctDebtDirections(text, parsedTransactions), text);
   // fallback آمن للجمل الصوتية القصيرة مثل "غدا مية جنيه" إذا أعاد المصنّف unknown.
-  if (!transactions.some((t) => (t?.type === 'expense' || t?.type === 'debt') && Number(t.amount) > 0)) {
+  if (!transactions.some((t) => (t?.type === 'expense' || t?.type === 'purchase' || t?.type === 'asset' || t?.type === 'debt') && Number(t.amount) > 0)) {
     const deterministicExpense = extractDeterministicExpense(text);
     if (deterministicExpense) transactions = [deterministicExpense];
   }
   let successCount = 0;
   let hadPortfolioAttempt = false;
-  const expenseCount = transactions.filter((t) => t.type === 'expense' && t.amount).length;
+  const expenseCount = transactions.filter((t) => (t.type === 'expense' || t.type === 'purchase' || t.type === 'asset') && t.amount).length;
 
   for (const result of transactions) {
-    if (result.type === 'expense' && result.amount) {
+    // "purchase" و"asset" بيتسجلوا هنا كمصروف حقيقي زي "expense" بالظبط — لو اتسجلوا عن طريق
+    // recordFinancialEvent (في financial_events) كانوا بيختفوا من مصاريف اليوم/الأسبوع/الشهر
+    // لأن كل شاشات المصاريف بتقرا من جدول expenses بس.
+    if ((result.type === 'expense' || result.type === 'purchase' || result.type === 'asset') && result.amount) {
       // لو الرسالة/الفويس فيها أكتر من مصروف مع بعض، منستخدمش النص الأصلي الكامل كـ fallback لوصف
       // كل مصروف على حدة — كان ده بالظبط سبب إن كل المصاريف في الرسالة الواحدة بتظهر في الداشبورد
       // بنفس الوصف الطويل (نص الرسالة كله) بدل ما كل مصروف يوصف بنفسه. لو مصروف واحد بس، لسه بنستخدم

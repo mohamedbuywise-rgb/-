@@ -413,7 +413,7 @@ async function handleEntryDraft(userId, body, res) {
   const reconciledTransactions = reconcileSingleTransaction(correctDebtDirections(text, normalizedTransactions), text);
   // العميل مبيختارش دخل/مصروف يدويًا في الإدخال السريع — دبّر يصنّف كل عملية من كلامه مباشرة (classifyMessage)
   const transactions = reconciledTransactions;
-  let validTx = transactions.filter((item) => ((isFinancialEventType(item?.type) || item?.type === 'expense') || item?.type === 'debt' || item?.type === 'portfolio_buy' || item?.type === 'portfolio_sell') && Number.isFinite(Number(item.amount)) && Number(item.amount) > 0 && (item.type !== 'debt' || item.person));
+  let validTx = transactions.filter((item) => ((isFinancialEventType(item?.type) || item?.type === 'expense' || item?.type === 'purchase' || item?.type === 'asset') || item?.type === 'debt' || item?.type === 'portfolio_buy' || item?.type === 'portfolio_sell') && Number.isFinite(Number(item.amount)) && Number(item.amount) > 0 && (item.type !== 'debt' || item.person));
   // لو التصنيف الذكي لم يلتقط جملة قصيرة مثل "غدا 100 جنيه"، نستخدم استخراجًا حتميًا
   // مقيدًا بعلامات المصروف، فلا نخلط جمل الديون أو الأسئلة مع مصروفات وهمية.
   if (!validTx.length) {
@@ -468,9 +468,14 @@ async function saveOneDraft(userId, draft) {
   const amount = Number(draft.amount);
   if (!Number.isFinite(amount) || amount <= 0 || amount > 100000000) return { ok: false, error: 'المبلغ غير صحيح.' };
 
-  if (draft.type === 'expense') {
+  // ============ مصروف عادي / شراء شيء محدد (purchase) / شراء أصل شخصي (asset) — الثلاثة بيتسجلوا كمصروف حقيقي ============
+  // "purchase" و"asset" اتشالوا من مسار financial_events عمدًا (كانوا بيختفوا من كل شاشات المصاريف
+  // لأنها بتقرا من جدول expenses بس) — دلوقتي بيتسجلوا هنا زي أي مصروف عادي فيظهروا في مصاريف
+  // النهاردة/الأسبوع/الشهر زي المفروض.
+  if (draft.type === 'expense' || draft.type === 'purchase' || draft.type === 'asset') {
     const currency_code = String(draft.currency_code || detectCurrency(draft.raw_text || draft.sourceText || '')).toUpperCase();
-    const { data, error } = await supabase.from('expenses').insert({ telegram_user_id: userId, amount, currency_code, category: String(draft.category || 'مصروف عام').slice(0, 80), description: String(draft.note || draft.sourceText || '').slice(0, 500) }).select('id, amount, currency_code, category, description, created_at').single();
+    const description = String(draft.note || (draft.item ? `${draft.item}` : '') || draft.sourceText || '').slice(0, 500);
+    const { data, error } = await supabase.from('expenses').insert({ telegram_user_id: userId, amount, currency_code, category: String(draft.category || 'مصروف عام').slice(0, 80), description }).select('id, amount, currency_code, category, description, created_at').single();
     if (error) { console.error('entry_confirm expense error:', JSON.stringify(error)); return { ok: false, error: 'تعذر حفظ المصروف.' }; }
     await maybeSendBudgetAlert(userId).catch((pushError) => console.error('entry_confirm budget push failed:', pushError));
     return { ok: true, type: 'expense', record: data, message: `تم تسجيل مصروف ${data.amount} ${currencyLabel(data.currency_code)} في ${data.category}.` };

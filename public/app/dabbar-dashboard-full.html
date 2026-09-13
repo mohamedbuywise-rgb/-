@@ -2598,13 +2598,17 @@
         .account-organization-section > summary::after { content:'⌄'; margin-right:auto; color:var(--db-muted); font-size:1rem; transition:transform .2s ease; }
         .account-organization-section[open] > summary::after { transform:rotate(180deg); }
         .account-section-icon {
-            display:flex; align-items:center; justify-content:center; width:2.2rem; height:2.2rem;
+            position:relative; display:flex; align-items:center; justify-content:center; width:2.2rem; height:2.2rem;
             border-radius:.8rem; background:rgba(244,198,72,.1); border:1px solid rgba(244,198,72,.2); font-size:1.05rem;
         }
         .account-section-title { color:var(--db-ink); font:900 .76rem 'Cairo',sans-serif; }
         .account-section-subtitle { margin-top:.18rem; color:var(--db-muted); font:600 .62rem/1.4 'Cairo',sans-serif; }
         .account-section-body { display:grid; gap:.8rem; padding:0 1rem 1rem; }
         .account-section-body > * { margin:0 !important; }
+        .assistant-back-btn {
+            display:flex; align-items:center; gap:.35rem; background:var(--db-surface-soft); border:1px solid rgba(148,163,184,.22);
+            color:var(--db-ink); font:800 .72rem 'Cairo',sans-serif; padding:.55rem .9rem; border-radius:.9rem; cursor:pointer;
+        }
         .account-organization-section[open] > summary { border-bottom:1px solid rgba(148,163,184,.14); }
         html:not([data-theme="light"]) .account-organization-section,
         html:not([data-theme="light"]) #daily-details { border-color:rgba(244,198,72,.22); }
@@ -3340,6 +3344,8 @@
         <!-- ===================== TAB: CATEGORIES ===================== -->
         <div class="tab-content p-5 space-y-4" id="tab-categories">
 
+            <button type="button" class="assistant-back-btn" data-back-to-tab="assistant">→ رجوع لمساعد</button>
+
             <div class="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-4 text-center space-y-1 shadow-lg">
                 <span class="text-xs text-slate-400 font-semibold block">أكتر فئة بتاخد من ميزانيتك</span>
                 <h3 class="text-2xl font-black text-slate-100" id="top-category-name">—</h3>
@@ -3373,6 +3379,8 @@
 
         <!-- ===================== TAB: TIPS ===================== -->
         <div class="tab-content p-5 space-y-3" id="tab-tips">
+
+            <button type="button" class="assistant-back-btn" data-back-to-tab="assistant">→ رجوع لمساعد</button>
 
             <div class="bg-gradient-to-br from-emerald-950/60 to-slate-900 border border-emerald-500/30 rounded-3xl p-4 text-center space-y-1 shadow-lg mb-1">
                 <span class="text-xs text-emerald-400 font-semibold block">نظرة على صرفك</span>
@@ -3536,6 +3544,8 @@
 
         <!-- ===================== TAB: REMINDERS ===================== -->
         <div class="tab-content p-5 space-y-4" id="tab-reminders">
+            <button type="button" class="assistant-back-btn" data-back-to-tab="assistant">→ رجوع لمساعد</button>
+
             <div id="reminders-telegram-banner" class="hidden bg-amber-500/10 border border-amber-500/30 rounded-2xl p-3.5 flex items-center justify-between gap-3">
                 <div class="min-w-0"><p class="text-xs font-bold text-amber-300">التذكيرات هتوصلك رسالة تليجرام في وقتها</p><p class="text-[10.5px] text-amber-400/80 mt-0.5">لسه مربوطش تليجرام — اربطه عشان توصلك برة التطبيق</p></div>
                 <button type="button" id="reminders-link-telegram-btn" class="shrink-0 rounded-xl bg-amber-500 px-3 py-2 text-[11px] font-black text-slate-950">اربط تليجرام</button>
@@ -5408,11 +5418,15 @@
 
         function inAppNotificationsKey() { return `dabbar-in-app-notifications-${currentUser?.id || 'guest'}`; }
         function updateAccountNotificationBadge(count) {
-            const badge = document.getElementById('account-notification-badge');
-            if (!badge) return;
             const unread = Math.max(0, Number(count) || 0);
-            badge.textContent = unread > 9 ? '9+' : String(unread);
-            badge.style.display = unread ? 'grid' : 'none';
+            const label = unread > 9 ? '9+' : String(unread);
+            // بادج تبويب "حسابي" في الشريط السفلي + بادج كارت "مركز الإشعارات" نفسه وهو مقفول — نفس العدد في المكانين.
+            ['account-notification-badge', 'account-notifications-section-badge'].forEach((id) => {
+                const badge = document.getElementById(id);
+                if (!badge) return;
+                badge.textContent = label;
+                badge.style.display = unread ? 'grid' : 'none';
+            });
         }
         function renderInAppNotifications(data = {}) {
             const list = document.getElementById('in-app-notifications-list');
@@ -9924,7 +9938,7 @@
                 subline.textContent = 'خلال الـ3 أيام دي هتشوف بنفسك إزاي دبّر بيوفّرلك وقت وبيخليك متابع كل جنيه بيتصرف — من غير ما تفتح جدول ولا تكتب رقم بإيدك. اشترك دلوقتي عشان الخدمة متتقطعش.';
             } else {
                 headline.textContent = '⏳ خلصت أيام التجربة المجانية';
-                subline.textContent = 'جربت 3 أيام وشفت إزاي دبّر بيتابعلك مصاريفك وديونك أول بأول — دلوقتي كمّل معاك عشان متفوّتش أي تفصيلة من حساباتك، ب150 جنيه بس في الشهر.';
+                subline.textContent = `جربت 3 أيام وشفت إزاي دبّر بيتابعلك مصاريفك وديونك أول بأول — دلوقتي كمّل معاك عشان متفوّتش أي تفصيلة من حساباتك، بـ${subscription.priceEgp} جنيه بس في الشهر.`;
             }
         }
 
@@ -10445,6 +10459,17 @@
                 nav.dataset.ready = 'true';
             }
 
+            // ============ زرار "رجوع لمساعد" في شاشات التصنيفات/النصايح/التذكيرات ============
+            // الشاشات دي بقت متاحة بس من جوه شاشة "مساعد" (أزرارها في الشريط السفلي مخفية)،
+            // فمن غيره المستخدم يقف فيها من غير طريقة واضحة يرجع بيها.
+            document.querySelectorAll('.assistant-back-btn[data-back-to-tab]').forEach((button) => {
+                if (button.dataset.ready) return;
+                button.dataset.ready = 'true';
+                button.addEventListener('click', () => {
+                    document.querySelector(`.tab-btn[data-tab="${button.dataset.backToTab}"]`)?.click();
+                });
+            });
+
             function setupDailyDetails() {
                 const daily = document.getElementById('tab-daily');
                 const explainer = document.getElementById('daily-explainer-card');
@@ -10479,7 +10504,7 @@
                     if (id === 'account-connections-section') section.open = true;
                     section.innerHTML = `
                         <summary>
-                            <span class="account-section-icon" aria-hidden="true">${icon}</span>
+                            <span class="account-section-icon" aria-hidden="true">${icon}<span id="${id}-badge" class="account-notification-badge" aria-label="إشعارات جديدة"></span></span>
                             <span>
                                 <span class="account-section-title">${title}</span>
                                 <span class="account-section-subtitle">${subtitle}</span>
@@ -10505,12 +10530,21 @@
                     'شارك التطبيق مع أصحابك',
                     ['account-referral-card']
                 );
+                // ============ مركز الإشعارات بقى كارت مستقل بذاته، مش داخل كارت "التفضيلات والتنبيهات" ============
+                // عشان يكون واضح لوحده، وعليه بادج بعدد الإشعارات غير المقروءة حتى وهو مقفول (زي بادج تبويب "حسابي").
+                makeSection(
+                    'account-notifications-section',
+                    '📣',
+                    'مركز الإشعارات',
+                    'ملخص خطتك وتنبيهاتك أول بأول',
+                    ['in-app-notifications-card']
+                );
                 makeSection(
                     'account-preferences-section',
                     '⚙️',
                     'التفضيلات والتنبيهات',
                     'المظهر، الإشعارات، والتثبيت',
-                    ['account-theme-toggle', 'push-notifications-card', 'in-app-notifications-card', 'install-notice']
+                    ['account-theme-toggle', 'push-notifications-card', 'install-notice']
                 );
                 makeSection(
                     'account-security-section',

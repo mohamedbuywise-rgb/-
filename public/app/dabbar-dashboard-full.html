@@ -3700,9 +3700,10 @@
 
             <div class="rounded-3xl border border-slate-800 bg-slate-950/50 overflow-hidden">
                 <button type="button" id="reminder-form-toggle" aria-expanded="false" class="w-full flex items-center justify-between gap-3 p-4 text-right">
-                    <span class="text-xs font-black text-slate-200">إضافة تذكير جديد</span><span id="reminder-form-chevron" class="text-xl leading-none text-emerald-400">⌄</span>
+                    <span id="reminder-form-title" class="text-xs font-black text-slate-200">إضافة تذكير جديد</span><span id="reminder-form-chevron" class="text-xl leading-none text-emerald-400">⌄</span>
                 </button>
                 <div id="reminder-form-panel" class="hidden border-t border-slate-800 p-4 space-y-2.5">
+                    <input type="hidden" id="reminder-edit-id" value="">
                     <label class="block text-[10px] font-bold text-slate-400" for="reminder-title-input">اسم التذكير</label>
                     <input type="text" id="reminder-title-input" maxlength="200" placeholder="مثال: دفع قسط العربية" class="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2.5 text-xs text-slate-100 outline-none focus:border-emerald-400">
                     <label class="block text-[10px] font-bold text-slate-400" for="reminder-date-input">التاريخ</label>
@@ -3715,6 +3716,7 @@
                         <input type="number" id="reminder-installments-remaining-input" min="1" placeholder="12" class="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2.5 text-xs text-slate-100 outline-none focus:border-emerald-400">
                     </div>
                     <button type="button" id="reminder-save-btn" class="w-full rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950">حفظ التذكير</button>
+                    <button type="button" id="reminder-edit-cancel-btn" class="hidden w-full rounded-xl border border-slate-700 py-2 text-[11px] font-bold text-slate-400">إلغاء التعديل</button>
                     <p id="reminder-form-status" class="min-h-4 text-center text-[11px] text-rose-400"></p>
                     <p class="text-center text-[10px] text-slate-500">المبلغ اختياري، تقدر تضيف التذكير من غيره.</p>
                 </div>
@@ -7634,6 +7636,8 @@
                 const res = await fetch('/api/reminders', { headers: { Authorization: `Bearer ${accessToken}` } });
                 const data = await res.json();
                 const allReminders = data.reminders || [];
+                window.__remindersMap = {};
+                allReminders.forEach((r) => { window.__remindersMap[r.id] = r; });
                 const installments = allReminders.filter((r) => r.installment_type === 'installment');
                 const reminders = allReminders.filter((r) => r.installment_type !== 'installment');
                 const urgentCount = allReminders.filter((r) => {
@@ -7649,6 +7653,7 @@
                         <div class="rounded-2xl border border-amber-500/20 bg-amber-500/[0.05] p-3 flex items-center gap-2.5">
                             <span class="w-9 h-9 shrink-0 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-base">📆</span>
                             <div class="min-w-0 flex-1"><p class="text-xs font-bold text-slate-200 truncate">${debtEscape(r.title)}</p><p class="text-[10px] text-slate-500 mt-0.5">باقي ${r.installments_remaining} قسط · ${fmt(r.amount || 0)} ج.م/شهر</p></div>
+                            <button type="button" class="edit-installment-btn shrink-0 text-slate-500 hover:text-emerald-400 text-sm px-1" data-reminder-id="${debtEscape(r.id)}" aria-label="تعديل القسط">✏️</button>
                             <button type="button" class="pay-installment-btn shrink-0 rounded-lg bg-amber-500 px-2.5 py-1.5 text-[10px] font-black text-slate-950" data-reminder-id="${debtEscape(r.id)}">دفعت القسط</button>
                         </div>`).join('') : '<p class="text-[11px] text-slate-500 text-center py-2">مفيش أقساط ثابتة مسجلة.</p>';
                     installmentsListEl.querySelectorAll('.pay-installment-btn').forEach((btn) => btn.addEventListener('click', async () => {
@@ -7657,6 +7662,7 @@
                             if (r.ok) { quickStatus('اتسجل القسط!', 'success'); loadReminders(); }
                         } catch (e) {}
                     }));
+                    installmentsListEl.querySelectorAll('.edit-installment-btn').forEach((btn) => btn.addEventListener('click', () => openReminderEditForm(btn.dataset.reminderId)));
                 }
                 listEl.innerHTML = reminders.length ? reminders.map((r) => {
                     const amount = r.amount !== null && r.amount !== undefined && r.amount !== '' ? `<div class="text-[10px] font-black text-amber-400 mt-1">${fmt(r.amount)}</div>` : '';
@@ -7664,9 +7670,11 @@
                         <span class="w-9 h-9 shrink-0 rounded-xl bg-emerald-500/10 border border-emerald-500/15 flex items-center justify-center text-base">🔔</span>
                         <div class="min-w-0 flex-1"><p class="text-xs font-bold text-slate-200 truncate">${debtEscape(r.title)}</p><p class="text-[10px] text-slate-500 mt-0.5">${new Date(r.due_date + 'T00:00:00').toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'short' })}</p></div>
                         <div class="text-left shrink-0"><span class="text-[10px] font-black text-emerald-400 bg-emerald-500/10 rounded-full px-2 py-1">${reminderDaysLabel(r.due_date)}</span>${amount}</div>
+                        <button type="button" class="text-slate-500 hover:text-emerald-400 text-sm px-1" data-edit-reminder="${debtEscape(r.id)}" aria-label="تعديل التذكير">✏️</button>
                         <button type="button" class="text-slate-500 hover:text-rose-400 text-lg leading-none" data-delete-reminder="${debtEscape(r.id)}" aria-label="حذف التذكير">×</button>
                     </div>`;
                 }).join('') : '<div class="rounded-2xl border border-dashed border-slate-800 p-5 text-xs text-slate-500 text-center">مفيش تذكيرات قادمة، ضيف واحد من الزرار فوق.</div>';
+                listEl.querySelectorAll('[data-edit-reminder]').forEach((btn) => btn.addEventListener('click', () => openReminderEditForm(btn.getAttribute('data-edit-reminder'))));
                 listEl.querySelectorAll('[data-delete-reminder]').forEach((btn) => btn.addEventListener('click', () => {
                     const id = btn.getAttribute('data-delete-reminder'); const row = btn.closest('[data-delete-reminder]')?.parentElement;
                     const title = row?.querySelector('p.truncate')?.textContent || 'التذكير'; row.style.display = 'none';
@@ -7677,15 +7685,59 @@
 
         document.getElementById('reminder-form-toggle')?.addEventListener('click', () => {
             const panel = document.getElementById('reminder-form-panel'); const toggle = document.getElementById('reminder-form-toggle'); const chevron = document.getElementById('reminder-form-chevron');
-            const isOpen = !panel.classList.contains('hidden'); panel.classList.toggle('hidden', isOpen); toggle.setAttribute('aria-expanded', String(!isOpen)); chevron.textContent = isOpen ? '⌄' : '⌃';
+            const isOpen = !panel.classList.contains('hidden');
+            if (!isOpen) resetReminderFormToAddMode();
+            panel.classList.toggle('hidden', isOpen); toggle.setAttribute('aria-expanded', String(!isOpen)); chevron.textContent = isOpen ? '⌄' : '⌃';
         });
         document.getElementById('reminder-installment-toggle')?.addEventListener('change', function () {
             document.getElementById('reminder-installment-fields')?.classList.toggle('hidden', !this.checked);
         });
+
+        // إعادة الفورم لوضع "إضافة جديد" — بيتنادى لما المستخدم يفتح الفورم عادي أو يلغي تعديل شغال
+        function resetReminderFormToAddMode() {
+            document.getElementById('reminder-edit-id').value = '';
+            document.getElementById('reminder-form-title').textContent = 'إضافة تذكير جديد';
+            document.getElementById('reminder-save-btn').textContent = 'حفظ التذكير';
+            document.getElementById('reminder-edit-cancel-btn')?.classList.add('hidden');
+            document.getElementById('reminder-title-input').value = '';
+            document.getElementById('reminder-date-input').value = '';
+            document.getElementById('reminder-amount-input').value = '';
+            document.getElementById('reminder-installment-toggle').checked = false;
+            document.getElementById('reminder-installment-fields')?.classList.add('hidden');
+            document.getElementById('reminder-installments-remaining-input').value = '';
+            document.getElementById('reminder-form-status').textContent = '';
+        }
+
+        // فتح الفورم في وضع "تعديل" مع تعبئة بيانات التذكير/القسط المختار — بيشتغل لكل التذكيرات العادية والأقساط الثابتة
+        function openReminderEditForm(id) {
+            const r = window.__remindersMap?.[id];
+            const panel = document.getElementById('reminder-form-panel'); const toggle = document.getElementById('reminder-form-toggle'); const chevron = document.getElementById('reminder-form-chevron');
+            if (!r) return;
+            const isInstallment = r.installment_type === 'installment';
+            document.getElementById('reminder-title-input').value = r.title || '';
+            document.getElementById('reminder-date-input').value = r.due_date || '';
+            document.getElementById('reminder-amount-input').value = (r.amount ?? '') === null ? '' : (r.amount ?? '');
+            document.getElementById('reminder-installment-toggle').checked = isInstallment;
+            document.getElementById('reminder-installment-fields')?.classList.toggle('hidden', !isInstallment);
+            document.getElementById('reminder-installments-remaining-input').value = isInstallment ? (r.installments_remaining ?? '') : '';
+            document.getElementById('reminder-edit-id').value = id;
+            document.getElementById('reminder-form-title').textContent = isInstallment ? 'تعديل القسط' : 'تعديل التذكير';
+            document.getElementById('reminder-save-btn').textContent = 'حفظ التعديل';
+            document.getElementById('reminder-edit-cancel-btn')?.classList.remove('hidden');
+            document.getElementById('reminder-form-status').textContent = '';
+            panel.classList.remove('hidden'); toggle.setAttribute('aria-expanded', 'true'); chevron.textContent = '⌃';
+            panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        document.getElementById('reminder-edit-cancel-btn')?.addEventListener('click', () => {
+            resetReminderFormToAddMode();
+            document.getElementById('reminder-form-toggle')?.click();
+        });
+
         document.getElementById('reminder-save-btn')?.addEventListener('click', async () => {
             const titleInput = document.getElementById('reminder-title-input'); const dateInput = document.getElementById('reminder-date-input'); const amountInput = document.getElementById('reminder-amount-input'); const statusEl = document.getElementById('reminder-form-status');
             const isInstallment = document.getElementById('reminder-installment-toggle')?.checked;
             const installmentsRemainingInput = document.getElementById('reminder-installments-remaining-input');
+            const editId = document.getElementById('reminder-edit-id')?.value || '';
             const title = titleInput.value.trim(); const dueDate = dateInput.value; const rawAmount = amountInput.value.trim(); const amount = rawAmount === '' ? null : Number(rawAmount);
             if (!title) { statusEl.textContent = 'اكتب عنوان التذكير الأول.'; return; }
             if (!dueDate) { statusEl.textContent = 'اختار تاريخ.'; return; }
@@ -7695,9 +7747,17 @@
             try {
                 const payload = { title, due_date: dueDate, amount };
                 if (isInstallment) { payload.installment_type = 'installment'; payload.installments_remaining = Number(installmentsRemainingInput.value); }
-                const res = await fetch('/api/reminders', { method: 'POST', headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                let res;
+                if (editId) {
+                    payload.id = editId;
+                    res = await fetch('/api/reminders', { method: 'PATCH', headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                } else {
+                    res = await fetch('/api/reminders', { method: 'POST', headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                }
                 if (!res.ok) { const err = await res.json(); statusEl.textContent = err.error || 'حصل خطأ.'; return; }
-                titleInput.value = ''; dateInput.value = ''; amountInput.value = ''; document.getElementById('reminder-installment-toggle').checked = false; document.getElementById('reminder-installment-fields')?.classList.add('hidden'); if (installmentsRemainingInput) installmentsRemainingInput.value = ''; document.getElementById('reminder-form-toggle')?.click(); loadReminders();
+                quickStatus(editId ? 'اتعدّل بنجاح!' : 'اتضاف بنجاح!', 'success');
+                resetReminderFormToAddMode();
+                document.getElementById('reminder-form-toggle')?.click(); loadReminders();
             } catch (e) { statusEl.textContent = 'حصل خطأ، حاول تاني.'; }
         });
 

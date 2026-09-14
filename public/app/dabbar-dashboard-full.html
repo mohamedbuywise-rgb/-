@@ -344,6 +344,17 @@
         .dabbar-reminder-banner-title { font-size:.76rem; font-weight:900; color: var(--pm-ink, #f6f1e5); }
         .dabbar-reminder-banner-sub { font-size:.66rem; color: var(--pm-muted, #aaa39b); margin-top:.1rem; }
         .dabbar-reminder-banner-close { flex-shrink:0; width:1.5rem; height:1.5rem; border-radius:99px; border:none; background:rgba(0,0,0,.12); color: var(--pm-muted, #aaa39b); font-size:.8rem; font-weight:900; cursor:pointer; }
+        .dabbar-reminder-banner-cta { display:inline-block; margin-top:.5rem; border:none; border-radius:.75rem; padding:.42rem .8rem; font-size:.66rem; font-weight:900; cursor:pointer; background: var(--pm-gold, #10b981); color: var(--pm-surface, #06271a); }
+        #trial-ending-banner.due-0 .dabbar-reminder-banner-cta,
+        #reports-frozen-banner .dabbar-reminder-banner-cta { background: #b3432f; color: #fff; }
+        /* ============ تجميد بصري للتقارير بعد انتهاء التجربة/الاشتراك — بيوضّح إن اللي بيتعرض بيانات قديمة ============ */
+        body.db-reports-frozen .flex-1.overflow-y-auto .tab-content > section:not(#reports-frozen-banner):not(#quick-entry-card):not(#daily-reminder-card):not(#trial-ending-banner),
+        body.db-reports-frozen .flex-1.overflow-y-auto .tab-content > div:not(#reports-frozen-banner):not(#quick-entry-card):not(#trial-ending-banner) {
+            filter: grayscale(.65) contrast(.94);
+            opacity: .68;
+            position: relative;
+        }
+        body.db-reports-frozen #reports-frozen-banner { filter: none !important; opacity: 1 !important; }
         .dabbar-soon-pulse { width:.45rem; height:.45rem; border-radius:99px; background:#b3432f; display:inline-block; animation: dabbarSoonPulse 1.4s infinite; }
         @keyframes dabbarSoonPulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:.4; transform:scale(1.3); } }
         .dabbar-soon-card { display:flex; align-items:center; justify-content:space-between; gap:.6rem; border-radius:1.1rem; padding:.75rem .9rem; border:1px solid var(--pm-hairline); background: var(--pm-surface-hi, transparent); }
@@ -2506,6 +2517,15 @@
         .savings-opportunities-details > summary::-webkit-details-marker { display:none; }
         .savings-opportunities-details > summary::after { content:'⌄'; margin-right:auto; font-size:1rem; transition:transform .2s ease; }
         .savings-opportunities-details[open] > summary::after { transform:rotate(180deg); }
+        /* ============ غلاف قابل للطي عام لقسم "الدخل والميزانية" ============ */
+        .dabbar-collapsible-section { border-radius: 1.6rem; }
+        .dabbar-collapsible-section > summary { list-style: none; cursor: pointer; }
+        .dabbar-collapsible-section > summary::-webkit-details-marker { display: none; }
+        .dabbar-collapsible-summary { display: flex; align-items: center; justify-content: space-between; gap: .5rem; padding: .2rem .1rem .7rem; }
+        .dabbar-collapsible-summary-label { font-size: .78rem; font-weight: 900; color: var(--db-ink, var(--pm-ink)); }
+        .dabbar-collapsible-chev { font-size: 1rem; color: var(--db-muted, var(--pm-muted)); transition: transform .2s ease; }
+        .dabbar-collapsible-section[open] .dabbar-collapsible-chev { transform: rotate(180deg); }
+        .dabbar-collapsible-body { display: flex; flex-direction: column; gap: .6rem; }
         .savings-opportunities-body { display:grid; gap:.55rem; margin-top:.55rem; }
 
         .balance-summary { display:flex; align-items:flex-start; justify-content:space-between; gap:.7rem; list-style:none; cursor:pointer; }
@@ -2942,6 +2962,35 @@
                 </div>
             </section>
 
+            <div id="trial-ending-banner" class="dabbar-reminder-banner hidden" role="status">
+                <div class="dabbar-reminder-banner-icon" id="trial-ending-banner-icon">⏳</div>
+                <div class="dabbar-reminder-banner-body">
+                    <p class="dabbar-reminder-banner-title" id="trial-ending-banner-title">—</p>
+                    <p class="dabbar-reminder-banner-sub" id="trial-ending-banner-sub">—</p>
+                    <button type="button" id="trial-ending-banner-cta" class="dabbar-reminder-banner-cta">اشترك دلوقتي</button>
+                </div>
+                <button type="button" id="trial-ending-banner-close" class="dabbar-reminder-banner-close" aria-label="إخفاء التذكير">✕</button>
+            </div>
+
+            <div id="reports-frozen-banner" class="dabbar-reminder-banner due-0 hidden" role="status">
+                <div class="dabbar-reminder-banner-icon">🧊</div>
+                <div class="dabbar-reminder-banner-body">
+                    <p class="dabbar-reminder-banner-title">بياناتك متوقفة عن التحديث</p>
+                    <p class="dabbar-reminder-banner-sub" id="reports-frozen-banner-sub">—</p>
+                    <button type="button" id="reports-frozen-banner-cta" class="dabbar-reminder-banner-cta">اشترك واستكمل المتابعة</button>
+                </div>
+            </div>
+
+            <!-- كارت فرص التوفير — أول حاجة يشوفها المستخدم؛ قابل للطي بس مفتوح افتراضيًا عشان يبقى "لحظة القيمة" الأولى -->
+            <details id="savings-opportunities-card" class="hidden relative overflow-hidden rounded-3xl p-4 shadow-lg dabbar-savings-card savings-opportunities-details" open>
+                <div class="dabbar-metric-glow" aria-hidden="true"></div>
+                <summary class="relative text-[11px] font-bold dabbar-metric-label"><span>💡</span><span>فرص التوفير الشهر ده</span></summary>
+                <div class="relative savings-opportunities-body">
+                    <p class="text-base font-black dabbar-metric-title leading-relaxed">دَبّر لقى لك <span id="savings-total" class="dabbar-metric-value-accent">—</span> ممكن توفرهم</p>
+                    <div id="savings-breakdown" class="space-y-1.5"></div>
+                </div>
+            </details>
+
             <section id="quick-entry-card" class="relative bg-gradient-to-br from-emerald-50 via-white to-teal-50 border border-emerald-200 rounded-[28px] p-4 space-y-3 shadow-[0_12px_35px_rgba(16,185,129,.14)] dark:bg-slate-950/60 dark:from-slate-950/60 dark:via-slate-950/60 dark:to-slate-900 dark:border-slate-800" aria-label="إضافة عملية مالية">
                 <div id="dabbar-celebrate-fx" aria-hidden="true"></div>
                 <div id="dabbar-magic-fx" aria-hidden="true"></div>
@@ -2975,6 +3024,12 @@
             </section>
 
             <!-- كارت "المتاح ليك تصرفه" الموحّد: بديل صافي ثروتك، بيظهر بس لما العميل يحدد دخله أو ميزانيته -->
+            <details id="available-collapsible" class="dabbar-collapsible-section" open>
+                <summary class="dabbar-collapsible-summary">
+                    <span class="dabbar-collapsible-summary-label">💰 الدخل والميزانية الشهر ده</span>
+                    <span class="dabbar-collapsible-chev" aria-hidden="true">⌄</span>
+                </summary>
+                <div class="dabbar-collapsible-body">
             <div id="available-empty" class="hidden">
                 💡 لسه ما حددتش دخلك أو ميزانيتك الشهرية.<br>
                 حددها من قسم «الدخل والميزانية» تحت، وهيبان هنا «المتاح ليك تصرفه الشهر ده» تلقائيًا.
@@ -3007,6 +3062,8 @@
                 <span class="hidden" id="monthly-avg"></span>
             </div>
             <div id="monthly-income-details" class="hidden bg-white dark:bg-slate-950/60 border border-emerald-300 dark:border-emerald-500/20 rounded-3xl p-4 space-y-1 mt-2"></div>
+                </div>
+            </details>
 
             <!-- المحفظة الاستثمارية: بيانات حقيقية بيدخلها العميل بنفسه (ذهب/صناديق/عملات رقمية/أي أصل) -->
             <details id="portfolio-collapsible">
@@ -3175,15 +3232,6 @@
             </section>
 
             <!-- عداد "المرتب لسه فاضل كام" — بيظهر بس لو المستخدم مسجل ميزانية شهرية -->
-            <!-- كارت فرص التوفير — بيتحمّل لوحده أول ما تفتح تبويب يومي -->
-            <details id="savings-opportunities-card" class="hidden relative overflow-hidden rounded-3xl p-4 shadow-lg dabbar-savings-card savings-opportunities-details">
-                <div class="dabbar-metric-glow" aria-hidden="true"></div>
-                <summary class="relative text-[11px] font-bold dabbar-metric-label"><span>💡</span><span>فرص التوفير الشهر ده</span></summary>
-                <div class="relative savings-opportunities-body">
-                    <p class="text-base font-black dabbar-metric-title leading-relaxed">دَبّر لقى لك <span id="savings-total" class="dabbar-metric-value-accent">—</span> ممكن توفرهم</p>
-                    <div id="savings-breakdown" class="space-y-1.5"></div>
-                </div>
-            </details>
 
             <div id="salary-countdown-card" class="hidden dabbar-metric-card relative overflow-hidden rounded-3xl p-4 space-y-3 shadow-lg">
                 <div class="dabbar-metric-glow" aria-hidden="true"></div>
@@ -4176,14 +4224,14 @@
                 <p class="text-[10px] tracking-widest text-amber-400 font-black mb-1">DABBAR PREMIUM</p>
                 <h3 class="text-lg font-black text-white mb-1">افتح كل قوة دبّر</h3>
                 <p class="text-[11px] text-slate-400 mb-4 leading-relaxed">تتبع ذكي، تقارير مفصلة، وأمان بنكي لبياناتك — من غير حدود شهرية.</p>
-                <div class="grid grid-cols-2 gap-2 text-right mb-4">
-                    <div class="bg-white/5 border border-white/10 rounded-xl p-2.5">
-                        <span class="block text-[10px] text-amber-300 font-bold mb-0.5">📊 تتبع ذكي</span>
-                        <span class="block text-[10px] text-slate-400">كل مصروف بوضوح</span>
+                <div class="grid grid-cols-2 gap-2 text-right mb-4" id="premium-hero-stats-grid">
+                    <div class="bg-white/5 border border-white/10 rounded-xl p-2.5" id="premium-hero-stat-entries">
+                        <span class="block text-[10px] text-amber-300 font-bold mb-0.5 premium-hero-stat-value">📊 تتبع ذكي</span>
+                        <span class="block text-[10px] text-slate-400 premium-hero-stat-label">كل مصروف بوضوح</span>
                     </div>
-                    <div class="bg-white/5 border border-white/10 rounded-xl p-2.5">
-                        <span class="block text-[10px] text-amber-300 font-bold mb-0.5">📈 تقارير</span>
-                        <span class="block text-[10px] text-slate-400">فهم أعمق لفلوسك</span>
+                    <div class="bg-white/5 border border-white/10 rounded-xl p-2.5" id="premium-hero-stat-category">
+                        <span class="block text-[10px] text-amber-300 font-bold mb-0.5 premium-hero-stat-value">📈 تقارير</span>
+                        <span class="block text-[10px] text-slate-400 premium-hero-stat-label">فهم أعمق لفلوسك</span>
                     </div>
                     <div class="bg-white/5 border border-white/10 rounded-xl p-2.5">
                         <span class="block text-[10px] text-amber-300 font-bold mb-0.5">🔒 أمان بنكي</span>
@@ -6081,7 +6129,7 @@
             renderDebts(data.debts);
             renderRemindersTelegramBanner(data.linked);
             renderArchive(data.history);
-            renderSubscription(data.subscription);
+            renderSubscription(data.subscription, data);
             renderAssistant(data);
             renderPortfolio(data.portfolio, data.portfolioDigest);
             applyStreak(data.streak);
@@ -8321,6 +8369,28 @@
 
         // ============ Unified Expense Entry: v5-safe ============
         let quickEntrySubscription = { active: true, inTrial: true };
+        // ============ تجميد بصري للتقارير بعد انتهاء التجربة/الاشتراك — مش بس قفل زرار الإدخال ============
+        const REPORTS_FROZEN_SINCE_KEY = 'dabbar-reports-frozen-since';
+        function updateReportsFrozenState(locked) {
+            document.body.classList.toggle('db-reports-frozen', locked);
+            const banner = document.getElementById('reports-frozen-banner');
+            const subEl = document.getElementById('reports-frozen-banner-sub');
+            if (!banner) return;
+            if (!locked) {
+                banner.classList.add('hidden');
+                try { localStorage.removeItem(REPORTS_FROZEN_SINCE_KEY); } catch (e) {}
+                return;
+            }
+            let since = null;
+            try { since = localStorage.getItem(REPORTS_FROZEN_SINCE_KEY); } catch (e) {}
+            if (!since) {
+                since = new Date().toISOString();
+                try { localStorage.setItem(REPORTS_FROZEN_SINCE_KEY, since); } catch (e) {}
+            }
+            const sinceLabel = new Date(since).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' });
+            if (subEl) subEl.textContent = `التقارير والأرقام اللي شايفها تحت دي واقفة من ${sinceLabel} — اشترك عشان تكمل المتابعة وتتحدث أول بأول.`;
+            banner.classList.remove('hidden');
+        }
         function setQuickEntrySubscription(subscription) {
             quickEntrySubscription = subscription || { active: true, inTrial: true };
             const locked = !quickEntrySubscription.active && !quickEntrySubscription.inTrial;
@@ -8328,6 +8398,7 @@
             const lock = document.getElementById('quick-entry-subscription-lock');
             card?.classList.toggle('is-subscription-locked', locked);
             lock?.classList.toggle('hidden', !locked);
+            updateReportsFrozenState(locked);
         }
         function requireQuickEntryAccess() {
             if (quickEntrySubscription.active || quickEntrySubscription.inTrial) return true;
@@ -9906,11 +9977,59 @@
         // بتظهر بس لو مفيش اشتراك فعّال دلوقتي (يعني التجربة خلصت أو الاشتراك انتهى)
         // نفس الرقم والسعر اللي البوت بيبعتهم على تليجرام، جايين من نفس الـ config عن طريق الـ API
         const SUB_BOT_USERNAME = 'Masaaref_bot';
-        function renderSubscription(subscription) {
+        // ============ بانر استباقي قبل انتهاء التجربة بيوم/يومين — نفس نمط بانرات التذكيرات، مع إخفاء يومي لو المستخدم قفله ============
+        const TRIAL_BANNER_DISMISS_KEY = 'dabbar-trial-banner-dismissed-on';
+        function updateTrialEndingBanner(subscription) {
+            const banner = document.getElementById('trial-ending-banner');
+            if (!banner) return;
+            const daysLeft = Number(subscription?.trialDaysLeft);
+            const shouldShow = !!subscription?.inTrial && Number.isFinite(daysLeft) && daysLeft <= 2 && daysLeft >= 0;
+            if (!shouldShow) { banner.classList.add('hidden'); return; }
+
+            const todayKey = new Date().toDateString();
+            let dismissedOn = null;
+            try { dismissedOn = localStorage.getItem(TRIAL_BANNER_DISMISS_KEY); } catch (e) {}
+            if (dismissedOn === todayKey) { banner.classList.add('hidden'); return; }
+
+            const tone = daysLeft === 0 ? 'due-0' : daysLeft === 1 ? 'due-1' : 'due-2';
+            banner.classList.remove('due-0', 'due-1', 'due-2');
+            banner.classList.add(tone);
+            banner.classList.remove('hidden');
+
+            const icon = document.getElementById('trial-ending-banner-icon');
+            const title = document.getElementById('trial-ending-banner-title');
+            const sub = document.getElementById('trial-ending-banner-sub');
+            if (icon) icon.textContent = daysLeft === 0 ? '🔴' : '⏳';
+            if (title) title.textContent = daysLeft === 0
+                ? 'تجربتك المجانية بتخلص النهاردة'
+                : `باقي ${daysLeft} ${daysLeft === 1 ? 'يوم' : 'يومين'} بس على تجربتك المجانية`;
+            if (sub) sub.textContent = daysLeft === 0
+                ? 'بعد النهاردة هتفضل شايف بياناتك بس مش هتقدر تسجّل عمليات جديدة. اشترك دلوقتي عشان متتقطعش.'
+                : 'اشترك دلوقتي عشان التسجيل والمتابعة يفضلوا شغالين من غير أي وقفة.';
+
+            const closeBtn = document.getElementById('trial-ending-banner-close');
+            if (closeBtn && !closeBtn.dataset.bound) {
+                closeBtn.dataset.bound = '1';
+                closeBtn.addEventListener('click', () => {
+                    try { localStorage.setItem(TRIAL_BANNER_DISMISS_KEY, new Date().toDateString()); } catch (e) {}
+                    banner.classList.add('hidden');
+                });
+            }
+            const ctaBtn = document.getElementById('trial-ending-banner-cta');
+            if (ctaBtn && !ctaBtn.dataset.bound) {
+                ctaBtn.dataset.bound = '1';
+                ctaBtn.addEventListener('click', () => {
+                    document.querySelector('.tab-btn[data-tab="account"]')?.click();
+                    setTimeout(() => document.getElementById('account-sub-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
+                });
+            }
+        }
+        function renderSubscription(subscription, dashboardData) {
             const card = document.getElementById('account-subscription-card');
             const hero = document.getElementById('premium-hero-card');
             if (!card || !subscription) return;
             setQuickEntrySubscription(subscription);
+            updateTrialEndingBanner(subscription);
 
             if (subscription.active) {
                 setQuickEntrySubscription(subscription);
@@ -9925,6 +10044,7 @@
                 const perDay = Math.round(Number(subscription.priceEgp) / 30);
                 const ctaBtn = document.getElementById('premium-hero-cta');
                 if (ctaBtn) ctaBtn.textContent = `اشترك دلوقتي — يعني ${perDay} ج.م بس في اليوم`;
+                renderPremiumHeroStats(dashboardData);
             }
             document.getElementById('account-sub-price').textContent = `${subscription.priceEgp} ج.م`;
             document.getElementById('account-sub-instapay').textContent = subscription.instapayNumber || '—';
@@ -9932,13 +10052,42 @@
 
             const headline = document.getElementById('account-sub-headline');
             const subline = document.getElementById('account-sub-subline');
+            const entriesCount = Number(dashboardData?.month?.count || 0);
+            const activeDaysCount = Number(dashboardData?.activeDays?.totalActiveDays || 0);
 
             if (subscription.inTrial) {
                 headline.textContent = `🎁 باقي ${subscription.trialDaysLeft} يوم على تجربتك المجانية`;
-                subline.textContent = 'خلال الـ3 أيام دي هتشوف بنفسك إزاي دبّر بيوفّرلك وقت وبيخليك متابع كل جنيه بيتصرف — من غير ما تفتح جدول ولا تكتب رقم بإيدك. اشترك دلوقتي عشان الخدمة متتقطعش.';
+                subline.textContent = entriesCount > 0
+                    ? `لحد دلوقتي سجّلت ${entriesCount} ${entriesCount === 1 ? 'عملية' : 'عمليات'} وكنت نشط ${activeDaysCount} ${activeDaysCount === 1 ? 'يوم' : 'أيام'} — اشترك دلوقتي عشان الخدمة متتقطعش.`
+                    : 'خلال الأيام دي هتشوف بنفسك إزاي دبّر بيوفّرلك وقت وبيخليك متابع كل جنيه بيتصرف — من غير ما تفتح جدول ولا تكتب رقم بإيدك. اشترك دلوقتي عشان الخدمة متتقطعش.';
             } else {
                 headline.textContent = '⏳ خلصت أيام التجربة المجانية';
-                subline.textContent = `جربت 3 أيام وشفت إزاي دبّر بيتابعلك مصاريفك وديونك أول بأول — دلوقتي كمّل معاك عشان متفوّتش أي تفصيلة من حساباتك، بـ${subscription.priceEgp} جنيه بس في الشهر.`;
+                subline.textContent = entriesCount > 0
+                    ? `سجّلت ${entriesCount} ${entriesCount === 1 ? 'عملية' : 'عمليات'} وشفت إزاي دبّر بيتابعلك مصاريفك وديونك أول بأول — دلوقتي كمّل معاك عشان متفوّتش أي تفصيلة من حساباتك، بـ${subscription.priceEgp} جنيه بس في الشهر.`
+                    : `جربت دبّر وشفت إزاي بيتابعلك مصاريفك وديونك أول بأول — دلوقتي كمّل معاك عشان متفوّتش أي تفصيلة من حساباتك، بـ${subscription.priceEgp} جنيه بس في الشهر.`;
+            }
+        }
+        // ============ كارت البريميوم: أرقام حقيقية من استخدام المستخدم الفعلي بدل كلام تسويقي عام ============
+        function renderPremiumHeroStats(dashboardData) {
+            const grid = document.getElementById('premium-hero-stats-grid');
+            if (!grid) return;
+            const month = dashboardData?.month;
+            const entriesCount = Number(month?.count || 0);
+            const activeDaysCount = Number(dashboardData?.activeDays?.totalActiveDays || 0);
+            const topCategory = Array.isArray(month?.byCategory) && month.byCategory.length ? month.byCategory[0] : null;
+            const totalSpent = Number(month?.total || 0);
+
+            const statEntries = document.getElementById('premium-hero-stat-entries');
+            const statCategory = document.getElementById('premium-hero-stat-category');
+            if (statEntries) {
+                statEntries.querySelector('.premium-hero-stat-value').textContent = entriesCount > 0 ? `${entriesCount} عملية` : 'لسه بتبدأ';
+                statEntries.querySelector('.premium-hero-stat-label').textContent = activeDaysCount > 0 ? `سجّلتها في ${activeDaysCount} ${activeDaysCount === 1 ? 'يوم' : 'أيام'} نشطة` : 'سجّل أول عملية';
+            }
+            if (statCategory) {
+                statCategory.querySelector('.premium-hero-stat-value').textContent = topCategory ? `${getCategoryEmoji(topCategory.name)} ${topCategory.name}` : '—';
+                statCategory.querySelector('.premium-hero-stat-label').textContent = topCategory
+                    ? `أكتر فئة صرفت فيها (${fmt(topCategory.amount)})`
+                    : (totalSpent > 0 ? `صرفت ${fmt(totalSpent)} لحد دلوقتي` : 'مفيش عمليات كفاية لسه');
             }
         }
 

@@ -1260,10 +1260,11 @@
         #tab-monthly.active > #planning-card { order: 5; }
         #tab-monthly.active > #expense-ledger-card { order: 6; }
         #tab-monthly.active > #monthly-categories-card { order: 7; }
+        #tab-monthly.active > #monthly-goals-card { order: 7; }
         #tab-monthly.active > #monthly-tip-card { order: 8; }
         #tab-monthly.active > #footer-cta { order: 9; }
 
-        #tab-monthly.active > div:not(#quick-entry-card):not(#monthly-categories-card):not(#monthly-tip-card):not(#footer-cta) {
+        #tab-monthly.active > div:not(#quick-entry-card):not(#monthly-categories-card):not(#monthly-goals-card):not(#monthly-tip-card):not(#footer-cta) {
             order: 4;
         }
 
@@ -2634,6 +2635,67 @@
         html:not([data-theme="light"]) #daily-details { border-color:rgba(244,198,72,.22); }
         html:not([data-theme="light"]) .account-section-icon { background:rgba(244,198,72,.1); }
 
+        /* زرار "عرض الكل" الموحّد — بيتكرر جوه كارت الفئات وكارت الأهداف في شهري */
+        .dabbar-see-all-btn {
+            background:transparent; border:0; padding:.2rem 0; cursor:pointer;
+            color:var(--db-accent); font:800 .68rem 'Cairo',sans-serif; white-space:nowrap;
+        }
+
+        /* دائرة الفئات (Donut) — بديل الأشرطة القديمة، نفس الفكرة اللي في شاشة الموبايل */
+        .dabbar-donut-chart {
+            position:relative; width:7.2rem; height:7.2rem; border-radius:50%;
+            background: conic-gradient(#1e293b 0deg 360deg);
+        }
+        .dabbar-donut-center {
+            position:absolute; inset:15%; border-radius:50%; background:var(--db-surface);
+            display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.1rem;
+            box-shadow: inset 0 0 0 1px rgba(148,163,184,.15);
+        }
+        .dabbar-donut-center-label { color:var(--db-muted); font:700 .55rem 'Cairo',sans-serif; }
+        .dabbar-donut-center-value { color:var(--db-ink); font:900 .78rem 'Cairo',sans-serif; }
+        .dabbar-donut-legend-row {
+            display:flex; align-items:center; justify-content:space-between; gap:.5rem; font-size:.68rem;
+        }
+        .dabbar-donut-legend-name { display:flex; align-items:center; gap:.4rem; min-width:0; color:var(--db-ink); font-weight:700; }
+        .dabbar-donut-legend-dot { width:.55rem; height:.55rem; border-radius:50%; flex-shrink:0; }
+        .dabbar-donut-legend-percent { color:var(--db-muted); font-weight:800; flex-shrink:0; }
+
+        /* اختصار الأهداف جوه شهري — صف مبسّط لكل هدف بأيقونة وشريط تقدّم */
+        .dabbar-goal-row {
+            display:flex; align-items:center; gap:.7rem; background:var(--db-surface-soft);
+            border:1px solid rgba(148,163,184,.16); border-radius:1.1rem; padding:.65rem .8rem; cursor:pointer;
+        }
+        .dabbar-goal-row-icon {
+            width:2.3rem; height:2.3rem; border-radius:.85rem; background:rgba(16,185,129,.12); color:#10b981;
+            display:flex; align-items:center; justify-content:center; font-size:1.05rem; flex-shrink:0;
+        }
+        .dabbar-goal-row-body { flex:1; min-width:0; }
+        .dabbar-goal-row-top { display:flex; align-items:center; justify-content:space-between; gap:.5rem; margin-bottom:.35rem; }
+        .dabbar-goal-row-title { color:var(--db-ink); font:800 .72rem 'Cairo',sans-serif; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .dabbar-goal-row-percent { color:#10b981; font:900 .68rem 'Cairo',sans-serif; flex-shrink:0; }
+        .dabbar-goal-row-track { width:100%; height:.4rem; border-radius:999px; background:rgba(148,163,184,.18); overflow:hidden; }
+        .dabbar-goal-row-bar { height:100%; border-radius:999px; background:linear-gradient(90deg,#10b981,#34d399); }
+        .dabbar-goal-row-amounts { margin-top:.3rem; color:var(--db-muted); font:700 .6rem 'Cairo',sans-serif; }
+
+        /* كارت ربط تليجرام — هوية تليجرام الحقيقية (أزرق فاتح) بدل الأيقونة الرمادية القديمة، واضح ليلي/نهاري */
+        .dabbar-telegram-card {
+            background: linear-gradient(135deg, rgba(41,169,234,.12), rgba(41,169,234,.02)) !important;
+            border-color: rgba(41,169,234,.30) !important;
+        }
+        .dabbar-telegram-logo {
+            width:2.6rem; height:2.6rem; border-radius:.9rem; flex-shrink:0;
+            background: linear-gradient(135deg,#2AABEE,#229ED9);
+            display:flex; align-items:center; justify-content:center;
+            box-shadow: 0 6px 14px rgba(41,169,234,.35);
+        }
+        .dabbar-telegram-logo svg { width:1.35rem; height:1.35rem; }
+        .dabbar-telegram-title { color:var(--db-ink); font:900 .76rem 'Cairo',sans-serif; }
+        .dabbar-telegram-note { color:var(--db-muted); font:700 .62rem/1.55 'Cairo',sans-serif; margin-top:.35rem; }
+        .dabbar-telegram-status { color:#229ED9; font:800 .66rem 'Cairo',sans-serif; margin-top:.15rem; }
+        html:not([data-theme="light"]) .dabbar-telegram-card {
+            background: linear-gradient(135deg, rgba(41,169,234,.10), rgba(17,34,27,.6)) !important;
+        }
+
         /* الديون: التبويبات تظل واضحة على الشاشات الصغيرة بدل أن تنضغط */
         .debts-tabs-heading {
             display:flex; align-items:center; justify-content:space-between; gap:.5rem;
@@ -2962,25 +3024,6 @@
                 </div>
             </section>
 
-            <div id="trial-ending-banner" class="dabbar-reminder-banner hidden" role="status">
-                <div class="dabbar-reminder-banner-icon" id="trial-ending-banner-icon">⏳</div>
-                <div class="dabbar-reminder-banner-body">
-                    <p class="dabbar-reminder-banner-title" id="trial-ending-banner-title">—</p>
-                    <p class="dabbar-reminder-banner-sub" id="trial-ending-banner-sub">—</p>
-                    <button type="button" id="trial-ending-banner-cta" class="dabbar-reminder-banner-cta">اشترك دلوقتي</button>
-                </div>
-                <button type="button" id="trial-ending-banner-close" class="dabbar-reminder-banner-close" aria-label="إخفاء التذكير">✕</button>
-            </div>
-
-            <div id="reports-frozen-banner" class="dabbar-reminder-banner due-0 hidden" role="status">
-                <div class="dabbar-reminder-banner-icon">🧊</div>
-                <div class="dabbar-reminder-banner-body">
-                    <p class="dabbar-reminder-banner-title">بياناتك متوقفة عن التحديث</p>
-                    <p class="dabbar-reminder-banner-sub" id="reports-frozen-banner-sub">—</p>
-                    <button type="button" id="reports-frozen-banner-cta" class="dabbar-reminder-banner-cta">اشترك واستكمل المتابعة</button>
-                </div>
-            </div>
-
             <!-- كارت فرص التوفير — أول حاجة يشوفها المستخدم؛ قابل للطي بس مفتوح افتراضيًا عشان يبقى "لحظة القيمة" الأولى -->
             <details id="savings-opportunities-card" class="hidden relative overflow-hidden rounded-3xl p-4 shadow-lg dabbar-savings-card savings-opportunities-details" open>
                 <div class="dabbar-metric-glow" aria-hidden="true"></div>
@@ -3170,9 +3213,37 @@
 
                     <p class="text-center text-[9px] text-slate-500">غيّر أي فئة من احتياجات لرغبات أو العكس</p>
                 </details>
-                <h4 class="text-xs font-bold text-slate-300">أكثر فئات تم الصرف فيها:</h4>
-                <div class="space-y-2.5 text-xs" id="monthly-categories-list">
-                    <p class="text-slate-500">سجّل أول عملية وهتلاقي هنا أكتر فئة بتصرف فيها.</p>
+                <div class="flex items-center justify-between gap-2">
+                    <h4 class="text-xs font-bold text-slate-300">الفئات</h4>
+                    <button type="button" id="monthly-categories-see-all" class="dabbar-see-all-btn">عرض الكل ‹</button>
+                </div>
+
+                <div id="monthly-categories-donut-wrap" class="flex items-center gap-4">
+                    <div class="dabbar-donut-chart shrink-0" id="monthly-categories-donut">
+                        <div class="dabbar-donut-center">
+                            <span class="dabbar-donut-center-label">إجمالي</span>
+                            <span class="dabbar-donut-center-value" id="monthly-categories-donut-total">—</span>
+                        </div>
+                    </div>
+                    <div class="flex-1 min-w-0 space-y-1.5" id="monthly-categories-legend">
+                        <p class="text-xs text-slate-500">سجّل أول عملية وهتلاقي هنا أكتر فئة بتصرف فيها.</p>
+                    </div>
+                </div>
+
+                <div class="space-y-2.5 text-xs hidden" id="monthly-categories-list"></div>
+            </div>
+
+            <!-- اختصار "أهدافك" داخل تبويب شهري — بيعرض أول هدف نشط بسرعة، والتفاصيل الكاملة في مساعد -->
+            <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3" id="monthly-goals-card">
+                <div class="flex items-center justify-between gap-2">
+                    <h4 class="text-xs font-bold text-slate-300 flex items-center gap-1.5">🎯 أهدافك</h4>
+                    <button type="button" id="monthly-goals-see-all" class="dabbar-see-all-btn">عرض الكل ‹</button>
+                </div>
+                <div id="monthly-goals-content" class="space-y-2.5">
+                    <div class="flex items-center justify-between gap-3 rounded-2xl bg-slate-900/70 border border-dashed border-slate-700 p-3">
+                        <p class="text-[11px] text-slate-500 leading-relaxed">مفيش هدف مسجل دلوقتي. حدد هدف وابدأ توفر ليه.</p>
+                        <button type="button" id="monthly-goals-empty-cta" class="shrink-0 rounded-xl bg-emerald-500 px-3 py-2 text-[11px] font-black text-slate-950">ابدأ هدف</button>
+                    </div>
                 </div>
             </div>
 
@@ -3890,15 +3961,22 @@
                 </div>
             </details>
 
-            <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 flex items-center justify-between gap-3 cursor-pointer active:opacity-70 transition" id="account-telegram-card">
-                <div class="flex items-center gap-3">
-                    <span class="w-9 h-9 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-base">💬</span>
-                    <div>
-                        <p class="text-xs font-bold text-slate-200">حساب تليجرام</p>
-                        <p class="text-[11px] text-slate-500" id="account-telegram-status">جاري التحقق من حالة الربط...</p>
+            <div class="dabbar-telegram-card border rounded-3xl p-4 cursor-pointer active:opacity-70 transition" id="account-telegram-card">
+                <div class="flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <span class="dabbar-telegram-logo" aria-hidden="true">
+                            <svg viewBox="0 0 240 240" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M186.8 60.4 159.6 187c-2.1 9.3-7.6 11.6-15.4 7.2l-42.6-31.4-20.6 19.8c-2.3 2.3-4.2 4.2-8.5 4.2l3-43.4L155 71.5c3.4-3 -.7-4.7-5.2-1.7L82.6 115l-42.2-13.2c-9.2-2.9-9.4-9.2 1.9-13.6L175 47.6c7.6-2.8 14.3 1.8 11.8 12.8Z" fill="#ffffff"/>
+                            </svg>
+                        </span>
+                        <div class="min-w-0">
+                            <p class="dabbar-telegram-title">اربط حسابك بتليجرام</p>
+                            <p class="dabbar-telegram-status" id="account-telegram-status">جاري التحقق من حالة الربط...</p>
+                        </div>
                     </div>
+                    <span id="account-telegram-badge" class="shrink-0 text-[10px] font-bold px-2.5 py-1 rounded-full bg-slate-800 text-slate-400">—</span>
                 </div>
-                <span id="account-telegram-badge" class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-slate-800 text-slate-400">—</span>
+                <p class="dabbar-telegram-note">إحنا تطبيق ويب بالكامل، وتليجرام هو الطريقة الوحيدة اللي بنوصّلك بيها رسايلك وتنبيهاتك الشخصية 💬 اضغط هنا وابدأ الربط في نص دقيقة.</p>
             </div>
 
             <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3" id="data-import-card">
@@ -4772,6 +4850,9 @@
         }
         const MONTH_NAMES = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
         const CATEGORY_BAR_COLOR = { 'أكل':'bg-rose-400', 'مواصلات':'bg-teal-400', 'فواتير':'bg-amber-400', 'تسوق':'bg-violet-400', 'ترفيه':'bg-pink-400', 'صحة':'bg-emerald-400', 'تعليم':'bg-blue-400', 'منزل وأثاث':'bg-orange-400', 'ملابس':'bg-fuchsia-400', 'اشتراكات':'bg-indigo-400', 'هدايا وتبرعات':'bg-amber-500', 'شخصي وعناية':'bg-cyan-400' };
+        // نفس الألوان بالظبط بس Hex عشان نرسم بيها دائرة الفئات (conic-gradient بيحتاج قيم حقيقية مش أسماء كلاسات Tailwind)
+        const CATEGORY_HEX = { 'أكل':'#fb7185', 'مواصلات':'#2dd4bf', 'فواتير':'#fbbf24', 'تسوق':'#a78bfa', 'ترفيه':'#f472b6', 'صحة':'#34d399', 'تعليم':'#60a5fa', 'منزل وأثاث':'#fb923c', 'ملابس':'#e879f9', 'اشتراكات':'#818cf8', 'هدايا وتبرعات':'#f59e0b', 'شخصي وعناية':'#22d3ee' };
+        const CATEGORY_HEX_FALLBACK = '#94a3b8';
         const CATEGORY_QUICK_TIPS = {
             'أكل': ['جرّب تحدد ميزانية للأكل قبل أول طلب', 'وجبة من البيت ممكن توفر معاك فرق حلو', 'خطط لوجباتك، وهتطلب براحة أكتر'],
             'مواصلات': ['جمّع مشاويرك، ممكن توفّر في تكلفة التنقل', 'اختار الطريق الأقل تكلفة في المشاوير المتكررة', 'خطط لمشاويرك بدري وخلي ميزانيتك مرتاحة'],
@@ -6131,6 +6212,7 @@
             renderArchive(data.history);
             renderSubscription(data.subscription, data);
             renderAssistant(data);
+            renderMonthlyGoalsShortcut(Array.isArray(data.goals) ? data.goals : (data.goal ? [data.goal] : []));
             renderPortfolio(data.portfolio, data.portfolioDigest);
             applyStreak(data.streak);
             updateHeaderForTab(document.querySelector('.tab-btn.active-tab').dataset.tab, data);
@@ -6686,22 +6768,7 @@
                 compareEl.textContent = 'سجّل شوية عمليات كمان وهنقارنلك بالشهر اللي فات.';
             }
 
-            const listEl = document.getElementById('monthly-categories-list');
-            if (month.byCategory.length === 0) {
-                listEl.innerHTML = '<p class="text-slate-500">سجّل أول عملية وهتلاقي هنا أكتر فئة بتصرف فيها.</p>';
-            } else {
-                listEl.innerHTML = month.byCategory.slice(0, 3).map((c) => `
-                    <div>
-                        <div class="flex justify-between mb-1 text-slate-300">
-                            <span>${getCategoryEmoji(c.name)} ${c.name}</span>
-                            <span class="font-bold text-slate-200">${fmt(c.amount)} (${c.percent}%)</span>
-                        </div>
-                        <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
-                            <div class="${CATEGORY_BAR_COLOR[c.name] || 'bg-slate-400'} h-full rounded-full" style="width: ${c.percent}%"></div>
-                        </div>
-                    </div>
-                `).join('');
-            }
+            renderMonthlyCategoriesDonut(month);
 
             renderPersonalizedInsight(month);
             paintInsightCard('-newmonth', getNewMonthInsight(month));
@@ -6718,6 +6785,90 @@
                 document.getElementById('monthly-tip-advice').textContent = '';
             }
         }
+
+        // ============ دائرة الفئات (Donut) جوه شهري — نفس فكرة "توزيع الصرف" في شاشة الموبايل بس هنا ============
+        function renderMonthlyCategoriesDonut(month) {
+            const donutEl = document.getElementById('monthly-categories-donut');
+            const legendEl = document.getElementById('monthly-categories-legend');
+            const totalEl = document.getElementById('monthly-categories-donut-total');
+            const cats = month.byCategory || [];
+
+            if (cats.length === 0) {
+                donutEl.style.background = 'conic-gradient(#1e293b 0deg 360deg)';
+                totalEl.textContent = '—';
+                legendEl.innerHTML = '<p class="text-xs text-slate-500">سجّل أول عملية وهتلاقي هنا أكتر فئة بتصرف فيها.</p>';
+                return;
+            }
+
+            totalEl.textContent = fmt(month.total);
+
+            let deg = 0;
+            const stops = cats.map((c) => {
+                const color = CATEGORY_HEX[c.name] || CATEGORY_HEX_FALLBACK;
+                const start = deg;
+                const end = deg + (Number(c.percent) || 0) * 3.6;
+                deg = end;
+                return `${color} ${start}deg ${end}deg`;
+            });
+            // لو النسب مجمعة أقل من 360 (تقريب)، نكمّل آخر لون لحد آخر الدائرة عشان ميبقاش فيه فراغ
+            if (deg < 360 && cats.length) {
+                const lastColor = CATEGORY_HEX[cats[cats.length - 1].name] || CATEGORY_HEX_FALLBACK;
+                stops.push(`${lastColor} ${deg}deg 360deg`);
+            }
+            donutEl.style.background = `conic-gradient(${stops.join(', ')})`;
+
+            legendEl.innerHTML = cats.slice(0, 6).map((c) => `
+                <div class="dabbar-donut-legend-row">
+                    <span class="dabbar-donut-legend-name"><span class="dabbar-donut-legend-dot" style="background:${CATEGORY_HEX[c.name] || CATEGORY_HEX_FALLBACK}"></span><span class="truncate">${getCategoryEmoji(c.name)} ${c.name}</span></span>
+                    <span class="dabbar-donut-legend-percent">${c.percent}%</span>
+                </div>
+            `).join('');
+        }
+
+        // زرار "عرض الكل" في كارت الفئات — بيوديك مباشرة لتاب "التصنيفات" في مساعد
+        document.getElementById('monthly-categories-see-all')?.addEventListener('click', () => {
+            document.querySelector('.tab-btn[data-tab="categories"]')?.click();
+        });
+
+        // ============ اختصار "أهدافك" جوه شهري — عرض سريع لأول هدف نشط + رابط لكل الأهداف في مساعد ============
+        function renderMonthlyGoalsShortcut(goals) {
+            const contentEl = document.getElementById('monthly-goals-content');
+            const list = Array.isArray(goals) ? goals : (goals ? [goals] : []);
+            if (!contentEl) return;
+
+            if (list.length === 0) {
+                contentEl.innerHTML = `
+                    <div class="flex items-center justify-between gap-3 rounded-2xl bg-slate-900/70 border border-dashed border-slate-700 p-3">
+                        <p class="text-[11px] text-slate-500 leading-relaxed">مفيش هدف مسجل دلوقتي. حدد هدف وابدأ توفر ليه.</p>
+                        <button type="button" id="monthly-goals-empty-cta" class="shrink-0 rounded-xl bg-emerald-500 px-3 py-2 text-[11px] font-black text-slate-950">ابدأ هدف</button>
+                    </div>`;
+                document.getElementById('monthly-goals-empty-cta')?.addEventListener('click', goToAssistantGoals);
+                return;
+            }
+
+            contentEl.innerHTML = list.slice(0, 2).map((g) => `
+                <div class="dabbar-goal-row" data-goal-id="${g.id}">
+                    <span class="dabbar-goal-row-icon">${pickGoalIcon(g.title)}</span>
+                    <div class="dabbar-goal-row-body">
+                        <div class="dabbar-goal-row-top">
+                            <span class="dabbar-goal-row-title">${g.title}</span>
+                            <span class="dabbar-goal-row-percent">${g.percent}%</span>
+                        </div>
+                        <div class="dabbar-goal-row-track"><div class="dabbar-goal-row-bar" style="width:${g.percent}%"></div></div>
+                        <p class="dabbar-goal-row-amounts">${fmt(g.savedAmount)} من ${fmt(g.targetAmount)}</p>
+                    </div>
+                </div>
+            `).join('');
+
+            contentEl.querySelectorAll('.dabbar-goal-row').forEach((row) => row.addEventListener('click', goToAssistantGoals));
+        }
+
+        function goToAssistantGoals() {
+            document.querySelector('.tab-btn[data-tab="assistant"]')?.click();
+            document.querySelector('.assistant-hub-btn[data-assistant-target="assistant-goals-card"]')?.click();
+        }
+
+        document.getElementById('monthly-goals-see-all')?.addEventListener('click', goToAssistantGoals);
 
         // ============ كارت "شهر جديد بدأ" — بيظهر أول يومين من الشهر بس لو المستخدم عنده تاريخ صرف قبل كده ============
         // الهدف إن العميل ميتخضش لما يشوف الأرقام رجعت صفر فجأة، فبنسبقه بتوضيح كوميدي إن ده طبيعي.

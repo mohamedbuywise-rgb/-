@@ -477,29 +477,29 @@
            من غير حدود أو فواصل صريحة بين الأقسام.
            ============================================================ */
         :root {
-            --db-canvas: #f4f8f5;
-            --db-surface: rgba(255,255,255,.82);
+            --db-canvas: #f4f5f7;
+            --db-surface: rgba(255,255,255,.88);
             --db-surface-strong: #ffffff;
-            --db-surface-soft: #edf5ef;
-            --db-ink: #143126;
-            --db-muted: #718078;
-            --db-shadow: 0 18px 45px rgba(17, 55, 35, .07);
-            --db-shadow-soft: 0 8px 24px rgba(17, 55, 35, .045);
+            --db-surface-soft: #f8f9fa;
+            --db-ink: #17202b;
+            --db-muted: #7b8490;
+            --db-shadow: 0 18px 45px rgba(15, 23, 42, .07);
+            --db-shadow-soft: 0 8px 24px rgba(15, 23, 42, .045);
             --db-accent: #16a878;
             --db-accent-soft: rgba(22,168,120,.11);
         }
 
         html:not([data-theme="light"]) {
-            --db-canvas: #08100e;
-            --db-surface: rgba(17, 29, 24, .88);
-            --db-surface-strong: #121c18;
-            --db-surface-soft: rgba(30, 48, 39, .72);
-            --db-ink: #eef8f1;
-            --db-muted: #9aac9f;
+            --db-canvas: #1f2022;
+            --db-surface: rgba(48, 49, 53, .90);
+            --db-surface-strong: #303135;
+            --db-surface-soft: rgba(54, 55, 59, .82);
+            --db-ink: #f5f5f4;
+            --db-muted: #a8aaab;
             --db-shadow: 0 20px 48px rgba(0, 0, 0, .24);
             --db-shadow-soft: 0 9px 25px rgba(0, 0, 0, .18);
-            --db-accent: #34d399;
-            --db-accent-soft: rgba(52,211,153,.12);
+            --db-accent: #bdf23f;
+            --db-accent-soft: rgba(189,242,63,.14);
         }
 
         html[data-theme="light"] body,
@@ -1562,8 +1562,8 @@
         }
             /* تحسين وضوح الوضع النهاري: نفس الهوية الفاتحة، لكن بتباين مقروء وواضح */
         html[data-theme="light"] { color-scheme: light; }
-        html[data-theme="light"] body { background: #edf4f0 !important; color: #10251d !important; }
-        html[data-theme="light"] .flex-1.overflow-y-auto { background: #edf4f0 !important; }
+        html[data-theme="light"] body { background: #f4f5f7 !important; color: #17202b !important; }
+        html[data-theme="light"] .flex-1.overflow-y-auto { background: #f4f5f7 !important; }
         html[data-theme="light"] .flex-1.overflow-y-auto .tab-content > section,
         html[data-theme="light"] .flex-1.overflow-y-auto .tab-content > div { background: rgba(255,255,255,.93) !important; box-shadow: 0 10px 26px rgba(30,70,50,.09) !important; }
         html[data-theme="light"] .flex-1.overflow-y-auto .tab-content > section.bg-slate-950\/50,
@@ -1582,7 +1582,7 @@
         html[data-theme="light"] .border-slate-700 { border-color: #b8cec2 !important; }
         html[data-theme="light"] .border-slate-800 { border-color: #d3e1da !important; }
         /* النهاري هنا Canvas واحدة؛ التمييز بالمسافات والضوء وليس بكروت متجاورة */
-        html[data-theme="light"] #tab-monthly { background: #edf4f0 !important; }
+        html[data-theme="light"] #tab-monthly { background: #f4f5f7 !important; }
         html[data-theme="light"] #tab-monthly > section:not(.personalized-insight-card),
         html[data-theme="light"] #tab-monthly > div { background: transparent !important; border: 0 !important; box-shadow: none !important; border-radius: 0 !important; }
         html[data-theme="light"] #tab-monthly > #quick-entry-card { background: linear-gradient(135deg,#ffffff,#f0faf5) !important; border-radius: 1.5rem !important; box-shadow: 0 10px 26px rgba(30,70,50,.07) !important; }
@@ -1639,44 +1639,44 @@
            من غير ما نلمس أي HTML أو منطق JS.
            ============================================================ */
         :root {
-            /* Night A — true Onyx with a restrained premium gold accent */
-            --pm-canvas: #08090a;
-            --pm-canvas-2: #0d0f10;
-            --pm-surface: #121416;
-            --pm-surface-hi: #181a1c;
-            --pm-surface-soft: #101214;
-            --pm-hairline: rgba(201,162,75,.22);
-            --pm-hairline-soft: rgba(239,230,202,.10);
-            --pm-ink: #f6f1e5;
-            --pm-ink-dim: #d7d0c3;
-            --pm-muted: #aaa39b;
-            --pm-muted-2: #7f827f;
-            --pm-gold: #c9a24b;
-            --pm-gold-bright: #f1d37f;
-            --pm-gold-dim: #8b6a2b;
-            --pm-mint: #56aaa0;
-            --pm-mint-dim: #2d706a;
+            /* Night B — charcoal canvas and neon-lime accent inspired by the reference */
+            --pm-canvas: #1f2022;
+            --pm-canvas-2: #252629;
+            --pm-surface: #292a2d;
+            --pm-surface-hi: #303135;
+            --pm-surface-soft: #36373b;
+            --pm-hairline: rgba(255,255,255,.12);
+            --pm-hairline-soft: rgba(255,255,255,.08);
+            --pm-ink: #f5f5f4;
+            --pm-ink-dim: #d2d3d0;
+            --pm-muted: #a8aaab;
+            --pm-muted-2: #777a7c;
+            --pm-gold: #bdf23f;
+            --pm-gold-bright: #d0ff52;
+            --pm-gold-dim: #7fa329;
+            --pm-mint: #bdf23f;
+            --pm-mint-dim: #789b25;
             --pm-clay: #d36a56;
             --pm-clay-dim: #8f4033;
         }
         html[data-theme="light"] {
-            /* Day C — warm cream and deep petrol for calm, legible hierarchy */
-            --pm-canvas: #f6f1e7;
-            --pm-canvas-2: #efe7d8;
-            --pm-surface: #fffdf8;
+            /* Day D — neutral light canvas inspired by the clean mobile reference */
+            --pm-canvas: #f4f5f7;
+            --pm-canvas-2: #eceef1;
+            --pm-surface: #ffffff;
             --pm-surface-hi: #ffffff;
-            --pm-surface-soft: #f2ece0;
-            --pm-hairline: rgba(14,90,82,.22);
-            --pm-hairline-soft: rgba(26,43,39,.11);
-            --pm-ink: #17322e;
-            --pm-ink-dim: #31514a;
-            --pm-muted: #5d716a;
-            --pm-muted-2: #7d8e87;
-            --pm-gold: #0e655b;
-            --pm-gold-bright: #0a4b45;
-            --pm-gold-dim: #4c9387;
-            --pm-mint: #0e655b;
-            --pm-mint-dim: #083e3a;
+            --pm-surface-soft: #f8f9fa;
+            --pm-hairline: rgba(15,23,42,.12);
+            --pm-hairline-soft: rgba(15,23,42,.08);
+            --pm-ink: #17202b;
+            --pm-ink-dim: #475569;
+            --pm-muted: #7b8490;
+            --pm-muted-2: #9aa3ad;
+            --pm-gold: #0e8f68;
+            --pm-gold-bright: #087a59;
+            --pm-gold-dim: #53b995;
+            --pm-mint: #0e8f68;
+            --pm-mint-dim: #086044;
             --pm-clay: #a94c3a;
             --pm-clay-dim: #7e352a;
         }
@@ -2045,15 +2045,15 @@
            LIGHT PREMIUM PARITY — نفس وضوح الوضع الليلي من غير لمس قواعده
            ============================================================ */
         html[data-theme="light"] {
-            --day-canvas: #f2efe7;
-            --day-surface: #fffdf8;
+            --day-canvas: #f4f5f7;
+            --day-surface: #ffffff;
             --day-card: #ffffff;
-            --day-card-soft: #f8f5ee;
-            --day-line: #d8d2c5;
-            --day-line-strong: #c7beb0;
-            --day-ink: #173127;
-            --day-muted: #5e7066;
-            --day-shadow: 0 12px 28px rgba(39, 57, 48, .09), 0 2px 7px rgba(39, 57, 48, .05);
+            --day-card-soft: #f8f9fa;
+            --day-line: #e2e5e9;
+            --day-line-strong: #d3d8de;
+            --day-ink: #17202b;
+            --day-muted: #687381;
+            --day-shadow: 0 12px 28px rgba(15, 23, 42, .09), 0 2px 7px rgba(15, 23, 42, .05);
         }
 
         /* canvas واضح + سطح التطبيق منفصل، بدل الأبيض المسطّح أو خلطه بالبطاقات */
@@ -2177,7 +2177,7 @@
     
         .debts-tab-btn { color: #94a3b8; }
         .debts-tab-btn.active { background: #10b981; color: #0f172a; }
-        html:not([data-theme="light"]) .debts-tab-btn.active { background: linear-gradient(135deg, #f4c648, #b8860b) !important; color: #241b05 !important; }
+        html:not([data-theme="light"]) .debts-tab-btn.active { background: linear-gradient(135deg, #d0ff52, #9fcf2f) !important; color: #182006 !important; }
         html[data-theme="light"] .debts-tab-btn { color: #64748b !important; }
         html[data-theme="light"] .debts-tab-btn.active { background: #10b981 !important; color: #0f172a !important; }
         html[data-theme="light"] #debts-active-search, html[data-theme="light"] #debts-statement-search { background: #f8fafc !important; color: #1e293b !important; border-color: #cbd5e1 !important; }
@@ -2709,18 +2709,18 @@
         #debts-tabs .debts-tab-btn {
             flex:0 0 auto; min-width:8rem; white-space:nowrap; scroll-snap-align:start;
         }
-        html:not([data-theme="light"]) .debts-tabs-heading span:last-child { color:#f4c648; }
+        html:not([data-theme="light"]) .debts-tabs-heading span:last-child { color:#bdf23f !important; }
 
-        /* الهوية النهائية: كريمي/بترولي نهارًا، أونيكس/ذهبي ليلًا */
+        /* الهوية النهائية: رمادي محايد نهارًا، فحمي/ليموني ليلًا */
         :root {
-            --db-canvas:#fbf8ef; --db-surface:#fffdf8; --db-surface-soft:#f2ece0;
+            --db-canvas:#f4f5f7; --db-surface:#ffffff; --db-surface-soft:#f8f9fa;
             --db-ink:#17322e; --db-muted:#64756f; --db-accent:#0e655b;
             --db-accent-soft:rgba(14,101,91,.11);
         }
         html:not([data-theme="light"]) {
-            --db-canvas:#0b1415; --db-surface:#122322; --db-surface-soft:#18312d;
-            --db-ink:#f5f0e5; --db-muted:#a5b4b0; --db-accent:#f4c648;
-            --db-accent-soft:rgba(244,198,72,.13);
+            --db-canvas:#1f2022; --db-surface:#292a2d; --db-surface-soft:#36373b;
+            --db-ink:#f5f5f4; --db-muted:#a8aaab; --db-accent:#bdf23f;
+            --db-accent-soft:rgba(189,242,63,.14);
         }
 
         /* رأس الصفحات: نفس الهوية، لكن بارتفاع أصغر حتى يصل المستخدم للمحتوى بسرعة */
@@ -2944,6 +2944,52 @@
          #bottom-tab-nav .tab-btn.active-tab { background:transparent !important; }
          html:not([data-theme="light"]) #bottom-tab-nav .tab-btn.active-tab { color:var(--pm-gold-bright) !important; }
          html[data-theme="light"] #bottom-tab-nav .tab-btn.active-tab { color:var(--pm-gold-bright) !important; }
+         /* توحيد الوضع الليلي: لا ذهبي ولا تركواز، فقط فحمي + أبيض + ليموني */
+         html:not([data-theme="light"]) .tab-btn.active-tab,
+         html:not([data-theme="light"]) #bottom-tab-nav .tab-btn.active-tab,
+         html:not([data-theme="light"]) .planning-header-summary,
+         html:not([data-theme="light"]) .planning-head-action,
+         html:not([data-theme="light"]) .daily-focus-details > summary::after,
+         html:not([data-theme="light"]) .balance-summary::after,
+         html:not([data-theme="light"]) .honor-loyalty-section > summary::after,
+         html:not([data-theme="light"]) .debts-tabs-heading span:last-child { color:#bdf23f !important; }
+         html:not([data-theme="light"]) .planning-head-action { background:rgba(189,242,63,.12) !important; }
+         html:not([data-theme="light"]) .quick-workspace-btn.active,
+         html:not([data-theme="light"]) .assistant-hub-btn.active,
+         html:not([data-theme="light"]) #quick-entry-type-expense[aria-pressed="true"],
+         html:not([data-theme="light"]) #quick-entry-type-income[aria-pressed="true"] {
+             background:linear-gradient(135deg,#d0ff52,#9fcf2f) !important;
+             color:#182006 !important;
+         }
+         html:not([data-theme="light"]) #bottom-tab-nav .tab-btn.active-tab .tab-icon-wrap {
+             background:linear-gradient(145deg,#d0ff52,#9fcf2f) !important;
+             color:#182006 !important;
+             box-shadow:0 4px 12px rgba(189,242,63,.30) !important;
+         }
+         html:not([data-theme="light"]) #quick-entry-card,
+         html:not([data-theme="light"]) #tab-monthly.active > #quick-entry-card,
+         html:not([data-theme="light"]) #quick-entry-card #quick-entry-form,
+         html:not([data-theme="light"]) #quick-entry-card #quick-entry-draft,
+         html:not([data-theme="light"]) #quick-entry-card #quick-entry-voice-preview {
+             background:#292a2d !important;
+             border-color:rgba(255,255,255,.10) !important;
+             box-shadow:0 14px 32px rgba(0,0,0,.18) !important;
+         }
+         html:not([data-theme="light"]) .daily-reminder-card,
+         html:not([data-theme="light"]) .active-days-card {
+             background:#292a2d !important;
+             border-color:rgba(189,242,63,.24) !important;
+         }
+         .brand-greeting {
+             font-family:'Cairo',sans-serif;
+             font-size:1.02rem;
+             font-weight:900;
+             letter-spacing:-.02em;
+             color:var(--pm-ink) !important;
+         }
+         .brand-greeting::first-letter { color:inherit !important; }
+         html[data-theme="light"] #page-header { background:linear-gradient(180deg,#ffffff 0%,#f4f5f7 100%) !important; }
+         html:not([data-theme="light"]) #page-header { background:linear-gradient(180deg,#303135 0%,#1f2022 100%) !important; }
     </style>
 </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col overflow-hidden">
@@ -2964,7 +3010,7 @@
         <div id="brand-bar" class="bg-slate-900/90 px-5 pt-4 pb-1 flex items-center justify-between">
             <div class="flex items-center gap-2">
                 <img src="./icons/icon-192.png" alt="دبّر" class="w-8 h-8 rounded-xl">
-                <span class="text-2xl font-black" style="font-family:'Cairo',sans-serif; letter-spacing:-0.5px; background:linear-gradient(90deg,var(--pm-gold-bright),var(--pm-gold)); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;">دبّر</span>
+                <span id="brand-greeting" class="brand-greeting">صباح الخير</span>
                 <span id="streak-badge" class="hidden items-center gap-1 bg-amber-500/10 border border-amber-500/25 text-amber-400 text-xs font-black px-2 py-1 rounded-full">
                     <span>🔥</span><span id="streak-count">0</span>
                 </span>
@@ -2977,8 +3023,8 @@
             <div class="flex items-center gap-3">
                 <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-slate-950 font-black text-xl shadow-lg shadow-emerald-500/20" id="header-icon">📊</div>
                 <div>
-                    <h2 class="font-bold text-base text-slate-100 leading-tight" id="header-title">تقرير نهاية الشهر</h2>
-                    <span class="text-xs text-emerald-400 font-medium" id="header-sub">● تقييم أداء الشهر</span>
+                    <h2 class="font-bold text-base text-slate-100 leading-tight" id="header-title">ملخصك المالي</h2>
+                    <span class="text-xs text-emerald-400 font-medium" id="header-sub">تقرير نهاية الشهر</span>
                 </div>
             </div>
             <div class="flex items-center gap-2">
@@ -5957,6 +6003,7 @@
                 if (!session) { window.location.href = ONBOARDING_URL; return; }
                 accessToken = session.access_token;
                 currentUser = session.user;
+                updateBrandGreeting();
                 // بيحدّث accessToken أوتوماتيك لما Supabase يجدد الجلسة في الخلفية (كل ما الجلسة تتجدد يبعت TOKEN_REFRESHED)
                 // من غير ده، كانت التوكن بتفضل قديمة وبيظهر "انتهت صلاحية الجلسة" غلط حتى لو المستخدم لسه فاتح الصفحة
                 sb.auth.onAuthStateChange((event, newSession) => {
@@ -10065,6 +10112,21 @@
         const headerIcon = document.getElementById('header-icon');
         const headerBadge = document.getElementById('header-badge');
         const footerCta = document.getElementById('footer-cta');
+        const brandGreeting = document.getElementById('brand-greeting');
+        function updateBrandGreeting() {
+            if (!brandGreeting) return;
+            const hour = new Date().getHours();
+            const period = hour >= 5 && hour < 12 ? 'صباح الخير' : 'مساء الخير';
+            const rawName = currentUser?.user_metadata?.full_name || currentUser?.user_metadata?.name || currentUser?.email?.split('@')[0] || '';
+            const firstName = String(rawName).trim().split(/\s+/)[0];
+            brandGreeting.textContent = firstName ? `${period}، ${firstName}` : period;
+        }
+        const professionalTabCopy = {
+            monthly: ['ملخصك المالي', 'تقرير نهاية الشهر'], daily: ['ملخص اليوم', 'حركة يومك المالية'],
+            categories: ['توزيع مصروفاتك', 'الفئات الأكثر تأثيرًا'], tips: ['خطوات أذكى للتوفير', 'اقتراحات مخصصة ليك'],
+            debts: ['الديون والسلف', 'متابعة اللي ليك واللي عليك'], reminders: ['مواعيدك المهمة', 'تذكيراتك القادمة'],
+            assistant: ['مساعدك المالي', 'اسأل وخد قرار أوضح'], account: ['حسابك وإعداداتك', 'بياناتك وتفضيلاتك']
+        };
 
         tabBtns.forEach(btn => {
             btn.addEventListener('click', () => {
@@ -10077,8 +10139,9 @@
                 target.classList.add('active');
                 target.classList.add('fade-up');
 
-                headerTitle.textContent = btn.dataset.title;
-                headerSub.textContent = btn.dataset.sub;
+                const copy = professionalTabCopy[btn.dataset.tab] || [btn.dataset.title, btn.dataset.sub];
+                headerTitle.textContent = copy[0];
+                headerSub.textContent = copy[1];
                 headerIcon.textContent = btn.dataset.icon;
                 headerBadge.textContent = btn.dataset.badge;
 

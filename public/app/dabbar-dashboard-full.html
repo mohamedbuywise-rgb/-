@@ -2645,6 +2645,7 @@
         .dabbar-donut-chart {
             position:relative; width:7.2rem; height:7.2rem; border-radius:50%;
             background: conic-gradient(#1e293b 0deg 360deg);
+            transition: filter .25s ease;
         }
         .dabbar-donut-center {
             position:absolute; inset:15%; border-radius:50%; background:var(--db-surface);
@@ -2655,10 +2656,15 @@
         .dabbar-donut-center-value { color:var(--db-ink); font:900 .78rem 'Cairo',sans-serif; }
         .dabbar-donut-legend-row {
             display:flex; align-items:center; justify-content:space-between; gap:.5rem; font-size:.68rem;
+            cursor:pointer; padding:.3rem .4rem; border-radius:.6rem; margin:0 -.4rem;
+            border:1px solid transparent; transition: background .15s ease, transform .15s ease, border-color .15s ease;
         }
+        .dabbar-donut-legend-row:hover { background: rgba(148,163,184,.08); }
+        .dabbar-donut-legend-row.is-active { background: rgba(148,163,184,.12); border-color: rgba(148,163,184,.2); transform: scale(1.02); }
         .dabbar-donut-legend-name { display:flex; align-items:center; gap:.4rem; min-width:0; color:var(--db-ink); font-weight:700; }
         .dabbar-donut-legend-dot { width:.55rem; height:.55rem; border-radius:50%; flex-shrink:0; }
         .dabbar-donut-legend-percent { color:var(--db-muted); font-weight:800; flex-shrink:0; }
+        .dabbar-donut-legend-row.is-active .dabbar-donut-legend-percent { color:var(--db-ink); }
 
         /* اختصار الأهداف جوه شهري — صف مبسّط لكل هدف بأيقونة وشريط تقدّم */
         .dabbar-goal-row {
@@ -6836,11 +6842,69 @@
         }
 
         // ============ دائرة الفئات (Donut) جوه شهري — نفس فكرة "توزيع الصرف" في شاشة الموبايل بس هنا ============
+        // دوس على أي فئة في الليجند: شريحتها في الدايرة تنور وتكبّر شوية (glow)، والباقي يغمق،
+        // والنص في نص الدايرة يبدّل يعرض اسم الفئة ونسبتها بدل الإجمالي. دوس تاني على نفس الفئة يرجّع الوضع الافتراضي.
+        let monthlyDonutCats = [];
+        let monthlyDonutTotalLabel = '—';
+        let monthlyDonutActiveIndex = null;
+
+        function buildDonutGradient(cats, activeIndex) {
+            let deg = 0;
+            const stops = cats.map((c, i) => {
+                let color = CATEGORY_HEX[c.name] || CATEGORY_HEX_FALLBACK;
+                const start = deg;
+                const end = deg + (Number(c.percent) || 0) * 3.6;
+                deg = end;
+                if (activeIndex !== null && i !== activeIndex) {
+                    // نغمّق الفئات الغير مختارة بدل ما نلونها بالكامل، عشان التركيز يبقى واضح على الفئة المختارة
+                    color = color + '33';
+                }
+                return `${color} ${start}deg ${end}deg`;
+            });
+            if (deg < 360 && cats.length) {
+                let lastColor = CATEGORY_HEX[cats[cats.length - 1].name] || CATEGORY_HEX_FALLBACK;
+                if (activeIndex !== null && activeIndex !== cats.length - 1) lastColor = lastColor + '33';
+                stops.push(`${lastColor} ${deg}deg 360deg`);
+            }
+            return `conic-gradient(${stops.join(', ')})`;
+        }
+
+        function setMonthlyDonutActive(index) {
+            const donutEl = document.getElementById('monthly-categories-donut');
+            const totalEl = document.getElementById('monthly-categories-donut-total');
+            const totalLbl = document.querySelector('#monthly-categories-donut .dabbar-donut-center-label');
+            if (!donutEl || !totalEl) return;
+
+            monthlyDonutActiveIndex = index;
+            donutEl.style.background = buildDonutGradient(monthlyDonutCats, index);
+
+            if (index === null) {
+                donutEl.style.filter = 'none';
+                if (totalLbl) totalLbl.textContent = 'إجمالي';
+                totalEl.textContent = monthlyDonutTotalLabel;
+            } else {
+                const c = monthlyDonutCats[index];
+                const color = CATEGORY_HEX[c.name] || CATEGORY_HEX_FALLBACK;
+                donutEl.style.filter = `drop-shadow(0 0 8px ${color}99)`;
+                if (totalLbl) totalLbl.textContent = `${getCategoryEmoji(c.name)} ${c.name}`;
+                totalEl.textContent = `${c.percent}%`;
+            }
+
+            document.querySelectorAll('#monthly-categories-legend .dabbar-donut-legend-row').forEach((row) => {
+                row.classList.toggle('is-active', Number(row.dataset.catIndex) === index);
+            });
+        }
+
         function renderMonthlyCategoriesDonut(month) {
             const donutEl = document.getElementById('monthly-categories-donut');
             const legendEl = document.getElementById('monthly-categories-legend');
             const totalEl = document.getElementById('monthly-categories-donut-total');
             const cats = month.byCategory || [];
+
+            monthlyDonutCats = cats.slice(0, 6);
+            monthlyDonutTotalLabel = fmt(month.total);
+            monthlyDonutActiveIndex = null;
+            donutEl.style.filter = 'none';
 
             if (cats.length === 0) {
                 donutEl.style.background = 'conic-gradient(#1e293b 0deg 360deg)';
@@ -6849,29 +6913,28 @@
                 return;
             }
 
-            totalEl.textContent = fmt(month.total);
+            totalEl.textContent = monthlyDonutTotalLabel;
+            donutEl.style.background = buildDonutGradient(monthlyDonutCats, null);
 
-            let deg = 0;
-            const stops = cats.map((c) => {
-                const color = CATEGORY_HEX[c.name] || CATEGORY_HEX_FALLBACK;
-                const start = deg;
-                const end = deg + (Number(c.percent) || 0) * 3.6;
-                deg = end;
-                return `${color} ${start}deg ${end}deg`;
-            });
-            // لو النسب مجمعة أقل من 360 (تقريب)، نكمّل آخر لون لحد آخر الدائرة عشان ميبقاش فيه فراغ
-            if (deg < 360 && cats.length) {
-                const lastColor = CATEGORY_HEX[cats[cats.length - 1].name] || CATEGORY_HEX_FALLBACK;
-                stops.push(`${lastColor} ${deg}deg 360deg`);
-            }
-            donutEl.style.background = `conic-gradient(${stops.join(', ')})`;
-
-            legendEl.innerHTML = cats.slice(0, 6).map((c) => `
-                <div class="dabbar-donut-legend-row">
+            legendEl.innerHTML = monthlyDonutCats.map((c, i) => `
+                <div class="dabbar-donut-legend-row" data-cat-index="${i}" role="button" tabindex="0">
                     <span class="dabbar-donut-legend-name"><span class="dabbar-donut-legend-dot" style="background:${CATEGORY_HEX[c.name] || CATEGORY_HEX_FALLBACK}"></span><span class="truncate">${getCategoryEmoji(c.name)} ${c.name}</span></span>
                     <span class="dabbar-donut-legend-percent">${c.percent}%</span>
                 </div>
             `).join('');
+
+            legendEl.querySelectorAll('.dabbar-donut-legend-row').forEach((row) => {
+                const i = Number(row.dataset.catIndex);
+                row.addEventListener('click', () => {
+                    setMonthlyDonutActive(monthlyDonutActiveIndex === i ? null : i);
+                });
+                row.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        setMonthlyDonutActive(monthlyDonutActiveIndex === i ? null : i);
+                    }
+                });
+            });
         }
 
         // زرار "عرض الكل" في كارت الفئات — بيوديك مباشرة لتاب "التصنيفات" في مساعد

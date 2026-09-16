@@ -1596,6 +1596,15 @@
         .planning-summary-grid strong { font-size:.9rem; line-height:1.25; font-weight:900; white-space:nowrap; }
         .planning-summary-note { margin-top:.6rem; font-size:.62rem; line-height:1.55; text-align:center; opacity:.7; }
         .planning-empty-note { font-size:.72rem; font-weight:800; text-align:center; }
+        /* حالة "آخر عملياتك" الفاضية: كارت مضغوط بحدود متقطعة بدل مساحة فاضية كبيرة */
+        .ledger-empty-hint { display:flex; align-items:center; justify-content:space-between; gap:.5rem; margin:.3rem 0; padding:.65rem .8rem; border:1px dashed rgba(148,163,184,.35); border-radius:.9rem; font-size:.66rem; font-weight:700; color:var(--db-muted,#64748b); }
+        .ledger-empty-hint-icon { font-size:1rem; opacity:.7; }
+        /* تلميح "دوس على الفئة" بشكل بصري واضح بدل نص عادي */
+        .dabbar-tap-hint { display:flex; align-items:center; justify-content:center; gap:.3rem; margin-top:.15rem; padding:.4rem .7rem; border-radius:999px; background:rgba(16,185,129,.1); border:1px dashed rgba(16,185,129,.4); color:#10b981; font-size:.62rem; font-weight:800; text-align:center; }
+        .dabbar-tap-hint-icon { display:inline-block; animation:dabbar-tap-bounce 1.4s ease-in-out infinite; }
+        @keyframes dabbar-tap-bounce { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-2px); } }
+        .planning-minirow { display:flex; align-items:center; justify-content:center; gap:.35rem; font-size:.64rem; font-weight:700; opacity:.7; margin-bottom:.25rem; }
+        .planning-minirow b { font-weight:900; }
         .planning-hero { display:flex; flex-direction:column; align-items:center; gap:.15rem; text-align:center; }
         .planning-hero-label { font-size:.68rem; font-weight:700; opacity:.75; }
         .planning-hero-value { font-size:1.55rem; font-weight:900; line-height:1.2; }
@@ -2535,6 +2544,14 @@
         #balance-card[open] .balance-summary::after { transform:rotate(180deg); }
         .balance-summary-main { min-width:0; }
         html:not([data-theme="light"]) .balance-summary::after { color:#f4c648; }
+        /* زرار "اعرض" واضح تحت عنوان توازن مصاريفك عشان يبان إنه قابل للدوس مش مجرد كارت معلومات */
+        .balance-summary--cta::after { display:none; }
+        .balance-cta-btn { display:inline-flex; align-items:center; gap:.2rem; margin-top:.5rem; padding:.32rem .7rem; border-radius:999px; background:#10b981; color:#052e21; font-size:.66rem; font-weight:900; box-shadow:0 4px 10px rgba(16,185,129,.28); transition:transform .15s ease; }
+        #balance-card .balance-summary:active .balance-cta-btn,
+        #balance-card .balance-summary:hover .balance-cta-btn { transform:translateY(-1px); }
+        .balance-cta-chev { display:inline-block; transform:rotate(180deg); font-size:.7rem; }
+        #balance-card[open] .balance-cta-btn { display:none; }
+        html[data-theme="light"] .balance-cta-btn { background:#0aa875; color:#f0fff8; }
 
         .honor-loyalty-section { border:1px solid rgba(148,163,184,.2); border-radius:1.35rem; overflow:hidden; }
         .honor-loyalty-section > summary { display:flex; align-items:center; justify-content:space-between; gap:.6rem; list-style:none; cursor:pointer; padding:.9rem 1rem; background:var(--db-surface-soft); }
@@ -3253,10 +3270,11 @@
 
             <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3" id="monthly-categories-card">
                 <details id="balance-card" class="hidden rounded-[1.35rem] border border-emerald-500/20 bg-emerald-500/[0.045] p-3.5 space-y-3">
-                    <summary class="balance-summary">
+                    <summary class="balance-summary balance-summary--cta">
                         <div class="balance-summary-main">
                             <div class="flex items-center gap-1.5"><span class="text-sm">⚖️</span><h4 class="text-sm font-black text-slate-100">توازن مصاريفك</h4></div>
-                            <p class="mt-1 text-[10px] leading-relaxed text-slate-400">اضغط لعرض مقارنة احتياجاتك ورغباتك وادخارك</p>
+                            <p class="mt-1 text-[10px] leading-relaxed text-slate-400">قارن احتياجاتك ورغباتك وادخارك</p>
+                            <span class="balance-cta-btn" aria-hidden="true">اعرض <span class="balance-cta-chev">‹</span></span>
                         </div>
                         <div class="shrink-0 rounded-xl bg-emerald-500/10 px-2.5 py-1.5 text-left"><span class="block text-[9px] text-slate-500">دخلك الشهري</span><strong id="balance-income" class="text-xs font-black text-emerald-300">—</strong></div>
                     </summary>
@@ -3281,6 +3299,7 @@
                         <p class="text-xs text-slate-500">سجّل أول عملية وهتلاقي هنا أكتر فئة بتصرف فيها.</p>
                     </div>
                 </div>
+                <p class="dabbar-tap-hint hidden" id="monthly-categories-tap-hint">على أي فئة تنور في الدايرة <span class="dabbar-tap-hint-icon" aria-hidden="true">👆</span></p>
 
                 <div class="space-y-2.5 text-xs hidden" id="monthly-categories-list"></div>
             </div>
@@ -6413,6 +6432,7 @@
                 if (incomeOrBudget) {
                     const pct = (income && budget) ? Math.min(100, Math.round((total / budget) * 100)) : null;
                     summary.innerHTML = `
+                        ${income ? `<div class="planning-minirow"><span>💰 دخلك</span><b>${fmt(income)}</b></div>` : ''}
                         <div class="planning-hero"><span class="planning-hero-label">المتاح لك دلوقتي</span><strong class="planning-hero-value">${fmt(remaining)}</strong></div>
                         <div class="planning-subrow"><span>💸 صرفت فعليًا: <b>${fmt(total)}</b></span></div>
                         ${pct !== null ? `<div class="planning-progress-wrap"><div class="planning-progress-track"><div class="planning-progress-fill" style="width:${pct}%"></div></div><span class="planning-progress-pct">${pct}% من ميزانيتك اتصرف</span></div>` : ''}
@@ -6446,7 +6466,7 @@
             const events = (data?.month?.financialEvents || []).filter((event) => new Date(event.created_at).toDateString() === new Date().toDateString());
             const expenseRows = items.slice(0, 5).map((item) => `<div class="flex items-center gap-2 border-b border-slate-800/50 py-2 last:border-0"><span class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10">${getCategoryEmoji(item.category)}</span><div class="min-w-0 flex-1"><p class="truncate text-[11px] font-bold text-slate-200">${(item.description || item.category || 'مصروف').replace(/[<>]/g, '')}</p><p class="text-[9px] text-slate-500">مصروف · ${item.category || 'عام'}</p></div><span class="text-[11px] font-bold text-rose-400">-${fmt(item.amount, item.currency_code)}</span><button type="button" data-expense-edit="${item.id}" data-expense-amount="${item.amount}" data-expense-description="${(item.description || '').replace(/"/g, '&quot;')}" class="text-[11px] text-slate-500 hover:text-emerald-400" aria-label="تعديل العملية">✎</button><button type="button" data-expense-delete="${item.id}" class="text-[11px] text-slate-500 hover:text-rose-400" aria-label="حذف العملية">✕</button></div>`).join('');
             const eventRows = events.slice(0, 5).map((event) => { const inflow = event.direction === 'inflow' || event.event_type === 'income'; const icon = event.event_type === 'income' ? '💰' : event.event_type === 'asset' ? '📦' : event.event_type === 'transfer' ? '↔️' : '🧾'; return `<div class="flex items-center gap-2 border-b border-slate-800/50 py-2 last:border-0"><span class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10">${icon}</span><div class="min-w-0 flex-1"><p class="truncate text-[11px] font-bold text-slate-200">${(event.description || event.category || typeLabel(event.event_type)).replace(/[<>]/g, '')}</p><p class="text-[9px] text-slate-500">${typeLabel(event.event_type)}${event.category ? ` · ${event.category}` : ''}</p></div><span class="text-[11px] font-bold ${inflow ? 'text-emerald-400' : 'text-amber-300'}">${inflow ? '+' : '-'}${fmt(event.amount, event.currency_code)}</span></div>`; }).join('');
-            if (list) list.innerHTML = expenseRows + eventRows || '<p class="py-2 text-[10px] text-slate-500">سجّل أول عملية عشان تظهر هنا للمراجعة.</p>';
+            if (list) list.innerHTML = expenseRows + eventRows || '<div class="ledger-empty-hint"><span>سجّل أول عملية عشان تظهر هنا للمراجعة</span><span class="ledger-empty-hint-icon" aria-hidden="true">🧾</span></div>';
             list?.querySelectorAll('[data-expense-edit]').forEach((btn) => btn.addEventListener('click', () => editExpense(btn.dataset.expenseEdit, btn.dataset.expenseAmount, btn.dataset.expenseDescription)));
             list?.querySelectorAll('[data-expense-delete]').forEach((btn) => btn.addEventListener('click', () => deleteExpense(btn.dataset.expenseDelete)));
         }
@@ -6906,13 +6926,16 @@
             monthlyDonutActiveIndex = null;
             donutEl.style.filter = 'none';
 
+            const tapHintEl = document.getElementById('monthly-categories-tap-hint');
             if (cats.length === 0) {
                 donutEl.style.background = 'conic-gradient(#1e293b 0deg 360deg)';
                 totalEl.textContent = '—';
                 legendEl.innerHTML = '<p class="text-xs text-slate-500">سجّل أول عملية وهتلاقي هنا أكتر فئة بتصرف فيها.</p>';
+                tapHintEl?.classList.add('hidden');
                 return;
             }
 
+            tapHintEl?.classList.remove('hidden');
             totalEl.textContent = monthlyDonutTotalLabel;
             donutEl.style.background = buildDonutGradient(monthlyDonutCats, null);
 
@@ -9142,7 +9165,32 @@
 
         // دبّر بيصنّف كل عملية (دخل/مصروف/دين...) من كلام العميل نفسه من غير اختيار مسبق
         // ويجعل الخادم يحفظ العملية في جدول المصروفات أو جدول الدخل الصحيح.
-        document.getElementById('quick-entry-confirm')?.addEventListener('click', async () => { if (!requireQuickEntryAccess() || !quickEntryDrafts.length) return; const btn = document.getElementById('quick-entry-confirm'); btn.disabled = true; quickStatus('جاري حفظ العملية...'); try { const result = await asstApi('entry_confirm', { drafts: quickEntryDrafts }); celebrateSave(btn); document.getElementById('quick-entry-input').value = ''; quickShow('quick-entry-draft', false); quickStatus(result.message || 'تم التسجيل بنجاح.', 'success'); await loadDashboard(); } catch (e) { quickStatus(e.message || 'تعذر الحفظ.', 'error'); } finally { btn.disabled = false; } });
+        // حارس منفصل عن btn.disabled: بيمنع أي ضغطة تانية أثناء إرسال الطلب حتى لو الطلب اتأخر
+        // أو الزرار اتعاد رسمه، عشان العملية متتسجلش أكتر من مرة.
+        let quickEntryConfirmInFlight = false;
+        document.getElementById('quick-entry-confirm')?.addEventListener('click', async () => {
+            if (quickEntryConfirmInFlight) return;
+            if (!requireQuickEntryAccess() || !quickEntryDrafts.length) return;
+            quickEntryConfirmInFlight = true;
+            const btn = document.getElementById('quick-entry-confirm');
+            btn.disabled = true;
+            btn.style.pointerEvents = 'none';
+            quickStatus('جاري حفظ العملية...');
+            try {
+                const result = await asstApi('entry_confirm', { drafts: quickEntryDrafts });
+                celebrateSave(btn);
+                document.getElementById('quick-entry-input').value = '';
+                quickShow('quick-entry-draft', false);
+                quickStatus(result.message || 'تم التسجيل بنجاح.', 'success');
+                await loadDashboard();
+            } catch (e) {
+                quickStatus(e.message || 'تعذر الحفظ.', 'error');
+            } finally {
+                quickEntryConfirmInFlight = false;
+                btn.disabled = false;
+                btn.style.pointerEvents = '';
+            }
+        });
         document.getElementById('quick-entry-invoice')?.addEventListener('click', () => { if (!requireQuickEntryAccess()) return; document.getElementById('quick-entry-invoice-input')?.click(); });
         document.getElementById('quick-entry-draft-close')?.addEventListener('click', () => { quickShow('quick-entry-draft', false); quickStatus(''); document.getElementById('quick-entry-input').value = ''; });
         // ============ فاتورة سريعة: نفس بالظبط سلوك "امسح فاتورة" — بتستخرج كل صنف بسعره وتتسجل أوتوماتيك من غير خطوة تأكيد إضافية ============

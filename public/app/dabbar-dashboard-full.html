@@ -902,28 +902,66 @@
 
         /* ===== كارت "المتاح ليك تصرفه" الموحّد (بديل صافي الثروة) + خانات الدخل/المصروف المدمجة ===== */
         #available-card, #available-empty { border-radius: 1.6rem; padding: 1.15rem 1.1rem 1.25rem; }
-        html[data-theme="dark"] #available-card { background: #1c1406; border: 1px solid rgba(244,198,72,.35); box-shadow: 0 12px 28px rgba(0,0,0,.18); }
+        html[data-theme="dark"] #available-card { background: linear-gradient(160deg, #1f2022, #171819); border: 1px solid rgba(189,242,63,.28); box-shadow: 0 12px 28px rgba(0,0,0,.32); }
         html[data-theme="light"] #available-card { background: #fdf6e3; border: 1px solid #e8d28a; box-shadow: 0 10px 24px rgba(139,107,10,.1); }
         #available-hero { text-align: center; padding-bottom: 1rem; margin-bottom: 1rem; border-bottom: 1px dashed rgba(244,198,72,.28); }
+        html[data-theme="dark"] #available-hero { border-bottom-color: rgba(189,242,63,.22); }
         html[data-theme="light"] #available-hero { border-bottom-color: #e8d28a; }
         #available-hero-label { font-size: .8rem; font-weight: 800; display: block; }
-        html[data-theme="dark"] #available-hero-label { color: #f4c648; }
+        html[data-theme="dark"] #available-hero-label { color: #bdf23f; }
         html[data-theme="light"] #available-hero-label { color: #8a6d0a; }
         #available-hero-value { font-size: 2.1rem; font-weight: 900; display: block; margin-top: .22rem; letter-spacing: -.5px; }
-        html[data-theme="dark"] #available-hero-value { color: #fbe7a8; }
+        html[data-theme="dark"] #available-hero-value { color: #eaffb0; }
         html[data-theme="light"] #available-hero-value { color: #6b5300; }
         #available-hero-note { font-size: .66rem; opacity: .72; margin: .45rem 0 0; line-height: 1.7; }
+        html[data-theme="dark"] #available-hero-note { color: #b7c9a3; }
         #available-progress-track { height: 8px; border-radius: 99px; margin: .75rem 0 0; overflow: hidden; }
-        html[data-theme="dark"] #available-progress-track { background: rgba(0,0,0,.35); }
+        html[data-theme="dark"] #available-progress-track { background: rgba(0,0,0,.45); }
         html[data-theme="light"] #available-progress-track { background: rgba(0,0,0,.1); }
         #available-progress-fill { height: 100%; border-radius: 99px; }
-        html[data-theme="dark"] #available-progress-fill { background: #f1d37f; }
+        html[data-theme="dark"] #available-progress-fill { background: #bdf23f; }
         html[data-theme="light"] #available-progress-fill { background: #c9971f; }
+        html[data-theme="dark"] #available-progress-pct { color: #9fe870; }
         #available-progress-pct { font-size: .62rem; opacity: .65; display: block; text-align: center; margin-top: .32rem; }
         #available-empty { text-align: center; border: 1px dashed rgba(244,198,72,.35); font-size: .72rem; line-height: 1.8; }
         html[data-theme="light"] #available-empty { border-color: #e8d28a; color: #6b6252; }
         html[data-theme="dark"] #available-empty { color: #a89f8c; }
         #available-empty button { margin-top: .5rem; background: #10b981; color: #04140e; border: none; border-radius: .8rem; padding: .5rem 1rem; font-weight: 800; font-size: .72rem; cursor: pointer; }
+
+        /* قايمة تفاصيل عمليات الدخل (بتفتح لما تدوس على كارت "دخلك الشهر ده") — خلفية صريحة وألوان واضحة في الوضعين */
+        html[data-theme="light"] #monthly-income-details { background: #ffffff !important; }
+        html[data-theme="dark"] #monthly-income-details { background: #0b1220 !important; }
+        html[data-theme="light"] #monthly-income-details p.text-slate-700,
+        html[data-theme="light"] #monthly-income-details p { color: #1e293b !important; }
+        html[data-theme="dark"] #monthly-income-details p { color: #e2e8f0 !important; }
+
+        /* ===== المناسبات (أفراح وعزومات) — إحصائيات مفصولة + اختيار نوع المناسبة بريميوم ===== */
+        .occ-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .55rem; }
+        .occ-stat-box { border-radius: 1.1rem; padding: .8rem .8rem .85rem; display: flex; flex-direction: column; gap: .35rem; }
+        html[data-theme="dark"] .occ-stat-box { background: rgba(15,23,42,.6); border: 1px solid rgba(148,163,184,.16); }
+        html[data-theme="light"] .occ-stat-box { background: #f8fafc; border: 1px solid rgba(15,23,42,.08); }
+        .occ-stat-label { font-size: .62rem; font-weight: 800; }
+        html[data-theme="dark"] .occ-stat-label { color: #94a3b8; }
+        html[data-theme="light"] .occ-stat-label { color: #64748b; }
+        .occ-stat-value { font-size: 1.05rem; font-weight: 900; }
+        html[data-theme="dark"] .occ-stat-value { color: #f1f5f9; }
+        html[data-theme="light"] .occ-stat-value { color: #0f172a; }
+        .occ-stat-value--count { }
+        html[data-theme="dark"] .occ-stat-value--count { color: #46d7a5; }
+        html[data-theme="light"] .occ-stat-value--count { color: #0e8f68; }
+
+        .occ-type-pills { display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; }
+        .occ-type-pill {
+            display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .28rem;
+            border-radius: 1rem; padding: .65rem .4rem; cursor: pointer; font-size: .68rem; font-weight: 800;
+            font-family: inherit; transition: transform .15s, border-color .15s, background .15s;
+        }
+        .occ-type-pill:active { transform: scale(.96); }
+        .occ-type-pill-icon { font-size: 1.15rem; line-height: 1; }
+        html[data-theme="dark"] .occ-type-pill { background: rgba(15,23,42,.55); border: 1px solid rgba(148,163,184,.18); color: #94a3b8; }
+        html[data-theme="dark"] .occ-type-pill.active { background: rgba(191,242,63,.12); border: 1px solid #bdf23f; color: #bdf23f; box-shadow: 0 0 0 1px rgba(191,242,63,.15); }
+        html[data-theme="light"] .occ-type-pill { background: #f8fafc; border: 1px solid rgba(15,23,42,.08); color: #475569; }
+        html[data-theme="light"] .occ-type-pill.active { background: rgba(14,143,104,.1); border: 1px solid #0e8f68; color: #0e8f68; box-shadow: 0 0 0 1px rgba(14,143,104,.12); }
 
         .available-cell { position: relative; border-radius: 1.1rem; padding: 1.35rem .7rem .7rem !important; }
         .available-count-badge {
@@ -931,7 +969,19 @@
             font-size: .56rem; font-weight: 800; border-radius: 999px; padding: .2rem .5rem; line-height: 1.3;
             box-shadow: 0 3px 8px rgba(0,0,0,.15);
         }
-        html[data-theme="dark"] .available-count-badge.gold { background: rgba(244,198,72,.14); border: 1px solid rgba(244,198,72,.3); color: #f4c648; }
+        html[data-theme="dark"] .available-count-badge.gold { background: rgba(189,242,63,.14); border: 1px solid rgba(189,242,63,.32); color: #bdf23f; }
+
+        /* زرار تعديل بريميوم (بديل أيقونة القلم الرصاص) — للتذكيرات والأقساط */
+        .premium-edit-btn {
+            display: inline-flex; align-items: center; gap: .28rem; border-radius: .75rem;
+            padding: .4rem .55rem; font-size: .64rem; font-weight: 800; font-family: inherit;
+            cursor: pointer; transition: transform .12s, background .15s; line-height: 1;
+        }
+        .premium-edit-btn:active { transform: scale(.94); }
+        html[data-theme="dark"] .premium-edit-btn { background: rgba(189,242,63,.1); border: 1px solid rgba(189,242,63,.26); color: #bdf23f; }
+        html[data-theme="dark"] .premium-edit-btn:hover { background: rgba(189,242,63,.18); }
+        html[data-theme="light"] .premium-edit-btn { background: rgba(14,143,104,.08); border: 1px solid rgba(14,143,104,.24); color: #0e8f68; }
+        html[data-theme="light"] .premium-edit-btn:hover { background: rgba(14,143,104,.15); }
         html[data-theme="light"] .available-count-badge.gold { background: rgba(138,109,10,.1); border: 1px solid rgba(138,109,10,.25); color: #8a6d0a; }
 
         /* ===== المحفظة الاستثمارية — واجهة بريميوم متوافقة مع الوضعين ===== */
@@ -3014,6 +3064,39 @@
          html[data-theme="light"] #page-header { background:linear-gradient(180deg,#ffffff 0%,#f4f5f7 100%) !important; }
          html:not([data-theme="light"]) #page-header { background:linear-gradient(180deg,#303135 0%,#1f2022 100%) !important; }
     </style>
+
+<style id="dabbar-interactive-onboarding-styles">
+  #dabbar-coach-backdrop { position: fixed; inset: 0; z-index: 1100; background: rgba(15,23,42,.48); backdrop-filter: blur(3px); display:flex; align-items:flex-start; justify-content:center; padding:clamp(18px,8vh,90px) 16px 24px; }
+  #dabbar-coach-backdrop.hidden { display:none; }
+  .dabbar-coach-panel { width:min(100%, 430px); max-height:min(82vh,680px); overflow:auto; border:1px solid rgba(16,185,129,.28); border-radius:28px; background:var(--pm-surface-hi,#fff); color:var(--pm-ink,#0f172a); box-shadow:0 24px 70px rgba(2,6,23,.28); padding:22px; animation:coachIn .35s cubic-bezier(.16,.84,.44,1) both; }
+  html:not([data-theme="light"]) .dabbar-coach-panel { background:#0f172a; color:#f8fafc; border-color:rgba(52,211,153,.28); }
+  @keyframes coachIn { from { opacity:0; transform:translateY(18px) scale(.97) } to { opacity:1; transform:none } }
+  .dabbar-coach-kicker { color:#059669; font-size:11px; font-weight:900; letter-spacing:.03em; }
+  .dabbar-coach-title { margin:7px 0 8px; font-size:22px; line-height:1.45; font-weight:900; }
+  .dabbar-coach-copy { color:#64748b; font-size:13px; line-height:1.8; }
+  html:not([data-theme="light"]) .dabbar-coach-copy { color:#94a3b8; }
+  .dabbar-coach-actions { display:flex; gap:8px; margin-top:18px; }
+  .dabbar-coach-primary { flex:1; border:0; border-radius:15px; background:linear-gradient(135deg,#10b981,#14b8a6); color:#042f2e; padding:12px 14px; font-size:12px; font-weight:900; cursor:pointer; }
+  .dabbar-coach-secondary { border:1px solid #cbd5e1; border-radius:15px; background:transparent; color:#64748b; padding:12px 14px; font-size:12px; font-weight:800; cursor:pointer; }
+  html:not([data-theme="light"]) .dabbar-coach-secondary { border-color:#334155; color:#cbd5e1; }
+  .dabbar-coach-fields { display:grid; gap:10px; margin-top:15px; }
+  .dabbar-coach-field { display:block; color:#64748b; font-size:11px; font-weight:800; }
+  .dabbar-coach-field input { width:100%; margin-top:5px; border:1px solid #cbd5e1; border-radius:13px; padding:11px 12px; background:transparent; color:inherit; outline:none; }
+  html:not([data-theme="light"]) .dabbar-coach-field input { border-color:#334155; }
+  .dabbar-coach-progress { display:flex; gap:5px; margin:0 0 17px; }
+  .dabbar-coach-progress i { height:4px; flex:1; border-radius:99px; background:#e2e8f0; }
+  html:not([data-theme="light"]) .dabbar-coach-progress i { background:#334155; }
+  .dabbar-coach-progress i.is-done { background:#10b981; }
+  #quick-entry-text.dabbar-coach-focus { position:relative; z-index:1110; outline:3px solid #34d399; outline-offset:5px; box-shadow:0 0 0 10px rgba(52,211,153,.17), 0 0 25px rgba(16,185,129,.48); animation:coachPulse 1.2s ease-in-out infinite; }
+  @keyframes coachPulse { 50% { transform:translateY(-2px); } }
+  .dabbar-coach-result { display:grid; grid-template-columns:1fr 1fr; gap:9px; margin-top:15px; }
+  .dabbar-coach-stat { border:1px solid rgba(16,185,129,.2); border-radius:16px; padding:11px; background:rgba(16,185,129,.06); }
+  .dabbar-coach-stat b { display:block; font-size:16px; color:#059669; }
+  .dabbar-coach-stat span { display:block; margin-top:3px; color:#64748b; font-size:10px; }
+  .dabbar-coach-arrow { position:fixed; z-index:1111; pointer-events:none; color:#10b981; font-size:27px; filter:drop-shadow(0 3px 3px rgba(2,6,23,.25)); animation:arrowBounce .85s ease-in-out infinite alternate; }
+  @keyframes arrowBounce { to { transform:translateY(6px); } }
+</style>
+
 </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col overflow-hidden">
 
@@ -3173,7 +3256,7 @@
                 <span class="hidden" id="monthly-count"></span>
                 <span class="hidden" id="monthly-avg"></span>
             </div>
-            <div id="monthly-income-details" class="hidden bg-white dark:bg-slate-950/60 border border-emerald-300 dark:border-emerald-500/20 rounded-3xl p-4 space-y-1 mt-2"></div>
+            <div id="monthly-income-details" class="hidden border border-emerald-300 dark:border-emerald-500/20 rounded-3xl p-4 space-y-1 mt-2"></div>
                 </div>
             </details>
 
@@ -3266,7 +3349,92 @@
                 <span class="shrink-0 text-slate-400">‹</span>
             </button>
 
-            <!-- الحركات البنكية Bottom Sheet + مودال المراجعة اتنقلوا لآخر الصفحة (قبل </body>) عشان يبقوا برة أي كونتينر عنده overflow/transform ممكن يكسر الـ position:fixed بتاعهم -->
+            <!-- الحركات البنكية Bottom Sheet + مودال المراجعة اتنقلوا لآخر الصفحة (قبل 
+<div id="dabbar-coach-backdrop" class="hidden" aria-hidden="true">
+  <section class="dabbar-coach-panel" role="dialog" aria-modal="true" aria-labelledby="dabbar-coach-title">
+    <div id="dabbar-coach-progress" class="dabbar-coach-progress" aria-label="تقدم الإعداد"></div>
+    <div class="dabbar-coach-kicker" id="dabbar-coach-kicker">دبّر معاك خطوة بخطوة</div>
+    <h2 class="dabbar-coach-title" id="dabbar-coach-title"></h2>
+    <p class="dabbar-coach-copy" id="dabbar-coach-copy"></p>
+    <div id="dabbar-coach-fields" class="dabbar-coach-fields hidden">
+      <label class="dabbar-coach-field">دخلك الشهري تقريبًا؟<input id="dabbar-coach-income" inputmode="numeric" type="number" placeholder="مثال: 12000"></label>
+      <label class="dabbar-coach-field">عايز تصرف كام خلال الشهر؟<input id="dabbar-coach-budget" inputmode="numeric" type="number" placeholder="مثال: 9000"></label>
+      <label class="dabbar-coach-field">عندك إيجار أو اشتراك ثابت؟<input id="dabbar-coach-fixed" inputmode="numeric" type="number" placeholder="مثال: 3000"></label>
+    </div>
+    <div id="dabbar-coach-result" class="dabbar-coach-result hidden"></div>
+    <div class="dabbar-coach-actions"><button id="dabbar-coach-secondary" class="dabbar-coach-secondary" type="button">تخطي الآن</button><button id="dabbar-coach-primary" class="dabbar-coach-primary" type="button">ابدأ الآن</button></div>
+  </section>
+</div>
+<div id="dabbar-coach-arrow" class="dabbar-coach-arrow hidden" aria-hidden="true">↓</div>
+
+
+<script id="dabbar-interactive-onboarding-script">
+(function () {
+  const key = () => `dabbar-interactive-coach-${window.currentUser?.id || 'guest'}`;
+  const state = { step: 0, saved: 0, data: {} };
+  const $ = (id) => document.getElementById(id);
+  const backdrop = $('dabbar-coach-backdrop');
+  if (!backdrop) return;
+  const copy = {
+    0: ['أهلًا بك في دبّر', 'في أقل من 3 دقائق هنعرف فلوسك بتروح فين ونطلع لك أول فرصة توفير.'],
+    1: ['إعداد سريع — اختياري', 'قولنا أرقام تقريبية عشان حساب المتبقي وفرصة التوفير يبقوا أقرب لواقعك. تقدر تخطي دلوقتي وتكمل التسجيل فورًا.'],
+    2: ['الآن سجّل أول مصروف', 'اضغط على «كتابة» واكتب مثلًا: «دفعت 180 جنيه غدا». دبّر هيفهم المبلغ والفئة ويطلب تأكيدك قبل الحفظ.'],
+    3: ['ممتاز. كمل العملية الثانية', 'سجل مصروفًا من فئة مختلفة حتى نبدأ نفهم نمط صرفك الحقيقي.'],
+    4: ['بدأنا نرى نمطك', 'سجل عملية ثالثة، وبعدها هنعرض لك أول فرصة توفير مبنية على بياناتك الفعلية.'],
+    5: ['دبّر فهم فلوسك', 'دي أول لقطة من نمط صرفك الحقيقي. من هنا تقدر تحول الملاحظة لخطة توفير قابلة للمتابعة.']
+  };
+  function render() {
+    const [title, body] = copy[state.step];
+    $('dabbar-coach-title').textContent = title;
+    $('dabbar-coach-copy').textContent = body;
+    $('dabbar-coach-fields').classList.toggle('hidden', state.step !== 1);
+    $('dabbar-coach-result').classList.toggle('hidden', state.step !== 5);
+    $('dabbar-coach-secondary').textContent = state.step === 0 ? 'لاحقًا' : state.step === 1 ? 'تخطي الآن' : 'إغلاق';
+    $('dabbar-coach-primary').textContent = state.step === 0 ? 'ابدأ الآن' : state.step === 1 ? 'حفظ والمتابعة' : state.step === 5 ? 'اعمل لي خطة توفير' : 'سجّل الآن';
+    const progress = $('dabbar-coach-progress');
+    progress.innerHTML = [1,2,3].map((n) => `<i class="${state.step > n+1 || (state.step >= 2 && state.saved >= n) ? 'is-done' : ''}"></i>`).join('');
+    if (state.step === 5) renderResult();
+    const showFocus = state.step >= 2 && state.step <= 4;
+    $('quick-entry-text')?.classList.toggle('dabbar-coach-focus', showFocus);
+    $('dabbar-coach-arrow').classList.toggle('hidden', !showFocus);
+    if (showFocus) positionArrow();
+  }
+  function renderResult() {
+    const total = state.data.total || 0;
+    const category = state.data.category || 'مصروفاتك اليومية';
+    const budget = Number(state.data.budget || 0);
+    const remaining = budget ? Math.max(0, budget - total) : null;
+    $('dabbar-coach-result').innerHTML = `<div class="dabbar-coach-stat"><b>${total ? total.toLocaleString('ar-EG') + ' ج.م' : '—'}</b><span>إجمالي المسجل</span></div><div class="dabbar-coach-stat"><b>${category}</b><span>أكثر فئة ظاهرة</span></div>${remaining !== null ? `<div class="dabbar-coach-stat"><b>${remaining.toLocaleString('ar-EG')} ج.م</b><span>تقدير المتبقي</span></div>` : ''}<div class="dabbar-coach-stat"><b>جاهز</b><span>أول فرصة توفير بعد اكتمال البيانات</span></div>`;
+  }
+  function positionArrow() { const btn = $('quick-entry-text'), arrow = $('dabbar-coach-arrow'); if (!btn || arrow.classList.contains('hidden')) return; const r = btn.getBoundingClientRect(); arrow.style.top = `${Math.max(10, r.top - 39)}px`; arrow.style.left = `${r.left + r.width/2 - 12}px`; }
+  function open(step = 0) { state.step = step; backdrop.classList.remove('hidden'); backdrop.setAttribute('aria-hidden','false'); render(); }
+  function close(markDone = false) { backdrop.classList.add('hidden'); backdrop.setAttribute('aria-hidden','true'); $('quick-entry-text')?.classList.remove('dabbar-coach-focus'); $('dabbar-coach-arrow').classList.add('hidden'); if (markDone) localStorage.setItem(key(), JSON.stringify({ done:true, saved:state.saved, data:state.data })); }
+  function next() {
+    if (state.step === 0) { state.step = 1; render(); return; }
+    if (state.step === 1) { state.data = { income:$('dabbar-coach-income').value, budget:$('dabbar-coach-budget').value, fixed:$('dabbar-coach-fixed').value }; localStorage.setItem(key()+':plan', JSON.stringify(state.data)); state.step = 2; render(); focusWriter(); return; }
+    if (state.step >= 2 && state.step <= 4) { focusWriter(); return; }
+    if (state.step === 5) { close(true); document.querySelector('[data-tab="monthly"]')?.click(); $('savings-opportunities-card')?.scrollIntoView({behavior:'smooth',block:'center'}); return; }
+  }
+  function focusWriter() { const b = $('quick-entry-text'); if (!b) return; b.scrollIntoView({behavior:'smooth',block:'center'}); setTimeout(() => b.click(), 250); }
+  $('dabbar-coach-primary').addEventListener('click', next);
+  $('dabbar-coach-secondary').addEventListener('click', () => { if (state.step === 0) close(true); else if (state.step === 1) { state.step = 2; render(); focusWriter(); } else close(false); });
+  window.addEventListener('resize', positionArrow);
+  window.addEventListener('scroll', positionArrow, true);
+  window.dabbarCoachRecord = function (drafts, result) {
+    const list = Array.isArray(drafts) ? drafts : [];
+    const expenses = list.filter(x => x.type === 'expense');
+    if (!expenses.length) return;
+    state.saved += expenses.length;
+    state.data.total = (state.data.total || 0) + expenses.reduce((sum,x) => sum + Number(x.amount || 0), 0);
+    state.data.category = expenses[0].category || state.data.category;
+    if (!backdrop.classList.contains('hidden')) { state.step = Math.min(5, state.saved >= 3 ? 5 : state.saved + 2); render(); }
+  };
+  window.dabbarCoachMaybeStart = function () { let saved; try { saved = JSON.parse(localStorage.getItem(key()) || 'null'); } catch(e) {} if (!saved?.done && !saved?.saved) setTimeout(() => open(0), 550); };
+  window.dabbarCoachMaybeStart();
+})();
+</script>
+
+</body>) عشان يبقوا برة أي كونتينر عنده overflow/transform ممكن يكسر الـ position:fixed بتاعهم -->
 
             <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3" id="monthly-categories-card">
                 <details id="balance-card" class="hidden rounded-[1.35rem] border border-emerald-500/20 bg-emerald-500/[0.045] p-3.5 space-y-3">
@@ -3703,9 +3871,15 @@
                     <h4 class="text-xs font-black text-slate-200">المناسبات (أفراح وعزومات)</h4>
                     <button type="button" id="occasion-add-btn" class="text-[11px] font-bold text-emerald-400">+ نقطة جديدة</button>
                 </div>
-                <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-3.5 flex items-center justify-between">
-                    <span class="text-[11px] text-slate-400">إجمالي اللي إديته في مناسبات</span>
-                    <span id="occasions-total" class="text-sm font-black text-slate-100">—</span>
+                <div class="occ-stats-grid">
+                    <div class="occ-stat-box">
+                        <span class="occ-stat-label">💸 إجمالي اللي إديته في مناسبات</span>
+                        <span id="occasions-total" class="occ-stat-value">—</span>
+                    </div>
+                    <div class="occ-stat-box">
+                        <span class="occ-stat-label">📋 عدد المناسبات المسجلة</span>
+                        <span id="occasions-count" class="occ-stat-value occ-stat-value--count">—</span>
+                    </div>
                 </div>
                 <div id="occasions-list" class="space-y-2"><p class="text-[11px] text-slate-500 text-center py-2">مفيش مناسبات مسجلة لسه.</p></div>
 
@@ -3715,13 +3889,20 @@
                     <label class="block text-[10px] font-bold text-slate-400">المبلغ</label>
                     <input type="number" id="occasion-amount-input" min="0" placeholder="500" class="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2.5 text-xs text-slate-100 outline-none focus:border-emerald-400">
                     <label class="block text-[10px] font-bold text-slate-400">نوع المناسبة</label>
-                    <select id="occasion-type-input" class="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2.5 text-xs text-slate-100 outline-none focus:border-emerald-400">
+                    <select id="occasion-type-input" class="hidden">
                         <option value="فرح">فرح</option>
                         <option value="خطوبة">خطوبة</option>
                         <option value="سبوع">سبوع</option>
                         <option value="عزومة">عزومة</option>
                         <option value="تاني">تاني</option>
                     </select>
+                    <div id="occasion-type-pills" class="occ-type-pills">
+                        <button type="button" class="occ-type-pill active" data-occ-type="فرح"><span class="occ-type-pill-icon">💍</span><span>فرح</span></button>
+                        <button type="button" class="occ-type-pill" data-occ-type="خطوبة"><span class="occ-type-pill-icon">💎</span><span>خطوبة</span></button>
+                        <button type="button" class="occ-type-pill" data-occ-type="سبوع"><span class="occ-type-pill-icon">👶</span><span>سبوع</span></button>
+                        <button type="button" class="occ-type-pill" data-occ-type="عزومة"><span class="occ-type-pill-icon">🍽️</span><span>عزومة</span></button>
+                        <button type="button" class="occ-type-pill" data-occ-type="تاني"><span class="occ-type-pill-icon">✨</span><span>تاني</span></button>
+                    </div>
                     <label class="flex items-center gap-2 text-[11px] text-slate-400 pt-1"><input type="checkbox" id="occasion-as-debt-input" class="rounded"> اعتبرها دين هيرجعلي (تدخل في حساب الديون)</label>
                     <div class="flex gap-2">
                         <button type="button" id="occasion-cancel-btn" class="flex-1 rounded-xl bg-slate-800 py-2.5 text-xs font-black text-slate-300">إلغاء</button>
@@ -7786,7 +7967,7 @@
                         <div class="rounded-2xl border border-amber-500/20 bg-amber-500/[0.05] p-3 flex items-center gap-2.5">
                             <span class="w-9 h-9 shrink-0 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-base">📆</span>
                             <div class="min-w-0 flex-1"><p class="text-xs font-bold text-slate-200 truncate">${debtEscape(r.title)}</p><p class="text-[10px] text-slate-500 mt-0.5">باقي ${r.installments_remaining} قسط · ${fmt(r.amount || 0)} ج.م/شهر</p></div>
-                            <button type="button" class="edit-installment-btn shrink-0 text-slate-500 hover:text-emerald-400 text-sm px-1" data-reminder-id="${debtEscape(r.id)}" aria-label="تعديل القسط">✏️</button>
+                            <button type="button" class="edit-installment-btn premium-edit-btn shrink-0" data-reminder-id="${debtEscape(r.id)}" aria-label="تعديل القسط"><iconify-icon icon="ph:pencil-simple-line-duotone"></iconify-icon><span>تعديل</span></button>
                             <button type="button" class="pay-installment-btn shrink-0 rounded-lg bg-amber-500 px-2.5 py-1.5 text-[10px] font-black text-slate-950" data-reminder-id="${debtEscape(r.id)}">دفعت القسط</button>
                         </div>`).join('') : '<p class="text-[11px] text-slate-500 text-center py-2">مفيش أقساط ثابتة مسجلة.</p>';
                     installmentsListEl.querySelectorAll('.pay-installment-btn').forEach((btn) => btn.addEventListener('click', async () => {
@@ -7803,7 +7984,7 @@
                         <span class="w-9 h-9 shrink-0 rounded-xl bg-emerald-500/10 border border-emerald-500/15 flex items-center justify-center text-base">🔔</span>
                         <div class="min-w-0 flex-1"><p class="text-xs font-bold text-slate-200 truncate">${debtEscape(r.title)}</p><p class="text-[10px] text-slate-500 mt-0.5">${new Date(r.due_date + 'T00:00:00').toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'short' })}</p></div>
                         <div class="text-left shrink-0"><span class="text-[10px] font-black text-emerald-400 bg-emerald-500/10 rounded-full px-2 py-1">${reminderDaysLabel(r.due_date)}</span>${amount}</div>
-                        <button type="button" class="text-slate-500 hover:text-emerald-400 text-sm px-1" data-edit-reminder="${debtEscape(r.id)}" aria-label="تعديل التذكير">✏️</button>
+                        <button type="button" class="premium-edit-btn shrink-0" data-edit-reminder="${debtEscape(r.id)}" aria-label="تعديل التذكير"><iconify-icon icon="ph:pencil-simple-line-duotone"></iconify-icon><span>تعديل</span></button>
                         <button type="button" class="text-slate-500 hover:text-rose-400 text-lg leading-none" data-delete-reminder="${debtEscape(r.id)}" aria-label="حذف التذكير">×</button>
                     </div>`;
                 }).join('') : '<div class="rounded-2xl border border-dashed border-slate-800 p-5 text-xs text-slate-500 text-center">مفيش تذكيرات قادمة، ضيف واحد من الزرار فوق.</div>';
@@ -7976,8 +8157,16 @@
         });
 
         // ============ المناسبات — رندر القايمة + الفورم ============
+        document.getElementById('occasion-type-pills')?.addEventListener('click', (e) => {
+            const pill = e.target.closest('.occ-type-pill');
+            if (!pill) return;
+            document.querySelectorAll('#occasion-type-pills .occ-type-pill').forEach((p) => p.classList.toggle('active', p === pill));
+            document.getElementById('occasion-type-input').value = pill.dataset.occType;
+        });
         function renderOccasionsList(summary) {
             document.getElementById('occasions-total').textContent = fmt(summary.total || 0);
+            const countEl = document.getElementById('occasions-count');
+            if (countEl) countEl.textContent = String((summary.items || []).length);
             const listEl = document.getElementById('occasions-list');
             if (!summary.items || !summary.items.length) { listEl.innerHTML = '<p class="text-[11px] text-slate-500 text-center py-2">مفيش مناسبات مسجلة لسه.</p>'; return; }
             listEl.innerHTML = summary.items.map((it) => `
@@ -8006,6 +8195,8 @@
                 renderOccasionsList(res.occasionsSummary);
                 document.getElementById('occasion-form').classList.add('hidden');
                 document.getElementById('occasion-name-input').value = ''; document.getElementById('occasion-amount-input').value = ''; document.getElementById('occasion-as-debt-input').checked = false;
+                document.getElementById('occasion-type-input').value = 'فرح';
+                document.querySelectorAll('#occasion-type-pills .occ-type-pill').forEach((p) => p.classList.toggle('active', p.dataset.occType === 'فرح'));
                 quickStatus('اتسجلت المناسبة!', 'success');
                 if (asDebt) loadDashboard(); // عشان صافي الديون يتحدث فورًا لو المستخدم اعتبرها دين
             } catch (e) { statusEl.textContent = 'حصل خطأ، حاول تاني.'; }
@@ -9178,6 +9369,7 @@
             quickStatus('جاري حفظ العملية...');
             try {
                 const result = await asstApi('entry_confirm', { drafts: quickEntryDrafts });
+                window.dabbarCoachRecord?.(quickEntryDrafts, result);
                 celebrateSave(btn);
                 document.getElementById('quick-entry-input').value = '';
                 quickShow('quick-entry-draft', false);

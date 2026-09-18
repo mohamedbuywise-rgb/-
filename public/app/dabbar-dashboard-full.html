@@ -3230,6 +3230,7 @@
             <div id="available-empty" class="hidden">
                 💡 لسه ما حددتش دخلك أو ميزانيتك الشهرية.<br>
                 حددها من قسم «الدخل والميزانية» تحت، وهيبان هنا «المتاح ليك تصرفه الشهر ده» تلقائيًا.
+                <button type="button" id="available-empty-cta" class="mt-3 w-full rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950">🎯 حدد دخلك وميزانيتك دلوقتي</button>
             </div>
             <div id="available-card" class="hidden">
                 <div id="available-hero">
@@ -4022,11 +4023,8 @@
                     <p id="asst-goal-empty-hint" class="text-[11px] text-slate-500">مفيش هدف مسجل دلوقتي. حدد هدف وابدأ توفر ليه.</p>
                     <input id="asst-goal-title" type="text" placeholder="اسم الهدف (مثلاً: عربية BMW أو رحلة تركيا)" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-100 placeholder-slate-500 outline-none focus:border-emerald-500/50">
                     <div class="flex gap-2">
-                        <input id="asst-goal-amount" type="number" inputmode="numeric" placeholder="المبلغ المطلوب" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-100 placeholder-slate-500 outline-none focus:border-emerald-500/50">
-                        <input id="asst-goal-date" type="date" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-100 outline-none focus:border-emerald-500/50">
-
-
-
+                        <label class="flex-1 text-[10px] text-slate-500">المبلغ المطلوب<input id="asst-goal-amount" type="number" inputmode="numeric" placeholder="مثال: 20000" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-100 placeholder-slate-500 outline-none focus:border-emerald-500/50"></label>
+                        <label class="flex-1 text-[10px] text-slate-500">📅 تاريخ الوصول للهدف<input id="asst-goal-date" type="date" class="mt-1 w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-100 outline-none focus:border-emerald-500/50"></label>
                     </div>
                     <button id="asst-goal-create-btn" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-bold py-2.5 rounded-xl text-xs transition">ابدأ الهدف ده</button>
                     <p id="asst-goal-error" class="hidden text-[11px] text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-lg p-2 text-center"></p>
@@ -4222,8 +4220,8 @@
                 <span style="display:flex;align-items:center;gap:10px;">
                     <span style="width:2.4rem;height:2.4rem;border-radius:.9rem;display:flex;align-items:center;justify-content:center;font-size:1.15rem;background:color-mix(in srgb,var(--pm-gold) 16%,transparent);">🧭</span>
                     <span style="text-align:right;">
-                        <span style="display:block;font-size:.82rem;font-weight:900;color:var(--pm-ink);">جولة إرشادية على التطبيق</span>
-                        <span style="display:block;font-size:.66rem;color:var(--pm-muted);margin-top:2px;">راجع دخلك وميزانيتك، أو خد جولة تانية على أهم الأماكن</span>
+                        <span style="display:block;font-size:.82rem;font-weight:900;color:var(--pm-ink);">تعرف على دبّر</span>
+                        <span style="display:block;font-size:.66rem;color:var(--pm-muted);margin-top:2px;">تعريف سريع بكل مميزات دبّر</span>
                     </span>
                 </span>
                 <span style="color:var(--pm-muted);">←</span>
@@ -6570,6 +6568,29 @@
             document.getElementById('recurring-add').addEventListener('click', addRecurringExpense);
             document.getElementById('category-budget-add').addEventListener('click', addCategoryBudget);
             document.getElementById('balance-edit-link')?.addEventListener('click', openBalanceCategoryEditor);
+            document.getElementById('available-empty-cta')?.addEventListener('click', () => {
+                const details = document.getElementById('available-collapsible');
+                if (details && !details.open) details.open = true;
+                wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                setTimeout(() => document.getElementById('planning-income')?.focus(), 350);
+            });
+
+            // ============ حفظ تلقائي — أي رقم يدخّله في الدخل/الميزانية/حد الفئة يتحفظ لوحده أول ما يسيب الخانة، من غير أي زرار ============
+            let __planningAutoSaveTimer = null;
+            wrap.addEventListener('input', (e) => {
+                const t = e.target;
+                if (t.id === 'planning-income' || t.id === 'planning-budget' || t.hasAttribute('data-category-budget')) {
+                    clearTimeout(__planningAutoSaveTimer);
+                    __planningAutoSaveTimer = setTimeout(() => savePlanningSettings(), 900);
+                }
+            });
+            wrap.addEventListener('change', (e) => {
+                const t = e.target;
+                if (t.id === 'planning-income' || t.id === 'planning-budget' || t.hasAttribute('data-category-budget')) {
+                    clearTimeout(__planningAutoSaveTimer);
+                    savePlanningSettings();
+                }
+            });
         }
         function addCategoryBudget() {
             const input = document.getElementById('category-budget-custom-name');
@@ -11335,94 +11356,36 @@
 
 
 <!-- ============================================================
-     دبّر — Onboarding + Guided Tour (أول مرة للمستخدم)
-     مبني على هوية دبّر البصرية (نفس متغيرات --pm-*)، ومربوط فعليًا
-     بنظام التخطيط الحقيقي (planningSettings / savePlanningSettings)
-     وبالتابات الحقيقية تحت (#bottom-tab-nav) — مش ديكور بس.
+     دبّر — Onboarding (تعريف بالمميزات فقط، بدون أي إدخال بيانات)
+     بيظهر تلقائي أول مرة بعد تسجيل الدخول، ومرة واحدة بس لكل مستخدم.
+     ممكن يفتحه تاني وقت ما يحب من "حسابي" (dbo-reopen-btn).
      ============================================================ -->
 <style id="dbo-styles">
 #dbo-root{position:fixed;inset:0;z-index:1200;display:none;font-family:'Cairo',sans-serif;}
 #dbo-root.dbo-show{display:block;}
 #dbo-backdrop{position:absolute;inset:0;background:var(--pm-canvas);}
 #dbo-shell{position:relative;max-width:430px;margin:0 auto;height:100%;display:flex;flex-direction:column;background:var(--pm-canvas);}
-#dbo-root .dbo-topbar{padding:16px 18px 10px;display:flex;align-items:center;gap:10px;}
+#dbo-root .dbo-topbar{padding:16px 18px 8px;display:flex;align-items:center;gap:10px;}
 #dbo-root .dbo-back-btn{width:2rem;height:2rem;border-radius:999px;background:var(--pm-surface-hi);border:1px solid var(--pm-hairline);color:var(--pm-ink);display:flex;align-items:center;justify-content:center;font-weight:900;cursor:pointer;flex-shrink:0;visibility:hidden;}
 #dbo-root .dbo-back-btn.dbo-show-back{visibility:visible;}
-#dbo-root .dbo-progress-wrap{flex:1;height:6px;border-radius:999px;background:var(--pm-surface-soft);overflow:hidden;}
-#dbo-root .dbo-progress-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--pm-gold-dim),var(--pm-gold));border-radius:999px;transition:width .35s ease;}
-#dbo-root .dbo-step-count{font-size:.62rem;font-weight:800;color:var(--pm-muted);flex-shrink:0;min-width:34px;text-align:left;}
-#dbo-root .dbo-steps{flex:1;display:flex;flex-direction:column;padding:6px 20px 12px;overflow-y:auto;}
-#dbo-root .dbo-step{display:none;flex-direction:column;flex:1;animation:dboFadeUp .35s ease both;}
+#dbo-root .dbo-skip-top{font-size:.68rem;font-weight:800;color:var(--pm-muted);cursor:pointer;flex-shrink:0;}
+#dbo-root .dbo-dots{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;}
+#dbo-root .dbo-dot{width:6px;height:6px;border-radius:999px;background:var(--pm-surface-soft);transition:all .25s ease;flex-shrink:0;}
+#dbo-root .dbo-dot.dbo-dot-active{width:18px;background:var(--pm-gold);}
+#dbo-root .dbo-steps{flex:1;display:flex;flex-direction:column;padding:8px 24px 12px;overflow-y:auto;}
+#dbo-root .dbo-step{display:none;flex-direction:column;align-items:center;text-align:center;flex:1;animation:dboFadeUp .35s ease both;padding-top:6%;}
 #dbo-root .dbo-step.dbo-active{display:flex;}
-@keyframes dboFadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
-#dbo-root .dbo-badge{width:3.4rem;height:3.4rem;border-radius:1.1rem;background:color-mix(in srgb,var(--pm-gold) 16%,transparent);border:1px solid color-mix(in srgb,var(--pm-gold) 35%,transparent);display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin-bottom:16px;}
-#dbo-root h1.dbo-step-title{font-size:1.24rem;font-weight:900;margin:0 0 6px;line-height:1.4;color:var(--pm-ink);}
-#dbo-root p.dbo-step-sub{font-size:.8rem;color:var(--pm-muted);line-height:1.7;margin:0 0 20px;}
-#dbo-root label.dbo-field-label{display:block;font-size:.72rem;font-weight:800;color:var(--pm-muted);margin-bottom:8px;}
-#dbo-root .dbo-amount-wrap{position:relative;margin-bottom:14px;}
-#dbo-root .dbo-amount-input{width:100%;border-radius:1.1rem;border:1px solid var(--pm-hairline);background:var(--pm-surface-soft);color:var(--pm-ink);font-size:1.5rem;font-weight:900;padding:16px 62px 16px 16px;outline:none;text-align:left;direction:ltr;font-family:'Cairo',sans-serif;}
-#dbo-root .dbo-amount-input:focus{border-color:color-mix(in srgb,var(--pm-gold) 55%,var(--pm-hairline));}
-#dbo-root .dbo-amount-suffix{position:absolute;right:16px;top:50%;transform:translateY(-50%);font-size:.72rem;font-weight:800;color:var(--pm-muted);}
-#dbo-root .dbo-pill-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;}
-#dbo-root .dbo-qpill{border-radius:999px;padding:.5rem 1rem;font-size:.72rem;font-weight:800;background:var(--pm-surface-hi);border:1px solid var(--pm-hairline);color:var(--pm-ink-dim);cursor:pointer;font-family:'Cairo',sans-serif;}
-#dbo-root .dbo-qpill.dbo-active{background:color-mix(in srgb,var(--pm-gold) 16%,transparent);border-color:var(--pm-gold);color:var(--pm-gold);}
-#dbo-root .dbo-live-card{border-radius:1.2rem;border:1px solid var(--pm-hairline);background:linear-gradient(160deg,color-mix(in srgb,var(--pm-gold) 10%,var(--pm-surface-hi)) 0%,var(--pm-surface-hi) 65%);padding:16px;margin-top:auto;}
-#dbo-root .dbo-live-label{font-size:.68rem;font-weight:800;color:var(--pm-muted);margin-bottom:4px;}
-#dbo-root .dbo-live-value{font-size:1.2rem;font-weight:900;color:var(--pm-gold-bright);}
-#dbo-root .dbo-live-note{font-size:.66rem;color:var(--pm-muted);margin-top:6px;line-height:1.6;}
-#dbo-root .dbo-meter{height:10px;border-radius:999px;background:var(--pm-surface-soft);overflow:hidden;margin:14px 0 8px;}
-#dbo-root .dbo-meter-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--pm-gold-dim),var(--pm-gold));width:0%;transition:width .4s ease;}
-#dbo-root .dbo-commit-list{display:flex;flex-direction:column;gap:8px;margin-bottom:14px;}
-#dbo-root .dbo-commit-row{display:flex;align-items:center;gap:10px;border-radius:1rem;border:1px solid var(--pm-hairline);background:var(--pm-surface-hi);padding:10px 12px;}
-#dbo-root .dbo-commit-emoji{width:2.1rem;height:2.1rem;border-radius:.8rem;background:var(--pm-surface-soft);display:flex;align-items:center;justify-content:center;font-size:1.05rem;flex-shrink:0;}
-#dbo-root .dbo-commit-info{flex:1;min-width:0;}
-#dbo-root .dbo-commit-name{font-size:.78rem;font-weight:800;color:var(--pm-ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-#dbo-root .dbo-commit-type{font-size:.62rem;color:var(--pm-muted);}
-#dbo-root .dbo-commit-amount{font-size:.78rem;font-weight:900;color:var(--pm-gold-bright);flex-shrink:0;}
-#dbo-root .dbo-commit-del{width:1.7rem;height:1.7rem;border-radius:999px;background:var(--pm-surface-soft);border:none;color:var(--pm-muted);font-size:.7rem;cursor:pointer;flex-shrink:0;}
-#dbo-root .dbo-commit-empty{font-size:.72rem;color:var(--pm-muted);text-align:center;padding:16px 0;}
-#dbo-root .dbo-commit-form{border-radius:1.1rem;border:1px dashed var(--pm-hairline);background:var(--pm-surface-soft);padding:14px;margin-bottom:12px;}
-#dbo-root .dbo-commit-form input{width:100%;border-radius:.85rem;border:1px solid var(--pm-hairline);background:var(--pm-surface-hi);color:var(--pm-ink);font-size:.78rem;font-weight:700;padding:.65rem .85rem;outline:none;margin-bottom:8px;font-family:'Cairo',sans-serif;}
-#dbo-root .dbo-type-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px;}
-#dbo-root .dbo-type-pill{border-radius:.8rem;border:1px solid var(--pm-hairline);background:var(--pm-surface-hi);color:var(--pm-muted);font-size:.62rem;font-weight:800;padding:.5rem .3rem;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;font-family:'Cairo',sans-serif;}
-#dbo-root .dbo-type-pill.dbo-active{border-color:var(--pm-gold);color:var(--pm-gold);background:color-mix(in srgb,var(--pm-gold) 12%,transparent);}
-#dbo-root .dbo-type-pill span.dbo-ic{font-size:1rem;}
-#dbo-root .dbo-add-commit-btn{width:100%;border-radius:.9rem;border:1px dashed var(--pm-hairline);background:transparent;color:var(--pm-gold);font-size:.74rem;font-weight:800;padding:.75rem;cursor:pointer;font-family:'Cairo',sans-serif;}
-#dbo-root .dbo-commit-actions{display:flex;gap:8px;}
-#dbo-root .dbo-commit-actions button{flex:1;border-radius:.85rem;padding:.6rem;font-size:.72rem;font-weight:900;border:none;cursor:pointer;font-family:'Cairo',sans-serif;}
-#dbo-root .dbo-commit-save{background:var(--pm-gold);color:var(--pm-canvas);}
-#dbo-root .dbo-commit-cancel{background:var(--pm-surface-hi);color:var(--pm-muted);border:1px solid var(--pm-hairline) !important;}
-#dbo-root .dbo-link-card{border-radius:1.2rem;border:1px solid var(--pm-hairline);background:var(--pm-surface-hi);padding:16px;margin-bottom:14px;}
-#dbo-root .dbo-link-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;}
-#dbo-root .dbo-link-icon{width:2.4rem;height:2.4rem;border-radius:.9rem;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0;}
-#dbo-root .dbo-link-icon.dbo-tg{background:rgba(34,158,217,.15);color:#229ED9;}
-#dbo-root .dbo-link-icon.dbo-bank{background:color-mix(in srgb,var(--pm-gold) 16%,transparent);color:var(--pm-gold);}
-#dbo-root .dbo-link-title{font-size:.82rem;font-weight:900;color:var(--pm-ink);}
-#dbo-root .dbo-link-note{font-size:.68rem;color:var(--pm-muted);line-height:1.7;}
-#dbo-root .dbo-step-num-row{display:flex;align-items:flex-start;gap:9px;margin-top:12px;}
-#dbo-root .dbo-step-num{width:1.5rem;height:1.5rem;border-radius:999px;background:var(--pm-gold);color:var(--pm-canvas);font-size:.66rem;font-weight:900;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
-#dbo-root .dbo-step-num-text{font-size:.72rem;color:var(--pm-ink-dim);padding-top:1px;line-height:1.6;}
-#dbo-root .dbo-link-cta{display:block;width:100%;text-align:center;border-radius:.9rem;padding:.8rem;font-size:.76rem;font-weight:900;background:var(--pm-gold);color:var(--pm-canvas);border:none;cursor:pointer;margin-top:12px;font-family:'Cairo',sans-serif;}
-#dbo-root .dbo-summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:6px 0 20px;}
-#dbo-root .dbo-summary-cell{border-radius:1rem;border:1px solid var(--pm-hairline);background:var(--pm-surface-hi);padding:12px;text-align:center;}
-#dbo-root .dbo-summary-cell .dbo-lbl{font-size:.62rem;color:var(--pm-muted);font-weight:800;margin-bottom:4px;}
-#dbo-root .dbo-summary-cell .dbo-val{font-size:1.02rem;font-weight:900;color:var(--pm-gold-bright);}
-#dbo-root .dbo-confetti{width:4rem;height:4rem;border-radius:999px;background:color-mix(in srgb,var(--pm-gold) 18%,transparent);border:1px solid var(--pm-gold);display:flex;align-items:center;justify-content:center;font-size:1.9rem;margin:0 auto 16px;}
-#dbo-root .dbo-actions{padding:12px 20px calc(16px + env(safe-area-inset-bottom));display:flex;gap:10px;}
+@keyframes dboFadeUp{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+#dbo-root .dbo-icon{width:5.2rem;height:5.2rem;border-radius:1.6rem;background:color-mix(in srgb,var(--pm-gold) 15%,transparent);border:1px solid color-mix(in srgb,var(--pm-gold) 35%,transparent);display:flex;align-items:center;justify-content:center;font-size:2.3rem;margin-bottom:22px;}
+#dbo-root .dbo-tag{font-size:.66rem;font-weight:900;color:var(--pm-gold);background:color-mix(in srgb,var(--pm-gold) 14%,transparent);border-radius:999px;padding:.3rem .85rem;margin-bottom:14px;}
+#dbo-root h1.dbo-step-title{font-size:1.32rem;font-weight:900;margin:0 0 12px;line-height:1.45;color:var(--pm-ink);}
+#dbo-root p.dbo-step-sub{font-size:.85rem;color:var(--pm-muted);line-height:1.85;margin:0;max-width:320px;}
+#dbo-root .dbo-mini-row{display:flex;gap:8px;margin-top:20px;flex-wrap:wrap;justify-content:center;}
+#dbo-root .dbo-mini-pill{font-size:.66rem;font-weight:800;color:var(--pm-ink-dim);background:var(--pm-surface-hi);border:1px solid var(--pm-hairline);border-radius:999px;padding:.4rem .8rem;}
+#dbo-root .dbo-actions{padding:14px 20px calc(18px + env(safe-area-inset-bottom));display:flex;gap:10px;}
 #dbo-root .dbo-btn{flex:1;border-radius:1rem;padding:.95rem;font-size:.85rem;font-weight:900;border:none;cursor:pointer;transition:transform .1s;font-family:'Cairo',sans-serif;}
 #dbo-root .dbo-btn:active{transform:scale(.97);}
 #dbo-root .dbo-btn-primary{background:var(--pm-gold);color:var(--pm-canvas);}
-#dbo-root .dbo-btn-ghost{background:transparent;color:var(--pm-muted);border:1px solid var(--pm-hairline) !important;}
-#dbo-root .dbo-skip{text-align:center;font-size:.72rem;color:var(--pm-muted);font-weight:800;margin-top:10px;cursor:pointer;text-decoration:underline;text-underline-offset:3px;}
-#dbo-tour-overlay{position:fixed;inset:0;z-index:1210;display:none;}
-#dbo-tour-hole{position:absolute;border-radius:1rem;box-shadow:0 0 0 4px var(--pm-gold),0 0 0 9999px rgba(0,0,0,.62);transition:all .35s ease;pointer-events:none;}
-#dbo-tour-tip{position:absolute;max-width:250px;background:var(--pm-surface-hi);border:1px solid var(--pm-hairline);border-radius:1rem;padding:14px;box-shadow:0 10px 30px rgba(0,0,0,.35);transition:all .35s ease;}
-#dbo-tour-tip .dbo-tt-title{font-size:.8rem;font-weight:900;margin-bottom:4px;color:var(--pm-ink);}
-#dbo-tour-tip .dbo-tt-sub{font-size:.68rem;color:var(--pm-muted);line-height:1.6;margin-bottom:10px;}
-#dbo-tour-tip .dbo-tt-row{display:flex;align-items:center;justify-content:space-between;gap:8px;}
-#dbo-tour-tip .dbo-tt-count{font-size:.62rem;color:var(--pm-muted-2);font-weight:800;}
-#dbo-tour-tip .dbo-tt-next{background:var(--pm-gold);color:var(--pm-canvas);border:none;border-radius:.7rem;padding:.45rem .9rem;font-size:.7rem;font-weight:900;cursor:pointer;font-family:'Cairo',sans-serif;}
-#dbo-tour-skip{position:fixed;bottom:calc(14px + env(safe-area-inset-bottom));right:50%;transform:translateX(50%);z-index:1211;background:var(--pm-surface-hi);border:1px solid var(--pm-hairline);color:var(--pm-muted);font-size:.68rem;font-weight:800;padding:.5rem 1rem;border-radius:999px;cursor:pointer;display:none;font-family:'Cairo',sans-serif;}
 .dbo-hide{display:none !important;}
 </style>
 
@@ -11431,136 +11394,100 @@
   <div id="dbo-shell">
     <div class="dbo-topbar">
       <button class="dbo-back-btn" id="dbo-backBtn" type="button">←</button>
-      <div class="dbo-progress-wrap"><div class="dbo-progress-bar" id="dbo-progressBar"></div></div>
-      <div class="dbo-step-count" id="dbo-stepCount">1/8</div>
+      <div class="dbo-dots" id="dbo-dots"></div>
+      <span class="dbo-skip-top" id="dbo-skipTop">تخطي</span>
     </div>
 
     <div class="dbo-steps" id="dbo-steps">
 
       <div class="dbo-step dbo-active" data-step="0">
-        <div class="dbo-badge">👋</div>
+        <div class="dbo-icon">👋</div>
         <h1 class="dbo-step-title">أهلًا بيك في دبّر</h1>
-        <p class="dbo-step-sub">دقيقتين بس، وبعدها دبّر بيبقى عارف وضعك المالي زيك بالظبط — مش بيتوقع، بيحسب.</p>
-        <div class="dbo-live-card" style="margin-top:0;">
-          <div class="dbo-live-label">🎯 هتاخد إيه من الدقيقتين دول</div>
-          <div style="font-size:.74rem;color:var(--pm-ink-dim);line-height:1.8;margin-top:6px;">ليمت يومي مظبوط على مقاسك، تذكير بأي قسط قبل ما يفاجئك، وصورة حقيقية لفلوسك من غير ما تحسب بإيدك.</div>
-        </div>
+        <p class="dbo-step-sub">قبل ما تبدأ، خليك معانا نص دقيقة نعرّفك بأهم اللي دبّر يعرف يعمله ليك.</p>
       </div>
 
       <div class="dbo-step" data-step="1">
-        <div class="dbo-badge">💰</div>
-        <h1 class="dbo-step-title">دخلك الشهري قد إيه؟</h1>
-        <p class="dbo-step-sub">مش لازم تكون دقيقة 100%، رقم تقريبي كفاية ونظبطه مع بعض بعدين.</p>
-        <label class="dbo-field-label">الدخل الشهري</label>
-        <div class="dbo-amount-wrap">
-          <input type="number" inputmode="numeric" class="dbo-amount-input" id="dbo-incomeInput" placeholder="0">
-          <span class="dbo-amount-suffix">ج.م</span>
-        </div>
-        <div class="dbo-pill-row" id="dbo-incomePills">
-          <button type="button" class="dbo-qpill" data-val="5000">5,000</button>
-          <button type="button" class="dbo-qpill" data-val="8000">8,000</button>
-          <button type="button" class="dbo-qpill" data-val="12000">12,000</button>
-          <button type="button" class="dbo-qpill" data-val="20000">20,000</button>
-          <button type="button" class="dbo-qpill" data-val="30000">30,000</button>
-        </div>
+        <div class="dbo-icon">🎙️</div>
+        <div class="dbo-tag">تسجيل المصاريف</div>
+        <h1 class="dbo-step-title">سجّل مصروفك زي ما يريحك</h1>
+        <p class="dbo-step-sub">بصوتك، بالكتابة العادية، أو بصورة فاتورة — دبّر بيفهمها ويصنّفها لوحده. وحتى لو انت في تطبيق تاني، تقدر تعمل مشاركة (Share) للصوت أو الصورة أو الرسالة على دبّر مباشرة.</p>
+        <div class="dbo-mini-row"><span class="dbo-mini-pill">🎙️ صوت</span><span class="dbo-mini-pill">⌨️ كتابة</span><span class="dbo-mini-pill">🧾 فاتورة</span><span class="dbo-mini-pill">↗️ Share من أي app</span></div>
       </div>
 
       <div class="dbo-step" data-step="2">
-        <div class="dbo-badge">📊</div>
-        <h1 class="dbo-step-title">إيه الميزانية اللي عايز تلتزم بيها؟</h1>
-        <p class="dbo-step-sub">السقف اللي عايز تلعب جواه كل شهر، من غير الأقساط والالتزامات الثابتة.</p>
-        <label class="dbo-field-label">الميزانية الشهرية</label>
-        <div class="dbo-amount-wrap">
-          <input type="number" inputmode="numeric" class="dbo-amount-input" id="dbo-budgetInput" placeholder="0">
-          <span class="dbo-amount-suffix">ج.م</span>
-        </div>
-        <div class="dbo-live-card">
-          <div class="dbo-live-label">💡 هيفضل معاك تقريبًا</div>
-          <div class="dbo-live-value" id="dbo-remainAfterBudget">—</div>
-          <div class="dbo-live-note">دخلك ناقص الميزانية دي — يعني الهامش اللي تقدر توفره أو تصرفه على حاجة تانية.</div>
-        </div>
+        <div class="dbo-icon">📈</div>
+        <div class="dbo-tag">محفظة استثمارية</div>
+        <h1 class="dbo-step-title">تابع أصولك لحظة بلحظة</h1>
+        <p class="dbo-step-sub">حط أسهمك، عملاتك، أو أي أصول عندك، ودبّر يتابعلك أسعارها في السوق أول بأول من غير ما تفتح 10 تطبيقات.</p>
       </div>
 
       <div class="dbo-step" data-step="3">
-        <div class="dbo-badge">📆</div>
-        <h1 class="dbo-step-title">الليمت اليومي</h1>
-        <p class="dbo-step-sub">حسبنالك سقف يومي من ميزانيتك، عشان تعرف تلتزم بيه أول بأول.</p>
-        <label class="dbo-field-label">الليمت اليومي</label>
-        <div class="dbo-amount-wrap">
-          <input type="number" inputmode="numeric" class="dbo-amount-input" id="dbo-limitInput" placeholder="0">
-          <span class="dbo-amount-suffix">ج.م</span>
-        </div>
-        <div class="dbo-meter"><div class="dbo-meter-fill" id="dbo-limitMeter"></div></div>
-        <div class="dbo-live-note" style="margin-bottom:14px;" id="dbo-limitNote">هيتغير تلقائي لو عدّلت الميزانية.</div>
+        <div class="dbo-icon">🏦</div>
+        <div class="dbo-tag">أمان تام</div>
+        <h1 class="dbo-step-title">دبّر يقرأ رسايل بنكك، من غير أي كلمة سر</h1>
+        <p class="dbo-step-sub">من غير ربط فيزا ومن غير أي باسورد خاص بيك، بس بإذن بسيط لدبّر يقرأ رسايل البنك أو المحفظة، مصاريفك تتسجل لوحدها. الموضوع كله بياخد أقل من دقيقة.</p>
       </div>
 
       <div class="dbo-step" data-step="4">
-        <div class="dbo-badge">📌</div>
-        <h1 class="dbo-step-title">التزاماتك الثابتة</h1>
-        <p class="dbo-step-sub">أقساط، إيجار، اشتراكات… أي حاجة بتتخصم منك ثابت كل شهر. ضيف كام واحدة عايز.</p>
-        <div class="dbo-commit-list" id="dbo-commitList">
-          <p class="dbo-commit-empty">لسه مفيش التزامات مضافة.</p>
-        </div>
-        <div class="dbo-commit-form dbo-hide" id="dbo-commitForm">
-          <input type="text" id="dbo-commitNameInput" placeholder="اسم الالتزام، مثال: قسط العربية">
-          <input type="number" id="dbo-commitAmountInput" placeholder="المبلغ الشهري">
-          <div class="dbo-type-grid" id="dbo-commitTypePills">
-            <button type="button" class="dbo-type-pill dbo-active" data-type="إيجار" data-emoji="🏠"><span class="dbo-ic">🏠</span>إيجار</button>
-            <button type="button" class="dbo-type-pill" data-type="قسط عربية" data-emoji="🚗"><span class="dbo-ic">🚗</span>قسط عربية</button>
-            <button type="button" class="dbo-type-pill" data-type="قسط" data-emoji="💳"><span class="dbo-ic">💳</span>قسط</button>
-            <button type="button" class="dbo-type-pill" data-type="اشتراك" data-emoji="🔁"><span class="dbo-ic">🔁</span>اشتراك</button>
-            <button type="button" class="dbo-type-pill" data-type="تعليم" data-emoji="🎓"><span class="dbo-ic">🎓</span>تعليم</button>
-            <button type="button" class="dbo-type-pill" data-type="تاني" data-emoji="✨"><span class="dbo-ic">✨</span>تاني</button>
-          </div>
-          <div class="dbo-commit-actions">
-            <button type="button" class="dbo-commit-cancel" id="dbo-commitCancelBtn">إلغاء</button>
-            <button type="button" class="dbo-commit-save" id="dbo-commitSaveBtn">إضافة</button>
-          </div>
-        </div>
-        <button class="dbo-add-commit-btn" id="dbo-commitAddBtn" type="button">+ إضافة التزام جديد</button>
+        <div class="dbo-icon">💰</div>
+        <div class="dbo-tag">التخطيط المالي</div>
+        <h1 class="dbo-step-title">دخلك، ميزانيتك، والتزاماتك في مكان واحد</h1>
+        <p class="dbo-step-sub">دوّن دخلك الشهري، حدّد ميزانيتك، وسجّل التزاماتك الثابتة زي الإيجار والأقساط — ودبّر يبني لك الصورة الكاملة لفلوسك.</p>
       </div>
 
       <div class="dbo-step" data-step="5">
-        <div class="dbo-badge">💬</div>
-        <h1 class="dbo-step-title">اربط حسابك بتليجرام</h1>
-        <p class="dbo-step-sub">تليجرام هو خطنا الوحيد معاك — منه بتوصلك تنبيهاتك، ومنه تقدر تسجّل مصروف بصوتك وانت ماشي.</p>
-        <div class="dbo-link-card">
-          <div class="dbo-link-head">
-            <span class="dbo-link-icon dbo-tg">✈️</span>
-            <div><div class="dbo-link-title">دبّر على تليجرام</div><div class="dbo-link-note">خطوة اختيارية، بتاخد نص دقيقة</div></div>
-          </div>
-          <div class="dbo-step-num-row"><span class="dbo-step-num">1</span><span class="dbo-step-num-text">افتح <b>دبّر على تليجرام</b> بضغطة واحدة</span></div>
-          <div class="dbo-step-num-row"><span class="dbo-step-num">2</span><span class="dbo-step-num-text">هيبعتلك كود من 6 أرقام</span></div>
-          <div class="dbo-step-num-row"><span class="dbo-step-num">3</span><span class="dbo-step-num-text">اكتب الكود هنا وهتتربط فورًا</span></div>
-          <button class="dbo-link-cta" id="dbo-telegramCta" type="button">✅ افتح تليجرام واربط الحساب</button>
-        </div>
-        <div class="dbo-skip" id="dbo-skipTelegram">تخطي دلوقتي</div>
+        <div class="dbo-icon">🎯</div>
+        <div class="dbo-tag">ليمتات الفئات</div>
+        <h1 class="dbo-step-title">حدّد ليمت لكل فئة، ودبّر ينبهك</h1>
+        <p class="dbo-step-sub">اختار ليمت شهري لكل فئة بتصرف عليها (أكل، ترفيه، مواصلات...)، وهنبعتلك تنبيه أول ما توصل لـ80% منه، عشان ما تتفاجئش في آخر الشهر.</p>
       </div>
 
       <div class="dbo-step" data-step="6">
-        <div class="dbo-badge">🏦</div>
-        <h1 class="dbo-step-title">اربط بنكك أو محفظتك</h1>
-        <p class="dbo-step-sub">اربط بنكك أو محفظتك مرة واحدة، ودبّر يمسك كل حركة فلوس تحصل عليها لوحده.</p>
-        <div class="dbo-link-card">
-          <div class="dbo-link-head">
-            <span class="dbo-link-icon dbo-bank">🏦</span>
-            <div><div class="dbo-link-title">ربط البنوك والمحافظ</div><div class="dbo-link-note">اختياري — تقدر تضيفه في أي وقت من "حسابي"</div></div>
-          </div>
-          <button class="dbo-link-cta" id="dbo-bankCta" type="button">🔗 ابدأ الربط</button>
-        </div>
-        <div class="dbo-skip" id="dbo-skipBank">تخطي دلوقتي</div>
+        <div class="dbo-icon">🏆</div>
+        <div class="dbo-tag">الأهداف</div>
+        <h1 class="dbo-step-title">حدد هدفك، ودبّر يمشيك خطوة خطوة</h1>
+        <p class="dbo-step-sub">عايز توفر لسفرية، عربية، أو أي هدف؟ حدده في دبّر وهو يساعدك تنظم توفيرك عشان توصله في الوقت اللي تحدده.</p>
       </div>
 
       <div class="dbo-step" data-step="7">
-        <div class="dbo-confetti">🎉</div>
-        <h1 class="dbo-step-title" style="text-align:center;">حسابك جاهز يا نجم</h1>
-        <p class="dbo-step-sub" style="text-align:center;">دي أرقامك زي ما ظبطناها مع بعض. غيّر أي رقم منها وقت ما تحب من "حسابي".</p>
-        <div class="dbo-summary-grid">
-          <div class="dbo-summary-cell"><div class="dbo-lbl">الدخل الشهري</div><div class="dbo-val" id="dbo-sumIncome">—</div></div>
-          <div class="dbo-summary-cell"><div class="dbo-lbl">الميزانية</div><div class="dbo-val" id="dbo-sumBudget">—</div></div>
-          <div class="dbo-summary-cell"><div class="dbo-lbl">الليمت اليومي</div><div class="dbo-val" id="dbo-sumLimit">—</div></div>
-          <div class="dbo-summary-cell"><div class="dbo-lbl">عدد الالتزامات</div><div class="dbo-val" id="dbo-sumCommits">—</div></div>
-        </div>
+        <div class="dbo-icon">📄</div>
+        <div class="dbo-tag">التقارير</div>
+        <h1 class="dbo-step-title">تقرير كامل، يومي وشهري</h1>
+        <p class="dbo-step-sub">تقدر تطلع تقرير PDF يوضح كل مصاريفك ودخلك يوم بيوم أو شهر بشهر، جاهز تراجعه أو تشاركه وقت ما تحب.</p>
+      </div>
+
+      <div class="dbo-step" data-step="8">
+        <div class="dbo-icon">💬</div>
+        <div class="dbo-tag">الإشعارات</div>
+        <h1 class="dbo-step-title">كل تنبيهاتك في مكان واحد</h1>
+        <p class="dbo-step-sub">اربط تليجرام بدبّر عشان توصلك كل إشعاراته فورًا، وفيه كمان إشعارات داخلية جوه التطبيق نفسه.</p>
+      </div>
+
+      <div class="dbo-step" data-step="9">
+        <div class="dbo-icon">🐷</div>
+        <div class="dbo-tag">الحصالة</div>
+        <h1 class="dbo-step-title">وفّر فلوسك في حصالة دبّر</h1>
+        <p class="dbo-step-sub">جنّب أي مبلغ تحب توفّره على جنب، وتابعه لحد ما يوصل للمبلغ اللي عايزه.</p>
+      </div>
+
+      <div class="dbo-step" data-step="10">
+        <div class="dbo-icon">🤝</div>
+        <div class="dbo-tag">الديون والمناسبات</div>
+        <h1 class="dbo-step-title">مين ليك ومين عليك، وكل مناسباتك</h1>
+        <p class="dbo-step-sub">سجّل ديونك (اللي ليك واللي عليك)، جمعياتك، ومناسباتك زي الأفراح والخطوبات — كل ده متابع في مكان واحد.</p>
+      </div>
+
+      <div class="dbo-step" data-step="11">
+        <div class="dbo-icon">🔔</div>
+        <div class="dbo-tag">التذكيرات</div>
+        <h1 class="dbo-step-title">خليك سابق مواعيدك</h1>
+        <p class="dbo-step-sub">دبّر يفكّرك بمواعيد أقساطك وأي التزام قبل ما ييجي، عشان محدش يفاجئك.</p>
+      </div>
+
+      <div class="dbo-step" data-step="12">
+        <div class="dbo-icon">🚀</div>
+        <h1 class="dbo-step-title">يلا نبدأ يا نجم</h1>
+        <p class="dbo-step-sub">دي كانت أهم مميزات دبّر. تقدر ترجع تشوفها تاني وقت ما تحب من "حسابي".</p>
       </div>
 
     </div>
@@ -11571,315 +11498,79 @@
   </div>
 </div>
 
-<div id="dbo-tour-overlay">
-  <div id="dbo-tour-hole"></div>
-  <div id="dbo-tour-tip">
-    <div class="dbo-tt-title" id="dbo-tourTitle"></div>
-    <div class="dbo-tt-sub" id="dbo-tourSub"></div>
-    <div class="dbo-tt-row"><span class="dbo-tt-count" id="dbo-tourCount"></span><button class="dbo-tt-next" id="dbo-tourNext" type="button">التالي</button></div>
-  </div>
-</div>
-<button id="dbo-tour-skip" type="button">تخطي الجولة</button>
-
 <script id="dbo-script">
 (function(){
   const dboSteps = Array.from(document.querySelectorAll('#dbo-steps .dbo-step'));
   const dboTotal = dboSteps.length;
   let dboCurrent = 0;
-  let dboState = { commits: [] };
   let dboUid = 'guest';
 
-  function dboFmt(n){ return (n||0).toLocaleString('ar-EG'); }
+  const dotsWrap = document.getElementById('dbo-dots');
+  dotsWrap.innerHTML = dboSteps.map((_, i) => `<span class="dbo-dot" data-dot="${i}"></span>`).join('');
+  const dboDots = Array.from(dotsWrap.querySelectorAll('.dbo-dot'));
 
   function dboRenderStep(){
     dboSteps.forEach(s => s.classList.toggle('dbo-active', Number(s.dataset.step) === dboCurrent));
-    document.getElementById('dbo-progressBar').style.width = ((dboCurrent)/(dboTotal-1)*100) + '%';
-    document.getElementById('dbo-stepCount').textContent = (dboCurrent+1)+'/'+dboTotal;
+    dboDots.forEach((d,i) => d.classList.toggle('dbo-dot-active', i === dboCurrent));
     document.getElementById('dbo-backBtn').classList.toggle('dbo-show-back', dboCurrent > 0);
-
-    const nextBtn = document.getElementById('dbo-nextBtn');
-    if (dboCurrent === 0) nextBtn.textContent = 'يلا نبدأ';
-    else if (dboCurrent === 7) nextBtn.textContent = 'ابدأ الجولة السريعة';
-    else nextBtn.textContent = 'التالي';
-
-    const actions = document.getElementById('dbo-actions');
-    actions.querySelectorAll('.dbo-btn-ghost').forEach(b=>b.remove());
-    if (dboCurrent === 7) {
-      const skipBtn = document.createElement('button');
-      skipBtn.type = 'button';
-      skipBtn.className = 'dbo-btn dbo-btn-ghost';
-      skipBtn.textContent = 'تخطي الجولة';
-      skipBtn.onclick = dboSaveAndClose;
-      actions.insertBefore(skipBtn, nextBtn);
-    }
-
-    if (dboCurrent === 2) dboUpdateBudgetLive();
-    if (dboCurrent === 3) dboUpdateLimitLive();
-    if (dboCurrent === 7) dboUpdateSummary();
+    document.getElementById('dbo-skipTop').classList.toggle('dbo-hide', dboCurrent === dboTotal-1);
+    document.getElementById('dbo-nextBtn').textContent = dboCurrent === 0 ? 'يلا نبدأ' : (dboCurrent === dboTotal-1 ? 'يلا هيا 🚀' : 'التالي');
     dboSaveProgress();
-  }
-
-  document.getElementById('dbo-incomePills').addEventListener('click', (e)=>{
-    const p = e.target.closest('.dbo-qpill'); if(!p) return;
-    document.querySelectorAll('#dbo-incomePills .dbo-qpill').forEach(x=>x.classList.remove('dbo-active'));
-    p.classList.add('dbo-active');
-    document.getElementById('dbo-incomeInput').value = p.dataset.val;
-    dboSaveProgress();
-  });
-  document.getElementById('dbo-incomeInput').addEventListener('input', ()=>{
-    document.querySelectorAll('#dbo-incomePills .dbo-qpill').forEach(x=>x.classList.remove('dbo-active'));
-    dboSaveProgress();
-  });
-
-  function dboUpdateBudgetLive(){
-    const income = Number(document.getElementById('dbo-incomeInput').value)||0;
-    const budget = Number(document.getElementById('dbo-budgetInput').value)||0;
-    document.getElementById('dbo-remainAfterBudget').textContent = dboFmt(income-budget) + ' ج.م';
-  }
-  document.getElementById('dbo-budgetInput').addEventListener('input', ()=>{ dboUpdateBudgetLive(); dboSaveProgress(); });
-
-  function dboSuggestLimitIfEmpty(){
-    const limitInput = document.getElementById('dbo-limitInput');
-    const budget = Number(document.getElementById('dbo-budgetInput').value)||0;
-    if(!limitInput.dataset.touched){ limitInput.value = budget ? Math.round(budget/30) : ''; }
-  }
-  function dboUpdateLimitLive(){
-    dboSuggestLimitIfEmpty();
-    const budget = Number(document.getElementById('dbo-budgetInput').value)||0;
-    const limit = Number(document.getElementById('dbo-limitInput').value)||0;
-    const suggested = budget ? Math.round(budget/30) : 0;
-    const pct = suggested ? Math.min(100, Math.round((limit/(suggested*1.5))*100)) : 0;
-    document.getElementById('dbo-limitMeter').style.width = pct+'%';
-    document.getElementById('dbo-limitNote').textContent = suggested ? `المقترح تلقائيًا: ${dboFmt(suggested)} ج.م/يوم (الميزانية ÷ 30)` : 'حدّد ميزانيتك الأول عشان نقترحلك رقم.';
-  }
-  document.getElementById('dbo-limitInput').addEventListener('input', (e)=>{ e.target.dataset.touched='1'; dboUpdateLimitLive(); dboSaveProgress(); });
-
-  const dboCommitList = document.getElementById('dbo-commitList');
-  const dboCommitForm = document.getElementById('dbo-commitForm');
-  let dboActiveCommitType = { type:'إيجار', emoji:'🏠' };
-
-  function dboRenderCommits(){
-    if(!dboState.commits.length){ dboCommitList.innerHTML = '<p class="dbo-commit-empty">لسه مفيش التزامات مضافة.</p>'; return; }
-    dboCommitList.innerHTML = dboState.commits.map((c,i)=>`
-      <div class="dbo-commit-row">
-        <span class="dbo-commit-emoji">${c.emoji}</span>
-        <div class="dbo-commit-info"><div class="dbo-commit-name">${c.name}</div><div class="dbo-commit-type">${c.type}</div></div>
-        <span class="dbo-commit-amount">${dboFmt(c.amount)} ج.م</span>
-        <button type="button" class="dbo-commit-del" data-i="${i}">✕</button>
-      </div>`).join('');
-    dboCommitList.querySelectorAll('.dbo-commit-del').forEach(btn=>btn.addEventListener('click', ()=>{
-      dboState.commits.splice(Number(btn.dataset.i),1); dboRenderCommits(); dboSaveProgress();
-    }));
-  }
-  document.getElementById('dbo-commitAddBtn').addEventListener('click', ()=>{
-    dboCommitForm.classList.remove('dbo-hide');
-    document.getElementById('dbo-commitAddBtn').classList.add('dbo-hide');
-  });
-  document.getElementById('dbo-commitCancelBtn').addEventListener('click', ()=>{
-    dboCommitForm.classList.add('dbo-hide');
-    document.getElementById('dbo-commitAddBtn').classList.remove('dbo-hide');
-    document.getElementById('dbo-commitNameInput').value=''; document.getElementById('dbo-commitAmountInput').value='';
-  });
-  document.getElementById('dbo-commitTypePills').addEventListener('click',(e)=>{
-    const p = e.target.closest('.dbo-type-pill'); if(!p) return;
-    document.querySelectorAll('#dbo-commitTypePills .dbo-type-pill').forEach(x=>x.classList.remove('dbo-active'));
-    p.classList.add('dbo-active');
-    dboActiveCommitType = { type:p.dataset.type, emoji:p.dataset.emoji };
-  });
-  document.getElementById('dbo-commitSaveBtn').addEventListener('click', ()=>{
-    const name = document.getElementById('dbo-commitNameInput').value.trim();
-    const amount = Number(document.getElementById('dbo-commitAmountInput').value);
-    if(!name || !amount) return;
-    dboState.commits.push({ name, amount, type:dboActiveCommitType.type, emoji:dboActiveCommitType.emoji });
-    dboRenderCommits();
-    dboSaveProgress();
-    document.getElementById('dbo-commitNameInput').value=''; document.getElementById('dbo-commitAmountInput').value='';
-    document.getElementById('dbo-commitNameInput').focus();
-    // الفورم بيفضل مفتوح عشان يضيف كذا التزام ورا بعض من غير ما يتقفل
-  });
-
-  let dboPendingTelegramOpen = false;
-  let dboPendingBankOpen = false;
-  document.getElementById('dbo-telegramCta').addEventListener('click', ()=>{
-    dboPendingTelegramOpen = true;
-    dboGoNext();
-  });
-  document.getElementById('dbo-skipTelegram').addEventListener('click', dboGoNext);
-  document.getElementById('dbo-bankCta').addEventListener('click', ()=>{
-    dboPendingBankOpen = true;
-    dboGoNext();
-  });
-  document.getElementById('dbo-skipBank').addEventListener('click', dboGoNext);
-
-  function dboUpdateSummary(){
-    document.getElementById('dbo-sumIncome').textContent = dboFmt(Number(document.getElementById('dbo-incomeInput').value)) + ' ج.م';
-    document.getElementById('dbo-sumBudget').textContent = dboFmt(Number(document.getElementById('dbo-budgetInput').value)) + ' ج.م';
-    document.getElementById('dbo-sumLimit').textContent = dboFmt(Number(document.getElementById('dbo-limitInput').value)) + ' ج.م';
-    document.getElementById('dbo-sumCommits').textContent = dboState.commits.length;
   }
 
   function dboGoNext(){
-    if (dboCurrent === dboTotal-1){ dboSaveAndClose(); return; }
+    if (dboCurrent === dboTotal-1){ dboClose(); return; }
     dboCurrent++;
     dboRenderStep();
   }
-  function dboGoBack(){ if(dboCurrent>0){ dboCurrent--; dboRenderStep(); } }
+  function dboGoBack(){ if (dboCurrent>0){ dboCurrent--; dboRenderStep(); } }
   document.getElementById('dbo-nextBtn').addEventListener('click', dboGoNext);
   document.getElementById('dbo-backBtn').addEventListener('click', dboGoBack);
+  document.getElementById('dbo-skipTop').addEventListener('click', dboClose);
 
-  // ===== حفظ فعلي في نظام التخطيط الحقيقي (planningSettings) =====
-  function dboSaveAndClose(){
-    try {
-      const income = Number(document.getElementById('dbo-incomeInput').value) || 0;
-      const budget = Number(document.getElementById('dbo-budgetInput').value) || 0;
+  // سحب يمين/شمال للتنقل بين السلايدز
+  let dboTouchX = null;
+  const dboStepsEl = document.getElementById('dbo-steps');
+  dboStepsEl.addEventListener('touchstart', (e) => { dboTouchX = e.touches[0].clientX; }, { passive: true });
+  dboStepsEl.addEventListener('touchend', (e) => {
+    if (dboTouchX === null) return;
+    const dx = e.changedTouches[0].clientX - dboTouchX;
+    if (Math.abs(dx) > 45) { dx < 0 ? dboGoNext() : dboGoBack(); }
+    dboTouchX = null;
+  }, { passive: true });
 
-      if (typeof ensurePlanningUI === 'function') ensurePlanningUI();
-      const incomeField = document.getElementById('planning-income');
-      const budgetField = document.getElementById('planning-budget');
-      if (incomeField) incomeField.value = income;
-      if (budgetField) budgetField.value = budget;
-
-      if (typeof planningSettings === 'function' && dboState.commits.length) {
-        const settings = planningSettings();
-        settings.recurringExpenses = [
-          ...(settings.recurringExpenses || []),
-          ...dboState.commits.map(c => ({
-            id: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now()+Math.random())),
-            name: `${c.emoji} ${c.name}`,
-            amount: c.amount,
-            day: 1,
-            category: c.type,
-            active: true,
-          })),
-        ];
-        window.__financialSettings = settings;
-      }
-
-      if (typeof savePlanningSettings === 'function') savePlanningSettings();
-    } catch (e) { console.error('dbo save error', e); }
-
-    try { localStorage.setItem('dabbar-onboarding-done-' + dboUid, '1'); } catch(e) {}
-    dboClearProgress();
-
-    document.getElementById('dbo-root').classList.remove('dbo-show');
-    dboStartTour();
-  }
-
-  // ===== الجولة الإرشادية الحقيقية — بتدور على التابات الفعلية تحت =====
-  const dboTourSteps = [
-    { selector: '.tab-btn[data-tab="account"]', title:'👤 حسابي', sub:'كل حاجة بتخصك هنا: بياناتك، ربط تليجرام، وربط بنكك ومحافظك.' },
-    { selector: '.tab-btn[data-tab="assistant"]', title:'✨ مساعد', sub:'مركز دبّر الذكي: حدّد أهدافك، اسأل دبّر أي سؤال مالي، وشوف تصنيفاتك وتذكيراتك ونصايح موفّرة ليك.' },
-    { selector: '.tab-btn[data-tab="debts"]', title:'🤝 ديون', sub:'مين ليك ومين عليك مكتوب أول بأول، ومناسباتك في نفس المكان.' },
-    { selector: '.tab-btn[data-tab="daily"]', title:'📅 يومي', sub:'كل جنيه اتحرك النهاردة، لحظة بلحظة.' },
-    { selector: '.tab-btn[data-tab="monthly"]', title:'📈 شهري', sub:'سجّل مصروفك في ثانية من هنا، وشوف تقرير شهرك كامل بضغطة واحدة.' },
-  ];
-  let dboTourIdx = 0;
-  const dboTourOverlay = document.getElementById('dbo-tour-overlay');
-  const dboTourHole = document.getElementById('dbo-tour-hole');
-
-  function dboStartTour(){
-    dboTourIdx = 0;
-    dboTourOverlay.style.display='block';
-    document.getElementById('dbo-tour-skip').style.display='block';
-    dboPositionTour();
-  }
-  function dboPositionTour(){
-    const step = dboTourSteps[dboTourIdx];
-    const el = document.querySelector(step.selector);
-    if (!el) { dboTourIdx < dboTourSteps.length-1 ? (dboTourIdx++, dboPositionTour()) : dboEndTour(); return; }
-    el.scrollIntoView({ block: 'nearest', inline: 'center' });
-    const r = el.getBoundingClientRect();
-    const pad = 6;
-    dboTourHole.style.left = (r.left-pad)+'px';
-    dboTourHole.style.top = (r.top-pad)+'px';
-    dboTourHole.style.width = (r.width+pad*2)+'px';
-    dboTourHole.style.height = (r.height+pad*2)+'px';
-
-    document.getElementById('dbo-tourTitle').textContent = step.title;
-    document.getElementById('dbo-tourSub').textContent = step.sub;
-    document.getElementById('dbo-tourCount').textContent = (dboTourIdx+1)+' / '+dboTourSteps.length;
-    document.getElementById('dbo-tourNext').textContent = dboTourIdx===dboTourSteps.length-1 ? 'خلاص، يلا ابدأ' : 'التالي';
-
-    const tip = document.getElementById('dbo-tour-tip');
-    const tipTop = r.top - 150;
-    tip.style.top = (tipTop < 10 ? '' : tipTop+'px');
-    if (tipTop < 10) tip.style.bottom = (window.innerHeight - r.top + 16) + 'px'; else tip.style.bottom = '';
-    let tipLeft = r.left + r.width/2 - 125;
-    tipLeft = Math.max(12, Math.min(tipLeft, window.innerWidth-262));
-    tip.style.left = tipLeft+'px';
-  }
-  document.getElementById('dbo-tourNext').addEventListener('click', ()=>{
-    if (dboTourIdx < dboTourSteps.length-1){ dboTourIdx++; dboPositionTour(); }
-    else { dboEndTour(); }
-  });
-  document.getElementById('dbo-tour-skip').addEventListener('click', dboEndTour);
-  window.addEventListener('resize', ()=>{ if(dboTourOverlay.style.display==='block') dboPositionTour(); });
-
-  function dboEndTour(){
-    dboTourOverlay.style.display='none';
-    document.getElementById('dbo-tour-skip').style.display='none';
-    if (dboPendingTelegramOpen) {
-      dboPendingTelegramOpen = false;
-      setTimeout(() => document.getElementById('account-telegram-card')?.click(), 300);
-    } else if (dboPendingBankOpen) {
-      dboPendingBankOpen = false;
-      setTimeout(() => document.getElementById('bank-accounts-card')?.click(), 300);
-    }
-  }
-
-  // ===== حفظ التقدم في sessionStorage — لو المستخدم عمل رفريش نص الرحلة يرجع نفس النقطة =====
   function dboProgressKey(){ return 'dabbar-onboarding-progress-' + dboUid; }
   function dboSaveProgress(){
-    try {
-      sessionStorage.setItem(dboProgressKey(), JSON.stringify({
-        step: dboCurrent,
-        income: document.getElementById('dbo-incomeInput').value,
-        budget: document.getElementById('dbo-budgetInput').value,
-        limit: document.getElementById('dbo-limitInput').value,
-        limitTouched: !!document.getElementById('dbo-limitInput').dataset.touched,
-        commits: dboState.commits,
-      }));
-    } catch(e) {}
+    try { sessionStorage.setItem(dboProgressKey(), String(dboCurrent)); } catch(e) {}
   }
   function dboLoadProgress(){
     try {
       const raw = sessionStorage.getItem(dboProgressKey());
-      if (!raw) return null;
-      return JSON.parse(raw);
+      return raw !== null ? Number(raw) : null;
     } catch(e) { return null; }
   }
   function dboClearProgress(){
     try { sessionStorage.removeItem(dboProgressKey()); } catch(e) {}
   }
 
+  function dboClose(){
+    try { localStorage.setItem('dabbar-onboarding-done-' + dboUid, '1'); } catch(e) {}
+    dboClearProgress();
+    document.getElementById('dbo-root').classList.remove('dbo-show');
+  }
+
   // ===== نقاط الدخول =====
-  window.startDabbarOnboarding = function(uid){
+  window.startDabbarOnboarding = function(uid, forceRestart){
     dboUid = uid || 'guest';
-    const saved = dboLoadProgress();
-    if (saved) {
-      dboCurrent = Math.min(saved.step || 0, dboTotal - 1);
-      dboState = { commits: Array.isArray(saved.commits) ? saved.commits : [] };
-      document.getElementById('dbo-incomeInput').value = saved.income || '';
-      document.getElementById('dbo-budgetInput').value = saved.budget || '';
-      document.getElementById('dbo-limitInput').value = saved.limit || '';
-      if (saved.limitTouched) document.getElementById('dbo-limitInput').dataset.touched = '1';
-      else delete document.getElementById('dbo-limitInput').dataset.touched;
-    } else {
-      dboCurrent = 0;
-      dboState = { commits: [] };
-      document.getElementById('dbo-incomeInput').value='';
-      document.getElementById('dbo-budgetInput').value='';
-      document.getElementById('dbo-limitInput').value='';
-      delete document.getElementById('dbo-limitInput').dataset.touched;
-    }
-    dboRenderCommits();
+    const saved = forceRestart ? null : dboLoadProgress();
+    dboCurrent = (saved !== null && saved >= 0 && saved < dboTotal) ? saved : 0;
     dboRenderStep();
     document.getElementById('dbo-root').classList.add('dbo-show');
   };
 
   document.getElementById('dbo-reopen-btn')?.addEventListener('click', () => {
     const uid = (typeof currentUser !== 'undefined' && currentUser?.id) || window.__dashboardData?.telegramUserId || 'guest';
-    window.startDabbarOnboarding(uid);
+    window.startDabbarOnboarding(uid, true);
   });
 
   dboRenderStep();

@@ -9,6 +9,15 @@ import { hasActiveSubscription, getSubscriptionExpiry, isInTrial, getTrialDaysLe
 import { getActiveDays } from '../../lib/activeDays.js';
 import { getPortfolio, getPortfolioDigest } from '../../lib/investments.js';
 
+// مهم: الفنكشن ده بيعمل ~19 استعلام Supabase على التوازي وممكن ياخد وقت أطول من
+// الـ default timeout بتاع Vercel (10 ثواني على Hobby)، وده كان سبب رسالة
+// "فشل تحميل البيانات" الافتراضية — الفنكشن كانت بتتقفل بـ 504 (صفحة مش JSON)
+// قبل ما توصل حتى لأي try/catch جوه الكود. رفعنا المهلة هنا صراحةً.
+// ملحوظة: على Vercel Hobby أقصى قيمة مسموحة 60، وعلى Pro لغاية 300.
+export const config = {
+  maxDuration: 30,
+};
+
 function sumByCurrency(rows = []) {
   return rows.reduce((acc, row) => {
     const code = String(row.currency_code || 'EGP').toUpperCase();
@@ -167,6 +176,9 @@ export default async function handler(req, res) {
       subActive,
       subExpiresAt,
     ] = await Promise.all([
+      // ملحوظة: أضفنا .catch على أي استعلام مش أساسي (مش المصاريف/الدخل نفسها) عشان لو
+      // استعلام واحد فشل (schema تغيّر، جدول فاضي، RPC عطلانة...) الداشبورد كله ميقعش بـ 500،
+      // وبدل كده يفضل يشتغل وياخد قيمة افتراضية آمنة للجزء ده بس.
       getExpensesBetween(dataUserId, startOfDay, endOfDay),
       getExpensesBetween(dataUserId, weekStart, weekEnd),
       getExpensesBetween(dataUserId, previousWeekStart, weekStart),
@@ -202,14 +214,26 @@ export default async function handler(req, res) {
         .eq('is_active', true)
         .eq('is_daily_piggybank', false)
         .order('created_at', { ascending: true }),
-      getPortfolio(dataUserId),
+      getPortfolio(dataUserId).catch((error) => {
+        console.error('getPortfolio error:', error);
+        return null;
+      }),
       getPortfolioDigest(dataUserId, 3).catch((error) => {
         console.error('getPortfolioDigest error:', error);
         return null;
       }),
-      computeNetByPerson(dataUserId),
-      getLifetimeCashPosition(dataUserId),
-      detectRecurringSubscriptions(dataUserId),
+      computeNetByPerson(dataUserId).catch((error) => {
+        console.error('computeNetByPerson error:', error);
+        return {};
+      }),
+      getLifetimeCashPosition(dataUserId).catch((error) => {
+        console.error('getLifetimeCashPosition error:', error);
+        return { cash: 0 };
+      }),
+      detectRecurringSubscriptions(dataUserId).catch((error) => {
+        console.error('detectRecurringSubscriptions error:', error);
+        return [];
+      }),
       supabase
         .from('debts')
         .select('id, person_name, amount, currency_code, note, created_at')
@@ -227,15 +251,15 @@ export default async function handler(req, res) {
         .lt('created_at', endOfDay.toISOString())
         .order('created_at', { ascending: false }),
       getExpensesBetween(dataUserId, yearStart, yearEnd),
-      hasActiveSubscription(dataUserId),
-      getSubscriptionExpiry(dataUserId),
+      hasActiveSubscription(dataUserId).catch((error) => { console.error('hasActiveSubscription error:', error); return false; }),
+      getSubscriptionExpiry(dataUserId).catch((error) => { console.error('getSubscriptionExpiry error:', error); return null; }),
     ]);
 
     // ---- الجمعية + المناسبات + الحصالة اليومية + الأقساط الثابتة — استعلامات مستقلة، مش جوه الدفعة الكبيرة فوق عشان أي تعديل هنا منعملش mismatch في الترتيب ----
     const [gameyaList, occasionsSummary, dailyPiggybank, installmentReminders, activeSubscribersCount] = await Promise.all([
-      getGameyaList(dataUserId),
-      getOccasionsSummary(dataUserId),
-      getDailyPiggybank(dataUserId),
+      getGameyaList(dataUserId).catch((error) => { console.error('getGameyaList error:', error); return []; }),
+      getOccasionsSummary(dataUserId).catch((error) => { console.error('getOccasionsSummary error:', error); return null; }),
+      getDailyPiggybank(dataUserId).catch((error) => { console.error('getDailyPiggybank error:', error); return null; }),
       supabase
         .from('reminders')
         .select('id, title, amount, due_date, installments_remaining, last_installment_date')
@@ -243,8 +267,9 @@ export default async function handler(req, res) {
         .eq('installment_type', 'installment')
         .eq('done', false)
         .order('due_date', { ascending: true })
-        .then(({ data }) => data || []),
-      getActiveSubscribersCount(),
+        .then(({ data }) => data || [])
+        .catch((error) => { console.error('installment reminders error:', error); return []; }),
+      getActiveSubscribersCount().catch((error) => { console.error('getActiveSubscribersCount error:', error); return 0; }),
     ]);
     const installmentsMonthlyTotal = installmentReminders.reduce((sum, r) => sum + Number(r.amount || 0), 0);
 

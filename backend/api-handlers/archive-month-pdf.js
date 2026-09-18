@@ -6,6 +6,7 @@ import { getDashboardUserFromRequest } from '../../lib/dashboardAuth.js';
 import { getMonthRange, getExpensesBetween, buildCategoryBreakdown } from '../../lib/expenses.js';
 import { buildReportHtml } from '../../lib/reportTemplate.js';
 import { renderPdfFromHtml } from '../../lib/pdf.js';
+import { supabase } from '../../lib/supabaseClient.js';
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ ok: false, error: 'Method not allowed' });
@@ -30,6 +31,26 @@ export default async function handler(req, res) {
     ? `مقارنة بـ${prevRange.label}: صرفت ${Math.round(Math.abs(((total - prevTotal) / prevTotal) * 100))}% ${total >= prevTotal ? 'أكتر' : 'أقل'}`
     : '';
 
+  // ---- حركة السيولة (الديون) بتاعت الشهر ده، عشان تتضاف كسكشن في التقرير ----
+  const { data: monthFlowRows } = await supabase
+    .from('debts')
+    .select('id, person_name, amount, currency_code, note, direction, created_at')
+    .eq('telegram_user_id', dataUserId)
+    .gte('created_at', start.toISOString())
+    .lt('created_at', end.toISOString())
+    .order('created_at', { ascending: false });
+  const flowItems = (monthFlowRows || []).map((d) => ({
+    personName: d.person_name || null,
+    amount: Number(d.amount),
+    currency_code: d.currency_code || 'EGP',
+    note: d.note || null,
+    direction: d.direction,
+    created_at: d.created_at,
+  }));
+  const flowIn = flowItems.filter((d) => d.direction === 'borrowed').reduce((sum, d) => sum + d.amount, 0);
+  const flowOut = flowItems.filter((d) => d.direction === 'lent').reduce((sum, d) => sum + d.amount, 0);
+  const flow = { in: flowIn, out: flowOut, net: flowIn - flowOut, items: flowItems };
+
   const html = buildReportHtml({
     title: `كشف حساب ${label} ${start.getFullYear()}`,
     periodLabel: `${label} ${start.getFullYear()}`,
@@ -39,6 +60,7 @@ export default async function handler(req, res) {
     topCategoryName: breakdown[0]?.name || '—',
     comparisonLine,
     categories: breakdown,
+    flow,
   });
 
   try {

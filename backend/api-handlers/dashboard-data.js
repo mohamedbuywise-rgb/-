@@ -221,10 +221,11 @@ export default async function handler(req, res) {
         .order('created_at', { ascending: false }),
       supabase
         .from('debts')
-        .select('amount, direction')
+        .select('id, person_name, amount, currency_code, note, direction, created_at')
         .eq('telegram_user_id', dataUserId)
         .gte('created_at', startOfDay.toISOString())
-        .lt('created_at', endOfDay.toISOString()),
+        .lt('created_at', endOfDay.toISOString())
+        .order('created_at', { ascending: false }),
       getExpensesBetween(dataUserId, yearStart, yearEnd),
       hasActiveSubscription(dataUserId),
       getSubscriptionExpiry(dataUserId),
@@ -476,7 +477,16 @@ export default async function handler(req, res) {
       flow: {
         in: flowIn,
         out: flowOut,
-        net: flowIn - flowOut
+        net: flowIn - flowOut,
+        items: (todayFlowData || []).map((d) => ({
+          id: d.id,
+          personName: d.person_name || null,
+          amount: Number(d.amount),
+          currency_code: d.currency_code || 'EGP',
+          note: d.note || null,
+          direction: d.direction,
+          created_at: d.created_at,
+        })).sort((a, b) => new Date(b.created_at) - new Date(a.created_at)),
       },
       history,
       goal,

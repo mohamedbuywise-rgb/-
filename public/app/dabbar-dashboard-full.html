@@ -658,10 +658,53 @@
         #quick-entry-card.is-subscription-locked > .grid { opacity: .42; filter: grayscale(.35); pointer-events: none; }
         #quick-entry-subscription-lock { display:none; }
         #quick-entry-subscription-lock:not(.hidden) { display:flex; }
-        #quick-entry-subscription-lock button { background:#08b878; color:#06271a; }
-        html:not([data-theme="light"]) #quick-entry-subscription-lock { background:rgba(251,191,36,.08); border-color:rgba(251,191,36,.28); color:#fde68a; }
-        html[data-theme="light"] #quick-entry-subscription-lock { background:#fff8e1; border-color:#f1d48a; color:#735514; }
-        html[data-theme="light"] #quick-entry-subscription-lock button { background:#08b878; color:#06271a; }
+
+        /* ===== VIP unlock banner — built on the --pm-* premium tokens so it auto-adapts to light/dark with guaranteed contrast ===== */
+        #quick-entry-subscription-lock {
+            align-items:flex-start; gap:12px; padding:14px; border-radius:18px;
+            border:1px solid var(--pm-hairline);
+            background: linear-gradient(160deg, color-mix(in srgb, var(--pm-gold) 12%, var(--pm-surface-hi)) 0%, var(--pm-surface-hi) 70%);
+            box-shadow: 0 10px 28px -14px color-mix(in srgb, var(--pm-gold) 45%, transparent);
+        }
+        #quick-entry-vip-badge {
+            flex-shrink:0; width:34px; height:34px; border-radius:11px; display:flex; align-items:center; justify-content:center;
+            font-size:16px; background: linear-gradient(155deg, var(--pm-gold-bright), var(--pm-gold-dim));
+            box-shadow: 0 4px 12px -3px color-mix(in srgb, var(--pm-gold) 55%, transparent);
+        }
+        #quick-entry-subscription-lock strong { color: var(--pm-ink); font-size:12px; }
+        #quick-entry-subscription-lock span { color: var(--pm-ink-dim); line-height:1.6; }
+        #quick-entry-subscription-lock button {
+            background: linear-gradient(150deg, var(--pm-gold-bright), var(--pm-gold-dim));
+            color: var(--pm-surface, #06271a);
+            box-shadow: 0 6px 16px -6px color-mix(in srgb, var(--pm-gold) 60%, transparent);
+            transition: transform .15s ease, filter .15s ease;
+        }
+        #quick-entry-subscription-lock button:hover { transform: translateY(-1px); filter:brightness(1.05); }
+        html[data-theme="light"] #quick-entry-subscription-lock button { color:#ffffff; }
+
+        /* ===== Premium manual-entry form ===== */
+        .dabbar-manual-form{ border-radius:20px; border:1px solid var(--pm-hairline); background:var(--pm-surface-hi); padding:14px; display:flex; flex-direction:column; gap:12px; box-shadow:0 10px 26px -18px rgba(0,0,0,.35); }
+        .dabbar-manual-head{ display:flex; align-items:flex-start; justify-content:space-between; gap:10px; }
+        .dabbar-manual-title{ font-weight:900; font-size:13px; color:var(--pm-ink); }
+        .dabbar-manual-sub{ margin-top:2px; font-size:10px; color:var(--pm-muted); line-height:1.5; }
+        .dabbar-manual-badge{ flex-shrink:0; border-radius:999px; padding:4px 10px; font-size:10px; font-weight:800; background:color-mix(in srgb, var(--pm-gold) 16%, transparent); color:var(--pm-gold-bright); border:1px solid color-mix(in srgb, var(--pm-gold) 30%, transparent); white-space:nowrap; }
+        .dabbar-manual-type-row{ display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+        .dabbar-manual-type{ border-radius:14px; border:1px solid var(--pm-hairline); background:var(--pm-surface-soft); color:var(--pm-muted); font-weight:900; font-size:12px; padding:10px; transition:transform .15s ease, filter .15s ease, background .15s ease, color .15s ease; }
+        .dabbar-manual-type.active{ background:linear-gradient(150deg,var(--pm-gold-bright),var(--pm-gold-dim)); color:var(--pm-surface,#06271a); border-color:transparent; box-shadow:0 8px 18px -8px color-mix(in srgb, var(--pm-gold) 55%, transparent); }
+        html[data-theme="light"] .dabbar-manual-type.active{ color:#ffffff; }
+        .dabbar-manual-field{ position:relative; }
+        .dabbar-manual-field input{ width:100%; border-radius:14px; border:1px solid var(--pm-hairline); background:var(--pm-surface-soft); color:var(--pm-ink); padding:12px 52px 12px 14px; font-size:16px; font-weight:800; outline:none; transition:border-color .15s ease; }
+        .dabbar-manual-field input:focus{ border-color:var(--pm-gold); }
+        .dabbar-manual-suffix{ position:absolute; top:50%; right:14px; transform:translateY(-50%); font-size:11px; font-weight:800; color:var(--pm-muted); pointer-events:none; }
+        .dabbar-manual-input{ width:100%; border-radius:14px; border:1px solid var(--pm-hairline); background:var(--pm-surface-soft); color:var(--pm-ink); padding:11px 14px; font-size:12px; outline:none; transition:border-color .15s ease; }
+        .dabbar-manual-input:focus{ border-color:var(--pm-gold); }
+        .dabbar-manual-input::placeholder{ color:var(--pm-muted); }
+        .dabbar-manual-label{ display:block; margin-bottom:6px; font-size:10px; font-weight:800; color:var(--pm-muted); }
+        .dabbar-manual-actions{ display:flex; gap:8px; }
+        .dabbar-manual-save{ flex:1; border-radius:14px; padding:12px; font-size:12px; font-weight:900; background:linear-gradient(150deg,var(--pm-gold-bright),var(--pm-gold-dim)); color:var(--pm-surface,#06271a); box-shadow:0 10px 22px -10px color-mix(in srgb, var(--pm-gold) 55%, transparent); transition:transform .15s ease, filter .15s ease; }
+        .dabbar-manual-save:hover{ transform:translateY(-1px); filter:brightness(1.05); }
+        html[data-theme="light"] .dabbar-manual-save{ color:#ffffff; }
+        .dabbar-manual-cancel{ border-radius:14px; padding:12px 16px; font-size:12px; font-weight:800; color:var(--pm-muted); border:1px solid var(--pm-hairline); background:transparent; }
 
         #monthly-total-label + h3 {
             text-shadow: 0 7px 24px rgba(16,185,129,.14);
@@ -2058,7 +2101,7 @@
         }
         #planning-summary { background: color-mix(in srgb, var(--pm-gold) 13%, var(--pm-surface-hi)) !important; color: var(--pm-ink) !important; }
         #planning-reset { background: var(--pm-surface-soft) !important; color: var(--pm-ink-dim) !important; border-color: var(--pm-hairline-soft) !important; }
-        #quick-entry-subscription-lock { background: color-mix(in srgb, var(--pm-gold) 11%, var(--pm-surface-hi)) !important; border-color: var(--pm-hairline) !important; color: var(--pm-ink) !important; }
+        #quick-entry-subscription-lock { border-color: var(--pm-hairline) !important; }
         .active-days-card { background: linear-gradient(135deg, color-mix(in srgb, var(--pm-gold) 10%, var(--pm-surface-hi)), var(--pm-surface-soft)) !important; border-color: var(--pm-hairline) !important; color: var(--pm-ink) !important; }
         .active-days-title, .active-days-badge, .active-days-dot.is-active { color: var(--pm-gold-bright) !important; }
         .active-days-badge { background: color-mix(in srgb, var(--pm-gold) 14%, var(--pm-surface-hi)) !important; border-color: var(--pm-hairline) !important; }
@@ -3198,20 +3241,20 @@
                     <button type="button" class="quick-workspace-btn" data-quick-workspace="bank" role="tab" aria-selected="false">🏦 الحركات البنكية</button>
                 </div>
                 <div id="quick-expense-content">
-                <div id="quick-entry-subscription-lock" class="hidden items-center justify-between gap-3 rounded-2xl border px-3 py-2.5 text-[11px]"><div><strong class="block">الميزة الذكية مقفولة حاليًا</strong><span>الإدخال اليدوي متاح مجانًا، واشترك لفتح الصوت والفواتير والـ AI.</span></div><button id="quick-entry-open-subscription" type="button" class="shrink-0 rounded-xl px-3 py-2 text-[10px] font-black">شوف الاشتراك</button></div>
+                <div id="quick-entry-subscription-lock" class="hidden gap-3 rounded-2xl border px-3.5 py-3 text-[11px]"><span id="quick-entry-vip-badge" aria-hidden="true">💎</span><div class="flex-1"><strong class="block">التصنيف الذكي بقى ميزة VIP</strong><span>سجّل يدويًا زي ما انت متعود من غير أي قيود، أو فعّل الاشتراك يرجعلك يفهم كتابتك وصوتك وفاتورتك تلقائيًا.</span></div><button id="quick-entry-open-subscription" type="button" class="shrink-0 self-center rounded-xl px-3.5 py-2 text-[10px] font-black">فعّل VIP</button></div>
                 <p class="text-center text-[10px] text-slate-500 dark:text-slate-400">اختار نوع العملية الأول، وهتفضل شغالة لحد ما تغيّرها بنفسك.</p>
                 
                 <div class="grid grid-cols-3 gap-2"><button id="quick-entry-voice" class="rounded-2xl border border-emerald-200 bg-white/80 px-2 py-3 text-center shadow-sm transition hover:-translate-y-0.5 dark:bg-slate-900" type="button"><span class="mx-auto mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/15 text-xl">🎙</span><span class="block text-[11px] font-bold text-slate-700 dark:text-slate-200">صوت</span></button><button id="quick-entry-text" class="rounded-2xl border border-emerald-200 bg-white/80 px-2 py-3 text-center shadow-sm transition hover:-translate-y-0.5 dark:bg-slate-900" type="button"><span class="mx-auto mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/15 text-xl">✍️</span><span class="block text-[11px] font-bold text-slate-700 dark:text-slate-200">كتابة</span></button><button id="quick-entry-invoice" class="rounded-2xl border border-emerald-200 bg-white/80 px-2 py-3 text-center shadow-sm transition hover:-translate-y-0.5 dark:bg-slate-900" type="button"><span class="mx-auto mb-1 flex h-10 w-10 items-center justify-center rounded-full bg-emerald-500/15 text-xl">📸</span><span class="block text-[11px] font-bold text-slate-700 dark:text-slate-200">فاتورة</span></button></div><p class="text-center text-[10px] text-slate-500">ملاحظة مهمة: أقل مدة لتسجيل الصوت هي <b class="quick-voice-minimum text-emerald-600 dark:text-emerald-300">5 ثواني</b> عشان دبّر يسمعه ويفهمه بدقة.</p>
                 <input type="file" id="quick-entry-invoice-input" accept="image/*" class="hidden">
                 <div id="quick-entry-scanning" class="hidden dabbar-scan-box rounded-2xl p-3 text-center"><div class="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl dabbar-scan-box-icon text-xl shadow-sm"><span style="display:inline-block;animation:dabbar-scan-spin 1s linear infinite">⟳</span></div><p class="text-xs font-bold dabbar-scan-box-title">بنقرأ الفاتورة...</p><p class="mt-1 text-[10px] dabbar-scan-box-sub">دبّر بيستخرج المبلغ والأصناف</p></div>
                 <div id="quick-entry-form" class="hidden space-y-2"><p class="text-[10px] text-slate-500">اكتب مثلًا: «قبضت 5000 جنيه مرتب» أو «صرفت 75 جنيه أكل».</p><textarea id="quick-entry-input" rows="2" maxlength="2500" placeholder="مثال: صرفت 75 جنيه أكل" class="w-full resize-none rounded-2xl border border-emerald-200 bg-white px-3 py-2.5 text-xs outline-none dark:bg-slate-900 dark:text-slate-100"></textarea><div class="flex gap-2"><button id="quick-entry-analyze" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950" type="button">فهم وتجهيز</button><button id="quick-entry-cancel" class="rounded-xl border border-slate-300 px-3 py-2.5 text-xs text-slate-500 dark:border-slate-700" type="button">إلغاء</button></div></div>
-                <div id="quick-entry-manual-form" class="hidden space-y-3 rounded-2xl border border-emerald-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900">
-                    <div class="flex items-center justify-between"><div><p class="text-xs font-black text-slate-800 dark:text-slate-100">إدخال يدوي بدون AI</p><p class="mt-1 text-[10px] text-slate-500">اختار النوع والفئة بنفسك، وبياناتك بتتحفظ فورًا.</p></div><span class="rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-bold text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">مجاني دائمًا</span></div>
-                    <div class="grid grid-cols-2 gap-2"><button id="quick-manual-expense" type="button" class="quick-manual-type active rounded-xl border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">مصروف</button><button id="quick-manual-income" type="button" class="quick-manual-type rounded-xl border border-slate-200 px-3 py-2 text-xs font-black text-slate-500 dark:border-slate-700">دخل</button></div>
-                    <input id="quick-manual-amount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="المبلغ — مثال 150" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100">
-                    <input id="quick-manual-description" type="text" maxlength="500" placeholder="الوصف — مثال: غدا أو مرتب" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100">
-                    <div><label for="quick-manual-category" class="mb-1 block text-[10px] font-bold text-slate-500">الفئة</label><select id="quick-manual-category" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"><option>أكل</option><option>مواصلات</option><option>فواتير</option><option>تسوق</option><option>ترفيه</option><option>صحة</option><option>تعليم</option><option>منزل وأثاث</option><option>ملابس</option><option>اشتراكات</option><option>هدايا وتبرعات</option><option>شخصي وعناية</option><option value="other">أخرى</option></select><input id="quick-manual-custom-category" type="text" maxlength="80" placeholder="اسم الفئة اختياريًا" class="mt-2 hidden w-full rounded-xl border border-emerald-200 bg-white px-3 py-2.5 text-xs outline-none dark:border-emerald-500/40 dark:bg-slate-950 dark:text-slate-100"></div>
-                    <div class="flex gap-2"><button id="quick-manual-save" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950" type="button">حفظ العملية</button><button id="quick-manual-cancel" class="rounded-xl border border-slate-300 px-3 py-2.5 text-xs text-slate-500 dark:border-slate-700" type="button">إلغاء</button></div>
+                <div id="quick-entry-manual-form" class="hidden dabbar-manual-form">
+                    <div class="dabbar-manual-head"><div><p class="dabbar-manual-title">إدخال يدوي كامل</p><p class="dabbar-manual-sub">اختار النوع والفئة بنفسك، وبياناتك بتتحفظ فورًا.</p></div><span class="dabbar-manual-badge">مجاني للأبد</span></div>
+                    <div class="dabbar-manual-type-row"><button id="quick-manual-expense" type="button" class="quick-manual-type dabbar-manual-type active">🧾 مصروف</button><button id="quick-manual-income" type="button" class="quick-manual-type dabbar-manual-type">💰 دخل</button></div>
+                    <div class="dabbar-manual-field"><input id="quick-manual-amount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0.00"><span class="dabbar-manual-suffix">ج.م</span></div>
+                    <input id="quick-manual-description" type="text" maxlength="500" placeholder="الوصف — مثال: غدا أو مرتب" class="dabbar-manual-input">
+                    <div><label for="quick-manual-category" class="dabbar-manual-label">الفئة</label><select id="quick-manual-category" class="dabbar-manual-input"><option>أكل</option><option>مواصلات</option><option>فواتير</option><option>تسوق</option><option>ترفيه</option><option>صحة</option><option>تعليم</option><option>منزل وأثاث</option><option>ملابس</option><option>اشتراكات</option><option>هدايا وتبرعات</option><option>شخصي وعناية</option><option value="other">أخرى</option></select><input id="quick-manual-custom-category" type="text" maxlength="80" placeholder="اسم الفئة اختياريًا" class="dabbar-manual-input mt-2 hidden"></div>
+                    <div class="dabbar-manual-actions"><button id="quick-manual-save" class="dabbar-manual-save" type="button">✅ حفظ العملية</button><button id="quick-manual-cancel" class="dabbar-manual-cancel" type="button">إلغاء</button></div>
                 </div>
                 <div id="quick-entry-recording" class="hidden rounded-2xl border border-rose-200 bg-rose-50 p-3 text-center text-xs text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200">
                     <div class="flex items-center justify-between gap-2"><span class="font-black">جاري التسجيل... <span id="quick-entry-recording-type-label" class="font-bold"></span></span><button id="quick-entry-recording-cancel" class="flex h-7 w-7 items-center justify-center rounded-full bg-white/70 text-sm font-black text-rose-500 transition hover:bg-white" type="button" aria-label="إلغاء التسجيل">✕</button></div>
@@ -3659,13 +3702,13 @@
             </div>
 
             <!-- حركة السيولة اليومية (واصل من / واصل لـ) -->
-            <div id="daily-flow-card" class="bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-4 space-y-3 shadow-lg">
+            <div id="daily-flow-card" role="button" tabindex="0" class="cursor-pointer transition hover:border-emerald-500/40 bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-4 space-y-3 shadow-lg">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2">
                         <div class="w-7 h-7 rounded-lg bg-emerald-500/15 flex items-center justify-center text-emerald-400 text-sm">⇄</div>
                         <span class="text-xs font-bold text-slate-200">حركة السيولة (النهاردة)</span>
                     </div>
-                    <span class="text-[9px] text-slate-500 font-normal">تتصفّر الساعة 12م</span>
+                    <span class="text-[9px] text-slate-500 font-normal">دوس تشوف التفاصيل ↖</span>
                 </div>
 
                 <div class="grid grid-cols-2 gap-2.5">
@@ -5088,6 +5131,22 @@
         </div>
     </div>
     <div id="bank-movements-review-root"></div>
+
+    <!-- مودال حركة السيولة (النهاردة) — بيفتح لما تدوس على كارت "حركة السيولة" ويعرض كل عمليات الديون بتاعت النهاردة -->
+    <div id="daily-flow-sheet" class="fixed inset-0 z-50 hidden items-end justify-center bg-black/70 backdrop-blur-sm">
+        <div class="w-full max-w-lg max-h-[88vh] overflow-y-auto rounded-t-3xl bg-slate-950 border-t border-slate-800 px-4 pt-4 pb-6">
+            <div class="flex items-center justify-between gap-3 mb-3">
+                <h3 class="text-sm font-black text-slate-100">حركة السيولة (النهاردة)</h3>
+                <button id="daily-flow-close" type="button" class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-800 text-slate-300">✕</button>
+            </div>
+            <p class="text-[10.5px] text-slate-500 mb-3">كل حركات الدين اللي واصلة منك أو ليك النهاردة، من غير ما تتحسب في مصروفاتك.</p>
+            <div id="daily-flow-empty" class="hidden text-center py-10">
+                <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-slate-900 flex items-center justify-center text-xl">⇄</div>
+                <p class="text-[12.5px] text-slate-400 leading-relaxed">لسه مفيش حركة سيولة النهاردة.</p>
+            </div>
+            <div id="daily-flow-list" class="hidden rounded-2xl bg-slate-900/60 border border-slate-800 divide-y divide-slate-800"></div>
+        </div>
+    </div>
 
     <script>
         /* ===== Supabase auth guard + logout =====
@@ -6699,15 +6758,19 @@
             const items = data?.today?.items || [];
             const events = (data?.month?.financialEvents || []).filter((event) => new Date(event.created_at).toDateString() === new Date().toDateString());
             const expenseRows = items.slice(0, 5).map((item) => `<div class="flex items-center gap-2 border-b border-slate-800/50 py-2 last:border-0"><span class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10">${getCategoryEmoji(item.category)}</span><div class="min-w-0 flex-1"><p class="truncate text-[11px] font-bold text-slate-200">${(item.description || item.category || 'مصروف').replace(/[<>]/g, '')}</p><p class="text-[9px] text-slate-500">مصروف · ${item.category || 'عام'}</p></div><span class="text-[11px] font-bold text-rose-400">-${fmt(item.amount, item.currency_code)}</span><button type="button" data-expense-edit="${item.id}" data-expense-amount="${item.amount}" data-expense-description="${(item.description || '').replace(/"/g, '&quot;')}" class="text-[11px] text-slate-500 hover:text-emerald-400" aria-label="تعديل العملية">✎</button><button type="button" data-expense-delete="${item.id}" class="text-[11px] text-slate-500 hover:text-rose-400" aria-label="حذف العملية">✕</button></div>`).join('');
-            const eventRows = events.slice(0, 5).map((event) => { const inflow = event.direction === 'inflow' || event.event_type === 'income'; const icon = event.event_type === 'income' ? '💰' : event.event_type === 'asset' ? '📦' : event.event_type === 'transfer' ? '↔️' : '🧾'; return `<div class="flex items-center gap-2 border-b border-slate-800/50 py-2 last:border-0"><span class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10">${icon}</span><div class="min-w-0 flex-1"><p class="truncate text-[11px] font-bold text-slate-200">${(event.description || event.category || typeLabel(event.event_type)).replace(/[<>]/g, '')}</p><p class="text-[9px] text-slate-500">${typeLabel(event.event_type)}${event.category ? ` · ${event.category}` : ''}</p></div><span class="text-[11px] font-bold ${inflow ? 'text-emerald-400' : 'text-amber-300'}">${inflow ? '+' : '-'}${fmt(event.amount, event.currency_code)}</span></div>`; }).join('');
+            const eventRows = events.slice(0, 5).map((event) => { const inflow = event.direction === 'inflow' || event.event_type === 'income'; const icon = event.event_type === 'income' ? '💰' : event.event_type === 'asset' ? '📦' : event.event_type === 'transfer' ? '↔️' : '🧾'; return `<div class="flex items-center gap-2 border-b border-slate-800/50 py-2 last:border-0"><span class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10">${icon}</span><div class="min-w-0 flex-1"><p class="truncate text-[11px] font-bold text-slate-200">${(event.description || event.category || typeLabel(event.event_type)).replace(/[<>]/g, '')}</p><p class="text-[9px] text-slate-500">${typeLabel(event.event_type)}${event.category ? ` · ${event.category}` : ''}</p></div><span class="text-[11px] font-bold ${inflow ? 'text-emerald-400' : 'text-amber-300'}">${inflow ? '+' : '-'}${fmt(event.amount, event.currency_code)}</span><button type="button" data-event-edit="${event.id}" data-event-amount="${event.amount}" data-event-description="${(event.description || '').replace(/"/g, '&quot;')}" class="text-[11px] text-slate-500 hover:text-emerald-400" aria-label="تعديل العملية">✎</button><button type="button" data-event-delete="${event.id}" class="text-[11px] text-slate-500 hover:text-rose-400" aria-label="حذف العملية">✕</button></div>`; }).join('');
             if (list) list.innerHTML = expenseRows + eventRows || '<div class="ledger-empty-hint"><span>سجّل أول عملية عشان تظهر هنا للمراجعة</span><span class="ledger-empty-hint-icon" aria-hidden="true">🧾</span></div>';
             list?.querySelectorAll('[data-expense-edit]').forEach((btn) => btn.addEventListener('click', () => editExpense(btn.dataset.expenseEdit, btn.dataset.expenseAmount, btn.dataset.expenseDescription)));
             list?.querySelectorAll('[data-expense-delete]').forEach((btn) => btn.addEventListener('click', () => deleteExpense(btn.dataset.expenseDelete)));
+            list?.querySelectorAll('[data-event-edit]').forEach((btn) => btn.addEventListener('click', () => editExpense(btn.dataset.eventEdit, btn.dataset.eventAmount, btn.dataset.eventDescription, true)));
+            list?.querySelectorAll('[data-event-delete]').forEach((btn) => btn.addEventListener('click', () => deleteExpense(btn.dataset.eventDelete, true)));
         }
         // ============ بدل ما نستخدم اتنين prompt() منفصلين (مبلغ لوحده، وصف لوحده) بشكل مبعثر — بنفتح فورم واحد مرتب فيه الحقلين مع بعض ============
         let __expenseEditId = null;
-        function openExpenseEditModal(id, oldAmount, oldDescription) {
+        let __expenseEditIsEvent = false;
+        function openExpenseEditModal(id, oldAmount, oldDescription, isEvent) {
             __expenseEditId = id;
+            __expenseEditIsEvent = !!isEvent;
             const overlay = document.getElementById('expense-edit-overlay');
             const amountInput = document.getElementById('expense-edit-amount');
             const descInput = document.getElementById('expense-edit-description');
@@ -6726,8 +6789,8 @@
             overlay?.classList.add('hidden');
             overlay?.classList.remove('flex');
         }
-        async function editExpense(id, oldAmount, oldDescription) {
-            openExpenseEditModal(id, oldAmount, oldDescription);
+        async function editExpense(id, oldAmount, oldDescription, isEvent) {
+            openExpenseEditModal(id, oldAmount, oldDescription, isEvent);
         }
         (function bindExpenseEditModal() {
             const overlay = document.getElementById('expense-edit-overlay');
@@ -6754,7 +6817,7 @@
                 const original = saveBtn.textContent;
                 saveBtn.textContent = 'جاري الحفظ...';
                 try {
-                    const res = await fetch(`/api/financial-actions?id=${encodeURIComponent(__expenseEditId)}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({ amount, description }) });
+                    const res = await fetch(`/api/financial-actions?id=${encodeURIComponent(__expenseEditId)}${__expenseEditIsEvent ? '&type=event' : ''}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({ amount, description, type: __expenseEditIsEvent ? 'event' : 'expense' }) });
                     if (!res.ok) throw new Error();
                     closeExpenseEditModal();
                     await loadDashboard();
@@ -6828,7 +6891,7 @@
             }
         }
         function addRecurringExpense() { const name = document.getElementById('recurring-name')?.value.trim(); const amount = Number(document.getElementById('recurring-amount')?.value || 0); if (!name || amount <= 0) return quickStatus('اكتب اسم ومبلغ المصروف المتكرر.', 'error'); const settings = planningSettings(); settings.recurringExpenses = [...(settings.recurringExpenses || []), { id: crypto.randomUUID(), name, amount, day: 1, category: 'أخرى', active: true }]; document.getElementById('recurring-name').value = ''; document.getElementById('recurring-amount').value = ''; savePlanningSettings(); }
-        async function deleteExpense(id) { if (!id) return; if (!(await dabbarConfirm('بعد الحذف هتتخصم من إجمالي اليوم والشهر، ومش هتقدر ترجعها.', { title: 'تحذف العملية دي؟' }))) return; try { const res = await fetch(`/api/financial-actions?id=${encodeURIComponent(id)}`, { method: 'DELETE', headers: { Authorization: `Bearer ${accessToken}` } }); const body = await res.json().catch(() => ({})); if (!res.ok) throw new Error(body.error || 'معرفناش نحذف العملية دلوقتي.'); await loadDashboard(); quickStatus('اتحذفت العملية واتخصمت من إجمالياتك.', 'success'); } catch (error) { quickStatus(error.message || 'معرفناش نحذف العملية دلوقتي.', 'error'); } }
+        async function deleteExpense(id, isEvent) { if (!id) return; if (!(await dabbarConfirm('بعد الحذف هتتخصم من إجمالي اليوم والشهر، ومش هتقدر ترجعها.', { title: 'تحذف العملية دي؟' }))) return; try { const res = await fetch(`/api/financial-actions?id=${encodeURIComponent(id)}${isEvent ? '&type=event' : ''}`, { method: 'DELETE', headers: { Authorization: `Bearer ${accessToken}` } }); const body = await res.json().catch(() => ({})); if (!res.ok) throw new Error(body.error || 'معرفناش نحذف العملية دلوقتي.'); await loadDashboard(); quickStatus('اتحذفت العملية واتخصمت من إجمالياتك.', 'success'); } catch (error) { quickStatus(error.message || 'معرفناش نحذف العملية دلوقتي.', 'error'); } }
         const BALANCE_BUCKETS = [
             { key: 'needs', label: 'احتياجات', target: 0.50, color: '#34d399', categories: new Set(['أكل', 'مواصلات', 'فواتير', 'صحة', 'تعليم', 'منزل وأثاث']) },
             { key: 'wants', label: 'رغبات', target: 0.30, color: '#a78bfa', categories: new Set(['تسوق', 'ترفيه', 'ملابس', 'اشتراكات', 'هدايا وتبرعات', 'شخصي وعناية']) },
@@ -7455,6 +7518,7 @@
                 document.getElementById('flow-out').textContent = fmt(flow.out);
                 document.getElementById('flow-net').textContent = fmt(flow.net);
                 document.getElementById('flow-net').className = `text-base font-bold ${flow.net >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+                window.__todayFlowItems = flow.items || [];
             }
 
             const listEl = document.getElementById('daily-items-list');
@@ -9419,7 +9483,7 @@
         document.getElementById('quick-entry-text')?.addEventListener('click', () => { document.getElementById('quick-entry-input').value = ''; quickShow('quick-entry-form', false); quickShow('quick-entry-manual-form', true); document.getElementById('quick-manual-amount')?.focus(); });
         document.getElementById('quick-entry-cancel')?.addEventListener('click', () => { quickShow('quick-entry-form', false); quickShow('quick-entry-draft', false); quickStatus(''); document.getElementById('quick-entry-input').value = ''; });
         document.getElementById('quick-manual-cancel')?.addEventListener('click', () => { quickShow('quick-entry-manual-form', false); quickStatus(''); });
-        document.querySelectorAll('.quick-manual-type').forEach((button) => button.addEventListener('click', () => { document.querySelectorAll('.quick-manual-type').forEach((item) => { item.classList.remove('active', 'border-emerald-300', 'bg-emerald-50', 'text-emerald-700'); item.classList.add('border-slate-200', 'text-slate-500'); }); button.classList.add('active', 'border-emerald-300', 'bg-emerald-50', 'text-emerald-700'); button.classList.remove('border-slate-200', 'text-slate-500'); }));
+        document.querySelectorAll('.quick-manual-type').forEach((button) => button.addEventListener('click', () => { document.querySelectorAll('.quick-manual-type').forEach((item) => item.classList.remove('active')); button.classList.add('active'); }));
         document.getElementById('quick-manual-category')?.addEventListener('change', (event) => { document.getElementById('quick-manual-custom-category')?.classList.toggle('hidden', event.target.value !== 'other'); if (event.target.value === 'other') document.getElementById('quick-manual-custom-category')?.focus(); });
         document.getElementById('quick-manual-save')?.addEventListener('click', async () => {
             const amount = Number(document.getElementById('quick-manual-amount')?.value);
@@ -9673,6 +9737,29 @@
         }
         document.getElementById('bank-movements-card')?.addEventListener('click', openBankMovementsSheet);
         document.getElementById('bank-movements-close')?.addEventListener('click', closeBankMovementsSheet);
+        function renderDailyFlowSheet() {
+            const items = window.__todayFlowItems || [];
+            const listEl = document.getElementById('daily-flow-list');
+            const emptyEl = document.getElementById('daily-flow-empty');
+            if (!items.length) {
+                listEl.classList.add('hidden');
+                emptyEl.classList.remove('hidden');
+                return;
+            }
+            emptyEl.classList.add('hidden');
+            listEl.classList.remove('hidden');
+            listEl.innerHTML = items.map((it) => {
+                const isIn = it.direction === 'borrowed';
+                const label = isIn ? 'واصل من' : 'واصل لـ';
+                const time = new Date(it.created_at).toLocaleTimeString('ar-EG', { hour: 'numeric', minute: '2-digit' });
+                return `<div class="flex items-center justify-between gap-2 px-3 py-2.5"><div class="min-w-0"><p class="truncate text-xs font-bold text-slate-200">${(it.personName || it.note || label).toString().replace(/[<>]/g, '')}</p><p class="text-[10px] text-slate-500">${label}${it.note ? ` · ${it.note}` : ''} · ${time}</p></div><span class="shrink-0 text-xs font-bold ${isIn ? 'text-emerald-400' : 'text-rose-400'}">${isIn ? '+' : '-'}${fmt(it.amount, it.currency_code)}</span></div>`;
+            }).join('');
+        }
+        function openDailyFlowSheet() { renderDailyFlowSheet(); const sheet = document.getElementById('daily-flow-sheet'); sheet?.classList.remove('hidden'); sheet?.classList.add('flex'); }
+        function closeDailyFlowSheet() { const sheet = document.getElementById('daily-flow-sheet'); sheet?.classList.add('hidden'); sheet?.classList.remove('flex'); }
+        document.getElementById('daily-flow-card')?.addEventListener('click', openDailyFlowSheet);
+        document.getElementById('daily-flow-close')?.addEventListener('click', closeDailyFlowSheet);
+        document.getElementById('daily-flow-sheet')?.addEventListener('click', (e) => { if (e.target.id === 'daily-flow-sheet') closeDailyFlowSheet(); });
         document.getElementById('bank-movements-sheet')?.addEventListener('click', (e) => { if (e.target.id === 'bank-movements-sheet') closeBankMovementsSheet(); });
         // ============ نطلب آخر chunk قبل stop؛ على بعض أجهزة Android حدث stop يصل قبل اكتمال تسليم
         // آخر dataavailable، فتطلع المعاينة بملف صغير جدًا (رأس WebM فقط) رغم أن مدتها ظاهرة وصوتها مسموع. ============

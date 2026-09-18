@@ -40,6 +40,33 @@ export default async function handler(req, res) {
       return res.status(200).json({ settings: cleanSettings(data) });
     }
 
+    if (req.method === 'POST') {
+      const body = req.body || {};
+      const type = body.type === 'income' ? 'income' : 'expense';
+      const amount = Number(body.amount);
+      const category = String(body.category || 'أخرى').trim().slice(0, 80) || 'أخرى';
+      const description = String(body.description || '').trim().slice(0, 500);
+      const createdAt = body.createdAt ? new Date(body.createdAt) : new Date();
+      if (!Number.isFinite(amount) || amount <= 0) return res.status(400).json({ error: 'اكتب مبلغًا صحيحًا أكبر من صفر.' });
+      if (Number.isNaN(createdAt.getTime())) return res.status(400).json({ error: 'التاريخ غير صحيح.' });
+
+      if (type === 'income') {
+        const { data, error } = await supabase.from('financial_events').insert({
+          telegram_user_id: userId, event_type: 'income', amount, category, description,
+          raw_text: description, direction: 'inflow', metadata: { source: 'manual_free' }, created_at: createdAt.toISOString(),
+        }).select('*').single();
+        if (error) throw error;
+        return res.status(200).json({ ok: true, type, record: data });
+      }
+
+      const { data, error } = await supabase.from('expenses').insert({
+        telegram_user_id: userId, amount, category, description, source: 'manual_free', created_at: createdAt.toISOString(),
+      }).select('*').single();
+      if (error) throw error;
+      await maybeSendBudgetAlert(userId).catch((pushError) => console.error('manual entry budget push failed:', pushError));
+      return res.status(200).json({ ok: true, type, record: data });
+    }
+
     if (req.method === 'PATCH' || req.method === 'DELETE') {
       const id = Number(req.query?.id || req.body?.id);
       if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'معرف العملية غير صحيح.' });

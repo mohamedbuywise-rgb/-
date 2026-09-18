@@ -6,6 +6,8 @@
 
 import { supabase } from '../../lib/supabaseClient.js';
 import { EGYPT_BANK_WALLET_SENDERS } from '../../lib/bank-senders.js';
+import { getDashboardUserFromRequest } from '../../lib/dashboardAuth.js';
+import { getFeatureAccess, subscriptionRequiredResponse } from '../../lib/subscriptionAccess.js';
 
 async function requireAuthUser(req) {
   const authHeader = req.headers.authorization || '';
@@ -19,6 +21,11 @@ async function requireAuthUser(req) {
 export default async function handler(req, res) {
   const user = await requireAuthUser(req);
   if (!user) return res.status(401).json({ ok: false, error: 'محتاج تسجيل دخول.' });
+
+  const dashboardUser = await getDashboardUserFromRequest(req);
+  if (!dashboardUser) return res.status(401).json({ ok: false, error: 'محتاج تسجيل دخول.' });
+  const access = await getFeatureAccess(dashboardUser.dataUserId, 'bank_linking', { startTrial: true });
+  if (!access.allowed) return res.status(403).json({ ok: false, ...subscriptionRequiredResponse(access) });
 
   // بنضمن وجود صف profile (لو أول مرة) عشان يتولد التوكن تلقائي بالـ default
   await supabase.from('profiles').upsert({ id: user.id }, { onConflict: 'id', ignoreDuplicates: true });

@@ -20,6 +20,7 @@ import { getDashboardUserFromRequest } from '../../lib/dashboardAuth.js';
 import { extractTransactionsFromRows } from '../../lib/groq.js';
 import { checkStatementUsage, refundStatementUsage } from '../../lib/rateLimits.js';
 import { BANK_STATEMENT_MAX_PDF_PAGES, BANK_STATEMENT_MAX_LINES, BANK_STATEMENT_LINES_PER_AI_CALL } from '../../lib/config.js';
+import { getFeatureAccess, subscriptionRequiredResponse } from '../../lib/subscriptionAccess.js';
 import crypto from 'crypto';
 
 function importKeyFor(userId, t) {
@@ -55,6 +56,9 @@ export default async function handler(req, res) {
   const dashboardUser = await getDashboardUserFromRequest(req);
   if (!dashboardUser) return res.status(401).json({ ok: false, error: 'محتاج تسجيل دخول.' });
   const { dataUserId } = dashboardUser;
+
+  const access = await getFeatureAccess(dataUserId, 'bank_linking', { startTrial: true });
+  if (!access.allowed) return res.status(403).json({ ok: false, ...subscriptionRequiredResponse(access) });
 
   const { fileBase64, fileName = '', mimeType = 'application/pdf' } = req.body || {};
   const cleanBase64 = String(fileBase64 || '').replace(/^data:[^,]+,/, '');

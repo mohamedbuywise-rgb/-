@@ -9,6 +9,7 @@ import { claimCronSlot } from '../../lib/cronRuns.js';
 import { refreshPortfolioMarketPrices, savePortfolioSnapshot, getPortfolioDigest, buildPortfolioDigestMessage, checkPortfolioPriceAlerts, buildPortfolioAlertTelegramMessage, buildPortfolioAlertPushPayload } from '../../lib/investments.js';
 import { CATEGORY_EMOJI, CRON_SECRET, ADMIN_TELEGRAM_ID, isModelsCheckOverdue } from '../../lib/config.js';
 import { claimPushRun, getNotificationPreferences, hasActivePushSubscription, sendPushToUser } from '../../lib/webPush.js';
+import { getUsersNeedingTrialReminder, getSubscriptionState, formatTrialReminder, markTrialReminderSent } from '../../lib/subscriptionAccess.js';
 
 // عدد المستخدمين اللي بيتعالجوا بالتوازي في نفس الوقت، بدل ما نلف عليهم واحد واحد.
 // بيوازن بين السرعة (منعديش الـ maxDuration بتاعة الفنكشن) وبين إننا منضربش Telegram/Supabase بـ rate limit.
@@ -319,6 +320,19 @@ export default async function handler(req, res) {
   }
 
   const users = await getAllUsers();
+
+  const trialReminderUsers = await getUsersNeedingTrialReminder().catch((error) => {
+    console.error('getUsersNeedingTrialReminder failed:', error);
+    return [];
+  });
+  await runWithConcurrencyLimit(trialReminderUsers, CONCURRENCY, async (user) => {
+    if (!user.chat_id || Number(user.chat_id) <= 0) return { ok: true };
+    const state = await getSubscriptionState(user.telegram_user_id);
+    if (state.status !== 'trial') return { ok: true };
+    await sendTelegramMessage(user.chat_id, formatTrialReminder(state), 'HTML');
+    await markTrialReminderSent(user.telegram_user_id);
+    return { ok: true };
+  });
 
   // التذكيرات المستحقة تنبيه النهاردة (يومين قبل / يوم قبل / يوم الاستحقاق) — بنجيبها مرة واحدة بس لكل المستخدمين
   const dueReminders = await getRemindersNeedingNotification().catch((error) => {

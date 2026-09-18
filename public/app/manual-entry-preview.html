@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>دبّر — الإدخال اليدوي</title>
+  <style>
+    :root { --ink:#1d2433; --muted:#7c8494; --line:#e8ebf1; --paper:#fff; --bg:#f5f7fb; --brand:#5b55d8; --brand-soft:#eeedff; --green:#159570; --red:#d65261; --shadow:0 18px 50px rgba(37,42,71,.10); }
+    * { box-sizing:border-box } .hidden { display:none !important; } body { margin:0; background:var(--bg); color:var(--ink); font-family:Tahoma,Arial,sans-serif; }
+    .shell { max-width:440px; min-height:100vh; margin:auto; background:var(--paper); box-shadow:var(--shadow); }
+    header { padding:28px 22px 18px; background:linear-gradient(145deg,#5550cf,#756fe8); color:#fff; border-radius:0 0 28px 28px; }
+    .top { display:flex; justify-content:space-between; align-items:center; margin-bottom:26px; }
+    .brand { font-size:24px; font-weight:800; letter-spacing:-.5px; } .avatar { width:38px;height:38px;border-radius:14px;background:#ffffff2b;display:grid;place-items:center;font-size:18px; }
+    .eyebrow { font-size:12px; opacity:.78; margin-bottom:7px; } h1 { margin:0; font-size:26px; line-height:1.35; letter-spacing:-.5px; }
+    .sub { margin:9px 0 0; color:#e7e6ff; font-size:13px; line-height:1.7; }
+    main { padding:20px 18px 30px; } .ai-free { display:flex; align-items:center; gap:8px; padding:10px 12px; background:#effaf6; color:#147b60; border:1px solid #d2f0e5; border-radius:14px; font-size:12px; margin-bottom:18px; }
+    .dot { width:8px;height:8px;background:#20aa7b;border-radius:50%; } .label { display:block; font-size:12px; color:var(--muted); margin:18px 0 8px; font-weight:700; }
+    .type-row { display:grid; grid-template-columns:1fr 1fr; gap:10px; } .type { border:1px solid var(--line); background:#fff; border-radius:16px; padding:13px; text-align:right; cursor:pointer; font:inherit; color:var(--ink); }
+    .type strong { display:block; font-size:14px; margin-top:6px; } .type small { color:var(--muted); font-size:11px; } .type.active { border-color:var(--brand); background:var(--brand-soft); color:#403bb3; box-shadow:0 0 0 3px #e2e0ff; }
+    .icon { font-size:22px; } input, select { width:100%; border:1px solid var(--line); border-radius:14px; padding:14px; font:inherit; color:var(--ink); background:#fff; outline:none; } input:focus, select:focus { border-color:var(--brand); box-shadow:0 0 0 3px #eeedff; }
+    .amount-wrap { position:relative; } .amount-wrap span { position:absolute; left:14px; top:14px; color:var(--muted); font-size:13px; }
+    .row { display:grid; grid-template-columns:1fr 1fr; gap:10px; } .button { width:100%; margin-top:20px; border:0; padding:15px; color:#fff; background:var(--brand); border-radius:15px; font:inherit; font-weight:800; cursor:pointer; box-shadow:0 10px 20px #5b55d833; }
+    .button:active { transform:translateY(1px); } .recent-title { display:flex; justify-content:space-between; margin:28px 0 10px; align-items:center; } .recent-title strong { font-size:15px; } .recent-title span { color:var(--muted); font-size:11px; }
+    .transaction { display:flex; justify-content:space-between; align-items:center; padding:13px 0; border-bottom:1px solid var(--line); } .transaction:last-child { border:0; } .tx-left { display:flex; gap:10px; align-items:center; } .tx-icon { width:38px;height:38px;border-radius:13px;background:#f1f2f7;display:grid;place-items:center; } .tx-name { font-size:13px; font-weight:700; } .tx-meta { margin-top:4px; color:var(--muted); font-size:10px; } .tx-amount { font-size:13px; font-weight:800; } .expense { color:var(--red); } .income { color:var(--green); }
+    .toast { position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(20px); background:#1d2433; color:white; padding:12px 16px; border-radius:13px; font-size:12px; opacity:0; pointer-events:none; transition:.25s; white-space:nowrap; } .toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+  <section class="shell">
+    <header>
+      <div class="top"><div class="brand">دبّر</div><div class="avatar">م</div></div>
+      <div class="eyebrow">التسجيل المجاني</div>
+      <h1>سجّل عمليتك بإيدك</h1>
+      <p class="sub">من غير AI، من غير تصنيف تلقائي. اختار النوع والفئة وسجّلها في ثواني.</p>
+    </header>
+    <main>
+      <div class="ai-free"><span class="dot"></span><b>وضع مجاني بدون AI</b><span>بياناتك محفوظة زي ما هي</span></div>
+      <label class="label">نوع العملية</label>
+      <div class="type-row">
+        <button class="type active" data-type="expense"><span class="icon">↘</span><strong>مصروف</strong><small>فلوس خرجت</small></button>
+        <button class="type" data-type="income"><span class="icon">↗</span><strong>دخل</strong><small>فلوس دخلت</small></button>
+      </div>
+      <label class="label" for="amount">المبلغ</label>
+      <div class="amount-wrap"><input id="amount" type="number" inputmode="decimal" placeholder="مثال: 150"><span>ج.م</span></div>
+      <label class="label" for="description">الوصف</label>
+      <input id="description" type="text" placeholder="مثال: غدا، مواصلات، مرتب">
+      <div class="row">
+        <div><label class="label" for="category">الفئة</label><select id="category"><option>أكل</option><option>مواصلات</option><option>فواتير</option><option>تسوق</option><option>ترفيه</option><option>صحة</option><option>تعليم</option><option>منزل وأثاث</option><option>ملابس</option><option>اشتراكات</option><option>هدايا وتبرعات</option><option>شخصي وعناية</option><option value="other">أخرى</option></select><input id="customCategory" class="hidden" type="text" placeholder="اكتب اسم الفئة اختياريًا" style="margin-top:8px"></div>
+        <div><label class="label" for="date">التاريخ</label><input id="date" type="date"></div>
+      </div>
+      <button class="button" id="save">حفظ العملية</button>
+      <div class="recent-title"><strong>آخر العمليات</strong><span>محفوظة بالكامل</span></div>
+      <div id="list">
+        <div class="transaction"><div class="tx-left"><div class="tx-icon">🍔</div><div><div class="tx-name">غدا</div><div class="tx-meta">أكل · اليوم</div></div></div><div class="tx-amount expense">− 150 ج.م</div></div>
+        <div class="transaction"><div class="tx-left"><div class="tx-icon">🚕</div><div><div class="tx-name">مواصلات</div><div class="tx-meta">مواصلات · أمس</div></div></div><div class="tx-amount expense">− 45 ج.م</div></div>
+        <div class="transaction"><div class="tx-left"><div class="tx-icon">💰</div><div><div class="tx-name">مرتب</div><div class="tx-meta">دخل · أمس</div></div></div><div class="tx-amount income">+ 8,000 ج.م</div></div>
+      </div>
+    </main>
+  </section>
+  <div class="toast" id="toast">تم حفظ العملية يدويًا</div>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    let type = 'expense';
+    const icons = { 'أكل':'🍔','مواصلات':'🚕','فواتير':'🧾','تسوق':'🛍️','ترفيه':'🎬','صحة':'💊','تعليم':'📚','منزل وأثاث':'🏠','ملابس':'👕','اشتراكات':'🔁','هدايا وتبرعات':'🎁','شخصي وعناية':'🧴','أخرى':'📌' };
+    $('date').value = new Date().toISOString().slice(0,10);
+    $('category').addEventListener('change', () => { $('customCategory').classList.toggle('hidden', $('category').value !== 'other'); if ($('category').value === 'other') $('customCategory').focus(); });
+    document.querySelectorAll('.type').forEach((button) => button.addEventListener('click', () => { document.querySelectorAll('.type').forEach((b) => b.classList.remove('active')); button.classList.add('active'); type = button.dataset.type; }));
+    $('save').addEventListener('click', () => {
+      const amount = Number($('amount').value), description = $('description').value.trim();
+      const categoryValue = $('category').value;
+      const customCategory = $('customCategory').value.trim();
+      const category = categoryValue === 'other' ? (customCategory || 'أخرى') : categoryValue;
+      if (!amount || amount <= 0) { $('amount').focus(); return; }
+      const item = document.createElement('div'); item.className = 'transaction';
+      item.innerHTML = `<div class="tx-left"><div class="tx-icon">${icons[category] || '📌'}</div><div><div class="tx-name">${description || category}</div><div class="tx-meta">${type === 'income' ? 'دخل' : category} · الآن</div></div></div><div class="tx-amount ${type === 'income' ? 'income' : 'expense'}">${type === 'income' ? '+' : '−'} ${amount.toLocaleString('ar-EG')} ج.م</div>`;
+      $('list').prepend(item); $('amount').value = ''; $('description').value = ''; $('customCategory').value = ''; $('customCategory').classList.add('hidden'); $('category').value = 'أكل'; $('toast').classList.add('show'); setTimeout(() => $('toast').classList.remove('show'), 1800);
+    });
+  </script>
+</body>
+</html>

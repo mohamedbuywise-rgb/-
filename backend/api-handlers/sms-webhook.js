@@ -18,6 +18,7 @@ import { recordDebt } from '../../lib/debts.js';
 import { recordFinancialEvent } from '../../lib/financialEvents.js';
 import { matchBankSender } from '../../lib/bank-senders.js';
 import { checkTextUsage } from '../../lib/rateLimits.js';
+import { getFeatureAccess, subscriptionRequiredResponse } from '../../lib/subscriptionAccess.js';
 import { standaloneDataUserId, ensureStandaloneUser } from '../../lib/dashboardAuth.js';
 
 const DAILY_SMS_LIMIT = 80; // حد أقصى يومي للحماية من استهلاك API غير متوقع لكل مستخدم
@@ -103,6 +104,9 @@ export default async function handler(req, res) {
   // المستقلة (إيميل/باسورد) الـ id سالب صناعي، وأي نداء sendTelegramMessage بيه بيفشل بهدوء
   // (متعالج جوه lib/telegram.js) من غير ما يوقف تسجيل الحركة نفسها في الداشبورد.
   const chatId = telegramUserId;
+
+  const bankAccess = await getFeatureAccess(telegramUserId, 'bank_linking', { startTrial: true });
+  if (!bankAccess.allowed) return res.status(403).json({ ok: false, ...subscriptionRequiredResponse(bankAccess) });
 
   // SMS البنكية تستخدم نفس عداد التصنيف النصي الشهري، مع Telegram والداشبورد.
   const textUsage = await checkTextUsage(telegramUserId);

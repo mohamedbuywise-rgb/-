@@ -9,12 +9,13 @@ import { upsertUser, hasActiveSubscription, getSubscriptionExpiry, activateSubsc
 import { createLinkCode } from '../../lib/linking.js';
 import { isFinancialEventType, recordFinancialEvent } from '../../lib/financialEvents.js';
 import { buyIntoPortfolio, sellFromPortfolio } from '../../lib/investments.js';
-import { CATEGORY_EMOJI } from '../../lib/config.js';
+import { CATEGORY_EMOJI, CATEGORIES } from '../../lib/config.js';
 import { currencyLabel } from '../../lib/textNormalize.js';
 import { normalizeDigits, extractDeterministicExpense, correctDebtDirections, normalizeFinancialTransaction, reconcileSingleTransaction } from '../../lib/textNormalize.js';
 import { checkVoiceUsage, checkOcrUsage, checkChatUsage, checkTextUsage, refundOcrUsage } from '../../lib/rateLimits.js';
 import { GUIDE_URL, TRIAL_SUMMARY_BASE_URL, ADMIN_TELEGRAM_ID, SUBSCRIPTION_DAYS, SUBSCRIPTION_PRICE_EGP, INSTAPAY_LINK, ADMIN_CONTACT_USERNAME, VOICE_MAX_DURATION_SECONDS, TELEGRAM_WEBHOOK_SECRET } from '../../lib/config.js';
 import { createTrialSummaryToken } from '../../lib/trialToken.js';
+import { getFeatureAccess, subscriptionRequiredResponse } from '../../lib/subscriptionAccess.js';
 
 // ============ نص دليل الأوامر — بيتبعت مع /start وبرضو متاح في أي وقت عن طريق "مساعدة" ============
 function buildCommandsGuide() {
@@ -365,10 +366,9 @@ export default async function handler(req, res) {
       const caption = message.caption ? message.caption.trim() : '';
       const looksLikePaymentProof = /اشتراك|دفعت|فيزا|انستاباي|إنستاباي|instapay/i.test(caption);
 
-      const activeNow = await hasActiveSubscription(userId);
-      const trialNow = activeNow ? false : await isInTrial(userId);
+      const invoiceAccess = await getFeatureAccess(userId, 'invoice_ocr', { startTrial: !looksLikePaymentProof });
 
-      if ((activeNow || trialNow) && !looksLikePaymentProof) {
+      if (invoiceAccess.allowed && !looksLikePaymentProof) {
         const usage = await checkOcrUsage(userId);
         if (!usage.allowed) {
           if (usage.isTrial) {
@@ -383,6 +383,11 @@ export default async function handler(req, res) {
           return res.status(200).json({ ok: true });
         }
         await handleReceiptPhoto(message, userId, chatId, usage);
+        return res.status(200).json({ ok: true });
+      }
+
+      if (!invoiceAccess.allowed && !looksLikePaymentProof) {
+        await sendTelegramMessage(chatId, subscriptionRequiredResponse(invoiceAccess).error + '\n\nافتح /subscription للاشتراك مباشرة.');
         return res.status(200).json({ ok: true });
       }
 
@@ -473,36 +478,15 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true });
     }
 
-    // --- البوابة: أي استخدام تاني للبوت (صوت، مصروف، تقرير، إلخ) محتاج اشتراك فعّال أو تجربة مجانية شغالة ---
-    const subscribed = await hasActiveSubscription(userId);
-    if (!subscribed) {
-      const inTrial = await isInTrial(userId);
-      if (!inTrial) {
-        const expiresAt = await getSubscriptionExpiry(userId);
-        if (expiresAt) {
-          await sendTelegramMessage(chatId, buildSubscriptionPrompt(true, true), 'HTML');
-        } else {
-          await sendTrialEndedPrompt(chatId, userId);
-        }
-        return res.status(200).json({ ok: true });
-      }
-      // لسه في التجربة المجانية — نديله تنبيه بسيط لو الأيام قربت تخلص، ونكمل عادي
-      const daysLeft = await getTrialDaysLeft(userId);
-      if (daysLeft <= 1) {
-        await sendTelegramMessage(
-          chatId,
-          `⏳ باقي أقل من يوم على نهاية تجربتك المجانية.\n\n` +
-            `💡 خلال الـ3 أيام دي شفت بنفسك إزاي دبّر بيوفّرلك وقت وبيخليك متابع كل جنيه بيتصرف — ` +
-            `عشان الخدمة متتقطعش، اشترك بـ<b>${SUBSCRIPTION_PRICE_EGP} ج.م/شهر</b>.`,
-          'HTML'
-        );
-      }
-    }
-
     // --- حالة 1: رسالة صوتية — بتتفرّغ لنص وبعدين تتوجّه بنفس منطق الرسالة النصية بالظبط ---
     // (قبل كده كانت بتتفرّغ وتروح على طول للتصنيف الذكي (مصروف/دين) من غير ما تعدّي على أوامر
     // زي "تقرير" أو "ديون" أو "دور على" — يعني الأوامر دي كانت مش شغالة بالصوت. اتصلحت دلوقتي.)
     if (message.voice) {
+      const voiceAccess = await getFeatureAccess(userId, 'voice_input', { startTrial: true });
+      if (!voiceAccess.allowed) {
+        await sendTelegramMessage(chatId, subscriptionRequiredResponse(voiceAccess).error + '\n\nافتح /subscription للاشتراك مباشرة.');
+        return res.status(200).json({ ok: true });
+      }
       // مدة الفويس محدودة (تكلفة التفريغ عند Groq بتتحسب على المدة) — بنرفض بلطف من غير ما نستهلك عداد
       if ((message.voice.duration || 0) > VOICE_MAX_DURATION_SECONDS) {
         await sendTelegramMessage(
@@ -739,10 +723,47 @@ async function handlePortfolioTransaction(result, text, userId, chatId) {
   return true;
 }
 
+function parseFreeManualEntry(text) {
+  const normalized = normalizeDigits(String(text || '').trim());
+  const amountMatch = normalized.match(/(?:^|\s)(\d+(?:[.,]\d+)?)(?:\s|$)/);
+  if (!amountMatch) return null;
+  const amount = Number(amountMatch[1].replace(',', '.'));
+  if (!Number.isFinite(amount) || amount <= 0) return null;
+  const isIncome = /^(دخل|استلمت|قبضت|وصلني|جالي|جاءني|تحويل داخل|تحويل ليا|ايداع|إيداع|مرتب|راتب|عمولة|ربحت)\b/i.test(normalized);
+  const isExpense = /^(مصروف|مصروفات|صرفت|صرفنا|دفعت|دفعنا|اشتريت|اشتريت|شراء|تكلفة|كلفني|فاتورة|حولت|تبرعت)\b/i.test(normalized);
+  if (!isIncome && !isExpense) return null;
+  const customMatch = normalized.match(/(?:فئة|الفئة|تصنيف)\s*[:：-]?\s*([^،,]+)/i);
+  const category = CATEGORIES.find((item) => normalized.includes(item)) || customMatch?.[1]?.trim() || null;
+  const description = normalized.replace(/^(دخل|استلمت|قبضت|وصلني|جالي|جاءني|تحويل داخل|تحويل ليا|ايداع|إيداع|مرتب|راتب|عمولة|ربحت|مصروف|مصروفات|صرفت|صرفنا|دفعت|دفعنا|اشتريت|شراء|تكلفة|كلفني|فاتورة|حولت|تبرعت)\s*/i, '').replace(amountMatch[1], '').replace(/^(جنيه|ج\.م|ج)\s*/i, '').replace(/(?:فئة|الفئة|تصنيف)\s*[:：-]?\s*([^،,]+)/i, '').trim();
+  return { amount, category: category || 'أخرى', description: description || null, isIncome };
+}
+
+async function handleFreeManualEntry(text, userId, chatId) {
+  const entry = parseFreeManualEntry(text);
+  if (!entry) {
+    await sendTelegramMessage(chatId, 'الإدخال المجاني بيحتاج صيغة بسيطة من غير AI، مثلًا: «مصروف 50 أكل» أو «دخل 500 مرتب». اختار الفئة يدويًا من القائمة الموجودة في التطبيق.');
+    return true;
+  }
+  if (entry.isIncome) {
+    const saved = await recordFinancialEvent({ type: 'income', amount: entry.amount, category: entry.category, note: entry.description || 'دخل يدوي', sourceText: text }, userId);
+    if (!saved.ok) await sendTelegramMessage(chatId, 'حصل خطأ وإحنا بنسجل الدخل، جرب تاني.');
+    else await sendTelegramMessage(chatId, `✅ سجلت دخل ${entry.amount} جنيه${entry.description ? ` — ${entry.description}` : ''}.`);
+  } else {
+    await recordExpense({ amount: entry.amount, category: entry.category, note: entry.description || '' }, entry.description || text, userId, chatId, null, { source: 'manual_free' });
+  }
+  return true;
+}
+
 // ============ التصنيف الذكي لأي رسالة (مصروف / دين / تسوية) — بيتنادى بس لو الرسالة مش أمر معروف ============
 async function handleIncomingText(text, userId, chatId, { fromVoice = false } = {}) {
   if (!text) {
     await sendTelegramMessage(chatId, 'معرفتش أفهم الرسالة، ممكن تعيدها؟');
+    return;
+  }
+
+  const classificationAccess = await getFeatureAccess(userId, 'ai_classification', { startTrial: true });
+  if (classificationAccess.status === 'free_locked' && !fromVoice) {
+    await handleFreeManualEntry(text, userId, chatId);
     return;
   }
 

@@ -20,6 +20,7 @@ import { recordFinancialEvent } from '../../lib/financialEvents.js';
 import { saveInvoiceRecord } from '../../lib/invoices.js';
 import { checkTextUsage, checkVoiceUsage, checkOcrUsage } from '../../lib/rateLimits.js';
 import { standaloneDataUserId, ensureStandaloneUser } from '../../lib/dashboardAuth.js';
+import { getFeatureAccess, subscriptionRequiredResponse } from '../../lib/subscriptionAccess.js';
 
 const DAILY_LIMIT = 80; // نفس حد sms-webhook.js تقريبًا، حماية من استهلاك API غير متوقع
 
@@ -109,6 +110,9 @@ export default async function handler(req, res) {
 
   const userId = await resolveDataUserId(profile.id);
   const note = '\n\n📤 اتسجلت من مشاركة آيفون (Share Sheet)';
+
+  const access = await getFeatureAccess(userId, 'share_extension', { startTrial: true });
+  if (!access.allowed) return res.status(403).json({ ok: false, ...subscriptionRequiredResponse(access) });
 
   try {
     // ============ صورة فاتورة — أعلى أولوية لو اتبعتت ============

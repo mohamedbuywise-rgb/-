@@ -4,7 +4,7 @@ import { getDebtsSummaryText, createGameya, getGameyaList, toggleGameyaMemberPai
 import { createDailyPiggybank, getDailyPiggybank, contributeDailyPiggybank, deleteDailyPiggybank } from '../../lib/goals.js';
 import { extractItemizedReceiptFromImageBase64, askDabbarChat, askDabbarRoast, classifyMessage, transcribeAudioBase64 } from '../../lib/groq.js';
 import { saveInvoiceRecord, deleteInvoiceById } from '../../lib/invoices.js';
-import { hasActiveSubscription, isInTrial } from '../../lib/users.js';
+import { getFeatureAccess, subscriptionRequiredResponse } from '../../lib/subscriptionAccess.js';
 import { checkOcrUsage, checkChatUsage, checkVoiceUsage, checkTextUsage, refundOcrUsage, refundUsage } from '../../lib/rateLimits.js';
 import { normalizeDigits, extractDeterministicExpense, correctDebtDirections, detectCurrency, currencyLabel, normalizeFinancialTransaction, reconcileSingleTransaction } from '../../lib/textNormalize.js';
 import { maybeSendBudgetAlert } from '../../lib/webPush.js';
@@ -34,13 +34,10 @@ async function requireLink(req, res) {
 
   // الربط بتيليجرام ليس شرطًا. الحساب المستقل يستخدم dataUserId السالب
   // بنفس جداول المصروفات/الديون، بينما تظل بوابة الاشتراك والتجربة فعّالة.
-  const subscribed = await hasActiveSubscription(user.dataUserId);
-  if (!subscribed) {
-    const trial = await isInTrial(user.dataUserId);
-    if (!trial) {
-      res.status(403).json({ error: 'محتاج تشترك الأول عشان تستخدم دبّر الذكي.', subscriptionRequired: true });
-      return null;
-    }
+  const access = await getFeatureAccess(user.dataUserId, 'ai_assistant', { startTrial: true });
+  if (!access.allowed) {
+    res.status(403).json(subscriptionRequiredResponse(access));
+    return null;
   }
 
   return user.dataUserId;

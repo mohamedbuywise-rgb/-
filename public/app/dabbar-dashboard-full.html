@@ -6481,11 +6481,7 @@
                     signal: controller.signal,
                 });
                 const data = await res.json().catch(() => ({}));
-                if (!res.ok) {
-                    const error = new Error(data.error || 'فشل تحميل البيانات');
-                    error.status = res.status;
-                    throw error;
-                }
+                if (!res.ok) throw new Error(data.error || 'فشل تحميل البيانات');
                 return data;
             } finally {
                 clearTimeout(timeoutId);
@@ -6493,10 +6489,7 @@
         }
         async function loadDashboard(isInitialLoad = false, attempt = 1) {
             const MAX_ATTEMPTS = 3;
-            // الـ API بيجمع استعلامات مستقلة كثيرة بالتوازي. 12 ثانية كانت أقل من زمن
-            // الاستجابة الفعلي أحيانًا، فتُلغي الواجهة الطلب السليم وتعرض "فشل تحميل البيانات".
-            // نخلي المهلة متوافقة مع maxDuration في Vercel، مع الإبقاء على إعادة المحاولة.
-            const TIMEOUT_MS = attempt === 1 ? 30000 : (attempt === 2 ? 45000 : 55000);
+            const TIMEOUT_MS = attempt === 1 ? 12000 : 20000; // أول محاولة أسرع عشان نحس بالمشكلة بدري ونعيد المحاولة، الباقي أطول احتياطًا لشبكة بطيئة
             clearTimeout(__dashboardRetryTimer);
             const syncNote = document.getElementById('dashboard-sync-note');
             const syncNoteText = document.getElementById('dashboard-sync-note-text');
@@ -6505,20 +6498,6 @@
                 data = await fetchDashboardOnce(TIMEOUT_MS);
             } catch (e) {
                 console.error(`dashboard-data fetch failed (attempt ${attempt}/${MAX_ATTEMPTS}):`, e);
-                // لو الجلسة اتجدّدت في الخلفية بعد ما الصفحة خزّنت التوكن القديم،
-                // حدّث التوكن وأعد الطلب بدل عرض خطأ للمستخدم وإيقاف اللوحة.
-                if (e.status === 401 && attempt === 1) {
-                    try {
-                        const { data: { session } } = await sb.auth.refreshSession();
-                        if (session?.access_token) {
-                            accessToken = session.access_token;
-                            currentUser = session.user;
-                            return loadDashboard(isInitialLoad, attempt + 1);
-                        }
-                    } catch (refreshError) {
-                        console.error('dashboard session refresh failed:', refreshError);
-                    }
-                }
                 const isTimeoutOrNetwork = e.name === 'AbortError' || e.message === 'Failed to fetch';
                 // خطأ شبكة/تايم آوت عابر: نعيد المحاولة تلقائيًا بتأخير بسيط، مع مؤشر تحميل هادي مش تنبيه مقلق
                 if (isTimeoutOrNetwork && attempt < MAX_ATTEMPTS) {

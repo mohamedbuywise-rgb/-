@@ -9,33 +9,12 @@ import { hasActiveSubscription, getSubscriptionExpiry, isInTrial, getTrialDaysLe
 import { getActiveDays } from '../../lib/activeDays.js';
 import { getPortfolio, getPortfolioDigest } from '../../lib/investments.js';
 
-// مهم: الفنكشن ده بيعمل ~19 استعلام Supabase على التوازي وممكن ياخد وقت أطول من
-// الـ default timeout بتاع Vercel (10 ثواني على Hobby)، وده كان سبب رسالة
-// "فشل تحميل البيانات" الافتراضية — الفنكشن كانت بتتقفل بـ 504 (صفحة مش JSON)
-// قبل ما توصل حتى لأي try/catch جوه الكود. رفعنا المهلة هنا صراحةً.
-// ملحوظة: على Vercel Hobby أقصى قيمة مسموحة 60، وعلى Pro لغاية 300.
-export const config = {
-  maxDuration: 30,
-};
-
 function sumByCurrency(rows = []) {
   return rows.reduce((acc, row) => {
     const code = String(row.currency_code || 'EGP').toUpperCase();
     acc[code] = (acc[code] || 0) + Number(row.amount || 0);
     return acc;
   }, {});
-}
-
-// فشل استعلام واحد لا ينبغي أن يسقط الداشبورد كله.
-// نرجّع مصفوفة فارغة مع تسجيل اسم الجزء الفاشل للتشخيص من Logs.
-async function safeExpenses(userId, from, to, label) {
-  try {
-    const rows = await getExpensesBetween(userId, from, to);
-    return Array.isArray(rows) ? rows : [];
-  } catch (error) {
-    console.error(`dashboard-data ${label} expenses error:`, error);
-    return [];
-  }
 }
 
 // ============ GET /api/dashboard-data ============
@@ -68,6 +47,9 @@ export default async function handler(req, res) {
       linked ? telegramUserId : dashboardUser.authUserId
     );
 
+    // ---- الأيام النشطة: طلب واحد من RPC، والـ fallback لا يعطل الداشبورد ----
+    const activeDays = await getActiveDays(dataUserId);
+
     // ---- كل الفواتير / تفاصيل فاتورة واحدة (GET /api/dashboard-data?invoices=1 أو ?invoiceId=123) ----
     // اتحطوا هنا بدل ملف API منفصل عشان نفضل تحت حد Vercel Hobby (12 function كحد أقصى)،
     // بنفس فكرة تجميع الميزات في api/assistant.js.
@@ -81,11 +63,6 @@ export default async function handler(req, res) {
       return res.status(200).json({ linked, telegramUserId: linked ? telegramUserId : null, invoices });
     }
 
-    // ---- الأيام النشطة: طلب واحد من RPC، والفشل فيه لا يعطل الداشبورد ----
-    const activeDays = await getActiveDays(dataUserId).catch((error) => {
-      console.error('getActiveDays error:', error);
-      return [];
-    });
 
     // ---- حساب كل نطاقات التاريخ الأول (عمليات JS بحتة، بدون أي استعلام) ----
     const startOfDay = new Date();
@@ -190,13 +167,10 @@ export default async function handler(req, res) {
       subActive,
       subExpiresAt,
     ] = await Promise.all([
-      // ملحوظة: أضفنا .catch على أي استعلام مش أساسي (مش المصاريف/الدخل نفسها) عشان لو
-      // استعلام واحد فشل (schema تغيّر، جدول فاضي، RPC عطلانة...) الداشبورد كله ميقعش بـ 500،
-      // وبدل كده يفضل يشتغل وياخد قيمة افتراضية آمنة للجزء ده بس.
-      safeExpenses(dataUserId, startOfDay, endOfDay, 'today'),
-      safeExpenses(dataUserId, weekStart, weekEnd, 'week'),
-      safeExpenses(dataUserId, previousWeekStart, weekStart, 'previous-week'),
-      safeExpenses(dataUserId, start, end, 'month'),
+      getExpensesBetween(dataUserId, startOfDay, endOfDay),
+      getExpensesBetween(dataUserId, weekStart, weekEnd),
+      getExpensesBetween(dataUserId, previousWeekStart, weekStart),
+      getExpensesBetween(dataUserId, start, end),
       supabase
         .from('financial_events')
         .select('id, event_type, amount, currency_code, category, description, raw_text, direction, created_at')
@@ -204,7 +178,7 @@ export default async function handler(req, res) {
         .gte('created_at', start.toISOString())
         .lt('created_at', end.toISOString())
         .order('created_at', { ascending: false }),
-      safeExpenses(dataUserId, prevRange.start, prevRange.end, 'previous-month'),
+      getExpensesBetween(dataUserId, prevRange.start, prevRange.end),
       supabase
         .from('financial_events')
         .select('event_type, amount, currency_code')
@@ -220,11 +194,7 @@ export default async function handler(req, res) {
         .eq('is_repayment', false)
         .gte('created_at', prevRange.start.toISOString())
         .lt('created_at', prevRange.end.toISOString()),
-      Promise.all(
-        historyOffsets.map(({ range, offset }) =>
-          safeExpenses(dataUserId, range.start, range.end, `history-${offset}`)
-        )
-      ),
+      Promise.all(historyOffsets.map(({ range }) => getExpensesBetween(dataUserId, range.start, range.end))),
       supabase
         .from('goals')
         .select('*')
@@ -232,26 +202,14 @@ export default async function handler(req, res) {
         .eq('is_active', true)
         .eq('is_daily_piggybank', false)
         .order('created_at', { ascending: true }),
-      getPortfolio(dataUserId).catch((error) => {
-        console.error('getPortfolio error:', error);
-        return null;
-      }),
+      getPortfolio(dataUserId),
       getPortfolioDigest(dataUserId, 3).catch((error) => {
         console.error('getPortfolioDigest error:', error);
         return null;
       }),
-      computeNetByPerson(dataUserId).catch((error) => {
-        console.error('computeNetByPerson error:', error);
-        return {};
-      }),
-      getLifetimeCashPosition(dataUserId).catch((error) => {
-        console.error('getLifetimeCashPosition error:', error);
-        return { cash: 0 };
-      }),
-      detectRecurringSubscriptions(dataUserId).catch((error) => {
-        console.error('detectRecurringSubscriptions error:', error);
-        return [];
-      }),
+      computeNetByPerson(dataUserId),
+      getLifetimeCashPosition(dataUserId),
+      detectRecurringSubscriptions(dataUserId),
       supabase
         .from('debts')
         .select('id, person_name, amount, currency_code, note, created_at')
@@ -267,17 +225,19 @@ export default async function handler(req, res) {
         .eq('telegram_user_id', dataUserId)
         .gte('created_at', startOfDay.toISOString())
         .lt('created_at', endOfDay.toISOString())
-        .order('created_at', { ascending: false }),
-      safeExpenses(dataUserId, yearStart, yearEnd, 'year'),
-      hasActiveSubscription(dataUserId).catch((error) => { console.error('hasActiveSubscription error:', error); return false; }),
-      getSubscriptionExpiry(dataUserId).catch((error) => { console.error('getSubscriptionExpiry error:', error); return null; }),
+        .order('created_at', { ascending: false })
+        .then((r) => { if (r.error) console.error('todayFlowData query failed (falling back to empty):', r.error.message); return r.error ? { data: [], error: r.error } : r; })
+        .catch((error) => { console.error('todayFlowData query threw (falling back to empty):', error.message); return { data: [], error }; }),
+      getExpensesBetween(dataUserId, yearStart, yearEnd),
+      hasActiveSubscription(dataUserId),
+      getSubscriptionExpiry(dataUserId),
     ]);
 
     // ---- الجمعية + المناسبات + الحصالة اليومية + الأقساط الثابتة — استعلامات مستقلة، مش جوه الدفعة الكبيرة فوق عشان أي تعديل هنا منعملش mismatch في الترتيب ----
     const [gameyaList, occasionsSummary, dailyPiggybank, installmentReminders, activeSubscribersCount] = await Promise.all([
-      getGameyaList(dataUserId).catch((error) => { console.error('getGameyaList error:', error); return []; }),
-      getOccasionsSummary(dataUserId).catch((error) => { console.error('getOccasionsSummary error:', error); return null; }),
-      getDailyPiggybank(dataUserId).catch((error) => { console.error('getDailyPiggybank error:', error); return null; }),
+      getGameyaList(dataUserId),
+      getOccasionsSummary(dataUserId),
+      getDailyPiggybank(dataUserId),
       supabase
         .from('reminders')
         .select('id, title, amount, due_date, installments_remaining, last_installment_date')
@@ -285,25 +245,14 @@ export default async function handler(req, res) {
         .eq('installment_type', 'installment')
         .eq('done', false)
         .order('due_date', { ascending: true })
-        .then(({ data }) => data || [])
-        .catch((error) => { console.error('installment reminders error:', error); return []; }),
-      getActiveSubscribersCount().catch((error) => { console.error('getActiveSubscribersCount error:', error); return 0; }),
+        .then(({ data }) => data || []),
+      getActiveSubscribersCount(),
     ]);
     const installmentsMonthlyTotal = installmentReminders.reduce((sum, r) => sum + Number(r.amount || 0), 0);
 
     // ---- الاشتراك/التجربة: subInTrial محتاج نتيجة subActive الأول، فبيفضل استعلام إضافي واحد بس لو لازم ----
-    const subInTrial = !subActive
-      ? await isInTrial(dataUserId).catch((error) => {
-          console.error('isInTrial error:', error);
-          return false;
-        })
-      : false;
-    const subTrialDaysLeft = subInTrial
-      ? await getTrialDaysLeft(dataUserId).catch((error) => {
-          console.error('getTrialDaysLeft error:', error);
-          return 0;
-        })
-      : 0;
+    const subInTrial = !subActive && (await isInTrial(dataUserId));
+    const subTrialDaysLeft = subInTrial ? await getTrialDaysLeft(dataUserId) : 0;
 
     // ---- Financial Wrapped: بإعادة استخدام المصاريف اللي جابتها الدفعة فوق، من غير أي استعلام إضافي ----
     const weekWrapped = computeWrapped(weekExpenses, 'day', { periodLabel: `${weekStart.getDate()}/${weekStart.getMonth() + 1} - ${new Date(wrappedWeekEnd.getTime() - 86400000).getDate()}/${new Date(wrappedWeekEnd.getTime() - 86400000).getMonth() + 1}` });
@@ -461,7 +410,7 @@ export default async function handler(req, res) {
       generatedAt: new Date().toISOString(),
       subscription: {
         active: subActive,
-        expiresAt: subExpiresAt ? new Date(subExpiresAt).toISOString() : null,
+        expiresAt: subExpiresAt ? subExpiresAt.toISOString() : null,
         inTrial: subInTrial,
         trialDaysLeft: subTrialDaysLeft,
         priceEgp: SUBSCRIPTION_PRICE_EGP,

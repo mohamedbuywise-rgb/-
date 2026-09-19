@@ -3208,12 +3208,6 @@
                 <div id="quick-entry-scanning" class="hidden dabbar-scan-box rounded-2xl p-3 text-center"><div class="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl dabbar-scan-box-icon text-xl shadow-sm"><span style="display:inline-block;animation:dabbar-scan-spin 1s linear infinite">⟳</span></div><p class="text-xs font-bold dabbar-scan-box-title">بنقرأ الفاتورة...</p><p class="mt-1 text-[10px] dabbar-scan-box-sub">دبّر بيستخرج المبلغ والأصناف</p></div>
                 <div id="quick-entry-form" class="hidden space-y-3 rounded-2xl border p-3" style="border-color:var(--pm-hairline);background:var(--pm-surface-hi);"><div><p class="text-xs font-black" style="color:var(--pm-ink);">اكتب عمليتك بطريقتك</p><p class="mt-1 text-[10px]" style="color:var(--pm-muted);">مثال: «صرفت 50 جنيه على القهوة النهاردة»</p></div><textarea id="quick-entry-input" rows="5" maxlength="2500" placeholder="مثال: صرفت 50 جنيه على القهوة النهاردة" class="w-full resize-y rounded-2xl border px-3 py-3 text-sm leading-7 outline-none" style="border-color:var(--pm-hairline);background:var(--pm-surface-soft);color:var(--pm-ink);"></textarea><div class="flex gap-2"><button id="quick-entry-analyze" class="quick-entry-ai-save flex-1 rounded-xl py-2.5 text-xs font-black" type="button" style="background:linear-gradient(145deg,var(--pm-gold-bright),var(--pm-gold));color:var(--pm-ink);">حلّل وسجّل</button><button id="quick-entry-cancel" class="rounded-xl border px-3 py-2.5 text-xs" style="border-color:var(--pm-hairline);color:var(--pm-muted);" type="button">إلغاء</button></div></div>
                 <div id="quick-entry-manual-form" class="hidden space-y-3 rounded-2xl border p-3" style="border-color:color-mix(in srgb,var(--pm-gold-bright) 34%,transparent);background:var(--pm-surface-hi);"><div class="flex items-center justify-between gap-2"><div><p class="text-xs font-black" style="color:var(--pm-ink);">إدخال يدوي سريع</p><p class="mt-1 text-[10px]" style="color:var(--pm-muted);">اختار النوع والفئة واحفظ من غير AI.</p></div><span class="rounded-full px-2 py-1 text-[10px] font-bold" style="background:color-mix(in srgb,var(--pm-gold-bright) 14%,transparent);color:var(--pm-gold-bright);">مجاني دائمًا</span></div><div class="grid grid-cols-2 gap-2"><button id="quick-manual-expense" type="button" class="quick-manual-type active rounded-xl border px-3 py-2 text-xs font-black" style="border-color:var(--pm-gold-bright);background:color-mix(in srgb,var(--pm-gold-bright) 14%,transparent);color:var(--pm-ink);">🧾 مصروف</button><button id="quick-manual-income" type="button" class="quick-manual-type rounded-xl border px-3 py-2 text-xs font-black" style="border-color:var(--pm-hairline);color:var(--pm-muted);">💰 دخل</button></div><div class="relative"><input id="quick-manual-amount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="المبلغ" class="w-full rounded-xl border px-3 py-3 pl-14 text-sm outline-none" style="border-color:var(--pm-hairline);background:var(--pm-surface-soft);color:var(--pm-ink);"><span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs font-black" style="color:var(--pm-gold-bright);">ج.م</span></div><input id="quick-manual-description" type="text" maxlength="500" placeholder="الوصف — مثال: غدا أو مرتب" class="w-full rounded-xl border px-3 py-3 text-xs outline-none" style="border-color:var(--pm-hairline);background:var(--pm-surface-soft);color:var(--pm-ink);"><div><label for="quick-manual-category" class="mb-1 block text-[10px] font-bold" style="color:var(--pm-muted);">الفئة</label><select id="quick-manual-category" class="w-full rounded-xl border px-3 py-3 text-xs outline-none" style="border-color:var(--pm-hairline);background:var(--pm-surface-soft);color:var(--pm-ink);"><option>أكل</option><option>مواصلات</option><option>فواتير</option><option>تسوق</option><option>ترفيه</option><option>صحة</option><option>تعليم</option><option>منزل وأثاث</option><option>ملابس</option><option>اشتراكات</option><option>هدايا وتبرعات</option><option>شخصي وعناية</option><option value="other">أخرى</option></select><input id="quick-manual-custom-category" type="text" maxlength="80" placeholder="اسم الفئة اختياريًا" class="mt-2 hidden w-full rounded-xl border px-3 py-3 text-xs outline-none" style="border-color:var(--pm-hairline);background:var(--pm-surface-soft);color:var(--pm-ink);"></div><div class="flex gap-2"><button id="quick-manual-save" class="flex-1 rounded-xl py-2.5 text-xs font-black" style="background:linear-gradient(145deg,var(--pm-gold-bright),var(--pm-gold));color:var(--pm-ink);" type="button">حفظ العملية</button><button id="quick-manual-cancel" class="rounded-xl border px-3 py-2.5 text-xs" style="border-color:var(--pm-hairline);color:var(--pm-muted);" type="button">إلغاء</button></div></div>
-                    <div class="grid grid-cols-2 gap-2"><button id="quick-manual-expense" type="button" class="quick-manual-type active rounded-xl border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">مصروف</button><button id="quick-manual-income" type="button" class="quick-manual-type rounded-xl border border-slate-200 px-3 py-2 text-xs font-black text-slate-500 dark:border-slate-700">دخل</button></div>
-                    <input id="quick-manual-amount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="المبلغ — مثال 150" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100">
-                    <input id="quick-manual-description" type="text" maxlength="500" placeholder="الوصف — مثال: غدا أو مرتب" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100">
-                    <div><label for="quick-manual-category" class="mb-1 block text-[10px] font-bold text-slate-500">الفئة</label><select id="quick-manual-category" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"><option>أكل</option><option>مواصلات</option><option>فواتير</option><option>تسوق</option><option>ترفيه</option><option>صحة</option><option>تعليم</option><option>منزل وأثاث</option><option>ملابس</option><option>اشتراكات</option><option>هدايا وتبرعات</option><option>شخصي وعناية</option><option value="other">أخرى</option></select><input id="quick-manual-custom-category" type="text" maxlength="80" placeholder="اسم الفئة اختياريًا" class="mt-2 hidden w-full rounded-xl border border-emerald-200 bg-white px-3 py-2.5 text-xs outline-none dark:border-emerald-500/40 dark:bg-slate-950 dark:text-slate-100"></div>
-                    <div class="flex gap-2"><button id="quick-manual-save" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950" type="button">حفظ العملية</button><button id="quick-manual-cancel" class="rounded-xl border border-slate-300 px-3 py-2.5 text-xs text-slate-500 dark:border-slate-700" type="button">إلغاء</button></div>
-                </div>
                 <div id="quick-entry-recording" class="hidden rounded-2xl border border-rose-200 bg-rose-50 p-3 text-center text-xs text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200">
                     <div class="flex items-center justify-between gap-2"><span class="font-black">جاري التسجيل... <span id="quick-entry-recording-type-label" class="font-bold"></span></span><button id="quick-entry-recording-cancel" class="flex h-7 w-7 items-center justify-center rounded-full bg-white/70 text-sm font-black text-rose-500 transition hover:bg-white" type="button" aria-label="إلغاء التسجيل">✕</button></div>
                     <div id="quick-entry-recording-time" class="mt-1 font-black">00:00</div>
@@ -6340,7 +6334,9 @@
                 setupAutoRefresh();
                 handleQuickParam();
             } catch (e) {
-                /* supabase not configured يعني، بيسيب الصفحة مفتوحة عشان المعاينة بس */
+                console.error('dashboard boot failed:', e);
+                // لو الجلسة اتحملت، نضمن إن التحديث التلقائي وزرار 🔄 يشتغلوا حتى لو خطوة في التشغيل فشلت
+                try { if (accessToken) setupAutoRefresh(); } catch (err) { console.error('auto refresh setup failed:', err); }
             }
         })();
 
@@ -6349,6 +6345,8 @@
         // (2) polling كل 20 ثانية طول ما الصفحة فاتحة وظاهرة قدامه، عشان يبقى شبه لايف
         // (3) زرار تحديث يدوي 🔄 لو عايز يتأكد فورًا ============
         function setupAutoRefresh() {
+            if (window.__autoRefreshReady) return;
+            window.__autoRefreshReady = true;
             // قبل أي تحديث بعد رجوع المستخدم للصفحة، نتأكد إن الجلسة لسه سليمة (وده بيجدد التوكن لو خلصت صلاحيتها)
             async function ensureFreshSessionThenLoad() {
                 try {
@@ -6513,6 +6511,15 @@
                 clearTimeout(timeoutId);
             }
         }
+        function safeRender(name, fn) {
+            try {
+                const result = fn();
+                if (result && typeof result.catch === 'function') result.catch((err) => console.error(`render failed: ${name}`, err));
+            } catch (err) {
+                console.error(`render failed: ${name}`, err);
+            }
+        }
+
         async function loadDashboard(isInitialLoad = false, attempt = 1) {
             const MAX_ATTEMPTS = 3;
             const TIMEOUT_MS = attempt === 1 ? 12000 : 20000; // أول محاولة أسرع عشان نحس بالمشكلة بدري ونعيد المحاولة، الباقي أطول احتياطًا لشبكة بطيئة
@@ -6555,27 +6562,29 @@
 
             window.__dashboardData = data;
 
-            renderActiveDays(data.activeDays);
-            renderMonthly(data.month);
-            renderNetWorth(data.netWorth);
-            renderPlanning(data);
-            renderInAppNotifications(data);
-            renderDaily(data.today, data.flow);
-            loadSavingsOpportunities();
-            renderPiggybankCard(data.dailyPiggybank);
-            renderDailyReminder(data.today);
-            renderCategories(data.month);
-            renderSubscriptions(data.recurringSubscriptions);
-            renderTips(data.month);
-            renderDebts(data.debts);
-            renderRemindersTelegramBanner(data.linked);
-            renderArchive(data.history);
-            renderSubscription(data.subscription, data);
-            renderAssistant(data);
-            renderMonthlyGoalsShortcut(Array.isArray(data.goals) ? data.goals : (data.goal ? [data.goal] : []));
-            renderPortfolio(data.portfolio, data.portfolioDigest);
-            applyStreak(data.streak);
-            updateHeaderForTab(document.querySelector('.tab-btn.active-tab').dataset.tab, data);
+            // كل جزء بيترسم لوحده: لو جزء فشل بيتسجل في الكونسول والباقي يكمل عادي
+            // (قبل كده أي خطأ في جزء واحد كان بيوقف الداش كلها).
+            safeRender('activeDays', () => renderActiveDays(data.activeDays));
+            safeRender('monthly', () => renderMonthly(data.month));
+            safeRender('netWorth', () => renderNetWorth(data.netWorth));
+            safeRender('planning', () => renderPlanning(data));
+            safeRender('inAppNotifications', () => renderInAppNotifications(data));
+            safeRender('daily', () => renderDaily(data.today, data.flow));
+            safeRender('savingsOpportunities', () => loadSavingsOpportunities());
+            safeRender('piggybank', () => renderPiggybankCard(data.dailyPiggybank));
+            safeRender('dailyReminder', () => renderDailyReminder(data.today));
+            safeRender('categories', () => renderCategories(data.month));
+            safeRender('subscriptions', () => renderSubscriptions(data.recurringSubscriptions));
+            safeRender('tips', () => renderTips(data.month));
+            safeRender('debts', () => renderDebts(data.debts));
+            safeRender('remindersBanner', () => renderRemindersTelegramBanner(data.linked));
+            safeRender('archive', () => renderArchive(data.history));
+            safeRender('subscription', () => renderSubscription(data.subscription, data));
+            safeRender('assistant', () => renderAssistant(data));
+            safeRender('monthlyGoals', () => renderMonthlyGoalsShortcut(Array.isArray(data.goals) ? data.goals : (data.goal ? [data.goal] : [])));
+            safeRender('portfolio', () => renderPortfolio(data.portfolio, data.portfolioDigest));
+            safeRender('streak', () => applyStreak(data.streak));
+            safeRender('header', () => updateHeaderForTab(document.querySelector('.tab-btn.active-tab')?.dataset?.tab || 'monthly', data));
 
             const label = document.getElementById('last-updated-label');
             if (label) {
@@ -6644,12 +6653,13 @@
                 <details class="group border-t border-slate-800 pt-3"><summary class="flex cursor-pointer list-none items-center justify-between text-[10px] font-bold text-slate-400"><span>📌 التزامات شهرية متوقعة (إيجار / اشتراكات)</span><span class="text-slate-600 transition group-open:rotate-180">⌄</span></summary>
                 <div class="mt-2 space-y-2"><p class="text-[9px] text-slate-500">للتخطيط فقط — لا تُضاف للصرف الفعلي إلا عند تسجيلها.</p><div class="grid grid-cols-[1fr_5rem_2.5rem] gap-2"><input id="recurring-name" placeholder="إيجار / اشتراك" class="rounded-xl border border-slate-700 bg-slate-900 px-2.5 py-2 text-[10px] text-slate-100 outline-none"><input id="recurring-amount" type="number" min="0" placeholder="المبلغ" class="rounded-xl border border-slate-700 bg-slate-900 px-2.5 py-2 text-[10px] text-slate-100 outline-none"><button id="recurring-add" type="button" class="rounded-xl bg-slate-800 text-lg text-emerald-400">+</button></div><div id="recurring-list" class="mt-2 space-y-1.5"></div></div></details>
                 <div class="flex gap-2 border-t border-slate-800 pt-3"><button id="planning-save" type="button" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950">حفظ خطتي</button><button id="planning-reset" type="button" title="إدارة ومسح خطة الدخل والميزانية" class="rounded-xl border border-slate-700/60 px-3 py-2.5 text-xs text-slate-500">إدارة</button></div>`;
-            monthly.insertBefore(wrap, quick.nextSibling);
+            monthly.insertBefore(wrap, quick.parentNode === monthly ? quick.nextSibling : null);
             const ledger = document.createElement('section');
             ledger.id = 'expense-ledger-card';
             ledger.className = 'bg-slate-950/40 border border-slate-800 rounded-3xl p-4 space-y-2';
             ledger.innerHTML = `<div class="flex items-center justify-between"><div><span class="text-[10px] text-slate-500">مراجعة سريعة</span><h3 class="text-sm font-black text-slate-200">آخر عملياتك</h3></div><span class="text-lg">🧾</span></div><div id="expense-ledger-list"></div>`;
-            monthly.insertBefore(ledger, document.getElementById('monthly-categories-card'));
+            const categoriesRef = document.getElementById('monthly-categories-card');
+            monthly.insertBefore(ledger, categoriesRef && categoriesRef.parentNode === monthly ? categoriesRef : null);
             document.getElementById('planning-save').addEventListener('click', savePlanningSettings);
             document.getElementById('planning-reset').addEventListener('click', async () => {
                 if (!(await dabbarConfirm('مسح خطة الدخل والميزانية والالتزامات المتوقعة من هذا الحساب؟ لا يمكن التراجع عن المسح.', { confirmText: 'مسح نهائي' }))) return;
@@ -10355,6 +10365,16 @@
             setTimeout(() => URL.revokeObjectURL(url), 1000);
         }
 
+        function prepareWrappedImage(cacheKey, cardId) {
+            return getWrappedImage(cacheKey, cardId).catch((err) => { console.warn('prepareWrappedImage failed:', err); return null; });
+        }
+
+        function clearWrappedImageCache(cacheKey) {
+            delete wrappedImageCache[cacheKey];
+            delete wrappedImageCache[`${cacheKey}-light`];
+            delete wrappedImageCache[`${cacheKey}-dark`];
+        }
+
         async function shareWrappedCard({ cacheKey, cardId, filename, text }) {
             const blob = await getWrappedImage(cacheKey, cardId);
             if (!blob) throw new Error('مش قادر أجهز صورة الكارت دلوقتي. افتح الكارت وحاول تاني.');
@@ -10421,7 +10441,7 @@
             document.getElementById('wrapped-best-month-label').textContent = meta.bestLabel;
             document.getElementById('wrapped-best-month').textContent = w.bestMonthLabel ? `${w.bestMonthLabel} (${fmt(w.bestMonthTotal)})` : '—';
 
-            delete wrappedImageCache[`wrapped-${period}`];
+            clearWrappedImageCache(`wrapped-${period}`);
             requestAnimationFrame(() => prepareWrappedImage(`wrapped-${period}`, 'wrapped-card'));
         }
 
@@ -10501,7 +10521,7 @@
             dailyWrappedModal.classList.remove('hidden');
             dailyWrappedModal.classList.add('flex');
 
-            delete wrappedImageCache['daily'];
+            clearWrappedImageCache('daily');
             requestAnimationFrame(() => prepareWrappedImage('daily', 'daily-wrapped-card'));
         }
         document.getElementById('daily-wrapped-open').addEventListener('click', openDailyWrapped);

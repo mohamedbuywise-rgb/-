@@ -9,7 +9,7 @@
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="دبّر | المساعد المالي"
+        android:text="دبّر — تتبع رسائل البنك"
         android:textSize="20sp"
         android:textStyle="bold"
         android:layout_marginBottom="16dp" />

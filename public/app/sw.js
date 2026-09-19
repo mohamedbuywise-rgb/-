@@ -45,7 +45,12 @@ self.addEventListener('push', (event) => {
 
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const targetUrl = new URL(event.notification.data?.url || './dabbar-dashboard-full.html', self.location.origin).href;
+  const baseUrl = event.notification.data?.url || './dabbar-dashboard-full.html';
+  const url = new URL(baseUrl, self.location.origin);
+  // زرارين "🎙️ صوت" و "✍️ كتابة" على إشعار الوصول السريع — بنحول الضغطة لنفس عقد الـ quick param
+  if (event.action === 'quick-voice') url.searchParams.set('quick', 'voice');
+  else if (event.action === 'quick-text') url.searchParams.set('quick', 'text');
+  const targetUrl = url.href;
   event.waitUntil(
     self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
       const existing = clients.find((client) => client.url.startsWith(self.location.origin));
@@ -53,6 +58,38 @@ self.addEventListener('notificationclick', (event) => {
       return self.clients.openWindow(targetUrl);
     })
   );
+});
+
+// ============ إشعار "وصول سريع" ثابت (🎙️ صوت / ✍️ كتابة) — أقرب بديل ممكن لبلاطة Quick Settings على الويب ============
+// بيتفعّل بضغطة من المستخدم في إعدادات الحساب، وبيترسل تاني تلقائي كل ما يفتح الداش، عشان يفضل موجود
+// في شريط الإشعارات (requireInteraction بيمنعه يختفي لوحده). مش بلاطة حقيقية فوق كل حاجة زي واي فاي،
+// لكنه أسرع طريق موجود فعليًا على الويب لتسجيل صوت أو كتابة من غير ما تفتح التطبيق وتدور على الأيقونة.
+const QUICK_ACCESS_TAG = 'dabbar-quick-access';
+function showQuickAccessNotification() {
+  return self.registration.showNotification('دبّر — وصول سريع', {
+    body: 'سجّل عملية بصوتك أو بالكتابة على طول',
+    icon: './icons/icon-192.png',
+    badge: './icons/icon-192.png',
+    tag: QUICK_ACCESS_TAG,
+    renotify: false,
+    silent: true,
+    requireInteraction: true,
+    dir: 'rtl',
+    lang: 'ar',
+    actions: [
+      { action: 'quick-voice', title: '🎙️ صوت' },
+      { action: 'quick-text', title: '✍️ كتابة' },
+    ],
+    data: { url: './dabbar-dashboard-full.html' },
+  });
+}
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'SHOW_QUICK_ACCESS') event.waitUntil(showQuickAccessNotification());
+  else if (event.data?.type === 'HIDE_QUICK_ACCESS') {
+    event.waitUntil(
+      self.registration.getNotifications({ tag: QUICK_ACCESS_TAG }).then((list) => list.forEach((n) => n.close()))
+    );
+  }
 });
 
 // ============ Share Target (ملفات صوتية) ============

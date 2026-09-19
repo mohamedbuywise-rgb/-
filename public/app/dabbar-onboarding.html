@@ -484,9 +484,11 @@
   // بما إن الصفحة دي والـ API endpoints شغالين على نفس الدومين (نفس مشروع Vercel بتاع دبّر)،
   // مفيش داعي لأي رابط كامل — مسارات نسبية كفاية.
   const DASHBOARD_URL = 'dabbar-dashboard-full.html';
+  // لو وصلنا هنا بـ ?quick=text أو ?quick=voice (يعني جاي من اختصار/بلاطة إدخال سريع وهو مش مسجل دخول)،
+  // لازم نكمّل بنفس الوضع بعد نجاح الدخول بدل ما يضيع
   function dashboardUrlWithQuick() {
-    const quick = new URL(window.location.href).searchParams.get('quick');
-    return quick === 'text' || quick === 'voice' ? `${DASHBOARD_URL}?quick=${encodeURIComponent(quick)}` : DASHBOARD_URL;
+    const q = new URLSearchParams(window.location.search).get('quick');
+    return q ? `${DASHBOARD_URL}?quick=${encodeURIComponent(q)}` : DASHBOARD_URL;
   }
 
   // شبكة أمان: لو لأي سبب الفحص فوق اتعلّق أو اتأخر جدًا، منسيبش المستخدم واقف على شاشة التحميل للأبد

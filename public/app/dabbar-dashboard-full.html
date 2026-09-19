@@ -510,18 +510,6 @@
             color: var(--db-ink);
         }
 
-        /* حركة السيولة: سطح واضح في النهاري والليلي من غير تشويه backdrop-blur */
-        .daily-flow-card { background: linear-gradient(145deg, #172321 0%, #101817 100%); border: 1px solid rgba(82,214,159,.22); box-shadow: 0 14px 32px rgba(7,23,18,.18); }
-        .daily-flow-stat, .daily-flow-net, .daily-flow-sheet-panel, .daily-flow-item { background: rgba(255,255,255,.045); border-color: rgba(255,255,255,.10); }
-        .daily-flow-sheet { background: rgba(15,23,42,.58); }
-        html[data-theme="light"] .daily-flow-card { background: linear-gradient(145deg,#fff 0%,#f4faf7 100%); border-color: #cfe9dc; box-shadow: 0 12px 28px rgba(22,90,62,.10); }
-        html[data-theme="light"] .daily-flow-stat, html[data-theme="light"] .daily-flow-net, html[data-theme="light"] .daily-flow-sheet-panel, html[data-theme="light"] .daily-flow-item { background: #fff; border-color: #dbece3; }
-        html[data-theme="light"] .daily-flow-sheet { background: rgba(15,23,42,.38); }
-        html[data-theme="light"] .daily-flow-title { color: #17352a; }
-        html[data-theme="light"] .daily-flow-muted { color: #71847c; }
-        html[data-theme="light"] .daily-flow-net-label { color: #50665d; }
-        html[data-theme="light"] .daily-flow-sheet-title { color: #17352a; }
-
         body {
             letter-spacing: -.01em;
             transition: background-color .25s ease, color .25s ease;
@@ -3672,45 +3660,45 @@
             </div>
 
             <!-- حركة السيولة اليومية (واصل من / واصل لـ) -->
-            <div id="daily-flow-card" role="button" tabindex="0" aria-label="عرض تفاصيل حركة السيولة" class="daily-flow-card cursor-pointer rounded-3xl p-4 space-y-3 transition hover:border-emerald-500/50">
+            <div id="daily-flow-card" role="button" tabindex="0" aria-label="عرض تفاصيل حركة السيولة" class="cursor-pointer bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-4 space-y-3 shadow-lg transition hover:border-emerald-500/50">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2">
-                        <div class="w-8 h-8 rounded-xl bg-emerald-500/15 flex items-center justify-center text-emerald-400 text-sm">⇄</div>
-                        <span class="daily-flow-title text-xs font-bold">حركة السيولة (النهاردة)</span>
+                        <div class="w-7 h-7 rounded-lg bg-emerald-500/15 flex items-center justify-center text-emerald-400 text-sm">⇄</div>
+                        <span class="text-xs font-bold text-slate-200">حركة السيولة (النهاردة)</span>
                     </div>
-                    <span class="daily-flow-muted text-[9px] font-normal">تتصفّر الساعة 12م</span>
+                    <span class="text-[9px] text-slate-500 font-normal">تتصفّر الساعة 12م</span>
                 </div>
 
                 <div class="grid grid-cols-2 gap-2.5">
-                    <div class="daily-flow-stat rounded-2xl border border-emerald-500/30 p-3">
+                    <div class="bg-gradient-to-b from-emerald-500/10 to-emerald-500/0 border border-emerald-500/30 rounded-2xl p-3">
                         <div class="flex items-center gap-1.5 mb-2">
                             <span class="text-emerald-400 text-xs">↙</span>
-                            <span class="text-[10px] text-emerald-500">داخل (واصل من)</span>
+                            <span class="text-[10px] text-emerald-300/80">داخل (واصل من)</span>
                         </div>
                         <span class="text-xl font-bold text-emerald-400" id="flow-in">0 ج.م</span>
                     </div>
-                    <div class="daily-flow-stat rounded-2xl border border-rose-500/30 p-3">
+                    <div class="bg-gradient-to-b from-rose-500/10 to-rose-500/0 border border-rose-500/30 rounded-2xl p-3">
                         <div class="flex items-center gap-1.5 mb-2">
                             <span class="text-rose-400 text-xs">↗</span>
-                            <span class="text-[10px] text-rose-500">خارج (واصل لـ)</span>
+                            <span class="text-[10px] text-rose-300/80">خارج (واصل لـ)</span>
                         </div>
                         <span class="text-xl font-bold text-rose-400" id="flow-out">0 ج.م</span>
                     </div>
                 </div>
 
-                <div class="daily-flow-net rounded-2xl border px-3.5 py-2.5 flex items-center justify-between">
+                <div class="bg-slate-800/30 border border-slate-700/60 rounded-2xl px-3.5 py-2.5 flex items-center justify-between">
                     <div class="flex items-center gap-2">
-                        <span class="text-slate-400 text-sm">≈</span>
-                        <span class="daily-flow-net-label text-[11px]">صافي الحركة</span>
+                        <span class="text-slate-400 text-sm">⚖️</span>
+                        <span class="text-[11px] text-slate-400">صافي الحركة</span>
                     </div>
                     <span class="text-base font-bold text-slate-200" id="flow-net">0 ج.م</span>
                 </div>
 
-                <p class="daily-flow-muted text-[9px] text-center">الصافي = الداخل − الخارج خلال النهاردة بس</p>
+                <p class="text-[9px] text-slate-500 text-center">الصافي = الداخل − الخارج خلال النهاردة بس</p>
             </div>
-            <div id="daily-flow-sheet" class="daily-flow-sheet hidden fixed inset-0 z-[80] items-end justify-center p-3" role="dialog" aria-modal="true" aria-labelledby="daily-flow-sheet-title">
-                <div class="daily-flow-sheet-panel w-full max-w-lg rounded-[28px] border p-4 shadow-2xl">
-                    <div class="mb-3 flex items-center justify-between gap-3"><div><h3 id="daily-flow-sheet-title" class="daily-flow-sheet-title text-sm font-black">تفاصيل حركة السيولة</h3><p class="daily-flow-muted mt-1 text-[10px]">السلف والديون المسجلة النهاردة</p></div><button id="daily-flow-sheet-close" type="button" class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-800 text-slate-300">✕</button></div>
+            <div id="daily-flow-sheet" class="hidden fixed inset-0 z-[80] items-center justify-center p-3 dabbar-premium-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="daily-flow-sheet-title">
+                <div class="w-full max-w-lg rounded-[28px] border border-slate-700 bg-slate-950 p-4 shadow-2xl">
+                    <div class="mb-3 flex items-center justify-between gap-3"><div><h3 id="daily-flow-sheet-title" class="text-sm font-black text-slate-100">تفاصيل حركة السيولة</h3><p class="mt-1 text-[10px] text-slate-500">السلف والديون المسجلة النهاردة</p></div><button id="daily-flow-sheet-close" type="button" class="flex h-8 w-8 items-center justify-center rounded-full bg-slate-800 text-slate-300">✕</button></div>
                     <div id="daily-flow-sheet-list" class="max-h-[55vh] space-y-2 overflow-auto"></div>
                 </div>
             </div>
@@ -4221,16 +4209,6 @@
                 </div>
             </div>
 
-            <a href="./quick-access-preview.html" class="block rounded-3xl border border-emerald-500/25 bg-gradient-to-br from-emerald-500/10 to-teal-500/5 p-4 transition hover:border-emerald-500/50">
-                <div class="flex items-center justify-between gap-3">
-                    <div class="flex items-center gap-3 min-w-0">
-                        <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/15 text-xl">⚡</span>
-                        <span class="min-w-0"><b class="block text-sm text-emerald-400">الوصول السريع</b><span class="mt-1 block text-[11px] leading-5 text-slate-400">شوف إزاي تضيف بلاطة أو اختصار دبّر على جهازك</span></span>
-                    </div>
-                    <span class="shrink-0 text-slate-400">←</span>
-                </div>
-            </a>
-
             <details id="honor-board-card" class="hidden honor-loyalty-section">
                 <summary>
                     <span>
@@ -4570,6 +4548,18 @@
                     </div>
                     <button type="button" id="push-notifications-save" class="w-full bg-slate-800 border border-slate-700 text-slate-200 font-bold text-[11px] py-2.5 rounded-xl transition hover:bg-slate-700">حفظ إعدادات الإشعارات</button>
                 </div>
+            </section>
+
+            <section id="quick-access-card" class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3">
+                <div class="flex items-start gap-3">
+                    <span class="w-9 h-9 shrink-0 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-base">⚡</span>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-xs font-bold text-slate-200">الوصول السريع (صوت / كتابة)</p>
+                        <p id="quick-access-status" class="text-[11px] text-slate-500 leading-relaxed">إشعار ثابت في شريط الإشعارات فيه زرار 🎙️ صوت وزرار ✍️ كتابة، تسجّل بيهم من أي مكان من غير ما تفتح دبّر وتدور على الأيقونة.</p>
+                    </div>
+                    <button type="button" id="quick-access-toggle" class="shrink-0 bg-emerald-400 text-slate-950 font-black text-[10px] px-3 py-2 rounded-xl transition hover:bg-emerald-300 disabled:opacity-50">تفعيل</button>
+                </div>
+                <p id="quick-access-note" class="text-[10px] text-slate-500 leading-relaxed">على آيفون: أقرب حل هو اختصار Siri — <a href="./ios-shortcut-setup.html" class="text-emerald-400 underline">اعرف تعمله إزاي من هنا</a>.</p>
             </section>
 
             <section id="in-app-notifications-card" class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3">
@@ -5125,6 +5115,23 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_yHiX1cnEMCVEcjQxiIrqig_DRBiuveQ';
         const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         const ONBOARDING_URL = 'dabbar-onboarding.html';
+
+        // ============ عقد الـ Deep Link: ?quick=text أو ?quick=voice (من اختصار PWA / بلاطة أندرويد لاحقًا) ============
+        // بيتنادى بعد ما المستخدم يبقى مسجل دخول والداش خلصت تحميل. بيستخدم نفس أزرار "كتابة"/"صوت"
+        // الموجودة بالفعل في كارت الإدخال السريع (نفس المنطق بالظبط، من غير تكرار كود)، وبعدين يمسح الـ param.
+        function handleQuickParam() {
+            const params = new URLSearchParams(window.location.search);
+            const mode = params.get('quick');
+            if (!mode) return;
+            params.delete('quick');
+            const newQs = params.toString();
+            history.replaceState(null, '', window.location.pathname + (newQs ? `?${newQs}` : '') + window.location.hash);
+            const card = document.getElementById('quick-entry-card');
+            card?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            const btnId = mode === 'voice' ? 'quick-entry-voice' : mode === 'text' ? 'quick-entry-text' : null;
+            if (!btnId) return;
+            setTimeout(() => document.getElementById(btnId)?.click(), 150);
+        }
 
         const CATEGORY_EMOJI = { 'أكل':'🍔', 'مواصلات':'🚕', 'فواتير':'🧾', 'تسوق':'🛍️', 'ترفيه':'🎬', 'صحة':'💊', 'تعليم':'📚', 'منزل وأثاث':'🏠', 'ملابس':'👕', 'اشتراكات':'🔁', 'هدايا وتبرعات':'🎁', 'شخصي وعناية':'🧴' };
         const CATEGORY_EMOJI_RULES = [
@@ -6009,6 +6016,48 @@
             return pushRegistrationPromise;
         }
 
+        // ============ الوصول السريع (صوت/كتابة) — إشعار ثابت بزرارين، أقرب بديل ممكن لبلاطة Quick Settings على الويب ============
+        function quickAccessKey() { return `dabbar_quick_access_${currentUser?.id || 'anon'}`; }
+        async function setupQuickAccessUI() {
+            const toggle = document.getElementById('quick-access-toggle');
+            const status = document.getElementById('quick-access-status');
+            if (!toggle || toggle.dataset.quickAccessReady) return;
+            toggle.dataset.quickAccessReady = 'true';
+            const defaultStatusText = status?.textContent || '';
+            const applyState = (on) => {
+                toggle.textContent = on ? 'إيقاف' : 'تفعيل';
+                toggle.classList.toggle('bg-emerald-400', !on);
+                toggle.classList.toggle('bg-slate-700', on);
+            };
+            const enabled = localStorage.getItem(quickAccessKey()) === '1';
+            applyState(enabled);
+            if (enabled && 'Notification' in window && Notification.permission === 'granted') {
+                const registration = await getPushRegistration();
+                registration?.active?.postMessage({ type: 'SHOW_QUICK_ACCESS' });
+            }
+            toggle.addEventListener('click', async () => {
+                const isOn = localStorage.getItem(quickAccessKey()) === '1';
+                if (isOn) {
+                    localStorage.removeItem(quickAccessKey());
+                    applyState(false);
+                    const registration = await getPushRegistration();
+                    registration?.active?.postMessage({ type: 'HIDE_QUICK_ACCESS' });
+                    if (status) status.textContent = defaultStatusText;
+                    return;
+                }
+                if (!('Notification' in window)) { if (status) status.textContent = 'المتصفح ده مش بيدعم الإشعارات.'; return; }
+                if (Notification.permission === 'denied') { if (status) status.textContent = 'الإشعارات محجوبة من إعدادات الموقع في المتصفح — لازم تسمح بيها الأول، وبعدين ارجع دوس تفعيل.'; return; }
+                let perm = Notification.permission;
+                if (perm !== 'granted') perm = await Notification.requestPermission();
+                if (perm !== 'granted') return;
+                const registration = await getPushRegistration();
+                registration?.active?.postMessage({ type: 'SHOW_QUICK_ACCESS' });
+                localStorage.setItem(quickAccessKey(), '1');
+                applyState(true);
+                if (status) status.textContent = 'شغّال — هتلاقي إشعار فيه 🎙️ صوت و✍️ كتابة، دوس عليه من أي مكان.';
+            });
+        }
+
         function showPushHelp(show = true) {
             const help = document.getElementById('push-notifications-help');
             if (help) help.classList.toggle('hidden', !show);
@@ -6256,8 +6305,8 @@
             try {
                 const { data: { session } } = await sb.auth.getSession();
                 if (!session) {
-                    const quick = new URL(window.location.href).searchParams.get('quick');
-                    window.location.href = quick ? `${ONBOARDING_URL}?quick=${encodeURIComponent(quick)}` : ONBOARDING_URL;
+                    const q = new URLSearchParams(window.location.search).get('quick');
+                    window.location.href = q ? `${ONBOARDING_URL}?quick=${encodeURIComponent(q)}` : ONBOARDING_URL;
                     return;
                 }
                 accessToken = session.access_token;
@@ -6276,11 +6325,12 @@
                 await gateLocalSecurity();
                 // refreshPushUI مستقلة تمامًا عن بيانات الداشبورد (بتاعة إعدادات الإشعارات بس)، فبنشغّلها بالتوازي بدل ما نستنّاها الأول
                 const pushUIPromise = refreshPushUI();
+                const quickAccessPromise = setupQuickAccessUI();
                 await loadDashboard(true); // أول تحميل — الربط اختياري والداش تفتح للحساب المستقل عادي
-                window.dabbarConsumeQuickMode?.();
                 // البنود دي مش محتاجة بعضها البعض، فبنشغّلها بالتوازي بدل التتابع عشان الصفحة تفتح أسرع
                 await Promise.allSettled([
                     pushUIPromise,
+                    quickAccessPromise,
                     loadPlanningSettings(),
                     loadAccountTab(),
                     loadReminders(),
@@ -6288,6 +6338,7 @@
                 ]);
                 loadInvoicesCount();
                 setupAutoRefresh();
+                handleQuickParam();
             } catch (e) {
                 /* supabase not configured يعني، بيسيب الصفحة مفتوحة عشان المعاينة بس */
             }
@@ -7141,6 +7192,16 @@
         let monthlyDonutTotalLabel = '—';
         let monthlyDonutActiveIndex = null;
 
+        // بتزود سطوع لون الفئة (hex) لما تكون هي المختارة في الدايرة
+        function brightenHex(hex, amt) {
+            const h = String(hex || '').replace('#', '');
+            if (h.length !== 6) return hex;
+            const r = parseInt(h.slice(0, 2), 16), g = parseInt(h.slice(2, 4), 16), b = parseInt(h.slice(4, 6), 16);
+            const mix = (c) => Math.round(c + (255 - c) * amt);
+            const toHex = (c) => c.toString(16).padStart(2, '0');
+            return `#${toHex(mix(r))}${toHex(mix(g))}${toHex(mix(b))}`;
+        }
+
         function buildDonutGradient(cats, activeIndex) {
             let deg = 0;
             const stops = cats.map((c, i) => {
@@ -7148,15 +7209,22 @@
                 const start = deg;
                 const end = deg + (Number(c.percent) || 0) * 3.6;
                 deg = end;
-                if (activeIndex !== null && i !== activeIndex) {
-                    // نغمّق الفئات الغير مختارة بدل ما نلونها بالكامل، عشان التركيز يبقى واضح على الفئة المختارة
-                    color = color + '33';
+                if (activeIndex !== null) {
+                    if (i !== activeIndex) {
+                        // نغمّق الفئات الغير مختارة بدل ما نلونها بالكامل، عشان التركيز يبقى واضح على الفئة المختارة
+                        color = color + '33';
+                    } else {
+                        // نزود سطوع لون الفئة المختارة عشان تبان واضحة في الدايرة
+                        color = brightenHex(color, 0.25);
+                    }
                 }
                 return `${color} ${start}deg ${end}deg`;
             });
             if (deg < 360 && cats.length) {
                 let lastColor = CATEGORY_HEX[cats[cats.length - 1].name] || CATEGORY_HEX_FALLBACK;
-                if (activeIndex !== null && activeIndex !== cats.length - 1) lastColor = lastColor + '33';
+                if (activeIndex !== null) {
+                    lastColor = activeIndex !== cats.length - 1 ? lastColor + '33' : brightenHex(lastColor, 0.25);
+                }
                 stops.push(`${lastColor} ${deg}deg 360deg`);
             }
             return `conic-gradient(${stops.join(', ')})`;
@@ -9457,20 +9525,6 @@
         async function analyzeQuickEntry(payload) { if (!requireQuickEntryAccess()) return; const cycleMsgs = payload.audioBase64 ? ['🎙️ بنسمع كلامك', '🧠 بنفهم العملية', '📝 بنجهز المراجعة'] : payload.imageBase64 ? ['📸 بنقرأ الفاتورة', '🔎 بنفصّل الأصناف', '🧮 بنجهز الإجمالي'] : ['🧠 بنفهم كلامك', '🏷️ بنحدد الفئة', '📝 بنجهز المراجعة']; quickStatusCycle(cycleMsgs); try { const result = await asstApi(payload.imageBase64 ? 'entry_invoice_draft' : 'entry_draft', payload); quickDraft(result.drafts, result.transcript); } catch (e) { quickStatus(e.message || 'تعذر فهم العملية.', 'error'); } }
         setQuickEntryType();
         document.getElementById('quick-entry-text')?.addEventListener('click', () => { document.getElementById('quick-entry-input').value = ''; const locked = !quickEntrySubscription.active && !quickEntrySubscription.inTrial; quickShow('quick-entry-form', !locked); quickShow('quick-entry-manual-form', locked); if (locked) document.getElementById('quick-manual-amount')?.focus(); else document.getElementById('quick-entry-input')?.focus(); });
-        // Deep links من Android tile/widget واختصارات PWA: نستخدم نفس أزرار الواجهة حتى يظل سلوك الاشتراك والصوت موحدًا.
-        window.dabbarConsumeQuickMode = function () {
-            const url = new URL(window.location.href);
-            const mode = url.searchParams.get('quick');
-            if (mode !== 'text' && mode !== 'voice') return;
-            url.searchParams.delete('quick');
-            window.history.replaceState({}, document.title, `${url.pathname}${url.search}${url.hash}`);
-            window.setTimeout(() => {
-                const button = document.getElementById(mode === 'voice' ? 'quick-entry-voice' : 'quick-entry-text');
-                if (!button) return;
-                button.click();
-                if (mode === 'text') document.getElementById('quick-entry-input')?.focus();
-            }, 80);
-        };
         document.getElementById('quick-entry-cancel')?.addEventListener('click', () => { quickShow('quick-entry-form', false); quickShow('quick-entry-draft', false); quickStatus(''); document.getElementById('quick-entry-input').value = ''; });
         document.getElementById('quick-manual-cancel')?.addEventListener('click', () => { quickShow('quick-entry-manual-form', false); quickStatus(''); });
         document.querySelectorAll('.quick-manual-type').forEach((button) => button.addEventListener('click', () => { document.querySelectorAll('.quick-manual-type').forEach((item) => { item.classList.remove('active', 'border-emerald-300', 'bg-emerald-50', 'text-emerald-700'); item.classList.add('border-slate-200', 'text-slate-500'); }); button.classList.add('active', 'border-emerald-300', 'bg-emerald-50', 'text-emerald-700'); button.classList.remove('border-slate-200', 'text-slate-500'); }));
@@ -11373,8 +11427,8 @@
                         const note = item.note ? ` — ${escape(item.note)}` : '';
                         const amount = fmt(item.amount, item.currency_code);
                         const time = new Date(item.created_at).toLocaleTimeString('ar-EG', { hour: 'numeric', minute: '2-digit' });
-                        return `<div class="daily-flow-item flex items-center justify-between gap-3 rounded-2xl border p-3"><div class="min-w-0"><p class="daily-flow-item-title truncate text-xs font-bold">${incoming ? 'واصل من' : 'واصل لـ'} ${person}</p><p class="daily-flow-muted mt-1 truncate text-[10px]">${escape(time)}${note}</p></div><strong class="shrink-0 text-xs font-black ${incoming ? 'text-emerald-400' : 'text-rose-400'}">${incoming ? '+' : '−'}${escape(amount)}</strong></div>`;
-                    }).join('') : '<p class="daily-flow-item daily-flow-muted rounded-2xl border p-4 text-center text-xs">مفيش حركة سيولة مسجلة النهاردة.</p>';
+                        return `<div class="flex items-center justify-between gap-3 rounded-2xl border border-slate-800 bg-slate-900/80 p-3"><div class="min-w-0"><p class="truncate text-xs font-bold text-slate-100">${incoming ? 'واصل من' : 'واصل لـ'} ${person}</p><p class="mt-1 truncate text-[10px] text-slate-500">${escape(time)}${note}</p></div><strong class="shrink-0 text-xs font-black ${incoming ? 'text-emerald-400' : 'text-rose-400'}">${incoming ? '+' : '−'}${escape(amount)}</strong></div>`;
+                    }).join('') : '<p class="rounded-2xl border border-slate-800 p-4 text-center text-xs text-slate-500">مفيش حركة سيولة مسجلة النهاردة.</p>';
                 };
                 const open = () => { render(); sheet.classList.remove('hidden'); sheet.classList.add('flex'); };
                 const hide = () => { sheet.classList.add('hidden'); sheet.classList.remove('flex'); };

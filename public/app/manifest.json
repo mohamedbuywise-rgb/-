@@ -81,16 +81,16 @@
   },
   "shortcuts": [
     {
-      "name": "كتابة سريعة",
-      "short_name": "كتابة",
-      "url": "./dabbar-dashboard-full.html?quick=text",
+      "name": "إدخال سريع",
+      "short_name": "إدخال سريع",
+      "url": "./dabbar-quick-add.html",
       "icons": [
         { "src": "./icons/icon-192.png", "sizes": "192x192" }
       ]
     },
     {
-      "name": "تسجيل صوتي سريع",
-      "short_name": "صوت",
+      "name": "تسجيل صوت",
+      "short_name": "تسجيل صوت",
       "url": "./dabbar-dashboard-full.html?quick=voice",
       "icons": [
         { "src": "./icons/icon-192.png", "sizes": "192x192" }

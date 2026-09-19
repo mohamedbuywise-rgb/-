@@ -26,6 +26,18 @@ function sumByCurrency(rows = []) {
   }, {});
 }
 
+// فشل استعلام واحد لا ينبغي أن يسقط الداشبورد كله.
+// نرجّع مصفوفة فارغة مع تسجيل اسم الجزء الفاشل للتشخيص من Logs.
+async function safeExpenses(userId, from, to, label) {
+  try {
+    const rows = await getExpensesBetween(userId, from, to);
+    return Array.isArray(rows) ? rows : [];
+  } catch (error) {
+    console.error(`dashboard-data ${label} expenses error:`, error);
+    return [];
+  }
+}
+
 // ============ GET /api/dashboard-data ============
 // بيرجّع بيانات حقيقية بس (صفر mock data): مصاريف النهاردة، مصاريف الشهر بالتصنيفات، والديون.
 // Header: Authorization: Bearer <supabase access token>
@@ -56,9 +68,6 @@ export default async function handler(req, res) {
       linked ? telegramUserId : dashboardUser.authUserId
     );
 
-    // ---- الأيام النشطة: طلب واحد من RPC، والـ fallback لا يعطل الداشبورد ----
-    const activeDays = await getActiveDays(dataUserId);
-
     // ---- كل الفواتير / تفاصيل فاتورة واحدة (GET /api/dashboard-data?invoices=1 أو ?invoiceId=123) ----
     // اتحطوا هنا بدل ملف API منفصل عشان نفضل تحت حد Vercel Hobby (12 function كحد أقصى)،
     // بنفس فكرة تجميع الميزات في api/assistant.js.
@@ -72,6 +81,11 @@ export default async function handler(req, res) {
       return res.status(200).json({ linked, telegramUserId: linked ? telegramUserId : null, invoices });
     }
 
+    // ---- الأيام النشطة: طلب واحد من RPC، والفشل فيه لا يعطل الداشبورد ----
+    const activeDays = await getActiveDays(dataUserId).catch((error) => {
+      console.error('getActiveDays error:', error);
+      return [];
+    });
 
     // ---- حساب كل نطاقات التاريخ الأول (عمليات JS بحتة، بدون أي استعلام) ----
     const startOfDay = new Date();
@@ -179,10 +193,10 @@ export default async function handler(req, res) {
       // ملحوظة: أضفنا .catch على أي استعلام مش أساسي (مش المصاريف/الدخل نفسها) عشان لو
       // استعلام واحد فشل (schema تغيّر، جدول فاضي، RPC عطلانة...) الداشبورد كله ميقعش بـ 500،
       // وبدل كده يفضل يشتغل وياخد قيمة افتراضية آمنة للجزء ده بس.
-      getExpensesBetween(dataUserId, startOfDay, endOfDay),
-      getExpensesBetween(dataUserId, weekStart, weekEnd),
-      getExpensesBetween(dataUserId, previousWeekStart, weekStart),
-      getExpensesBetween(dataUserId, start, end),
+      safeExpenses(dataUserId, startOfDay, endOfDay, 'today'),
+      safeExpenses(dataUserId, weekStart, weekEnd, 'week'),
+      safeExpenses(dataUserId, previousWeekStart, weekStart, 'previous-week'),
+      safeExpenses(dataUserId, start, end, 'month'),
       supabase
         .from('financial_events')
         .select('id, event_type, amount, currency_code, category, description, raw_text, direction, created_at')
@@ -190,7 +204,7 @@ export default async function handler(req, res) {
         .gte('created_at', start.toISOString())
         .lt('created_at', end.toISOString())
         .order('created_at', { ascending: false }),
-      getExpensesBetween(dataUserId, prevRange.start, prevRange.end),
+      safeExpenses(dataUserId, prevRange.start, prevRange.end, 'previous-month'),
       supabase
         .from('financial_events')
         .select('event_type, amount, currency_code')
@@ -206,7 +220,11 @@ export default async function handler(req, res) {
         .eq('is_repayment', false)
         .gte('created_at', prevRange.start.toISOString())
         .lt('created_at', prevRange.end.toISOString()),
-      Promise.all(historyOffsets.map(({ range }) => getExpensesBetween(dataUserId, range.start, range.end))),
+      Promise.all(
+        historyOffsets.map(({ range, offset }) =>
+          safeExpenses(dataUserId, range.start, range.end, `history-${offset}`)
+        )
+      ),
       supabase
         .from('goals')
         .select('*')
@@ -250,7 +268,7 @@ export default async function handler(req, res) {
         .gte('created_at', startOfDay.toISOString())
         .lt('created_at', endOfDay.toISOString())
         .order('created_at', { ascending: false }),
-      getExpensesBetween(dataUserId, yearStart, yearEnd),
+      safeExpenses(dataUserId, yearStart, yearEnd, 'year'),
       hasActiveSubscription(dataUserId).catch((error) => { console.error('hasActiveSubscription error:', error); return false; }),
       getSubscriptionExpiry(dataUserId).catch((error) => { console.error('getSubscriptionExpiry error:', error); return null; }),
     ]);
@@ -274,8 +292,18 @@ export default async function handler(req, res) {
     const installmentsMonthlyTotal = installmentReminders.reduce((sum, r) => sum + Number(r.amount || 0), 0);
 
     // ---- الاشتراك/التجربة: subInTrial محتاج نتيجة subActive الأول، فبيفضل استعلام إضافي واحد بس لو لازم ----
-    const subInTrial = !subActive && (await isInTrial(dataUserId));
-    const subTrialDaysLeft = subInTrial ? await getTrialDaysLeft(dataUserId) : 0;
+    const subInTrial = !subActive
+      ? await isInTrial(dataUserId).catch((error) => {
+          console.error('isInTrial error:', error);
+          return false;
+        })
+      : false;
+    const subTrialDaysLeft = subInTrial
+      ? await getTrialDaysLeft(dataUserId).catch((error) => {
+          console.error('getTrialDaysLeft error:', error);
+          return 0;
+        })
+      : 0;
 
     // ---- Financial Wrapped: بإعادة استخدام المصاريف اللي جابتها الدفعة فوق، من غير أي استعلام إضافي ----
     const weekWrapped = computeWrapped(weekExpenses, 'day', { periodLabel: `${weekStart.getDate()}/${weekStart.getMonth() + 1} - ${new Date(wrappedWeekEnd.getTime() - 86400000).getDate()}/${new Date(wrappedWeekEnd.getTime() - 86400000).getMonth() + 1}` });
@@ -433,7 +461,7 @@ export default async function handler(req, res) {
       generatedAt: new Date().toISOString(),
       subscription: {
         active: subActive,
-        expiresAt: subExpiresAt ? subExpiresAt.toISOString() : null,
+        expiresAt: subExpiresAt ? new Date(subExpiresAt).toISOString() : null,
         inTrial: subInTrial,
         trialDaysLeft: subTrialDaysLeft,
         priceEgp: SUBSCRIPTION_PRICE_EGP,

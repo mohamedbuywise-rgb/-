@@ -81,9 +81,17 @@
   },
   "shortcuts": [
     {
-      "name": "إدخال سريع",
-      "short_name": "إدخال سريع",
-      "url": "./dabbar-quick-add.html",
+      "name": "كتابة سريعة",
+      "short_name": "كتابة",
+      "url": "./dabbar-dashboard-full.html?quick=text",
+      "icons": [
+        { "src": "./icons/icon-192.png", "sizes": "192x192" }
+      ]
+    },
+    {
+      "name": "تسجيل صوتي سريع",
+      "short_name": "صوت",
+      "url": "./dabbar-dashboard-full.html?quick=voice",
       "icons": [
         { "src": "./icons/icon-192.png", "sizes": "192x192" }
       ]

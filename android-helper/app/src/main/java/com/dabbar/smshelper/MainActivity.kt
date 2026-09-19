@@ -1,7 +1,11 @@
 package com.dabbar.smshelper
 
+import android.app.StatusBarManager
+import android.content.ComponentName
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.os.Build
 import android.provider.Settings
 import android.widget.Button
 import android.widget.EditText
@@ -45,12 +49,40 @@ class MainActivity : AppCompatActivity() {
             startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
         }
 
+        handleQuickIntent(intent)
+        maybeOfferQuickTile()
         updateStatus(statusText)
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        handleQuickIntent(intent)
     }
 
     override fun onResume() {
         super.onResume()
         updateStatus(findViewById(R.id.statusText))
+    }
+
+    private fun handleQuickIntent(intent: Intent?) {
+        val data = intent?.data ?: return
+        if (data.scheme != "dabbar" || data.host != "quick") return
+        val mode = if (data.getQueryParameter("mode")?.lowercase() == "voice") "voice" else "text"
+        startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://www.dabbar.online/app/dabbar-dashboard-full.html?quick=$mode")))
+    }
+
+    private fun maybeOfferQuickTile() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+        val prefs = getPreferences(MODE_PRIVATE)
+        if (prefs.getBoolean("quick_tile_requested", false)) return
+        val statusBar = getSystemService(StatusBarManager::class.java) ?: return
+        statusBar.requestAddTileService(
+            ComponentName(this, DabbarQuickTileService::class.java),
+            getString(R.string.tile_label),
+            android.graphics.drawable.Icon.createWithResource(this, R.drawable.ic_dabbar_tile),
+            mainExecutor
+        ) { prefs.edit().putBoolean("quick_tile_requested", true).apply() }
     }
 
     private fun updateStatus(statusText: TextView) {

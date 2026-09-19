@@ -484,6 +484,10 @@
   // بما إن الصفحة دي والـ API endpoints شغالين على نفس الدومين (نفس مشروع Vercel بتاع دبّر)،
   // مفيش داعي لأي رابط كامل — مسارات نسبية كفاية.
   const DASHBOARD_URL = 'dabbar-dashboard-full.html';
+  function dashboardUrlWithQuick() {
+    const quick = new URL(window.location.href).searchParams.get('quick');
+    return quick === 'text' || quick === 'voice' ? `${DASHBOARD_URL}?quick=${encodeURIComponent(quick)}` : DASHBOARD_URL;
+  }
 
   // شبكة أمان: لو لأي سبب الفحص فوق اتعلّق أو اتأخر جدًا، منسيبش المستخدم واقف على شاشة التحميل للأبد
   clearTimeout(window.__dabbarBootFailsafe);
@@ -579,7 +583,7 @@
       // مثبّت بالفعل (standalone): لو عنده جلسة شغالة يدخل الداش على طول، لو مفيش نوريله تسجيل الدخول
       const { data: { session } } = await sb.auth.getSession();
       if (session) {
-        window.location.href = DASHBOARD_URL;
+        window.location.href = dashboardUrlWithQuick();
       } else {
         showAuthScreen();
         hideBootSplash();
@@ -687,7 +691,7 @@
   function continueAfterAuth() {
     // شاشة الحساب دلوقتي بتظهر بس بعد ما يثبّت التطبيق (standalone)، فبعد نجاح الدخول نروح للداشبورد على طول.
     // لو حصل ونادرًا وصل هنا وهو لسه مش مثبّت (مثلاً فتح رابط استرجاع كلمة مرور)، نرجّعه لشاشة التثبيت الأول.
-    if (isStandalone()) window.location.href = DASHBOARD_URL;
+    if (isStandalone()) window.location.href = dashboardUrlWithQuick();
     else showInstallScreen();
   }
 
@@ -1020,7 +1024,7 @@
     successState.classList.add('show');
     try {
       const { data: { session } } = sb ? await sb.auth.getSession() : { data: { session: null } };
-      if (session) { window.location.href = DASHBOARD_URL; return; }
+      if (session) { window.location.href = dashboardUrlWithQuick(); return; }
     } catch (e) {}
     setTimeout(() => { successState.classList.remove('show'); linkFormState.style.display = ''; showAuthScreen(); }, 700);
   }

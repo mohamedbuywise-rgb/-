@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="horizontal"
+    android:gravity="center_vertical"
+    android:paddingStart="14dp"
+    android:paddingEnd="10dp"
+    android:paddingTop="8dp"
+    android:paddingBottom="8dp"
+    android:background="@drawable/widget_background">
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:gravity="center_vertical">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="دبّر"
+            android:textColor="@color/widget_gold"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="إضافة مالية فورية"
+            android:textColor="@color/widget_muted"
+            android:textSize="10sp" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/widget_voice_button"
+        android:layout_width="64dp"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:text="🎙&#10;صوت"
+        android:textColor="@color/widget_text"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:background="@drawable/widget_action_background" />
+
+    <TextView
+        android:id="@+id/widget_text_button"
+        android:layout_width="64dp"
+        android:layout_height="match_parent"
+        android:layout_marginStart="8dp"
+        android:gravity="center"
+        android:text="✍&#10;كتابة"
+        android:textColor="@color/widget_text"
+        android:textSize="12sp"
+        android:textStyle="bold"
+        android:background="@drawable/widget_action_background" />
+</LinearLayout>

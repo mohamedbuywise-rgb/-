@@ -657,7 +657,19 @@
             transform: translateY(-2px);
             box-shadow: 0 12px 24px rgba(16,185,129,.12) !important;
         }
-        #quick-entry-card.is-subscription-locked > .grid { opacity: .42; filter: grayscale(.35); pointer-events: none; }
+        #quick-entry-card.is-subscription-locked > .grid > #quick-entry-voice,
+        #quick-entry-card.is-subscription-locked > .grid > #quick-entry-invoice { opacity: .42; filter: grayscale(.35); pointer-events: none; }
+        /* ===== بلوك "الكتابة الذكية" — بريميوم، وبيتقفل هو بس (مش الفورم اليدوي جنبه) ===== */
+        #quick-entry-form { position:relative; overflow:hidden; }
+        #quick-entry-ai-lock-overlay { display:none; position:absolute; inset:0; z-index:5; flex-direction:column; align-items:center; justify-content:center; text-align:center; gap:8px; padding:16px; background:linear-gradient(180deg, transparent 0%, color-mix(in srgb, var(--pm-surface-hi) 55%, transparent) 26%, var(--pm-surface-hi) 74%); }
+        #quick-entry-form.ai-locked #quick-entry-ai-lock-overlay { display:flex; }
+        #quick-entry-form.ai-locked #quick-entry-input,
+        #quick-entry-form.ai-locked #quick-entry-analyze,
+        #quick-entry-form.ai-locked #quick-entry-cancel { filter: blur(2.5px) grayscale(.4); opacity:.5; pointer-events:none; user-select:none; }
+        .quick-ai-lock-diamond { width:44px; height:44px; border-radius:14px; display:flex; align-items:center; justify-content:center; font-size:21px; background:linear-gradient(155deg,var(--pm-gold-bright),var(--pm-gold)); box-shadow:0 8px 20px -6px color-mix(in srgb, var(--pm-gold) 60%, transparent); }
+        .quick-ai-lock-title { font-size:13px; font-weight:900; color:var(--pm-ink); margin:0; }
+        .quick-ai-lock-sub { font-size:10.5px; color:var(--pm-ink-dim); line-height:1.6; margin:0; max-width:250px; }
+        .quick-ai-lock-btn { border:none; border-radius:999px; padding:9px 22px; font-size:11.5px; font-weight:900; cursor:pointer; background:linear-gradient(150deg,var(--pm-gold-bright),var(--pm-gold)); color:var(--pm-ink); box-shadow:0 8px 18px -8px color-mix(in srgb, var(--pm-gold) 55%, transparent); }
         #quick-entry-subscription-lock { display:none; }
         #quick-entry-subscription-lock:not(.hidden) { display:flex; }
         #quick-entry-subscription-lock button { background:#08b878; color:#06271a; }
@@ -3206,17 +3218,17 @@
                 <div class="mb-1"><div class="flex items-center gap-2"><span class="text-lg">✨</span><div><h3 class="text-sm font-black" style="color:var(--pm-ink);">سجّل عمليتك الآن</h3><p class="text-[10px]" style="color:var(--pm-muted);">صوت أو كتابة أو صوّر الفاتورة — في ثواني</p></div></div></div><div class="grid grid-cols-3 gap-2"><button id="quick-entry-text" class="quick-entry-tab rounded-2xl border px-2 py-3 text-center shadow-sm transition" type="button" style="border-color:color-mix(in srgb,var(--pm-gold-bright) 50%,transparent);background:linear-gradient(145deg,color-mix(in srgb,var(--pm-gold-bright) 18%,var(--pm-surface-hi)),var(--pm-surface-hi));"><span class="mx-auto mb-1 flex h-9 w-9 items-center justify-center rounded-full text-xl" style="background:color-mix(in srgb,var(--pm-gold-bright) 18%,transparent);">✍️</span><span class="block text-[11px] font-bold" style="color:var(--pm-ink);">كتابة</span></button><button id="quick-entry-voice" class="quick-entry-tab rounded-2xl border px-2 py-3 text-center shadow-sm transition" type="button" style="border-color:var(--pm-hairline);background:var(--pm-surface-hi);"><span class="mx-auto mb-1 flex h-9 w-9 items-center justify-center rounded-full text-xl" style="background:color-mix(in srgb,var(--pm-gold-bright) 12%,transparent);">🎙️</span><span class="block text-[11px] font-bold" style="color:var(--pm-ink);">صوت</span></button><button id="quick-entry-invoice" class="quick-entry-tab rounded-2xl border px-2 py-3 text-center shadow-sm transition" type="button" style="border-color:var(--pm-hairline);background:var(--pm-surface-hi);"><span class="mx-auto mb-1 flex h-9 w-9 items-center justify-center rounded-full text-xl" style="background:color-mix(in srgb,var(--pm-gold-bright) 12%,transparent);">📸</span><span class="block text-[11px] font-bold" style="color:var(--pm-ink);">فاتورة</span></button></div><p class="text-center text-[10px]" style="color:var(--pm-muted);">اكتب بحرية، أو استخدم الصوت والفاتورة الذكية لو حسابك يدعم VIP.</p>
                 <input type="file" id="quick-entry-invoice-input" accept="image/*" class="hidden">
                 <div id="quick-entry-scanning" class="hidden dabbar-scan-box rounded-2xl p-3 text-center"><div class="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl dabbar-scan-box-icon text-xl shadow-sm"><span style="display:inline-block;animation:dabbar-scan-spin 1s linear infinite">⟳</span></div><p class="text-xs font-bold dabbar-scan-box-title">بنقرأ الفاتورة...</p><p class="mt-1 text-[10px] dabbar-scan-box-sub">دبّر بيستخرج المبلغ والأصناف</p></div>
-                <div id="quick-entry-form" class="hidden space-y-3 rounded-2xl border p-3" style="border-color:var(--pm-hairline);background:var(--pm-surface-hi);"><div><p class="text-xs font-black" style="color:var(--pm-ink);">اكتب عمليتك بطريقتك</p><p class="mt-1 text-[10px]" style="color:var(--pm-muted);">مثال: «صرفت 50 جنيه على القهوة النهاردة»</p></div><textarea id="quick-entry-input" rows="5" maxlength="2500" placeholder="مثال: صرفت 50 جنيه على القهوة النهاردة" class="w-full resize-y rounded-2xl border px-3 py-3 text-sm leading-7 outline-none" style="border-color:var(--pm-hairline);background:var(--pm-surface-soft);color:var(--pm-ink);"></textarea><div class="flex gap-2"><button id="quick-entry-analyze" class="quick-entry-ai-save flex-1 rounded-xl py-2.5 text-xs font-black" type="button" style="background:linear-gradient(145deg,var(--pm-gold-bright),var(--pm-gold));color:var(--pm-ink);">حلّل وسجّل</button><button id="quick-entry-cancel" class="rounded-xl border px-3 py-2.5 text-xs" style="border-color:var(--pm-hairline);color:var(--pm-muted);" type="button">إلغاء</button></div></div>
-                <div id="quick-entry-manual-form" class="hidden space-y-3 rounded-2xl border p-3 dabbar-manual-form" style="border-color:color-mix(in srgb,var(--pm-gold-bright) 34%,transparent);background:var(--pm-surface-hi);">
-  <div class="flex items-center justify-between gap-2"><div><p class="text-xs font-black" style="color:var(--pm-ink);">إدخال يدوي سريع</p><p class="mt-1 text-[10px]" style="color:var(--pm-muted);">اختار النوع والفئة واحفظ من غير AI.</p></div><span class="rounded-full px-2 py-1 text-[10px] font-bold" style="background:color-mix(in srgb,var(--pm-gold-bright) 14%,transparent);color:var(--pm-gold-bright);">مجاني دائمًا</span></div>
-  <div class="grid grid-cols-3 gap-2" role="group" aria-label="نوع العملية"><button id="quick-manual-expense" type="button" data-manual-type="expense" class="quick-manual-type dabbar-manual-type active rounded-xl border px-3 py-2 text-xs font-black" aria-pressed="true" style="border-color:var(--pm-gold);background:linear-gradient(145deg,var(--pm-gold-bright),var(--pm-surface-hi));color:var(--pm-ink);">🧾 مصروف</button><button id="quick-manual-income" type="button" data-manual-type="income" class="quick-manual-type dabbar-manual-type rounded-xl border px-3 py-2 text-xs font-black" aria-pressed="false" style="border-color:var(--pm-hairline);color:var(--pm-muted);">💰 دخل</button><button id="quick-manual-debt" type="button" data-manual-type="debt" class="quick-manual-type dabbar-manual-type rounded-xl border px-3 py-2 text-xs font-black" aria-pressed="false" style="border-color:var(--pm-hairline);color:var(--pm-muted);">🤝 دين</button></div>
-  <div class="relative"><input id="quick-manual-amount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="المبلغ" class="w-full rounded-xl border px-3 py-3 pl-14 text-sm outline-none" style="border-color:var(--pm-hairline);background:var(--pm-surface-soft);color:var(--pm-ink);"><span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs font-black" style="color:var(--pm-gold-bright);">ج.م</span></div>
-  <input id="quick-manual-description" type="text" maxlength="500" placeholder="الوصف — مثال: غدا أو مرتب" class="w-full rounded-xl border px-3 py-3 text-xs outline-none" style="border-color:var(--pm-hairline);background:var(--pm-surface-soft);color:var(--pm-ink);">
-  <div id="quick-manual-category-block"><label class="mb-1 block text-[10px] font-bold" style="color:var(--pm-muted);">الفئة</label><div id="quick-manual-category" class="grid grid-cols-2 gap-2" role="group" aria-label="الفئة"></div><input id="quick-manual-custom-category" type="text" maxlength="80" placeholder="اكتب اسم الفئة بنفسك" class="mt-2 hidden w-full rounded-xl border px-3 py-3 text-xs outline-none" style="border-color:var(--pm-hairline);background:var(--pm-surface-soft);color:var(--pm-ink);"></div>
-  <div id="quick-manual-debt-block" class="hidden space-y-2"><input id="quick-manual-person" type="text" maxlength="120" placeholder="اسم الشخص — مثال: أحمد" class="w-full rounded-xl border px-3 py-3 text-xs outline-none" style="border-color:var(--pm-hairline);background:var(--pm-surface-soft);color:var(--pm-ink);"><label class="block text-[10px] font-bold" style="color:var(--pm-muted);">اتجاه الدين</label><div class="grid grid-cols-2 gap-2"><button id="quick-manual-debt-lent" type="button" data-debt-direction="lent" class="quick-manual-debt-direction dabbar-manual-type active rounded-xl border px-2 py-2 text-[11px] font-black" aria-pressed="true" style="border-color:var(--pm-gold);background:linear-gradient(145deg,var(--pm-gold-bright),var(--pm-surface-hi));color:var(--pm-ink);">📤 ليك عنده (سلّفته)</button><button id="quick-manual-debt-borrowed" type="button" data-debt-direction="borrowed" class="quick-manual-debt-direction dabbar-manual-type rounded-xl border px-2 py-2 text-[11px] font-black" aria-pressed="false" style="border-color:var(--pm-hairline);color:var(--pm-muted);">📥 عليك له (استلفت منه)</button></div></div>
-  <div class="flex gap-2"><button id="quick-manual-save" class="flex-1 rounded-xl py-2.5 text-xs font-black" style="background:linear-gradient(145deg,var(--pm-gold-bright),var(--pm-gold));color:var(--pm-ink);" type="button">حفظ العملية</button><button id="quick-manual-cancel" class="rounded-xl border px-3 py-2.5 text-xs" style="border-color:var(--pm-hairline);color:var(--pm-muted);" type="button">إلغاء</button></div>
-</div>
-<div id="quick-entry-recording" class="hidden rounded-2xl border border-rose-200 bg-rose-50 p-3 text-center text-xs text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200">
+                <div id="quick-entry-form" class="hidden space-y-3 rounded-2xl border p-3" style="border-color:color-mix(in srgb,var(--pm-gold-bright) 38%,transparent);background:linear-gradient(160deg, color-mix(in srgb, var(--pm-gold-bright) 10%, var(--pm-surface-hi)) 0%, var(--pm-surface-hi) 75%);"><div class="flex items-center justify-between gap-2"><span class="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-black" style="background:color-mix(in srgb,var(--pm-gold-bright) 16%,transparent);color:var(--pm-gold-bright);border:1px solid color-mix(in srgb,var(--pm-gold-bright) 32%,transparent);">💎 كتابة ذكية</span><span id="quick-entry-ai-status" class="text-[9.5px] font-bold" style="color:var(--pm-muted);">متاحة الآن</span></div><div><p class="text-xs font-black" style="color:var(--pm-ink);">اكتب عمليتك بطريقتك</p><p class="mt-1 text-[10px]" style="color:var(--pm-muted);">مثال: «صرفت 50 جنيه على القهوة النهاردة»</p></div><textarea id="quick-entry-input" rows="5" maxlength="2500" placeholder="مثال: صرفت 50 جنيه على القهوة النهاردة" class="w-full resize-y rounded-2xl border px-3 py-3 text-sm leading-7 outline-none" style="border-color:var(--pm-hairline);background:var(--pm-surface-soft);color:var(--pm-ink);"></textarea><div class="flex gap-2"><button id="quick-entry-analyze" class="quick-entry-ai-save flex-1 rounded-xl py-2.5 text-xs font-black" type="button" style="background:linear-gradient(145deg,var(--pm-gold-bright),var(--pm-gold));color:var(--pm-ink);">✨ حلّل وسجّل</button><button id="quick-entry-cancel" class="rounded-xl border px-3 py-2.5 text-xs" style="border-color:var(--pm-hairline);color:var(--pm-muted);" type="button">إلغاء</button></div><p class="text-center text-[9.5px]" style="color:var(--pm-muted);">بيفهم كلامك بالعامية، يحدد نوعها (مصروف / دخل / حتى دين لشخص) وفئتها، ويسجلها في مكانها الصح تلقائيًا</p>
+                    <div id="quick-entry-ai-lock-overlay"><div class="quick-ai-lock-diamond">💎</div><p class="quick-ai-lock-title">الكتابة الذكية بقت ميزة VIP</p><p class="quick-ai-lock-sub">سجّل يدويًا زي ما انت متعود من تحت، أو فعّل الاشتراك يرجعلك يفهم كتابتك الحرة تلقائيًا.</p><button id="quick-entry-ai-lock-btn" type="button" class="quick-ai-lock-btn">فعّل VIP</button></div>
+                </div>
+                <div id="quick-entry-manual-form" class="hidden space-y-3 rounded-2xl border p-3" style="border-color:color-mix(in srgb,var(--pm-gold-bright) 34%,transparent);background:var(--pm-surface-hi);"><div class="flex items-center justify-between gap-2"><div><p class="text-xs font-black" style="color:var(--pm-ink);">إدخال يدوي سريع</p><p class="mt-1 text-[10px]" style="color:var(--pm-muted);">اختار النوع والفئة واحفظ من غير AI.</p></div><span class="rounded-full px-2 py-1 text-[10px] font-bold" style="background:color-mix(in srgb,var(--pm-gold-bright) 14%,transparent);color:var(--pm-gold-bright);">مجاني دائمًا</span></div><div class="grid grid-cols-2 gap-2"><button id="quick-manual-expense" type="button" class="quick-manual-type active rounded-xl border px-3 py-2 text-xs font-black" style="border-color:var(--pm-gold-bright);background:color-mix(in srgb,var(--pm-gold-bright) 14%,transparent);color:var(--pm-ink);">🧾 مصروف</button><button id="quick-manual-income" type="button" class="quick-manual-type rounded-xl border px-3 py-2 text-xs font-black" style="border-color:var(--pm-hairline);color:var(--pm-muted);">💰 دخل</button></div><div class="relative"><input id="quick-manual-amount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="المبلغ" class="w-full rounded-xl border px-3 py-3 pl-14 text-sm outline-none" style="border-color:var(--pm-hairline);background:var(--pm-surface-soft);color:var(--pm-ink);"><span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs font-black" style="color:var(--pm-gold-bright);">ج.م</span></div><input id="quick-manual-description" type="text" maxlength="500" placeholder="الوصف — مثال: غدا أو مرتب" class="w-full rounded-xl border px-3 py-3 text-xs outline-none" style="border-color:var(--pm-hairline);background:var(--pm-surface-soft);color:var(--pm-ink);"><div><label for="quick-manual-category" class="mb-1 block text-[10px] font-bold" style="color:var(--pm-muted);">الفئة</label><select id="quick-manual-category" class="w-full rounded-xl border px-3 py-3 text-xs outline-none" style="border-color:var(--pm-hairline);background:var(--pm-surface-soft);color:var(--pm-ink);"><option>أكل</option><option>مواصلات</option><option>فواتير</option><option>تسوق</option><option>ترفيه</option><option>صحة</option><option>تعليم</option><option>منزل وأثاث</option><option>ملابس</option><option>اشتراكات</option><option>هدايا وتبرعات</option><option>شخصي وعناية</option><option value="other">أخرى</option></select><input id="quick-manual-custom-category" type="text" maxlength="80" placeholder="اسم الفئة اختياريًا" class="mt-2 hidden w-full rounded-xl border px-3 py-3 text-xs outline-none" style="border-color:var(--pm-hairline);background:var(--pm-surface-soft);color:var(--pm-ink);"></div><div class="flex gap-2"><button id="quick-manual-save" class="flex-1 rounded-xl py-2.5 text-xs font-black" style="background:linear-gradient(145deg,var(--pm-gold-bright),var(--pm-gold));color:var(--pm-ink);" type="button">حفظ العملية</button><button id="quick-manual-cancel" class="rounded-xl border px-3 py-2.5 text-xs" style="border-color:var(--pm-hairline);color:var(--pm-muted);" type="button">إلغاء</button></div></div>
+                    <div class="grid grid-cols-2 gap-2"><button id="quick-manual-expense" type="button" class="quick-manual-type active rounded-xl border border-emerald-300 bg-emerald-50 px-3 py-2 text-xs font-black text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300">مصروف</button><button id="quick-manual-income" type="button" class="quick-manual-type rounded-xl border border-slate-200 px-3 py-2 text-xs font-black text-slate-500 dark:border-slate-700">دخل</button></div>
+                    <input id="quick-manual-amount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="المبلغ — مثال 150" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100">
+                    <input id="quick-manual-description" type="text" maxlength="500" placeholder="الوصف — مثال: غدا أو مرتب" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100">
+                    <div><label for="quick-manual-category" class="mb-1 block text-[10px] font-bold text-slate-500">الفئة</label><select id="quick-manual-category" class="w-full rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-xs outline-none dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100"><option>أكل</option><option>مواصلات</option><option>فواتير</option><option>تسوق</option><option>ترفيه</option><option>صحة</option><option>تعليم</option><option>منزل وأثاث</option><option>ملابس</option><option>اشتراكات</option><option>هدايا وتبرعات</option><option>شخصي وعناية</option><option value="other">أخرى</option></select><input id="quick-manual-custom-category" type="text" maxlength="80" placeholder="اسم الفئة اختياريًا" class="mt-2 hidden w-full rounded-xl border border-emerald-200 bg-white px-3 py-2.5 text-xs outline-none dark:border-emerald-500/40 dark:bg-slate-950 dark:text-slate-100"></div>
+                    <div class="flex gap-2"><button id="quick-manual-save" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950" type="button">حفظ العملية</button><button id="quick-manual-cancel" class="rounded-xl border border-slate-300 px-3 py-2.5 text-xs text-slate-500 dark:border-slate-700" type="button">إلغاء</button></div>
+                </div>
+                <div id="quick-entry-recording" class="hidden rounded-2xl border border-rose-200 bg-rose-50 p-3 text-center text-xs text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200">
                     <div class="flex items-center justify-between gap-2"><span class="font-black">جاري التسجيل... <span id="quick-entry-recording-type-label" class="font-bold"></span></span><button id="quick-entry-recording-cancel" class="flex h-7 w-7 items-center justify-center rounded-full bg-white/70 text-sm font-black text-rose-500 transition hover:bg-white" type="button" aria-label="إلغاء التسجيل">✕</button></div>
                     <div id="quick-entry-recording-time" class="mt-1 font-black">00:00</div>
                     <div class="quick-wave-shell live mt-2" aria-label="موجة الصوت أثناء التسجيل"><span class="quick-wave-live-dot" aria-hidden="true"></span><canvas id="quick-entry-live-waveform" class="quick-wave-canvas live-canvas" height="58"></canvas></div>
@@ -9014,6 +9026,9 @@
             const lock = document.getElementById('quick-entry-subscription-lock');
             card?.classList.toggle('is-subscription-locked', locked);
             lock?.classList.toggle('hidden', !locked);
+            document.getElementById('quick-entry-form')?.classList.toggle('ai-locked', locked);
+            const aiStatus = document.getElementById('quick-entry-ai-status');
+            if (aiStatus) aiStatus.textContent = locked ? 'مقفولة مؤقتًا' : 'متاحة الآن';
             updateReportsFrozenState(locked);
         }
         function requireQuickEntryAccess() {
@@ -9431,96 +9446,26 @@
         }
         async function analyzeQuickEntry(payload) { if (!requireQuickEntryAccess()) return; const cycleMsgs = payload.audioBase64 ? ['🎙️ بنسمع كلامك', '🧠 بنفهم العملية', '📝 بنجهز المراجعة'] : payload.imageBase64 ? ['📸 بنقرأ الفاتورة', '🔎 بنفصّل الأصناف', '🧮 بنجهز الإجمالي'] : ['🧠 بنفهم كلامك', '🏷️ بنحدد الفئة', '📝 بنجهز المراجعة']; quickStatusCycle(cycleMsgs); try { const result = await asstApi(payload.imageBase64 ? 'entry_invoice_draft' : 'entry_draft', payload); quickDraft(result.drafts, result.transcript); } catch (e) { quickStatus(e.message || 'تعذر فهم العملية.', 'error'); } }
         setQuickEntryType();
-        document.getElementById('quick-entry-text')?.addEventListener('click', () => { document.getElementById('quick-entry-input').value = ''; const locked = !quickEntrySubscription.active && !quickEntrySubscription.inTrial; quickShow('quick-entry-form', !locked); quickShow('quick-entry-manual-form', locked); if (locked) document.getElementById('quick-manual-amount')?.focus(); else document.getElementById('quick-entry-input')?.focus(); });
+        document.getElementById('quick-entry-text')?.addEventListener('click', () => { document.getElementById('quick-entry-input').value = ''; quickShow('quick-entry-form', true); quickShow('quick-entry-manual-form', true); const locked = !quickEntrySubscription.active && !quickEntrySubscription.inTrial; if (locked) document.getElementById('quick-manual-amount')?.focus(); else document.getElementById('quick-entry-input')?.focus(); });
         document.getElementById('quick-entry-cancel')?.addEventListener('click', () => { quickShow('quick-entry-form', false); quickShow('quick-entry-draft', false); quickStatus(''); document.getElementById('quick-entry-input').value = ''; });
         document.getElementById('quick-manual-cancel')?.addEventListener('click', () => { quickShow('quick-entry-manual-form', false); quickStatus(''); });
-        const manualExpenseCategories = [
-            ['🍔', 'أكل'], ['🚗', 'مواصلات'], ['🧾', 'فواتير'], ['🛍️', 'تسوق'], ['🎬', 'ترفيه'], ['💊', 'صحة'],
-            ['📚', 'تعليم'], ['🛋️', 'منزل'], ['👕', 'ملابس'], ['🔁', 'اشتراكات'], ['🎁', 'هدايا وتبرعات'], ['✨', 'other']
-        ];
-        const manualIncomeCategories = [
-            ['💼', 'مرتب'], ['🤝', 'بيع خدمة'], ['🎁', 'هدايا وتبرعات'], ['📈', 'أرباح استثمار'], ['↩️', 'استرداد فلوس'], ['🧾', 'دخل متنوع'], ['✨', 'other']
-        ];
-        let quickManualType = 'expense';
-        let quickManualDebtDirection = 'lent';
-        let quickManualCategory = 'أكل';
-        function renderManualCategories() {
-            const root = document.getElementById('quick-manual-category');
-            if (!root) return;
-            const categories = quickManualType === 'income' ? manualIncomeCategories : manualExpenseCategories;
-            root.innerHTML = categories.map(([emoji, value]) => `<button type="button" class="quick-manual-category-chip rounded-xl border px-2 py-2.5 text-[11px] font-black" data-category="${value}" aria-pressed="${quickManualCategory === value}" style="border-color:${quickManualCategory === value ? 'var(--pm-gold)' : 'var(--pm-hairline)'};background:${quickManualCategory === value ? 'linear-gradient(145deg,var(--pm-gold-bright),var(--pm-surface-hi))' : 'var(--pm-surface-soft)'};color:var(--pm-ink);">${emoji} ${value === 'other' ? 'أخرى' : value}</button>`).join('');
-            root.querySelectorAll('.quick-manual-category-chip').forEach((chip) => chip.addEventListener('click', () => {
-                quickManualCategory = chip.dataset.category;
-                renderManualCategories();
-                const custom = document.getElementById('quick-manual-custom-category');
-                custom?.classList.toggle('hidden', quickManualCategory !== 'other');
-                if (quickManualCategory === 'other') custom?.focus();
-            }));
-        }
-        function setManualType(type) {
-            quickManualType = type;
-            document.querySelectorAll('.quick-manual-type[data-manual-type]').forEach((button) => {
-                const active = button.dataset.manualType === type;
-                button.classList.toggle('active', active);
-                button.setAttribute('aria-pressed', String(active));
-                button.style.borderColor = active ? 'var(--pm-gold)' : 'var(--pm-hairline)';
-                button.style.background = active ? 'linear-gradient(145deg,var(--pm-gold-bright),var(--pm-surface-hi))' : 'var(--pm-surface-soft)';
-                button.style.color = active ? 'var(--pm-ink)' : 'var(--pm-muted)';
-            });
-            const isDebt = type === 'debt';
-            document.getElementById('quick-manual-category-block')?.classList.toggle('hidden', isDebt);
-            document.getElementById('quick-manual-debt-block')?.classList.toggle('hidden', !isDebt);
-            const description = document.getElementById('quick-manual-description');
-            if (description) description.placeholder = isDebt ? 'ملاحظة — مثال: تمن الموبايل' : 'الوصف — مثال: غدا أو مرتب';
-            if (!isDebt) {
-                quickManualCategory = type === 'income' ? 'مرتب' : 'أكل';
-                renderManualCategories();
-                document.getElementById('quick-manual-custom-category')?.classList.add('hidden');
-            }
-        }
-        function setManualDebtDirection(direction) {
-            quickManualDebtDirection = direction;
-            document.querySelectorAll('.quick-manual-debt-direction').forEach((button) => {
-                const active = button.dataset.debtDirection === direction;
-                button.classList.toggle('active', active);
-                button.setAttribute('aria-pressed', String(active));
-                button.style.borderColor = active ? 'var(--pm-gold)' : 'var(--pm-hairline)';
-                button.style.background = active ? 'linear-gradient(145deg,var(--pm-gold-bright),var(--pm-surface-hi))' : 'var(--pm-surface-soft)';
-                button.style.color = active ? 'var(--pm-ink)' : 'var(--pm-muted)';
-            });
-        }
-        renderManualCategories();
-        document.querySelectorAll('.quick-manual-type[data-manual-type]').forEach((button) => button.addEventListener('click', () => setManualType(button.dataset.manualType)));
-        document.querySelectorAll('.quick-manual-debt-direction').forEach((button) => button.addEventListener('click', () => setManualDebtDirection(button.dataset.debtDirection)));
+        document.querySelectorAll('.quick-manual-type').forEach((button) => button.addEventListener('click', () => { document.querySelectorAll('.quick-manual-type').forEach((item) => { item.classList.remove('active', 'border-emerald-300', 'bg-emerald-50', 'text-emerald-700'); item.classList.add('border-slate-200', 'text-slate-500'); }); button.classList.add('active', 'border-emerald-300', 'bg-emerald-50', 'text-emerald-700'); button.classList.remove('border-slate-200', 'text-slate-500'); }));
+        document.getElementById('quick-manual-category')?.addEventListener('change', (event) => { document.getElementById('quick-manual-custom-category')?.classList.toggle('hidden', event.target.value !== 'other'); if (event.target.value === 'other') document.getElementById('quick-manual-custom-category')?.focus(); });
         document.getElementById('quick-manual-save')?.addEventListener('click', async () => {
             const amount = Number(document.getElementById('quick-manual-amount')?.value);
             const description = document.getElementById('quick-manual-description')?.value.trim() || '';
+            const categoryValue = document.getElementById('quick-manual-category')?.value || 'أخرى';
             const customCategory = document.getElementById('quick-manual-custom-category')?.value.trim() || '';
+            const type = document.getElementById('quick-manual-income')?.classList.contains('active') ? 'income' : 'expense';
             if (!amount || amount <= 0) return quickStatus('اكتب مبلغًا صحيحًا أكبر من صفر.', 'error');
-            if (quickManualType === 'debt') {
-                const person = document.getElementById('quick-manual-person')?.value.trim() || '';
-                if (!person) return quickStatus('اكتب اسم الشخص الأول.', 'error');
-                const button = document.getElementById('quick-manual-save'); button.disabled = true; quickStatus('جاري حفظ الدين...');
-                try {
-                    const response = await fetch('/api?route=debts', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({ person, amount, direction: quickManualDebtDirection, note: description }) });
-                    const data = await response.json().catch(() => ({}));
-                    if (!response.ok) throw new Error(data.error || 'تعذر حفظ الدين.');
-                    quickStatus('تم حفظ الدين بنجاح.', 'success');
-                    document.getElementById('quick-manual-amount').value = ''; document.getElementById('quick-manual-person').value = ''; document.getElementById('quick-manual-description').value = '';
-                    await loadDashboard();
-                } catch (error) { quickStatus(error.message || 'تعذر حفظ الدين.', 'error'); } finally { button.disabled = false; }
-                return;
-            }
-            if (quickManualCategory === 'other' && !customCategory) return quickStatus('اكتب اسم الفئة الأول.', 'error');
-            const category = quickManualCategory === 'other' ? customCategory : quickManualCategory;
+            const category = categoryValue === 'other' ? (customCategory || 'أخرى') : categoryValue;
             const button = document.getElementById('quick-manual-save'); button.disabled = true; quickStatus('جاري حفظ العملية...');
             try {
-                const response = await fetch('/api?route=financial-actions', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({ type: quickManualType, amount, category, description }) });
+                const response = await fetch('/api?route=financial-actions', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({ type, amount, category, description }) });
                 const data = await response.json().catch(() => ({}));
                 if (!response.ok) throw new Error(data.error || 'تعذر حفظ العملية.');
-                quickStatus(quickManualType === 'income' ? 'تم حفظ الدخل بنجاح.' : 'تم حفظ المصروف بنجاح.', 'success');
-                document.getElementById('quick-manual-amount').value = ''; document.getElementById('quick-manual-description').value = ''; document.getElementById('quick-manual-custom-category').value = '';
-                setManualType(quickManualType);
+                quickStatus(type === 'income' ? 'تم حفظ الدخل بنجاح.' : 'تم حفظ المصروف بنجاح.', 'success');
+                document.getElementById('quick-manual-amount').value = ''; document.getElementById('quick-manual-description').value = ''; document.getElementById('quick-manual-category').value = 'أكل'; document.getElementById('quick-manual-custom-category').value = ''; document.getElementById('quick-manual-custom-category').classList.add('hidden');
                 await loadDashboard();
             } catch (error) { quickStatus(error.message || 'تعذر حفظ العملية.', 'error'); } finally { button.disabled = false; }
         });
@@ -9923,6 +9868,7 @@
         document.getElementById('quick-entry-voice-cancel')?.addEventListener('click', cancelQuickVoice);
         document.getElementById('quick-entry-voice-cancel-bottom')?.addEventListener('click', cancelQuickVoice);
         document.getElementById('quick-entry-open-subscription')?.addEventListener('click', () => document.querySelector('.tab-btn[data-tab="account"]')?.click());
+        document.getElementById('quick-entry-ai-lock-btn')?.addEventListener('click', () => document.querySelector('.tab-btn[data-tab="account"]')?.click());
         document.getElementById('quick-entry-voice-retry')?.addEventListener('click', () => { quickEntryVoiceCancelled = false; clearQuickVoicePreview(); quickShow('quick-entry-voice-preview', false); quickEntryVoiceBlob = null; quickStatus(''); document.getElementById('quick-entry-voice')?.click(); });
         document.getElementById('quick-entry-voice-send')?.addEventListener('click', () => {
             if (!quickEntryVoiceBlob) return;

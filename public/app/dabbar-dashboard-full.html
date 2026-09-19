@@ -2504,7 +2504,23 @@
             color: #0f172a !important;
         }
 
-    </style>
+    
+        /* صفوف تفاصيل حركة السيولة: ألوان صريحة لكل ثيم بدل الاعتماد على overrides الـ Tailwind
+           (bg-slate-900/80 ماكانش ليه override فاتح، فكان يفضل غامق والنص يبقى غامق برضو = مش مقروء) */
+        .dabbar-flow-row { display:flex; align-items:center; justify-content:space-between; gap:.75rem; padding:.8rem .9rem; border-radius:1rem; background:#ffffff; border:1px solid #d3e1da; }
+        .dabbar-flow-row .flow-main { min-width:0; flex:1; }
+        .dabbar-flow-row .flow-title { margin:0; font-size:.85rem; font-weight:800; color:#0f172a; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .dabbar-flow-row .flow-sub { margin:.25rem 0 0; font-size:.72rem; color:#475569; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+        .dabbar-flow-row .flow-amount { flex-shrink:0; font-size:.95rem; font-weight:900; }
+        .dabbar-flow-row .flow-amount.is-in { color:#047857; }
+        .dabbar-flow-row .flow-amount.is-out { color:#be123c; }
+        html[data-theme="dark"] .dabbar-flow-row { background:#1e293b; border-color:#334155; }
+        html[data-theme="dark"] .dabbar-flow-row .flow-title { color:#f1f5f9; }
+        html[data-theme="dark"] .dabbar-flow-row .flow-sub { color:#cbd5e1; }
+        html[data-theme="dark"] .dabbar-flow-row .flow-amount.is-in { color:#34d399; }
+        html[data-theme="dark"] .dabbar-flow-row .flow-amount.is-out { color:#fb7185; }
+        html[data-theme="light"] .bg-slate-900\/80 { background-color: rgba(255,255,255,0.92) !important; }
+</style>
     <style>
         #bank-movements-sheet.flex { display: flex; }
         .bm-filter-btn { background: rgba(30,41,59,.6); color: #94a3b8; border: 1px solid rgba(148,163,184,.18); }
@@ -3201,7 +3217,6 @@
                 </div>
                 <div id="quick-expense-content">
                 <div id="quick-entry-subscription-lock" class="hidden items-center justify-between gap-3 rounded-2xl border px-3 py-2.5 text-[11px]" style="border-color:color-mix(in srgb,var(--pm-gold-bright) 40%,transparent);background:color-mix(in srgb,var(--pm-gold-bright) 10%,var(--pm-surface-hi));color:var(--pm-ink);"><div class="flex items-center gap-2"><span id="quick-entry-vip-badge" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-lg" style="background:linear-gradient(145deg,var(--pm-gold-bright),var(--pm-gold));color:var(--pm-ink);">💎</span><span><strong class="block" style="color:var(--pm-gold-bright);">التصنيف الذكي بقى ميزة VIP</strong><span style="color:var(--pm-muted);">الإدخال اليدوي شغال زي العادة — فعّل VIP للصوت والفواتير والـ AI.</span></span></div><button id="quick-entry-open-subscription" type="button" class="shrink-0 rounded-xl px-3 py-2 text-[10px] font-black" style="background:linear-gradient(145deg,var(--pm-gold-bright),var(--pm-gold));color:var(--pm-ink);">فعّل VIP</button></div>
-                <p class="text-center text-[10px] text-slate-500 dark:text-slate-400">اختار نوع العملية الأول، وهتفضل شغالة لحد ما تغيّرها بنفسك.</p>
                 
                 <div class="mb-1"><div class="flex items-center gap-2"><span class="text-lg">✨</span><div><h3 class="text-sm font-black" style="color:var(--pm-ink);">سجّل عمليتك الآن</h3><p class="text-[10px]" style="color:var(--pm-muted);">صوت أو كتابة أو صوّر الفاتورة — في ثواني</p></div></div></div><div class="grid grid-cols-3 gap-2"><button id="quick-entry-text" class="quick-entry-tab rounded-2xl border px-2 py-3 text-center shadow-sm transition" type="button" style="border-color:color-mix(in srgb,var(--pm-gold-bright) 50%,transparent);background:linear-gradient(145deg,color-mix(in srgb,var(--pm-gold-bright) 18%,var(--pm-surface-hi)),var(--pm-surface-hi));"><span class="mx-auto mb-1 flex h-9 w-9 items-center justify-center rounded-full text-xl" style="background:color-mix(in srgb,var(--pm-gold-bright) 18%,transparent);">✍️</span><span class="block text-[11px] font-bold" style="color:var(--pm-ink);">كتابة</span></button><button id="quick-entry-voice" class="quick-entry-tab rounded-2xl border px-2 py-3 text-center shadow-sm transition" type="button" style="border-color:var(--pm-hairline);background:var(--pm-surface-hi);"><span class="mx-auto mb-1 flex h-9 w-9 items-center justify-center rounded-full text-xl" style="background:color-mix(in srgb,var(--pm-gold-bright) 12%,transparent);">🎙️</span><span class="block text-[11px] font-bold" style="color:var(--pm-ink);">صوت</span></button><button id="quick-entry-invoice" class="quick-entry-tab rounded-2xl border px-2 py-3 text-center shadow-sm transition" type="button" style="border-color:var(--pm-hairline);background:var(--pm-surface-hi);"><span class="mx-auto mb-1 flex h-9 w-9 items-center justify-center rounded-full text-xl" style="background:color-mix(in srgb,var(--pm-gold-bright) 12%,transparent);">📸</span><span class="block text-[11px] font-bold" style="color:var(--pm-ink);">فاتورة</span></button></div><p class="text-center text-[10px]" style="color:var(--pm-muted);">اكتب بحرية، أو استخدم الصوت والفاتورة الذكية لو حسابك يدعم VIP.</p>
                 <input type="file" id="quick-entry-invoice-input" accept="image/*" class="hidden">
@@ -6045,7 +6060,8 @@
                 if (perm !== 'granted') perm = await Notification.requestPermission();
                 if (perm !== 'granted') return;
                 const registration = await getPushRegistration();
-                registration?.active?.postMessage({ type: 'SHOW_QUICK_ACCESS' });
+                if (!registration?.active) { if (status) status.textContent = 'مقدرناش نشغّل خدمة الإشعارات دلوقتي. حدّث الصفحة وجرب تاني.'; return; }
+                registration.active.postMessage({ type: 'SHOW_QUICK_ACCESS' });
                 localStorage.setItem(quickAccessKey(), '1');
                 applyState(true);
                 if (status) status.textContent = 'شغّال — هتلاقي إشعار فيه 🎙️ صوت و✍️ كتابة، دوس عليه من أي مكان.';
@@ -6380,7 +6396,22 @@
         }
 
         if ('serviceWorker' in navigator) {
-            pushRegistrationPromise = navigator.serviceWorker.register('./sw.js').catch(() => null);
+            // مسار مطلق: الداش بتتفتح كمان من /account (rewrite)، و'./sw.js' كان بيتحوّل هناك لـ /sw.js (404)
+            // فالتسجيل كان بيفشل بصمت ومفيش إشعارات خالص. الـ SW الحقيقي في /app/sw.js.
+            pushRegistrationPromise = navigator.serviceWorker.register('/app/sw.js', { scope: '/app/' })
+                .then(async (reg) => {
+                    const worker = reg.installing || reg.waiting;
+                    if (worker && !reg.active) {
+                        await new Promise((resolve) => {
+                            const done = () => { if (worker.state === 'activated' || worker.state === 'redundant') { clearTimeout(t); worker.removeEventListener('statechange', done); resolve(); } };
+                            const t = setTimeout(resolve, 10000);
+                            worker.addEventListener('statechange', done);
+                            done();
+                        });
+                    }
+                    return reg;
+                })
+                .catch((err) => { console.error('service worker registration failed:', err); return null; });
         }
 
         // ============ تنويه التثبيت (جوه تاب "حسابي" بس) ============
@@ -11447,7 +11478,7 @@
                         const note = item.note ? ` — ${escape(item.note)}` : '';
                         const amount = fmt(item.amount, item.currency_code);
                         const time = new Date(item.created_at).toLocaleTimeString('ar-EG', { hour: 'numeric', minute: '2-digit' });
-                        return `<div class="flex items-center justify-between gap-3 rounded-2xl border border-slate-800 bg-slate-900/80 p-3"><div class="min-w-0"><p class="truncate text-xs font-bold text-slate-100">${incoming ? 'واصل من' : 'واصل لـ'} ${person}</p><p class="mt-1 truncate text-[10px] text-slate-500">${escape(time)}${note}</p></div><strong class="shrink-0 text-xs font-black ${incoming ? 'text-emerald-400' : 'text-rose-400'}">${incoming ? '+' : '−'}${escape(amount)}</strong></div>`;
+                        return `<div class="dabbar-flow-row"><div class="flow-main"><p class="flow-title">${incoming ? 'واصل من' : 'واصل لـ'} ${person}</p><p class="flow-sub">${escape(time)}${note}</p></div><strong class="flow-amount ${incoming ? 'is-in' : 'is-out'}">${incoming ? '+' : '−'}${escape(amount)}</strong></div>`;
                     }).join('') : '<p class="rounded-2xl border border-slate-800 p-4 text-center text-xs text-slate-500">مفيش حركة سيولة مسجلة النهاردة.</p>';
                 };
                 const open = () => { render(); sheet.classList.remove('hidden'); sheet.classList.add('flex'); };

@@ -46,7 +46,8 @@ self.addEventListener('push', (event) => {
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const baseUrl = event.notification.data?.url || './dabbar-dashboard-full.html';
-  const url = new URL(baseUrl, self.location.origin);
+  // نحلّ الرابط النسبي على نطاق الـ SW (/app/) مش على الـ origin، وإلا './dabbar-dashboard-full.html' كان بيروح /dabbar-dashboard-full.html (404)
+  const url = new URL(baseUrl, self.registration.scope);
   // زرارين "🎙️ صوت" و "✍️ كتابة" على إشعار الوصول السريع — بنحول الضغطة لنفس عقد الـ quick param
   if (event.action === 'quick-voice') url.searchParams.set('quick', 'voice');
   else if (event.action === 'quick-text') url.searchParams.set('quick', 'text');

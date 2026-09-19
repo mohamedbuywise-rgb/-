@@ -212,7 +212,7 @@ export default async function handler(req, res) {
       detectRecurringSubscriptions(dataUserId),
       supabase
         .from('debts')
-        .select('id, person_name, amount, currency_code, note, created_at')
+        .select('id, person_name, amount, currency_code, note, direction, created_at')
         .eq('telegram_user_id', dataUserId)
         .eq('direction', 'borrowed')
         .eq('is_repayment', false)
@@ -224,10 +224,7 @@ export default async function handler(req, res) {
         .select('id, person_name, amount, currency_code, note, direction, created_at')
         .eq('telegram_user_id', dataUserId)
         .gte('created_at', startOfDay.toISOString())
-        .lt('created_at', endOfDay.toISOString())
-        .order('created_at', { ascending: false })
-        .then((r) => { if (r.error) console.error('todayFlowData query failed (falling back to empty):', r.error.message); return r.error ? { data: [], error: r.error } : r; })
-        .catch((error) => { console.error('todayFlowData query threw (falling back to empty):', error.message); return { data: [], error }; }),
+        .lt('created_at', endOfDay.toISOString()),
       getExpensesBetween(dataUserId, yearStart, yearEnd),
       hasActiveSubscription(dataUserId),
       getSubscriptionExpiry(dataUserId),
@@ -403,6 +400,15 @@ export default async function handler(req, res) {
     const flowOut = (todayFlowData || [])
       .filter(d => d.direction === 'lent')
       .reduce((sum, d) => sum + Number(d.amount), 0);
+    const flowItems = (todayFlowData || []).map((d) => ({
+      id: d.id,
+      person_name: d.person_name || '—',
+      amount: Number(d.amount),
+      currency_code: d.currency_code || 'EGP',
+      note: d.note || '',
+      direction: d.direction,
+      created_at: d.created_at,
+    }));
 
     return res.status(200).json({
       linked,
@@ -480,15 +486,7 @@ export default async function handler(req, res) {
         in: flowIn,
         out: flowOut,
         net: flowIn - flowOut,
-        items: (todayFlowData || []).map((d) => ({
-          id: d.id,
-          personName: d.person_name || null,
-          amount: Number(d.amount),
-          currency_code: d.currency_code || 'EGP',
-          note: d.note || null,
-          direction: d.direction,
-          created_at: d.created_at,
-        })).sort((a, b) => new Date(b.created_at) - new Date(a.created_at)),
+        items: flowItems,
       },
       history,
       goal,

@@ -20,7 +20,15 @@ export default async function handler(req, res) {
 
   const { start, end, label } = getMonthRange(monthOffset);
   const expenses = await getExpensesBetween(dataUserId, start, end);
-  if (expenses.length === 0) return res.status(404).json({ ok: false, error: 'مفيش عمليات مسجلة في الشهر ده.' });
+  const { data: debts, error: debtsError } = await supabase
+    .from('debts')
+    .select('amount, currency_code, direction, created_at')
+    .eq('telegram_user_id', dataUserId)
+    .eq('is_repayment', false)
+    .gte('created_at', start.toISOString())
+    .lt('created_at', end.toISOString());
+  if (debtsError) throw debtsError;
+  if (expenses.length === 0 && !(debts || []).length) return res.status(404).json({ ok: false, error: 'مفيش عمليات مسجلة في الشهر ده.' });
 
   const total = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
   const breakdown = buildCategoryBreakdown(expenses);
@@ -30,26 +38,21 @@ export default async function handler(req, res) {
   const comparisonLine = prevTotal > 0
     ? `مقارنة بـ${prevRange.label}: صرفت ${Math.round(Math.abs(((total - prevTotal) / prevTotal) * 100))}% ${total >= prevTotal ? 'أكتر' : 'أقل'}`
     : '';
-
-  // ---- حركة السيولة (الديون) بتاعت الشهر ده، عشان تتضاف كسكشن في التقرير ----
-  const { data: monthFlowRows } = await supabase
-    .from('debts')
-    .select('id, person_name, amount, currency_code, note, direction, created_at')
-    .eq('telegram_user_id', dataUserId)
-    .gte('created_at', start.toISOString())
-    .lt('created_at', end.toISOString())
-    .order('created_at', { ascending: false });
-  const flowItems = (monthFlowRows || []).map((d) => ({
-    personName: d.person_name || null,
-    amount: Number(d.amount),
-    currency_code: d.currency_code || 'EGP',
-    note: d.note || null,
-    direction: d.direction,
-    created_at: d.created_at,
-  }));
-  const flowIn = flowItems.filter((d) => d.direction === 'borrowed').reduce((sum, d) => sum + d.amount, 0);
-  const flowOut = flowItems.filter((d) => d.direction === 'lent').reduce((sum, d) => sum + d.amount, 0);
-  const flow = { in: flowIn, out: flowOut, net: flowIn - flowOut, items: flowItems };
+  const flowByCurrency = {};
+  for (const debt of debts || []) {
+    const currency = String(debt.currency_code || 'EGP').toUpperCase();
+    const bucket = flowByCurrency[currency] || { in: 0, out: 0, net: 0 };
+    const amount = Number(debt.amount || 0);
+    if (debt.direction === 'borrowed') bucket.in += amount;
+    if (debt.direction === 'lent') bucket.out += amount;
+    bucket.net = bucket.in - bucket.out;
+    flowByCurrency[currency] = bucket;
+  }
+  Object.values(flowByCurrency).forEach((bucket) => {
+    bucket.in = Number(bucket.in.toFixed(2));
+    bucket.out = Number(bucket.out.toFixed(2));
+    bucket.net = Number(bucket.net.toFixed(2));
+  });
 
   const html = buildReportHtml({
     title: `كشف حساب ${label} ${start.getFullYear()}`,
@@ -60,7 +63,7 @@ export default async function handler(req, res) {
     topCategoryName: breakdown[0]?.name || '—',
     comparisonLine,
     categories: breakdown,
-    flow,
+    flow: { byCurrency: flowByCurrency },
   });
 
   try {

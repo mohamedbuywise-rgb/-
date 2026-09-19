@@ -70,10 +70,8 @@ export default async function handler(req, res) {
     if (req.method === 'PATCH' || req.method === 'DELETE') {
       const id = Number(req.query?.id || req.body?.id);
       if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'معرف العملية غير صحيح.' });
-      // النوع بيوصلنا من الفرونت إند: 'expense' (افتراضي، جدول expenses) أو 'event' لأي دخل/تحويل/أصل (جدول financial_events)
-      const isEvent = String(req.query?.type || req.body?.type || 'expense').toLowerCase() === 'event';
-      const table = isEvent ? 'financial_events' : 'expenses';
-
+      const recordType = String(req.query?.type || req.body?.type || 'expense') === 'event' ? 'event' : 'expense';
+      const table = recordType === 'event' ? 'financial_events' : 'expenses';
       if (req.method === 'DELETE') {
         const { data: deleted, error } = await supabase.from(table).delete().eq('id', id).eq('telegram_user_id', userId).select('id').maybeSingle();
         if (error) throw error;
@@ -85,17 +83,18 @@ export default async function handler(req, res) {
       if (body.amount !== undefined) patch.amount = Math.max(0.01, Number(body.amount));
       if (body.category !== undefined) patch.category = String(body.category).slice(0, 50);
       if (body.description !== undefined) patch.description = String(body.description).slice(0, 500);
-      if (!isEvent && body.currency_code !== undefined) {
+      if (body.currency_code !== undefined) {
         const currency = String(body.currency_code).trim().toUpperCase();
         if (!/^[A-Z]{3}$/.test(currency)) return res.status(400).json({ error: 'العملة غير صحيحة.' });
         patch.currency_code = currency;
       }
       if (!Object.keys(patch).length) return res.status(400).json({ error: 'مفيش بيانات للتعديل.' });
-      const selectCols = isEvent ? 'id, amount, category, description, event_type, created_at' : 'id, amount, currency_code, category, description, created_at';
-      const { data, error } = await supabase.from(table).update(patch).eq('id', id).eq('telegram_user_id', userId).select(selectCols).single();
+      const { data, error } = await supabase.from(table).update(patch).eq('id', id).eq('telegram_user_id', userId).select('id, amount, currency_code, category, description, created_at').single();
       if (error) throw error;
-      if (!isEvent) await maybeSendBudgetAlert(userId).catch((pushError) => console.error('financial-actions budget push failed:', pushError));
-      return res.status(200).json({ [isEvent ? 'event' : 'expense']: data });
+      if (recordType === 'expense') {
+        await maybeSendBudgetAlert(userId).catch((pushError) => console.error('financial-actions budget push failed:', pushError));
+      }
+      return res.status(200).json({ [recordType === 'event' ? 'event' : 'expense']: data });
     }
 
     return res.status(405).json({ error: 'Method not allowed' });

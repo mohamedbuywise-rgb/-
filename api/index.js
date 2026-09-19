@@ -21,6 +21,12 @@ import telegramWebhookHandler from '../backend/api-handlers/telegram-webhook.js'
 import trialSummaryProofHandler from '../backend/api-handlers/trial-summary-proof.js';
 import trialSummaryHandler from '../backend/api-handlers/trial-summary.js';
 
+// Vercel يطبّق إعدادات المدة على ملف الـ entrypoint الفعلي فقط.
+// وضع الإعداد في dashboard-data.js وحده لا يكفي لأن الطلب يمر أولًا من هنا.
+export const config = {
+  maxDuration: 60,
+};
+
 const handlers = {
   admin: adminHandler,
   assistant: assistantHandler,

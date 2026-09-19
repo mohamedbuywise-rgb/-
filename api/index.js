@@ -53,7 +53,10 @@ const handlers = {
 };
 
 export default async function handler(req, res) {
-  const route = String(req.query?.route || '').replace(/^\/+|\/+$/g, '');
+  const urlRoute = (() => {
+    try { return new URL(req.url || '/', 'http://localhost').searchParams.get('route') || ''; } catch { return ''; }
+  })();
+  const route = String(req.query?.route || urlRoute || '').replace(/^\/+|\/+$/g, '');
   const routeHandler = handlers[route];
   if (!routeHandler) {
     return res.status(404).json({ ok: false, error: 'API route not found' });

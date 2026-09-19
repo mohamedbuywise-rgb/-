@@ -3153,6 +3153,35 @@ html[data-theme="light"] .smart-write-badge {
     border: 1px solid rgba(154,116,40,.45);
     box-shadow: 0 2px 8px rgba(154,116,40,.16), inset 0 1px 0 rgba(255,255,255,.7);
 }
+/* ===== تبويبات التسجيل السريع: التلاتة ظاهرين دايماً بدون سحب ===== */
+.quick-workspace-switcher {
+    display: grid !important; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .3rem;
+    overflow: visible !important;
+}
+.quick-workspace-switcher .quick-workspace-btn {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .18rem;
+    min-width: 0; padding: .5rem .2rem; white-space: normal; text-align: center; line-height: 1.3;
+    font-size: .62rem;
+}
+.quick-workspace-switcher .qw-ico { font-size: 1.05rem; line-height: 1; }
+.quick-workspace-switcher .qw-txt { display: block; overflow-wrap: anywhere; }
+/* ===== مساعد: الخمس تبويبات ظاهرين دايماً بدون سحب ===== */
+#assistant-hub-nav {
+    display: grid !important; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .25rem;
+    overflow: visible !important;
+}
+#assistant-hub-nav .assistant-hub-btn {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .16rem;
+    min-width: 0; padding: .5rem .1rem; white-space: normal; text-align: center; line-height: 1.25; font-size: .58rem;
+}
+#assistant-hub-nav .ah-ico { font-size: 1rem; line-height: 1; }
+#assistant-hub-nav .ah-txt { display: block; overflow-wrap: anywhere; }
+
+/* ===== الدخل والميزانية: كارت قابل للطي زي فرص التوفير ===== */
+#available-collapsible > .dabbar-collapsible-summary { padding: .35rem .1rem .8rem; min-height: 2.4rem; }
+#available-collapsible:not([open]) > .dabbar-collapsible-summary { padding-bottom: .35rem; }
+#available-collapsible .dabbar-collapsible-summary-label { font-size: .85rem; }
+#available-collapsible .dabbar-collapsible-chev { font-size: 1.1rem; }
 </style>
 </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col overflow-hidden">
@@ -3248,9 +3277,9 @@ html[data-theme="light"] .smart-write-badge {
                 <div id="dabbar-magic-fx" aria-hidden="true"></div>
                 <div class="flex items-center justify-between gap-3"><div><span class="quick-entry-eyebrow">ابدأ من هنا</span><div class="flex items-center gap-2"><h3 class="text-base font-black text-slate-900 dark:text-slate-100">سجّل عمليتك الآن</h3><span id="dabbar-magic-chip" class="dabbar-magic-chip"><span class="dabbar-magic-chip-dot"></span><span id="dabbar-magic-label">جاهز يفهمها</span></span></div><p class="text-[11px] text-slate-600 dark:text-slate-400">صوت أو كتابة أو صوّر الفاتورة — في ثواني</p></div><span class="text-2xl" aria-hidden="true">✨</span></div>
                 <div id="quick-workspace-switcher" class="quick-workspace-switcher" role="tablist" aria-label="أقسام التسجيل السريع">
-                    <button type="button" class="quick-workspace-btn active" data-quick-workspace="expense" role="tab" aria-selected="true">✍️ سجل مصروفك بسرعة</button>
-                    <button type="button" class="quick-workspace-btn" data-quick-workspace="portfolio" role="tab" aria-selected="false">📈 المحفظة الاستثمارية</button>
-                    <button type="button" class="quick-workspace-btn" data-quick-workspace="bank" role="tab" aria-selected="false">🏦 الحركات البنكية</button>
+                    <button type="button" class="quick-workspace-btn active" data-quick-workspace="expense" role="tab" aria-selected="true"><span class="qw-ico" aria-hidden="true">✍️</span><span class="qw-txt">سجل مصروفك بسرعة</span></button>
+                    <button type="button" class="quick-workspace-btn" data-quick-workspace="portfolio" role="tab" aria-selected="false"><span class="qw-ico" aria-hidden="true">📈</span><span class="qw-txt">المحفظة الاستثمارية</span></button>
+                    <button type="button" class="quick-workspace-btn" data-quick-workspace="bank" role="tab" aria-selected="false"><span class="qw-ico" aria-hidden="true">🏦</span><span class="qw-txt">الحركات البنكية</span></button>
                 </div>
                 <div id="quick-expense-content">
                 <div id="quick-entry-subscription-lock" class="hidden items-center justify-between gap-3 rounded-2xl border px-3 py-2.5 text-[11px]" style="border-color:color-mix(in srgb,var(--pm-gold-bright) 40%,transparent);background:color-mix(in srgb,var(--pm-gold-bright) 10%,var(--pm-surface-hi));color:var(--pm-ink);"><div class="flex items-center gap-2"><span id="quick-entry-vip-badge" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-lg" style="background:linear-gradient(145deg,var(--pm-gold-bright),var(--pm-gold));color:var(--pm-ink);">💎</span><span><strong class="block" style="color:var(--pm-gold-bright);">التصنيف الذكي بقى ميزة VIP</strong><span style="color:var(--pm-muted);">الإدخال اليدوي شغال زي العادة — فعّل VIP للصوت والفواتير والـ AI.</span></span></div><button id="quick-entry-open-subscription" type="button" class="shrink-0 rounded-xl px-3 py-2 text-[10px] font-black" style="background:linear-gradient(145deg,var(--pm-gold-bright),var(--pm-gold));color:var(--pm-ink);">فعّل VIP</button></div>
@@ -3276,7 +3305,7 @@ html[data-theme="light"] .smart-write-badge {
             </section>
 
             <!-- كارت "المتاح ليك تصرفه" الموحّد: بديل صافي ثروتك، بيظهر بس لما العميل يحدد دخله أو ميزانيته -->
-            <details id="available-collapsible" class="dabbar-collapsible-section" open>
+            <details id="available-collapsible" class="dabbar-collapsible-section relative overflow-hidden rounded-3xl p-4 shadow-lg dabbar-savings-card" open>
                 <summary class="dabbar-collapsible-summary">
                     <span class="dabbar-collapsible-summary-label">💰 الدخل والميزانية الشهر ده</span>
                     <span class="dabbar-collapsible-chev" aria-hidden="true">⌄</span>
@@ -4049,11 +4078,11 @@ html[data-theme="light"] .smart-write-badge {
                 <p class="text-[11px] text-slate-400">اقتراحات وتوقعات وشات مبني على بياناتك الحقيقية بس</p>
             </div>
              <div id="assistant-hub-nav" role="tablist" aria-label="أقسام مساعد دبّر">
-                 <button type="button" class="assistant-hub-btn active" data-assistant-target="assistant-goals-card">🎯 الأهداف</button>
-                 <button type="button" class="assistant-hub-btn" data-assistant-target="assistant-chat-card">💬 اسأل دبّر</button>
-                 <button type="button" class="assistant-hub-btn" data-assistant-tab="categories">🧾 التصنيفات</button>
-                 <button type="button" class="assistant-hub-btn" data-assistant-tab="reminders">🔔 التذكيرات</button>
-                 <button type="button" class="assistant-hub-btn" data-assistant-tab="tips">💡 النصايح</button>
+                 <button type="button" class="assistant-hub-btn active" data-assistant-target="assistant-goals-card"><span class="ah-ico" aria-hidden="true">🎯</span><span class="ah-txt">الأهداف</span></button>
+                 <button type="button" class="assistant-hub-btn" data-assistant-target="assistant-chat-card"><span class="ah-ico" aria-hidden="true">💬</span><span class="ah-txt">اسأل دبّر</span></button>
+                 <button type="button" class="assistant-hub-btn" data-assistant-tab="categories"><span class="ah-ico" aria-hidden="true">🧾</span><span class="ah-txt">التصنيفات</span></button>
+                 <button type="button" class="assistant-hub-btn" data-assistant-tab="reminders"><span class="ah-ico" aria-hidden="true">🔔</span><span class="ah-txt">التذكيرات</span></button>
+                 <button type="button" class="assistant-hub-btn" data-assistant-tab="tips"><span class="ah-ico" aria-hidden="true">💡</span><span class="ah-txt">النصايح</span></button>
              </div>
 
             <!-- اقتراح ذكي تلقائي -->

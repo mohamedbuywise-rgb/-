@@ -2111,6 +2111,34 @@
         #push-notifications-toggle:hover { filter: brightness(1.06); }
         #push-notifications-save { background: var(--pm-surface-soft) !important; border-color: var(--pm-hairline-soft) !important; color: var(--pm-ink) !important; }
 
+        /* ===== إعدادات الإشعارات: وقت ونسبة بحرية (مضغوط) ===== */
+        .pnx-row { display:grid; grid-template-columns:1fr 1fr; gap:8px; padding-top:4px; }
+        .pnx-box { box-sizing:border-box; min-width:0; background:var(--pm-surface-soft); border:1px solid var(--pm-hairline-soft); border-radius:16px; padding:8px 8px 6px; }
+        .pnx-lbl { display:flex; align-items:center; justify-content:space-between; gap:4px; font:800 10px 'Cairo',sans-serif; color:var(--pm-muted); margin-bottom:4px; white-space:nowrap; }
+        .pnx-lbl b { color:var(--pm-ink); font-weight:900; font-size:10px; }
+        .pnx-wheels { position:relative; direction:ltr; display:flex; justify-content:center; align-items:center; height:72px; overflow:hidden; border-radius:12px; }
+        .pnx-wheels::before { content:""; position:absolute; left:2px; right:2px; top:24px; height:24px; border-radius:9px; pointer-events:none;
+            background:color-mix(in srgb,var(--pm-gold) 13%,transparent); border:1px solid color-mix(in srgb,var(--pm-gold) 38%,transparent); }
+        .pnx-wheels::after { content:""; position:absolute; inset:0; pointer-events:none;
+            background:linear-gradient(var(--pm-surface-soft) 0%,transparent 34%,transparent 66%,var(--pm-surface-soft) 100%); }
+        .pnx-wheel { box-sizing:border-box; position:relative; z-index:1; height:72px; width:40px; overflow-y:auto; scroll-snap-type:y mandatory; padding:24px 0; scrollbar-width:none; overscroll-behavior:contain; }
+        .pnx-wheel.pnx-narrow { width:34px; }
+        .pnx-wheel::-webkit-scrollbar { display:none; }
+        .pnx-wi { height:24px; display:grid; place-items:center; scroll-snap-align:center; font:700 14px 'Cairo',sans-serif; color:var(--pm-muted); cursor:pointer; user-select:none; font-variant-numeric:tabular-nums; }
+        .pnx-wi.sel { color:var(--pm-ink); font-weight:900; }
+        .pnx-colon { position:relative; z-index:1; font:900 15px 'Cairo',sans-serif; color:var(--pm-ink); margin:-2px 1px 0; }
+        .pnx-pct { display:flex; align-items:center; justify-content:space-between; gap:4px; height:34px; }
+        .pnx-step { width:30px; height:30px; flex:0 0 auto; border-radius:10px; border:1px solid var(--pm-hairline); background:var(--pm-surface-hi); color:var(--pm-ink);
+            font:900 17px/1 'Cairo',sans-serif; display:grid; place-items:center; padding:0; touch-action:manipulation; }
+        .pnx-step:active { transform:scale(.92); background:color-mix(in srgb,var(--pm-gold) 14%,var(--pm-surface-hi)); }
+        .pnx-num { font:900 24px/1 'Cairo',sans-serif; color:var(--pm-ink); font-variant-numeric:tabular-nums; }
+        .pnx-num span { font-size:13px; color:var(--pm-gold); margin-inline-start:1px; }
+        .pnx-range { -webkit-appearance:none; appearance:none; width:100%; height:24px; background:transparent; margin:2px 0 0; padding:0; direction:rtl; outline:none; }
+        .pnx-range::-webkit-slider-runnable-track { height:6px; border-radius:99px; background:var(--pnx-trk,var(--pm-hairline)); }
+        .pnx-range::-moz-range-track { height:6px; border-radius:99px; background:var(--pnx-trk,var(--pm-hairline)); }
+        .pnx-range::-webkit-slider-thumb { -webkit-appearance:none; width:20px; height:20px; border-radius:50%; background:#fff; border:3px solid var(--pm-gold); margin-top:-7px; box-shadow:0 2px 8px rgba(0,0,0,.28); }
+        .pnx-range::-moz-range-thumb { width:14px; height:14px; border-radius:50%; background:#fff; border:3px solid var(--pm-gold); box-shadow:0 2px 8px rgba(0,0,0,.28); }
+
         /* High-specificity day/night locks override the legacy light skin above. */
         html[data-theme="light"] body.bg-slate-950,
         html:not([data-theme="light"]) body.bg-slate-950,
@@ -4876,17 +4904,28 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
                         <span>تنبيه الاقتراب من الميزانية</span>
                         <input id="push-budget-alert" type="checkbox" class="accent-amber-400 w-4 h-4">
                     </label>
-                    <div class="grid grid-cols-2 gap-2 pt-1">
-                        <label class="text-[10px] text-slate-500">وقت التذكير
-                            <select id="push-daily-hour" class="mt-1 w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-2 text-[11px] text-slate-200">
-                                <option value="8" selected>8 صباحًا</option>
-                            </select>
-                        </label>
-                        <label class="text-[10px] text-slate-500">نسبة التنبيه
-                            <select id="push-budget-threshold" class="mt-1 w-full bg-slate-900 border border-slate-800 rounded-lg px-2 py-2 text-[11px] text-slate-200">
-                                <option value="0.8" selected>80%</option><option value="0.9">90%</option><option value="1">100%</option>
-                            </select>
-                        </label>
+                    <div class="pnx-row">
+                        <div class="pnx-box">
+                            <div class="pnx-lbl"><span>⏰ وقت التذكير</span><b id="pnx-time-txt">8:00 ص</b></div>
+                            <div class="pnx-wheels" aria-label="وقت التذكير">
+                                <div class="pnx-wheel" id="pnx-wh"></div>
+                                <div class="pnx-colon">:</div>
+                                <div class="pnx-wheel" id="pnx-wm"></div>
+                                <div class="pnx-wheel pnx-narrow" id="pnx-wp"></div>
+                            </div>
+                        </div>
+                        <div class="pnx-box">
+                            <div class="pnx-lbl"><span>🎯 نسبة التنبيه</span><b>من الميزانية</b></div>
+                            <div class="pnx-pct">
+                                <button type="button" class="pnx-step" id="pnx-minus" aria-label="نقصان">−</button>
+                                <div class="pnx-num"><b id="pnx-num">80</b><span>%</span></div>
+                                <button type="button" class="pnx-step" id="pnx-plus" aria-label="زيادة">+</button>
+                            </div>
+                            <input type="range" class="pnx-range" id="pnx-range" min="50" max="100" step="1" value="80" aria-label="نسبة التنبيه">
+                        </div>
+                        <input type="hidden" id="push-daily-hour" value="8">
+                        <input type="hidden" id="push-daily-minute" value="0">
+                        <input type="hidden" id="push-budget-threshold" value="0.8">
                     </div>
                     <button type="button" id="push-notifications-save" class="w-full bg-slate-800 border border-slate-700 text-slate-200 font-bold text-[11px] py-2.5 rounded-xl transition hover:bg-slate-700">حفظ إعدادات الإشعارات</button>
                 </div>
@@ -6338,6 +6377,97 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
             return Uint8Array.from([...rawData].map((char) => char.charCodeAt(0)));
         }
 
+        // ============ إعدادات الإشعارات: عجلة الوقت + سلايدر النسبة (اختيار حر) ============
+        (function pnxInit() {
+            function boot() {
+                const $ = (id) => document.getElementById(id);
+                const wrapH = $('pnx-wh'), wrapM = $('pnx-wm'), wrapP = $('pnx-wp'), range = $('pnx-range');
+                if (!wrapH || !wrapM || !wrapP || !range) return;
+                const RH = 24;
+                const pad = (n) => (n < 10 ? '0' + n : '' + n);
+                const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+                const S = { h12: 8, m: 0, p: 0, pct: 80 };
+
+                function makeWheel(el, labels, onChange) {
+                    let idx = 0, raf = 0;
+                    labels.forEach((t, i) => {
+                        const d = document.createElement('div');
+                        d.className = 'pnx-wi'; d.textContent = t;
+                        d.addEventListener('click', () => set(i, true));
+                        el.appendChild(d);
+                    });
+                    const paint = (i) => { for (let k = 0; k < el.children.length; k++) el.children[k].classList.toggle('sel', k === i); };
+                    function set(i, smooth, silent) {
+                        idx = clamp(i, 0, labels.length - 1);
+                        el.scrollTo({ top: idx * RH, behavior: smooth ? 'smooth' : 'auto' });
+                        paint(idx);
+                        if (!silent) onChange(idx);
+                    }
+                    el.addEventListener('scroll', () => {
+                        cancelAnimationFrame(raf);
+                        raf = requestAnimationFrame(() => {
+                            const i = clamp(Math.round(el.scrollTop / RH), 0, labels.length - 1);
+                            if (i !== idx) { idx = i; paint(i); onChange(i); }
+                        });
+                    }, { passive: true });
+                    return { set };
+                }
+
+                const hours = [], mins = [];
+                for (let i = 1; i <= 12; i++) hours.push(String(i));
+                for (let i = 0; i < 60; i++) mins.push(pad(i));
+                const to24 = () => (S.h12 % 12) + (S.p ? 12 : 0);
+
+                function writeHidden() {
+                    const h = $('push-daily-hour'), m = $('push-daily-minute'), t = $('push-budget-threshold');
+                    if (h) h.value = String(to24());
+                    if (m) m.value = String(S.m);
+                    if (t) t.value = (S.pct / 100).toFixed(2);
+                    const lbl = $('pnx-time-txt');
+                    if (lbl) lbl.textContent = S.h12 + ':' + pad(S.m) + ' ' + (S.p ? 'م' : 'ص');
+                }
+                const wH = makeWheel(wrapH, hours, (i) => { S.h12 = i + 1; writeHidden(); });
+                const wM = makeWheel(wrapM, mins, (i) => { S.m = i; writeHidden(); });
+                const wP = makeWheel(wrapP, ['ص', 'م'], (i) => { S.p = i; writeHidden(); });
+
+                function paintPct() {
+                    $('pnx-num').textContent = S.pct;
+                    range.value = S.pct;
+                    const f = ((S.pct - 50) / 50) * 100;
+                    range.style.setProperty('--pnx-trk', 'linear-gradient(to left,var(--pm-gold) ' + f + '%,var(--pm-hairline) ' + f + '%)');
+                }
+                function setPct(v) { S.pct = clamp(Math.round(v), 50, 100); paintPct(); writeHidden(); }
+                range.addEventListener('input', () => setPct(Number(range.value)));
+                function hold(btn, delta) {
+                    let t, iv;
+                    const stop = () => { clearTimeout(t); clearInterval(iv); };
+                    btn.addEventListener('pointerdown', (e) => { e.preventDefault(); setPct(S.pct + delta); t = setTimeout(() => { iv = setInterval(() => setPct(S.pct + delta), 70); }, 380); });
+                    ['pointerup', 'pointerleave', 'pointercancel'].forEach((ev) => btn.addEventListener(ev, stop));
+                }
+                hold($('pnx-minus'), -1); hold($('pnx-plus'), 1);
+
+                // قراءة القيم من الحقول المخفية (اللي renderPushPreferences بتملاها) وتحريك الواجهة
+                function sync() {
+                    let h = Number($('push-daily-hour')?.value); if (!Number.isFinite(h)) h = 8;
+                    h = clamp(Math.round(h), 0, 23);
+                    let m = Number($('push-daily-minute')?.value); if (!Number.isFinite(m)) m = 0;
+                    m = clamp(Math.round(m), 0, 59);
+                    let th = Number($('push-budget-threshold')?.value); if (!Number.isFinite(th) || th <= 0) th = 0.8;
+                    S.p = h >= 12 ? 1 : 0; S.h12 = h % 12 === 0 ? 12 : h % 12; S.m = m; S.pct = clamp(Math.round(th * 100), 50, 100);
+                    wH.set(S.h12 - 1, false, true); wM.set(S.m, false, true); wP.set(S.p, false, true);
+                    paintPct(); writeHidden();
+                }
+                window.pnxSync = sync;
+                sync();
+                // الكارت بيكون مخفي (display:none) لحد ما المستخدم يفتحه، فنعيد ضبط مواضع العجلات أول ما تظهر
+                if (window.ResizeObserver) {
+                    const ro = new ResizeObserver(() => { if (wrapH.offsetHeight > 0) sync(); });
+                    ro.observe(wrapH);
+                }
+            }
+            if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+        })();
+
         function renderPushPreferences(preferences) {
             pushPreferences = preferences || { dailyReminderEnabled: true, dailySummaryEnabled: true, weeklySummaryEnabled: true, budgetAlertEnabled: true, dailyReminderHour: 8, budgetAlertThreshold: 0.8 };
             const daily = document.getElementById('push-daily-reminder');
@@ -6352,6 +6482,9 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
             if (budget) budget.checked = pushPreferences.budgetAlertEnabled !== false;
             if (hour) hour.value = String(pushPreferences.dailyReminderHour ?? 8);
             if (threshold) threshold.value = String(pushPreferences.budgetAlertThreshold ?? 0.8);
+            const minute = document.getElementById('push-daily-minute');
+            if (minute) minute.value = String(pushPreferences.dailyReminderMinute ?? 0);
+            if (typeof window.pnxSync === 'function') window.pnxSync();
         }
 
         async function pushApi(method = 'GET', body) {
@@ -6533,7 +6666,9 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
                     weeklySummaryEnabled: document.getElementById('push-weekly-summary')?.checked !== false,
                     budgetAlertEnabled: document.getElementById('push-budget-alert')?.checked !== false,
                     dailyReminderHour: Number(document.getElementById('push-daily-hour')?.value || 8),
-                    budgetAlertThreshold: Number(document.getElementById('push-budget-threshold')?.value || 0.8),
+                    dailyReminderMinute: Number(document.getElementById('push-daily-minute')?.value || 0),
+                    budgetAlertThreshold: Math.min(1, Math.max(0.5, Number(document.getElementById('push-budget-threshold')?.value || 0.8))),
+                    timezone: (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || 'Africa/Cairo'; } catch { return 'Africa/Cairo'; } })(),
                 };
                 const data = await pushApi('PUT', { preferences });
                 renderPushPreferences(data.preferences);

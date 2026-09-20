@@ -1,6 +1,6 @@
 import { supabase } from '../../lib/supabaseClient.js';
 import { sendTelegramMessage } from '../../lib/telegram.js';
-import { getExpensesBetween, sendMonthlyReport, sendWeeklyReport, sendReportPdf } from '../../lib/expenses.js';
+import { sendMonthlyReport, sendWeeklyReport, sendReportPdf } from '../../lib/expenses.js';
 import { getOldUnsettledDebtsSummary, recordDebtReminders } from '../../lib/debts.js';
 import { getRemindersNeedingNotification, markReminderNotified, buildReminderMessage } from '../../lib/reminders.js';
 import { generateFriendlyReminderIntro } from '../../lib/groq.js';
@@ -8,7 +8,8 @@ import { getAllUsers } from '../../lib/users.js';
 import { claimCronSlot } from '../../lib/cronRuns.js';
 import { refreshPortfolioMarketPrices, savePortfolioSnapshot, getPortfolioDigest, buildPortfolioDigestMessage, checkPortfolioPriceAlerts, buildPortfolioAlertTelegramMessage, buildPortfolioAlertPushPayload } from '../../lib/investments.js';
 import { CATEGORY_EMOJI, CRON_SECRET, ADMIN_TELEGRAM_ID, isModelsCheckOverdue } from '../../lib/config.js';
-import { claimPushRun, getNotificationPreferences, hasActivePushSubscription, sendPushToUser } from '../../lib/webPush.js';
+import { hasActivePushSubscription, sendPushToUser } from '../../lib/webPush.js';
+import { runPushSchedule } from '../../lib/pushSchedule.js';
 import { getUsersNeedingTrialReminder, getSubscriptionState, formatTrialReminder, markTrialReminderSent } from '../../lib/subscriptionAccess.js';
 
 // عدد المستخدمين اللي بيتعالجوا بالتوازي في نفس الوقت، بدل ما نلف عليهم واحد واحد.
@@ -138,94 +139,6 @@ async function runWithConcurrencyLimit(items, limit, worker) {
   return results;
 }
 
-function localDateKey(date = new Date()) {
-  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-}
-
-function formatPushAmount(amount) {
-  return Number(amount || 0).toLocaleString('ar-EG', { maximumFractionDigits: 0 });
-}
-
-async function sendPushDailyReminder(userId, preferences, now) {
-  if (!preferences.dailyReminderEnabled || now.getHours() !== preferences.dailyReminderHour) return;
-  if (!(await hasActivePushSubscription(userId))) return;
-
-  const startOfToday = new Date(now);
-  startOfToday.setHours(0, 0, 0, 0);
-  const endOfToday = new Date(startOfToday);
-  endOfToday.setDate(endOfToday.getDate() + 1);
-  const todayExpenses = await getExpensesBetween(userId, startOfToday, endOfToday);
-  if (todayExpenses.length > 0) return;
-
-  const periodKey = localDateKey(startOfToday);
-  if (!(await claimPushRun(userId, 'daily-reminder', periodKey))) return;
-  await sendPushToUser(userId, {
-    title: 'دبّر — فاكر مصاريفك؟',
-    body: 'لسه مفيش مصروفات مسجلة النهارده. سجّل أول عملية في ثواني.',
-    tag: 'daily-reminder',
-    url: './dabbar-dashboard-full.html',
-    icon: './icons/icon-192.png',
-    badge: './icons/icon-192.png',
-  });
-}
-
-async function sendPushDailySummary(userId, preferences, now) {
-  if (!preferences.dailySummaryEnabled || now.getHours() !== 0) return;
-  if (!(await hasActivePushSubscription(userId))) return;
-
-  const startOfToday = new Date(now);
-  startOfToday.setHours(0, 0, 0, 0);
-  const startOfYesterday = new Date(startOfToday);
-  startOfYesterday.setDate(startOfYesterday.getDate() - 1);
-  const expenses = await getExpensesBetween(userId, startOfYesterday, startOfToday);
-  const total = expenses.reduce((sum, expense) => sum + Number(expense.amount || 0), 0);
-  const byCategory = new Map();
-  for (const expense of expenses) {
-    const category = String(expense.category || 'مصروف عام');
-    byCategory.set(category, (byCategory.get(category) || 0) + Number(expense.amount || 0));
-  }
-  const topCategory = [...byCategory.entries()].sort((a, b) => b[1] - a[1])[0];
-  const dayKey = localDateKey(startOfYesterday);
-  if (!(await claimPushRun(userId, 'daily-summary', dayKey))) return;
-
-  const dateLabel = startOfYesterday.toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long' });
-  const body = expenses.length
-    ? [`${dateLabel}`, `عدد العمليات: ${expenses.length}`, `الإجمالي: ${formatPushAmount(total)} جنيه`, `أكثر فئة: ${topCategory[0]} — ${formatPushAmount(topCategory[1])} جنيه`, '', 'يومك جاهز بشكل حلو — افتح دبّر وشاركه مع صحابك.'].join('\n')
-    : `${dateLabel}\nمفيش عمليات مسجلة امبارح. إجمالي الصرف: 0 جنيه.`;
-
-  await sendPushToUser(userId, {
-    title: 'دبّر — يومك جاهز 🎉',
-    body,
-    tag: 'daily-summary',
-    url: './dabbar-dashboard-full.html',
-    icon: './icons/icon-192.png',
-    badge: './icons/icon-192.png',
-    data: { type: 'daily-summary', date: dayKey, total, count: expenses.length, topCategory: topCategory?.[0] || null },
-  });
-}
-
-async function sendPushWeeklySummary(userId, preferences, isFriday, now) {
-  if (!preferences.weeklySummaryEnabled || !isFriday || now.getHours() !== preferences.dailyReminderHour) return;
-  if (!(await hasActivePushSubscription(userId))) return;
-
-  const todayStart = new Date(now);
-  todayStart.setHours(0, 0, 0, 0);
-  const weekStart = new Date(todayStart);
-  weekStart.setDate(weekStart.getDate() - 7);
-  const expenses = await getExpensesBetween(userId, weekStart, todayStart);
-  const total = expenses.reduce((sum, expense) => sum + Number(expense.amount || 0), 0);
-  const weekKey = `${localDateKey(weekStart)}:${localDateKey(todayStart)}`;
-  if (!(await claimPushRun(userId, 'weekly-summary', weekKey))) return;
-  await sendPushToUser(userId, {
-    title: 'دبّر — ملخص أسبوعك',
-    body: expenses.length ? `سجلت ${expenses.length} عملية بإجمالي ${formatPushAmount(total)} جنيه الأسبوع اللي فات.` : 'الأسبوع اللي فات مفيهوش مصروفات مسجلة.',
-    tag: 'weekly-summary',
-    url: './dabbar-dashboard-full.html',
-    icon: './icons/icon-192.png',
-    badge: './icons/icon-192.png',
-  });
-}
-
 // ============ كل التقارير/التذكيرات المطلوبة لمستخدم واحد ============
 async function processUser(user, { isFriday, isLastDayOfMonth, monthKey, remindersByUser }) {
   const { telegram_user_id: userId, chat_id: chatId, subscription_expires_at } = user;
@@ -245,14 +158,8 @@ async function processUser(user, { isFriday, isLastDayOfMonth, monthKey, reminde
     await sendPortfolioPriceAlerts(userId, chatId, telegramLinkedEarly, isSubscribed).catch((error) => console.error(`Portfolio price alerts failed for user ${userId}:`, error));
     await saveDailyPortfolioSnapshot(userId);
 
-    // إشعارات الـ push (تذكير يومي، ملخص يومي/أسبوعي) بتتبعت لكل المستخدمين
-    // (تجربة أو مشتركين) — مش مربوطة باشتراك مدفوع، عشان دي أهم أداة نحافظ بيها
-    // على تفاعل المستخدم الجديد من أول يوم.
-    const pushPreferences = await getNotificationPreferences(userId);
-    const now = new Date();
-    await sendPushDailyReminder(userId, pushPreferences, now).catch((error) => console.error(`Daily push failed for user ${userId}:`, error));
-    await sendPushDailySummary(userId, pushPreferences, now).catch((error) => console.error(`Daily summary push failed for user ${userId}:`, error));
-    await sendPushWeeklySummary(userId, pushPreferences, isFriday, now).catch((error) => console.error(`Weekly push failed for user ${userId}:`, error));
+    // إشعارات الـ push (تذكير يومي / ملخص يومي / ملخص أسبوعي) اتنقلت لـ lib/pushSchedule.js
+    // وبتتبعت لكل مستخدم في وقته المحلي عن طريق /api/push-cron (كل 5 دقايق) — راجع PUSH_NOTIFICATIONS_SETUP.md
 
     // من هنا تحت: تقارير وتذكيرات Telegram — دي مخصوصة للمشتركين فعليًا بس
     if (!isSubscribed) {
@@ -362,6 +269,13 @@ export default async function handler(req, res) {
   const processed = results.filter((r) => r && r.ok).length;
   const failed = results.length - processed;
 
+  // احتياطي: نفس جدولة الـ push الخاصة بكل مستخدم (idempotent بفضل push_notification_runs).
+  // الشغل الأساسي بيتم من /api/push-cron كل 5 دقايق، والسطر ده بيغطي لو الـ scheduler الخارجي وقع.
+  const push = await runPushSchedule().catch((error) => {
+    console.error('runPushSchedule (fallback) failed:', error);
+    return { error: String(error?.message || error) };
+  });
+
   // ⚠️ تنبيه واحد يوميًا للأدمن (لو فعّل ADMIN_TELEGRAM_ID) لو عدّى 60 يوم من غير ما حد يتأكد
   // إن موديلات Groq (النص والفيجن) لسه شغالة ومفيش deprecation جديدة عليها. الكرون ده بيشتغل مرة يوميًا،
   // وclaimCronSlot بيضمن عدم التكرار لو حصل retry.
@@ -378,5 +292,5 @@ export default async function handler(req, res) {
     }
   }
 
-  return res.status(200).json({ ok: true, total: users.length, processed, failed, isFriday, isLastDayOfMonth });
+  return res.status(200).json({ ok: true, total: users.length, processed, failed, isFriday, isLastDayOfMonth, push });
 }

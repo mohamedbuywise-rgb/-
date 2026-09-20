@@ -10,11 +10,11 @@ import importDataHandler from '../backend/api-handlers/import-data.js';
 import bankStatementImportHandler from '../backend/api-handlers/bank-statement-import.js';
 import archiveMonthPdfHandler from '../backend/api-handlers/archive-month-pdf.js';
 import pushHandler from '../backend/api-handlers/push.js';
+import pushCronHandler from '../backend/api-handlers/push-cron.js';
 import quickAddWebhookHandler from '../backend/api-handlers/quick-add-webhook.js';
 import reportsHandler from '../backend/api-handlers/reports.js';
 import remindersHandler from '../backend/api-handlers/reminders.js';
 import macrodroidMacroHandler from '../backend/api-handlers/macrodroid-macro.js';
-import manualDebtHandler from '../backend/api-handlers/manual-debt.js';
 import setupHandler from '../backend/api-handlers/setup.js';
 import smsWebhookHandler from '../backend/api-handlers/sms-webhook.js';
 import supportMessageHandler from '../backend/api-handlers/support-message.js';
@@ -35,11 +35,11 @@ const handlers = {
   'bank-statement-import': bankStatementImportHandler,
   'archive-month-pdf': archiveMonthPdfHandler,
   push: pushHandler,
+  'push-cron': pushCronHandler,
   'quick-add-webhook': quickAddWebhookHandler,
   reports: reportsHandler,
   reminders: remindersHandler,
   'macrodroid-macro': macrodroidMacroHandler,
-  'manual-debt': manualDebtHandler,
   setup: setupHandler,
   'sms-webhook': smsWebhookHandler,
   'support-message': supportMessageHandler,

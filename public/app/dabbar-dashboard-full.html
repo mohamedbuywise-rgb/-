@@ -703,6 +703,14 @@
             min-height: 2.6rem;
         }
 
+        /* ============ طي قوائم "ليك عند الناس" و"عليك للناس" لما الأسماء تزيد — أول 3 ظاهرين والباقي قابل للطي ============ */
+        .debt-collapse-wrap { position:relative; overflow:hidden; transition:max-height .25s ease; }
+        .debt-collapse-wrap.debt-collapsed { max-height: 9.4rem; }
+        .debt-collapse-wrap.debt-collapsed::after { content:''; position:absolute; left:0; right:0; bottom:0; height:1.8rem; background:linear-gradient(180deg, transparent, var(--pm-surface-hi,#0b0e13)); pointer-events:none; }
+        html[data-theme="light"] .debt-collapse-wrap.debt-collapsed::after { background:linear-gradient(180deg, transparent, var(--pm-surface-hi,#ffffff)); }
+        .debt-show-more-btn { display:block; margin:.5rem auto 0; background:transparent; border:1px solid var(--pm-hairline,#334155); color:var(--pm-muted,#94a3b8); font-size:.66rem; font-weight:800; padding:.4rem .9rem; border-radius:999px; cursor:pointer; }
+        .debt-show-more-btn.hidden { display:none; }
+
         /* صفوف الإحصائيات تصبح كتلًا هادئة داخل نفس السطح */
         #tab-daily .grid.grid-cols-2 > div,
         #tab-debts .grid.grid-cols-2 > div,
@@ -2098,7 +2106,7 @@
         input, textarea, select { accent-color: var(--pm-gold); }
         #theme-toggle-track.bg-amber-400 { background: var(--pm-gold) !important; }
         #theme-toggle-track.bg-slate-700 { background: var(--pm-surface-soft) !important; }
-        #push-notifications-card { background: var(--pm-surface-hi) !important; border-color: var(--pm-hairline) !important; display: none !important; }
+        #push-notifications-card { background: var(--pm-surface-hi) !important; border-color: var(--pm-hairline) !important; }
         #push-notifications-toggle { background: var(--pm-gold) !important; color: #ffffff !important; border-color: transparent !important; }
         #push-notifications-toggle:hover { filter: brightness(1.06); }
         #push-notifications-save { background: var(--pm-surface-soft) !important; border-color: var(--pm-hairline-soft) !important; color: var(--pm-ink) !important; }
@@ -3358,6 +3366,25 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
 .tab-content.fade-up { animation-fill-mode: backwards !important; }
 #telegram-link-overlay { z-index: 1300 !important; }
 </style>
+<style id="dabbar-compact-overrides-2026">
+/* ============ تصغير كارت "الدخل والميزانية الشهر ده" ============ */
+#available-card, #available-empty { padding: .8rem .85rem .9rem !important; border-radius: 1.35rem !important; }
+#available-hero { min-height: 0 !important; padding-bottom: .65rem !important; margin-bottom: .7rem !important; }
+#available-hero-label { font-size: .68rem !important; }
+#available-hero-value { font-size: 1.55rem !important; margin-top: .15rem !important; }
+#available-hero-note { font-size: .58rem !important; margin: .3rem 0 0 !important; line-height: 1.55 !important; }
+#available-progress-track { height: 6px !important; margin: .55rem 0 0 !important; }
+#available-progress-pct { font-size: .56rem !important; margin-top: .22rem !important; }
+.available-cell { padding: 1.05rem .55rem .5rem !important; border-radius: .9rem !important; }
+.available-count-badge { font-size: .5rem !important; padding: .16rem .42rem !important; top: -.45rem !important; }
+#available-card .available-cell h3 { font-size: .95rem !important; }
+#available-card .available-cell span.text-xs { font-size: .62rem !important; }
+#available-card .available-cell p { font-size: .56rem !important; }
+
+/* ============ تصغير توبات "ملفات الديون" (النشطة/الجمعية/رسالة التصفية/كشف الحساب) ============ */
+#debts-tabs .debts-tab-btn { padding: .38rem .1rem !important; gap: .1rem !important; font-size: .56rem !important; }
+#debts-tabs .dt-ico { font-size: .82rem !important; }
+</style>
 </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col overflow-hidden">
 
@@ -4143,8 +4170,8 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
             </div>
             <div id="debts-panel-active" class="space-y-3">
                 <input id="debts-active-search" type="search" class="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-100 outline-none focus:border-emerald-400" placeholder="دوّر على اسم..." autocomplete="off">
-                <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3" id="debts-owed-to-you-card" style="display:none;"><h4 class="text-xs font-bold text-slate-300 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> ليك عند الناس</h4><div class="space-y-1" id="debts-owed-to-you-list"></div></div>
-                <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3" id="debts-you-owe-card" style="display:none;"><h4 class="text-xs font-bold text-slate-300 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-rose-400"></span> عليك للناس</h4><div class="space-y-1" id="debts-you-owe-list"></div></div>
+                <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3" id="debts-owed-to-you-card" style="display:none;"><h4 class="text-xs font-bold text-slate-300 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> ليك عند الناس</h4><div class="debt-collapse-wrap" id="debts-owed-to-you-wrap"><div class="space-y-1" id="debts-owed-to-you-list"></div></div><button type="button" class="debt-show-more-btn hidden" id="debts-owed-to-you-more-btn"></button></div>
+                <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3" id="debts-you-owe-card" style="display:none;"><h4 class="text-xs font-bold text-slate-300 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-rose-400"></span> عليك للناس</h4><div class="debt-collapse-wrap" id="debts-you-owe-wrap"><div class="space-y-1" id="debts-you-owe-list"></div></div><button type="button" class="debt-show-more-btn hidden" id="debts-you-owe-more-btn"></button></div>
                 <div class="bg-slate-950/80 border border-slate-800 rounded-2xl p-3.5 flex items-start gap-3"><div class="w-8 h-8 rounded-full bg-slate-700/50 text-slate-300 flex items-center justify-center text-xs font-bold shrink-0 border border-slate-700">ℹ️</div><div class="text-xs text-slate-300 leading-relaxed">عشان تسجل سلفة جديدة، ابعت رسالة زي "عطيت محمد 200 جنيه" أو "استلفت من سارة 100 جنيه".</div></div>
                 <button id="download-debts-pdf" class="w-full bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-3 rounded-2xl text-sm transition border border-slate-700 flex items-center justify-center gap-2 mt-2"><span id="download-debts-pdf-icon">📄</span> <span id="download-debts-pdf-label">تحميل كشف حساب كل الديون (PDF)</span></button>
             </div>
@@ -8370,6 +8397,33 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
         const debtEscape = (value) => String(value ?? '').replace(/[&<>'"]/g, (c) => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
         let __debtHistory = { people: [], settlements: [] };
         let __debtTabInitialized = false;
+        // ============ حالة الطي لكارتي "ليك عند الناس" و"عليك للناس" — أول 3 أسماء ظاهرين افتراضيًا ============
+        const debtCardExpanded = { owed: false, owe: false };
+        const debtsLastCounts = { owed: 0, owe: 0 };
+        function applyDebtCollapse(key) {
+            const wrapId = key === 'owed' ? 'debts-owed-to-you-wrap' : 'debts-you-owe-wrap';
+            const btnId = key === 'owed' ? 'debts-owed-to-you-more-btn' : 'debts-you-owe-more-btn';
+            const wrap = document.getElementById(wrapId);
+            const btn = document.getElementById(btnId);
+            if (!wrap || !btn) return;
+            const count = debtsLastCounts[key];
+            if (count > 3) {
+                btn.classList.remove('hidden');
+                btn.textContent = debtCardExpanded[key] ? 'عرض أقل ⌃' : `عرض الكل (${count}) ⌄`;
+                wrap.classList.toggle('debt-collapsed', !debtCardExpanded[key]);
+            } else {
+                btn.classList.add('hidden');
+                wrap.classList.remove('debt-collapsed');
+            }
+        }
+        document.getElementById('debts-owed-to-you-more-btn')?.addEventListener('click', () => {
+            debtCardExpanded.owed = !debtCardExpanded.owed;
+            applyDebtCollapse('owed');
+        });
+        document.getElementById('debts-you-owe-more-btn')?.addEventListener('click', () => {
+            debtCardExpanded.owe = !debtCardExpanded.owe;
+            applyDebtCollapse('owe');
+        });
         function renderDebts(debts) {
             const netEl = document.getElementById('debts-net');
             const noteEl = document.getElementById('debts-net-note');
@@ -8397,6 +8451,10 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
             oweCard.className = 'bg-rose-500/[0.06] border border-rose-500/25 rounded-3xl p-4 space-y-3';
             owedCard.style.display = debts.owedToYou.length ? 'block' : 'none'; owedList.innerHTML = makeRows(debts.owedToYou, 'emerald', '+');
             oweCard.style.display = debts.youOwe.length ? 'block' : 'none'; oweList.innerHTML = makeRows(debts.youOwe, 'rose', '-');
+            debtsLastCounts.owed = debts.owedToYou.length;
+            debtsLastCounts.owe = debts.youOwe.length;
+            applyDebtCollapse('owed');
+            applyDebtCollapse('owe');
             document.querySelectorAll('#debts-owed-to-you-list [data-person-name], #debts-you-owe-list [data-person-name]').forEach((row) => row.addEventListener('click', () => openPersonDebtDetail(row.dataset.personName)));
             applyDebtOverdueFilter();
             initDebtsTabs();
@@ -8781,6 +8839,13 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
         function applyDebtActiveSearch() {
             const q = String(document.getElementById('debts-active-search')?.value || '').trim().toLocaleLowerCase('ar');
             document.querySelectorAll('#debts-owed-to-you-list [data-person-name], #debts-you-owe-list [data-person-name]').forEach((row) => row.classList.toggle('hidden', q && !row.dataset.personName.toLocaleLowerCase('ar').includes(q)));
+            // ============ لو فيه بحث شغال، نفك الطي مؤقتًا عشان أي اسم مطابق يبان حتى لو مش من أول 3 ============
+            ['debts-owed-to-you-wrap', 'debts-you-owe-wrap'].forEach((id) => {
+                document.getElementById(id)?.classList.toggle('debt-collapsed', false);
+            });
+            document.getElementById('debts-owed-to-you-more-btn')?.classList.add('hidden');
+            document.getElementById('debts-you-owe-more-btn')?.classList.add('hidden');
+            if (!q) { applyDebtCollapse('owed'); applyDebtCollapse('owe'); }
         }
         async function loadDebtHistory() {
             try {
@@ -11949,12 +12014,20 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
                     'ملخص خطتك وتنبيهاتك أول بأول',
                     ['in-app-notifications-card']
                 );
+                // ============ "تفعيل الإشعارات" بقى خانة مستقلة بذاتها في "حسابي" — عشان يبان واضح ويفهم اليوزر لازم يفعّلها عشان توصله إشعارات على جهازه ============
+                makeSection(
+                    'account-push-permission-section',
+                    '🔔',
+                    'تفعيل الإشعارات',
+                    'فعّلها عشان توصلك تنبيهاتك على جهازك',
+                    ['push-notifications-card']
+                );
                 makeSection(
                     'account-preferences-section',
                     '⚙️',
                     'التفضيلات والتنبيهات',
-                    'المظهر، الإشعارات، والتثبيت',
-                    ['account-theme-toggle', 'push-notifications-card', 'install-notice']
+                    'المظهر والتثبيت',
+                    ['account-theme-toggle', 'install-notice']
                 );
                 makeSection(
                     'account-security-section',
@@ -11995,6 +12068,18 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
 #dbo-backdrop::before,#dbo-backdrop::after{content:'';position:absolute;border-radius:999px;filter:blur(60px);pointer-events:none;opacity:.55;}
 #dbo-backdrop::before{width:280px;height:280px;top:-90px;right:-70px;background:radial-gradient(circle,var(--pm-gold-bright),transparent 70%);animation:dboDrift1 16s ease-in-out infinite;}
 #dbo-backdrop::after{width:240px;height:240px;bottom:-60px;left:-80px;background:radial-gradient(circle,var(--pm-gold),transparent 70%);animation:dboDrift2 19s ease-in-out infinite;}
+/* ---- كرات خضراء متحركة إضافية في خلفية جولة "تعرف على دبّر" — أوضح وأكتر حيوية ---- */
+.dbo-orb{position:absolute;border-radius:999px;filter:blur(38px);pointer-events:none;opacity:.6;background:radial-gradient(circle,var(--pm-gold-bright),transparent 72%);}
+.dbo-orb-a{width:150px;height:150px;top:8%;left:-40px;animation:dboOrbFloatA 13s ease-in-out infinite;}
+.dbo-orb-b{width:110px;height:110px;top:55%;right:-30px;background:radial-gradient(circle,var(--pm-gold),transparent 72%);animation:dboOrbFloatB 17s ease-in-out infinite;}
+.dbo-orb-c{width:90px;height:90px;bottom:10%;left:18%;animation:dboOrbFloatC 15s ease-in-out infinite;}
+.dbo-orb-d{width:130px;height:130px;top:30%;right:20%;background:radial-gradient(circle,var(--pm-gold),transparent 72%);opacity:.45;animation:dboOrbFloatA 20s ease-in-out infinite reverse;}
+html[data-theme="light"] .dbo-orb{opacity:.34;}
+html[data-theme="light"] .dbo-orb-d{opacity:.24;}
+@keyframes dboOrbFloatA{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(32px,26px) scale(1.18);}}
+@keyframes dboOrbFloatB{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(-26px,-30px) scale(1.12);}}
+@keyframes dboOrbFloatC{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(18px,-22px) scale(1.22);}}
+@media (prefers-reduced-motion: reduce){.dbo-orb{animation:none !important;}}
 html[data-theme="light"] #dbo-backdrop::before,html[data-theme="light"] #dbo-backdrop::after{opacity:.28;}
 @keyframes dboDrift1{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(-24px,30px) scale(1.15);}}
 @keyframes dboDrift2{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(26px,-22px) scale(1.1);}}
@@ -12035,11 +12120,16 @@ html[data-theme="light"] #dbo-backdrop::before,html[data-theme="light"] #dbo-bac
 #dbo-root .dbo-btn-primary::after{content:'';position:absolute;top:0;bottom:0;width:60%;left:-70%;background:linear-gradient(115deg,transparent,rgba(255,255,255,.4),transparent);animation:dboShine 3.2s ease-in-out infinite;}
 @keyframes dboShine{0%{left:-70%;}45%,100%{left:130%;}}
 .dbo-hide{display:none !important;}
-@media (prefers-reduced-motion: reduce){#dbo-backdrop::before,#dbo-backdrop::after,#dbo-root .dbo-icon,#dbo-root .dbo-icon::before,#dbo-root .dbo-dot.dbo-dot-active,#dbo-root .dbo-btn-primary::after,#dbo-root .dbo-step.dbo-active>*{animation:none !important;}}
+@media (prefers-reduced-motion: reduce){#dbo-backdrop::before,#dbo-backdrop::after,.dbo-orb,#dbo-root .dbo-icon,#dbo-root .dbo-icon::before,#dbo-root .dbo-dot.dbo-dot-active,#dbo-root .dbo-btn-primary::after,#dbo-root .dbo-step.dbo-active>*{animation:none !important;}}
 </style>
 
 <div id="dbo-root" aria-modal="true" role="dialog">
-  <div id="dbo-backdrop"></div>
+  <div id="dbo-backdrop">
+    <span class="dbo-orb dbo-orb-a" aria-hidden="true"></span>
+    <span class="dbo-orb dbo-orb-b" aria-hidden="true"></span>
+    <span class="dbo-orb dbo-orb-c" aria-hidden="true"></span>
+    <span class="dbo-orb dbo-orb-d" aria-hidden="true"></span>
+  </div>
   <div id="dbo-shell">
     <div class="dbo-topbar">
       <button class="dbo-back-btn" id="dbo-backBtn" type="button">←</button>

@@ -14,6 +14,7 @@ import quickAddWebhookHandler from '../backend/api-handlers/quick-add-webhook.js
 import reportsHandler from '../backend/api-handlers/reports.js';
 import remindersHandler from '../backend/api-handlers/reminders.js';
 import macrodroidMacroHandler from '../backend/api-handlers/macrodroid-macro.js';
+import manualDebtHandler from '../backend/api-handlers/manual-debt.js';
 import setupHandler from '../backend/api-handlers/setup.js';
 import smsWebhookHandler from '../backend/api-handlers/sms-webhook.js';
 import supportMessageHandler from '../backend/api-handlers/support-message.js';
@@ -38,6 +39,7 @@ const handlers = {
   reports: reportsHandler,
   reminders: remindersHandler,
   'macrodroid-macro': macrodroidMacroHandler,
+  'manual-debt': manualDebtHandler,
   setup: setupHandler,
   'sms-webhook': smsWebhookHandler,
   'support-message': supportMessageHandler,

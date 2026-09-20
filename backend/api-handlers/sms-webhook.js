@@ -122,6 +122,9 @@ export default async function handler(req, res) {
     // ده كان الباج الحقيقي اللي بيخلي "recorded" يطلع 0 دايمًا حتى لو التصنيف نجح فعلاً (شوف telegram-webhook.js اللي بيستخدمها صح كأراي مباشرة)
     const transactions = await classifyMessage(text);
     let recorded = 0;
+    let pushSent = 0;
+    let pushFailed = 0;
+    const pushSkipped = [];
     for (const [index, item] of transactions.entries()) {
       if (item.type === 'expense' || item.type === 'purchase' || item.type === 'asset' || item.type === 'refund') {
         await recordExpense(item, text, telegramUserId, chatId, `\n\n🏦 اتسجلت أوتوماتيك من رسالة ${bankMatch.label}`, { source: 'sms', bank_key: bankMatch.key, bank_label: bankMatch.label, bank_sender: sender || bank });
@@ -142,7 +145,7 @@ export default async function handler(req, res) {
       if (['expense', 'purchase', 'asset', 'refund', 'income', 'withdrawal', 'deposit', 'transfer'].includes(item.type)) {
         const direction = ['income', 'refund', 'deposit'].includes(item.type) ? 'in' : 'out';
         const dedupeKey = `${profile.id}:${Buffer.from(`${text}:${index}`).toString('base64url').slice(0, 96)}`;
-        await sendBankMovementPush(telegramUserId, {
+        const pushResult = await sendBankMovementPush(telegramUserId, {
           direction,
           amount: item.amount,
           currency: item.currency_code || item.currency || 'EGP',
@@ -150,10 +153,19 @@ export default async function handler(req, res) {
           bank: bankMatch.label,
           dedupeKey,
         });
+        pushSent += Number(pushResult?.sent || 0);
+        pushFailed += Number(pushResult?.failed || 0);
+        if (pushResult?.skipped) pushSkipped.push(pushResult.skipped);
       }
       // settlement/unknown بنتجاهلها هنا عشان منسجلش حاجة غلط أوتوماتيك بدون مراجعة المستخدم
     }
-    return res.status(200).json({ ok: true, recorded, bank: bankMatch.label, linked });
+    return res.status(200).json({
+      ok: true,
+      recorded,
+      bank: bankMatch.label,
+      linked,
+      push: { sent: pushSent, failed: pushFailed, skipped: [...new Set(pushSkipped)] },
+    });
   } catch (err) {
     console.error('sms-webhook classify/record error:', err);
     return res.status(500).json({ ok: false, error: 'تعذر معالجة الرسالة.' });

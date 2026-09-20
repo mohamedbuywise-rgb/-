@@ -3333,6 +3333,8 @@ html[data-theme] #dbo-reopen-btn[class][class] {
 }
 html:not([data-theme="light"]) .tab-content > section#quick-access-card[class][class],
 html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgba(244,198,72,.22) !important; }
+/* الوصول السريع: مخفي من الداش */
+#quick-access-card { display: none !important; }
 </style>
 </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col overflow-hidden">
@@ -5389,13 +5391,7 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
         // نفس الألوان بالظبط بس Hex عشان نرسم بيها دائرة الفئات (conic-gradient بيحتاج قيم حقيقية مش أسماء كلاسات Tailwind)
         const CATEGORY_HEX = { 'أكل':'#fb7185', 'مواصلات':'#2dd4bf', 'فواتير':'#fbbf24', 'تسوق':'#a78bfa', 'ترفيه':'#f472b6', 'صحة':'#34d399', 'تعليم':'#60a5fa', 'منزل وأثاث':'#fb923c', 'ملابس':'#e879f9', 'اشتراكات':'#818cf8', 'هدايا وتبرعات':'#f59e0b', 'شخصي وعناية':'#22d3ee' };
         const CATEGORY_HEX_FALLBACK = '#94a3b8';
-        // النهاري: درجات أعمق عشان الألوان تبان على الأبيض
-        const CATEGORY_HEX_DEEPEN = { '#fb7185':'#f43f5e', '#2dd4bf':'#14b8a6', '#fbbf24':'#f59e0b', '#a78bfa':'#8b5cf6', '#f472b6':'#ec4899', '#34d399':'#10b981', '#60a5fa':'#3b82f6', '#fb923c':'#f97316', '#e879f9':'#d946ef', '#818cf8':'#6366f1', '#f59e0b':'#d97706', '#22d3ee':'#06b6d4', '#94a3b8':'#64748b' };
-        function isLightTheme() { return document.documentElement.getAttribute('data-theme') === 'light'; }
-        function catHex(name) {
-            const base = CATEGORY_HEX[name] || CATEGORY_HEX_FALLBACK;
-            return isLightTheme() ? (CATEGORY_HEX_DEEPEN[base] || base) : base;
-        }
+
         const CATEGORY_QUICK_TIPS = {
             'أكل': ['جرّب تحدد ميزانية للأكل قبل أول طلب', 'وجبة من البيت ممكن توفر معاك فرق حلو', 'خطط لوجباتك، وهتطلب براحة أكتر'],
             'مواصلات': ['جمّع مشاويرك، ممكن توفّر في تكلفة التنقل', 'اختار الطريق الأقل تكلفة في المشاوير المتكررة', 'خطط لمشاويرك بدري وخلي ميزانيتك مرتاحة'],
@@ -5458,16 +5454,6 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
             document.documentElement.setAttribute('data-theme', theme === 'light' ? 'light' : 'dark');
             try { localStorage.setItem(THEME_KEY, theme); } catch (e) {}
             applyThemeToggleUI(theme);
-            try {
-                if (typeof monthlyDonutCats !== 'undefined' && monthlyDonutCats.length) {
-                    setMonthlyDonutActive(monthlyDonutActiveIndex);
-                    document.querySelectorAll('#monthly-categories-legend .dabbar-donut-legend-row').forEach((row) => {
-                        const c = monthlyDonutCats[Number(row.dataset.catIndex)];
-                        const dot = row.querySelector('.dabbar-donut-legend-dot');
-                        if (c && dot) dot.style.background = catHex(c.name);
-                    });
-                }
-            } catch (e) {}
         }
 
         // الثيم نفسه بيتطبق بدري في <head> (عشان منشوفش فلاش)، هنا بس بنظبط شكل السويتش والنص يتوافق معاه
@@ -7479,28 +7465,26 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
 
         function buildDonutGradient(cats, activeIndex) {
             let deg = 0;
-            const light = isLightTheme();
-            const dim = light ? 'b3' : '99';
             const stops = cats.map((c, i) => {
-                let color = catHex(c.name);
+                let color = CATEGORY_HEX[c.name] || CATEGORY_HEX_FALLBACK;
                 const start = deg;
                 const end = deg + (Number(c.percent) || 0) * 3.6;
                 deg = end;
                 if (activeIndex !== null) {
                     if (i !== activeIndex) {
                         // نغمّق الفئات الغير مختارة بدل ما نلونها بالكامل، عشان التركيز يبقى واضح على الفئة المختارة
-                        color = color + dim;
+                        color = color + '33';
                     } else {
                         // نزود سطوع لون الفئة المختارة عشان تبان واضحة في الدايرة
-                        color = light ? color : brightenHex(color, 0.25);
+                        color = brightenHex(color, 0.25);
                     }
                 }
                 return `${color} ${start}deg ${end}deg`;
             });
             if (deg < 360 && cats.length) {
-                let lastColor = catHex(cats[cats.length - 1].name);
+                let lastColor = CATEGORY_HEX[cats[cats.length - 1].name] || CATEGORY_HEX_FALLBACK;
                 if (activeIndex !== null) {
-                    lastColor = activeIndex !== cats.length - 1 ? lastColor + dim : (light ? lastColor : brightenHex(lastColor, 0.25));
+                    lastColor = activeIndex !== cats.length - 1 ? lastColor + '33' : brightenHex(lastColor, 0.25);
                 }
                 stops.push(`${lastColor} ${deg}deg 360deg`);
             }
@@ -7522,7 +7506,7 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
                 totalEl.textContent = monthlyDonutTotalLabel;
             } else {
                 const c = monthlyDonutCats[index];
-                const color = catHex(c.name);
+                const color = CATEGORY_HEX[c.name] || CATEGORY_HEX_FALLBACK;
                 donutEl.style.filter = `drop-shadow(0 0 8px ${color}99)`;
                 if (totalLbl) totalLbl.textContent = `${getCategoryEmoji(c.name)} ${c.name}`;
                 totalEl.textContent = `${c.percent}%`;
@@ -7559,7 +7543,7 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
 
             legendEl.innerHTML = monthlyDonutCats.map((c, i) => `
                 <div class="dabbar-donut-legend-row" data-cat-index="${i}" role="button" tabindex="0">
-                    <span class="dabbar-donut-legend-name"><span class="dabbar-donut-legend-dot" style="background:${catHex(c.name)}"></span><span class="truncate">${getCategoryEmoji(c.name)} ${c.name}</span></span>
+                    <span class="dabbar-donut-legend-name"><span class="dabbar-donut-legend-dot" style="background:${CATEGORY_HEX[c.name] || CATEGORY_HEX_FALLBACK}"></span><span class="truncate">${getCategoryEmoji(c.name)} ${c.name}</span></span>
                     <span class="dabbar-donut-legend-percent">${c.percent}%</span>
                 </div>
             `).join('');

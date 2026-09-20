@@ -19,6 +19,7 @@ import { recordFinancialEvent } from '../../lib/financialEvents.js';
 import { matchBankSender } from '../../lib/bank-senders.js';
 import { checkTextUsage } from '../../lib/rateLimits.js';
 import { getFeatureAccess, subscriptionRequiredResponse } from '../../lib/subscriptionAccess.js';
+import { sendBankMovementPush } from '../../lib/webPush.js';
 import { standaloneDataUserId, ensureStandaloneUser } from '../../lib/dashboardAuth.js';
 
 const DAILY_SMS_LIMIT = 80; // حد أقصى يومي للحماية من استهلاك API غير متوقع لكل مستخدم
@@ -121,7 +122,7 @@ export default async function handler(req, res) {
     // ده كان الباج الحقيقي اللي بيخلي "recorded" يطلع 0 دايمًا حتى لو التصنيف نجح فعلاً (شوف telegram-webhook.js اللي بيستخدمها صح كأراي مباشرة)
     const transactions = await classifyMessage(text);
     let recorded = 0;
-    for (const item of transactions) {
+    for (const [index, item] of transactions.entries()) {
       if (item.type === 'expense' || item.type === 'purchase' || item.type === 'asset' || item.type === 'refund') {
         await recordExpense(item, text, telegramUserId, chatId, `\n\n🏦 اتسجلت أوتوماتيك من رسالة ${bankMatch.label}`, { source: 'sms', bank_key: bankMatch.key, bank_label: bankMatch.label, bank_sender: sender || bank });
         recorded += 1;
@@ -137,6 +138,18 @@ export default async function handler(req, res) {
         // لو غامضة (تحويل لشخص/رقم موبايل بدون سياق تجاري) بتتحط needs_review عشان المستخدم يراجعها بنفسه.
         await recordFinancialEvent({ ...item, bank_key: bankMatch.key, bank_label: bankMatch.label, bank_sender: sender || bank, source: 'sms' }, telegramUserId);
         recorded += 1;
+      }
+      if (['expense', 'purchase', 'asset', 'refund', 'income', 'withdrawal', 'deposit', 'transfer'].includes(item.type)) {
+        const direction = ['income', 'refund', 'deposit'].includes(item.type) ? 'in' : 'out';
+        const dedupeKey = `${profile.id}:${Buffer.from(`${text}:${index}`).toString('base64url').slice(0, 96)}`;
+        await sendBankMovementPush(telegramUserId, {
+          direction,
+          amount: item.amount,
+          currency: item.currency_code || item.currency || 'EGP',
+          merchant: item.note || item.item || item.description || bankMatch.label,
+          bank: bankMatch.label,
+          dedupeKey,
+        });
       }
       // settlement/unknown بنتجاهلها هنا عشان منسجلش حاجة غلط أوتوماتيك بدون مراجعة المستخدم
     }

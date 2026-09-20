@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Preview — رسالة دبّر اليومية</title>
+  <style>
+    :root { color-scheme: dark; --bg:#0c1110; --card:#151d1a; --line:#26362f; --ink:#f3f6f3; --muted:#9eaca5; --gold:#f4c648; --green:#40d993; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100vh; font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif; color:var(--ink); background:radial-gradient(circle at 50% -10%,#27463a 0,#111b18 38%,#090d0c 78%); }
+    .wrap { width:min(1100px,100%); margin:auto; padding:34px 20px 60px; }
+    .top { text-align:center; max-width:700px; margin:0 auto 34px; }
+    .top img { width:74px; height:74px; border-radius:22px; box-shadow:0 14px 36px #0008; margin-bottom:14px; }
+    .eyebrow { color:var(--gold); font-size:11px; font-weight:900; letter-spacing:.16em; text-transform:uppercase; }
+    h1 { margin:8px 0 10px; font-size:clamp(26px,5vw,42px); letter-spacing:-.04em; }
+    .top p { margin:0; color:var(--muted); line-height:1.9; font-size:15px; }
+    .grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; align-items:start; }
+    .panel { border:1px solid var(--line); background:linear-gradient(145deg,#17221e,#101614); border-radius:28px; padding:22px; box-shadow:0 22px 60px #0003; }
+    .panel h2 { margin:0 0 6px; font-size:17px; }
+    .panel .desc { margin:0 0 20px; color:var(--muted); font-size:12px; line-height:1.8; }
+    .phone { width:min(100%,360px); margin:auto; padding:13px; border:7px solid #222b28; border-radius:40px; background:#080b0a; box-shadow:inset 0 0 0 2px #3b4943,0 24px 54px #0008; }
+    .notch { width:112px; height:23px; margin:-1px auto 18px; border-radius:0 0 15px 15px; background:#202a26; }
+    .status { display:flex; justify-content:space-between; padding:0 10px 16px; color:#adbab2; font-size:10px; direction:ltr; }
+    .notif { border-radius:19px; padding:15px 15px 14px; background:linear-gradient(145deg,#202c27,#17221e); border:1px solid #4a6255; box-shadow:0 8px 22px #0007; direction:rtl; }
+    .notif-head { display:flex; align-items:center; gap:10px; }
+    .notif-icon { width:38px; height:38px; border-radius:12px; object-fit:cover; }
+    .app-name { font-weight:900; font-size:12px; }
+    .time { margin-inline-start:auto; color:#a7b3ad; font-size:10px; }
+    .notif-title { margin:13px 0 6px; font-weight:900; font-size:15px; }
+    .notif-body { margin:0; color:#c6d0ca; font-size:12px; line-height:1.8; }
+    .action { margin-top:13px; display:inline-block; border-radius:9px; padding:7px 10px; background:#2c3c34; color:var(--green); font-size:10px; font-weight:800; }
+    .states { display:grid; gap:10px; }
+    .state { padding:13px 14px; border-radius:16px; border:1px solid var(--line); background:#101714; }
+    .state strong { display:block; color:var(--gold); font-size:11px; margin-bottom:5px; }
+    .state span { display:block; color:#d5ddd8; font-size:12px; line-height:1.75; }
+    .flow { grid-column:1/-1; display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin-top:2px; }
+    .step { text-align:center; padding:18px 14px; border-radius:18px; border:1px solid var(--line); background:#111916; }
+    .num { display:grid; place-items:center; width:28px; height:28px; margin:0 auto 9px; border-radius:50%; background:var(--gold); color:#18170f; font-weight:900; font-size:12px; }
+    .step b { font-size:12px; }
+    .step p { margin:6px 0 0; color:var(--muted); font-size:11px; line-height:1.7; }
+    .note { margin-top:22px; padding:13px 15px; border-radius:15px; background:#f4c64812; border:1px solid #f4c64838; color:#e8dfb9; font-size:11px; line-height:1.8; }
+    @media(max-width:760px){ .grid{grid-template-columns:1fr;} .flow{grid-column:auto; grid-template-columns:1fr;} .panel{padding:18px;} }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header class="top">
+      <img src="./icons/icon-192.png" alt="شعار دبّر">
+      <div class="eyebrow">DABBAR DAILY PRESENCE</div>
+      <h1>رسالة دبّر اليومية</h1>
+      <p>تذكير لطيف يصل مرة واحدة يوميًا ليقول للمستخدم إن دبّر موجود معه — ويتغير تلقائيًا حسب ما إذا كان سجّل مصروفات أم لا.</p>
+    </header>
+    <section class="grid">
+      <article class="panel">
+        <h2>كيف ستظهر على جهاز المستخدم؟</h2>
+        <p class="desc">هذا هو الشكل المتوقع لإشعار Web Push في شريط إشعارات الهاتف. الشعار هو أيقونة دبّر نفسها.</p>
+        <div class="phone">
+          <div class="notch"></div>
+          <div class="status"><span>9:41</span><span>▮▮▮  Wi‑Fi  ٨٧٪</span></div>
+          <div class="notif">
+            <div class="notif-head"><img class="notif-icon" src="./icons/icon-192.png" alt=""><span class="app-name">دبّر</span><span class="time">الآن</span></div>
+            <div class="notif-title">دبّر موجود معاك 🌱</div>
+            <p class="notif-body">ممتاز، دبّر شايف متابعتك النهارده. خطوة صغيرة كل يوم تصنع فرقًا كبيرًا.</p>
+            <span class="action">فتح دبّر</span>
+          </div>
+        </div>
+      </article>
+      <article class="panel">
+        <h2>الرسائل حسب حالة المستخدم</h2>
+        <p class="desc">الرسالة لا تكون ثابتة أو آلية بشكل مزعج؛ المحتوى يختار الحالة الأنسب.</p>
+        <div class="states">
+          <div class="state"><strong>سجّل اليوم</strong><span>دبّر موجود معاك 🌱<br>ممتاز، دبّر شايف متابعتك النهارده. خطوة صغيرة كل يوم تصنع فرقًا كبيرًا.</span></div>
+          <div class="state"><strong>لم يسجل اليوم</strong><span>دبّر موجود معاك 🤝<br>لسه مفيش مصروفات مسجلة النهارده. لو صرفت حاجة، سجّلها في ثواني.</span></div>
+          <div class="state"><strong>التذكير اليومي متوقف</strong><span>لو احتجت ترتّب فلوسك النهارده، دبّر موجود معاك.</span></div>
+        </div>
+        <div class="note">إذا كان «التذكير اليومي عند عدم وجود مصروفات» مفعّلًا، يتم دمجه مع هذه الرسالة في إشعار واحد. لذلك لا يصل للمستخدم إشعاران متتابعان في نفس الوقت.</div>
+      </article>
+      <div class="flow">
+        <div class="step"><div class="num">1</div><b>المستخدم يفعّلها</b><p>من حسابي ← إشعارات دبّر ← رسالة دبّر اليومية.</p></div>
+        <div class="step"><div class="num">2</div><b>تصل مرة واحدة يوميًا</b><p>في نفس وقت التذكير الذي يختاره المستخدم وبحسب توقيته المحلي.</p></div>
+        <div class="step"><div class="num">3</div><b>الضغط يفتح دبّر</b><p>بالضغط على الإشعار ينتقل المستخدم مباشرة إلى لوحة التحكم.</p></div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

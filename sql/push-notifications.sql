@@ -44,6 +44,7 @@ alter table notification_preferences add column if not exists daily_summary_enab
 -- إشعار فوري لكل حركة بنكية (SMS) + تذكير مواعيد الدفع
 alter table notification_preferences add column if not exists bank_movement_enabled boolean not null default true;
 alter table notification_preferences add column if not exists payment_reminders_enabled boolean not null default true;
+alter table notification_preferences add column if not exists daily_presence_enabled boolean not null default true;
 
 -- وقت تذكير حر لكل مستخدم (ساعة + دقيقة) وتوقيته المحلي (IANA زي Africa/Cairo أو Asia/Riyadh)
 alter table notification_preferences add column if not exists daily_reminder_minute smallint not null default 0

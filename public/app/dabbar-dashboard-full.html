@@ -114,6 +114,16 @@
             overflow-y: auto;
             background: var(--pm-canvas) !important;
         }
+        #bank-accounts-page .account-subpage-panel {
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
+        }
+        #bank-accounts-page .modal-body-surface {
+            -webkit-overflow-scrolling: touch;
+            flex: 1 1 auto;
+            min-height: 0;
+        }
         .account-subpage-view.opacity-0 { pointer-events: none; }
         @media (prefers-reduced-motion: reduce) {
             .account-subpage-view .account-subpage-panel { transition: none !important; }
@@ -1778,6 +1788,11 @@
         html[data-theme="light"] .border-slate-800, html[data-theme="light"] .border-slate-700 {
             border-color: var(--pm-hairline-soft) !important;
         }
+        html:not([data-theme="light"]) #quick-add-tg-open-bot {
+            border-color: var(--pm-gold) !important;
+            color: var(--pm-gold-bright) !important;
+            background: color-mix(in srgb, var(--pm-gold) 12%, transparent) !important;
+        }
 
         /* نصوص رمادية */
         .text-slate-100, .text-slate-200, html[data-theme="light"] .text-slate-100, html[data-theme="light"] .text-slate-200 { color: var(--pm-ink) !important; }
@@ -2653,6 +2668,7 @@
         }
         .assistant-hub-btn.active { background:var(--db-surface-strong); color:var(--db-accent); }
         html:not([data-theme="light"]) .assistant-hub-btn.active { background:linear-gradient(135deg,#f4c648,#b8860b); color:#241b05; }
+        html[data-theme="light"] .assistant-hub-btn.active { background:#10b981 !important; color:#0f172a !important; box-shadow:0 3px 10px rgba(16,185,129,.25) !important; }
 
         /* نقل الأقسام الثانوية إلى "مساعد" يخفف ازدحام الشريط السفلي بدون حذف الوظائف */
         .tab-btn[data-tab="categories"],

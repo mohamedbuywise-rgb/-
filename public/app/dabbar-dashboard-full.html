@@ -4904,6 +4904,14 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
                         <span>تنبيه الاقتراب من الميزانية</span>
                         <input id="push-budget-alert" type="checkbox" class="accent-amber-400 w-4 h-4">
                     </label>
+                    <label class="flex items-center justify-between gap-3 text-[11px] text-slate-300">
+                        <span>حركات البنك (SMS) فورًا</span>
+                        <input id="push-bank-movement" type="checkbox" class="accent-amber-400 w-4 h-4">
+                    </label>
+                    <label class="flex items-center justify-between gap-3 text-[11px] text-slate-300">
+                        <span>تذكير مواعيد الدفع</span>
+                        <input id="push-payment-reminders" type="checkbox" class="accent-amber-400 w-4 h-4">
+                    </label>
                     <div class="pnx-row">
                         <div class="pnx-box">
                             <div class="pnx-lbl"><span>⏰ وقت التذكير</span><b id="pnx-time-txt">8:00 ص</b></div>
@@ -6480,6 +6488,10 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
             if (dailySummary) dailySummary.checked = pushPreferences.dailySummaryEnabled !== false;
             if (weekly) weekly.checked = pushPreferences.weeklySummaryEnabled !== false;
             if (budget) budget.checked = pushPreferences.budgetAlertEnabled !== false;
+            const bankMovement = document.getElementById('push-bank-movement');
+            const paymentReminders = document.getElementById('push-payment-reminders');
+            if (bankMovement) bankMovement.checked = pushPreferences.bankMovementEnabled !== false;
+            if (paymentReminders) paymentReminders.checked = pushPreferences.paymentRemindersEnabled !== false;
             if (hour) hour.value = String(pushPreferences.dailyReminderHour ?? 8);
             if (threshold) threshold.value = String(pushPreferences.budgetAlertThreshold ?? 0.8);
             const minute = document.getElementById('push-daily-minute');
@@ -6665,6 +6677,8 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
                     dailySummaryEnabled: document.getElementById('push-daily-summary')?.checked !== false,
                     weeklySummaryEnabled: document.getElementById('push-weekly-summary')?.checked !== false,
                     budgetAlertEnabled: document.getElementById('push-budget-alert')?.checked !== false,
+                    bankMovementEnabled: document.getElementById('push-bank-movement')?.checked !== false,
+                    paymentRemindersEnabled: document.getElementById('push-payment-reminders')?.checked !== false,
                     dailyReminderHour: Number(document.getElementById('push-daily-hour')?.value || 8),
                     dailyReminderMinute: Number(document.getElementById('push-daily-minute')?.value || 0),
                     budgetAlertThreshold: Math.min(1, Math.max(0.5, Number(document.getElementById('push-budget-threshold')?.value || 0.8))),
@@ -12210,6 +12224,19 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
 .dbo-orb-c{width:90px;height:90px;bottom:10%;left:18%;animation:dboOrbFloatC 15s ease-in-out infinite;}
 .dbo-orb-d{width:130px;height:130px;top:30%;right:20%;background:radial-gradient(circle,var(--pm-gold),transparent 72%);opacity:.45;animation:dboOrbFloatA 20s ease-in-out infinite reverse;}
 html[data-theme="light"] .dbo-orb{opacity:.34;}
+/* ---- جسيمات خضراء صغيرة بتطلع لفوق ببطء في خلفية الجولة ---- */
+.dbo-particles{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
+.dbo-p{position:absolute;bottom:-14px;border-radius:50%;background:var(--pm-gold-bright);opacity:0;will-change:transform,opacity;
+  box-shadow:0 0 10px 2px color-mix(in srgb,var(--pm-gold-bright) 55%,transparent);animation:dboRise var(--d,12s) linear var(--dl,0s) infinite;}
+html[data-theme="light"] .dbo-p{background:var(--pm-gold);box-shadow:0 0 8px 1px color-mix(in srgb,var(--pm-gold) 45%,transparent);}
+@keyframes dboRise{
+  0%{transform:translate3d(0,0,0) scale(.6);opacity:0;}
+  12%{opacity:var(--o,.7);}
+  50%{transform:translate3d(var(--sx,18px),-55vh,0) scale(1);}
+  88%{opacity:var(--o,.7);}
+  100%{transform:translate3d(calc(var(--sx,18px) * -1),-108vh,0) scale(.8);opacity:0;}
+}
+@media (prefers-reduced-motion: reduce){.dbo-p{animation:none !important;bottom:auto;top:var(--y,50%);opacity:.35;}}
 html[data-theme="light"] .dbo-orb-d{opacity:.24;}
 @keyframes dboOrbFloatA{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(32px,26px) scale(1.18);}}
 @keyframes dboOrbFloatB{0%,100%{transform:translate(0,0) scale(1);}50%{transform:translate(-26px,-30px) scale(1.12);}}
@@ -12264,6 +12291,7 @@ html[data-theme="light"] #dbo-backdrop::before,html[data-theme="light"] #dbo-bac
     <span class="dbo-orb dbo-orb-b" aria-hidden="true"></span>
     <span class="dbo-orb dbo-orb-c" aria-hidden="true"></span>
     <span class="dbo-orb dbo-orb-d" aria-hidden="true"></span>
+    <div class="dbo-particles" id="dbo-particles" aria-hidden="true"></div>
   </div>
   <div id="dbo-shell">
     <div class="dbo-topbar">
@@ -12488,6 +12516,30 @@ html[data-theme="light"] #dbo-backdrop::before,html[data-theme="light"] #dbo-bac
             ta.focus();
         });
     });
+})();
+</script>
+<script id="dbo-particles-script">
+(function () {
+  function build() {
+    var box = document.getElementById('dbo-particles');
+    if (!box || box.childElementCount) return;
+    var N = 18, frag = document.createDocumentFragment();
+    for (var i = 0; i < N; i++) {
+      var d = document.createElement('i');
+      d.className = 'dbo-p';
+      var size = 3 + Math.random() * 6;
+      d.style.width = d.style.height = size.toFixed(1) + 'px';
+      d.style.left = (Math.random() * 100).toFixed(1) + '%';
+      d.style.setProperty('--d', (9 + Math.random() * 10).toFixed(1) + 's');
+      d.style.setProperty('--dl', (-Math.random() * 18).toFixed(1) + 's');
+      d.style.setProperty('--sx', ((Math.random() * 44) - 22).toFixed(0) + 'px');
+      d.style.setProperty('--o', (0.45 + Math.random() * 0.45).toFixed(2));
+      d.style.setProperty('--y', (5 + Math.random() * 90).toFixed(0) + '%');
+      frag.appendChild(d);
+    }
+    box.appendChild(frag);
+  }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build); else build();
 })();
 </script>
 </body>

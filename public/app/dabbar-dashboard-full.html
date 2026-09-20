@@ -3335,6 +3335,9 @@ html:not([data-theme="light"]) .tab-content > section#quick-access-card[class][c
 html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgba(244,198,72,.22) !important; }
 /* الوصول السريع: مخفي من الداش */
 #quick-access-card { display: none !important; }
+/* الصفحات الفرعية (fixed) كانت بتتحسب من الصفحة الطويلة بدل الشاشة بسبب transform باقي بعد animation التبويب */
+.tab-content.fade-up { animation-fill-mode: backwards !important; }
+#telegram-link-overlay { z-index: 1300 !important; }
 </style>
 </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col overflow-hidden">
@@ -4556,11 +4559,26 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
                         <p class="text-[12px] text-slate-400 leading-relaxed mb-4">علّم نص فيه مصروف من أي تطبيق، أو استخدم اختصار سريع من الشاشة الرئيسية — من غير ما تفتح التطبيق أصلًا.</p>
 
                         <div class="flex gap-2 mb-4">
-                            <button type="button" id="quick-add-tab-android" class="flex-1 text-xs font-bold py-2 rounded-xl border border-emerald-500/40 bg-emerald-500/15 text-emerald-400">أندرويد</button>
+                            <button type="button" id="quick-add-tab-telegram" class="flex-1 text-xs font-bold py-2 rounded-xl border border-emerald-500/40 bg-emerald-500/15 text-emerald-400">✈️ تليجرام</button>
+                            <button type="button" id="quick-add-tab-android" class="flex-1 text-xs font-bold py-2 rounded-xl border border-slate-700 text-slate-400">أندرويد</button>
                             <button type="button" id="quick-add-tab-ios" class="flex-1 text-xs font-bold py-2 rounded-xl border border-slate-700 text-slate-400">آيفون</button>
                         </div>
 
-                        <div id="quick-add-steps-android" class="space-y-1">
+                        <div id="quick-add-steps-telegram" class="space-y-1">
+                            <p class="text-[11px] font-bold text-emerald-400 mb-1">الأسهل على أندرويد وآيفون: سجّل من تليجرام</p>
+                            <div id="quick-add-tg-status" class="flex items-center justify-between gap-2 rounded-xl border border-slate-800 px-3 py-2.5 mb-2"><span id="quick-add-tg-status-text" class="text-[11px] text-slate-400">جاري التحقق من حالة الربط...</span><span id="quick-add-tg-badge" class="shrink-0 text-[10px] font-bold px-2.5 py-1 rounded-full bg-slate-800 text-slate-400">—</span></div>
+                            <div class="flex items-center gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">1</span><span class="text-[12px] text-slate-300">اربط حسابك بتليجرام مرة واحدة (بكود من 6 أرقام)</span></div>
+                            <div class="flex items-center gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">2</span><span class="text-[12px] text-slate-300">✍️ نص: ابعت للبوت «صرفت 50 جنيه على القهوة»</span></div>
+                            <div class="flex items-center gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">3</span><span class="text-[12px] text-slate-300">🎙️ صوت: ابعت رسالة صوتية وقول «دفعت 200 كهربا»</span></div>
+                            <div class="flex items-center gap-2.5 py-2"><span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">4</span><span class="text-[12px] text-slate-300">🧾 فاتورة: صوّر الفاتورة وابعتها كصورة — دبّر بيقرا المبلغ والأصناف</span></div>
+                            <div class="flex gap-2 pt-3">
+                                <button type="button" id="quick-add-tg-link-btn" class="flex-1 bg-emerald-500 text-slate-950 font-black text-[12px] py-2.5 rounded-xl">اربط وفعّل تليجرام</button>
+                                <a id="quick-add-tg-open-bot" href="https://t.me/Masaaref_bot" target="_blank" rel="noopener" class="flex-1 text-center border border-slate-700 text-slate-200 font-bold text-[12px] py-2.5 rounded-xl">افتح البوت</a>
+                            </div>
+                            <p class="text-[10px] text-slate-500 pt-2 leading-relaxed">الصوت والفاتورة الذكية حسب باقتك (VIP)، والنص متاح دايمًا. وتقدر تعمل Share لأي نص أو صورة لتليجرام واختار البوت.</p>
+                        </div>
+
+                        <div id="quick-add-steps-android" class="hidden space-y-1">
                             <p class="text-[11px] font-bold text-emerald-400 mb-1">الطريقة الأولى: مشاركة نص</p>
                             <div class="flex items-center gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">1</span><span class="text-[12px] text-slate-300">علّم أي نص فيه مصروف في أي تطبيق</span></div>
                             <div class="flex items-center gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">2</span><span class="text-[12px] text-slate-300">دوس زرار مشاركة (Share)</span></div>
@@ -4580,6 +4598,7 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
                             <div class="flex items-center gap-2.5 py-2 border-b border-slate-800"><span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">3</span><span class="text-[12px] text-slate-300">استخدمه من الشاشة الرئيسية أو بـ Siri</span></div>
                             <div class="flex items-center gap-2.5 py-2"><span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 text-[11px] font-bold flex items-center justify-center shrink-0">4</span><span class="text-[12px] text-slate-300">اكتب أو قول مصروفك — يتسجل فورًا</span></div>
                             <a href="#" id="quick-add-ios-install-link" target="_blank" rel="noopener" class="mt-3 w-full flex items-center justify-center gap-2 bg-emerald-500 text-slate-950 font-black text-[12px] py-2.5 rounded-xl">⬇️ ثبّت اختصار آيفون</a>
+                            <p class="text-[10px] text-slate-500 mt-3 leading-relaxed">ملحوظة: المشاركة (Share) المباشرة لدبّر مش متاحة على آيفون. استخدم الاختصار، أو اعمل Share لأي نص أو صورة لتليجرام واختار البوت.</p>
                         </div>
                     </div>
                 </div>
@@ -5513,6 +5532,7 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
             if (push && normalizeAccountRoute() !== route) history.pushState({ accountSubpage: route }, '', route);
             page.classList.remove('hidden');
             page.classList.add('flex');
+            page.querySelectorAll('.modal-body-surface').forEach((el) => { el.scrollTop = 0; });
             page.setAttribute('aria-hidden', 'false');
             page.setAttribute('role', 'main');
             document.title = ACCOUNT_SUBPAGE_TITLES[route] || 'دبّر';
@@ -5759,28 +5779,41 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
             iosLink.href = './ios-shortcut-setup.html';
             const activeTabClasses = ['border-emerald-500/40', 'bg-emerald-500/15', 'text-emerald-400'];
             const inactiveTabClasses = ['border-slate-700', 'text-slate-400'];
+            const tabTelegram = document.getElementById('quick-add-tab-telegram');
+            const stepsTelegram = document.getElementById('quick-add-steps-telegram');
+            const tgStatusText = document.getElementById('quick-add-tg-status-text');
+            const tgBadge = document.getElementById('quick-add-tg-badge');
+            const tgLinkBtn = document.getElementById('quick-add-tg-link-btn');
+            const tabs = { telegram: [tabTelegram, stepsTelegram], android: [tabAndroid, stepsAndroid], ios: [tabIos, stepsIos] };
+            function refreshTelegramState() {
+                const linked = !!window.__dashboardData?.telegramUserId;
+                if (tgStatusText) tgStatusText.textContent = linked ? 'حسابك مربوط بتليجرام — ابعت للبوت نص أو صوت أو فاتورة.' : 'حسابك لسه مش مربوط بتليجرام.';
+                if (tgBadge) {
+                    tgBadge.textContent = linked ? 'مربوط' : 'غير مربوط';
+                    tgBadge.className = 'shrink-0 text-[10px] font-bold px-2.5 py-1 rounded-full ' + (linked ? 'bg-emerald-500/15 text-emerald-400' : 'bg-slate-800 text-slate-400');
+                }
+                if (tgLinkBtn) tgLinkBtn.classList.toggle('hidden', linked);
+            }
             function setTab(target) {
-                const isAndroid = target === 'android';
-                stepsAndroid.classList.toggle('hidden', !isAndroid);
-                stepsIos.classList.toggle('hidden', isAndroid);
-                tabAndroid.classList.toggle('border-emerald-500/40', isAndroid);
-                tabAndroid.classList.toggle('bg-emerald-500/15', isAndroid);
-                tabAndroid.classList.toggle('text-emerald-400', isAndroid);
-                tabAndroid.classList.toggle('border-slate-700', !isAndroid);
-                tabAndroid.classList.toggle('text-slate-400', !isAndroid);
-                tabIos.classList.toggle('border-emerald-500/40', !isAndroid);
-                tabIos.classList.toggle('bg-emerald-500/15', !isAndroid);
-                tabIos.classList.toggle('text-emerald-400', !isAndroid);
-                tabIos.classList.toggle('border-slate-700', isAndroid);
-                tabIos.classList.toggle('text-slate-400', isAndroid);
+                Object.keys(tabs).forEach((key) => {
+                    const [btn, steps] = tabs[key];
+                    const on = key === target;
+                    steps?.classList.toggle('hidden', !on);
+                    activeTabClasses.forEach((c) => btn?.classList.toggle(c, on));
+                    inactiveTabClasses.forEach((c) => btn?.classList.toggle(c, !on));
+                });
+                if (target === 'telegram') refreshTelegramState();
             }
             card.addEventListener('click', () => {
                 showAccountTab();
+                setTab('telegram');
                 openAccountSubpage(modal, modal.dataset.accountRoute);
             });
             closeBtn?.addEventListener('click', () => closeAccountSubpage(modal));
+            tabTelegram?.addEventListener('click', () => setTab('telegram'));
             tabAndroid?.addEventListener('click', () => setTab('android'));
             tabIos?.addEventListener('click', () => setTab('ios'));
+            tgLinkBtn?.addEventListener('click', () => document.getElementById('account-telegram-card')?.click());
         })();
 
         (function setupBankAccountsCard() {

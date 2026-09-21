@@ -2153,7 +2153,24 @@
         .pnx-step:active { transform:scale(.92); background:color-mix(in srgb,var(--pm-gold) 14%,var(--pm-surface-hi)); }
         .pnx-num { font:900 24px/1 'Cairo',sans-serif; color:var(--pm-ink); font-variant-numeric:tabular-nums; }
         .pnx-num span { font-size:13px; color:var(--pm-gold); margin-inline-start:1px; }
-        .pnx-range { -webkit-appearance:none; appearance:none; width:100%; height:24px; background:transparent; margin:2px 0 0; padding:0; direction:rtl; outline:none; }
+        .pnx-range { -webkit-appearance:none; appearance:none; width:100%; height:24px !important; background:transparent !important; border:0 !important; box-shadow:none !important; border-radius:0 !important; margin:2px 0 0; padding:0 !important; direction:rtl; outline:none !important; }
+        /* ---- زر الحفظ: spinner → علامة صح متحركة → رجوع ---- */
+        .pnx-save { position:relative; display:flex; align-items:center; justify-content:center; gap:8px; overflow:hidden; transition:background-color .25s, border-color .25s, color .25s, transform .15s; }
+        .pnx-save:active { transform:scale(.98); }
+        .pnx-save-spin, .pnx-save-check { display:none; flex:0 0 auto; }
+        .pnx-save-spin { width:14px; height:14px; border-radius:50%; border:2px solid currentColor; border-top-color:transparent; animation:pnxSpin .7s linear infinite; }
+        .pnx-save-check { width:16px; height:16px; fill:none; stroke:currentColor; stroke-width:3; stroke-linecap:round; stroke-linejoin:round; stroke-dasharray:24; stroke-dashoffset:24; }
+        .pnx-save.is-saving { opacity:.85; pointer-events:none; }
+        .pnx-save.is-saving .pnx-save-spin { display:inline-block; }
+        .pnx-save.is-saved { background:var(--pm-gold) !important; border-color:var(--pm-gold) !important; color:#fff !important; pointer-events:none; animation:pnxRing .9s ease-out 1; }
+        html:not([data-theme="light"]) .pnx-save.is-saved { color:#17202b !important; }
+        .pnx-save.is-saved .pnx-save-check { display:inline-block; animation:pnxCheck .45s .05s ease-out forwards; }
+        .pnx-save.is-error { border-color:#f43f5e !important; color:#fb7185 !important; animation:pnxShake .45s; }
+        @keyframes pnxSpin { to { transform:rotate(360deg); } }
+        @keyframes pnxCheck { to { stroke-dashoffset:0; } }
+        @keyframes pnxRing { 0% { box-shadow:0 0 0 0 color-mix(in srgb,var(--pm-gold) 55%,transparent); } 100% { box-shadow:0 0 0 14px transparent; } }
+        @keyframes pnxShake { 20%,60% { transform:translateX(-5px); } 40%,80% { transform:translateX(5px); } }
+        @media (prefers-reduced-motion: reduce) { .pnx-save-spin { animation-duration:1.6s; } .pnx-save.is-saved, .pnx-save.is-error, .pnx-save.is-saved .pnx-save-check { animation:none; } .pnx-save-check { stroke-dashoffset:0; } }
         .pnx-range::-webkit-slider-runnable-track { height:6px; border-radius:99px; background:var(--pnx-trk,var(--pm-hairline)); }
         .pnx-range::-moz-range-track { height:6px; border-radius:99px; background:var(--pnx-trk,var(--pm-hairline)); }
         .pnx-range::-webkit-slider-thumb { -webkit-appearance:none; width:20px; height:20px; border-radius:50%; background:#fff; border:3px solid var(--pm-gold); margin-top:-7px; box-shadow:0 2px 8px rgba(0,0,0,.28); }
@@ -4969,7 +4986,7 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
                         <input type="hidden" id="push-daily-minute" value="0">
                         <input type="hidden" id="push-budget-threshold" value="0.8">
                     </div>
-                    <button type="button" id="push-notifications-save" class="w-full bg-slate-800 border border-slate-700 text-slate-200 font-bold text-[11px] py-2.5 rounded-xl transition hover:bg-slate-700">حفظ إعدادات الإشعارات</button>
+                    <button type="button" id="push-notifications-save" class="pnx-save w-full bg-slate-800 border border-slate-700 text-slate-200 font-bold text-[11px] py-2.5 rounded-xl transition hover:bg-slate-700"><span class="pnx-save-spin" aria-hidden="true"></span><svg class="pnx-save-check" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg><span class="pnx-save-label">حفظ إعدادات الإشعارات</span></button>
                     <button type="button" id="push-notifications-test" class="w-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 font-bold text-[11px] py-2.5 rounded-xl transition hover:bg-emerald-500/20">🔔 جرّب إشعار الآن</button>
                 </div>
             </section>
@@ -6702,6 +6719,7 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
                         const keyChanged = Boolean(currentKey) && Boolean(pushPublicKey) && currentKey !== pushPublicKey.replace(/=+$/, '');
                         if (keyChanged) {
                             await subscription.unsubscribe().catch(() => {});
+                            subscription = null; // لو إعادة الاشتراك فشلت، الواجهة لازم تعرض "تفعيل" بدل ما تقول مفعّلة بالغلط
                             subscription = await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(pushPublicKey) });
                             await pushApi('POST', { subscription: subscription.toJSON() });
                             syncNote = ' (اتجدّد اشتراك الجهاز مع الخادم)';
@@ -6776,7 +6794,25 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
             }
         }
 
+        let pushSaveResetTimer = null;
+        function setPushSaveState(state, text) {
+            const button = document.getElementById('push-notifications-save');
+            const label = button?.querySelector('.pnx-save-label');
+            if (!button || !label) return;
+            clearTimeout(pushSaveResetTimer);
+            button.classList.remove('is-saving', 'is-saved', 'is-error');
+            if (state === 'idle') { label.textContent = 'حفظ إعدادات الإشعارات'; return; }
+            button.classList.add(`is-${state}`);
+            label.textContent = text;
+            if (state !== 'saving') {
+                pushSaveResetTimer = setTimeout(() => setPushSaveState('idle'), state === 'saved' ? 1800 : 2200);
+            }
+        }
+
         async function savePushPreferencesFromUI() {
+            if (document.getElementById('push-notifications-save')?.classList.contains('is-saving')) return;
+            const startedAt = Date.now();
+            setPushSaveState('saving', 'جاري الحفظ...');
             try {
                 const preferences = {
                     dailyReminderEnabled: document.getElementById('push-daily-reminder')?.checked !== false,
@@ -6795,8 +6831,14 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
                 };
                 const data = await pushApi('PUT', { preferences });
                 renderPushPreferences(data.preferences);
+                // نضمن إن الـ spinner يبان لحظة قصيرة حتى لو الحفظ كان فوري، عشان الحركة تبان طبيعية
+                const elapsed = Date.now() - startedAt;
+                if (elapsed < 400) await new Promise((resolve) => setTimeout(resolve, 400 - elapsed));
+                setPushSaveState('saved', 'اتحفظت');
+                try { navigator.vibrate?.(15); } catch (e) {}
                 pushStatus('اتحفظت إعدادات الإشعارات.', 'success');
             } catch (error) {
+                setPushSaveState('error', 'مقدرناش نحفظ');
                 pushStatus(error.message || 'مقدرناش نحفظ إعدادات الإشعارات.', 'error');
             }
         }

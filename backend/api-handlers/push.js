@@ -3,11 +3,13 @@ import {
   getDashboardUserFromToken,
   getNotificationPreferences,
   getPushSubscriptionStatus,
+  getVapidPublicKey,
   isPushConfigured,
   removePushSubscription,
   saveNotificationPreferences,
   savePushSubscription,
   sendTestPush,
+  vapidEnvPublicKeyMatches,
 } from '../../lib/webPush.js';
 
 function tokenFromRequest(req) {
@@ -37,7 +39,9 @@ export default async function handler(req, res) {
       const server = await getPushSubscriptionStatus(user.dataUserId, endpoint);
       return res.status(200).json({
         configured: isPushConfigured(),
-        publicKey: process.env.VAPID_PUBLIC_KEY || '',
+        // المفتاح العام بيتحسب من المفتاح الخاص، فالاشتراك اللي الداشبورد بيعمله دايمًا بيطابق اللي السيرفر بيوقّع بيه.
+        publicKey: getVapidPublicKey(),
+        vapid: { envPublicKeyMatches: vapidEnvPublicKeyMatches() },
         preferences,
         server,
       });

@@ -2,10 +2,12 @@ import {
   DEFAULT_PREFERENCES,
   getDashboardUserFromToken,
   getNotificationPreferences,
+  getPushSubscriptionStatus,
   isPushConfigured,
   removePushSubscription,
   saveNotificationPreferences,
   savePushSubscription,
+  sendTestPush,
 } from '../../lib/webPush.js';
 
 function tokenFromRequest(req) {
@@ -30,11 +32,22 @@ export default async function handler(req, res) {
 
     if (req.method === 'GET') {
       const preferences = await getNotificationPreferences(user.dataUserId);
+      // لو الجهاز بعت endpoint بتاعه، بنرجّع حالة اشتراكه على الخادم (مسجّل؟ فعّال؟ آخر خطأ؟) عشان الداشبورد يصلّحه تلقائيًا لو ناقص.
+      const endpoint = String(req.query?.endpoint || '').trim();
+      const server = await getPushSubscriptionStatus(user.dataUserId, endpoint);
       return res.status(200).json({
         configured: isPushConfigured(),
         publicKey: process.env.VAPID_PUBLIC_KEY || '',
         preferences,
+        server,
       });
+    }
+
+    if (req.method === 'POST' && req.body?.action === 'test') {
+      // إشعار تجريبي فوري + تفاصيل النتيجة (عدد اللي وصل، أو سبب الفشل) لتشخيص أي مشكلة توصيل.
+      const result = await sendTestPush(user.dataUserId);
+      const server = await getPushSubscriptionStatus(user.dataUserId, String(req.body?.endpoint || '').trim());
+      return res.status(200).json({ ok: true, result, server });
     }
 
     if (req.method === 'POST') {

@@ -16,7 +16,9 @@ export default async function handler(req, res) {
   }
 
   try {
-    const summary = await runPushSchedule();
+    // ?debug=1 بيرجّع تفاصيل لكل مستخدم (آخر 4 أرقام بس) لتشخيص ليه إشعار اتبعت أو لأ
+    const debug = String(req.query?.debug || '') === '1';
+    const summary = await runPushSchedule({ debug });
     return res.status(200).json({ ok: true, ...summary });
   } catch (error) {
     console.error('push-cron failed:', error?.message || error);

@@ -41,11 +41,9 @@ export default async function handler(req, res) {
     });
   }
 
-  const payload = JSON.stringify({
-    token: String(profile.sms_webhook_token),
-    sender: '{sms_number}',
-    text: '{sms_message}',
-  });
+  // نص عادي بدل JSON: نص الرسالة ممكن يحتوي سطور جديدة أو علامات اقتباس، وفي JSON كانت بتكسر الطلب وترسالة بنكية حقيقية تضيع.
+  // السيرفر (sms-webhook.js) بيقرا الصيغتين. text لازم يفضل آخر سطر.
+  const payload = `token=${String(profile.sms_webhook_token)}\nsender={sms_number}\ntext={sms_message}`;
   const macro = {
     globalVariables: [],
     macro: {
@@ -81,7 +79,7 @@ export default async function handler(req, res) {
           contentBodyFolderUri: '',
           contentBodySource: 0,
           contentBodyText: payload,
-          contentType: 'application/json',
+          contentType: 'text/plain',
           followRedirects: true,
           headerParams: [],
           localFileUri: '',

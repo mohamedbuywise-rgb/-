@@ -4938,6 +4938,14 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
                         <span>رسالة دبّر اليومية — تذكير لطيف بوجود دبّر</span>
                         <input id="push-daily-presence" type="checkbox" class="accent-amber-400 w-4 h-4">
                     </label>
+                    <label class="flex items-center justify-between gap-3 text-[11px] text-slate-300">
+                        <span>انتهاء التجربة أو الاشتراك</span>
+                        <input id="push-subscription-alerts" type="checkbox" class="accent-amber-400 w-4 h-4">
+                    </label>
+                    <label class="flex items-center justify-between gap-3 text-[11px] text-slate-300">
+                        <span>مصروف أكبر من المعتاد بكتير</span>
+                        <input id="push-large-expense" type="checkbox" class="accent-amber-400 w-4 h-4">
+                    </label>
                     <div class="pnx-row">
                         <div class="pnx-box">
                             <div class="pnx-lbl"><span>⏰ وقت التذكير</span><b id="pnx-time-txt">8:00 ص</b></div>
@@ -4962,6 +4970,7 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
                         <input type="hidden" id="push-budget-threshold" value="0.8">
                     </div>
                     <button type="button" id="push-notifications-save" class="w-full bg-slate-800 border border-slate-700 text-slate-200 font-bold text-[11px] py-2.5 rounded-xl transition hover:bg-slate-700">حفظ إعدادات الإشعارات</button>
+                    <button type="button" id="push-notifications-test" class="w-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 font-bold text-[11px] py-2.5 rounded-xl transition hover:bg-emerald-500/20">🔔 جرّب إشعار الآن</button>
                 </div>
             </section>
 
@@ -6503,7 +6512,7 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
         })();
 
         function renderPushPreferences(preferences) {
-            pushPreferences = preferences || { dailyReminderEnabled: true, dailySummaryEnabled: true, weeklySummaryEnabled: true, budgetAlertEnabled: true, bankMovementEnabled: true, paymentRemindersEnabled: true, dailyPresenceEnabled: true, dailyReminderHour: 8, budgetAlertThreshold: 0.8 };
+            pushPreferences = preferences || { dailyReminderEnabled: true, dailySummaryEnabled: true, weeklySummaryEnabled: true, budgetAlertEnabled: true, bankMovementEnabled: true, paymentRemindersEnabled: true, dailyPresenceEnabled: true, subscriptionAlertsEnabled: true, largeExpenseEnabled: true, dailyReminderHour: 8, budgetAlertThreshold: 0.8 };
             const daily = document.getElementById('push-daily-reminder');
             const dailySummary = document.getElementById('push-daily-summary');
             const weekly = document.getElementById('push-weekly-summary');
@@ -6520,6 +6529,10 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
             if (bankMovement) bankMovement.checked = pushPreferences.bankMovementEnabled !== false;
             if (paymentReminders) paymentReminders.checked = pushPreferences.paymentRemindersEnabled !== false;
             if (dailyPresence) dailyPresence.checked = pushPreferences.dailyPresenceEnabled !== false;
+            const subscriptionAlerts = document.getElementById('push-subscription-alerts');
+            const largeExpense = document.getElementById('push-large-expense');
+            if (subscriptionAlerts) subscriptionAlerts.checked = pushPreferences.subscriptionAlertsEnabled !== false;
+            if (largeExpense) largeExpense.checked = pushPreferences.largeExpenseEnabled !== false;
             if (hour) hour.value = String(pushPreferences.dailyReminderHour ?? 8);
             if (threshold) threshold.value = String(pushPreferences.budgetAlertThreshold ?? 0.8);
             const minute = document.getElementById('push-daily-minute');
@@ -6527,8 +6540,8 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
             if (typeof window.pnxSync === 'function') window.pnxSync();
         }
 
-        async function pushApi(method = 'GET', body) {
-            const res = await fetch('/api/push', {
+        async function pushApi(method = 'GET', body, query = '') {
+            const res = await fetch(`/api/push${query}`, {
                 method,
                 headers: { Authorization: `Bearer ${accessToken}`, ...(body ? { 'Content-Type': 'application/json' } : {}) },
                 body: body ? JSON.stringify(body) : undefined,
@@ -6615,6 +6628,50 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
             banner.classList.toggle('hidden', Boolean(withinCooldown));
         }
 
+        function uint8ArrayToUrlBase64(bytes) {
+            let binary = '';
+            bytes.forEach((b) => { binary += String.fromCharCode(b); });
+            return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        }
+
+        // زر "جرّب إشعار الآن": بيبعت إشعار فعلي من الخادم لجهازك ويعرض النتيجة بالتفصيل (وصل / ليه ما وصلش).
+        async function sendPushTest() {
+            const button = document.getElementById('push-notifications-test');
+            if (button) { button.disabled = true; button.textContent = 'جاري الإرسال...'; }
+            try {
+                const registration = await getPushRegistration();
+                const subscription = await registration?.pushManager.getSubscription();
+                if (!subscription) { pushStatus('الجهاز ده مش مشترك. دوس "تفعيل" الأول.', 'error'); return; }
+                let data = await pushApi('POST', { action: 'test', endpoint: subscription.endpoint });
+                // لو الخادم مش شايف اشتراك الجهاز، نسجّله ونعيد المحاولة مرة واحدة
+                if (data?.result?.skipped === 'no_active_subscription' || !data?.server?.thisDevice?.active) {
+                    await pushApi('POST', { subscription: subscription.toJSON() });
+                    data = await pushApi('POST', { action: 'test', endpoint: subscription.endpoint });
+                }
+                const result = data?.result || {};
+                if (result.sent > 0) {
+                    pushStatus('اتبعت إشعار تجريبي ✅ لو ما ظهرش خلال ثواني: من إعدادات أندرويد ← التطبيقات ← Chrome ← الإشعارات اتأكد إنها شغّالة، وطفّي توفير الطاقة لـ Chrome.', 'success');
+                } else if (result.skipped === 'vapid_not_configured') {
+                    pushStatus('مفاتيح VAPID مش مضبوطة على الخادم (VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY).', 'error');
+                } else if (result.skipped === 'no_active_subscription') {
+                    pushStatus('الخادم مش شايف اشتراك فعّال لجهازك. دوس "إيقاف" ثم "تفعيل" تاني.', 'error');
+                } else if (result.errors?.length) {
+                    const first = result.errors[0];
+                    const hint = [401, 403].includes(first.status) ? 'الاشتراك اتعمل بمفاتيح قديمة — حدّث الصفحة وهيتجدد تلقائيًا، أو دوس "إيقاف" ثم "تفعيل".'
+                        : [404, 410].includes(first.status) ? 'الاشتراك انتهى في المتصفح — دوس "إيقاف" ثم "تفعيل".'
+                            : 'مشكلة عند خدمة الإشعارات الخاصة بالمتصفح.';
+                    pushStatus(`فشل الإرسال (خطأ ${first.status || '؟'}). ${hint}`, 'error');
+                } else {
+                    pushStatus('ما اتبعتش أي إشعار. حدّث الصفحة وجرّب تاني.', 'error');
+                }
+            } catch (error) {
+                pushStatus(error.message || 'تعذر إرسال الإشعار التجريبي.', 'error');
+            } finally {
+                if (button) { button.disabled = false; button.textContent = '🔔 جرّب إشعار الآن'; }
+            }
+        }
+        document.getElementById('push-notifications-test')?.addEventListener('click', sendPushTest);
+
         async function refreshPushUI() {
             const toggle = document.getElementById('push-notifications-toggle');
             const settings = document.getElementById('push-notifications-settings');
@@ -6634,11 +6691,32 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
                     return;
                 }
                 const registration = await getPushRegistration();
-                const subscription = await registration?.pushManager.getSubscription();
+                let subscription = await registration?.pushManager.getSubscription();
+                let syncNote = '';
+                if (subscription) {
+                    // إصلاح تلقائي: لو الجهاز مشترك في المتصفح بس الخادم مش شايف الاشتراك (أو شايفه معطّل، أو اتعمل بمفاتيح VAPID قديمة)
+                    // الإشعارات هتفضل "مفعّلة" على الشاشة وما توصلش. هنا بنطابق الاثنين.
+                    try {
+                        const state = await pushApi('GET', undefined, `?endpoint=${encodeURIComponent(subscription.endpoint)}`);
+                        const currentKey = subscription.options?.applicationServerKey ? uint8ArrayToUrlBase64(new Uint8Array(subscription.options.applicationServerKey)) : '';
+                        const keyChanged = Boolean(currentKey) && Boolean(pushPublicKey) && currentKey !== pushPublicKey.replace(/=+$/, '');
+                        if (keyChanged) {
+                            await subscription.unsubscribe().catch(() => {});
+                            subscription = await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(pushPublicKey) });
+                            await pushApi('POST', { subscription: subscription.toJSON() });
+                            syncNote = ' (اتجدّد اشتراك الجهاز مع الخادم)';
+                        } else if (!state?.server?.thisDevice?.active) {
+                            await pushApi('POST', { subscription: subscription.toJSON() });
+                            syncNote = ' (اتسجّل اشتراك الجهاز على الخادم)';
+                        }
+                    } catch (syncError) {
+                        console.warn('push sync failed:', syncError);
+                    }
+                }
                 if (subscription) {
                     if (toggle) { toggle.disabled = false; toggle.textContent = 'إيقاف'; toggle.classList.remove('bg-amber-400', 'text-slate-950'); toggle.classList.add('bg-slate-800', 'text-slate-200', 'border', 'border-slate-700'); }
                     if (settings) settings.classList.remove('hidden');
-                    pushStatus('الإشعارات مفعّلة على الجهاز ده.', 'success');
+                    pushStatus(`الإشعارات مفعّلة على الجهاز ده.${syncNote}`, 'success');
                     updatePushNudgeBanner(true);
                 } else {
                     if (toggle) { toggle.disabled = false; toggle.textContent = 'تفعيل'; toggle.classList.add('bg-amber-400', 'text-slate-950'); toggle.classList.remove('bg-slate-800', 'text-slate-200', 'border', 'border-slate-700'); }
@@ -6707,6 +6785,8 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
                     budgetAlertEnabled: document.getElementById('push-budget-alert')?.checked !== false,
                     bankMovementEnabled: document.getElementById('push-bank-movement')?.checked !== false,
                     paymentRemindersEnabled: document.getElementById('push-payment-reminders')?.checked !== false,
+                    subscriptionAlertsEnabled: document.getElementById('push-subscription-alerts')?.checked !== false,
+                    largeExpenseEnabled: document.getElementById('push-large-expense')?.checked !== false,
                     dailyPresenceEnabled: document.getElementById('push-daily-presence')?.checked !== false,
                     dailyReminderHour: Number(document.getElementById('push-daily-hour')?.value || 8),
                     dailyReminderMinute: Number(document.getElementById('push-daily-minute')?.value || 0),
@@ -10421,9 +10501,12 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
             filtered.forEach((m) => {
                 const row = document.createElement('div');
                 row.className = 'flex items-center justify-between gap-3 px-3 py-3';
-                const isExpenseLike = bmIsExpenseLike(m);
-                const amountClass = isExpenseLike ? 'text-rose-400' : (m.event_type === 'deposit' ? 'text-emerald-400' : 'text-slate-200');
-                const sign = isExpenseLike ? '-' : (m.event_type === 'deposit' ? '+' : '');
+                // علامة ولون المبلغ بالاتجاه الحقيقي: إيداع/دخل/استرداد/تحويل وارد = + أخضر، سحب/مصروف/تحويل صادر = - أحمر، والتحويل بين حساباتك محايد.
+                const evType = String(m.event_type || '').toLowerCase();
+                const isIn = ['deposit', 'income', 'refund'].includes(evType) || (evType === 'transfer' && m.direction === 'inflow');
+                const isOut = !isIn && (bmIsExpenseLike(m) || (evType === 'transfer' && m.direction === 'outflow'));
+                const amountClass = isOut ? 'text-rose-400' : (isIn ? 'text-emerald-400' : 'text-slate-200');
+                const sign = isOut ? '-' : (isIn ? '+' : '');
                 const desc = m.description || m.counterparty || BM_TYPE_LABELS[m.event_type] || m.label;
                 const brand = bmGetBankBrand(m);
                 const movementDate = new Date(m.created_at);

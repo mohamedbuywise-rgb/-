@@ -9,7 +9,7 @@ import { claimCronSlot } from '../../lib/cronRuns.js';
 import { refreshPortfolioMarketPrices, savePortfolioSnapshot, getPortfolioDigest, buildPortfolioDigestMessage, checkPortfolioPriceAlerts, buildPortfolioAlertTelegramMessage, buildPortfolioAlertPushPayload } from '../../lib/investments.js';
 import { CATEGORY_EMOJI, CRON_SECRET, ADMIN_TELEGRAM_ID, isModelsCheckOverdue } from '../../lib/config.js';
 import { hasActivePushSubscription, sendPushToUser } from '../../lib/webPush.js';
-import { runPushSchedule } from '../../lib/pushSchedule.js';
+import { plainText, runPushSchedule, sendSubscriptionAlertPush } from '../../lib/pushSchedule.js';
 import { getUsersNeedingTrialReminder, getSubscriptionState, formatTrialReminder, markTrialReminderSent } from '../../lib/subscriptionAccess.js';
 
 // عدد المستخدمين اللي بيتعالجوا بالتوازي في نفس الوقت، بدل ما نلف عليهم واحد واحد.
@@ -139,6 +139,18 @@ async function runWithConcurrencyLimit(items, limit, worker) {
   return results;
 }
 
+// بيحاول يعرف باقي كام يوم على التجربة من حالة الاشتراك (بدون افتراض شكل معين للحقول). لو ملقاش، بيرجّع null.
+function daysLeftFromState(state) {
+  if (Number.isFinite(Number(state?.daysLeft))) return Math.ceil(Number(state.daysLeft));
+  for (const key of ['trialEndsAt', 'trial_ends_at', 'trialExpiresAt', 'trial_expires_at', 'expiresAt', 'expires_at', 'endsAt', 'ends_at']) {
+    const value = state?.[key];
+    if (!value) continue;
+    const time = new Date(value).getTime();
+    if (Number.isFinite(time)) return Math.ceil((time - Date.now()) / (24 * 60 * 60 * 1000));
+  }
+  return null;
+}
+
 // ============ كل التقارير/التذكيرات المطلوبة لمستخدم واحد ============
 async function processUser(user, { isFriday, isLastDayOfMonth, monthKey, remindersByUser }) {
   const { telegram_user_id: userId, chat_id: chatId, subscription_expires_at } = user;
@@ -160,6 +172,21 @@ async function processUser(user, { isFriday, isLastDayOfMonth, monthKey, reminde
 
     // إشعارات الـ push (تذكير يومي / ملخص يومي / ملخص أسبوعي) اتنقلت لـ lib/pushSchedule.js
     // وبتتبعت لكل مستخدم في وقته المحلي عن طريق /api/push-cron (كل 5 دقايق) — راجع PUSH_NOTIFICATIONS_SETUP.md
+
+    // إشعار Push بقرب انتهاء الاشتراك المدفوع (3 أيام أو أقل) — لكل المشتركين، مش بس المرتبطين بتليجرام
+    if (isSubscribed) {
+      const renewalDaysLeft = Math.ceil((expiresAt.getTime() - Date.now()) / (24 * 60 * 60 * 1000));
+      if (renewalDaysLeft <= 3) {
+        await sendSubscriptionAlertPush(userId, {
+          kind: 'renewal',
+          periodKey: `${expiresAt.toISOString().slice(0, 10)}:${Math.max(0, renewalDaysLeft)}`,
+          title: 'دبّر — اشتراكك قرب يخلص ⏳',
+          body: renewalDaysLeft <= 0
+            ? 'اشتراكك بينتهي النهارده. جدّده من "حسابي" عشان تكمّل بنفس المميزات.'
+            : `اشتراكك هيخلص خلال ${renewalDaysLeft} يوم. جدّده من "حسابي" عشان تكمّل بنفس المميزات.`,
+        }).catch((error) => console.error(`Renewal push failed for user ${userId}:`, error));
+      }
+    }
 
     // من هنا تحت: تقارير وتذكيرات Telegram — دي مخصوصة للمشتركين فعليًا بس
     if (!isSubscribed) {
@@ -233,9 +260,21 @@ export default async function handler(req, res) {
     return [];
   });
   await runWithConcurrencyLimit(trialReminderUsers, CONCURRENCY, async (user) => {
-    if (!user.chat_id || Number(user.chat_id) <= 0) return { ok: true };
     const state = await getSubscriptionState(user.telegram_user_id);
     if (state.status !== 'trial') return { ok: true };
+
+    // إشعار Push بقرب انتهاء التجربة — لكل المستخدمين (حتى اللي مش مرتبطين بتليجرام)، مرة في اليوم
+    const trialDaysLeft = daysLeftFromState(state);
+    await sendSubscriptionAlertPush(user.telegram_user_id, {
+      kind: 'trial',
+      periodKey: new Date().toISOString().slice(0, 10),
+      title: 'دبّر — التجربة المجانية قربت تخلص ⏳',
+      body: trialDaysLeft !== null
+        ? `فاضل ${trialDaysLeft <= 0 ? 'أقل من يوم' : `${trialDaysLeft} يوم`} على انتهاء تجربتك. اختار خطة من "حسابي" عشان تكمّل بنفس المميزات.`
+        : (plainText(formatTrialReminder(state)).split('\n')[0] || 'تجربتك المجانية قربت تخلص. اختار خطة من "حسابي" عشان تكمّل بنفس المميزات.'),
+    }).catch((error) => console.error(`Trial push failed for user ${user.telegram_user_id}:`, error));
+
+    if (!user.chat_id || Number(user.chat_id) <= 0) return { ok: true };
     await sendTelegramMessage(user.chat_id, formatTrialReminder(state), 'HTML');
     await markTrialReminderSent(user.telegram_user_id);
     return { ok: true };

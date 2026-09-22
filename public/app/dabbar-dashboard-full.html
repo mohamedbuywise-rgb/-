@@ -2022,15 +2022,15 @@
         #dabbar-celebrate-fx { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 40; display:flex; align-items:center; justify-content:center; overflow:visible; }
         #quick-entry-manual-form { position:relative; overflow:hidden; }
         #quick-manual-success-fx { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:40; display:flex; align-items:center; justify-content:center; overflow:visible; }
-        .quick-entry-manual-link { position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.18rem; width:100%; min-height:2.8rem; margin:.08rem 0 .05rem; padding:.42rem .8rem; border:1px solid color-mix(in srgb,var(--pm-gold-bright) 48%,transparent); border-radius:1rem; background:linear-gradient(135deg,color-mix(in srgb,var(--pm-gold-bright) 13%,var(--pm-surface-hi)),color-mix(in srgb,var(--pm-mint) 7%,var(--pm-surface-hi))); color:var(--pm-ink) !important; box-shadow:0 7px 20px color-mix(in srgb,var(--pm-gold-bright) 12%,transparent), inset 0 1px 0 rgba(255,255,255,.08); text-align:center; cursor:pointer; transition:transform .18s cubic-bezier(.23,1,.32,1), box-shadow .18s ease, border-color .18s ease, background .18s ease; }
+        .quick-entry-manual-link { position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.1rem; width:100%; min-height:1.9rem; margin:.06rem 0 .04rem; padding:.26rem .7rem; border:1px solid color-mix(in srgb,var(--pm-gold-bright) 48%,transparent); border-radius:1rem; background:linear-gradient(135deg,color-mix(in srgb,var(--pm-gold-bright) 13%,var(--pm-surface-hi)),color-mix(in srgb,var(--pm-mint) 7%,var(--pm-surface-hi))); color:var(--pm-ink) !important; box-shadow:0 7px 20px color-mix(in srgb,var(--pm-gold-bright) 12%,transparent), inset 0 1px 0 rgba(255,255,255,.08); text-align:center; cursor:pointer; transition:transform .18s cubic-bezier(.23,1,.32,1), box-shadow .18s ease, border-color .18s ease, background .18s ease; }
         .quick-entry-manual-link::after { content:''; position:absolute; inset:0; border-radius:inherit; background:linear-gradient(110deg,transparent 20%,rgba(255,255,255,.12) 48%,transparent 76%); transform:translateX(-120%); transition:transform .55s ease; pointer-events:none; }
         .quick-entry-manual-link:hover { transform:translateY(-1px); border-color:color-mix(in srgb,var(--pm-gold-bright) 76%,transparent); box-shadow:0 10px 28px color-mix(in srgb,var(--pm-gold-bright) 20%,transparent), inset 0 1px 0 rgba(255,255,255,.12); }
         .quick-entry-manual-link:hover::after { transform:translateX(120%); }
         .quick-entry-manual-link:active { transform:scale(.98); }
-        .quick-entry-manual-main { display:flex; align-items:center; justify-content:center; gap:.28rem; font-size:.72rem; font-weight:950; letter-spacing:-.01em; }
-        .quick-entry-manual-arrow { color:var(--pm-gold-bright); font-size:1rem; line-height:1; transition:transform .18s ease; }
+        .quick-entry-manual-main { display:flex; align-items:center; justify-content:center; gap:.22rem; font-size:.6rem; font-weight:950; letter-spacing:-.01em; }
+        .quick-entry-manual-arrow { color:var(--pm-gold-bright); font-size:.8rem; line-height:1; transition:transform .18s ease; }
         .quick-entry-manual-link:hover .quick-entry-manual-arrow { transform:translateY(2px); }
-        .quick-entry-manual-sub { color:var(--pm-muted); font-size:.56rem; font-weight:700; }
+        .quick-entry-manual-sub { color:var(--pm-muted); font-size:.48rem; font-weight:700; }
         #quick-manual-success-fx.is-manual-success { background:radial-gradient(circle at 50% 48%,color-mix(in srgb,var(--pm-gold-bright) 19%,transparent),transparent 58%); animation:manualSuccessFlash .42s ease-out both; }
         #quick-manual-success-fx.is-manual-success .dabbar-celebrate-ring { width:5.8rem !important; height:5.8rem !important; border-width:2px; }
         #quick-manual-success-fx.is-manual-success .dabbar-celebrate-badge { width:5.25rem; height:5.25rem; box-shadow:0 0 0 7px color-mix(in srgb,var(--pm-gold-bright) 12%,transparent),0 14px 36px rgba(0,0,0,.32),inset 0 1px 2px rgba(255,255,255,.4); animation:manualSuccessBadgeIn .6s cubic-bezier(.2,.8,.3,1) both, dabbarCelebrateBadgeOut .45s ease 1.55s forwards; }
@@ -3454,6 +3454,8 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
 
 </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col overflow-hidden">
+    <script src="./dabbar-offline-queue.js"></script>
+
 
     <div id="dashboard-sync-note" class="hidden mx-auto mt-3 w-[min(92%,56rem)] flex items-center justify-center gap-2 text-[11px] font-bold text-slate-400">
         <span class="inline-block h-3 w-3 rounded-full border-2 border-slate-500 border-t-transparent animate-spin"></span>
@@ -3605,7 +3607,12 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
                     <style>
                         .quick-manual-chip { border-radius:10px; border:1px solid var(--pm-hairline); padding:7px 10px; font-size:11px; font-weight:800; color:var(--pm-ink-dim); background:var(--pm-surface-soft); }
                     </style>
-                <div class="flex gap-2"><button id="quick-manual-save" class="flex-1 rounded-xl py-2.5 text-xs font-black" style="background:linear-gradient(145deg,var(--pm-gold-bright),var(--pm-gold));color:#14150f;" type="button">حفظ العملية</button><button id="quick-manual-cancel" class="rounded-xl border px-3 py-2.5 text-xs" style="border-color:var(--pm-hairline);color:var(--pm-muted);" type="button">إلغاء</button></div></div>
+                <div class="off-banner" id="quick-manual-offline-banner" role="status">
+                <span class="off-dot" aria-hidden="true"></span>
+                <span class="off-text" id="quick-manual-offline-text"></span>
+                <button type="button" class="off-sync-btn" id="quick-manual-offline-sync">زامن الآن</button>
+            </div>
+            <div class="flex gap-2"><button id="quick-manual-save" class="flex-1 rounded-xl py-2.5 text-xs font-black" style="background:linear-gradient(145deg,var(--pm-gold-bright),var(--pm-gold));color:#14150f;" type="button">حفظ العملية</button><button id="quick-manual-cancel" class="rounded-xl border px-3 py-2.5 text-xs" style="border-color:var(--pm-hairline);color:var(--pm-muted);" type="button">إلغاء</button></div></div>
                 <div id="quick-entry-recording" class="hidden rounded-2xl border border-rose-200 bg-rose-50 p-3 text-center text-xs text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200">
                     <div class="flex items-center justify-between gap-2"><span class="font-black">جاري التسجيل... <span id="quick-entry-recording-type-label" class="font-bold"></span></span><button id="quick-entry-recording-cancel" class="flex h-7 w-7 items-center justify-center rounded-full bg-white/70 text-sm font-black text-rose-500 transition hover:bg-white" type="button" aria-label="إلغاء التسجيل">✕</button></div>
                     <div id="quick-entry-recording-time" class="mt-1 font-black">00:00</div>
@@ -10335,6 +10342,50 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
             quickManualSetActive(Array.from(document.querySelectorAll('.quick-manual-dir')), button, 'border-color:var(--pm-gold-bright);background:color-mix(in srgb,var(--pm-gold-bright) 14%,transparent);color:var(--pm-ink);');
             document.querySelectorAll('.quick-manual-dir').forEach((item) => { if (item !== button) item.setAttribute('style', 'border-color:var(--pm-hairline);color:var(--pm-muted);'); });
         }));
+        // ============ الكتابة اليدوية Offline: طابور + بانر + مزامنة تلقائية ============
+        // الكتابة الذكية والصوت والفاتورة محتاجين نت دايمًا (AI). الفورم اليدوي بس (هنا) بيشتغل من غير نت.
+        function updateOfflineBanner(state) {
+            const banner = document.getElementById('quick-manual-offline-banner');
+            const text = document.getElementById('quick-manual-offline-text');
+            const syncBtn = document.getElementById('quick-manual-offline-sync');
+            if (!banner || !text || !syncBtn) return;
+            banner.classList.remove('is-syncing', 'is-error');
+            if (!state || state.count === 0) { banner.classList.remove('show'); return; }
+            banner.classList.add('show');
+            if (state.syncing) {
+                banner.classList.add('is-syncing');
+                text.textContent = `جاري مزامنة ${state.count} عملية...`;
+            } else if (state.failedCount > 0) {
+                banner.classList.add('is-error');
+                text.textContent = `${state.count} عملية معلّقة، ${state.failedCount} منها محتاجة مراجعة (اتحفظت على الجهاز، مش على الخادم بعد).`;
+            } else if (!navigator.onLine) {
+                text.textContent = `📦 ${state.count} عملية هتتسجل تلقائيًا لما النت يرجع.`;
+            } else {
+                text.textContent = `📦 ${state.count} عملية في الانتظار.`;
+            }
+            syncBtn.disabled = !navigator.onLine || state.syncing;
+        }
+        async function dabbarOfflineFlush(showSyncingState) {
+            if (!window.DabbarOfflineQueue) return;
+            if (showSyncingState) updateOfflineBanner({ ...(await computeOfflineState()), syncing: true });
+            await window.DabbarOfflineQueue.flushQueue({ accessToken });
+        }
+        async function computeOfflineState() {
+            const rows = await window.DabbarOfflineQueue.getAllPending().catch(() => []);
+            return { count: rows.length, failedCount: rows.filter((r) => r.attempts >= 5).length };
+        }
+        if (window.DabbarOfflineQueue) {
+            window.DabbarOfflineQueue.onStateChange((state) => { updateOfflineBanner(state); if (state.count === 0) loadDashboard().catch(() => {}); });
+            window.DabbarOfflineQueue.refreshUI();
+            document.getElementById('quick-manual-offline-sync')?.addEventListener('click', () => dabbarOfflineFlush(true));
+            window.addEventListener('online', () => dabbarOfflineFlush(false));
+            document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && navigator.onLine) dabbarOfflineFlush(false); });
+            // حدث 'online' مش مضمون يحصل دايمًا صح (خصوصًا مع شبكات موبايل بطيئة أو نت ضعيف بيتردد)،
+            // فبنحاول كمان كل 20 ثانية طول ما الصفحة مفتوحة — flushQueue نفسها بترجع فورًا من غير أي طلب لو الطابور فاضي.
+            setInterval(() => { if (navigator.onLine) dabbarOfflineFlush(false); }, 20000);
+            dabbarOfflineFlush(false); // نحاول أول ما الصفحة تتفتح، لو فيه عمليات معلّقة من زيارة سابقة
+        }
+
         document.getElementById('quick-manual-save')?.addEventListener('click', async () => {
             const type = document.querySelector('.quick-manual-type.active')?.dataset.type || 'expense';
             const amount = Number(document.getElementById('quick-manual-amount')?.value);
@@ -10346,15 +10397,27 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
                 const person = document.getElementById('quick-manual-person')?.value.trim() || '';
                 const direction = document.querySelector('.quick-manual-dir.active')?.dataset.dir || 'lent';
                 if (!person) return quickStatus('اكتب اسم الشخص الأول.', 'error');
+                const debtPayload = { person, amount, direction, note: description };
                 button.disabled = true; quickStatus('جاري حفظ الدين...');
                 try {
-                    const response = await fetch('/api?route=manual-debt', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({ person, amount, direction, note: description }) });
+                    if (window.DabbarOfflineQueue && !navigator.onLine) throw new TypeError('Failed to fetch'); // من غير نت من الأساس: نروح على الطابور فورًا من غير ما نستنى مهلة الطلب
+                    const response = await fetch('/api?route=manual-debt', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` }, body: JSON.stringify(debtPayload) });
                     const data = await response.json().catch(() => ({}));
                     if (!response.ok) throw new Error(data.error || 'تعذر حفظ الدين.');
                     quickStatus(data.message || 'تم حفظ الدين بنجاح.', 'success'); celebrateSave('quick-manual-success-fx');
                     document.getElementById('quick-manual-amount').value = ''; document.getElementById('quick-manual-description').value = ''; document.getElementById('quick-manual-person').value = '';
                     await loadDashboard();
-                } catch (error) { quickStatus(error.message || 'تعذر حفظ الدين.', 'error'); } finally { button.disabled = false; }
+                } catch (error) {
+                    if (window.DabbarOfflineQueue && window.DabbarOfflineQueue.isNetworkFailure(error)) {
+                        await window.DabbarOfflineQueue.enqueue({ kind: 'manual-debt', payload: debtPayload, label: `دين ${person} — ${amount}` });
+                        await window.DabbarOfflineQueue.refreshUI();
+                        quickStatus('📦 مفيش نت دلوقتي — الدين اتحفظ على جهازك وهيتسجل تلقائيًا لما النت يرجع.', 'success');
+                        celebrateSave('quick-manual-success-fx');
+                        document.getElementById('quick-manual-amount').value = ''; document.getElementById('quick-manual-description').value = ''; document.getElementById('quick-manual-person').value = '';
+                    } else {
+                        quickStatus(error.message || 'تعذر حفظ الدين.', 'error');
+                    }
+                } finally { button.disabled = false; }
                 return;
             }
 
@@ -10363,15 +10426,27 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
             const customCategory = document.getElementById('quick-manual-custom-category')?.value.trim() || '';
             if (categoryValue === 'other' && !customCategory) { document.getElementById('quick-manual-cat-error')?.classList.remove('hidden'); return; }
             const category = categoryValue === 'other' ? customCategory : categoryValue;
+            const actionPayload = { type, amount, category, description };
             button.disabled = true; quickStatus('جاري حفظ العملية...');
             try {
-                const response = await fetch('/api?route=financial-actions', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({ type, amount, category, description }) });
+                if (window.DabbarOfflineQueue && !navigator.onLine) throw new TypeError('Failed to fetch');
+                const response = await fetch('/api?route=financial-actions', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` }, body: JSON.stringify(actionPayload) });
                 const data = await response.json().catch(() => ({}));
                 if (!response.ok) throw new Error(data.error || 'تعذر حفظ العملية.');
                 quickStatus(type === 'income' ? 'تم حفظ الدخل بنجاح.' : 'تم حفظ المصروف بنجاح.', 'success'); celebrateSave('quick-manual-success-fx');
                 document.getElementById('quick-manual-amount').value = ''; document.getElementById('quick-manual-description').value = ''; document.getElementById('quick-manual-custom-category').value = ''; document.getElementById('quick-manual-custom-category').classList.add('hidden');
                 await loadDashboard();
-            } catch (error) { quickStatus(error.message || 'تعذر حفظ العملية.', 'error'); } finally { button.disabled = false; }
+            } catch (error) {
+                if (window.DabbarOfflineQueue && window.DabbarOfflineQueue.isNetworkFailure(error)) {
+                    await window.DabbarOfflineQueue.enqueue({ kind: 'financial-action', payload: actionPayload, label: `${category} — ${amount}` });
+                    await window.DabbarOfflineQueue.refreshUI();
+                    quickStatus(`📦 مفيش نت دلوقتي — ${type === 'income' ? 'الدخل' : 'المصروف'} اتحفظ على جهازك وهيتسجل تلقائيًا لما النت يرجع.`, 'success');
+                    celebrateSave('quick-manual-success-fx');
+                    document.getElementById('quick-manual-amount').value = ''; document.getElementById('quick-manual-description').value = ''; document.getElementById('quick-manual-custom-category').value = ''; document.getElementById('quick-manual-custom-category').classList.add('hidden');
+                } else {
+                    quickStatus(error.message || 'تعذر حفظ العملية.', 'error');
+                }
+            } finally { button.disabled = false; }
         });
         document.getElementById('quick-entry-edit')?.addEventListener('click', () => { quickShow('quick-entry-draft', false); quickShow('quick-entry-form', true); document.getElementById('quick-entry-input').value = quickEntrySourceText || ''; });
         document.getElementById('quick-entry-analyze')?.addEventListener('click', () => { const text = document.getElementById('quick-entry-input')?.value.trim(); if (!text) return quickStatus('اكتب العملية الأول.', 'error'); analyzeQuickEntry({ text }); });

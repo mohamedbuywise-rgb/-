@@ -7,7 +7,9 @@ const PRECACHE_URLS = [
   './dabbar-quick-add.html',
   './manifest.json',
   './icons/icon-192.png',
-  './icons/icon-512.png'
+  './icons/icon-512.png',
+  './icons/badge-mono-96.png',
+  './dabbar-offline-queue.js'
 ];
 
 self.addEventListener('install', (event) => {
@@ -33,7 +35,7 @@ self.addEventListener('push', (event) => {
   const options = {
     body: payload.body || 'عندك تحديث جديد في دبّر.',
     icon: payload.icon || './icons/icon-192.png',
-    badge: payload.badge || './icons/icon-192.png',
+    badge: payload.badge || './icons/badge-mono-96.png',
     tag: payload.tag || 'dabbar-notification',
     renotify: Boolean(payload.renotify),
     dir: 'rtl',
@@ -70,7 +72,7 @@ function showQuickAccessNotification() {
   return self.registration.showNotification('دبّر — وصول سريع', {
     body: 'سجّل عملية بصوتك أو بالكتابة على طول',
     icon: './icons/icon-192.png',
-    badge: './icons/icon-192.png',
+    badge: './icons/badge-mono-96.png',
     tag: QUICK_ACCESS_TAG,
     renotify: false,
     silent: true,

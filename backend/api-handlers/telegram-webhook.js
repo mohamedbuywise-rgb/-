@@ -1,4 +1,4 @@
-import { transcribeVoice, classifyMessage, answerDataQuestion, extractItemizedReceiptFromImage } from '../../lib/groq.js';
+import { transcribeAndClassifyVoice, classifyMessage, answerDataQuestion, extractItemizedReceiptFromImage } from '../../lib/groq.js';
 import { recordInvoice, deleteInvoiceById } from '../../lib/invoices.js';
 import { sendTelegramMessage, forwardTelegramMessage, answerCallbackQuery, editTelegramMessage, sendChatAction } from '../../lib/telegram.js';
 import { recordExpense, sendMonthlyReport, sendWeeklyReport, sendDataExport, sendExpenseSearch, deleteExpenseById, updateExpenseById, getMostRecentExpense, getRecentExpensesSummaryText } from '../../lib/expenses.js';
@@ -508,8 +508,11 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true });
       }
 
-      const text = await transcribeVoice(message.voice.file_id);
-      await routeUserMessage(text, userId, chatId, { fromVoice: true });
+      const voiceResult = await transcribeAndClassifyVoice(message.voice.file_id);
+      await routeUserMessage(voiceResult.transcript, userId, chatId, {
+        fromVoice: true,
+        preClassifiedTransactions: voiceResult.transactions,
+      });
       return res.status(200).json({ ok: true });
     }
 
@@ -556,7 +559,7 @@ export default async function handler(req, res) {
 // بتفحص الأوامر الثابتة الأول (تقرير/ديون/دور على/صدّر البيانات)، ولو مفيش أمر معروف تعتبرها
 // مصروف أو دين أو تسوية وتبعتها للتصنيف الذكي. المسار ده واحد لكل من الكتابة والصوت، عشان
 // أي أمر بتقوله بالصوت يشتغل بالظبط زي ما لو كتبته.
-async function routeUserMessage(text, userId, chatId, { fromVoice = false } = {}) {
+async function routeUserMessage(text, userId, chatId, { fromVoice = false, preClassifiedTransactions = null } = {}) {
   if (!text) {
     await sendTelegramMessage(chatId, 'معرفتش أفهم الرسالة، ممكن تعيدها؟');
     return;
@@ -780,7 +783,12 @@ async function handleIncomingText(text, userId, chatId, { fromVoice = false } = 
     }
   }
 
-  const parsedTransactions = (await classifyMessage(text)).map((item) => normalizeFinancialTransaction(item, text));
+  // لو جايين من فويس واتصنفت المعاملات بالفعل في نفس نداء الصوت (المسار المدمج عبر Gemini)، مستخدمهاش
+  // تاني وبنستخدم اللي وصل جاهز بدل ما نعمل نداء classifyMessage تاني زيادة (بيوفر round trip كامل).
+  const rawTransactions = (preClassifiedTransactions && preClassifiedTransactions.length)
+    ? preClassifiedTransactions
+    : await classifyMessage(text);
+  const parsedTransactions = rawTransactions.map((item) => normalizeFinancialTransaction(item, text));
   let transactions = reconcileSingleTransaction(correctDebtDirections(text, parsedTransactions), text);
   // fallback آمن للجمل الصوتية القصيرة مثل "غدا مية جنيه" إذا أعاد المصنّف unknown.
   if (!transactions.some((t) => (t?.type === 'expense' || t?.type === 'purchase' || t?.type === 'asset' || t?.type === 'debt') && Number(t.amount) > 0)) {

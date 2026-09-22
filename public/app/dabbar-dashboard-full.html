@@ -10786,12 +10786,11 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
                         quickStatus('');
                         return;
                     }
-                    if (quickEntrySeconds < 5) {
-                        quickEntryVoiceBlob = null;
-                        quickShow('quick-entry-voice-preview', false);
-                        quickStatus('التسجيل قصير جدًا. أقل مدة لتسجيل الصوت هي 5 ثواني — اتكلم شوية كمان وسجّل من جديد.', 'error');
-                        return;
-                    }
+                    // ============ مفيش حد أدنى لمدة التسجيل ============
+                    // شلنا شرط الـ 5 ثواني — Gemini (المسار المدمج الجديد في groq.js) بيقدر يفهم
+                    // تسجيلات قصيرة جدًا كويس (زي "غدا 100 جنيه" في ثانية وحدة)، فمفيش داعي نرفض
+                    // تسجيل قصير قبل حتى ما نجربه. فحص الملف الفارغ (blob.size < 200) تحت لسه شغال
+                    // عشان يمنع بس التسجيل اللي مفيهوش صوت خالص.
                     const blob = new Blob(quickEntryChunks, { type: quickEntryRecorder.mimeType || mimeType || 'audio/webm' });
                     console.warn('DABBAR_VOICE_DEBUG', { size: blob.size, chunks: quickEntryChunks.length, mime: blob.type, seconds: quickEntrySeconds, hadSound: quickEntryHadSound });
                     if (!blob.size) { quickStatus('مسجلناش أي صوت خالص — جرّب تسمح للمتصفح بالميكروفون من إعدادات الموقع وحاول تاني.', 'error'); return; }

@@ -277,7 +277,6 @@
 
         /* كارت فرص التوفير */
         .dabbar-savings-card { border: 1px solid var(--pm-hairline); background: linear-gradient(160deg, color-mix(in srgb, var(--pm-gold, #10b981) 10%, var(--pm-surface-hi, #0b0e18)) 0%, var(--pm-surface-hi, #0b0e18) 65%); }
-        .dabbar-plain-card { border: 1px solid var(--pm-hairline); background: var(--pm-surface-hi); }
         .dabbar-savings-row { display:flex; align-items:center; justify-content:space-between; font-size:.66rem; background: var(--pm-surface-soft, rgba(0,0,0,.18)); border-radius:.7rem; padding:.4rem .6rem; }
         .dabbar-savings-row-label { color: var(--pm-ink-dim, #d7d0c3); font-weight:700; }
         .dabbar-savings-row-amount { color: var(--pm-gold-bright, #10b981); font-weight:900; }
@@ -3534,6 +3533,16 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
                 </div>
             </section>
 
+            <!-- كارت فرص التوفير — أول حاجة يشوفها المستخدم؛ قابل للطي بس مفتوح افتراضيًا عشان يبقى "لحظة القيمة" الأولى -->
+            <details id="savings-opportunities-card" class="hidden relative overflow-hidden rounded-3xl p-4 shadow-lg dabbar-savings-card savings-opportunities-details" open>
+                <div class="dabbar-metric-glow" aria-hidden="true"></div>
+                <summary class="relative text-[11px] font-bold dabbar-metric-label"><span>💡</span><span>فرص التوفير الشهر ده</span></summary>
+                <div class="relative savings-opportunities-body">
+                    <p class="text-base font-black dabbar-metric-title leading-relaxed">دَبّر لقى لك <span id="savings-total" class="dabbar-metric-value-accent">—</span> ممكن توفرهم</p>
+                    <div id="savings-breakdown" class="space-y-1.5"></div>
+                </div>
+            </details>
+
             <section id="push-nudge-banner" class="hidden relative overflow-hidden rounded-3xl p-4 flex items-center gap-3 bg-gradient-to-br from-amber-500/15 to-slate-900 border border-amber-500/30" aria-label="تفعيل إشعارات دبّر">
                 <span class="w-9 h-9 shrink-0 rounded-xl bg-amber-500/15 border border-amber-500/25 flex items-center justify-center text-base">🔔</span>
                 <div class="flex-1 min-w-0">
@@ -3544,8 +3553,7 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
                 <button type="button" id="push-nudge-close" aria-label="إغلاق" class="shrink-0 w-6 h-6 flex items-center justify-center rounded-full text-slate-500 hover:bg-slate-800 text-sm">✕</button>
             </section>
 
-            <!-- سجّل عمليتك الآن — أول حاجة يشوفها المستخدم؛ الكارت الوحيد بالتدرج الأخضر -->
-            <section id="quick-entry-card" class="relative bg-gradient-to-br from-emerald-50 via-white to-teal-50 border border-emerald-200 rounded-[28px] p-4 space-y-3 shadow-[0_12px_35px_rgba(16,185,129,.14)] dark:from-[#0f6e56] dark:via-[#10b981] dark:to-[#34d399] dark:border-[#0d9668] dark:shadow-[0_14px_32px_rgba(16,185,129,.35)]" aria-label="إضافة عملية مالية">
+            <section id="quick-entry-card" class="relative bg-gradient-to-br from-emerald-50 via-white to-teal-50 border border-emerald-200 rounded-[28px] p-4 space-y-3 shadow-[0_12px_35px_rgba(16,185,129,.14)] dark:bg-slate-950/60 dark:from-slate-950/60 dark:via-slate-950/60 dark:to-slate-900 dark:border-slate-800" aria-label="إضافة عملية مالية">
                 <div id="dabbar-celebrate-fx" aria-hidden="true"></div>
                 <div id="dabbar-magic-fx" aria-hidden="true"></div>
                 <div class="q-head"><div class="q-icon" aria-hidden="true">✨</div><div class="q-titles"><span class="quick-entry-eyebrow">ابدأ من هنا</span><h3 class="q-title">سجّل عمليتك الآن</h3><p class="q-sub">صوت أو كتابة أو صوّر الفاتورة — في ثواني</p></div><span id="dabbar-magic-chip" class="dabbar-magic-chip"><span class="dabbar-magic-chip-dot"></span><span id="dabbar-magic-label">جاهز يفهمها</span></span></div>
@@ -3620,17 +3628,7 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
                 </div>
             </section>
 
-            <!-- كارت فرص التوفير — تدرج أبيض عادي زي باقي الكروت -->
-            <details id="savings-opportunities-card" class="hidden relative overflow-hidden rounded-3xl p-4 shadow-lg dabbar-savings-card savings-opportunities-details" open>
-                <div class="dabbar-metric-glow" aria-hidden="true"></div>
-                <summary class="relative text-[11px] font-bold dabbar-metric-label"><span>💡</span><span>فرص التوفير الشهر ده</span></summary>
-                <div class="relative savings-opportunities-body">
-                    <p class="text-base font-black dabbar-metric-title leading-relaxed">دَبّر لقى لك <span id="savings-total" class="dabbar-metric-value-accent">—</span> ممكن توفرهم</p>
-                    <div id="savings-breakdown" class="space-y-1.5"></div>
-                </div>
-            </details>
-
-            <!-- كارت "المتاح ليك تصرفه" الموحّد: بديل صافي ثروتك، بيظهر بس لما العميل يحدد دخله أو ميزانيته — تدرج أبيض عادي -->
+            <!-- كارت "المتاح ليك تصرفه" الموحّد: بديل صافي ثروتك، بيظهر بس لما العميل يحدد دخله أو ميزانيته -->
             <details id="available-collapsible" class="dabbar-collapsible-section relative overflow-hidden rounded-3xl p-4 shadow-lg dabbar-savings-card" open>
                 <summary class="dabbar-collapsible-summary">
                     <span class="dabbar-collapsible-summary-label">💰 الدخل والميزانية الشهر ده</span>
@@ -10231,6 +10229,7 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
             var fx = document.getElementById(typeof target === 'string' ? target : 'dabbar-celebrate-fx');
             if (!fx || dabbarCelebrateActive) return;
             dabbarCelebrateActive = true;
+            try { dabbarReward(); } catch (e) {}
             var isManualSuccess = target === 'quick-manual-success-fx';
             fx.classList.toggle('is-manual-success', isManualSuccess);
             fx.innerHTML = '';
@@ -12781,6 +12780,42 @@ html[data-theme="light"] #dbo-backdrop::before,html[data-theme="light"] #dbo-bac
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', build); else build();
 })();
+</script>
+<style id="dabbar-reward-css">
+#dbr{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));width:min(340px,92vw);z-index:99999;transform:translate(-50%,130%);transition:transform .5s cubic-bezier(.2,1.15,.3,1);background:var(--pm-surface-hi,#26282c);color:var(--pm-ink,#f5f5f4);border:1px solid var(--pm-hairline,rgba(255,255,255,.12));border-radius:24px;padding:16px 16px 14px;text-align:center;box-shadow:0 18px 50px rgba(0,0,0,.4);font-family:inherit;direction:rtl}
+#dbr.on{transform:translate(-50%,0)}
+#dbr .xp{display:inline-block;background:var(--pm-gold-bright,#16a878);color:#0b1a12;font-weight:900;padding:2px 14px;border-radius:99px;font-size:.85rem}
+#dbr h4{font-size:1.1rem;font-weight:900;margin:8px 0 0}
+#dbr p{font-size:.75rem;opacity:.7;margin-top:6px}
+#dbr .dots{display:flex;gap:7px;justify-content:center;margin:12px 0 2px}
+#dbr .dots span{width:28px;height:28px;border-radius:50%;background:color-mix(in srgb,currentColor 14%,transparent);display:grid;place-items:center;font-size:.75rem;font-weight:900}
+#dbr .dots .f{background:var(--pm-gold-bright,#16a878);color:#0b1a12}
+#dbr .dots .n{background:none;border:2px dashed var(--pm-gold-bright,#16a878);animation:dbrNx 1.2s infinite .8s}
+#dbr.on .pop{animation:dbrPop .45s cubic-bezier(.2,1.7,.4,1) both;animation-delay:calc(var(--i)*80ms + 200ms)}
+@keyframes dbrPop{from{opacity:0;transform:scale(.3) translateY(12px)}}
+@keyframes dbrNx{50%{transform:scale(1.2);box-shadow:0 0 12px var(--pm-gold-bright,#16a878)}}
+</style>
+<script id="dabbar-reward-js">
+function dabbarReward(){
+  var K='dabbarStreakV1',d=new Date(),ymd=function(x){return x.getFullYear()+'-'+(x.getMonth()+1)+'-'+x.getDate()};
+  var today=ymd(d),y=new Date(d.getTime()-864e5),st={};
+  try{st=JSON.parse(localStorage.getItem(K))||{}}catch(e){}
+  var n=st.count||0,first=st.last!==today;
+  if(first){n=(st.last===ymd(y))?n+1:1}
+  var early=d.getHours()<10,xp=first?(early?20:10):5;
+  try{localStorage.setItem(K,JSON.stringify({last:today,count:n,xp:(st.xp||0)+xp}))}catch(e){}
+  var ar=function(v){return Number(v).toLocaleString('ar-EG')},pos=((n-1)%7)+1,gift=(n%7===0),dots='';
+  for(var i=1;i<=7;i++){var c=i<=pos?'f':(i===pos+1?'n':''),t=i<=pos?'✓':(i===7?'🎁':ar(i));
+    dots+='<span class="pop '+c+'" style="--i:'+(i+1)+'">'+t+'</span>'}
+  var title=gift?'🎁 كملت أسبوع كامل!':(n>1?'🔥 '+ar(n)+' أيام ورا بعض!':'🔥 بدأت سلسلتك!');
+  var hint=early?'بونص الصبح ×٢ اتحسب ⚡':'سجّل بكرة قبل ١٠ الصبح = نقاط ×٢ ⚡';
+  var el=document.getElementById('dbr');
+  if(!el){el=document.createElement('div');el.id='dbr';document.body.appendChild(el);el.onclick=function(){el.classList.remove('on')}}
+  el.classList.remove('on');
+  el.innerHTML='<span class="xp pop" style="--i:0">+'+ar(xp)+' نقطة ⚡</span><h4 class="pop" style="--i:1">'+title+'</h4><div class="dots">'+dots+'</div><p class="pop" style="--i:9">'+hint+'</p>';
+  clearTimeout(el._t);
+  setTimeout(function(){void el.offsetWidth;el.classList.add('on');el._t=setTimeout(function(){el.classList.remove('on')},3800)},1000);
+}
 </script>
 </body>
 </html>

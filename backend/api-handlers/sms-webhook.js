@@ -180,6 +180,7 @@ function validateAiItems(aiItems, rawText, parsed) {
       fee: Number.isFinite(Number(raw.fee)) && Number(raw.fee) > 0 ? Number(raw.fee) : (fee ?? null),
       reference: parsed.items?.[0]?.reference || '',
       card_last4: parsed.items?.[0]?.card_last4 || '',
+      account_last4: parsed.items?.[0]?.account_last4 || '',
     };
     if (candidate.type === 'transfer') {
       normalized.direction = direction || ruleDirection || 'out';
@@ -305,7 +306,7 @@ export default async function handler(req, res) {
     }
 
     // ============ 5) التسجيل + الإشعار ============
-    const sourceMeta = { source: 'sms', bank_key: bankMatch.key, bank_label: bankMatch.label, bank_sender: senderName };
+    const sourceMeta = { source: 'sms', bank_key: bankMatch.key, bank_label: bankMatch.label, bank_sender: senderName, account_last4: '' };
     let recorded = 0;
     const failures = [];
     let pushSent = 0;
@@ -317,7 +318,7 @@ export default async function handler(req, res) {
       const category = CATEGORIES.includes(item.category) ? item.category : 'تسوق';
 
       if (type === 'expense') {
-        await recordExpense({ ...item, type, category }, rawText, telegramUserId, chatId, `\n\n🏦 اتسجلت أوتوماتيك من رسالة ${bankMatch.label}`, sourceMeta);
+        await recordExpense({ ...item, type, category }, rawText, telegramUserId, chatId, `\n\n🏦 اتسجلت أوتوماتيك من رسالة ${bankMatch.label}${item.account_last4 ? ` (حساب ••${item.account_last4})` : ''}`, { ...sourceMeta, account_last4: item.account_last4 || '' });
         recorded += 1;
       } else if (['income', 'deposit', 'withdrawal', 'transfer', 'refund'].includes(type)) {
         // دخل/إيداع/سحب/تحويل/استرداد → financial_events، وبتظهر في "الحركات البنكية" ومش بتدخل إجمالي المصروفات.
@@ -329,6 +330,7 @@ export default async function handler(req, res) {
           bank_key: bankMatch.key,
           bank_label: bankMatch.label,
           bank_sender: senderName,
+          account_last4: item.account_last4 || '',
           source: 'sms',
           parsed_by: parsedBy,
         }, telegramUserId);
@@ -344,7 +346,7 @@ export default async function handler(req, res) {
         amount: item.amount,
         currency: item.currency_code || 'EGP',
         merchant: type === 'transfer' ? (item.counterparty || '') : (item.item || item.note || ''),
-        bank: bankMatch.label,
+        bank: item.account_last4 ? `${bankMatch.label} ••${item.account_last4}` : bankMatch.label,
         balance: item.balance,
       });
       pushSent += Number(pushResult?.sent || 0);

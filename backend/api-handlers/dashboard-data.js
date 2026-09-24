@@ -245,6 +245,56 @@ export default async function handler(req, res) {
         .then(({ data }) => data || []),
       getActiveSubscribersCount(),
     ]);
+    // ---- حركات النهاردة البنكية/المالية (دخل، إيداع، سحب، تحويل، استرداد) — بتظهر في "عمليات النهاردة" مع المصاريف ----
+    // (مصاريف الـ SMS أصلاً موجودة في today.items لأنها بتتسجل في جدول expenses)
+    const TODAY_MOVEMENT_TYPES = ['income', 'deposit', 'withdrawal', 'transfer', 'refund'];
+    let todayMovementRows = [];
+    try {
+      let mv = await supabase
+        .from('financial_events')
+        .select('id, event_type, amount, currency_code, category, description, direction, needs_review, counterparty, metadata, created_at')
+        .eq('telegram_user_id', dataUserId)
+        .in('event_type', TODAY_MOVEMENT_TYPES)
+        .gte('created_at', startOfDay.toISOString())
+        .lt('created_at', endOfDay.toISOString())
+        .order('created_at', { ascending: false });
+      if (mv.error) {
+        // قاعدة بيانات قديمة من غير أعمدة المراجعة/metadata: نعيد بالحقول الأساسية
+        mv = await supabase
+          .from('financial_events')
+          .select('id, event_type, amount, currency_code, category, description, direction, created_at')
+          .eq('telegram_user_id', dataUserId)
+          .in('event_type', TODAY_MOVEMENT_TYPES)
+          .gte('created_at', startOfDay.toISOString())
+          .lt('created_at', endOfDay.toISOString())
+          .order('created_at', { ascending: false });
+      }
+      todayMovementRows = mv.data || [];
+    } catch (movementError) {
+      console.error('dashboard-data today movements error:', movementError);
+    }
+    const todayMovements = todayMovementRows.map((m) => ({
+      id: m.id,
+      event_type: m.event_type,
+      direction: m.direction || 'neutral',
+      amount: Number(m.amount),
+      currency_code: m.currency_code || 'EGP',
+      category: m.category || null,
+      description: m.description || '',
+      counterparty: m.counterparty || '',
+      needs_review: Boolean(m.needs_review),
+      bank_label: m.metadata?.bank_label || '',
+      bank_key: m.metadata?.bank_key || '',
+      account_last4: m.metadata?.account_last4 || '',
+      source: m.metadata?.source || null,
+      created_at: m.created_at,
+    }));
+    let accountAliases = [];
+    try {
+      const { data: aliasRows, error: aliasError } = await supabase
+        .from('bank_account_aliases').select('bank_key, last4, nickname').eq('telegram_user_id', dataUserId);
+      if (!aliasError) accountAliases = aliasRows || [];
+    } catch { /* الجدول اختياري */ }
     const installmentsMonthlyTotal = installmentReminders.reduce((sum, r) => sum + Number(r.amount || 0), 0);
 
     // ---- الاشتراك/التجربة: subInTrial محتاج نتيجة subActive الأول، فبيفضل استعلام إضافي واحد بس لو لازم ----
@@ -429,6 +479,8 @@ export default async function handler(req, res) {
         count: todayExpenses.length,
         avgPerDayThisMonth,
         avgPerActiveDay,
+          movements: todayMovements,
+          accountAliases,
           byCurrency: todayByCurrency,
           items: todayExpenses.map((e) => ({
           id: e.id,
@@ -439,6 +491,8 @@ export default async function handler(req, res) {
           created_at: e.created_at,
           source: e.source || null,
           source_bank_label: e.source_bank_label || null,
+          source_bank_key: e.source_bank_key || null,
+          source_account_last4: e.source_account_last4 || null,
         })),
       },
       month: {

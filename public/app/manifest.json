@@ -81,19 +81,47 @@
   },
   "shortcuts": [
     {
-      "name": "إدخال سريع",
-      "short_name": "إدخال سريع",
-      "url": "./dabbar-quick-add.html",
+      "name": "أضف مصروف",
+      "short_name": "مصروف",
+      "url": "./dabbar-dashboard-full.html?quick=expense",
       "icons": [
-        { "src": "./icons/icon-192.png", "sizes": "192x192" }
+        {
+          "src": "./icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "أضف دخل",
+      "short_name": "دخل",
+      "url": "./dabbar-dashboard-full.html?quick=income",
+      "icons": [
+        {
+          "src": "./icons/icon-192.png",
+          "sizes": "192x192"
+        }
       ]
     },
     {
       "name": "تسجيل صوت",
-      "short_name": "تسجيل صوت",
+      "short_name": "صوت",
       "url": "./dabbar-dashboard-full.html?quick=voice",
       "icons": [
-        { "src": "./icons/icon-192.png", "sizes": "192x192" }
+        {
+          "src": "./icons/icon-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    },
+    {
+      "name": "إدخال سريع",
+      "short_name": "إدخال سريع",
+      "url": "./dabbar-quick-add.html",
+      "icons": [
+        {
+          "src": "./icons/icon-192.png",
+          "sizes": "192x192"
+        }
       ]
     }
   ]

@@ -434,7 +434,7 @@
   $('open-app-btn')?.addEventListener('click', () => { window.location.href = './dabbar-dashboard-full.html'; });
 
   // ============ التسجيل الصوتي المباشر داخل الصفحة (Web Audio / MediaRecorder) ============
-  // نفس منطق ونفس حدود لوحة التحكم الرئيسية (5 ثواني كحد أدنى، 30 ثانية كحد أقصى) عشان تجربة موحدة.
+  // نفس منطق ونفس حدود لوحة التحكم الرئيسية (بدون حد أدنى، 30 ثانية كحد أقصى) عشان تجربة موحدة.
   let recorder = null;
   let chunks = [];
   let seconds = 0;
@@ -636,11 +636,6 @@
         stopLiveVoiceWave();
         clearInterval(timerHandle);
         show('voice-recording', false);
-        if (seconds < 5) {
-          $('status').textContent = 'التسجيل قصير جدًا. اتكلم شوية كمان وسجّل من جديد.';
-          show('voice-idle', true);
-          return;
-        }
         const blob = new Blob(chunks, { type: recorder.mimeType || mimeType || 'audio/webm' });
         if (!blob.size) {
           $('status').textContent = 'مسجلناش أي صوت — تأكد من إذن الميكروفون وجرب تاني.';

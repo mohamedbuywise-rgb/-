@@ -2,7 +2,7 @@ import { supabase } from '../../lib/supabaseClient.js';
 import { getRecentExpensesSummaryText, flagSubscriptionUnused, unflagSubscriptionUnused, getSavingsOpportunities } from '../../lib/expenses.js';
 import { getDebtsSummaryText, createGameya, getGameyaList, toggleGameyaMemberPaid, deleteGameya, createOccasion, getOccasionsSummary, deleteOccasion, updateDebtById } from '../../lib/debts.js';
 import { createDailyPiggybank, getDailyPiggybank, contributeDailyPiggybank, deleteDailyPiggybank } from '../../lib/goals.js';
-import { extractItemizedReceiptFromImageBase64, askDabbarChat, askDabbarRoast, classifyMessage, transcribeAudioBase64 } from '../../lib/groq.js';
+import { extractItemizedReceiptFromImageBase64, askDabbarChat, askDabbarRoast, classifyMessage, transcribeAndClassifyVoiceBase64 } from '../../lib/groq.js';
 import { saveInvoiceRecord, deleteInvoiceById } from '../../lib/invoices.js';
 import { getFeatureAccess, subscriptionRequiredResponse } from '../../lib/subscriptionAccess.js';
 import { checkOcrUsage, checkChatUsage, checkVoiceUsage, checkTextUsage, refundOcrUsage, refundUsage } from '../../lib/rateLimits.js';
@@ -359,6 +359,7 @@ async function handleAsk(userId, body, res) {
 async function handleEntryDraft(userId, body, res) {
   let text = String(body.text || '').trim();
   let voiceUsageCharged = false;
+  let voiceTransactions = null; // ناتج التفريغ+التصنيف المدمج (نداء واحد) عشان منكررش التصنيف
 
   // الإدخال اليدوي النصي له عداد شهري موحد مع رسائل Telegram وSMS.
   // الصوت لا يستهلك هذا العداد؛ هو محسوب في عداد voice مستقل.
@@ -391,13 +392,14 @@ async function handleEntryDraft(userId, body, res) {
     }
     voiceUsageCharged = true;
 
-    const transcript = await transcribeAudioBase64(body.audioBase64, body.mimeType || 'audio/webm');
+    const transcript = await transcribeAndClassifyVoiceBase64(body.audioBase64, body.mimeType || 'audio/webm');
     if (!transcript.success) {
       // الفشل مش غلطة المستخدم (مشكلة تفريغ صوت) — نرجّعله المحاولة اللي اتخصمت من عداده
       await refundUsage(userId, 'voice');
       return res.status(422).json({ error: transcript.error });
     }
-    text = transcript.text;
+    text = transcript.transcript;
+    voiceTransactions = Array.isArray(transcript.transactions) && transcript.transactions.length ? transcript.transactions : null;
   }
   text = normalizeDigits(text);
   if (!text || text.length > 2500) return res.status(400).json({ error: 'اكتب أو سجّل وصفًا واضحًا للمصروف.' });
@@ -405,7 +407,8 @@ async function handleEntryDraft(userId, body, res) {
   // ============ نفس منطق تليجرام بالظبط: الرسالة الواحدة ممكن يكون فيها أكتر من معاملة مع بعض ============
   // (مثلاً "صرفت 50 جنيه أكل و100 مواصلات") — بنرجّعهم كلهم كمسودات عشان المستخدم يراجعهم ويأكدهم مرة واحدة،
   // بدل ما نلقط أول معاملة بس ونسيب الباقي بلا تسجيل زي ما كان الموقع بيعمل قبل كده.
-  const parsed = await classifyMessage(text);
+  // الفويس: التصنيف جه جاهز من نداء Gemini الواحد — مفيش نداء تاني. لو فاضي نرجع للتصنيف النصي.
+  const parsed = voiceTransactions || await classifyMessage(text);
   const normalizedTransactions = (Array.isArray(parsed) ? parsed : []).map((item) => normalizeFinancialTransaction(item, text));
   const reconciledTransactions = reconcileSingleTransaction(correctDebtDirections(text, normalizedTransactions), text);
   // العميل مبيختارش دخل/مصروف يدويًا في الإدخال السريع — دبّر يصنّف كل عملية من كلامه مباشرة (classifyMessage)

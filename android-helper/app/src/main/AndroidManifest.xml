@@ -29,6 +29,22 @@
             </intent-filter>
         </activity>
 
+        <!-- ويدجت دبّر (الملخص + إضافة سريعة) -->
+        <receiver android:name=".DabbarSummaryWidgetProvider" android:exported="true" android:label="دبّر — الملخص والإضافة">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_summary_info" />
+        </receiver>
+        <!-- ويدجت الإضافة السريعة الصغير (كان مكتوب في الكود ومش متسجل في الـ manifest) -->
+        <receiver android:name=".DabbarQuickWidgetProvider" android:exported="true" android:label="دبّر — إضافة سريعة">
+            <intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE" /></intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_quick_entry_info" />
+        </receiver>
+        <!-- بلاطة الإعدادات السريعة "دبّر" -->
+        <service android:name=".DabbarQuickTileService" android:exported="true" android:icon="@drawable/ic_dabbar_tile" android:label="دبّر"
+            android:permission="android.permission.BIND_QUICK_SETTINGS_TILE">
+            <intent-filter><action android:name="android.service.quicksettings.action.QS_TILE" /></intent-filter>
+        </service>
+
         <service
             android:name=".BankNotificationListenerService"
             android:exported="true"

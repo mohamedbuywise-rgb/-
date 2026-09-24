@@ -1,6 +1,6 @@
 // v2: لازم نغيّر الاسم عشان أي جهاز عنده الكاش القديم (اللي كان بيحفظ ردود الـ API غلط)
 // يمسحه فورًا ويبدأ من كاش جديد فاضي — خطوة activate تحت بتمسح أي CACHE_NAME قديم تلقائي.
-const CACHE_NAME = 'dabbar-cache-v6';
+const CACHE_NAME = 'dabbar-cache-v7';
 const PRECACHE_URLS = [
   './dabbar-onboarding.html',
   './dabbar-dashboard-full.html',
@@ -186,6 +186,11 @@ self.addEventListener('fetch', (event) => {
         caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy)).catch(() => {});
         return response;
       })
-      .catch(() => caches.match(event.request))
+      .catch(() =>
+        // أوفلاين: نفس الصفحة من الكاش حتى لو الرابط فيه ?quick=... ؛ وأي فتح للتطبيق (navigate) يرجع للداشبورد المحفوظة بدل صفحة "مفيش إنترنت"
+        caches.match(event.request, { ignoreSearch: true }).then((cached) =>
+          cached || (event.request.mode === 'navigate' ? caches.match('./dabbar-dashboard-full.html', { ignoreSearch: true }) : undefined)
+        )
+      )
   );
 });

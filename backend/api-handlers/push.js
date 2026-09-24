@@ -5,6 +5,7 @@ import {
   getPushSubscriptionStatus,
   getVapidPublicKey,
   isPushConfigured,
+  normalizeTimeZone,
   removePushSubscription,
   saveNotificationPreferences,
   savePushSubscription,
@@ -45,6 +46,19 @@ export default async function handler(req, res) {
         preferences,
         server,
       });
+    }
+
+    // مزامنة صامتة لتوقيت جهاز المستخدم (لو سافر أو غيّر المنطقة الزمنية) من غير ما نلمس باقي إعداداته.
+    if (req.method === 'POST' && req.body?.action === 'sync_timezone') {
+      const current = await getNotificationPreferences(user.dataUserId);
+      const timezone = normalizeTimeZone(req.body?.timezone, current.timezone);
+      if (timezone === current.timezone) return res.status(200).json({ ok: true, changed: false, timezone });
+      const saved = await saveNotificationPreferences({
+        authUserId: user.authUserId,
+        telegramUserId: user.dataUserId,
+        preferences: { ...current, timezone },
+      });
+      return res.status(200).json({ ok: true, changed: true, timezone: saved.timezone });
     }
 
     if (req.method === 'POST' && req.body?.action === 'test') {

@@ -1,0 +1,23 @@
+-- ============================================================================
+-- جدولة الإشعارات كل دقيقة (عشان توصل في نفس الدقيقة اللي ضبطتها، زي رسايل البنك)
+-- ----------------------------------------------------------------------------
+-- ليه محتاجينه؟ Vercel (الخطة المجانية) بيشغّل الكرون مرتين في اليوم بس، فالتذكيرات كانت بتتأخر لحد ما ييجي الكرون.
+-- الحل المجاني: Supabase pg_cron بينده /api/push-cron كل دقيقة، والسيرفر بيحسب وقت كل مستخدم بتوقيته الشخصي.
+--
+-- الخطوات (مرة واحدة):
+-- 1) Supabase -> Database -> Extensions: فعّل pg_cron و pg_net.
+-- 2) غيّر YOUR-DOMAIN و YOUR_CRON_SECRET تحت (نفس قيمة CRON_SECRET في Vercel Environment Variables).
+-- 3) شغّل الملف في SQL Editor.
+-- لمعرفة الحالة:   select * from cron.job;   وللإيقاف:   select cron.unschedule('dabbar-push-every-minute');
+-- ============================================================================
+select cron.schedule(
+  'dabbar-push-every-minute',
+  '* * * * *',
+  $$
+  select net.http_get(
+    url := 'https://YOUR-DOMAIN/api/push-cron',
+    headers := jsonb_build_object('Authorization', 'Bearer YOUR_CRON_SECRET'),
+    timeout_milliseconds := 20000
+  );
+  $$
+);

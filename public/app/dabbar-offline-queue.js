@@ -111,7 +111,7 @@
   async function refreshUI() { notify(await computeState()); }
 
   // ---------- المزامنة ----------
-  async function flushQueue({ accessToken } = {}) {
+  async function flushQueue({ accessToken, getAccessToken } = {}) {
     if (flushing) return { synced: 0, failed: 0, stopped: 'already_running' };
     if (!navigator.onLine) { await refreshUI(); return { synced: 0, failed: 0, stopped: 'offline' }; }
     flushing = true;
@@ -122,12 +122,16 @@
       const rows = await getAllPending();
       for (const entry of rows) {
         try {
+          // توكن طازة قبل كل عملية (التوكن القديمة ممكن تكون انتهت أثناء الأوفلاين)
+          const token = getAccessToken ? await getAccessToken() : accessToken;
           const response = await fetch(endpointFor(entry.kind), {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken || ''}` },
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token || ''}` },
             body: JSON.stringify(entry.payload),
           });
           if (response.ok) { await removeEntry(entry.localId); synced += 1; continue; }
+          // 401 = الجلسة لسه بتتجدد، مش عيب في العملية نفسها: منحسبهاش محاولة فاشلة ونوقف ونكمل في الجولة الجاية
+          if (response.status === 401) { stopped = 'auth'; break; }
           // السيرفر رفض الطلب (400/401/...) — مش مشكلة شبكة، إعادة المحاولة مش هتنجح لوحدها
           const data = await response.json().catch(() => ({}));
           await bumpAttempt(entry.localId, entry, data.error || `HTTP ${response.status}`);

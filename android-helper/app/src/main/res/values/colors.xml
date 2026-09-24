@@ -3,4 +3,6 @@
     <color name="widget_gold">#D6B15E</color>
     <color name="widget_muted">#A6B9B1</color>
     <color name="widget_text">#F5FBF7</color>
+    <color name="widget_income">#34D399</color>
+    <color name="widget_expense">#FB7185</color>
 </resources>

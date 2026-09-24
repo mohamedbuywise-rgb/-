@@ -22,6 +22,7 @@ import supportMessageHandler from '../backend/api-handlers/support-message.js';
 import telegramWebhookHandler from '../backend/api-handlers/telegram-webhook.js';
 import trialSummaryProofHandler from '../backend/api-handlers/trial-summary-proof.js';
 import trialSummaryHandler from '../backend/api-handlers/trial-summary.js';
+import widgetSummaryHandler from '../backend/api-handlers/widget-summary.js';
 
 const handlers = {
   admin: adminHandler,
@@ -48,6 +49,7 @@ const handlers = {
   'telegram-webhook': telegramWebhookHandler,
   'trial-summary-proof': trialSummaryProofHandler,
   'trial-summary': trialSummaryHandler,
+  'widget-summary': widgetSummaryHandler,
 };
 
 export default async function handler(req, res) {

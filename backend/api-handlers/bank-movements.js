@@ -60,9 +60,20 @@ export default async function handler(req, res) {
       return acc;
     }, { withdrawal: 0, deposit: 0, transfer: 0 });
 
+    // أسماء الحسابات (لو عندك أكتر من حساب في نفس البنك) — لو الجدول لسه مش موجود نكمل من غيره
+    let aliases = [];
+    try {
+      const { data: aliasRows, error: aliasError } = await supabase
+        .from('bank_account_aliases')
+        .select('bank_key, last4, nickname')
+        .eq('telegram_user_id', telegramUserId);
+      if (!aliasError) aliases = aliasRows || [];
+    } catch { /* الجدول اختياري */ }
+
     return res.status(200).json({
       ok: true,
       movements,
+      aliases,
       totals,
       bankLinkingEnabled: Boolean(profile?.sms_webhook_enabled),
     });
@@ -70,6 +81,40 @@ export default async function handler(req, res) {
 
   if (req.method === 'POST') {
     const { action, eventId, resolution, person, category, note } = req.body || {};
+    // ============ تسمية حساب: bankKey + آخر ٤ أرقام + اسم (اسم فاضي = مسح الاسم) ============
+    if (action === 'set_alias') {
+      const bankKey = String(req.body?.bankKey || '').slice(0, 60);
+      const last4 = String(req.body?.last4 || '').replace(/\D/g, '').slice(-4);
+      const nickname = String(req.body?.nickname || '').trim().slice(0, 40);
+      if (!bankKey || last4.length < 3) return res.status(400).json({ ok: false, error: 'بيانات الحساب ناقصة.' });
+      const query = nickname
+        ? supabase.from('bank_account_aliases').upsert({ telegram_user_id: telegramUserId, bank_key: bankKey, last4, nickname }, { onConflict: 'telegram_user_id,bank_key,last4' })
+        : supabase.from('bank_account_aliases').delete().eq('telegram_user_id', telegramUserId).eq('bank_key', bankKey).eq('last4', last4);
+      const { error } = await query;
+      if (error) return res.status(500).json({ ok: false, error: 'تعذر حفظ اسم الحساب. اتأكد إنك شغّلت ملف sql/bank-account-aliases.sql.' });
+      return res.status(200).json({ ok: true });
+    }
+
+    // ============ تحديد الحساب يدويًا لحركة رسالتها مفيهاش رقم حساب ============
+    if (action === 'assign_account') {
+      const movementId = String(req.body?.movementId || '');
+      const last4 = String(req.body?.last4 || '').replace(/\D/g, '').slice(-4);
+      if (!movementId || last4.length < 3) return res.status(400).json({ ok: false, error: 'بيانات ناقصة.' });
+      if (movementId.startsWith('expense:')) {
+        const { error } = await supabase.from('expenses').update({ source_account_last4: last4 })
+          .eq('id', movementId.slice('expense:'.length)).eq('telegram_user_id', telegramUserId);
+        if (error) return res.status(500).json({ ok: false, error: 'تعذر تحديد الحساب. اتأكد إنك شغّلت ملف sql/bank-account-aliases.sql.' });
+      } else {
+        const { data: ev } = await supabase.from('financial_events').select('metadata').eq('id', movementId).eq('telegram_user_id', telegramUserId).maybeSingle();
+        if (!ev) return res.status(404).json({ ok: false, error: 'الحركة غير موجودة.' });
+        const { error } = await supabase.from('financial_events')
+          .update({ metadata: { ...(ev.metadata || {}), account_last4: last4 } })
+          .eq('id', movementId).eq('telegram_user_id', telegramUserId);
+        if (error) return res.status(500).json({ ok: false, error: 'تعذر تحديد الحساب.' });
+      }
+      return res.status(200).json({ ok: true });
+    }
+
     if (action !== 'resolve') return res.status(400).json({ ok: false, error: 'action غير معروف.' });
     if (!eventId || !resolution) return res.status(400).json({ ok: false, error: 'بيانات ناقصة.' });
 

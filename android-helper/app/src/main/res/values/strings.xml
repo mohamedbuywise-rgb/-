@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">دبّر — تتبع البنك</string>
+    <string name="widget_description">إضافة سريعة لمصروف أو دخل أو صوت</string>
+    <string name="widget_summary_description">ملخص الشهر (الرصيد والدخل والمصروف) مع إضافة مصروف أو دخل بضغطة</string>
 </resources>

@@ -3540,13 +3540,26 @@ button:active, .quick-entry-tab:active { transition-duration: .06s; }
 .dabbar-process-card.is-leaving { animation: dabbarProcessCardOut .18s ease both; }
 @keyframes dabbarProcessCardIn { from { opacity:0; transform:translateY(6px) scale(.96); } to { opacity:1; transform:none; } }
 @keyframes dabbarProcessCardOut { to { opacity:0; transform:scale(.94); } }
-.dabbar-process-icon { width:2.6rem; height:2.6rem; border-radius:999px; display:flex; align-items:center; justify-content:center; font-size:1.25rem;
-  background:radial-gradient(circle at 35% 25%, color-mix(in srgb, var(--pm-gold-bright, #10b981) 85%, white 15%), var(--pm-gold, #0e655b));
-  animation: dabbarProcessIconPulse 1s ease-in-out infinite; }
-@keyframes dabbarProcessIconPulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.12); } }
+.dabbar-process-spinner { width:1.15rem; height:1.15rem; border-radius:999px; border:2px solid color-mix(in srgb, var(--pm-gold-bright, #10b981) 25%, transparent); border-top-color:var(--pm-gold-bright, #10b981); animation: dabbarSpin .6s linear infinite; }
+@keyframes dabbarSpin { to { transform:rotate(360deg); } }
 .dabbar-process-text { font-size:.78rem; font-weight:800; color:var(--pm-ink); text-align:center; white-space:nowrap; }
-.dabbar-process-track { width:9.5rem; height:.28rem; border-radius:999px; overflow:hidden; background:color-mix(in srgb, var(--pm-gold-bright, #10b981) 12%, transparent); }
-.dabbar-process-fill { height:100%; width:0%; border-radius:999px; background:linear-gradient(90deg, var(--pm-gold-dim, #7fa329), var(--pm-gold-bright, #10b981)); }
+
+/* ============ توست نجاح بسيط واحترافي — تشيك صغير + نص واحد، بدل الكونفيتي/الحلقات/الصوت المركب القديم ============ */
+.dabbar-simple-toast{
+  display:flex; align-items:center; gap:.5rem; background:var(--pm-surface-hi, #1e293b);
+  border:1px solid color-mix(in srgb, var(--pm-gold-bright, #10b981) 35%, transparent);
+  border-radius:999px; padding:.5rem .9rem; box-shadow:0 10px 26px rgba(0,0,0,.3);
+  opacity:0; transform:translateY(8px) scale(.97); transition:opacity .16s ease, transform .16s ease;
+}
+.dabbar-simple-toast.show{ opacity:1; transform:translateY(0) scale(1); }
+.dabbar-simple-toast .chk{
+  width:1.3rem; height:1.3rem; border-radius:999px; background:var(--pm-gold-bright, #10b981);
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  transform:scale(0); transition:transform .26s cubic-bezier(.34,1.56,.64,1);
+}
+.dabbar-simple-toast.show .chk{ transform:scale(1); }
+.dabbar-simple-toast .chk svg{ width:.68rem; height:.68rem; color:#052e21; }
+.dabbar-simple-toast span:last-child{ font-size:.8rem; font-weight:800; color:var(--pm-ink); white-space:nowrap; }
 
 /* ============ هايلايت العملية اللي لسه اتسجلت في "آخر عملياتك" — بيستخدم متغيرات الثيم فبيتلوّن صح ليلي ونهاري تلقائيًا، ويفضل ١٠ ثواني ============ */
 .ledger-row-new{ border-radius:.75rem; animation: ledgerRowGlow 10s ease-out both; }
@@ -7746,8 +7759,18 @@ button:active, .quick-entry-tab:active { transition-duration: .06s; }
             const items = data?.today?.items || [];
             const events = (data?.month?.financialEvents || []).filter((event) => new Date(event.created_at).toDateString() === new Date().toDateString());
             // ============ لو الفويس (أو أي مسار) سجّل أكتر من ٥ عمليات دفعة واحدة، بنوسّع عدد الصفوف الظاهرة لحد ١٠ عشان محدش يختفي من غير ما يتهايلايت، وبعد المرة دي بترجع تتقفل على ٥ تاني ============
-            const freshCutoff = Date.now() - 20000;
-            const isFresh = (rec) => { const ts = Date.parse(rec?.created_at || ''); return Number.isFinite(ts) && ts >= freshCutoff; };
+            const freshCutoff = Date.now() - 45000;
+            // ============ لو السيرفر رجّع created_at من غير Z أو offset في الآخر (زي "2026-09-25T14:23:00")، المتصفح بيفسّرها Local Time مش UTC،
+            // فبيطلع فرق ساعتين/تلاتة (حسب توقيت مصر) وده بيخلي isFresh ترجع false دايمًا. هنا بنجبر الفورمات ده يتقرا كـ UTC صح ============
+            const parseServerTs = (raw) => {
+                const s = String(raw || '').trim();
+                if (!s) return NaN;
+                const hasTz = /Z$|[+-]\d{2}:?\d{2}$/.test(s);
+                const normalized = hasTz ? s : `${s.replace(' ', 'T')}Z`;
+                const ts = Date.parse(normalized);
+                return Number.isFinite(ts) ? ts : Date.parse(s);
+            };
+            const isFresh = (rec) => { const ts = parseServerTs(rec?.created_at); return Number.isFinite(ts) && ts >= freshCutoff; };
             const expenseDisplayCount = Math.min(10, Math.max(5, items.filter(isFresh).length));
             const eventDisplayCount = Math.min(10, Math.max(5, events.filter(isFresh).length));
             const expenseRows = items.slice(0, expenseDisplayCount).map((item) => `<div class="flex items-center gap-2 border-b border-slate-800/50 py-2 last:border-0" data-created-at="${item.created_at || ''}"><span class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10">${getCategoryEmoji(item.category)}</span><div class="min-w-0 flex-1"><p class="truncate text-[11px] font-bold text-slate-200">${(item.description || item.category || 'مصروف').replace(/[<>]/g, '')}</p><p class="text-[9px] text-slate-500">مصروف · ${item.category || 'عام'}</p></div><span class="text-[11px] font-bold text-rose-400">-${fmt(item.amount, item.currency_code)}</span><button type="button" data-expense-edit="${item.id}" data-expense-amount="${item.amount}" data-expense-description="${(item.description || '').replace(/"/g, '&quot;')}" class="text-[11px] text-slate-500 hover:text-emerald-400" aria-label="تعديل العملية">✎</button><button type="button" data-expense-delete="${item.id}" class="text-[11px] text-slate-500 hover:text-rose-400" aria-label="حذف العملية">✕</button></div>`).join('');
@@ -7756,7 +7779,7 @@ button:active, .quick-entry-tab:active { transition-duration: .06s; }
             // ============ هايلايت كل عملية اتسجلت فعليًا في آخر ٢٠ ثانية (بالاعتماد على created_at الحقيقي بتاعها مش مكانها في الليست) — عشان لو سجّل ١٠ عمليات دفعة واحدة أو ورا بعض كل وحدة تتمّيز بذاتها ============
             let firstFreshRow = null;
             list?.querySelectorAll('[data-created-at]').forEach((row) => {
-                const ts = Date.parse(row.dataset.createdAt || '');
+                const ts = parseServerTs(row.dataset.createdAt);
                 if (!Number.isFinite(ts) || ts < freshCutoff) return;
                 row.classList.add('ledger-row-new');
                 const badge = document.createElement('span');
@@ -10573,120 +10596,54 @@ button:active, .quick-entry-tab:active { transition-duration: .06s; }
             quickStatus('');
         }
         function quickDraftLabel(type) { return typeLabel(type); }
-        // ============ احتفال بصري (عملات + كونفيتي) بعد نجاح الحفظ الفعلي — بيشتغل في الفويس والكتابة والفاتورة ============
+        // ============ نجاح الحفظ — نسخة بسيطة واحترافية: سبينر أثناء التسجيل، وتوست تشيك + صوت قصير بعد النجاح. بدل الكارت/الكونفيتي/الحلقات/الصوت المركب القديم ============
         var dabbarCelebrateActive = false;
-        // ============ أنيميشن نجاح بريميوم: ميدالية تشيك بتترسم + حلقتين نبض + شرارات ذهب خفيفة — بدل الكونفيتي/العملات القديمة اللي شكلها كان هاوي ============
-        // ============ صوت "أ" — 3 طبقات (دبة باس + صفير صاعد + رنة ذهب) بدون أي ملف صوت خارجي ============
+        // ============ صوت تأكيد قصير — نغمة واحدة صاعدة بدل الصوت المركب القديم (٣ طبقات) ============
         var dabbarMagicActx;
         function dabbarMagicCtx() { if (!dabbarMagicActx) dabbarMagicActx = new (window.AudioContext || window.webkitAudioContext)(); return dabbarMagicActx; }
         function playDabbarMagicSound() {
             try {
                 var c = dabbarMagicCtx();
                 var t0 = c.currentTime;
-                var thump = c.createOscillator(), tg = c.createGain();
-                thump.type = 'sine'; thump.frequency.setValueAtTime(160, t0); thump.frequency.exponentialRampToValueAtTime(50, t0 + .15);
-                tg.gain.setValueAtTime(0.22, t0); tg.gain.exponentialRampToValueAtTime(0.001, t0 + .2);
-                thump.connect(tg).connect(c.destination); thump.start(t0); thump.stop(t0 + .22);
-
-                var swirl = c.createOscillator(), sg = c.createGain();
-                swirl.type = 'sawtooth'; swirl.frequency.setValueAtTime(220, t0 + .05); swirl.frequency.exponentialRampToValueAtTime(1400, t0 + .42);
-                sg.gain.setValueAtTime(0.0001, t0 + .05); sg.gain.exponentialRampToValueAtTime(0.045, t0 + .25); sg.gain.exponentialRampToValueAtTime(0.001, t0 + .45);
-                var filt = c.createBiquadFilter(); filt.type = 'lowpass'; filt.frequency.value = 2200;
-                swirl.connect(filt).connect(sg).connect(c.destination); swirl.start(t0 + .05); swirl.stop(t0 + .46);
-
-                var t1 = t0 + 0.42;
-                [1046.5, 1318.5, 1568, 2093].forEach(function (freq, i) {
-                    var tt = t1 + i * 0.045;
-                    var osc = c.createOscillator(), gain = c.createGain();
-                    osc.type = 'sine'; osc.frequency.setValueAtTime(freq, tt);
-                    gain.gain.setValueAtTime(0, tt); gain.gain.linearRampToValueAtTime(0.15, tt + .015); gain.gain.exponentialRampToValueAtTime(0.001, tt + .5);
-                    osc.connect(gain).connect(c.destination); osc.start(tt); osc.stop(tt + .55);
-                });
+                var osc = c.createOscillator(), gain = c.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(880, t0);
+                osc.frequency.exponentialRampToValueAtTime(1320, t0 + .09);
+                gain.gain.setValueAtTime(0, t0);
+                gain.gain.linearRampToValueAtTime(0.18, t0 + .015);
+                gain.gain.exponentialRampToValueAtTime(0.001, t0 + .22);
+                osc.connect(gain).connect(c.destination);
+                osc.start(t0); osc.stop(t0 + .25);
             } catch (e) {}
         }
-        function dabbarMagicConfettiBurst(fx) {
-            var colors = ['var(--pm-gold-bright, #10b981)', '#ffd166', '#4cc9f0', '#ef476f'];
-            for (var i = 0; i < 14; i++) {
-                (function (i) {
-                    var p = document.createElement('div');
-                    p.className = 'dabbar-magic-confetti';
-                    var angle = (Math.PI * 2 * i / 14) + (Math.random() * 0.4);
-                    var dist = 55 + Math.random() * 30;
-                    var dx = Math.cos(angle) * dist, dy = Math.sin(angle) * dist;
-                    p.style.background = colors[i % colors.length];
-                    p.style.setProperty('--mdx', dx + 'px');
-                    p.style.setProperty('--mdy', dy + 'px');
-                    p.style.animation = 'dabbarMagicConfettiFly ' + (0.7 + Math.random() * 0.3) + 's ease-out forwards';
-                    p.style.animationDelay = '.32s';
-                    fx.appendChild(p);
-                })(i);
-            }
-        }
-        // ============ بطاقة معالجة عائمة (زي فيديو المصدر) + تسليم سلس لأنيميشن "أ" لما الحفظ يخلص ============
-        var dabbarProcessCycleTimer = null;
+        // ============ سبينر بسيط أثناء التسجيل — رسالة واحدة، من غير تدوير رسايل ولا تأخير مصطنع ============
         function showDabbarProcessCard(target, messages, ms) {
-            ms = ms || 550;
             var fx = document.getElementById(target);
             if (!fx) return function () {};
             fx.innerHTML = '';
             fx.classList.remove('is-manual-success');
             var card = document.createElement('div');
             card.className = 'dabbar-process-card';
-            card.innerHTML = '<div class="dabbar-process-icon">✨</div><div class="dabbar-process-text"></div><div class="dabbar-process-track"><div class="dabbar-process-fill"></div></div>';
+            card.innerHTML = '<div class="dabbar-process-spinner"></div><div class="dabbar-process-text"></div>';
             fx.appendChild(card);
-            var textEl = card.querySelector('.dabbar-process-text');
-            var fillEl = card.querySelector('.dabbar-process-fill');
-            var i = 0;
-            textEl.textContent = messages[0];
-            clearInterval(dabbarProcessCycleTimer);
-            dabbarProcessCycleTimer = setInterval(function () {
-                i = (i + 1) % messages.length;
-                textEl.textContent = messages[i];
-            }, ms);
-            // ============ الطلب الفعلي (fetch) مدته مش معروفة مقدمًا، فالشريط بيمشي بشكل واقعي لحد ٩٢٪ ببطء، وبعدين بيقفل ١٠٠٪ فورًا لما hide() تتنده فعليًا بعد رد السيرفر ============
-            requestAnimationFrame(function () {
-                fillEl.style.transition = 'width 3.4s cubic-bezier(.15,.7,.25,1)';
-                fillEl.style.width = '92%';
-            });
+            var label = Array.isArray(messages) ? (messages[0] || 'بنسجل...') : (messages || 'بنسجل...');
+            card.querySelector('.dabbar-process-text').textContent = label;
             return function hide(onDone) {
-                clearInterval(dabbarProcessCycleTimer);
-                dabbarProcessCycleTimer = null;
-                fillEl.style.transition = 'width .18s ease';
-                fillEl.style.width = '100%';
                 card.classList.add('is-leaving');
-                setTimeout(function () { card.remove(); if (onDone) onDone(); }, 180);
+                setTimeout(function () { card.remove(); if (onDone) onDone(); }, 140);
             };
         }
+        // ============ توست نجاح بسيط: تشيك صغير + نص + صوت قصير، بيختفي لوحده بعد أقل من ثانيتين ============
         function celebrateSave(target) {
             var fx = document.getElementById(typeof target === 'string' ? target : 'dabbar-celebrate-fx');
             if (!fx || dabbarCelebrateActive) return;
             dabbarCelebrateActive = true;
-            try { dabbarReward(); } catch (e) {}
-            var isManualSuccess = target === 'quick-manual-success-fx';
-            fx.classList.toggle('is-manual-success', isManualSuccess);
-            fx.classList.add('dabbar-magic-fx-active');
-            fx.innerHTML = '';
-
-            var r1 = document.createElement('div'); r1.className = 'dabbar-magic-ring';
-            var r2 = document.createElement('div'); r2.className = 'dabbar-magic-ring'; r2.style.animationDelay = '.2s';
-            var r3 = document.createElement('div'); r3.className = 'dabbar-magic-ring'; r3.style.animationDelay = '.4s';
-            fx.appendChild(r1); fx.appendChild(r2); fx.appendChild(r3);
-
-            var badge = document.createElement('div');
-            badge.className = 'dabbar-celebrate-badge';
-            badge.innerHTML = '<svg viewBox="0 0 24 24"><path d="M5 13l4.5 4.5L19 8"/></svg>';
-            fx.appendChild(badge);
-
-            var copy = document.createElement('div');
-            copy.className = 'manual-success-copy';
-            copy.innerHTML = '<span class="manual-success-kicker">تم التسجيل</span><span class="manual-success-title">اتحفظت العملية بنجاح</span>';
-            fx.appendChild(copy);
-
+            fx.classList.remove('is-manual-success', 'dabbar-magic-fx-active');
+            fx.innerHTML = '<div class="dabbar-simple-toast"><span class="chk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 13l4.5 4.5L19 8"/></svg></span><span>اتحفظت العملية</span></div>';
+            requestAnimationFrame(function () { fx.querySelector('.dabbar-simple-toast')?.classList.add('show'); });
             playDabbarMagicSound();
-            if (navigator.vibrate) { try { navigator.vibrate([15, 40, 15]); } catch (e) {} }
-            setTimeout(function () { dabbarMagicConfettiBurst(fx); }, 320);
-
-            setTimeout(() => { fx.innerHTML = ''; fx.classList.remove('is-manual-success', 'dabbar-magic-fx-active'); dabbarCelebrateActive = false; }, 1750);
+            if (navigator.vibrate) { try { navigator.vibrate(12); } catch (e) {} }
+            setTimeout(() => { fx.innerHTML = ''; dabbarCelebrateActive = false; }, 1400);
         }
         // ============ زي رسالة تليجرام بالظبط لما رسالة واحدة فيها أكتر من معاملة — كل معاملة بتتعرض لوحدها هنا ============
         function quickDraft(drafts, transcript) {

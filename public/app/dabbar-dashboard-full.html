@@ -3500,6 +3500,23 @@ button:active, .quick-entry-tab:active { transition-duration: .06s; }
 }
 #quick-manual-success-fx.is-manual-success .dabbar-magic-ring { display:block !important; }
 
+/* نفس معاملة "المعالجة اليدوي" بس بشكل عام لأي حاوية احتفال (الكتابة الذكية والصوت والفاتورة بيستخدموا #dabbar-celebrate-fx) */
+.dabbar-magic-fx-active {
+  background:radial-gradient(circle at 50% 48%, color-mix(in srgb, var(--pm-gold-bright) 19%, transparent), transparent 58%) !important;
+  animation: manualSuccessFlash .42s ease-out both !important;
+}
+.dabbar-magic-fx-active .dabbar-celebrate-badge {
+  animation: manualSuccessBadgeIn .6s cubic-bezier(.2,.8,.3,1) both, dabbarCelebrateBadgeOut .45s ease 1.55s forwards !important;
+}
+/* نسخة عامة من نص "تم التسجيل" مش مربوطة بـ id معيّن، عشان تشتغل جوه أي حاوية احتفال */
+.manual-success-copy {
+  position:absolute; top:calc(50% + 3.7rem); display:flex; flex-direction:column; align-items:center; gap:.12rem;
+  color:var(--pm-ink); text-shadow:0 1px 10px color-mix(in srgb,var(--pm-surface) 70%,transparent);
+  animation:manualSuccessCopyIn .45s cubic-bezier(.2,.8,.3,1) .12s both;
+}
+.manual-success-kicker { color:var(--pm-gold-bright); font-size:.58rem; font-weight:950; letter-spacing:.08em; }
+.manual-success-title { font-size:.82rem; font-weight:950; }
+
 .dabbar-magic-ring {
   position:absolute; border-radius:999px; border:2px solid var(--pm-gold-bright, #10b981);
   animation: dabbarMagicRingGrow 1.3s cubic-bezier(.2,.7,.3,1) both; pointer-events:none;
@@ -3528,6 +3545,33 @@ button:active, .quick-entry-tab:active { transition-duration: .06s; }
   animation: dabbarProcessIconPulse 1s ease-in-out infinite; }
 @keyframes dabbarProcessIconPulse { 0%,100% { transform:scale(1); } 50% { transform:scale(1.12); } }
 .dabbar-process-text { font-size:.78rem; font-weight:800; color:var(--pm-ink); text-align:center; white-space:nowrap; }
+.dabbar-process-track { width:9.5rem; height:.28rem; border-radius:999px; overflow:hidden; background:color-mix(in srgb, var(--pm-gold-bright, #10b981) 12%, transparent); }
+.dabbar-process-fill { height:100%; width:0%; border-radius:999px; background:linear-gradient(90deg, var(--pm-gold-dim, #7fa329), var(--pm-gold-bright, #10b981)); }
+
+/* ============ هايلايت العملية اللي لسه اتسجلت في "آخر عملياتك" — بيستخدم متغيرات الثيم فبيتلوّن صح ليلي ونهاري تلقائيًا، ويفضل ١٠ ثواني ============ */
+.ledger-row-new{ border-radius:.75rem; animation: ledgerRowGlow 10s ease-out both; }
+@keyframes ledgerRowGlow{
+  0%{ background: color-mix(in srgb, var(--pm-gold-bright, #10b981) 22%, transparent); box-shadow: inset 3px 0 0 0 var(--pm-gold-bright, #10b981); }
+  75%{ background: color-mix(in srgb, var(--pm-gold-bright, #10b981) 10%, transparent); box-shadow: inset 3px 0 0 0 var(--pm-gold-bright, #10b981); }
+  100%{ background: transparent; box-shadow: inset 3px 0 0 0 transparent; }
+}
+.ledger-row-new-tag{
+  display:inline-block; font-size:.58rem; font-weight:950; color:var(--pm-canvas, #0c0e10);
+  background:var(--pm-gold-bright, #10b981); padding:.05rem .38rem; border-radius:999px;
+  margin-left:.35rem; vertical-align:middle; animation: ledgerTagOut .4s ease 9.4s forwards;
+}
+@keyframes ledgerTagOut{ to{ opacity:0; transform:scale(.7); } }
+
+/* ============ زرار "كل عملياتك" — بادچ صغير واضح إنه قابل للضغط، بيتلوّن تلقائيًا مع الليلي والنهاري عن طريق متغيرات الثيم ============ */
+.expense-ledger-cta{
+  display:inline-flex; align-items:center; gap:.2rem; flex-shrink:0;
+  font-size:.66rem; font-weight:900; color:var(--pm-gold-bright, #10b981);
+  background:color-mix(in srgb, var(--pm-gold-bright, #10b981) 13%, transparent);
+  border:1px solid color-mix(in srgb, var(--pm-gold-bright, #10b981) 35%, transparent);
+  border-radius:999px; padding:.32rem .65rem; line-height:1; white-space:nowrap;
+  transition:transform .12s ease, background .12s ease;
+}
+.expense-ledger-cta:active{ transform:scale(.94); background:color-mix(in srgb, var(--pm-gold-bright, #10b981) 22%, transparent); }
 </style>
 <style id="bm-redesign">
 #bank-movements-sheet > div { padding-top:0 !important; }
@@ -7564,9 +7608,10 @@ button:active, .quick-entry-tab:active { transition-duration: .06s; }
             const ledger = document.createElement('section');
             ledger.id = 'expense-ledger-card';
             ledger.className = 'bg-slate-950/40 border border-slate-800 rounded-3xl p-4 space-y-2';
-            ledger.innerHTML = `<div class="flex items-center justify-between"><div><span class="text-[10px] text-slate-500">مراجعة سريعة</span><h3 class="text-sm font-black text-slate-200">آخر عملياتك</h3></div><span class="text-lg">🧾</span></div><div id="expense-ledger-list"></div>`;
+            ledger.innerHTML = `<div class="flex items-center justify-between"><div><span class="text-[10px] text-slate-500">مراجعة سريعة</span><h3 class="text-sm font-black text-slate-200">آخر عملياتك</h3></div><button type="button" id="expense-ledger-goto-daily" class="expense-ledger-cta">كل عملياتك <span aria-hidden="true">‹</span></button></div><div id="expense-ledger-list"></div>`;
             const categoriesRef = document.getElementById('monthly-categories-card');
             monthly.insertBefore(ledger, categoriesRef && categoriesRef.parentNode === monthly ? categoriesRef : null);
+            document.getElementById('expense-ledger-goto-daily')?.addEventListener('click', () => { document.querySelector('.tab-btn[data-tab="daily"]')?.click(); });
             document.getElementById('planning-save').addEventListener('click', savePlanningSettings);
             document.getElementById('planning-reset').addEventListener('click', async () => {
                 if (!(await dabbarConfirm('مسح خطة الدخل والميزانية والالتزامات المتوقعة من هذا الحساب؟ لا يمكن التراجع عن المسح.', { confirmText: 'مسح نهائي' }))) return;
@@ -7700,9 +7745,30 @@ button:active, .quick-entry-tab:active { transition-duration: .06s; }
             const list = document.getElementById('expense-ledger-list');
             const items = data?.today?.items || [];
             const events = (data?.month?.financialEvents || []).filter((event) => new Date(event.created_at).toDateString() === new Date().toDateString());
-            const expenseRows = items.slice(0, 5).map((item) => `<div class="flex items-center gap-2 border-b border-slate-800/50 py-2 last:border-0"><span class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10">${getCategoryEmoji(item.category)}</span><div class="min-w-0 flex-1"><p class="truncate text-[11px] font-bold text-slate-200">${(item.description || item.category || 'مصروف').replace(/[<>]/g, '')}</p><p class="text-[9px] text-slate-500">مصروف · ${item.category || 'عام'}</p></div><span class="text-[11px] font-bold text-rose-400">-${fmt(item.amount, item.currency_code)}</span><button type="button" data-expense-edit="${item.id}" data-expense-amount="${item.amount}" data-expense-description="${(item.description || '').replace(/"/g, '&quot;')}" class="text-[11px] text-slate-500 hover:text-emerald-400" aria-label="تعديل العملية">✎</button><button type="button" data-expense-delete="${item.id}" class="text-[11px] text-slate-500 hover:text-rose-400" aria-label="حذف العملية">✕</button></div>`).join('');
-            const eventRows = events.slice(0, 5).map((event) => { const inflow = event.direction === 'inflow' || event.event_type === 'income'; const icon = event.event_type === 'income' ? '💰' : event.event_type === 'asset' ? '📦' : event.event_type === 'transfer' ? '↔️' : '🧾'; return `<div class="flex items-center gap-2 border-b border-slate-800/50 py-2 last:border-0"><span class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10">${icon}</span><div class="min-w-0 flex-1"><p class="truncate text-[11px] font-bold text-slate-200">${(event.description || event.category || typeLabel(event.event_type)).replace(/[<>]/g, '')}</p><p class="text-[9px] text-slate-500">${typeLabel(event.event_type)}${event.category ? ` · ${event.category}` : ''}</p></div><span class="text-[11px] font-bold ${inflow ? 'text-emerald-400' : 'text-amber-300'}">${inflow ? '+' : '-'}${fmt(event.amount, event.currency_code)}</span><button type="button" data-event-edit="${event.id}" data-event-amount="${event.amount}" data-event-description="${(event.description || '').replace(/"/g, '&quot;')}" class="text-[11px] text-slate-500 hover:text-emerald-400" aria-label="تعديل الدخل">✎</button><button type="button" data-event-delete="${event.id}" class="text-[11px] text-slate-500 hover:text-rose-400" aria-label="حذف الدخل">✕</button></div>`; }).join('');
+            // ============ لو الفويس (أو أي مسار) سجّل أكتر من ٥ عمليات دفعة واحدة، بنوسّع عدد الصفوف الظاهرة لحد ١٠ عشان محدش يختفي من غير ما يتهايلايت، وبعد المرة دي بترجع تتقفل على ٥ تاني ============
+            const freshCutoff = Date.now() - 20000;
+            const isFresh = (rec) => { const ts = Date.parse(rec?.created_at || ''); return Number.isFinite(ts) && ts >= freshCutoff; };
+            const expenseDisplayCount = Math.min(10, Math.max(5, items.filter(isFresh).length));
+            const eventDisplayCount = Math.min(10, Math.max(5, events.filter(isFresh).length));
+            const expenseRows = items.slice(0, expenseDisplayCount).map((item) => `<div class="flex items-center gap-2 border-b border-slate-800/50 py-2 last:border-0" data-created-at="${item.created_at || ''}"><span class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10">${getCategoryEmoji(item.category)}</span><div class="min-w-0 flex-1"><p class="truncate text-[11px] font-bold text-slate-200">${(item.description || item.category || 'مصروف').replace(/[<>]/g, '')}</p><p class="text-[9px] text-slate-500">مصروف · ${item.category || 'عام'}</p></div><span class="text-[11px] font-bold text-rose-400">-${fmt(item.amount, item.currency_code)}</span><button type="button" data-expense-edit="${item.id}" data-expense-amount="${item.amount}" data-expense-description="${(item.description || '').replace(/"/g, '&quot;')}" class="text-[11px] text-slate-500 hover:text-emerald-400" aria-label="تعديل العملية">✎</button><button type="button" data-expense-delete="${item.id}" class="text-[11px] text-slate-500 hover:text-rose-400" aria-label="حذف العملية">✕</button></div>`).join('');
+            const eventRows = events.slice(0, eventDisplayCount).map((event) => { const inflow = event.direction === 'inflow' || event.event_type === 'income'; const icon = event.event_type === 'income' ? '💰' : event.event_type === 'asset' ? '📦' : event.event_type === 'transfer' ? '↔️' : '🧾'; return `<div class="flex items-center gap-2 border-b border-slate-800/50 py-2 last:border-0" data-created-at="${event.created_at || ''}"><span class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10">${icon}</span><div class="min-w-0 flex-1"><p class="truncate text-[11px] font-bold text-slate-200">${(event.description || event.category || typeLabel(event.event_type)).replace(/[<>]/g, '')}</p><p class="text-[9px] text-slate-500">${typeLabel(event.event_type)}${event.category ? ` · ${event.category}` : ''}</p></div><span class="text-[11px] font-bold ${inflow ? 'text-emerald-400' : 'text-amber-300'}">${inflow ? '+' : '-'}${fmt(event.amount, event.currency_code)}</span><button type="button" data-event-edit="${event.id}" data-event-amount="${event.amount}" data-event-description="${(event.description || '').replace(/"/g, '&quot;')}" class="text-[11px] text-slate-500 hover:text-emerald-400" aria-label="تعديل الدخل">✎</button><button type="button" data-event-delete="${event.id}" class="text-[11px] text-slate-500 hover:text-rose-400" aria-label="حذف الدخل">✕</button></div>`; }).join('');
             if (list) list.innerHTML = expenseRows + eventRows || '<div class="ledger-empty-hint"><span>سجّل أول عملية عشان تظهر هنا للمراجعة</span><span class="ledger-empty-hint-icon" aria-hidden="true">🧾</span></div>';
+            // ============ هايلايت كل عملية اتسجلت فعليًا في آخر ٢٠ ثانية (بالاعتماد على created_at الحقيقي بتاعها مش مكانها في الليست) — عشان لو سجّل ١٠ عمليات دفعة واحدة أو ورا بعض كل وحدة تتمّيز بذاتها ============
+            let firstFreshRow = null;
+            list?.querySelectorAll('[data-created-at]').forEach((row) => {
+                const ts = Date.parse(row.dataset.createdAt || '');
+                if (!Number.isFinite(ts) || ts < freshCutoff) return;
+                row.classList.add('ledger-row-new');
+                const badge = document.createElement('span');
+                badge.className = 'ledger-row-new-tag';
+                badge.textContent = 'جديد';
+                const titleEl = row.querySelector('.flex-1 p');
+                if (titleEl) titleEl.insertBefore(badge, titleEl.firstChild);
+                if (!firstFreshRow) firstFreshRow = row;
+                setTimeout(() => { row.classList.remove('ledger-row-new'); }, 10000);
+                setTimeout(() => { badge.remove(); }, 9500);
+            });
+            firstFreshRow?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             list?.querySelectorAll('[data-expense-edit]').forEach((btn) => btn.addEventListener('click', () => editExpense(btn.dataset.expenseEdit, btn.dataset.expenseAmount, btn.dataset.expenseDescription)));
             list?.querySelectorAll('[data-expense-delete]').forEach((btn) => btn.addEventListener('click', () => deleteExpense(btn.dataset.expenseDelete)));
             list?.querySelectorAll('[data-event-edit]').forEach((btn) => btn.addEventListener('click', () => editExpense(btn.dataset.eventEdit, btn.dataset.eventAmount, btn.dataset.eventDescription, true)));
@@ -10566,9 +10632,10 @@ button:active, .quick-entry-tab:active { transition-duration: .06s; }
             fx.classList.remove('is-manual-success');
             var card = document.createElement('div');
             card.className = 'dabbar-process-card';
-            card.innerHTML = '<div class="dabbar-process-icon">✨</div><div class="dabbar-process-text"></div>';
+            card.innerHTML = '<div class="dabbar-process-icon">✨</div><div class="dabbar-process-text"></div><div class="dabbar-process-track"><div class="dabbar-process-fill"></div></div>';
             fx.appendChild(card);
             var textEl = card.querySelector('.dabbar-process-text');
+            var fillEl = card.querySelector('.dabbar-process-fill');
             var i = 0;
             textEl.textContent = messages[0];
             clearInterval(dabbarProcessCycleTimer);
@@ -10576,9 +10643,16 @@ button:active, .quick-entry-tab:active { transition-duration: .06s; }
                 i = (i + 1) % messages.length;
                 textEl.textContent = messages[i];
             }, ms);
+            // ============ الطلب الفعلي (fetch) مدته مش معروفة مقدمًا، فالشريط بيمشي بشكل واقعي لحد ٩٢٪ ببطء، وبعدين بيقفل ١٠٠٪ فورًا لما hide() تتنده فعليًا بعد رد السيرفر ============
+            requestAnimationFrame(function () {
+                fillEl.style.transition = 'width 3.4s cubic-bezier(.15,.7,.25,1)';
+                fillEl.style.width = '92%';
+            });
             return function hide(onDone) {
                 clearInterval(dabbarProcessCycleTimer);
                 dabbarProcessCycleTimer = null;
+                fillEl.style.transition = 'width .18s ease';
+                fillEl.style.width = '100%';
                 card.classList.add('is-leaving');
                 setTimeout(function () { card.remove(); if (onDone) onDone(); }, 180);
             };
@@ -10590,31 +10664,29 @@ button:active, .quick-entry-tab:active { transition-duration: .06s; }
             try { dabbarReward(); } catch (e) {}
             var isManualSuccess = target === 'quick-manual-success-fx';
             fx.classList.toggle('is-manual-success', isManualSuccess);
+            fx.classList.add('dabbar-magic-fx-active');
             fx.innerHTML = '';
 
-            if (isManualSuccess) {
-                var r1 = document.createElement('div'); r1.className = 'dabbar-magic-ring';
-                var r2 = document.createElement('div'); r2.className = 'dabbar-magic-ring'; r2.style.animationDelay = '.2s';
-                var r3 = document.createElement('div'); r3.className = 'dabbar-magic-ring'; r3.style.animationDelay = '.4s';
-                fx.appendChild(r1); fx.appendChild(r2); fx.appendChild(r3);
-            }
+            var r1 = document.createElement('div'); r1.className = 'dabbar-magic-ring';
+            var r2 = document.createElement('div'); r2.className = 'dabbar-magic-ring'; r2.style.animationDelay = '.2s';
+            var r3 = document.createElement('div'); r3.className = 'dabbar-magic-ring'; r3.style.animationDelay = '.4s';
+            fx.appendChild(r1); fx.appendChild(r2); fx.appendChild(r3);
 
             var badge = document.createElement('div');
             badge.className = 'dabbar-celebrate-badge';
             badge.innerHTML = '<svg viewBox="0 0 24 24"><path d="M5 13l4.5 4.5L19 8"/></svg>';
             fx.appendChild(badge);
 
-            if (isManualSuccess) {
-                var copy = document.createElement('div');
-                copy.className = 'manual-success-copy';
-                copy.innerHTML = '<span class="manual-success-kicker">تم التسجيل</span><span class="manual-success-title">اتحفظت العملية بنجاح</span>';
-                fx.appendChild(copy);
-                playDabbarMagicSound();
-                if (navigator.vibrate) { try { navigator.vibrate([15, 40, 15]); } catch (e) {} }
-                setTimeout(function () { dabbarMagicConfettiBurst(fx); }, 320);
-            }
+            var copy = document.createElement('div');
+            copy.className = 'manual-success-copy';
+            copy.innerHTML = '<span class="manual-success-kicker">تم التسجيل</span><span class="manual-success-title">اتحفظت العملية بنجاح</span>';
+            fx.appendChild(copy);
 
-            setTimeout(() => { fx.innerHTML = ''; fx.classList.remove('is-manual-success'); dabbarCelebrateActive = false; }, isManualSuccess ? 1750 : 800);
+            playDabbarMagicSound();
+            if (navigator.vibrate) { try { navigator.vibrate([15, 40, 15]); } catch (e) {} }
+            setTimeout(function () { dabbarMagicConfettiBurst(fx); }, 320);
+
+            setTimeout(() => { fx.innerHTML = ''; fx.classList.remove('is-manual-success', 'dabbar-magic-fx-active'); dabbarCelebrateActive = false; }, 1750);
         }
         // ============ زي رسالة تليجرام بالظبط لما رسالة واحدة فيها أكتر من معاملة — كل معاملة بتتعرض لوحدها هنا ============
         function quickDraft(drafts, transcript) {
@@ -10840,16 +10912,17 @@ button:active, .quick-entry-tab:active { transition-duration: .06s; }
             const btn = document.getElementById('quick-entry-confirm');
             btn.disabled = true;
             btn.style.pointerEvents = 'none';
-            quickStatus('جاري حفظ العملية...');
+            const hideProcessConfirm = showDabbarProcessCard('dabbar-celebrate-fx', ['📝 بنجهز العملية...', '🏷️ بنصنّفها...', '💾 بنسجلها في سجلك...']);
             try {
                 const result = await asstApi('entry_confirm', { drafts: quickEntryDrafts });
                 window.dabbarCoachRecord?.(quickEntryDrafts, result);
-                celebrateSave(btn);
                 document.getElementById('quick-entry-input').value = '';
                 quickShow('quick-entry-draft', false);
+                hideProcessConfirm(() => celebrateSave(btn));
                 quickStatus(result.message || 'تم التسجيل بنجاح.', 'success');
                 await loadDashboard();
             } catch (e) {
+                hideProcessConfirm();
                 quickStatus(e.message || 'تعذر الحفظ.', 'error');
             } finally {
                 quickEntryConfirmInFlight = false;

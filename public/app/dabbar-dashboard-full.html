@@ -1147,6 +1147,11 @@
         .portfolio-add-form-panel:not(.hidden) { display: flex; }
         .portfolio-add-form-panel { border: 1px solid var(--portfolio-line); border-radius: 1.15rem; padding: .9rem .95rem; background: color-mix(in srgb, var(--portfolio-card) 92%, transparent); }
         .portfolio-note { color: var(--portfolio-muted); font-size: .6rem; opacity: .9; margin-top: .6rem; text-align: center; line-height: 1.8; }
+        .portfolio-summary-header { display: flex; align-items: center; background: var(--portfolio-card); border: 1px solid var(--portfolio-line); border-radius: 1.1rem; padding: .8rem .6rem; margin-bottom: .9rem; box-shadow: 0 6px 16px rgba(8,80,65,.06); }
+        .portfolio-summary-header-cell { flex: 1; display: flex; flex-direction: column; align-items: center; gap: .2rem; text-align: center; }
+        .portfolio-summary-header-label { font-size: .6rem; font-weight: 700; color: var(--portfolio-muted); }
+        .portfolio-summary-header-value { font-size: 1.05rem; font-weight: 900; color: var(--portfolio-ink); }
+        .portfolio-summary-header-sep { width: 1px; align-self: stretch; background: var(--portfolio-line); }
         .portfolio-form-title { color: var(--portfolio-ink); font-size: .72rem; font-weight: 900; }
         .portfolio-form-input { width: 100%; box-sizing: border-box; border: 1px solid var(--portfolio-line); border-radius: .75rem; padding: .65rem .72rem; background: var(--portfolio-card); color: var(--portfolio-ink); font: inherit; font-size: .68rem; outline: none; }
         .portfolio-form-input::placeholder { color: var(--portfolio-muted); opacity: .85; }
@@ -4032,6 +4037,17 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                     </div>
                 </div>
                 <div class="portfolio-body">
+                    <div id="portfolio-summary-header" class="portfolio-summary-header">
+                        <div class="portfolio-summary-header-cell">
+                            <span class="portfolio-summary-header-label">إجمالي المحفظة</span>
+                            <span class="portfolio-summary-header-value" id="portfolio-summary-header-total">—</span>
+                        </div>
+                        <div class="portfolio-summary-header-sep" aria-hidden="true"></div>
+                        <div class="portfolio-summary-header-cell">
+                            <span class="portfolio-summary-header-label">عدد الأصول</span>
+                            <span class="portfolio-summary-header-value" id="portfolio-summary-header-count">—</span>
+                        </div>
+                    </div>
                     <div id="portfolio-empty" class="hidden portfolio-note" style="text-align:center;padding:.5rem 0;">مفيش أصول مسجلة لسه. ضيف أول أصل (ذهب، صناديق استثمار، عملات رقمية... إلخ) وهنجمّعلك إجمالي محفظتك تلقائيًا.</div>
                     <div id="portfolio-asset-list" class="portfolio-asset-list"></div>
                     <template id="portfolio-asset-template">
@@ -5861,10 +5877,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
     <div id="portfolio-sheet" class="fixed inset-0 z-50 hidden items-end justify-center bg-black/70 backdrop-blur-sm">
         <div class="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-t-3xl" style="background:var(--pm-canvas);">
             <div class="sticky top-0 z-10 flex items-center justify-between gap-3 px-4 pt-4 pb-3" style="background:var(--pm-canvas);border-bottom:1px solid var(--pm-hairline);">
-                <div>
-                    <h3 class="text-sm font-black" style="color:var(--pm-ink);">محفظتك الاستثمارية</h3>
-                    <p style="font-size:.62rem;font-weight:800;margin-top:.15rem;color:var(--pm-muted);">💡 بياناتك الحقيقية — القيم اللي تحتها هي آخر تقييم دخّلته إنت بنفسك لكل أصل، مش سعر سوق تلقائي</p>
-                </div>
+                <h3 class="text-sm font-black" style="color:var(--pm-ink);">محفظتك الاستثمارية</h3>
                 <button id="portfolio-sheet-close" type="button" class="flex h-8 w-8 items-center justify-center rounded-full shrink-0" style="background:var(--pm-surface-soft);color:var(--pm-muted);" aria-label="إغلاق">✕</button>
             </div>
             <div id="portfolio-sheet-slot" class="px-4 pb-6 pt-2"></div>
@@ -8234,11 +8247,11 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                 const actual = values[bucket.key];
                 const target = Math.round(balance.income * bucket.target);
                 const delta = target - actual;
-                const actualPercent = Math.round((actual / balance.income) * 100);
-                const visualWidth = Math.min(100, Math.max(3, (actual / Math.max(1, target)) * 100));
+                const actualPercent = Math.max(0, Math.min(100, Math.round((actual / balance.income) * 100)));
+                const visualWidth = actualPercent;
                 const status = delta >= 0 ? `متبقي ${fmt(delta)}` : `زيادة ${fmt(Math.abs(delta))}`;
                 const statusClass = bucket.key === 'savings' && delta <= 0 ? 'text-emerald-300' : delta >= 0 ? 'text-slate-500' : 'text-amber-300';
-                return `<div class="bal-row-organized"><div class="bal-row-pct" style="color:${bucket.color}">${Math.round(bucket.target * 100)}<small>٪<br>${bucket.label}</small></div><div class="bal-row-mid"><div class="bal-row-nums"><b>${fmt(actual)}</b><span class="${statusClass}">${status} · من ${fmt(target)}</span></div><div class="h-2 overflow-hidden rounded-full bg-slate-800/80"><div class="h-full rounded-full transition-all duration-500" style="width:${visualWidth}%;background:${bucket.color};box-shadow:0 0 12px ${bucket.color}66"></div></div></div></div>`;
+                return `<div class="bal-row-organized"><div class="bal-row-pct" style="color:${bucket.color}">${Math.round(bucket.target * 100)}<small>٪<br>${bucket.label}</small></div><div class="bal-row-mid"><div class="bal-row-nums"><b>${fmt(actual)}</b><span class="${statusClass}">${status} · من ${fmt(target)}</span></div><div class="h-2 overflow-hidden rounded-full" style="background:rgba(148,163,184,.28);"><div class="h-full rounded-full transition-all duration-500" style="width:${visualWidth}%;background:${bucket.color};"></div></div></div></div>`;
             }).join('');
             const wantsOver = Math.max(0, balance.wants - balance.income * 0.30);
             const saved = balance.savings;
@@ -10203,6 +10216,10 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             if (!listEl || !template) return;
 
             if (totalEl) totalEl.textContent = fmt(data.total || 0);
+            const sheetTotalEl = document.getElementById('portfolio-summary-header-total');
+            const sheetCountEl = document.getElementById('portfolio-summary-header-count');
+            if (sheetTotalEl) sheetTotalEl.textContent = `${fmt(data.total || 0)} ج.م`;
+            if (sheetCountEl) { const n = (data.assets || []).length; sheetCountEl.textContent = `${n} ${n === 1 ? 'أصل' : 'أصول'}`; }
             listEl.innerHTML = '';
             renderPortfolioPreviewStrip(data);
             if (!data.assets || data.assets.length === 0) {

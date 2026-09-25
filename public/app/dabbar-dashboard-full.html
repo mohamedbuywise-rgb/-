@@ -65,6 +65,10 @@
         .income-row-tag { font-size: .6rem; color: var(--db-muted); margin-top: .1rem; font-weight: 600; }
         .income-row-amt { font-size: .74rem; font-weight: 900; color: var(--cs-up); flex: none; white-space: nowrap; }
         .daily-group[open] > summary { padding-bottom: .25rem; }
+        .daily-group { border-bottom: 1px solid rgba(148,163,184,.22); margin-bottom: .15rem; }
+        .daily-group:last-child { border-bottom: none; margin-bottom: 0; }
+        .daily-group[open] { background: rgba(148,163,184,.05); border-radius: .9rem; padding: 0 .5rem; margin-inline: -.5rem; border-bottom-color: transparent; }
+        .daily-group[open] + .daily-group { margin-top: .35rem; }
         .quick-entry-tab:focus-visible { outline: 2px solid var(--pm-gold-bright); outline-offset: 2px; }
         html[data-theme="light"] .quick-entry-tab { box-shadow: 0 8px 18px rgba(180,140,40,.08); }
 
@@ -736,7 +740,9 @@
         html[data-theme="light"] .debt-collapse-wrap.debt-collapsed::after { background:linear-gradient(180deg, transparent, var(--pm-surface-hi,#ffffff)); }
         .debt-show-more-btn { display:block; margin:.5rem auto 0; background:transparent; border:1px solid var(--pm-hairline,#334155); color:var(--pm-muted,#94a3b8); font-size:.66rem; font-weight:800; padding:.4rem .9rem; border-radius:999px; cursor:pointer; }
         .debt-show-more-btn.hidden { display:none; }
-        .debt-collapse-wrap.statement-collapse-wrap.debt-collapsed { max-height: 15.4rem; }
+        .debt-collapse-wrap.statement-collapse-wrap.debt-collapsed { max-height: 17.6rem; }
+        .statement-collapse-wrap .debt-history-badge { flex: none; }
+        .statement-collapse-wrap button[data-history-person] > span:first-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
         /* صفوف الإحصائيات تصبح كتلًا هادئة داخل نفس السطح */
         #tab-daily .grid.grid-cols-2 > div,
@@ -2670,9 +2676,10 @@
         .qe2-dock:hover { background:var(--pm-surface-soft); }
         .qe2-dock .q-icon { width:1.9rem; height:1.9rem; font-size:.95rem; }
         .qe2-dock .q-title { font-size:.78rem !important; }
-        .qe2-dock .q-sub { font-size:.6rem !important; margin-top:.1rem !important; }
-        .qe2-quickmic { flex-shrink:0; width:1.9rem; height:1.9rem; border-radius:50%; border:1px solid color-mix(in srgb,var(--pm-gold-bright) 45%,transparent); background:transparent; color:var(--pm-gold-bright); font-size:.85rem; display:flex; align-items:center; justify-content:center; cursor:pointer; padding:0; line-height:1; }
-        .qe2-chevron { flex-shrink:0; font-size:1rem; color:var(--pm-muted); transform:rotate(-90deg); transition:transform .22s ease; margin-inline-start:.1rem; }
+        .qe2-dock .q-sub { font-size:.6rem !important; margin-top:0 !important; }
+        .qe2-open-hint { flex-shrink:0; font-size:.62rem; font-weight:800; color:var(--pm-gold-bright); background:color-mix(in srgb,var(--pm-gold-bright) 14%,transparent); border:1px solid color-mix(in srgb,var(--pm-gold-bright) 40%,transparent); border-radius:999px; padding:.22rem .55rem; }
+        .qe2-dock[aria-expanded="true"] .qe2-open-hint { display:none; }
+        .qe2-chevron { flex-shrink:0; font-size:1.2rem; font-weight:900; color:var(--pm-gold-bright); transform:rotate(-90deg); transition:transform .22s ease; margin-inline-start:.1rem; }
         .qe2-dock[aria-expanded="true"] .qe2-chevron { transform:rotate(90deg); }
         .qe2-detail { max-height:0; opacity:0; overflow:hidden; transition:max-height .3s ease, opacity .22s ease, margin-top .28s ease; margin-top:0; }
         .qe2-detail.qe2-open { max-height:1600px; opacity:1; margin-top:.7rem; }
@@ -2826,6 +2833,7 @@
         #tab-monthly.active > #daily-reminder-card { order:1; }
         #tab-monthly.active > #quick-entry-card { order:2; }
         #tab-monthly.active > #active-days-card { order:3; }
+        #tab-monthly.active > #available-collapsible,
         #tab-monthly.active > #available-card,
         #tab-monthly.active > #available-empty { order:4; }
         #tab-monthly.active > #planning-card { order:5; }
@@ -3379,11 +3387,13 @@ html #tab-monthly.active > #quick-entry-card, html[data-theme] #tab-monthly.acti
     background: color-mix(in srgb, var(--db-accent) 14%, transparent);
     border: 1px solid color-mix(in srgb, var(--db-accent) 30%, transparent);
 }
-#quick-entry-card .q-titles { flex:1; min-width:0; }
+#quick-entry-card .q-titles { flex:1; min-width:0; display:flex; align-items:baseline; flex-wrap:wrap; gap:.35rem; }
+#quick-entry-card .q-titles .q-title { flex-shrink:0; }
+#quick-entry-card .q-titles .q-sub { min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
 html #quick-entry-card .q-title, html[data-theme] #quick-entry-card .q-title {
     margin:.1rem 0 0; font-size:1.1rem !important; font-weight:900; line-height:1.35; color:var(--db-ink) !important;
 }
-#quick-entry-card .q-sub { margin:.15rem 0 0; font-size:.68rem; color:var(--db-muted) !important; }
+#quick-entry-card .q-sub { margin:0; font-size:.68rem; color:var(--db-muted) !important; }
 html[data-theme="light"] #quick-entry-card .quick-entry-eyebrow { color:var(--db-accent) !important; }
 #quick-entry-card .quick-entry-eyebrow { letter-spacing:.02em; text-transform:none; margin-bottom:0; }
 html #quick-entry-card .dabbar-magic-chip, html[data-theme] #quick-entry-card .dabbar-magic-chip {
@@ -3822,7 +3832,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             <section id="quick-entry-card" class="relative bg-gradient-to-br from-emerald-50 via-white to-teal-50 border border-emerald-200 rounded-[28px] p-4 space-y-3 shadow-[0_12px_35px_rgba(16,185,129,.14)] dark:bg-slate-950/60 dark:from-slate-950/60 dark:via-slate-950/60 dark:to-slate-900 dark:border-slate-800" aria-label="إضافة عملية مالية">
                 <div id="dabbar-celebrate-fx" aria-hidden="true"></div>
                 <div id="dabbar-magic-fx" aria-hidden="true"></div>
-                <div class="q-head qe2-dock" id="qe2-dock" data-quick-workspace="expense" role="button" tabindex="0" aria-expanded="false" aria-controls="quick-expense-detail"><div class="q-icon" aria-hidden="true">✨</div><div class="q-titles"><h3 class="q-title" id="qe2-title">سجّل مصروفك بسرعة</h3><p class="q-sub" id="qe2-sub">كتابة، صوت، أو فاتورة — في ثواني</p></div><span id="dabbar-magic-chip" class="dabbar-magic-chip"><span class="dabbar-magic-chip-dot"></span><span id="dabbar-magic-label">جاهز يفهمها</span></span><button type="button" id="qe2-quickmic" class="qe2-quickmic" aria-label="سجّل بالصوت">🎙️</button><span class="qe2-chevron" id="qe2-chevron" aria-hidden="true">‹</span></div>
+                <div class="q-head qe2-dock" id="qe2-dock" data-quick-workspace="expense" role="button" tabindex="0" aria-expanded="false" aria-controls="quick-expense-detail"><div class="q-icon" aria-hidden="true">✨</div><div class="q-titles"><h3 class="q-title" id="qe2-title">سجّل مصروفك بسرعة</h3><p class="q-sub" id="qe2-sub">كتابة، صوت، أو فاتورة — في ثواني</p></div><span id="dabbar-magic-chip" class="dabbar-magic-chip"><span class="dabbar-magic-chip-dot"></span><span id="dabbar-magic-label">جاهز يفهمها</span></span><span class="qe2-open-hint" aria-hidden="true">افتح</span><span class="qe2-chevron" id="qe2-chevron" aria-hidden="true">‹</span></div>
                 <div id="quick-expense-content"><div id="quick-expense-detail" class="qe2-detail">
                 <div id="quick-entry-subscription-lock" class="hidden items-center justify-between gap-3 rounded-2xl border px-3 py-2.5 text-[11px]" style="border-color:color-mix(in srgb,var(--pm-gold-bright) 40%,transparent);background:color-mix(in srgb,var(--pm-gold-bright) 10%,var(--pm-surface-hi));color:var(--pm-ink);"><div class="flex items-center gap-2"><span id="quick-entry-vip-badge" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-lg" style="background:linear-gradient(145deg,var(--pm-gold-bright),var(--pm-gold));color:var(--pm-ink);">💎</span><span><strong class="block" style="color:var(--pm-gold-bright);">التصنيف الذكي بقى ميزة VIP</strong><span style="color:var(--pm-muted);">الإدخال اليدوي شغال زي العادة — فعّل VIP للصوت والفواتير والـ AI.</span></span></div><button id="quick-entry-open-subscription" type="button" class="shrink-0 rounded-xl px-3 py-2 text-[10px] font-black" style="background:linear-gradient(145deg,var(--pm-gold-bright),var(--pm-gold));color:var(--pm-ink);">فعّل VIP</button></div>
                 
@@ -3830,7 +3840,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                 <input type="file" id="quick-entry-invoice-input" accept="image/*" class="hidden">
                 <div id="quick-entry-scanning" class="hidden dabbar-scan-box rounded-2xl p-3 text-center"><div class="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl dabbar-scan-box-icon text-xl shadow-sm"><span style="display:inline-block;animation:dabbar-scan-spin 1s linear infinite">⟳</span></div><p class="text-xs font-bold dabbar-scan-box-title">بنقرأ الفاتورة...</p><p class="mt-1 text-[10px] dabbar-scan-box-sub">دبّر بيستخرج المبلغ والأصناف</p></div>
                 <div id="quick-entry-form" class="hidden space-y-3 rounded-2xl border p-3" style="border-color:var(--pm-hairline);background:var(--pm-surface-hi);"><div><div class="flex items-center gap-2 flex-wrap"><p class="text-xs font-black" style="color:var(--pm-ink);">اكتب عمليتك بطريقتك</p><span class="smart-write-badge"><svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor" aria-hidden="true"><path d="M12 2l1.9 5.6L19.5 9.5l-5.6 1.9L12 17l-1.9-5.6L4.5 9.5l5.6-1.9L12 2zm7 12l.9 2.6 2.6.9-2.6.9L19 21l-.9-2.6-2.6-.9 2.6-.9L19 14z"/></svg>كتابة ذكية</span></div><p class="mt-1 text-[10px]" style="color:var(--pm-muted);">مثال: «صرفت 50 جنيه على القهوة النهاردة»</p></div><textarea id="quick-entry-input" rows="1" maxlength="2500" placeholder="مثال: صرفت 50 جنيه على القهوة النهاردة" class="w-full resize-y rounded-2xl border px-3 py-3 text-sm leading-7 outline-none" style="border-color:var(--pm-hairline);background:var(--pm-surface-soft);color:var(--pm-ink);"></textarea><div class="q-ex-chips"><button type="button" class="q-ex-chip" data-ex="صرفت 50 جنيه على القهوة النهاردة">☕ قهوة ٥٠</button><button type="button" class="q-ex-chip" data-ex="دفعت 30 جنيه مواصلات">🚌 مواصلات ٣٠</button><button type="button" class="q-ex-chip" data-ex="قبضت 8000 جنيه مرتب">💰 مرتب</button></div><div class="flex gap-2"><button id="quick-entry-analyze" class="quick-entry-ai-save flex-1 rounded-xl py-2.5 text-xs font-black" type="button" style="background:linear-gradient(145deg,var(--pm-gold-bright),var(--pm-gold));color:var(--pm-ink);">حلّل وسجّل</button><button id="quick-entry-cancel" class="rounded-xl border px-3 py-2.5 text-xs" style="border-color:var(--pm-hairline);color:var(--pm-muted);" type="button">إلغاء</button></div></div>
-                <div id="quick-entry-manual-form" class="hidden relative space-y-3 rounded-2xl border p-3" style="border-color:color-mix(in srgb,var(--pm-gold-bright) 34%,transparent);background:var(--pm-surface-hi);"><div id="quick-manual-success-fx" aria-hidden="true"></div><div class="flex items-center justify-between gap-2"><div><p class="text-xs font-black" style="color:var(--pm-ink);">إدخال يدوي سريع</p><p class="mt-1 text-[10px]" style="color:var(--pm-muted);">اختار النوع والفئة واحفظ من غير AI.</p></div><span class="rounded-full px-2 py-1 text-[10px] font-bold" style="background:color-mix(in srgb,var(--pm-gold-bright) 14%,transparent);color:var(--pm-gold-bright);">متاح للجميع</span></div><div class="grid grid-cols-3 gap-2"><button id="quick-manual-expense" type="button" data-type="expense" class="quick-manual-type active rounded-xl border px-2 py-2 text-[11px] font-black" style="border-color:var(--pm-gold-bright);background:color-mix(in srgb,var(--pm-gold-bright) 14%,transparent);color:var(--pm-ink);">🧾 مصروف</button><button id="quick-manual-income" type="button" data-type="income" class="quick-manual-type rounded-xl border px-2 py-2 text-[11px] font-black" style="border-color:var(--pm-hairline);color:var(--pm-muted);">💰 دخل</button><button id="quick-manual-debt" type="button" data-type="debt" class="quick-manual-type rounded-xl border px-2 py-2 text-[11px] font-black" style="border-color:var(--pm-hairline);color:var(--pm-muted);">🤝 دين</button></div><div class="relative"><input id="quick-manual-amount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="المبلغ" class="w-full rounded-xl border px-3 py-3 pl-14 text-sm outline-none" style="border-color:var(--pm-hairline);background:var(--pm-surface-soft);color:var(--pm-ink);"><span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs font-black" style="color:var(--pm-gold-bright);">ج.م</span></div><input id="quick-manual-description" type="text" maxlength="500" placeholder="الوصف — مثال: غدا أو مرتب" class="w-full rounded-xl border px-3 py-3 text-xs outline-none" style="border-color:var(--pm-hairline);background:var(--pm-surface-soft);color:var(--pm-ink);">
+                <div id="quick-entry-manual-form" class="hidden relative space-y-3 rounded-2xl border p-3" style="border-color:color-mix(in srgb,var(--pm-gold-bright) 34%,transparent);background:var(--pm-surface-hi);"><div id="quick-manual-success-fx" aria-hidden="true"></div><div class="flex items-center justify-between gap-2"><div><p class="text-xs font-black" style="color:var(--pm-ink);">إدخال يدوي سريع</p><p class="mt-1 text-[10px]" style="color:var(--pm-muted);">اختار النوع والفئة واحفظ من غير AI.</p><p class="mt-1 text-[10px] font-bold" id="quick-manual-month-label" style="color:var(--pm-gold-bright);"></p></div><span class="rounded-full px-2 py-1 text-[10px] font-bold" style="background:color-mix(in srgb,var(--pm-gold-bright) 14%,transparent);color:var(--pm-gold-bright);">متاح للجميع</span></div><div class="grid grid-cols-3 gap-2"><button id="quick-manual-expense" type="button" data-type="expense" class="quick-manual-type active rounded-xl border px-2 py-2 text-[11px] font-black" style="border-color:var(--pm-gold-bright);background:color-mix(in srgb,var(--pm-gold-bright) 14%,transparent);color:var(--pm-ink);">🧾 مصروف</button><button id="quick-manual-income" type="button" data-type="income" class="quick-manual-type rounded-xl border px-2 py-2 text-[11px] font-black" style="border-color:var(--pm-hairline);color:var(--pm-muted);">💰 دخل</button><button id="quick-manual-debt" type="button" data-type="debt" class="quick-manual-type rounded-xl border px-2 py-2 text-[11px] font-black" style="border-color:var(--pm-hairline);color:var(--pm-muted);">🤝 دين</button></div><div class="relative"><input id="quick-manual-amount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="المبلغ" class="w-full rounded-xl border px-3 py-3 pl-14 text-sm outline-none" style="border-color:var(--pm-hairline);background:var(--pm-surface-soft);color:var(--pm-ink);"><span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs font-black" style="color:var(--pm-gold-bright);">ج.م</span></div><input id="quick-manual-description" type="text" maxlength="500" placeholder="الوصف — مثال: غدا أو مرتب" class="w-full rounded-xl border px-3 py-3 text-xs outline-none" style="border-color:var(--pm-hairline);background:var(--pm-surface-soft);color:var(--pm-ink);">
                     <div id="quick-manual-category-block"><p class="mb-1 text-[10px] font-bold" style="color:var(--pm-muted);">الفئة</p>
                         <div id="quick-manual-chips-expense" class="flex flex-wrap gap-1.5">
                             <button type="button" class="quick-manual-chip active" data-category="أكل" style="border-color:var(--pm-gold);background:linear-gradient(135deg,color-mix(in srgb,var(--pm-gold-bright) 30%,transparent),var(--pm-surface-hi));color:var(--pm-ink);">🍔 أكل</button>
@@ -4359,7 +4369,10 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                         <div class="w-7 h-7 rounded-lg bg-emerald-500/15 flex items-center justify-center text-emerald-400 text-sm">⇄</div>
                         <span class="text-xs font-bold text-slate-200">حركة السيولة (النهاردة)</span>
                     </div>
-                    <span class="text-[9px] text-slate-500 font-normal">تتصفّر الساعة 12م</span>
+                    <div class="flex items-center gap-2">
+                        <span class="text-[9px] text-slate-500 font-normal">تتصفّر الساعة 12م</span>
+                        <span class="flex items-center gap-1 text-[9px] font-bold text-emerald-400/90" aria-hidden="true"><span>التفاصيل</span><span style="transform:scaleX(-1);display:inline-block;">›</span></span>
+                    </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-2.5">
@@ -8839,6 +8852,9 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             }
 
             const listEl = document.getElementById('daily-items-list');
+            // بنفتكر الفئات المفتوحة قبل إعادة الرسم (كل 20 ثانية بيتحدث الكارت تلقائيًا) عشان ميقفلوش فجأة تحت إيد المستخدم
+            const prevOpenLabels = new Set(Array.from(listEl?.querySelectorAll('details.daily-group[open]') || [])
+                .map((d) => d.querySelector('[data-group-label]')?.getAttribute('data-group-label')).filter(Boolean));
             // ============ عمليات النهاردة = مصاريف + كل الحركات البنكية (دخل/إيداع/سحب/تحويل) مرتبة بالوقت ============
             const todayMovements = Array.isArray(today.movements) ? today.movements : [];
             const todayRows = [...today.items, ...todayMovements.map((m) => ({ ...m, __movement: true }))]
@@ -8926,13 +8942,14 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                 listEl.innerHTML = Array.from(groupsMap.values()).map((g) => {
                     const rowsHtml = g.items.map((it, i) => it.__movement ? renderTodayMovementRow(it, i, g.items.length) : renderExpenseRow(it, i, g.items.length)).join('');
                     const currency = g.items[0]?.currency_code;
+                    const wasOpen = prevOpenLabels.has(g.label);
                     return `
-                    <details class="daily-group border-b border-slate-800/60">
+                    <details class="daily-group"${wasOpen ? ' open' : ''}>
                         <summary class="flex items-center justify-between gap-2 py-2.5 cursor-pointer">
                             <div class="flex min-w-0 items-center gap-2.5">
                                 <span class="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-sm">${g.emoji}</span>
                                 <div class="min-w-0">
-                                    <p class="truncate text-xs font-semibold text-slate-200">${escHtml(g.label)}</p>
+                                    <p class="truncate text-xs font-semibold text-slate-200" data-group-label="${escHtml(g.label)}">${escHtml(g.label)}</p>
                                     <p class="text-[10px] text-slate-500">${g.count} ${g.count === 1 ? 'عملية' : 'عمليات'}</p>
                                 </div>
                             </div>
@@ -11051,7 +11068,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
         }
         setQuickEntryType();
         document.getElementById('quick-entry-text')?.addEventListener('click', () => { document.getElementById('quick-entry-input').value = ''; const locked = !quickEntrySubscription.active && !quickEntrySubscription.inTrial; quickShow('quick-entry-form', !locked); quickShow('quick-entry-manual-form', false); if (locked) quickStatus('للتسجيل بدون AI اضغط «إذا أردت من غير AI».'); else document.getElementById('quick-entry-input')?.focus(); });
-        document.getElementById('quick-entry-manual')?.addEventListener('click', () => { quickShow('quick-entry-form', false); quickShow('quick-entry-draft', false); quickShow('quick-entry-manual-form', true); document.getElementById('quick-manual-amount')?.focus(); });
+        document.getElementById('quick-entry-manual')?.addEventListener('click', () => { quickShow('quick-entry-form', false); quickShow('quick-entry-draft', false); quickShow('quick-entry-manual-form', true); document.getElementById('quick-manual-amount')?.focus(); const monthLbl = document.getElementById('quick-manual-month-label'); if (monthLbl) monthLbl.textContent = `📅 هتتسجّل في: ${new Date().toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' })}`; });
         document.getElementById('quick-entry-cancel')?.addEventListener('click', () => { quickShow('quick-entry-form', false); quickShow('quick-entry-draft', false); quickStatus(''); document.getElementById('quick-entry-input').value = ''; });
         document.getElementById('quick-manual-cancel')?.addEventListener('click', () => { quickShow('quick-entry-manual-form', false); quickStatus(''); });
         function quickManualSetActive(list, target, activeStyle) {
@@ -13066,6 +13083,11 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                     });
                     if (expenseContent) expenseContent.hidden = name !== 'expense';
                     panels.forEach((panel) => panel.classList.toggle('active', panel.dataset.quickToolPanel === name));
+                    // نفتح المحفظة الاستثمارية أوتوماتيك زي ما الحركات البنكية بتفتح بضغطة واحدة، من غير ما المستخدم يحتاج يضغط تاني على العنوان
+                    if (name === 'portfolio') {
+                        const portfolioDetails = document.getElementById('portfolio-collapsible');
+                        if (portfolioDetails && !portfolioDetails.open) portfolioDetails.open = true;
+                    }
                 }
                 if (!card.dataset.workspaceReady) {
                     buttons.forEach((button) => button.addEventListener('click', () => setWorkspace(button.dataset.quickWorkspace)));

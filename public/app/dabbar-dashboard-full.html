@@ -1109,8 +1109,10 @@
         .portfolio-body { padding: .9rem 1.1rem 1.15rem; border-top: 1px dashed var(--portfolio-line); }
         #portfolio-sheet-slot .portfolio-body { border-top:0; padding:0; }
         .portfolio-change { text-align: center; font-size: .64rem; opacity: .75; margin: .75rem 0; }
-        .portfolio-asset-list { display: grid; gap: .55rem; }
-        .portfolio-asset { position: relative; display: flex; justify-content: space-between; align-items: center; gap: .7rem; border-radius: 1.15rem; padding: .68rem .72rem; background: var(--portfolio-card); border: 1px solid var(--portfolio-line); box-shadow: 0 6px 16px rgba(8,80,65,.06); }
+        .portfolio-asset-list { display: grid; gap: .9rem; }
+        .portfolio-asset-wrap { border-radius: 1.15rem; }
+        .portfolio-asset-wrap + .portfolio-asset-wrap { margin-top: .1rem; }
+        .portfolio-asset { position: relative; display: flex; justify-content: space-between; align-items: center; gap: .7rem; border-radius: 1.15rem; padding: .68rem .72rem; background: var(--portfolio-card); border: 1.5px solid var(--portfolio-line); box-shadow: 0 6px 16px rgba(8,80,65,.08); }
         .portfolio-asset-main { display: flex; align-items: center; gap: .65rem; min-width: 0; }
         .portfolio-asset-icon { width: 40px; height: 40px; flex: 0 0 40px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 1.58rem; color: #07533f; background: #d4f1e5; border: 1px solid rgba(8,80,65,.24); box-shadow: inset 0 0 0 1px rgba(255,255,255,.45), 0 3px 8px rgba(8,80,65,.10); }
         .portfolio-asset[data-tone="gold"] .portfolio-asset-icon { color: #704900; background: #ffe9a3; border-color: rgba(112,73,0,.28); }
@@ -3860,7 +3862,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             <section id="quick-entry-card" class="relative bg-gradient-to-br from-emerald-50 via-white to-teal-50 border border-emerald-200 rounded-[28px] p-4 space-y-3 shadow-[0_12px_35px_rgba(16,185,129,.14)] dark:bg-slate-950/60 dark:from-slate-950/60 dark:via-slate-950/60 dark:to-slate-900 dark:border-slate-800" aria-label="إضافة عملية مالية">
                 <div id="dabbar-celebrate-fx" aria-hidden="true"></div>
                 <div id="dabbar-magic-fx" aria-hidden="true"></div>
-                <div class="q-head qe2-dock" id="qe2-dock" data-quick-workspace="expense" role="button" tabindex="0" aria-expanded="false" aria-controls="quick-expense-detail"><div class="q-icon" aria-hidden="true">✨</div><div class="q-titles"><h3 class="q-title" id="qe2-title">سجّل مصروفك بسرعة</h3><p class="q-sub" id="qe2-sub">كتابة، صوت، أو فاتورة — في ثواني</p></div><span id="dabbar-magic-chip" class="dabbar-magic-chip"><span class="dabbar-magic-chip-dot"></span><span id="dabbar-magic-label">جاهز يفهمها</span></span><span class="qe2-open-hint" aria-hidden="true">افتح</span><span class="qe2-chevron" id="qe2-chevron" aria-hidden="true">‹</span></div>
+                <div class="q-head qe2-dock" id="qe2-dock" data-quick-workspace="expense" role="button" tabindex="0" aria-expanded="false" aria-controls="quick-expense-detail"><div class="q-icon" aria-hidden="true">✨</div><div class="q-titles"><h3 class="q-title" id="qe2-title">سجّل مصروفك بسرعة</h3><p class="q-sub" id="qe2-sub">كتابة، صوت، أو فاتورة — في ثواني</p></div><span id="dabbar-magic-chip" class="dabbar-magic-chip" hidden><span class="dabbar-magic-chip-dot"></span><span id="dabbar-magic-label">جاهز يفهمها</span></span><span class="qe2-chevron" id="qe2-chevron" aria-hidden="true">‹</span></div>
                 <div id="quick-expense-content"><div id="quick-expense-detail" class="qe2-detail">
                 <div id="quick-entry-subscription-lock" class="hidden items-center justify-between gap-3 rounded-2xl border px-3 py-2.5 text-[11px]" style="border-color:color-mix(in srgb,var(--pm-gold-bright) 40%,transparent);background:color-mix(in srgb,var(--pm-gold-bright) 10%,var(--pm-surface-hi));color:var(--pm-ink);"><div class="flex items-center gap-2"><span id="quick-entry-vip-badge" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-lg" style="background:linear-gradient(145deg,var(--pm-gold-bright),var(--pm-gold));color:var(--pm-ink);">💎</span><span><strong class="block" style="color:var(--pm-gold-bright);">التصنيف الذكي بقى ميزة VIP</strong><span style="color:var(--pm-muted);">الإدخال اليدوي شغال زي العادة — فعّل VIP للصوت والفواتير والـ AI.</span></span></div><button id="quick-entry-open-subscription" type="button" class="shrink-0 rounded-xl px-3 py-2 text-[10px] font-black" style="background:linear-gradient(145deg,var(--pm-gold-bright),var(--pm-gold));color:var(--pm-ink);">فعّل VIP</button></div>
                 
@@ -3986,6 +3988,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                         <span class="text-xs text-emerald-700 dark:text-emerald-400 font-semibold block">💰 دخلك الشهر ده</span>
                         <h3 class="text-lg font-black text-emerald-800 dark:text-emerald-300" id="monthly-income">—</h3>
                         <p class="text-[10px] text-emerald-600 dark:text-emerald-500" id="monthly-income-compare"></p>
+                        <p class="text-[9.5px] text-emerald-600/80 dark:text-emerald-400/70 font-semibold">اضغط تشوف كل عمليات دخلك</p>
                     </button>
                     <div id="monthly-total-card" class="available-cell bg-black/5 dark:bg-white/5 text-center">
                         <span class="available-count-badge gold" id="monthly-count-badge">—</span>
@@ -5858,8 +5861,11 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
     <div id="portfolio-sheet" class="fixed inset-0 z-50 hidden items-end justify-center bg-black/70 backdrop-blur-sm">
         <div class="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-t-3xl" style="background:var(--pm-canvas);">
             <div class="sticky top-0 z-10 flex items-center justify-between gap-3 px-4 pt-4 pb-3" style="background:var(--pm-canvas);border-bottom:1px solid var(--pm-hairline);">
-                <h3 class="text-sm font-black" style="color:var(--pm-ink);">محفظتك الاستثمارية</h3>
-                <button id="portfolio-sheet-close" type="button" class="flex h-8 w-8 items-center justify-center rounded-full" style="background:var(--pm-surface-soft);color:var(--pm-muted);" aria-label="إغلاق">✕</button>
+                <div>
+                    <h3 class="text-sm font-black" style="color:var(--pm-ink);">محفظتك الاستثمارية</h3>
+                    <p style="font-size:.62rem;font-weight:800;margin-top:.15rem;color:var(--pm-muted);">💡 بياناتك الحقيقية — القيم اللي تحتها هي آخر تقييم دخّلته إنت بنفسك لكل أصل، مش سعر سوق تلقائي</p>
+                </div>
+                <button id="portfolio-sheet-close" type="button" class="flex h-8 w-8 items-center justify-center rounded-full shrink-0" style="background:var(--pm-surface-soft);color:var(--pm-muted);" aria-label="إغلاق">✕</button>
             </div>
             <div id="portfolio-sheet-slot" class="px-4 pb-6 pt-2"></div>
         </div>
@@ -7907,10 +7913,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             __ledgerHighlightCount = Math.max(__ledgerHighlightCount, normalizedCount);
             // المدة أطول من مدة طلب إعادة التحميل، لكن التوهج المرئي نفسه 10 ثوانٍ.
             __ledgerHighlightUntil = Date.now() + 30000;
-            // ============ بعد ما تتسجل العملية، ننزل تلقائيًا على "آخر عملياتك" عشان المستخدم يتأكد إنها اتسجلت ============
-            setTimeout(() => {
-                document.getElementById('expense-ledger-card')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }, 650);
+            // ============ متنزلش المستخدم إجباريًا لـ"آخر عملياتك" بعد كل تسجيل — الهايلايت وحده كفاية إنه يتأكد إنها اتسجلت، وهو حر ينزل يشوفها وقت ما يحب ============
         }
 
         function renderPlanning(data) {
@@ -13208,26 +13211,52 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                 if (!card || !portfolioSlot || !bankSlot || !buttons.length) return false;
 
                 if (portfolio && portfolio.parentElement !== portfolioSlot) portfolioSlot.appendChild(portfolio);
-                if (bank && bank.parentElement !== bankSlot) bankSlot.appendChild(bank);
+                // ============ بطل نستخدم كارت "الحركات البنكية" الوسيط جوه اللوحة — بقى بيفتح شيته مباشرة زي المحفظة بالظبط، فمحتاجينش نستضيفه هنا تاني ============
+                if (bank) bank.hidden = true;
 
                 const expenseContent = document.getElementById('quick-expense-content');
                 const panels = [...card.querySelectorAll('[data-quick-tool-panel]')];
+                let currentWorkspace = 'expense';
                 function setWorkspace(name) {
+                    currentWorkspace = name;
                     buttons.forEach((button) => {
                         const active = button.dataset.quickWorkspace === name;
                         button.classList.toggle('active', active);
                         button.setAttribute('aria-selected', String(active));
                     });
                     if (expenseContent) expenseContent.hidden = name !== 'expense';
-                    panels.forEach((panel) => panel.classList.toggle('active', panel.dataset.quickToolPanel === name));
-                    // نفتح المحفظة الاستثمارية أوتوماتيك زي ما الحركات البنكية بتفتح بضغطة واحدة، من غير ما المستخدم يحتاج يضغط تاني على العنوان
+                    panels.forEach((panel) => {
+                        if (panel.dataset.quickToolPanel === 'bank') return; // بقى شيت مستقل، مش لوحة داخلية
+                        panel.classList.toggle('active', panel.dataset.quickToolPanel === name);
+                    });
+                    const portfolioDetails = document.getElementById('portfolio-collapsible');
                     if (name === 'portfolio') {
-                        const portfolioDetails = document.getElementById('portfolio-collapsible');
+                        // ضغطة واحدة تفتح المحفظة مباشرة
                         if (portfolioDetails && !portfolioDetails.open) portfolioDetails.open = true;
+                    } else if (portfolioDetails && portfolioDetails.open) {
+                        // وأي رجوع للتاب التاني يقفلها، عشان الضغط يبقى فتح/قفل حقيقي
+                        portfolioDetails.open = false;
                     }
                 }
                 if (!card.dataset.workspaceReady) {
-                    buttons.forEach((button) => button.addEventListener('click', () => setWorkspace(button.dataset.quickWorkspace)));
+                    buttons.forEach((button) => button.addEventListener('click', () => {
+                        const name = button.dataset.quickWorkspace;
+                        if (name === 'bank') {
+                            // نفس مبدأ المحفظة بالظبط: ضغطة تفتح شيت الحركات البنكية، وضغطة تانية على نفس الكارت تقفله
+                            const sheet = document.getElementById('bank-movements-sheet');
+                            const isOpen = sheet && sheet.classList.contains('flex');
+                            if (isOpen) { closeBankMovementsSheet(); setWorkspace('expense'); }
+                            else { openBankMovementsSheet(); setWorkspace('bank'); }
+                            return;
+                        }
+                        // نفس الكارت المفتوح لو انضغط تاني بيقفل (فتح/قفل حقيقي مش فتح بس)
+                        setWorkspace(name === currentWorkspace ? 'expense' : name);
+                    }));
+                    // لو المحفظة أو شيت الحركات البنكية اتقفلوا من زرار الإغلاق بتاعهم أو بالضغط برة، نرجّع الكارت لحالة عادية
+                    document.getElementById('portfolio-sheet-close')?.addEventListener('click', () => { if (currentWorkspace === 'portfolio') setWorkspace('expense'); });
+                    document.getElementById('portfolio-sheet')?.addEventListener('click', (e) => { if (e.target.id === 'portfolio-sheet' && currentWorkspace === 'portfolio') setWorkspace('expense'); });
+                    document.getElementById('bank-movements-close')?.addEventListener('click', () => { if (currentWorkspace === 'bank') setWorkspace('expense'); });
+                    document.getElementById('bank-movements-sheet')?.addEventListener('click', (e) => { if (e.target.id === 'bank-movements-sheet' && currentWorkspace === 'bank') setWorkspace('expense'); });
                     card.dataset.workspaceReady = 'true';
                 }
                 setWorkspace(buttons.find((button) => button.classList.contains('active'))?.dataset.quickWorkspace || 'expense');

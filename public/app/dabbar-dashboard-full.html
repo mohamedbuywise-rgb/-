@@ -7756,8 +7756,13 @@ button:active, .quick-entry-tab:active { transition-duration: .06s; }
                 savePlanningSettings();
             }));
             const list = document.getElementById('expense-ledger-list');
-            const items = data?.today?.items || [];
-            const events = (data?.month?.financialEvents || []).filter((event) => new Date(event.created_at).toDateString() === new Date().toDateString());
+            // ============ لازم ترتيب صريح بالأحدث أولًا هنا: مفيش ضمان إن الـ API راجع العمليات بترتيب زمني تنازلي،
+            // (بالظبط زي الفرز اللي بيحصل لنفس السبب في renderDaily) — من غيره العملية الجديدة ممكن متطلعش في أول ٥/١٠ صفوف
+            // فتتقص من الليست خالص قبل ما توصل لمرحلة الهايلايت ============
+            const items = [...(data?.today?.items || [])].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+            const events = (data?.month?.financialEvents || [])
+                .filter((event) => new Date(event.created_at).toDateString() === new Date().toDateString())
+                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
             // ============ لو الفويس (أو أي مسار) سجّل أكتر من ٥ عمليات دفعة واحدة، بنوسّع عدد الصفوف الظاهرة لحد ١٠ عشان محدش يختفي من غير ما يتهايلايت، وبعد المرة دي بترجع تتقفل على ٥ تاني ============
             const freshCutoff = Date.now() - 45000;
             // ============ لو السيرفر رجّع created_at من غير Z أو offset في الآخر (زي "2026-09-25T14:23:00")، المتصفح بيفسّرها Local Time مش UTC،

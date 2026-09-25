@@ -3569,19 +3569,34 @@ button:active, .quick-entry-tab:active { transition-duration: .06s; }
   box-shadow:inset -3px 0 0 0 var(--pm-gold-bright, #10b981);
   animation: ledgerRowGlow 10s ease-out both;
 }
+html:not([data-theme="light"]) .ledger-row-new{ background:rgba(208,255,82,.16) !important; }
+html[data-theme="light"] .ledger-row-new{ background:rgba(8,122,89,.14) !important; }
 @keyframes ledgerRowGlow{
   0%{ background: rgba(16,185,129,.22); box-shadow: inset -3px 0 0 0 var(--pm-gold-bright, #10b981); }
   75%{ background: rgba(16,185,129,.10); box-shadow: inset -3px 0 0 0 var(--pm-gold-bright, #10b981); }
   100%{ background: transparent; box-shadow: inset -3px 0 0 0 transparent; }
 }
 /* ============ هايلايت كارت "آخر عملياتك" كله (مش بس الصف) لما تتضاف عملية جديدة — نفس مدة هايلايت الصف الواحد (10 ثواني) ============ */
-#expense-ledger-card.ledger-card-new{
-  animation: ledgerCardGlow 10s ease-out both;
+#expense-ledger-card.ledger-card-new{ position:relative; }
+#expense-ledger-card.ledger-card-new::after{
+  content:''; position:absolute; inset:-3px; z-index:5; pointer-events:none;
+  border:2px solid var(--pm-gold-bright, #10b981); border-radius:inherit;
+  box-shadow:0 0 0 3px rgba(16,185,129,.16), 0 0 22px rgba(16,185,129,.24);
+  opacity:0; animation:ledgerCardGlow 2.2s ease-out both;
+}
+html:not([data-theme="light"]) #expense-ledger-card.ledger-card-new::after{
+  box-shadow:0 0 0 3px rgba(208,255,82,.16), 0 0 22px rgba(208,255,82,.24);
+}
+html[data-theme="light"] #expense-ledger-card.ledger-card-new::after{
+  box-shadow:0 0 0 3px rgba(8,122,89,.16), 0 0 22px rgba(8,122,89,.24);
 }
 @keyframes ledgerCardGlow{
-  0%{ box-shadow: inset 0 0 0 1.5px var(--pm-gold-bright, #10b981), 0 0 0 3px rgba(16,185,129,.16); }
-  75%{ box-shadow: inset 0 0 0 1.5px var(--pm-gold-bright, #10b981), 0 0 0 2px rgba(16,185,129,.08); }
-  100%{ box-shadow: inset 0 0 0 1.5px transparent, 0 0 0 0 transparent; }
+  0%{ opacity:1; transform:scale(.995); }
+  42%{ opacity:.9; transform:scale(1); }
+  100%{ opacity:0; transform:scale(1.008); }
+}
+@media (prefers-reduced-motion: reduce){
+  #expense-ledger-card.ledger-card-new::after{ animation:none !important; opacity:1; }
 }
 .ledger-row-new-tag{
   display:inline-block; font-size:.58rem; font-weight:950; color:var(--pm-canvas, #0c0e10);
@@ -7698,11 +7713,83 @@ button:active, .quick-entry-tab:active { transition-duration: .06s; }
         // الاستجابات تأتي بدون timezone أو بتأخير بسيط بين الحفظ وإعادة تحميل الداشبورد.
         let __ledgerHighlightCount = 0;
         let __ledgerHighlightUntil = 0;
-        function armLedgerHighlight(count = 1) {
+        let __ledgerCardHighlightTimer = null;
+        function flashLedgerCard(restart = false) {
+            const cardEl = document.getElementById('expense-ledger-card');
+            if (!cardEl || (cardEl.classList.contains('ledger-card-new') && !restart)) return;
+            clearTimeout(__ledgerCardHighlightTimer);
+            cardEl.classList.remove('ledger-card-new');
+            void cardEl.offsetWidth;
+            cardEl.classList.add('ledger-card-new');
+            __ledgerCardHighlightTimer = setTimeout(() => {
+                cardEl.classList.remove('ledger-card-new');
+                __ledgerCardHighlightTimer = null;
+            }, 10000);
+        }
+
+        // أظهر العملية فور نجاح الحفظ؛ لا تنتظر /api/dashboard-data ليعيد رسم البطاقة.
+        function addOptimisticLedgerEntries(entries = []) {
+            const normalized = (Array.isArray(entries) ? entries : [])
+                .map((entry) => ({
+                    ...entry,
+                    type: String(entry?.type || 'expense').toLowerCase(),
+                    amount: Number(entry?.amount || 0),
+                }))
+                .filter((entry) => entry.amount > 0 && ['expense', 'income'].includes(entry.type));
+            if (!normalized.length) return [];
+
+            ensurePlanningUI();
+            const list = document.getElementById('expense-ledger-list');
+            if (!list) return [];
+            list.querySelector('.ledger-empty-hint')?.remove();
+
+            const inserted = [];
+            normalized.forEach((entry) => {
+                const isIncome = entry.type === 'income';
+                const category = String(entry.category || (isIncome ? 'دخل آخر' : 'عام'));
+                const titleText = String(entry.description || entry.note || entry.name || category || (isIncome ? 'دخل' : 'مصروف')).trim();
+                const row = document.createElement('div');
+                row.className = 'flex items-center gap-2 border-b border-slate-800/50 py-2 last:border-0 ledger-row-new';
+                row.dataset.optimisticLedger = 'true';
+
+                const icon = document.createElement('span');
+                icon.className = 'flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10';
+                icon.textContent = isIncome ? '💰' : getCategoryEmoji(category);
+
+                const details = document.createElement('div');
+                details.className = 'min-w-0 flex-1';
+                const title = document.createElement('p');
+                title.className = 'truncate text-[11px] font-bold text-slate-200';
+                const badge = document.createElement('span');
+                badge.className = 'ledger-row-new-tag';
+                badge.textContent = 'جديد';
+                title.append(badge, document.createTextNode(titleText));
+                const meta = document.createElement('p');
+                meta.className = 'text-[9px] text-slate-500';
+                meta.textContent = `${isIncome ? 'دخل' : 'مصروف'} · ${category}`;
+                details.append(title, meta);
+
+                const amount = document.createElement('span');
+                amount.className = `text-[11px] font-bold ${isIncome ? 'text-emerald-400' : 'text-rose-400'}`;
+                amount.textContent = `${isIncome ? '+' : '-'}${fmt(entry.amount, entry.currency_code || entry.currencyCode)}`;
+                row.append(icon, details, amount);
+                list.insertBefore(row, list.firstChild);
+                inserted.push(row);
+                setTimeout(() => row.classList.remove('ledger-row-new'), 10000);
+                setTimeout(() => badge.remove(), 9500);
+            });
+
+            const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+            inserted[inserted.length - 1]?.scrollIntoView({ behavior: prefersReducedMotion ? 'auto' : 'smooth', block: 'nearest' });
+            return inserted;
+        }
+
+        function armLedgerHighlight(count = 1, entries = []) {
             const normalizedCount = Math.max(1, Number(count) || 1);
             __ledgerHighlightCount = Math.max(__ledgerHighlightCount, normalizedCount);
-            // المدة أطول من مدة طلب إعادة التحميل، لكن التوهج المرئي نفسه 10 ثوانٍ.
+            // المهلة تخص إعادة الرسم الاحتياطية فقط؛ الهايلايت المرئي يبدأ فور نجاح الحفظ.
             __ledgerHighlightUntil = Date.now() + 30000;
+            if (addOptimisticLedgerEntries(entries).length) flashLedgerCard(true);
         }
 
         function renderPlanning(data) {
@@ -7841,16 +7928,7 @@ button:active, .quick-entry-tab:active { transition-duration: .06s; }
                 setTimeout(() => { badge.remove(); }, 9500);
             });
             firstFreshRow?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-            if (firstFreshRow) {
-                const cardEl = document.getElementById('expense-ledger-card');
-                if (cardEl) {
-                    cardEl.classList.remove('ledger-card-new');
-                    // ============ إعادة تشغيل الأنيميشن حتى لو كانت الكلاس متحطة أصلًا (reflow) ============
-                    void cardEl.offsetWidth;
-                    cardEl.classList.add('ledger-card-new');
-                    setTimeout(() => { cardEl.classList.remove('ledger-card-new'); }, 10000);
-                }
-            }
+            if (firstFreshRow) flashLedgerCard();
             list?.querySelectorAll('[data-expense-edit]').forEach((btn) => btn.addEventListener('click', () => editExpense(btn.dataset.expenseEdit, btn.dataset.expenseAmount, btn.dataset.expenseDescription)));
             list?.querySelectorAll('[data-expense-delete]').forEach((btn) => btn.addEventListener('click', () => deleteExpense(btn.dataset.expenseDelete)));
             list?.querySelectorAll('[data-event-edit]').forEach((btn) => btn.addEventListener('click', () => editExpense(btn.dataset.eventEdit, btn.dataset.eventAmount, btn.dataset.eventDescription, true)));
@@ -10900,7 +10978,7 @@ button:active, .quick-entry-tab:active { transition-duration: .06s; }
                 if (!response.ok) throw new Error(data.error || 'تعذر حفظ العملية.');
                 quickStatus(type === 'income' ? 'تم حفظ الدخل بنجاح.' : 'تم حفظ المصروف بنجاح.', 'success'); hideProcessMoney(() => celebrateSave('quick-manual-success-fx'));
                 document.getElementById('quick-manual-amount').value = ''; document.getElementById('quick-manual-description').value = ''; document.getElementById('quick-manual-custom-category').value = ''; document.getElementById('quick-manual-custom-category').classList.add('hidden');
-                armLedgerHighlight(1);
+                armLedgerHighlight(1, [actionPayload]);
                 await loadDashboard();
             } catch (error) {
                 if (window.DabbarOfflineQueue && window.DabbarOfflineQueue.isNetworkFailure(error)) {
@@ -10938,7 +11016,10 @@ button:active, .quick-entry-tab:active { transition-duration: .06s; }
                 quickShow('quick-entry-draft', false);
                 hideProcessConfirm(() => celebrateSave(btn));
                 quickStatus(result.message || 'تم التسجيل بنجاح.', 'success');
-                armLedgerHighlight(Math.max(1, quickEntryDrafts.length));
+                const ledgerEntries = quickEntryDrafts
+                    .filter((draft) => ['expense', 'income'].includes(String(draft?.type || '').toLowerCase()))
+                    .map((draft) => ({ ...draft, description: draft.note || draft.category || '' }));
+                armLedgerHighlight(Math.max(1, ledgerEntries.length), ledgerEntries);
                 await loadDashboard();
             } catch (e) {
                 hideProcessConfirm();
@@ -10976,7 +11057,13 @@ button:active, .quick-entry-tab:active { transition-duration: .06s; }
                 quickShow('quick-entry-draft', true);
                 celebrateSave(document.getElementById('quick-entry-invoice'));
                 quickStatus('تم الحفظ في كل الفواتير ✅', 'success');
-                armLedgerHighlight(1);
+                const ledgerEntries = (result.items || [])
+                    .map((item) => ({ type: 'expense', amount: item.amount, category: item.category || 'مشتريات', description: item.name, currency_code: item.currency_code }))
+                    .filter((item) => Number(item.amount) > 0);
+                if (!ledgerEntries.length && Number(result.totalAmount) > 0) {
+                    ledgerEntries.push({ type: 'expense', amount: result.totalAmount, category: 'مشتريات', description: result.merchant ? `فاتورة ${result.merchant}` : 'فاتورة' });
+                }
+                armLedgerHighlight(Math.max(1, ledgerEntries.length), ledgerEntries);
                 await loadDashboard();
                 await loadInvoicesCount?.();
             } catch (e) {

@@ -1104,7 +1104,10 @@
         .portfolio-detail-edit-btn { width: 100%; margin-top: .6rem; padding: .55rem; border-radius: 10px; border: 1px solid var(--portfolio-line); background: transparent; color: var(--portfolio-accent-strong); font-family: inherit; font-size: .72rem; font-weight: 900; cursor: pointer; }
         .portfolio-chev { color: var(--portfolio-muted); transition: transform .2s; font-size: 1.1rem; }
         #portfolio-collapsible[open] .portfolio-chev { transform: rotate(180deg); }
+        /* المحتوى بقى بيتفتح في بوب أب مستقل (#portfolio-sheet) مش جوه الصفحة، فبنمنع البريفيو الصغير إنه يفضل ظاهر تحت العنوان وقت ما يكون مفتوح */
+        #portfolio-collapsible[open] .portfolio-preview-strip { display:none !important; }
         .portfolio-body { padding: .9rem 1.1rem 1.15rem; border-top: 1px dashed var(--portfolio-line); }
+        #portfolio-sheet-slot .portfolio-body { border-top:0; padding:0; }
         .portfolio-change { text-align: center; font-size: .64rem; opacity: .75; margin: .75rem 0; }
         .portfolio-asset-list { display: grid; gap: .55rem; }
         .portfolio-asset { position: relative; display: flex; justify-content: space-between; align-items: center; gap: .7rem; border-radius: 1.15rem; padding: .68rem .72rem; background: var(--portfolio-card); border: 1px solid var(--portfolio-line); box-shadow: 0 6px 16px rgba(8,80,65,.06); }
@@ -2061,6 +2064,15 @@
         #quick-entry-card { position: relative; }
         #dabbar-celebrate-fx { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 40; display:flex; align-items:center; justify-content:center; overflow:visible; }
         #quick-entry-manual-form { position:relative; overflow:hidden; }
+        /* ============ إدخال يدوي سريع يفتح كبوب أب احترافي (Bottom Sheet) زي باقي المودالات، بدل ما يفتح داخل الكارت ============ */
+        #quick-manual-popup-backdrop { position:fixed; inset:0; z-index:70; display:none; align-items:flex-end; justify-content:center; background:rgba(0,0,0,.68); backdrop-filter:blur(2px); }
+        #quick-manual-popup-backdrop.show { display:flex; }
+        #quick-manual-popup-backdrop .quick-manual-sheet-shell { width:100%; max-width:34rem; max-height:88vh; overflow-y:auto; border-radius:1.5rem 1.5rem 0 0; padding:1rem 1rem calc(1rem + env(safe-area-inset-bottom,0px)); background:var(--pm-canvas); box-shadow:0 -18px 46px rgba(0,0,0,.35); transform:translateY(16px); opacity:0; transition:transform .26s cubic-bezier(.23,1,.32,1), opacity .22s ease; }
+        #quick-manual-popup-backdrop.show .quick-manual-sheet-shell { transform:translateY(0); opacity:1; }
+        #quick-manual-popup-backdrop .quick-manual-sheet-handle { width:2.6rem; height:.28rem; border-radius:999px; margin:0 auto .75rem; background:var(--pm-hairline); }
+        #quick-manual-popup-backdrop #quick-entry-manual-form { border:0 !important; background:transparent !important; padding:0 !important; }
+        .quick-manual-close-btn { width:1.7rem; height:1.7rem; flex:none; display:flex; align-items:center; justify-content:center; border-radius:50%; border:1px solid var(--pm-hairline); background:var(--pm-surface-soft); color:var(--pm-muted); font-size:.75rem; cursor:pointer; }
+        .quick-manual-close-btn:active { transform:scale(.94); }
         #quick-manual-success-fx { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:40; display:flex; align-items:center; justify-content:center; overflow:visible; }
         .quick-entry-manual-link { position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.1rem; width:100%; min-height:1.9rem; margin:.06rem 0 .04rem; padding:.26rem .7rem; border:1px solid color-mix(in srgb,var(--pm-gold-bright) 48%,transparent); border-radius:1rem; background:linear-gradient(135deg,color-mix(in srgb,var(--pm-gold-bright) 13%,var(--pm-surface-hi)),color-mix(in srgb,var(--pm-mint) 7%,var(--pm-surface-hi))); color:var(--pm-ink) !important; box-shadow:0 7px 20px color-mix(in srgb,var(--pm-gold-bright) 12%,transparent), inset 0 1px 0 rgba(255,255,255,.08); text-align:center; cursor:pointer; transition:transform .18s cubic-bezier(.23,1,.32,1), box-shadow .18s ease, border-color .18s ease, background .18s ease; }
         .quick-entry-manual-link::after { content:''; position:absolute; inset:0; border-radius:inherit; background:linear-gradient(110deg,transparent 20%,rgba(255,255,255,.12) 48%,transparent 76%); transform:translateX(-120%); transition:transform .55s ease; pointer-events:none; }
@@ -2777,9 +2789,13 @@
         .bal-row-pct { font:900 1rem/1 'Cairo',sans-serif; text-align:center; }
         .bal-row-pct small { display:block; font:800 .5rem/1.35 'Cairo',sans-serif; color:var(--db-muted); margin-top:.2rem; }
         .bal-row-mid { min-width:0; }
-        .bal-row-nums { display:flex; align-items:baseline; justify-content:space-between; gap:.5rem; margin-bottom:.32rem; }
-        .bal-row-nums b { font:900 .74rem/1 'Cairo',sans-serif; color:var(--db-ink); white-space:nowrap; }
-        .bal-row-nums span { font:700 .58rem/1.3 'Cairo',sans-serif; text-align:left; }
+        .bal-row-nums { display:flex; align-items:baseline; justify-content:space-between; gap:.5rem; margin-bottom:.5rem; flex-wrap:nowrap; }
+        .bal-row-nums b { font:900 .74rem/1 'Cairo',sans-serif; color:var(--db-ink); white-space:nowrap; flex:none; }
+        .bal-row-nums span { font:700 .58rem/1.3 'Cairo',sans-serif; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; display:block; }
+        /* زرار إقفال "توازن مصاريفك" لما تكون مفتوحة — بيبان بس وهي مفتوحة */
+        .balance-close-btn { display:none; align-items:center; justify-content:center; gap:.3rem; width:100%; margin-top:.15rem; padding:.5rem .7rem; border-radius:999px; border:1px solid var(--cs-line); background:var(--db-surface-soft); color:var(--db-muted); font:800 .68rem 'Cairo',sans-serif; cursor:pointer; }
+        #balance-card[open] .balance-close-btn { display:flex; }
+        .balance-close-btn:active { transform:translateY(1px); }
 
         .honor-loyalty-section { border:1px solid rgba(148,163,184,.2); border-radius:1.35rem; overflow:hidden; }
         .honor-loyalty-section > summary { display:flex; align-items:center; justify-content:space-between; gap:.6rem; list-style:none; cursor:pointer; padding:.9rem 1rem; background:var(--db-surface-soft); }
@@ -3381,7 +3397,12 @@ html #tab-monthly.active > #quick-entry-card, html[data-theme] #tab-monthly.acti
     box-shadow: var(--cs-shadow) !important;
     border-radius: 1.6rem !important;
 }
-#quick-entry-card .q-head { display:flex; align-items:center; gap:.75rem; }
+#quick-entry-card .q-head { display:flex; align-items:flex-start; gap:.75rem; }
+/* لما العنوان الطويل "سجّل مصروفك بسرعة" يلف على سطرين جوه q-titles، لو الشارة والسهم فاضلين في النص (align-items:center) بيقعوا فوق سطر الوصف ويحصل تداخل. بنخليهم يبدأوا من فوق بدل النص. */
+#quick-entry-card .q-head > .q-icon { align-self:center; }
+#quick-entry-card .q-head > .dabbar-magic-chip,
+#quick-entry-card .q-head > .qe2-open-hint,
+#quick-entry-card .q-head > .qe2-chevron { margin-top:.2rem; }
 #quick-entry-card .q-icon {
     width:2.8rem; height:2.8rem; flex:none; display:grid; place-items:center; font-size:1.35rem; border-radius:.95rem;
     background: color-mix(in srgb, var(--db-accent) 14%, transparent);
@@ -3720,6 +3741,13 @@ html[data-theme="light"] .bm-pos { color:#0aa875 !important; }
 html[data-theme="light"] .bm-neg { color:#dc4c4c !important; }
 html[data-theme="light"] .bm-pos-bg { background: rgba(10,168,117,.12) !important; }
 html[data-theme="light"] .bm-neg-bg { background: rgba(220,76,76,.12) !important; }
+/* تحويلات: كانت رمادي غامق ثابت فبتبان باهتة في الوضع النهاري — بنخليها متجاوبة مع الوضعين */
+.bm-transfer-bg { background: rgba(148,163,184,.16); }
+.bm-transfer-label { color: #cbd5e1; }
+.bm-transfer-value { color: #e2e8f0; }
+html[data-theme="light"] .bm-transfer-bg { background: rgba(91,101,112,.12) !important; }
+html[data-theme="light"] .bm-transfer-label { color: #48525c !important; }
+html[data-theme="light"] .bm-transfer-value { color: #17202b !important; }
 html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .bm-source-filter-btn { background:#eef2f0 !important; color:#5b6570 !important; border:1px solid rgba(148,163,184,.30) !important; }
 html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .bm-source-filter-btn.active { background:#0aa875 !important; color:#f0fff8 !important; border-color:#0aa875 !important; }
 .bm-acct-chip { display:inline-block; border-radius:999px; padding:0 .45rem; font-size:9.5px; font-weight:800; line-height:1.15rem; color:#7dd3fc; border:1px solid rgba(125,211,252,.35); background:rgba(56,189,248,.1); margin-inline-start:.2rem; }
@@ -3840,7 +3868,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                 <input type="file" id="quick-entry-invoice-input" accept="image/*" class="hidden">
                 <div id="quick-entry-scanning" class="hidden dabbar-scan-box rounded-2xl p-3 text-center"><div class="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl dabbar-scan-box-icon text-xl shadow-sm"><span style="display:inline-block;animation:dabbar-scan-spin 1s linear infinite">⟳</span></div><p class="text-xs font-bold dabbar-scan-box-title">بنقرأ الفاتورة...</p><p class="mt-1 text-[10px] dabbar-scan-box-sub">دبّر بيستخرج المبلغ والأصناف</p></div>
                 <div id="quick-entry-form" class="hidden space-y-3 rounded-2xl border p-3" style="border-color:var(--pm-hairline);background:var(--pm-surface-hi);"><div><div class="flex items-center gap-2 flex-wrap"><p class="text-xs font-black" style="color:var(--pm-ink);">اكتب عمليتك بطريقتك</p><span class="smart-write-badge"><svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor" aria-hidden="true"><path d="M12 2l1.9 5.6L19.5 9.5l-5.6 1.9L12 17l-1.9-5.6L4.5 9.5l5.6-1.9L12 2zm7 12l.9 2.6 2.6.9-2.6.9L19 21l-.9-2.6-2.6-.9 2.6-.9L19 14z"/></svg>كتابة ذكية</span></div><p class="mt-1 text-[10px]" style="color:var(--pm-muted);">مثال: «صرفت 50 جنيه على القهوة النهاردة»</p></div><textarea id="quick-entry-input" rows="1" maxlength="2500" placeholder="مثال: صرفت 50 جنيه على القهوة النهاردة" class="w-full resize-y rounded-2xl border px-3 py-3 text-sm leading-7 outline-none" style="border-color:var(--pm-hairline);background:var(--pm-surface-soft);color:var(--pm-ink);"></textarea><div class="q-ex-chips"><button type="button" class="q-ex-chip" data-ex="صرفت 50 جنيه على القهوة النهاردة">☕ قهوة ٥٠</button><button type="button" class="q-ex-chip" data-ex="دفعت 30 جنيه مواصلات">🚌 مواصلات ٣٠</button><button type="button" class="q-ex-chip" data-ex="قبضت 8000 جنيه مرتب">💰 مرتب</button></div><div class="flex gap-2"><button id="quick-entry-analyze" class="quick-entry-ai-save flex-1 rounded-xl py-2.5 text-xs font-black" type="button" style="background:linear-gradient(145deg,var(--pm-gold-bright),var(--pm-gold));color:var(--pm-ink);">حلّل وسجّل</button><button id="quick-entry-cancel" class="rounded-xl border px-3 py-2.5 text-xs" style="border-color:var(--pm-hairline);color:var(--pm-muted);" type="button">إلغاء</button></div></div>
-                <div id="quick-entry-manual-form" class="hidden relative space-y-3 rounded-2xl border p-3" style="border-color:color-mix(in srgb,var(--pm-gold-bright) 34%,transparent);background:var(--pm-surface-hi);"><div id="quick-manual-success-fx" aria-hidden="true"></div><div class="flex items-center justify-between gap-2"><div><p class="text-xs font-black" style="color:var(--pm-ink);">إدخال يدوي سريع</p><p class="mt-1 text-[10px]" style="color:var(--pm-muted);">اختار النوع والفئة واحفظ من غير AI.</p><p class="mt-1 text-[10px] font-bold" id="quick-manual-month-label" style="color:var(--pm-gold-bright);"></p></div><span class="rounded-full px-2 py-1 text-[10px] font-bold" style="background:color-mix(in srgb,var(--pm-gold-bright) 14%,transparent);color:var(--pm-gold-bright);">متاح للجميع</span></div><div class="grid grid-cols-3 gap-2"><button id="quick-manual-expense" type="button" data-type="expense" class="quick-manual-type active rounded-xl border px-2 py-2 text-[11px] font-black" style="border-color:var(--pm-gold-bright);background:color-mix(in srgb,var(--pm-gold-bright) 14%,transparent);color:var(--pm-ink);">🧾 مصروف</button><button id="quick-manual-income" type="button" data-type="income" class="quick-manual-type rounded-xl border px-2 py-2 text-[11px] font-black" style="border-color:var(--pm-hairline);color:var(--pm-muted);">💰 دخل</button><button id="quick-manual-debt" type="button" data-type="debt" class="quick-manual-type rounded-xl border px-2 py-2 text-[11px] font-black" style="border-color:var(--pm-hairline);color:var(--pm-muted);">🤝 دين</button></div><div class="relative"><input id="quick-manual-amount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="المبلغ" class="w-full rounded-xl border px-3 py-3 pl-14 text-sm outline-none" style="border-color:var(--pm-hairline);background:var(--pm-surface-soft);color:var(--pm-ink);"><span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs font-black" style="color:var(--pm-gold-bright);">ج.م</span></div><input id="quick-manual-description" type="text" maxlength="500" placeholder="الوصف — مثال: غدا أو مرتب" class="w-full rounded-xl border px-3 py-3 text-xs outline-none" style="border-color:var(--pm-hairline);background:var(--pm-surface-soft);color:var(--pm-ink);">
+                <div id="quick-entry-manual-form" class="hidden relative space-y-3 rounded-2xl border p-3" style="border-color:color-mix(in srgb,var(--pm-gold-bright) 34%,transparent);background:var(--pm-surface-hi);"><div id="quick-manual-success-fx" aria-hidden="true"></div><div class="flex items-center justify-between gap-2"><div><p class="text-xs font-black" style="color:var(--pm-ink);">إدخال يدوي سريع</p><p class="mt-1 text-[10px]" style="color:var(--pm-muted);">اختار النوع والفئة واحفظ من غير AI.</p><p class="mt-1 text-[10px] font-bold" id="quick-manual-month-label" style="color:var(--pm-gold-bright);"></p></div><div class="flex items-center gap-1.5 shrink-0"><span class="rounded-full px-2 py-1 text-[10px] font-bold" style="background:color-mix(in srgb,var(--pm-gold-bright) 14%,transparent);color:var(--pm-gold-bright);">متاح للجميع</span><button type="button" id="quick-manual-close" aria-label="إغلاق" class="quick-manual-close-btn">✕</button></div></div><div class="grid grid-cols-3 gap-2"><button id="quick-manual-expense" type="button" data-type="expense" class="quick-manual-type active rounded-xl border px-2 py-2 text-[11px] font-black" style="border-color:var(--pm-gold-bright);background:color-mix(in srgb,var(--pm-gold-bright) 14%,transparent);color:var(--pm-ink);">🧾 مصروف</button><button id="quick-manual-income" type="button" data-type="income" class="quick-manual-type rounded-xl border px-2 py-2 text-[11px] font-black" style="border-color:var(--pm-hairline);color:var(--pm-muted);">💰 دخل</button><button id="quick-manual-debt" type="button" data-type="debt" class="quick-manual-type rounded-xl border px-2 py-2 text-[11px] font-black" style="border-color:var(--pm-hairline);color:var(--pm-muted);">🤝 دين</button></div><div class="relative"><input id="quick-manual-amount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="المبلغ" class="w-full rounded-xl border px-3 py-3 pl-14 text-sm outline-none" style="border-color:var(--pm-hairline);background:var(--pm-surface-soft);color:var(--pm-ink);"><span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs font-black" style="color:var(--pm-gold-bright);">ج.م</span></div><input id="quick-manual-description" type="text" maxlength="500" placeholder="الوصف — مثال: غدا أو مرتب" class="w-full rounded-xl border px-3 py-3 text-xs outline-none" style="border-color:var(--pm-hairline);background:var(--pm-surface-soft);color:var(--pm-ink);">
                     <div id="quick-manual-category-block"><p class="mb-1 text-[10px] font-bold" style="color:var(--pm-muted);">الفئة</p>
                         <div id="quick-manual-chips-expense" class="flex flex-wrap gap-1.5">
                             <button type="button" class="quick-manual-chip active" data-category="أكل" style="border-color:var(--pm-gold);background:linear-gradient(135deg,color-mix(in srgb,var(--pm-gold-bright) 30%,transparent),var(--pm-surface-hi));color:var(--pm-ink);">🍔 أكل</button>
@@ -4165,6 +4193,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                     <div id="balance-insight" class="rounded-xl border border-emerald-500/15 bg-emerald-500/10 px-3 py-2 text-[10px] font-bold leading-relaxed text-emerald-300">الحسبة ببساطة: المستهدف = نسبة من دخلك، والفعلي = اللي صرفته</div>
 
                     <p class="text-center text-[9px] text-slate-500">غيّر أي فئة من احتياجات لرغبات أو العكس</p>
+                    <button type="button" id="balance-card-close-btn" class="balance-close-btn">اقفل <span style="display:inline-block;transform:rotate(180deg);">⌃</span></button>
                 </details>
                 <div class="flex items-center justify-between gap-2">
                     <h4 class="text-xs font-bold text-slate-300">الفئات</h4>
@@ -5825,6 +5854,17 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
         </div>
     </div>
 
+    <!-- المحفظة الاستثمارية — بتفتح كبوب أب (Bottom Sheet) بالظبط زي الحركات البنكية، برة أي كونتينر مقيّد -->
+    <div id="portfolio-sheet" class="fixed inset-0 z-50 hidden items-end justify-center bg-black/70 backdrop-blur-sm">
+        <div class="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-t-3xl" style="background:var(--pm-canvas);">
+            <div class="sticky top-0 z-10 flex items-center justify-between gap-3 px-4 pt-4 pb-3" style="background:var(--pm-canvas);border-bottom:1px solid var(--pm-hairline);">
+                <h3 class="text-sm font-black" style="color:var(--pm-ink);">محفظتك الاستثمارية</h3>
+                <button id="portfolio-sheet-close" type="button" class="flex h-8 w-8 items-center justify-center rounded-full" style="background:var(--pm-surface-soft);color:var(--pm-muted);" aria-label="إغلاق">✕</button>
+            </div>
+            <div id="portfolio-sheet-slot" class="px-4 pb-6 pt-2"></div>
+        </div>
+    </div>
+
     <div id="bank-movements-sheet" class="fixed inset-0 z-50 hidden items-end justify-center bg-black/70 backdrop-blur-sm">
         <div class="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-t-3xl bg-slate-950 border-t border-slate-800 px-4 pb-6">
             <div class="bm-head sticky top-0 z-10 -mx-4 px-4 pt-4 pb-3 flex items-center justify-between gap-3">
@@ -5853,7 +5893,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                     <div class="grid grid-cols-3 gap-2">
                         <div class="rounded-xl bm-neg-bg px-2 py-2 text-center"><div class="text-[10px] bm-neg mb-0.5">خارج</div><div id="bm-stat-withdrawal" class="text-[12px] font-bold bm-neg">0</div></div>
                         <div class="rounded-xl bm-pos-bg px-2 py-2 text-center"><div class="text-[10px] bm-pos mb-0.5">وارد</div><div id="bm-stat-deposit" class="text-[12px] font-bold bm-pos">0</div></div>
-                        <div class="rounded-xl bg-slate-800/60 px-2 py-2 text-center"><div class="text-[10px] text-slate-400 mb-0.5">تحويلات</div><div id="bm-stat-transfer" class="text-[12px] font-bold text-slate-200">0</div></div>
+                        <div class="rounded-xl bm-transfer-bg px-2 py-2 text-center"><div class="text-[10px] bm-transfer-label mb-0.5">تحويلات</div><div id="bm-stat-transfer" class="text-[12px] font-bold bm-transfer-value">0</div></div>
                     </div>
                 </div>
                 <div class="bm-search flex items-center gap-2 rounded-xl px-3 py-2 mb-3">
@@ -8175,6 +8215,10 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             const savings = Math.max(0, income - total);
             return { income, total, needs, wants, savings };
         }
+        document.getElementById('balance-card-close-btn')?.addEventListener('click', () => {
+            const card = document.getElementById('balance-card');
+            if (card) card.open = false;
+        });
         function renderBalanceCard(month) {
             const card = document.getElementById('balance-card');
             if (!card) return;
@@ -10236,6 +10280,33 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             const details = document.getElementById('portfolio-collapsible');
             if (details) details.open = true;
         });
+        // ============ المحفظة الاستثمارية: بدل ما تتمدد جوه الصفحة (أكورديون)، بقت بتفتح كبوب أب ثابت زي الحركات البنكية بالظبط ============
+        let __portfolioSheetSyncing = false;
+        function openPortfolioSheet() {
+            const sheet = document.getElementById('portfolio-sheet');
+            const slot = document.getElementById('portfolio-sheet-slot');
+            const body = document.querySelector('#portfolio-collapsible .portfolio-body');
+            if (slot && body && body.parentElement !== slot) slot.appendChild(body);
+            if (!sheet) return;
+            sheet.classList.remove('hidden');
+            sheet.classList.add('flex');
+        }
+        function closePortfolioSheet() {
+            const sheet = document.getElementById('portfolio-sheet');
+            if (sheet) { sheet.classList.add('hidden'); sheet.classList.remove('flex'); }
+            const details = document.getElementById('portfolio-collapsible');
+            if (details && details.open) {
+                __portfolioSheetSyncing = true;
+                details.open = false;
+                __portfolioSheetSyncing = false;
+            }
+        }
+        document.getElementById('portfolio-collapsible')?.addEventListener('toggle', function () {
+            if (__portfolioSheetSyncing) return;
+            if (this.open) openPortfolioSheet(); else closePortfolioSheet();
+        });
+        document.getElementById('portfolio-sheet-close')?.addEventListener('click', closePortfolioSheet);
+        document.getElementById('portfolio-sheet')?.addEventListener('click', (e) => { if (e.target.id === 'portfolio-sheet') closePortfolioSheet(); });
         document.getElementById('portfolio-refresh-prices-btn')?.addEventListener('click', async (event) => {
             event.preventDefault();
             event.stopPropagation();
@@ -11068,9 +11139,38 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
         }
         setQuickEntryType();
         document.getElementById('quick-entry-text')?.addEventListener('click', () => { document.getElementById('quick-entry-input').value = ''; const locked = !quickEntrySubscription.active && !quickEntrySubscription.inTrial; quickShow('quick-entry-form', !locked); quickShow('quick-entry-manual-form', false); if (locked) quickStatus('للتسجيل بدون AI اضغط «إذا أردت من غير AI».'); else document.getElementById('quick-entry-input')?.focus(); });
-        document.getElementById('quick-entry-manual')?.addEventListener('click', () => { quickShow('quick-entry-form', false); quickShow('quick-entry-draft', false); quickShow('quick-entry-manual-form', true); document.getElementById('quick-manual-amount')?.focus(); const monthLbl = document.getElementById('quick-manual-month-label'); if (monthLbl) monthLbl.textContent = `📅 هتتسجّل في: ${new Date().toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' })}`; });
+        // ============ فتح "إدخال يدوي سريع" كبوب أب مستقل بدل التمدد جوه الكارت — بننقل نفس عنصر الفورم جوه Backdrop ثابت مرة واحدة ونعيد استخدامه ============
+        function quickManualPopupEl() {
+            let backdrop = document.getElementById('quick-manual-popup-backdrop');
+            if (!backdrop) {
+                backdrop = document.createElement('div');
+                backdrop.id = 'quick-manual-popup-backdrop';
+                backdrop.innerHTML = '<div class="quick-manual-sheet-shell"><div class="quick-manual-sheet-handle" aria-hidden="true"></div><div id="quick-manual-sheet-slot"></div></div>';
+                document.body.appendChild(backdrop);
+                const slot = backdrop.querySelector('#quick-manual-sheet-slot');
+                const form = document.getElementById('quick-entry-manual-form');
+                if (form) slot.appendChild(form);
+                backdrop.addEventListener('click', (e) => { if (e.target === backdrop) closeQuickManualPopup(); });
+            }
+            return backdrop;
+        }
+        function openQuickManualPopup() {
+            const backdrop = quickManualPopupEl();
+            quickShow('quick-entry-form', false); quickShow('quick-entry-draft', false);
+            quickShow('quick-entry-manual-form', true);
+            backdrop.classList.add('show');
+            document.getElementById('quick-manual-amount')?.focus();
+            const monthLbl = document.getElementById('quick-manual-month-label');
+            if (monthLbl) monthLbl.textContent = `📅 هتتسجّل في: ${new Date().toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+        }
+        function closeQuickManualPopup() {
+            document.getElementById('quick-manual-popup-backdrop')?.classList.remove('show');
+            quickShow('quick-entry-manual-form', false);
+        }
+        document.getElementById('quick-entry-manual')?.addEventListener('click', openQuickManualPopup);
+        document.getElementById('quick-manual-close')?.addEventListener('click', closeQuickManualPopup);
         document.getElementById('quick-entry-cancel')?.addEventListener('click', () => { quickShow('quick-entry-form', false); quickShow('quick-entry-draft', false); quickStatus(''); document.getElementById('quick-entry-input').value = ''; });
-        document.getElementById('quick-manual-cancel')?.addEventListener('click', () => { quickShow('quick-entry-manual-form', false); quickStatus(''); });
+        document.getElementById('quick-manual-cancel')?.addEventListener('click', () => { closeQuickManualPopup(); quickStatus(''); });
         function quickManualSetActive(list, target, activeStyle) {
             list.forEach((item) => { item.classList.remove('active'); item.removeAttribute('style'); });
             target.classList.add('active');
@@ -11173,6 +11273,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                     quickStatus(data.message || 'تم حفظ الدين بنجاح.', 'success'); hideProcess(() => celebrateSave('quick-manual-success-fx'));
                     document.getElementById('quick-manual-amount').value = ''; document.getElementById('quick-manual-description').value = ''; document.getElementById('quick-manual-person').value = '';
                     armLedgerHighlight(1);
+                    setTimeout(closeQuickManualPopup, 900); // نقفل البوب أب لوحده بعد ما يشوف رسالة النجاح، وبعدين ينزل على آخر عملياتك
                     await loadDashboard();
                 } catch (error) {
                     if (window.DabbarOfflineQueue && window.DabbarOfflineQueue.isNetworkFailure(error)) {
@@ -11181,6 +11282,8 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                         quickStatus('📦 مفيش نت دلوقتي — الدين اتحفظ على جهازك وهيتسجل تلقائيًا لما النت يرجع.', 'success');
                         hideProcess(() => celebrateSave('quick-manual-success-fx'));
                         document.getElementById('quick-manual-amount').value = ''; document.getElementById('quick-manual-description').value = ''; document.getElementById('quick-manual-person').value = '';
+                        armLedgerHighlight(1);
+                        setTimeout(closeQuickManualPopup, 900);
                     } else {
                         hideProcess();
                         quickStatus(error.message || 'تعذر حفظ الدين.', 'error');
@@ -11205,6 +11308,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                 quickStatus(type === 'income' ? 'تم حفظ الدخل بنجاح.' : 'تم حفظ المصروف بنجاح.', 'success'); hideProcessMoney(() => celebrateSave('quick-manual-success-fx'));
                 document.getElementById('quick-manual-amount').value = ''; document.getElementById('quick-manual-description').value = ''; document.getElementById('quick-manual-custom-category').value = ''; document.getElementById('quick-manual-custom-category').classList.add('hidden');
                 armLedgerHighlight(1);
+                setTimeout(closeQuickManualPopup, 900);
                 await loadDashboard();
             } catch (error) {
                 if (window.DabbarOfflineQueue && window.DabbarOfflineQueue.isNetworkFailure(error)) {
@@ -11213,6 +11317,8 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                     quickStatus(`📦 مفيش نت دلوقتي — ${type === 'income' ? 'الدخل' : 'المصروف'} اتحفظ على جهازك وهيتسجل تلقائيًا لما النت يرجع.`, 'success');
                     hideProcessMoney(() => celebrateSave('quick-manual-success-fx'));
                     document.getElementById('quick-manual-amount').value = ''; document.getElementById('quick-manual-description').value = ''; document.getElementById('quick-manual-custom-category').value = ''; document.getElementById('quick-manual-custom-category').classList.add('hidden');
+                    armLedgerHighlight(1);
+                    setTimeout(closeQuickManualPopup, 900);
                 } else {
                     hideProcessMoney();
                     quickStatus(error.message || 'تعذر حفظ العملية.', 'error');
@@ -11313,6 +11419,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
         let bmAliases = [];
         let bmSearch = '';
         let bmLoadedOnce = false;
+        let bmCache = {}; // كاش بالفترة عشان التبديل بين "الشهر ده" و"٧ أيام" و"الكل" يبقى فوري بدل ما يستنى نداء الشبكة كل مرة
         const bmFmt = (n) => Number(n || 0).toLocaleString('ar-EG', { maximumFractionDigits: 0 });
 
         function openBankMovementsSheet() {
@@ -11324,35 +11431,64 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             document.getElementById('bank-movements-sheet').classList.add('hidden');
             document.getElementById('bank-movements-sheet').classList.remove('flex');
         }
+        function bmApplyData(data) {
+            const emptyEl = document.getElementById('bank-movements-empty');
+            const contentEl = document.getElementById('bank-movements-content');
+            bmMovements = data.movements || [];
+            bmAliases = data.aliases || [];
+            if (!bmMovements.length) {
+                contentEl.classList.add('hidden');
+                emptyEl.classList.remove('hidden');
+                if (bmPeriod !== 'all') { document.getElementById('bank-movements-empty-msg').innerHTML = 'مفيش حركات في الفترة دي. <button type="button" id="bm-empty-all" class="text-emerald-400 font-bold">اعرض الكل</button>'; document.getElementById('bm-empty-all')?.addEventListener('click', () => { bmPeriod = 'all'; loadBankMovements(); }); }
+                return;
+            }
+            emptyEl.classList.add('hidden');
+            contentEl.classList.remove('hidden');
+            const bmNet = Number(data.totals.deposit || 0) - Number(data.totals.withdrawal || 0);
+            const bmNetEl = document.getElementById('bm-stat-net');
+            bmNetEl.textContent = `${bmNet > 0 ? '+' : bmNet < 0 ? '-' : ''}${bmFmt(Math.abs(bmNet))} ج.م`;
+            bmNetEl.className = `text-lg font-black ${bmNet > 0 ? 'text-emerald-400' : bmNet < 0 ? 'text-rose-400' : 'text-slate-100'}`;
+            document.getElementById('bm-stat-count').textContent = `${bmMovements.length} حركة`;
+            document.getElementById('bm-subtitle').textContent = `${bmMovements.length} حركة · ${bmPeriod === 'week' ? 'آخر ٧ أيام' : bmPeriod === 'all' ? 'كل الفترات' : 'الشهر ده'}`;
+            document.getElementById('bm-stat-withdrawal').textContent = `${bmFmt(data.totals.withdrawal)} ج.م`;
+            document.getElementById('bm-stat-deposit').textContent = `${bmFmt(data.totals.deposit)} ج.م`;
+            document.getElementById('bm-stat-transfer').textContent = `${bmFmt(data.totals.transfer)} ج.م`;
+            const bmReviewN = bmMovements.filter((m) => m.needs_review).length;
+            const bmReviewEl = document.getElementById('bm-review-count');
+            bmReviewEl.textContent = bmReviewN; bmReviewEl.classList.toggle('hidden', !bmReviewN);
+            bmRenderSourceFilters();
+            bmRenderList();
+        }
+        async function bmFetchPeriod(period) {
+            const res = await fetch(`/api?route=bank-movements&period=${period}`, { headers: { Authorization: `Bearer ${accessToken}` } });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok || !data.ok) throw new Error('bm-fetch-failed');
+            return data;
+        }
         async function loadBankMovements() {
             const statusEl = document.getElementById('bank-movements-status');
             const emptyEl = document.getElementById('bank-movements-empty');
             const contentEl = document.getElementById('bank-movements-content');
+            const periodAtCall = bmPeriod;
+            // لو الفترة دي متخزنة قبل كده، اعرضها فورًا من غير سبينر ولا انتظار الشبكة — تبديل فوري بين "الشهر ده"/"٧ أيام"/"الكل"
+            if (bmCache[periodAtCall]) {
+                statusEl.classList.add('hidden');
+                bmApplyData(bmCache[periodAtCall]);
+                // تحديث هادي في الخلفية من غير ما يبين أي لودينج، عشان الأرقام تفضل حديثة
+                bmFetchPeriod(periodAtCall).then((data) => {
+                    bmCache[periodAtCall] = data;
+                    if (bmPeriod === periodAtCall) bmApplyData(data);
+                }).catch(() => {});
+                return;
+            }
             statusEl.classList.remove('hidden'); statusEl.textContent = 'بنجيب حركاتك...';
             emptyEl.classList.add('hidden'); contentEl.classList.add('hidden');
             try {
-                const res = await fetch(`/api?route=bank-movements&period=${bmPeriod}`, { headers: { Authorization: `Bearer ${accessToken}` } });
-                const data = await res.json().catch(() => ({}));
-                if (!res.ok || !data.ok) { statusEl.classList.add('hidden'); emptyEl.classList.remove('hidden'); return; }
-                bmMovements = data.movements || [];
-                bmAliases = data.aliases || [];
+                const data = await bmFetchPeriod(periodAtCall);
+                if (bmPeriod !== periodAtCall) return; // المستخدم بدّل الفترة تاني قبل ما الرد يوصل
+                bmCache[periodAtCall] = data;
                 statusEl.classList.add('hidden');
-                if (!bmMovements.length) { emptyEl.classList.remove('hidden'); if (bmPeriod !== 'all') { document.getElementById('bank-movements-empty-msg').innerHTML = 'مفيش حركات في الفترة دي. <button type="button" id="bm-empty-all" class="text-emerald-400 font-bold">اعرض الكل</button>'; document.getElementById('bm-empty-all')?.addEventListener('click', () => { bmPeriod = 'all'; loadBankMovements(); }); } return; }
-                contentEl.classList.remove('hidden');
-                const bmNet = Number(data.totals.deposit || 0) - Number(data.totals.withdrawal || 0);
-                const bmNetEl = document.getElementById('bm-stat-net');
-                bmNetEl.textContent = `${bmNet > 0 ? '+' : bmNet < 0 ? '-' : ''}${bmFmt(Math.abs(bmNet))} ج.م`;
-                bmNetEl.className = `text-lg font-black ${bmNet > 0 ? 'text-emerald-400' : bmNet < 0 ? 'text-rose-400' : 'text-slate-100'}`;
-                document.getElementById('bm-stat-count').textContent = `${bmMovements.length} حركة`;
-                document.getElementById('bm-subtitle').textContent = `${bmMovements.length} حركة · ${bmPeriod === 'week' ? 'آخر ٧ أيام' : bmPeriod === 'all' ? 'كل الفترات' : 'الشهر ده'}`;
-                document.getElementById('bm-stat-withdrawal').textContent = `${bmFmt(data.totals.withdrawal)} ج.م`;
-                document.getElementById('bm-stat-deposit').textContent = `${bmFmt(data.totals.deposit)} ج.م`;
-                document.getElementById('bm-stat-transfer').textContent = `${bmFmt(data.totals.transfer)} ج.م`;
-                const bmReviewN = bmMovements.filter((m) => m.needs_review).length;
-                const bmReviewEl = document.getElementById('bm-review-count');
-                bmReviewEl.textContent = bmReviewN; bmReviewEl.classList.toggle('hidden', !bmReviewN);
-                bmRenderSourceFilters();
-                bmRenderList();
+                bmApplyData(data);
             } catch (e) {
                 statusEl.classList.add('hidden'); emptyEl.classList.remove('hidden');
             }
@@ -11504,7 +11640,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                 <div class="flex gap-2"><button id="bm-alias-save" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-[12.5px] font-black text-slate-950">حفظ</button><button id="bm-alias-cancel" class="rounded-xl border border-slate-700 px-4 py-2.5 text-[12.5px] text-slate-300">إلغاء</button></div>`);
             document.getElementById('bm-alias-cancel').addEventListener('click', () => { root.innerHTML = ''; });
             document.getElementById('bm-alias-save').addEventListener('click', async () => {
-                try { await bmPost({ action: 'set_alias', bankKey, last4, nickname: document.getElementById('bm-alias-input').value.trim() }); root.innerHTML = ''; await loadBankMovements(); if (typeof loadDashboard === 'function') loadDashboard().catch(() => {}); }
+                try { await bmPost({ action: 'set_alias', bankKey, last4, nickname: document.getElementById('bm-alias-input').value.trim() }); root.innerHTML = ''; bmCache = {}; await loadBankMovements(); if (typeof loadDashboard === 'function') loadDashboard().catch(() => {}); }
                 catch (e) { const el = document.getElementById('bm-modal-error'); el.textContent = e.message; el.classList.remove('hidden'); }
             });
         }
@@ -11515,7 +11651,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                 <p class="text-[11.5px] text-slate-400 leading-relaxed mb-3">رسالة البنك مفيهاش رقم الحساب. اختار الحساب الصح.</p>
                 <div class="flex flex-col gap-2">${accounts.map((a) => `<button data-acct="${debtEscape(a)}" class="rounded-xl border border-slate-700 px-3 py-2.5 text-[12.5px] text-slate-200 text-right">${debtEscape(bmAcctText(bankKey, a))}</button>`).join('')}</div>`);
             root.querySelectorAll('[data-acct]').forEach((btn) => btn.addEventListener('click', async () => {
-                try { await bmPost({ action: 'assign_account', movementId, last4: btn.dataset.acct }); root.innerHTML = ''; await loadBankMovements(); if (typeof loadDashboard === 'function') loadDashboard().catch(() => {}); }
+                try { await bmPost({ action: 'assign_account', movementId, last4: btn.dataset.acct }); root.innerHTML = ''; bmCache = {}; await loadBankMovements(); if (typeof loadDashboard === 'function') loadDashboard().catch(() => {}); }
                 catch (e) { const el = document.getElementById('bm-modal-error'); el.textContent = e.message; el.classList.remove('hidden'); }
             }));
         }
@@ -11561,6 +11697,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             document.getElementById('bank-movements-review-root').innerHTML = '';
             try {
                 await fetch('/api?route=bank-movements', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({ action: 'resolve', eventId, resolution }) });
+                bmCache = {};
                 await loadBankMovements();
             } catch (e) { /* متبقاش تفشل الواجهة لو فشل التحديث؛ المستخدم يقدر يحاول تاني */ }
         }

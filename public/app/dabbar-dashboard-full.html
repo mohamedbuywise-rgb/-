@@ -3562,10 +3562,16 @@ button:active, .quick-entry-tab:active { transition-duration: .06s; }
 .dabbar-simple-toast span:last-child{ font-size:.8rem; font-weight:800; color:var(--pm-ink); white-space:nowrap; }
 
 /* ============ هايلايت العملية اللي لسه اتسجلت في "آخر عملياتك" — بيستخدم متغيرات الثيم فبيتلوّن صح ليلي ونهاري تلقائيًا، ويفضل ١٠ ثواني ============ */
-.ledger-row-new{ border-radius:.75rem; animation: ledgerRowGlow 10s ease-out both; }
+.ledger-row-new{
+  border-radius:.75rem;
+  /* fallback ثابت عشان الهايلايت يبان حتى لو المتصفح/الثيم ما دعمش color-mix داخل animation */
+  background:rgba(16,185,129,.18) !important;
+  box-shadow:inset 3px 0 0 0 var(--pm-gold-bright, #10b981);
+  animation: ledgerRowGlow 10s ease-out both;
+}
 @keyframes ledgerRowGlow{
-  0%{ background: color-mix(in srgb, var(--pm-gold-bright, #10b981) 22%, transparent); box-shadow: inset 3px 0 0 0 var(--pm-gold-bright, #10b981); }
-  75%{ background: color-mix(in srgb, var(--pm-gold-bright, #10b981) 10%, transparent); box-shadow: inset 3px 0 0 0 var(--pm-gold-bright, #10b981); }
+  0%{ background: rgba(16,185,129,.22); box-shadow: inset 3px 0 0 0 var(--pm-gold-bright, #10b981); }
+  75%{ background: rgba(16,185,129,.10); box-shadow: inset 3px 0 0 0 var(--pm-gold-bright, #10b981); }
   100%{ background: transparent; box-shadow: inset 3px 0 0 0 transparent; }
 }
 .ledger-row-new-tag{
@@ -7679,6 +7685,17 @@ button:active, .quick-entry-tab:active { transition-duration: .06s; }
             renderPlanning(window.__dashboardData || {});
         }
 
+        // عدد العمليات التي تم حفظها للتو. لا نعتمد على created_at وحده لأن بعض
+        // الاستجابات تأتي بدون timezone أو بتأخير بسيط بين الحفظ وإعادة تحميل الداشبورد.
+        let __ledgerHighlightCount = 0;
+        let __ledgerHighlightUntil = 0;
+        function armLedgerHighlight(count = 1) {
+            const normalizedCount = Math.max(1, Number(count) || 1);
+            __ledgerHighlightCount = Math.max(__ledgerHighlightCount, normalizedCount);
+            // المدة أطول من مدة طلب إعادة التحميل، لكن التوهج المرئي نفسه 10 ثوانٍ.
+            __ledgerHighlightUntil = Date.now() + 30000;
+        }
+
         function renderPlanning(data) {
             ensurePlanningUI();
             const settings = planningSettings();
@@ -7775,17 +7792,35 @@ button:active, .quick-entry-tab:active { transition-duration: .06s; }
                 const ts = Date.parse(normalized);
                 return Number.isFinite(ts) ? ts : Date.parse(s);
             };
-            const isFresh = (rec) => { const ts = parseServerTs(rec?.created_at); return Number.isFinite(ts) && ts >= freshCutoff; };
+            const isFresh = (rec) => {
+                const ts = parseServerTs(rec?.created_at);
+                return Number.isFinite(ts) && ts >= freshCutoff && ts <= Date.now() + 120000;
+            };
             const expenseDisplayCount = Math.min(10, Math.max(5, items.filter(isFresh).length));
             const eventDisplayCount = Math.min(10, Math.max(5, events.filter(isFresh).length));
-            const expenseRows = items.slice(0, expenseDisplayCount).map((item) => `<div class="flex items-center gap-2 border-b border-slate-800/50 py-2 last:border-0" data-created-at="${item.created_at || ''}"><span class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10">${getCategoryEmoji(item.category)}</span><div class="min-w-0 flex-1"><p class="truncate text-[11px] font-bold text-slate-200">${(item.description || item.category || 'مصروف').replace(/[<>]/g, '')}</p><p class="text-[9px] text-slate-500">مصروف · ${item.category || 'عام'}</p></div><span class="text-[11px] font-bold text-rose-400">-${fmt(item.amount, item.currency_code)}</span><button type="button" data-expense-edit="${item.id}" data-expense-amount="${item.amount}" data-expense-description="${(item.description || '').replace(/"/g, '&quot;')}" class="text-[11px] text-slate-500 hover:text-emerald-400" aria-label="تعديل العملية">✎</button><button type="button" data-expense-delete="${item.id}" class="text-[11px] text-slate-500 hover:text-rose-400" aria-label="حذف العملية">✕</button></div>`).join('');
-            const eventRows = events.slice(0, eventDisplayCount).map((event) => { const inflow = event.direction === 'inflow' || event.event_type === 'income'; const icon = event.event_type === 'income' ? '💰' : event.event_type === 'asset' ? '📦' : event.event_type === 'transfer' ? '↔️' : '🧾'; return `<div class="flex items-center gap-2 border-b border-slate-800/50 py-2 last:border-0" data-created-at="${event.created_at || ''}"><span class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10">${icon}</span><div class="min-w-0 flex-1"><p class="truncate text-[11px] font-bold text-slate-200">${(event.description || event.category || typeLabel(event.event_type)).replace(/[<>]/g, '')}</p><p class="text-[9px] text-slate-500">${typeLabel(event.event_type)}${event.category ? ` · ${event.category}` : ''}</p></div><span class="text-[11px] font-bold ${inflow ? 'text-emerald-400' : 'text-amber-300'}">${inflow ? '+' : '-'}${fmt(event.amount, event.currency_code)}</span><button type="button" data-event-edit="${event.id}" data-event-amount="${event.amount}" data-event-description="${(event.description || '').replace(/"/g, '&quot;')}" class="text-[11px] text-slate-500 hover:text-emerald-400" aria-label="تعديل الدخل">✎</button><button type="button" data-event-delete="${event.id}" class="text-[11px] text-slate-500 hover:text-rose-400" aria-label="حذف الدخل">✕</button></div>`; }).join('');
+            const ledgerKey = (kind, record, index) => encodeURIComponent(`${kind}:${record?.id ?? `${record?.created_at || ''}|${record?.amount || ''}|${record?.description || ''}|${index}`}`);
+            const expenseRowsData = items.slice(0, expenseDisplayCount).map((item, index) => ({ item, key: ledgerKey('expense', item, index) }));
+            const eventRowsData = events.slice(0, eventDisplayCount).map((event, index) => ({ event, key: ledgerKey('event', event, index) }));
+            // fallback دقيق للحفظ الحالي: لو timestamp غير قابل للقراءة، نأخذ أحدث N
+            // عمليات من نفس البيانات بدل أن نترك العملية الجديدة بلا highlight.
+            const fallbackHighlightKeys = new Set();
+            if (__ledgerHighlightUntil > Date.now()) {
+                [...expenseRowsData.map(({ item, key }) => ({ record: item, key })),
+                 ...eventRowsData.map(({ event, key }) => ({ record: event, key }))]
+                    .sort((a, b) => (parseServerTs(b.record?.created_at) || 0) - (parseServerTs(a.record?.created_at) || 0))
+                    .slice(0, __ledgerHighlightCount)
+                    .forEach(({ key }) => fallbackHighlightKeys.add(key));
+            }
+            const expenseRows = expenseRowsData.map(({ item, key }) => `<div class="flex items-center gap-2 border-b border-slate-800/50 py-2 last:border-0" data-ledger-key="${key}" data-created-at="${item.created_at || ''}"><span class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10">${getCategoryEmoji(item.category)}</span><div class="min-w-0 flex-1"><p class="truncate text-[11px] font-bold text-slate-200">${(item.description || item.category || 'مصروف').replace(/[<>]/g, '')}</p><p class="text-[9px] text-slate-500">مصروف · ${item.category || 'عام'}</p></div><span class="text-[11px] font-bold text-rose-400">-${fmt(item.amount, item.currency_code)}</span><button type="button" data-expense-edit="${item.id}" data-expense-amount="${item.amount}" data-expense-description="${(item.description || '').replace(/"/g, '&quot;')}" class="text-[11px] text-slate-500 hover:text-emerald-400" aria-label="تعديل العملية">✎</button><button type="button" data-expense-delete="${item.id}" class="text-[11px] text-slate-500 hover:text-rose-400" aria-label="حذف العملية">✕</button></div>`).join('');
+            const eventRows = eventRowsData.map(({ event, key }) => { const inflow = event.direction === 'inflow' || event.event_type === 'income'; const icon = event.event_type === 'income' ? '💰' : event.event_type === 'asset' ? '📦' : event.event_type === 'transfer' ? '↔️' : '🧾'; return `<div class="flex items-center gap-2 border-b border-slate-800/50 py-2 last:border-0" data-ledger-key="${key}" data-created-at="${event.created_at || ''}"><span class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10">${icon}</span><div class="min-w-0 flex-1"><p class="truncate text-[11px] font-bold text-slate-200">${(event.description || event.category || typeLabel(event.event_type)).replace(/[<>]/g, '')}</p><p class="text-[9px] text-slate-500">${typeLabel(event.event_type)}${event.category ? ` · ${event.category}` : ''}</p></div><span class="text-[11px] font-bold ${inflow ? 'text-emerald-400' : 'text-amber-300'}">${inflow ? '+' : '-'}${fmt(event.amount, event.currency_code)}</span><button type="button" data-event-edit="${event.id}" data-event-amount="${event.amount}" data-event-description="${(event.description || '').replace(/"/g, '&quot;')}" class="text-[11px] text-slate-500 hover:text-emerald-400" aria-label="تعديل الدخل">✎</button><button type="button" data-event-delete="${event.id}" class="text-[11px] text-slate-500 hover:text-rose-400" aria-label="حذف الدخل">✕</button></div>`; }).join('');
             if (list) list.innerHTML = expenseRows + eventRows || '<div class="ledger-empty-hint"><span>سجّل أول عملية عشان تظهر هنا للمراجعة</span><span class="ledger-empty-hint-icon" aria-hidden="true">🧾</span></div>';
             // ============ هايلايت كل عملية اتسجلت فعليًا في آخر ٢٠ ثانية (بالاعتماد على created_at الحقيقي بتاعها مش مكانها في الليست) — عشان لو سجّل ١٠ عمليات دفعة واحدة أو ورا بعض كل وحدة تتمّيز بذاتها ============
             let firstFreshRow = null;
             list?.querySelectorAll('[data-created-at]').forEach((row) => {
                 const ts = parseServerTs(row.dataset.createdAt);
-                if (!Number.isFinite(ts) || ts < freshCutoff) return;
+                if (!Number.isFinite(ts) || ts < freshCutoff || ts > Date.now() + 120000) {
+                    if (!fallbackHighlightKeys.has(row.dataset.ledgerKey)) return;
+                }
                 row.classList.add('ledger-row-new');
                 const badge = document.createElement('span');
                 badge.className = 'ledger-row-new-tag';
@@ -10814,6 +10849,7 @@ button:active, .quick-entry-tab:active { transition-duration: .06s; }
                     if (!response.ok) throw new Error(data.error || 'تعذر حفظ الدين.');
                     quickStatus(data.message || 'تم حفظ الدين بنجاح.', 'success'); hideProcess(() => celebrateSave('quick-manual-success-fx'));
                     document.getElementById('quick-manual-amount').value = ''; document.getElementById('quick-manual-description').value = ''; document.getElementById('quick-manual-person').value = '';
+                    armLedgerHighlight(1);
                     await loadDashboard();
                 } catch (error) {
                     if (window.DabbarOfflineQueue && window.DabbarOfflineQueue.isNetworkFailure(error)) {
@@ -10845,6 +10881,7 @@ button:active, .quick-entry-tab:active { transition-duration: .06s; }
                 if (!response.ok) throw new Error(data.error || 'تعذر حفظ العملية.');
                 quickStatus(type === 'income' ? 'تم حفظ الدخل بنجاح.' : 'تم حفظ المصروف بنجاح.', 'success'); hideProcessMoney(() => celebrateSave('quick-manual-success-fx'));
                 document.getElementById('quick-manual-amount').value = ''; document.getElementById('quick-manual-description').value = ''; document.getElementById('quick-manual-custom-category').value = ''; document.getElementById('quick-manual-custom-category').classList.add('hidden');
+                armLedgerHighlight(1);
                 await loadDashboard();
             } catch (error) {
                 if (window.DabbarOfflineQueue && window.DabbarOfflineQueue.isNetworkFailure(error)) {
@@ -10882,6 +10919,7 @@ button:active, .quick-entry-tab:active { transition-duration: .06s; }
                 quickShow('quick-entry-draft', false);
                 hideProcessConfirm(() => celebrateSave(btn));
                 quickStatus(result.message || 'تم التسجيل بنجاح.', 'success');
+                armLedgerHighlight(Math.max(1, quickEntryDrafts.length));
                 await loadDashboard();
             } catch (e) {
                 hideProcessConfirm();
@@ -10919,6 +10957,7 @@ button:active, .quick-entry-tab:active { transition-duration: .06s; }
                 quickShow('quick-entry-draft', true);
                 celebrateSave(document.getElementById('quick-entry-invoice'));
                 quickStatus('تم الحفظ في كل الفواتير ✅', 'success');
+                armLedgerHighlight(1);
                 await loadDashboard();
                 await loadInvoicesCount?.();
             } catch (e) {

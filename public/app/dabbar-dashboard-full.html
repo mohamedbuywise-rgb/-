@@ -65,10 +65,22 @@
         .income-row-tag { font-size: .6rem; color: var(--db-muted); margin-top: .1rem; font-weight: 600; }
         .income-row-amt { font-size: .74rem; font-weight: 900; color: var(--cs-up); flex: none; white-space: nowrap; }
         .daily-group[open] > summary { padding-bottom: .25rem; }
-        .daily-group { border-bottom: 1px solid rgba(148,163,184,.22); margin-bottom: .15rem; }
+        .daily-group { border-bottom: 1px solid rgba(148,163,184,.22); margin-bottom: .15rem; transition: opacity .18s ease; }
         .daily-group:last-child { border-bottom: none; margin-bottom: 0; }
-        .daily-group[open] { background: rgba(148,163,184,.05); border-radius: .9rem; padding: 0 .5rem; margin-inline: -.5rem; border-bottom-color: transparent; }
+        /* هايلايت واضح للفئة المفتوحة — بلون البراند (لايم في الغامق / أخضر في الفاتح) بدل الرمادي العادي */
+        .daily-group[open] {
+            background: color-mix(in srgb, var(--pm-gold-bright, #d0ff52) 8%, transparent);
+            border: 1px solid color-mix(in srgb, var(--pm-gold-bright, #d0ff52) 35%, transparent);
+            border-radius: .9rem; padding: 0 .5rem; margin-inline: -.5rem; margin-top: .3rem;
+        }
         .daily-group[open] + .daily-group { margin-top: .35rem; }
+        .daily-group[open] > summary { color: var(--pm-ink, #f5f5f4); }
+        .daily-group[open] > summary [data-group-label] { color: var(--pm-gold-bright, #087a59) !important; font-weight: 900; }
+        /* عمليات الفئة المفتوحة بخط جانبي بلون البراند عشان تبان متجمعة عن باقي القائمة */
+        .daily-group[open] > .pr-2 { border-right: 2px solid var(--pm-gold-bright, #d0ff52); padding-right: .65rem; margin-top: .15rem; }
+        /* باقي الفئات تتظلل لما فئة تانية مفتوحة، عشان الفرق يبان واضح */
+        .daily-group-dim { opacity: .4; }
+        .daily-group-dim > summary { pointer-events: auto; }
         .quick-entry-tab:focus-visible { outline: 2px solid var(--pm-gold-bright); outline-offset: 2px; }
         html[data-theme="light"] .quick-entry-tab { box-shadow: 0 8px 18px rgba(180,140,40,.08); }
 
@@ -308,6 +320,22 @@
         .dabbar-savings-row { display:flex; align-items:center; justify-content:space-between; font-size:.66rem; background: var(--pm-surface-soft, rgba(0,0,0,.18)); border-radius:.7rem; padding:.4rem .6rem; }
         .dabbar-savings-row-label { color: var(--pm-ink-dim, #d7d0c3); font-weight:700; }
         .dabbar-savings-row-amount { color: var(--pm-gold-bright, #10b981); font-weight:900; }
+        /* ============ كارت فرص التوفير — تصميم مضغوط: سطر واحد لكل بند، والتفاصيل بتتفتح بالدوس بس ============ */
+        .dabbar-savings-row2 { display:flex; align-items:center; gap:.55rem; padding:.55rem .1rem; border-top:1px solid var(--pm-hairline); cursor:pointer; }
+        .dabbar-savings-row2:first-of-type { border-top:none; }
+        .dabbar-savings-row2-ic { width:1.9rem; height:1.9rem; border-radius:.7rem; background: color-mix(in srgb, var(--pm-gold, #10b981) 14%, transparent); display:flex; align-items:center; justify-content:center; font-size:.9rem; flex:none; }
+        .dabbar-savings-row2-mid { flex:1; min-width:0; }
+        .dabbar-savings-row2-label { font-size:.72rem; font-weight:800; color: var(--pm-ink, #17202b); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .dabbar-savings-row2-hint { font-size:.6rem; color: var(--pm-muted, #7b8490); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+        .dabbar-savings-row2-amt { font-size:.78rem; font-weight:900; color: var(--pm-gold-bright, #10b981); flex:none; }
+        .dabbar-savings-row2-chev { font-size:.65rem; color: var(--pm-muted, #7b8490); transition:.2s; flex:none; }
+        .dabbar-savings-row2.expanded .dabbar-savings-row2-chev { transform: rotate(90deg); color: var(--pm-gold-bright, #10b981); }
+        .dabbar-savings-detail2 { max-height:0; overflow:hidden; transition:max-height .22s ease; }
+        .dabbar-savings-detail2.open { max-height:220px; }
+        .dabbar-savings-detail2-inner { padding:.1rem .1rem .6rem 2.55rem; font-size:.64rem; color: var(--pm-muted, #7b8490); line-height:1.6; }
+        .dabbar-savings-tags2 { display:flex; flex-wrap:wrap; gap:.3rem; margin-top:.35rem; }
+        .dabbar-savings-tag2 { font-size:.58rem; font-weight:700; color: var(--pm-gold-bright, #10b981); background: color-mix(in srgb, var(--pm-gold-bright, #10b981) 12%, transparent); border: 1px solid color-mix(in srgb, var(--pm-gold-bright, #10b981) 28%, transparent); border-radius:999px; padding:.15rem .5rem; }
+        .dabbar-savings-cta2 { display:inline-block; margin-top:.4rem; background:none; border:none; color: var(--pm-gold-bright, #10b981); font-size:.62rem; font-weight:900; cursor:pointer; padding:0; }
 
         /* أنيميشن سطر الحالة أثناء المعالجة (صوت/كتابة/فاتورة) — كل رسالة بتتمسح وتتغير بسرعة عالية بدل انتظار طويل */
         @keyframes dabbarStatusWipe {
@@ -1752,7 +1780,26 @@
         html[data-theme="dark"] .planning-forecast { background:rgba(189,242,63,.08); }
         html[data-theme="dark"] .planning-forecast strong { color:#f4ce62; }
         /* ============ أيقونة مناسبة تلقائيًا لكل التزام شهري (إيجار/كهرباء/مياه/نت... إلخ) ============ */
-        .commitment-icon { display:inline-flex; align-items:center; justify-content:center; flex:0 0 1.5rem; width:1.5rem; height:1.5rem; border-radius:50%; font-size:.82rem; margin-inline-end:.4rem; }
+        .commitment-icon { display:inline-flex; align-items:center; justify-content:center; flex:0 0 2rem; width:2rem; height:2rem; border-radius:.7rem; font-size:1.05rem; margin-inline-end:.55rem; }
+        .commitment-icon iconify-icon { display:block; }
+        /* ============ زرار "+ إضافة" الموحّد اللي بيفتح شيت بدل صف إدخال ثابت ============ */
+        .dabbar-fab-add { width:100%; border-radius:.9rem; padding:.6rem; font-size:.68rem; font-weight:800; border:1px dashed var(--pm-hairline); background:transparent; color:var(--pm-gold-bright); }
+        /* ============ شيت الإضافة (bottom sheet) لحد الفئة والالتزام — خطوة واحدة: اسم + مبلغ ============ */
+        .dabbar-sheet-backdrop { position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; align-items:flex-end; z-index:40; }
+        .dabbar-sheet-backdrop.open { display:flex; }
+        .dabbar-sheet { background:var(--pm-surface-hi); width:100%; max-width:28rem; margin:0 auto; border-radius:1.2rem 1.2rem 0 0; padding:1rem; padding-bottom:calc(1rem + env(safe-area-inset-bottom,0px)); border:1px solid var(--pm-hairline); border-bottom:none; }
+        .dabbar-sheet-label { font-size:.62rem; color:var(--pm-muted); display:block; margin:.5rem 0 .25rem; font-weight:700; }
+        .dabbar-sheet-input { width:100%; border:1px solid var(--pm-hairline); background:var(--pm-canvas); color:var(--pm-ink); border-radius:.7rem; padding:.55rem .7rem; font-size:.7rem; outline:none; }
+        .dabbar-sheet-input:focus { border-color:var(--pm-gold-bright); }
+        .dabbar-live-preview { display:flex; align-items:center; gap:.5rem; margin-top:.6rem; background:var(--pm-surface-soft); border-radius:.7rem; padding:.5rem .6rem; }
+        .dabbar-live-preview-tag { font-size:.6rem; color:var(--pm-muted); font-weight:700; }
+        .dabbar-sheet-btns { display:flex; gap:.5rem; margin-top:1rem; }
+        .dabbar-sheet-btns button { flex:1; padding:.6rem; border-radius:.8rem; font-size:.68rem; font-weight:800; border:none; }
+        .dabbar-sheet-cancel { background:transparent !important; border:1px solid var(--pm-hairline) !important; color:var(--pm-ink) !important; }
+        .dabbar-sheet-save { background:linear-gradient(135deg, var(--pm-gold-bright), var(--pm-gold)) !important; color:#1c1406 !important; }
+        .dabbar-chip-row { display:flex; flex-wrap:wrap; gap:.4rem; margin-top:.4rem; }
+        .dabbar-chip { font-size:.6rem; font-weight:700; padding:.3rem .6rem; border-radius:999px; border:1px solid var(--pm-hairline); color:var(--pm-muted); background:transparent; }
+        .dabbar-chip:hover { border-color:var(--pm-gold-bright); color:var(--pm-gold-bright); }
         .commitment-icon[data-tone="rent"] { color:#0a5d49; background:#d4f1e5; }
         .commitment-icon[data-tone="electric"] { color:#8a6d00; background:#fff1c2; }
         .commitment-icon[data-tone="water"] { color:#0b5f82; background:#d7eef7; }
@@ -1792,6 +1839,13 @@
         html[data-theme="light"] #planning-reset { background: #eef4f1 !important; color: #446256 !important; border: 1px solid #c7d8cf !important; }
         html[data-theme="light"] #quick-entry-card { background: linear-gradient(135deg,#ffffff,#f0faf5) !important; }
         html[data-theme="light"] #quick-entry-card > .grid > button { background: #ffffff !important; border: 1px solid #d3e2da !important; color: #24483a !important; box-shadow: 0 7px 18px rgba(23,74,50,.1) !important; }
+        /* أيقونة "سجّل مصروفك بسرعة" في الوضع النهاري — دائرة خضراء صريحة بدل التلوين الشفاف، عشان الكارت يبان أوضح كأهم كارت في الشاشة */
+        html[data-theme="light"] #quick-entry-card .q-icon {
+            background: linear-gradient(145deg, var(--db-accent, #16a878), #0c7a56) !important;
+            border-color: transparent !important;
+            color: #ffffff !important;
+            box-shadow: 0 6px 14px rgba(16,168,120,.35);
+        }
         /* بطاقة نتيجة "فاتورة/كتابة/صوت" السريعة — تُجبر على الألوان الفاتحة في الوضع النهاري بغض النظر عن ثيم نظام الجهاز */
         html[data-theme="light"] #quick-entry-draft { background: #ffffff !important; border-color: #b5dfcc !important; }
         html[data-theme="light"] #quick-entry-draft #quick-entry-draft-title { color: #35473c !important; }
@@ -3746,13 +3800,6 @@ button:active, .quick-entry-tab:active { transition-duration: .06s; }
   75%{ box-shadow: inset 0 0 0 1.5px var(--pm-gold-bright, #10b981), 0 0 0 2px rgba(16,185,129,.08); }
   100%{ box-shadow: inset 0 0 0 1.5px transparent, 0 0 0 0 transparent; }
 }
-.ledger-row-new-tag{
-  display:inline-block; font-size:.58rem; font-weight:950; color:var(--pm-canvas, #0c0e10);
-  background:var(--pm-gold-bright, #10b981); padding:.05rem .38rem; border-radius:999px;
-  margin-left:.35rem; vertical-align:middle; animation: ledgerTagOut .4s ease 9.4s forwards;
-}
-@keyframes ledgerTagOut{ to{ opacity:0; transform:scale(.7); } }
-
 /* ============ زرار "كل عملياتك" — بادچ صغير واضح إنه قابل للضغط، بيتلوّن تلقائيًا مع الليلي والنهاري عن طريق متغيرات الثيم ============ */
 .expense-ledger-cta{
   display:inline-flex; align-items:center; gap:.2rem; flex-shrink:0;
@@ -7911,10 +7958,12 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                 <div class="grid grid-cols-2 gap-2"><label class="text-[10px] text-slate-400">💰 دخلك الشهري<input id="planning-income" type="text" inputmode="numeric" placeholder="مثال: 12,000" class="mt-1 w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-100 outline-none focus:border-emerald-400 text-center"></label><label class="text-[10px] text-slate-400">🎯 ميزانيتك الشهرية<input id="planning-budget" type="text" inputmode="numeric" placeholder="مثال: 9,000" class="mt-1 w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-100 outline-none focus:border-emerald-400 text-center"></label></div>
                 <div id="planning-summary" class="rounded-2xl bg-emerald-500/10 px-3 py-3 text-[11px] text-emerald-200"></div>
                 <details class="group"><summary class="flex cursor-pointer list-none items-center gap-2.5 rounded-xl bg-slate-900/60 px-3 py-2.5 text-[10px] font-bold text-slate-400"><span class="planning-collapse-ic">📊</span><span class="flex-1">حدود مصروف لكل فئة (اختياري)</span><span class="text-slate-600 transition group-open:rotate-180">⌄</span></summary>
-                <div class="mt-2 space-y-2"><p class="text-[9.5px] leading-relaxed text-slate-500">حد تخطيطي بس، مش مصروف بيتسجل — دبّر ينبهك لما توصل لـ <b class="text-amber-300">80%</b> منه.</p><div id="category-budgets-list" class="space-y-1.5"></div><div class="flex gap-2"><input id="category-budget-custom-name" type="text" maxlength="40" placeholder="اكتب أي فئة: قهوة، سفر..." class="min-w-0 flex-1 rounded-xl border border-slate-700 bg-slate-900 px-2.5 py-2 text-[10px] text-slate-300 outline-none focus:border-emerald-400"><button id="category-budget-add" type="button" class="rounded-xl border border-emerald-500/25 px-3 py-2 text-[10px] font-bold text-emerald-300">إضافة</button></div></div></details>
+                <div class="mt-2 space-y-2"><p class="text-[9.5px] leading-relaxed text-slate-500">حد تخطيطي بس، مش مصروف بيتسجل — دبّر ينبهك لما توصل لـ <b class="text-amber-300">80%</b> منه.</p><div id="category-budgets-list" class="space-y-1.5"></div><button id="category-budget-add" type="button" class="dabbar-fab-add">+ إضافة حد لفئة</button></div></details>
                 <details class="group border-t border-slate-800 pt-3"><summary class="flex cursor-pointer list-none items-center gap-2.5 rounded-xl bg-slate-900/60 px-3 py-2.5 text-[10px] font-bold text-slate-400"><span class="planning-collapse-ic">📌</span><span class="flex-1">التزامات شهرية متوقعة (إيجار / اشتراكات)</span><span class="text-slate-600 transition group-open:rotate-180">⌄</span></summary>
-                <div class="mt-2 space-y-2"><p class="text-[9px] text-slate-500">للتخطيط فقط — لا تُضاف للصرف الفعلي إلا عند تسجيلها.</p><div class="grid grid-cols-[1fr_5rem_2.5rem] gap-2"><input id="recurring-name" placeholder="إيجار / اشتراك" class="rounded-xl border border-slate-700 bg-slate-900 px-2.5 py-2 text-[10px] text-slate-100 outline-none"><input id="recurring-amount" type="number" min="0" placeholder="المبلغ" class="rounded-xl border border-slate-700 bg-slate-900 px-2.5 py-2 text-[10px] text-slate-100 outline-none"><button id="recurring-add" type="button" class="rounded-xl bg-slate-800 text-lg text-emerald-400">+</button></div><div id="recurring-list" class="mt-2 space-y-1.5"></div></div></details>
-                <div class="flex gap-2 border-t border-slate-800 pt-3"><button id="planning-save" type="button" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950">حفظ خطتي</button><button id="planning-reset" type="button" title="إدارة ومسح خطة الدخل والميزانية" class="rounded-xl border border-slate-700/60 px-3 py-2.5 text-xs text-slate-500">إدارة</button></div>`;
+                <div class="mt-2 space-y-2"><p class="text-[9px] text-slate-500">للتخطيط فقط — لا تُضاف للصرف الفعلي إلا عند تسجيلها.</p><div id="recurring-list" class="space-y-1.5"></div><button id="recurring-add" type="button" class="dabbar-fab-add">+ إضافة التزام جديد</button></div></details>
+                <div class="flex gap-2 border-t border-slate-800 pt-3"><button id="planning-save" type="button" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950">حفظ خطتي</button><button id="planning-reset" type="button" title="إدارة ومسح خطة الدخل والميزانية" class="rounded-xl border border-slate-700/60 px-3 py-2.5 text-xs text-slate-500">إدارة</button></div>
+                <div class="dabbar-sheet-backdrop" id="limit-sheet"><div class="dabbar-sheet"><h3 class="text-xs font-black text-slate-100 mb-2">إضافة حد لفئة</h3><label class="dabbar-sheet-label">اسم الفئة</label><input id="limit-sheet-name" type="text" maxlength="40" placeholder="اكتب اسم الفئة أو اختار من تحت" class="dabbar-sheet-input"><div id="limit-sheet-chips" class="dabbar-chip-row"></div><label class="dabbar-sheet-label">الحد الشهري</label><input id="limit-sheet-amount" type="number" min="0" placeholder="مثال: 1500" class="dabbar-sheet-input"><div class="dabbar-sheet-btns"><button type="button" id="limit-sheet-cancel" class="dabbar-sheet-cancel">إلغاء</button><button type="button" id="limit-sheet-save" class="dabbar-sheet-save">حفظ الحد</button></div></div></div>
+                <div class="dabbar-sheet-backdrop" id="commit-sheet"><div class="dabbar-sheet"><h3 class="text-xs font-black text-slate-100 mb-2">إضافة التزام جديد</h3><label class="dabbar-sheet-label">اسم الالتزام</label><input id="commit-sheet-name" type="text" placeholder="مثال: اشتراك نتفليكس، إيجار الشقة..." class="dabbar-sheet-input"><div class="dabbar-live-preview"><span class="commitment-icon" data-tone="default" id="commit-sheet-icon-wrap"><iconify-icon id="commit-sheet-icon" icon="ph:push-pin-duotone" width="18"></iconify-icon></span><span class="dabbar-live-preview-tag" id="commit-sheet-tag">اكتب اسم عشان الأيقونة تتحدد تلقائي</span></div><label class="dabbar-sheet-label">المبلغ الشهري</label><input id="commit-sheet-amount" type="number" min="0" placeholder="مثال: 250" class="dabbar-sheet-input"><div class="dabbar-sheet-btns"><button type="button" id="commit-sheet-cancel" class="dabbar-sheet-cancel">إلغاء</button><button type="button" id="commit-sheet-save" class="dabbar-sheet-save">حفظ الالتزام</button></div></div></div>`;
             monthly.insertBefore(wrap, quick.parentNode === monthly ? quick.nextSibling : null);
             const ledger = document.createElement('section');
             ledger.id = 'expense-ledger-card';
@@ -7940,8 +7989,17 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                     el.value = raw ? Number(raw).toLocaleString('en-US') : '';
                 });
             });
-            document.getElementById('recurring-add').addEventListener('click', addRecurringExpense);
-            document.getElementById('category-budget-add').addEventListener('click', addCategoryBudget);
+            // ============ الإضافة بقت خطوة واحدة عن طريق شيت (اسم + مبلغ سوا) بدل صف إدخال ثابت + زرار منفصل ============
+            document.getElementById('recurring-add').addEventListener('click', openCommitSheet);
+            document.getElementById('category-budget-add').addEventListener('click', openLimitSheet);
+            document.getElementById('limit-sheet-cancel').addEventListener('click', closeLimitSheet);
+            document.getElementById('limit-sheet-save').addEventListener('click', saveLimitFromSheet);
+            document.getElementById('limit-sheet-name').addEventListener('input', renderLimitSheetChips);
+            document.getElementById('limit-sheet').addEventListener('click', (e) => { if (e.target.id === 'limit-sheet') closeLimitSheet(); });
+            document.getElementById('commit-sheet-cancel').addEventListener('click', closeCommitSheet);
+            document.getElementById('commit-sheet-save').addEventListener('click', saveCommitFromSheet);
+            document.getElementById('commit-sheet-name').addEventListener('input', updateCommitSheetPreview);
+            document.getElementById('commit-sheet').addEventListener('click', (e) => { if (e.target.id === 'commit-sheet') closeCommitSheet(); });
             document.getElementById('balance-edit-link')?.addEventListener('click', openBalanceCategoryEditor);
             document.getElementById('available-empty-cta')?.addEventListener('click', () => {
                 const details = document.getElementById('available-collapsible');
@@ -7978,6 +8036,76 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             if (input) input.value = '';
         }
 
+        // ============ شيت إضافة حد فئة — خطوة واحدة (اسم + مبلغ) مع اقتراحات من فئات الشهر اللي لسه مالهاش حد ============
+        function openLimitSheet() {
+            const nameEl = document.getElementById('limit-sheet-name');
+            const amtEl = document.getElementById('limit-sheet-amount');
+            if (nameEl) nameEl.value = '';
+            if (amtEl) amtEl.value = '';
+            renderLimitSheetChips();
+            document.getElementById('limit-sheet')?.classList.add('open');
+            setTimeout(() => nameEl?.focus(), 150);
+        }
+        function closeLimitSheet() { document.getElementById('limit-sheet')?.classList.remove('open'); }
+        function renderLimitSheetChips() {
+            const settings = planningSettings();
+            const typed = document.getElementById('limit-sheet-name')?.value.trim() || '';
+            const already = new Set(Object.keys(settings.categoryBudgets || {}));
+            const pool = Array.isArray(window.__dashboardData?.month?.byCategory) ? window.__dashboardData.month.byCategory.map((c) => c.name) : [];
+            const suggestions = [...new Set(pool)].filter((name) => !already.has(name) && name.includes(typed)).slice(0, 6);
+            const chips = document.getElementById('limit-sheet-chips');
+            if (chips) chips.innerHTML = suggestions.map((name) => `<button type="button" class="dabbar-chip" data-chip="${name.replace(/"/g, '&quot;')}">${getCategoryEmoji(name)} ${name}</button>`).join('');
+            chips?.querySelectorAll('[data-chip]').forEach((btn) => btn.addEventListener('click', () => {
+                const nameEl = document.getElementById('limit-sheet-name');
+                if (nameEl) nameEl.value = btn.dataset.chip;
+                renderLimitSheetChips();
+                document.getElementById('limit-sheet-amount')?.focus();
+            }));
+        }
+        function saveLimitFromSheet() {
+            const name = document.getElementById('limit-sheet-name')?.value.trim();
+            const amount = Number(document.getElementById('limit-sheet-amount')?.value || 0);
+            if (!name) return quickStatus('اكتب اسم الفئة الأول.', 'error');
+            if (amount <= 0) return quickStatus('اكتب مبلغ الحد.', 'error');
+            const settings = planningSettings();
+            settings.categoryBudgets = { ...(settings.categoryBudgets || {}), [name]: amount };
+            window.__financialSettings = settings;
+            closeLimitSheet();
+            savePlanningSettings();
+        }
+
+        // ============ شيت إضافة التزام — خطوة واحدة (اسم + مبلغ) مع معاينة الأيقونة التلقائية حية وهو بيكتب ============
+        function openCommitSheet() {
+            const nameEl = document.getElementById('commit-sheet-name');
+            const amtEl = document.getElementById('commit-sheet-amount');
+            if (nameEl) nameEl.value = '';
+            if (amtEl) amtEl.value = '';
+            updateCommitSheetPreview();
+            document.getElementById('commit-sheet')?.classList.add('open');
+            setTimeout(() => nameEl?.focus(), 150);
+        }
+        function closeCommitSheet() { document.getElementById('commit-sheet')?.classList.remove('open'); }
+        function updateCommitSheetPreview() {
+            const name = document.getElementById('commit-sheet-name')?.value || '';
+            const c = getCommitmentIcon(name);
+            const wrapEl = document.getElementById('commit-sheet-icon-wrap');
+            const iconEl = document.getElementById('commit-sheet-icon');
+            const tagEl = document.getElementById('commit-sheet-tag');
+            if (wrapEl) wrapEl.dataset.tone = c.tone;
+            if (iconEl) iconEl.setAttribute('icon', c.icon);
+            if (tagEl) tagEl.textContent = name.trim() ? 'الأيقونة اتحددت تلقائي' : 'اكتب اسم عشان الأيقونة تتحدد تلقائي';
+        }
+        function saveCommitFromSheet() {
+            const name = document.getElementById('commit-sheet-name')?.value.trim();
+            const amount = Number(document.getElementById('commit-sheet-amount')?.value || 0);
+            if (!name || amount <= 0) return quickStatus('اكتب اسم ومبلغ الالتزام.', 'error');
+            const settings = planningSettings();
+            settings.recurringExpenses = [...(settings.recurringExpenses || []), { id: crypto.randomUUID(), name, amount, day: 1, category: 'أخرى', active: true }];
+            window.__financialSettings = settings;
+            closeCommitSheet();
+            savePlanningSettings();
+        }
+
         function removeCategoryBudget(name) {
             const settings = planningSettings();
             const next = { ...(settings.categoryBudgets || {}) };
@@ -7992,7 +8120,11 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
         let __ledgerHighlightUntil = 0;
         function armLedgerHighlight(count = 1) {
             const normalizedCount = Math.max(1, Number(count) || 1);
-            __ledgerHighlightCount = Math.max(__ledgerHighlightCount, normalizedCount);
+            // ملحوظة: هنا كانت Math.max(__ledgerHighlightCount, normalizedCount) وده كان البق —
+            // لو دفعة قديمة سجّلت مثلاً 6 عمليات مرة واحدة، العدد كان يفضل 6 للأبد (Math.max ما بينزلش تاني)،
+            // فبعدها أي عملية واحدة جديدة كانت بتهايلايت أحدث 6 عمليات (حتى القديمة منها) بدل واحدة بس.
+            // دلوقتي كل تسجيل جديد بيحدد العدد الصح بتاعه هو بس، مش المتراكم من قبل.
+            __ledgerHighlightCount = normalizedCount;
             // المدة أطول من مدة طلب إعادة التحميل، لكن التوهج المرئي نفسه 10 ثوانٍ.
             __ledgerHighlightUntil = Date.now() + 30000;
             // ============ متنزلش المستخدم إجباريًا لـ"آخر عملياتك" بعد كل تسجيل — الهايلايت وحده كفاية إنه يتأكد إنها اتسجلت، وهو حر ينزل يشوفها وقت ما يحب ============
@@ -8063,11 +8195,42 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                     ? `المتاح دلوقتي: ${fmt(remaining)}`
                     : 'اضغط لإضافة دخلك أو ميزانيتك';
             }
+            // ============ إصلاح البق: قبل كده كان بيتعمل categoryBudgetList.innerHTML = ... كل مرة renderPlanning
+            // بتتنادى (بما فيها التحديث الدوري الصامت كل 60 ثانية)، وده كان بيمسح أي رقم لسه المستخدم بيكتبه
+            // في خانة حد فئة قبل ما الـ auto-save (900ms) يحفظه. الحل: reconcile بدل full wipe — نحدّث الصفوف
+            // الموجودة في مكانها، ومنلمسش value خانة عليها focus حاليًا (بالظبط زي فحص activeElement المستخدم
+            // فعلاً لخانتي الدخل والميزانية فوق)، وده بقى مطبّق على كل خانة حد فئة. كمان: كل الفئات بتتعرض دلوقتي
+            // (مش أول 3 بس) — أي فئة ظهرت في مصروفات الشهر + أي فئة المستخدم ضافها يدوي. ============
             const categoryBudgetList = document.getElementById('category-budgets-list');
-            const topCategories = Array.isArray(data?.month?.byCategory) ? data.month.byCategory.slice(0, 3).map((item) => item.name) : [];
-            const selectedCategories = [...new Set([...topCategories, ...Object.keys(settings.categoryBudgets || {})])];
-            if (categoryBudgetList) categoryBudgetList.innerHTML = selectedCategories.length ? selectedCategories.map((name) => `<label class="flex items-center gap-2 rounded-xl bg-slate-900/60 px-2.5 py-1.5 text-[10px] text-slate-400"><span class="flex-1">${getCategoryEmoji(name)} ${name}</span><input data-category-budget="${name}" type="number" min="0" placeholder="حد الفئة" value="${settings.categoryBudgets?.[name] || ''}" class="w-20 rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-left text-[10px] text-slate-100 outline-none"><button type="button" data-category-budget-remove="${name}" class="text-slate-600 hover:text-rose-400" aria-label="إزالة حد الفئة">×</button></label>`).join('') : '<p class="text-[10px] text-slate-500">مفيش فئات محددة؛ اختار فئة من القائمة لو عايز تتابعها.</p>';
-            categoryBudgetList?.querySelectorAll('[data-category-budget-remove]').forEach((btn) => btn.addEventListener('click', () => removeCategoryBudget(btn.dataset.categoryBudgetRemove)));
+            const monthCategories = Array.isArray(data?.month?.byCategory) ? data.month.byCategory.map((item) => item.name) : [];
+            const selectedCategories = [...new Set([...monthCategories, ...Object.keys(settings.categoryBudgets || {})])];
+            if (categoryBudgetList) {
+                if (!selectedCategories.length) {
+                    categoryBudgetList.innerHTML = '<p class="text-[10px] text-slate-500">مفيش فئات محددة؛ اختار فئة من القائمة لو عايز تتابعها.</p>';
+                } else {
+                    if (categoryBudgetList.querySelector('p')) categoryBudgetList.innerHTML = '';
+                    const existingRows = new Map([...categoryBudgetList.children].map((row) => [row.dataset.categoryRow, row]));
+                    const wanted = new Set(selectedCategories);
+                    existingRows.forEach((row, name) => { if (!wanted.has(name)) row.remove(); });
+                    selectedCategories.forEach((name) => {
+                        const value = settings.categoryBudgets?.[name] || '';
+                        let row = existingRows.get(name);
+                        if (!row) {
+                            row = document.createElement('label');
+                            row.dataset.categoryRow = name;
+                            row.className = 'flex items-center gap-2 rounded-xl bg-slate-900/60 px-2.5 py-1.5 text-[10px] text-slate-400';
+                            row.innerHTML = `<span class="flex-1">${getCategoryEmoji(name)} ${name}</span><input data-category-budget="${name}" type="number" min="0" placeholder="حد الفئة" class="w-20 rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-left text-[10px] text-slate-100 outline-none"><button type="button" data-category-budget-remove="${name}" class="text-slate-600 hover:text-rose-400" aria-label="إزالة حد الفئة">×</button>`;
+                            categoryBudgetList.appendChild(row);
+                            row.querySelector('[data-category-budget]').value = value;
+                            row.querySelector('[data-category-budget-remove]').addEventListener('click', () => removeCategoryBudget(name));
+                        } else {
+                            const input = row.querySelector('[data-category-budget]');
+                            // النقطة الجوهرية: متلمسش value الخانة لو هي دلوقتي focused عشان منمسحش اللي المستخدم بيكتبه
+                            if (input && document.activeElement !== input) input.value = value;
+                        }
+                    });
+                }
+            }
             const recurringList = document.getElementById('recurring-list');
             if (recurringList) recurringList.innerHTML = (settings.recurringExpenses || []).length ? settings.recurringExpenses.map((item, i) => {
                 const cIcon = getCommitmentIcon(item.name);
@@ -8129,14 +8292,8 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                     if (!fallbackHighlightKeys.has(row.dataset.ledgerKey)) return;
                 }
                 row.classList.add('ledger-row-new');
-                const badge = document.createElement('span');
-                badge.className = 'ledger-row-new-tag';
-                badge.textContent = 'جديد';
-                const titleEl = row.querySelector('.flex-1 p');
-                if (titleEl) titleEl.insertBefore(badge, titleEl.firstChild);
                 if (!firstFreshRow) firstFreshRow = row;
                 setTimeout(() => { row.classList.remove('ledger-row-new'); }, 10000);
-                setTimeout(() => { badge.remove(); }, 9500);
             });
             firstFreshRow?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
             if (firstFreshRow) {
@@ -8506,8 +8663,19 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                 : Math.round(month.total / activeDays);
             document.getElementById('monthly-avg').textContent = fmt(monthlyAvg);
 
-            const incomeTotal = Number(month.incomeTotal || month.incomeByCurrency?.EGP || 0);
-            const incomeItems = Array.isArray(month.incomeItems) ? month.incomeItems : [];
+            // ============ عمليات الدخل: السيرفر بيبعت month.incomeItems جاهزة، لكن لوحظ إن دخل بيتسجل من الداش
+            // (وبيظهر صح في "آخر عملياتك"/اليومي فورًا لأنه جاي من month.financialEvents) ممكن ميتحسبش في incomeItems
+            // من عند السيرفر. عشان محدش يضيع، بنكمل أي دخل (event_type === 'income') من financialEvents
+            // مش موجود أصلًا في incomeItems (بالمقارنة بالتاريخ+المبلغ+الوصف)، وبنضيفه للليست والإجمالي. ============
+            const serverIncomeItems = Array.isArray(month.incomeItems) ? month.incomeItems : [];
+            const incomeDedupeKey = (dateVal, amountVal, descVal) => `${Math.round(new Date(dateVal).getTime() / 60000)}|${Number(amountVal) || 0}|${String(descVal || '').trim()}`;
+            const knownIncomeKeys = new Set(serverIncomeItems.map((it) => incomeDedupeKey(it.date, it.amount, it.desc)));
+            const missingIncomeFromEvents = (month.financialEvents || [])
+                .filter((ev) => ev.event_type === 'income')
+                .map((ev) => ({ id: ev.id, date: ev.created_at, desc: ev.description || ev.category || 'دخل', amount: Number(ev.amount) || 0, isDebt: false }))
+                .filter((it) => !knownIncomeKeys.has(incomeDedupeKey(it.date, it.amount, it.desc)));
+            const incomeItems = [...serverIncomeItems, ...missingIncomeFromEvents];
+            const incomeTotal = Number(month.incomeTotal || month.incomeByCurrency?.EGP || 0) + missingIncomeFromEvents.reduce((sum, it) => sum + it.amount, 0);
             document.getElementById('monthly-income').textContent = incomeTotal > 0 ? fmt(incomeTotal) : '—';
             document.getElementById('monthly-income-count').textContent = incomeItems.length > 0
                 ? `من ${incomeItems.length} ${incomeItems.length === 1 ? 'عملية' : 'عمليات'} (بيع/دخل + سلف مستلَفة)`
@@ -9117,6 +9285,21 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             }
             listEl?.querySelectorAll('[data-expense-edit]').forEach((btn) => btn.addEventListener('click', () => editExpense(btn.dataset.expenseEdit, btn.dataset.expenseAmount, btn.dataset.expenseDescription)));
             listEl?.querySelectorAll('[data-expense-delete]').forEach((btn) => btn.addEventListener('click', () => deleteExpense(btn.dataset.expenseDelete)));
+
+            // ============ هايلايت الفئة المفتوحة في "عمليات النهاردة": فتح فئة يقفل غيرها ويظللها ============
+            const dailyGroups = Array.from(listEl?.querySelectorAll('details.daily-group') || []);
+            dailyGroups.forEach((det) => {
+                det.addEventListener('toggle', () => {
+                    if (det.open) {
+                        dailyGroups.forEach((other) => {
+                            if (other !== det) { other.open = false; other.classList.add('daily-group-dim'); }
+                        });
+                        det.classList.remove('daily-group-dim');
+                    } else {
+                        dailyGroups.forEach((other) => other.classList.remove('daily-group-dim'));
+                    }
+                });
+            });
         }
 
         // ============ كارت "فرص التوفير" فوق تبويب يومي — بيتحمّل لوحده (مش جزء من /api/dashboard-data الأساسي) ============
@@ -9129,16 +9312,95 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                 document.getElementById('savings-total').textContent = fmt(data.total);
                 const savingsChip = document.getElementById('savings-total-chip');
                 if (savingsChip) savingsChip.textContent = `· ${fmt(data.total)}`;
+
+                const allSubs = window.__dabbarSubscriptions || [];
+                const flaggedSubs = allSubs.filter((s) => s.flagged);
+                const raisedSubs = allSubs.filter((s) => s.priceChangePercent > 5);
+                const monthData = window.__dashboardData?.month;
+                const topCat = monthData?.topCategory;
+                const topCatPercent = topCat && monthData?.total ? Math.round((topCat.amount / monthData.total) * 100) : null;
+
+                const escHtmlLocal = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
                 const rows = [
-                    data.breakdown.unusedSubscriptions > 0 ? { icon: '🚫', label: 'اشتراكات علّمتها كمش مستخدمة', amount: data.breakdown.unusedSubscriptions } : null,
-                    data.breakdown.priceIncreases > 0 ? { icon: '📈', label: 'اشتراكات غلت من غير ما تاخد بالك', amount: data.breakdown.priceIncreases } : null,
-                    data.breakdown.discretionaryEstimate > 0 ? { icon: '🛍️', label: 'تقليل بسيط في الفئات الكمالية', amount: data.breakdown.discretionaryEstimate } : null,
+                    data.breakdown.unusedSubscriptions > 0 ? {
+                        icon: '🚫', label: 'اشتراكات علّمتها كمش مستخدمة', amount: data.breakdown.unusedSubscriptions,
+                        hint: flaggedSubs.length ? flaggedSubs.slice(0, 2).map((s) => escHtmlLocal(s.label)).join('، ') : 'اشتراكات ثابتة',
+                        detail: flaggedSubs.length ? `عندك ${flaggedSubs.length === 1 ? 'اشتراك واحد' : flaggedSubs.length + ' اشتراكات'} علّمت عليهم إنك مش بتستخدمهم، وبتفضل بتدفعهم شهريًا.` : 'اشتراكات علّمت عليها إنك مش بتستخدمها، وبتفضل بتتخصم شهريًا.',
+                        tags: flaggedSubs.slice(0, 4).map((s) => `${escHtmlLocal(s.label)} — ${fmt(s.amount)}`),
+                        cta: '🚫 وريني الاشتراكات', ctaTarget: 'subscriptions',
+                    } : null,
+                    data.breakdown.priceIncreases > 0 ? {
+                        icon: '📈', label: 'اشتراكات غلت من غير ما تاخد بالك', amount: data.breakdown.priceIncreases,
+                        hint: raisedSubs.length ? raisedSubs.slice(0, 2).map((s) => escHtmlLocal(s.label)).join('، ') : 'زيادة أسعار',
+                        detail: raisedSubs.length ? `${raisedSubs.length === 1 ? 'اشتراك واحد زاد' : raisedSubs.length + ' اشتراكات زادوا'} سعرهم عن الشهر اللي فات — يستاهل تراجعهم.` : 'في اشتراكات زادت في السعر عن الشهر اللي فات.',
+                        tags: raisedSubs.slice(0, 4).map((s) => `${escHtmlLocal(s.label)} +${s.priceChangePercent}%`),
+                        cta: '📈 وريني الاشتراكات اللي غلت', ctaTarget: 'subscriptions',
+                    } : null,
+                    data.breakdown.discretionaryEstimate > 0 ? {
+                        icon: '🛍️', label: 'تقليل بسيط في الفئات الكمالية', amount: data.breakdown.discretionaryEstimate,
+                        hint: topCat ? `${escHtmlLocal(topCat.name)} — أكبر فئة صرف` : 'فئات كمالية',
+                        detail: topCat ? `صرفت الشهر ده ${fmt(topCat.amount)} على "${escHtmlLocal(topCat.name)}" — أكتر فئة في مصروفك. تقليل بسيط فيها ممكن يوفر لك المبلغ ده.` : 'تقليل بسيط في الفئات الكمالية زي التسوق والترفيه ممكن يوفر لك المبلغ ده.',
+                        tags: topCat ? [`${escHtmlLocal(topCat.name)}${topCatPercent !== null ? `: ${topCatPercent}% من مصروفك` : ''}`] : [],
+                        cta: '🛍️ وريني تفاصيل الفئة', ctaTarget: 'category', ctaCategory: topCat?.name || '',
+                    } : null,
                 ].filter(Boolean);
-                document.getElementById('savings-breakdown').innerHTML = rows.map((r) => `
-                    <div class="dabbar-savings-row"><span class="dabbar-savings-row-label">${r.icon} ${r.label}</span><span class="dabbar-savings-row-amount">${fmt(r.amount)}</span></div>
+
+                document.getElementById('savings-breakdown').innerHTML = rows.map((r, idx) => `
+                    <div class="dabbar-savings-row2" data-savings-row="${idx}">
+                        <div class="dabbar-savings-row2-ic">${r.icon}</div>
+                        <div class="dabbar-savings-row2-mid">
+                            <div class="dabbar-savings-row2-label">${r.label}</div>
+                            <div class="dabbar-savings-row2-hint">${r.hint}</div>
+                        </div>
+                        <div class="dabbar-savings-row2-amt">${fmt(r.amount)}</div>
+                        <div class="dabbar-savings-row2-chev">‹</div>
+                    </div>
+                    <div class="dabbar-savings-detail2" id="savings-detail-${idx}">
+                        <div class="dabbar-savings-detail2-inner">
+                            ${r.detail}
+                            ${r.tags.length ? `<div class="dabbar-savings-tags2">${r.tags.map((t) => `<span class="dabbar-savings-tag2">${t}</span>`).join('')}</div>` : ''}
+                            <button type="button" class="dabbar-savings-cta2" data-savings-cta="${r.ctaTarget}" data-savings-cat="${escHtmlLocal(r.ctaCategory || '')}">${r.cta} ›</button>
+                        </div>
+                    </div>
                 `).join('');
+
+                const breakdownEl = document.getElementById('savings-breakdown');
+                const savingsRows = Array.from(breakdownEl.querySelectorAll('.dabbar-savings-row2'));
+                savingsRows.forEach((row) => {
+                    row.addEventListener('click', () => {
+                        const idx = row.dataset.savingsRow;
+                        const detail = document.getElementById(`savings-detail-${idx}`);
+                        const isOpen = row.classList.contains('expanded');
+                        savingsRows.forEach((r) => r.classList.remove('expanded'));
+                        breakdownEl.querySelectorAll('.dabbar-savings-detail2').forEach((d) => d.classList.remove('open'));
+                        if (!isOpen) { row.classList.add('expanded'); detail.classList.add('open'); }
+                    });
+                });
+                breakdownEl.querySelectorAll('[data-savings-cta]').forEach((btn) => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        goToSavingsTarget(btn.dataset.savingsCta, btn.dataset.savingsCat);
+                    });
+                });
+
                 card.classList.remove('hidden');
             } catch (e) { card.classList.add('hidden'); }
+        }
+
+        // ============ من كارت "فرص التوفير" — يودّي المستخدم لمكان الاشتراكات أو الفئة اللي فيها فرصة التوفير ============
+        function goToSavingsTarget(target, categoryName) {
+            const monthlyTabBtn = document.querySelector('.tab-btn[data-tab="monthly"]');
+            if (monthlyTabBtn && !monthlyTabBtn.classList.contains('active-tab')) monthlyTabBtn.click();
+            setTimeout(() => {
+                if (target === 'subscriptions') {
+                    const el = document.getElementById('subscriptions-card');
+                    if (el) { el.open = true; el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+                } else if (target === 'category' && categoryName) {
+                    const toggle = Array.from(document.querySelectorAll('[data-cat-name]')).find((n) => n.getAttribute('data-cat-name') === categoryName)?.closest('.category-toggle');
+                    if (toggle) { toggle.click(); toggle.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+                }
+            }, 150);
         }
         async function toggleSubscriptionFlag(key, label, amount, flagNow) {
             try {
@@ -9148,6 +9410,49 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                 loadSavingsOpportunities();
             } catch (e) { quickStatus('حصل خطأ، جرب تاني.', 'error'); }
         }
+        // ============ مكتبة لوجوهات الاشتراكات — Simple Icons (عبر jsdelivr، ملوّنة بأسلوب mask) —
+        // لو الاسم اتعرّف في المكتبة بيطلع بلوجو حقيقي، غير كده بيرجع أفتار حرف ملوّن زي أفتار المستخدم في التطبيق ============
+        const SUBSCRIPTION_LOGOS = {
+            'netflix': { slug: 'netflix', color: '#E50914' }, 'نتفليكس': { slug: 'netflix', color: '#E50914' },
+            'spotify': { slug: 'spotify', color: '#1DB954' }, 'سبوتيفاي': { slug: 'spotify', color: '#1DB954' },
+            'youtube': { slug: 'youtube', color: '#FF0000' }, 'يوتيوب': { slug: 'youtube', color: '#FF0000' },
+            'apple music': { slug: 'applemusic', color: '#FA243C' }, 'ابل ميوزيك': { slug: 'applemusic', color: '#FA243C' },
+            'apple tv': { slug: 'appletv', color: '#000000' },
+            'icloud': { slug: 'icloud', color: '#3693F3' }, 'ايكلاود': { slug: 'icloud', color: '#3693F3' },
+            'prime video': { slug: 'primevideo', color: '#00A8E1' }, 'amazon prime': { slug: 'primevideo', color: '#00A8E1' },
+            'disney': { slug: 'disneyplus', color: '#113CCF' }, 'ديزني': { slug: 'disneyplus', color: '#113CCF' },
+            'shahid': { slug: 'shahid4', color: '#1CE783' }, 'شاهد': { slug: 'shahid4', color: '#1CE783' },
+            'google one': { slug: 'google', color: '#4285F4' }, 'google drive': { slug: 'googledrive', color: '#4285F4' },
+            'microsoft 365': { slug: 'microsoft365', color: '#D83B01' }, 'office 365': { slug: 'microsoft365', color: '#D83B01' },
+            'adobe': { slug: 'adobe', color: '#FF0000' }, 'canva': { slug: 'canva', color: '#00C4CC' },
+            'chatgpt': { slug: 'openai', color: '#10A37F' }, 'شات جي بي تي': { slug: 'openai', color: '#10A37F' },
+            'playstation': { slug: 'playstation', color: '#003791' }, 'بلايستيشن': { slug: 'playstation', color: '#003791' },
+            'xbox': { slug: 'xbox', color: '#107C10' }, 'anghami': { slug: 'anghami', color: '#8B0FE8' }, 'انغامي': { slug: 'anghami', color: '#8B0FE8' },
+            'امازون': { slug: 'amazon', color: '#FF9900' }, 'amazon': { slug: 'amazon', color: '#FF9900' },
+        };
+        function findSubscriptionLogo(label) {
+            const key = String(label || '').trim().toLowerCase();
+            if (!key) return null;
+            for (const name in SUBSCRIPTION_LOGOS) { if (key.includes(name)) return SUBSCRIPTION_LOGOS[name]; }
+            return null;
+        }
+        // نفس ألوان "آخر عملياتك"/الأفاتار في الموقع (emerald/sky/amber/rose/violet بشفافية ١٠٪) — بنختار لون ثابت لكل اسم بالـ hash
+        function subAvatarColors(label) {
+            const palette = ['bg-emerald-500/10 text-emerald-400', 'bg-sky-500/10 text-sky-400', 'bg-amber-500/10 text-amber-400', 'bg-rose-500/10 text-rose-400', 'bg-violet-500/10 text-violet-400'];
+            const s = String(label || '');
+            let hash = 0;
+            for (let i = 0; i < s.length; i += 1) hash = (hash * 31 + s.charCodeAt(i)) >>> 0;
+            return palette[hash % palette.length];
+        }
+        function renderSubIcon(label) {
+            const logo = findSubscriptionLogo(label);
+            if (logo) {
+                const iconUrl = `https://cdn.jsdelivr.net/npm/simple-icons@latest/icons/${logo.slug}.svg`;
+                return `<div class="flex h-[34px] w-[34px] items-center justify-center rounded-full shrink-0" style="background:${logo.color}"><span style="display:block;width:17px;height:17px;background:#fff;-webkit-mask:url('${iconUrl}') center/contain no-repeat;mask:url('${iconUrl}') center/contain no-repeat;"></span></div>`;
+            }
+            const letter = debtEscape(String(label || '؟').trim().charAt(0).toUpperCase() || '؟');
+            return `<div class="flex h-[34px] w-[34px] items-center justify-center rounded-full text-[13px] font-black shrink-0 ${subAvatarColors(label)}">${letter}</div>`;
+        }
         function renderSubscriptions(subscriptions) {
             const listEl = document.getElementById('subscriptions-list');
             const countEl = document.getElementById('subscriptions-count');
@@ -9156,6 +9461,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             const purchasesCountEl = document.getElementById('recurring-purchases-count');
             if (!listEl) return;
             const all = subscriptions || [];
+            window.__dabbarSubscriptions = all; // متاحة لكارت "فرص التوفير" عشان يعرض بيانات حقيقية بالاسم
             const subs = all.filter((s) => s.type !== 'purchase');
             const purchases = all.filter((s) => s.type === 'purchase');
 
@@ -9174,15 +9480,18 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             } else {
                 listEl.innerHTML = subs.map((s, i) => {
                     const isUp = s.priceChangePercent > 5;
-                    const metaText = isUp ? `زاد ${s.priceChangePercent}% عن الشهر اللي فات` : `ثابت من ${s.monthsRecurring} ${s.monthsRecurring === 2 ? 'شهرين' : 'شهور'}`;
+                    const metaText = isUp ? `📈 زاد ${s.priceChangePercent}% عن الشهر اللي فات` : `ثابت من ${s.monthsRecurring} ${s.monthsRecurring === 2 ? 'شهرين' : 'شهور'}`;
                     const borderClass = i < subs.length - 1 ? 'border-b' : '';
-                    return `<div class="subscription-row flex items-center justify-between py-2 ${borderClass} ${isUp ? 'price-up' : ''}">
-                        <div class="min-w-0">
+                    return `<div class="subscription-row flex items-center gap-2.5 py-2.5 ${borderClass} ${isUp ? 'price-up' : ''}">
+                        ${renderSubIcon(s.label)}
+                        <div class="min-w-0 flex-1">
                             <p class="subscription-name text-xs font-bold truncate">${debtEscape(s.label)}</p>
-                            <p class="subscription-meta text-[9px]">${metaText}</p>
-                            <button type="button" class="mt-1 text-[9px] font-bold rounded-full px-2 py-0.5 border ${s.flagged ? 'border-rose-500/40 text-rose-400 bg-rose-500/10' : 'border-slate-700 text-slate-500'}" data-sub-flag-toggle="${debtEscape(s.key)}" data-sub-flag-label="${debtEscape(s.label)}" data-sub-flag-amount="${s.amount}" data-sub-flag-now="${s.flagged ? '0' : '1'}">${s.flagged ? '✓ متعلّم كمش مستخدم' : '🚫 مش بستخدمه؟'}</button>
+                            <p class="subscription-meta text-[9px] mt-0.5">${metaText}</p>
                         </div>
-                        <span class="subscription-amount text-xs font-black shrink-0">${fmt(s.amount)}</span>
+                        <div class="flex flex-col items-end gap-1 shrink-0">
+                            <span class="subscription-amount text-xs font-black">${fmt(s.amount)}</span>
+                            <button type="button" class="text-[9px] font-bold rounded-full px-2 py-0.5 border ${s.flagged ? 'border-rose-500/40 text-rose-400 bg-rose-500/10' : 'border-slate-700 text-slate-500'}" data-sub-flag-toggle="${debtEscape(s.key)}" data-sub-flag-label="${debtEscape(s.label)}" data-sub-flag-amount="${s.amount}" data-sub-flag-now="${s.flagged ? '0' : '1'}">${s.flagged ? '✓ مش مستخدم' : 'مش بستخدمه؟'}</button>
+                        </div>
                     </div>`;
                 }).join('');
                 listEl.querySelectorAll('[data-sub-flag-toggle]').forEach((btn) => btn.addEventListener('click', () => {
@@ -9200,10 +9509,11 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                 } else {
                     purchasesListEl.innerHTML = purchases.map((s, i) => {
                         const borderClass = i < purchases.length - 1 ? 'border-b' : '';
-                        return `<div class="subscription-row flex items-center justify-between py-2 ${borderClass}">
-                            <div class="min-w-0">
+                        return `<div class="subscription-row flex items-center gap-2.5 py-2.5 ${borderClass}">
+                            ${renderSubIcon(s.label)}
+                            <div class="min-w-0 flex-1">
                                 <p class="subscription-name text-xs font-bold truncate">${debtEscape(s.label)}</p>
-                                <p class="subscription-meta text-[9px]">بتسجّله بنفسك بقاله ${s.monthsRecurring} ${s.monthsRecurring === 2 ? 'شهرين متتاليين' : 'شهور متتالية'}</p>
+                                <p class="subscription-meta text-[9px] mt-0.5">بتسجّله بنفسك بقاله ${s.monthsRecurring} ${s.monthsRecurring === 2 ? 'شهرين متتاليين' : 'شهور متتالية'}</p>
                             </div>
                             <span class="subscription-amount text-xs font-black shrink-0">${fmt(s.amount)}</span>
                         </div>`;
@@ -9212,6 +9522,58 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             }
         }
 
+        // ============ تجميع عمليات الفئة حسب اليوم + كارت الإحصائيات + صندوق سكرول داخلي بدل الليستة المسطّحة اللي كانت بتطوّل الصفحة كلها ============
+        function groupCategoryItemsByDay(items) {
+            const groups = {};
+            items.forEach((it) => {
+                const key = new Date(it.date).toDateString();
+                (groups[key] = groups[key] || []).push(it);
+            });
+            return Object.entries(groups).sort((a, b) => new Date(b[0]) - new Date(a[0]));
+        }
+        function categoryDayGroupsHtml(entries, catName) {
+            return entries.map(([dateKey, dayItems]) => {
+                const dayTotal = dayItems.reduce((sum, it) => sum + Number(it.amount || 0), 0);
+                const label = new Date(dateKey).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' });
+                return `<div class="cat-day-group" data-day-key="${dateKey}">
+                    <div class="flex justify-between items-center py-1 text-[9.5px] font-bold text-emerald-400 border-b border-dashed border-slate-800" style="position:sticky;top:0;background:var(--pm-surface-hi, #181a1c)">
+                        <span>${label}</span><span>${fmt(dayTotal)}</span>
+                    </div>
+                    ${dayItems.map((it) => `
+                        <div class="flex items-center justify-between py-1.5 border-b border-slate-800/60 last:border-0">
+                            <p class="text-[11px] text-slate-300 truncate">${it.desc || catName}</p>
+                            <span class="shrink-0 text-[11px] font-bold text-slate-200">${fmt(it.amount)}</span>
+                        </div>
+                    `).join('')}
+                </div>`;
+            }).join('');
+        }
+        // يعيد رسم صندوق السكرول لفئة معينة حسب الفلتر (الشهر كله / آخر 7 أيام)، ومعاه زرار "عرض كل الأيام" لو فيه أيام متخبّية
+        function renderCategoryDayGroups(idx, range) {
+            const data = window.__categoryDayGroups?.[idx];
+            const box = document.querySelector(`[data-cat-items-inner="${idx}"]`);
+            const seeMoreBtn = document.querySelector(`.cat-seemore[data-cat-idx="${idx}"]`);
+            if (!data || !box) return;
+            let groups = data.groups;
+            if (range === '7') {
+                const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
+                groups = groups.filter(([dateKey]) => new Date(dateKey).getTime() >= cutoff);
+            }
+            const initialCount = range === '7' ? groups.length : 4;
+            const visible = groups.slice(0, initialCount);
+            const hidden = groups.slice(initialCount);
+            box.innerHTML = visible.length ? categoryDayGroupsHtml(visible, data.catName) : '<p class="text-[10px] text-slate-500 py-2">مفيش عمليات في المدة دي.</p>';
+            if (seeMoreBtn) {
+                window.__categoryDayGroupsHidden = window.__categoryDayGroupsHidden || {};
+                window.__categoryDayGroupsHidden[idx] = hidden;
+                if (hidden.length) {
+                    seeMoreBtn.classList.remove('hidden');
+                    seeMoreBtn.textContent = `عرض كل الأيام (${hidden.length} ${hidden.length === 1 ? 'يوم تاني' : 'أيام تانية'})`;
+                } else {
+                    seeMoreBtn.classList.add('hidden');
+                }
+            }
+        }
         function renderCategories(month) {
             if (month.topCategory) {
                 document.getElementById('top-category-name').textContent = `${getCategoryEmoji(month.topCategory.name)} ${month.topCategory.name}`;
@@ -9247,21 +9609,26 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                             <span class="text-[10px] ${nearOrOverLimit ? 'text-rose-400' : 'text-emerald-400'}">${fmt(c.amount)} / ${fmt(limit)}</span>
                         </div>
                     ` : '';
+                    const dayGroups = groupCategoryItemsByDay(items);
+                    window.__categoryDayGroups = window.__categoryDayGroups || {};
+                    window.__categoryDayGroups[idx] = { groups: dayGroups, catName: c.name };
+                    const statsHtml = items.length ? `
+                        <div class="grid grid-cols-3 gap-1.5 pb-1">
+                            <div class="rounded-xl bg-slate-900/60 text-center py-1.5"><p class="text-[11px] font-black text-slate-200">${items.length}</p><p class="text-[8.5px] text-slate-500">عملية</p></div>
+                            <div class="rounded-xl bg-slate-900/60 text-center py-1.5"><p class="text-[11px] font-black text-slate-200">${fmt(Math.round(c.amount / items.length))}</p><p class="text-[8.5px] text-slate-500">متوسط العملية</p></div>
+                            <div class="rounded-xl bg-slate-900/60 text-center py-1.5"><p class="text-[11px] font-black text-slate-200">${dayGroups.length}</p><p class="text-[8.5px] text-slate-500">أيام فيها صرف</p></div>
+                        </div>` : '';
+                    const initialGroups = dayGroups.slice(0, 4);
+                    const hiddenGroupsCount = dayGroups.length - initialGroups.length;
                     const itemsHtml = items.length ? `
                         ${limitBoxHtml}
+                        ${statsHtml}
                         <div class="flex gap-1.5 pt-1 pb-1">
                             <button type="button" class="cat-filter-btn flex-1 rounded-lg py-1 text-[10px] font-bold bg-emerald-500 text-slate-950" data-cat-idx="${idx}" data-range="all">الشهر كله</button>
                             <button type="button" class="cat-filter-btn flex-1 rounded-lg py-1 text-[10px] font-bold bg-slate-800 text-slate-400" data-cat-idx="${idx}" data-range="7">آخر 7 أيام</button>
                         </div>
-                        <div class="cat-items-inner" data-cat-items-inner="${idx}">${items.map((it) => `
-                            <div class="flex items-center justify-between py-1.5 border-b border-slate-800/60 last:border-0" data-item-date="${it.date}">
-                                <div class="min-w-0">
-                                    <p class="text-[11px] text-slate-300 truncate">${it.desc || c.name}</p>
-                                    <p class="text-[10px] text-slate-500">${new Date(it.date).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' })}</p>
-                                </div>
-                                <span class="shrink-0 text-[11px] font-bold text-slate-200">${fmt(it.amount)}</span>
-                            </div>
-                        `).join('')}</div>
+                        <div class="cat-items-inner" data-cat-items-inner="${idx}" style="max-height:15rem;overflow-y:auto">${categoryDayGroupsHtml(initialGroups, c.name)}</div>
+                        <button type="button" class="cat-seemore w-full mt-2 rounded-xl border border-dashed border-slate-700 text-emerald-400 text-[10px] font-bold py-2 ${hiddenGroupsCount ? '' : 'hidden'}" data-cat-idx="${idx}">عرض كل الأيام (${hiddenGroupsCount} ${hiddenGroupsCount === 1 ? 'يوم تاني' : 'أيام تانية'})</button>
                     ` : `${limitBoxHtml}<p class="text-[10px] text-slate-500 py-2">مفيش تفاصيل متاحة لهذه الفئة.</p>`;
                     return `
                     <div>
@@ -9302,12 +9669,17 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                             b.classList.toggle('bg-slate-800', !active);
                             b.classList.toggle('text-slate-400', !active);
                         });
-                        const inner = listEl.querySelector(`[data-cat-items-inner="${idx}"]`);
-                        const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
-                        inner.querySelectorAll('[data-item-date]').forEach((row) => {
-                            const rowDate = new Date(row.getAttribute('data-item-date')).getTime();
-                            row.classList.toggle('hidden', range === '7' && rowDate < cutoff);
-                        });
+                        renderCategoryDayGroups(idx, range);
+                    });
+                });
+                listEl.querySelectorAll('.cat-seemore').forEach((btn) => {
+                    btn.addEventListener('click', () => {
+                        const idx = btn.getAttribute('data-cat-idx');
+                        const hidden = window.__categoryDayGroupsHidden?.[idx] || [];
+                        const box = listEl.querySelector(`[data-cat-items-inner="${idx}"]`);
+                        const catName = window.__categoryDayGroups?.[idx]?.catName || '';
+                        if (box && hidden.length) box.insertAdjacentHTML('beforeend', categoryDayGroupsHtml(hidden, catName));
+                        btn.classList.add('hidden');
                     });
                 });
 

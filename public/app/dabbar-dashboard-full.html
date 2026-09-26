@@ -1082,11 +1082,11 @@
         html[data-theme="dark"] .portfolio-digest-badge.down { color: #ff8f85; background: rgba(255,90,75,.16); }
         .portfolio-asset { cursor: pointer; }
         /* ===== تفاصيل الأصل — بتفتح جوه المحفظة نفسها (مش بوب أب) تحت الأصل اللي اتدوس عليه ===== */
-        .portfolio-asset-wrap { display: block; position: relative; border: 1px solid var(--portfolio-line); border-radius: 1.15rem; background: var(--portfolio-card); box-shadow: 0 6px 16px rgba(8,80,65,.08); }
+        .portfolio-asset-wrap { display: contents; }
         .portfolio-asset-expand-chev { color: var(--portfolio-muted); font-size: .9rem; transition: transform .2s; margin-inline-start: .1rem; }
         .portfolio-asset-wrap.open .portfolio-asset-expand-chev { transform: rotate(180deg); }
-        .portfolio-asset-wrap.open { border-color: var(--portfolio-accent); }
-        .portfolio-asset-detail { margin-top: .15rem; padding: .85rem .9rem 1rem; border-top: 1px dashed var(--portfolio-line); border-radius: 0 0 1.15rem 1.15rem; background: color-mix(in srgb, var(--portfolio-card) 92%, transparent); }
+        .portfolio-asset-wrap.open .portfolio-asset { border-color: var(--portfolio-accent); }
+        .portfolio-asset-detail { grid-column: 1 / -1; margin-top: -.15rem; padding: .85rem .9rem 1rem; border: 1px solid var(--portfolio-line); border-top: none; border-radius: 0 0 1.15rem 1.15rem; background: color-mix(in srgb, var(--portfolio-card) 92%, transparent); }
         .portfolio-detail-loading { text-align: center; font-size: .7rem; color: var(--portfolio-muted); padding: .6rem 0; }
         .portfolio-detail-value { font-size: 1.35rem; font-weight: 900; color: var(--portfolio-ink); }
         .portfolio-detail-badge { display: inline-flex; align-items: center; gap: .25rem; font-size: .68rem; font-weight: 900; padding: .15rem .5rem; border-radius: 8px; margin-top: .3rem; }
@@ -1109,8 +1109,10 @@
         .portfolio-body { padding: .9rem 1.1rem 1.15rem; border-top: 1px dashed var(--portfolio-line); }
         #portfolio-sheet-slot .portfolio-body { border-top:0; padding:0; }
         .portfolio-change { text-align: center; font-size: .64rem; opacity: .75; margin: .75rem 0; }
-        .portfolio-asset-list { display: grid; gap: .8rem; }
-        .portfolio-asset { position: relative; display: flex; justify-content: space-between; align-items: center; gap: .7rem; border-radius: 1.15rem; padding: .68rem .72rem; background: transparent; border: 0; box-shadow: none; }
+        .portfolio-asset-list { display: grid; gap: .9rem; }
+        .portfolio-asset-wrap { border-radius: 1.15rem; }
+        .portfolio-asset-wrap + .portfolio-asset-wrap { margin-top: .1rem; }
+        .portfolio-asset { position: relative; display: flex; justify-content: space-between; align-items: center; gap: .7rem; border-radius: 1.15rem; padding: .68rem .72rem; background: var(--portfolio-card); border: 1.5px solid var(--portfolio-line); box-shadow: 0 6px 16px rgba(8,80,65,.08); }
         .portfolio-asset-main { display: flex; align-items: center; gap: .65rem; min-width: 0; }
         .portfolio-asset-icon { width: 40px; height: 40px; flex: 0 0 40px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 1.58rem; color: #07533f; background: #d4f1e5; border: 1px solid rgba(8,80,65,.24); box-shadow: inset 0 0 0 1px rgba(255,255,255,.45), 0 3px 8px rgba(8,80,65,.10); }
         .portfolio-asset[data-tone="gold"] .portfolio-asset-icon { color: #704900; background: #ffe9a3; border-color: rgba(112,73,0,.28); }
@@ -1149,7 +1151,8 @@
         .portfolio-summary-header-cell { flex: 1; display: flex; flex-direction: column; align-items: center; gap: .2rem; text-align: center; }
         .portfolio-summary-header-label { font-size: .6rem; font-weight: 700; color: var(--portfolio-muted); }
         .portfolio-summary-header-value { font-size: 1.05rem; font-weight: 900; color: var(--portfolio-ink); }
-        .portfolio-summary-header-sep { width: 1px; align-self: stretch; background: var(--portfolio-line); }
+        .portfolio-summary-header-sep { width: 1px; align-self: stretch; margin: .1rem 0; background: var(--portfolio-line); }
+        html[data-theme="dark"] .portfolio-summary-header-sep { background: rgba(70,215,165,.35); }
         .portfolio-form-title { color: var(--portfolio-ink); font-size: .72rem; font-weight: 900; }
         .portfolio-form-input { width: 100%; box-sizing: border-box; border: 1px solid var(--portfolio-line); border-radius: .75rem; padding: .65rem .72rem; background: var(--portfolio-card); color: var(--portfolio-ink); font: inherit; font-size: .68rem; outline: none; }
         .portfolio-form-input::placeholder { color: var(--portfolio-muted); opacity: .85; }
@@ -2793,10 +2796,10 @@
         .bal-row-organized + .bal-row-organized { border-top:1px dashed var(--cs-line); }
         .bal-row-pct { font:900 1rem/1 'Cairo',sans-serif; text-align:center; }
         .bal-row-pct small { display:block; font:800 .5rem/1.35 'Cairo',sans-serif; color:var(--db-muted); margin-top:.2rem; }
-        .bal-row-mid { min-width:0; }
-        .bal-row-nums { display:flex; align-items:baseline; justify-content:space-between; gap:.5rem; margin-bottom:.5rem; flex-wrap:nowrap; }
-        .bal-row-nums b { font:900 .74rem/1 'Cairo',sans-serif; color:var(--db-ink); white-space:nowrap; flex:none; background:transparent !important; border:0 !important; box-shadow:none !important; padding:0 !important; }
-        .bal-row-nums span { font:700 .58rem/1.3 'Cairo',sans-serif; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; display:block; }
+        .bal-row-mid { min-width:0; display:flex; flex-direction:column; gap:.35rem; }
+        .bal-row-amount { display:block; }
+        .bal-row-amount b { font:900 .8rem/1 'Cairo',sans-serif; color:var(--db-ink); white-space:nowrap; }
+        .bal-row-status { font:700 .6rem/1.4 'Cairo',sans-serif; text-align:right; white-space:normal; overflow-wrap:break-word; }
         /* زرار إقفال "توازن مصاريفك" لما تكون مفتوحة — بيبان بس وهي مفتوحة */
         .balance-close-btn { display:none; align-items:center; justify-content:center; gap:.3rem; width:100%; margin-top:.15rem; padding:.5rem .7rem; border-radius:999px; border:1px solid var(--cs-line); background:var(--db-surface-soft); color:var(--db-muted); font:800 .68rem 'Cairo',sans-serif; cursor:pointer; }
         #balance-card[open] .balance-close-btn { display:flex; }
@@ -3785,10 +3788,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                     <span>🔥</span><span id="streak-count">0</span>
                 </span>
             </div>
-            <div class="flex items-center gap-1.5">
-                <a id="download-dashboard-file" href="./dabbar-dashboard-updated.html" download="dabbar-dashboard-updated.html" title="Download updated dashboard" class="inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2.5 py-1.5 text-[10px] font-black text-slate-950 shadow-sm transition hover:bg-emerald-400">⬇️ <span>Download</span></a>
-                <button id="brandbar-theme-btn" title="تبديل المظهر" class="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-xs hover:bg-slate-700 transition">🌙</button>
-            </div>
+            <button id="brandbar-theme-btn" title="تبديل المظهر" class="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-xs hover:bg-slate-700 transition">🌙</button>
         </div>
 
         <!-- Header Bar -->
@@ -4040,12 +4040,12 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                 <div class="portfolio-body">
                     <div id="portfolio-summary-header" class="portfolio-summary-header">
                         <div class="portfolio-summary-header-cell">
-                            <span class="portfolio-summary-header-label">إجمالي القيمة النقدية</span>
+                            <span class="portfolio-summary-header-label">إجمالي المحفظة</span>
                             <span class="portfolio-summary-header-value" id="portfolio-summary-header-total">—</span>
                         </div>
                         <div class="portfolio-summary-header-sep" aria-hidden="true"></div>
                         <div class="portfolio-summary-header-cell">
-                            <span class="portfolio-summary-header-label">إجمالي عدد الأصول</span>
+                            <span class="portfolio-summary-header-label">عدد الأصول</span>
                             <span class="portfolio-summary-header-value" id="portfolio-summary-header-count">—</span>
                         </div>
                     </div>
@@ -4097,6 +4097,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                         <p id="portfolio-add-error" class="hidden text-[11px] text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-lg p-2 text-center"></p>
                     </div>
                     <button type="button" class="portfolio-add-btn" id="portfolio-add-btn"><iconify-icon icon="ph:plus-bold" aria-hidden="true"></iconify-icon> أضف أصلًا جديدًا</button>
+                    <p class="portfolio-note">القيمة اللي بتدخلها هي آخر تقييم حقيقي للأصل عندك، وإنت اللي بتحدّثها وقت ما تحب.</p>
                 </div>
             </details>
 
@@ -7512,21 +7513,35 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             if (window.__autoRefreshReady) return;
             window.__autoRefreshReady = true;
             // قبل أي تحديث بعد رجوع المستخدم للصفحة، نتأكد إن الجلسة لسه سليمة (وده بيجدد التوكن لو خلصت صلاحيتها)
+            // بياناتك أصلًا معروضة على الشاشة من آخر مرة، فمفيش داعي نستنى تحميل جديد كل مرة ترجع فيها للتطبيق
+            // لثواني قليلة (تبديل تطبيقات، فتح إشعار...). بنأجل أي تحديث فعلي لحد ما يعدي 15 ثانية بعيد.
+            let __lastDashboardLoadAt = 0;
             async function ensureFreshSessionThenLoad() {
+                if (Date.now() - __lastDashboardLoadAt < 15000) return; // رجوع سريع: البيانات المعروضة لسه طازة، متعملش حاجة
+
+                // Stale-While-Revalidate: أول ما ترجع للتطبيق، اعرض آخر بيانات محفوظة فورًا (من غير ما تستنى النت خالص)،
+                // وبعدين حدّث البيانات في الخلفية بهدوء من غير أي مؤشر تحميل يوقف حاجة على الشاشة.
+                try {
+                    const cacheKey = `dabbar-dashboard-cache-${currentUser?.id || 'guest'}`;
+                    const cached = JSON.parse(localStorage.getItem(cacheKey) || 'null');
+                    if (cached) renderDashboardData(cached, false);
+                } catch (e) {}
+
                 try {
                     const session = await getSessionResilient();
                     if (session) { accessToken = session.access_token; currentUser = session.user; }
                 } catch (e) {}
-                loadDashboard();
+                loadDashboard(); // تحديث حقيقي في الخلفية؛ هيستبدل العرض المؤقت لما البيانات الجديدة توصل
             }
             document.addEventListener('visibilitychange', () => {
                 if (document.visibilityState === 'visible') ensureFreshSessionThenLoad();
             });
             window.addEventListener('focus', () => ensureFreshSessionThenLoad());
 
+            // تحديث هادي في الخلفية كل دقيقة بدل كل 20 ثانية، عشان يقلل الريفريش المستمر اللي بيحس التطبيق بطيء
             setInterval(() => {
                 if (document.visibilityState === 'visible') loadDashboard();
-            }, 20000);
+            }, 60000);
 
             document.getElementById('refresh-btn').addEventListener('click', async (e) => {
                 const btn = e.currentTarget;
@@ -7699,6 +7714,51 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             }
         }
 
+        // بيرسم الشاشة كاملة من أي بيانات جاهزة عندنا (سواء جاية من السيرفر دلوقتي أو من الكاش المحفوظ على الجهاز)
+        // مفصولة عن loadDashboard عشان نقدر نرسم فورًا من الكاش من غير ما ننتظر أي طلب شبكة.
+        function renderDashboardData(data, servedFromCache = false) {
+            const syncNote = document.getElementById('dashboard-sync-note');
+            const syncNoteText = document.getElementById('dashboard-sync-note-text');
+            if (servedFromCache) {
+                if (syncNote && syncNoteText) { syncNoteText.textContent = '📴 أوفلاين — بنعرض آخر بيانات محفوظة. عملياتك الجديدة هتتسجل لما النت يرجع.'; syncNote.classList.remove('hidden'); }
+            } else if (syncNote) syncNote.classList.add('hidden');
+            __consecutiveUnlinked = 0;
+            const dashboardError = document.getElementById('dashboard-load-error');
+            if (dashboardError) dashboardError.classList.add('hidden');
+
+            window.__dashboardData = data;
+
+            // كل جزء بيترسم لوحده: لو جزء فشل بيتسجل في الكونسول والباقي يكمل عادي
+            // (قبل كده أي خطأ في جزء واحد كان بيوقف الداش كلها).
+            safeRender('activeDays', () => renderActiveDays(data.activeDays));
+            safeRender('monthly', () => renderMonthly(data.month));
+            safeRender('netWorth', () => renderNetWorth(data.netWorth));
+            safeRender('planning', () => renderPlanning(data));
+            safeRender('inAppNotifications', () => renderInAppNotifications(data));
+            safeRender('daily', () => renderDaily(data.today, data.flow));
+            safeRender('savingsOpportunities', () => loadSavingsOpportunities());
+            safeRender('piggybank', () => renderPiggybankCard(data.dailyPiggybank));
+            safeRender('dailyReminder', () => renderDailyReminder(data.today));
+            safeRender('categories', () => renderCategories(data.month));
+            safeRender('subscriptions', () => renderSubscriptions(data.recurringSubscriptions));
+            safeRender('tips', () => renderTips(data.month));
+            safeRender('debts', () => renderDebts(data.debts));
+            safeRender('remindersBanner', () => renderRemindersTelegramBanner(data.linked));
+            safeRender('archive', () => renderArchive(data.history));
+            safeRender('subscription', () => renderSubscription(data.subscription, data));
+            safeRender('assistant', () => renderAssistant(data));
+            safeRender('monthlyGoals', () => renderMonthlyGoalsShortcut(Array.isArray(data.goals) ? data.goals : (data.goal ? [data.goal] : [])));
+            safeRender('portfolio', () => renderPortfolio(data.portfolio, data.portfolioDigest));
+            safeRender('streak', () => applyStreak(data.streak));
+            safeRender('header', () => updateHeaderForTab(document.querySelector('.tab-btn.active-tab')?.dataset?.tab || 'monthly', data));
+
+            const label = document.getElementById('last-updated-label');
+            if (label) {
+                const now = new Date();
+                label.textContent = servedFromCache ? 'بيانات محفوظة على الجهاز (أوفلاين)' : `آخر تحديث ${now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}`;
+            }
+        }
+
         async function loadDashboard(isInitialLoad = false, attempt = 1) {
             const MAX_ATTEMPTS = 3;
             const TIMEOUT_MS = attempt === 1 ? 12000 : 20000; // أول محاولة أسرع عشان نحس بالمشكلة بدري ونعيد المحاولة، الباقي أطول احتياطًا لشبكة بطيئة
@@ -7753,37 +7813,8 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             const dashboardError = document.getElementById('dashboard-load-error');
             if (dashboardError) dashboardError.classList.add('hidden');
 
-            window.__dashboardData = data;
-
-            // كل جزء بيترسم لوحده: لو جزء فشل بيتسجل في الكونسول والباقي يكمل عادي
-            // (قبل كده أي خطأ في جزء واحد كان بيوقف الداش كلها).
-            safeRender('activeDays', () => renderActiveDays(data.activeDays));
-            safeRender('monthly', () => renderMonthly(data.month));
-            safeRender('netWorth', () => renderNetWorth(data.netWorth));
-            safeRender('planning', () => renderPlanning(data));
-            safeRender('inAppNotifications', () => renderInAppNotifications(data));
-            safeRender('daily', () => renderDaily(data.today, data.flow));
-            safeRender('savingsOpportunities', () => loadSavingsOpportunities());
-            safeRender('piggybank', () => renderPiggybankCard(data.dailyPiggybank));
-            safeRender('dailyReminder', () => renderDailyReminder(data.today));
-            safeRender('categories', () => renderCategories(data.month));
-            safeRender('subscriptions', () => renderSubscriptions(data.recurringSubscriptions));
-            safeRender('tips', () => renderTips(data.month));
-            safeRender('debts', () => renderDebts(data.debts));
-            safeRender('remindersBanner', () => renderRemindersTelegramBanner(data.linked));
-            safeRender('archive', () => renderArchive(data.history));
-            safeRender('subscription', () => renderSubscription(data.subscription, data));
-            safeRender('assistant', () => renderAssistant(data));
-            safeRender('monthlyGoals', () => renderMonthlyGoalsShortcut(Array.isArray(data.goals) ? data.goals : (data.goal ? [data.goal] : [])));
-            safeRender('portfolio', () => renderPortfolio(data.portfolio, data.portfolioDigest));
-            safeRender('streak', () => applyStreak(data.streak));
-            safeRender('header', () => updateHeaderForTab(document.querySelector('.tab-btn.active-tab')?.dataset?.tab || 'monthly', data));
-
-            const label = document.getElementById('last-updated-label');
-            if (label) {
-                const now = new Date();
-                label.textContent = servedFromCache ? 'بيانات محفوظة على الجهاز (أوفلاين)' : `آخر تحديث ${now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}`;
-            }
+            renderDashboardData(data, servedFromCache);
+            if (typeof __lastDashboardLoadAt !== 'undefined') __lastDashboardLoadAt = Date.now();
 
             // ============ Onboarding + جولة إرشادية — أول تحميل حقيقي بس، ومرة واحدة لكل مستخدم ============
             if (isInitialLoad && typeof window.startDabbarOnboarding === 'function') {
@@ -8247,11 +8278,11 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                 const actual = values[bucket.key];
                 const target = Math.round(balance.income * bucket.target);
                 const delta = target - actual;
-                const actualPercent = Math.max(0, Math.min(100, Math.round((actual / balance.income) * 1000) / 10));
-                const visualWidth = actualPercent;
+                // شريط التقدم بيعبّر عن نسبة الوصول للهدف نفسه (مش نسبة من الدخل)، عشان يبان فاضي/نص/مليان فعليًا حسب موقفك
+                const visualWidth = target > 0 ? Math.max(4, Math.min(100, Math.round((actual / target) * 100))) : 0;
                 const status = delta >= 0 ? `متبقي ${fmt(delta)}` : `زيادة ${fmt(Math.abs(delta))}`;
                 const statusClass = bucket.key === 'savings' && delta <= 0 ? 'text-emerald-300' : delta >= 0 ? 'text-slate-500' : 'text-amber-300';
-                return `<div class="bal-row-organized"><div class="bal-row-pct" style="color:${bucket.color}">${Math.round(bucket.target * 100)}<small>٪<br>${bucket.label}</small></div><div class="bal-row-mid"><div class="bal-row-nums"><b>${fmt(actual)}</b><span class="${statusClass}">${status} · ${actualPercent}% من الدخل · من ${fmt(target)}</span></div><div class="h-2 overflow-hidden rounded-full" style="background:rgba(148,163,184,.28);"><div class="h-full rounded-full transition-all duration-500" style="width:${visualWidth}%;background:${bucket.color};"></div></div></div></div>`;
+                return `<div class="bal-row-organized"><div class="bal-row-pct" style="color:${bucket.color}">${Math.round(bucket.target * 100)}<small>٪<br>${bucket.label}</small></div><div class="bal-row-mid"><div class="bal-row-amount"><b>${fmt(actual)}</b></div><div class="h-2 overflow-hidden rounded-full" style="background:rgba(148,163,184,.28);"><div class="h-full rounded-full transition-all duration-500" style="width:${visualWidth}%;background:${bucket.color};"></div></div><div class="bal-row-status ${statusClass}">${status} · من ${fmt(target)}</div></div></div>`;
             }).join('');
             const wantsOver = Math.max(0, balance.wants - balance.income * 0.30);
             const saved = balance.savings;

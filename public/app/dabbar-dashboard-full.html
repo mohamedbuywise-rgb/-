@@ -1082,11 +1082,11 @@
         html[data-theme="dark"] .portfolio-digest-badge.down { color: #ff8f85; background: rgba(255,90,75,.16); }
         .portfolio-asset { cursor: pointer; }
         /* ===== تفاصيل الأصل — بتفتح جوه المحفظة نفسها (مش بوب أب) تحت الأصل اللي اتدوس عليه ===== */
-        .portfolio-asset-wrap { display: contents; }
+        .portfolio-asset-wrap { display: block; position: relative; border: 1px solid var(--portfolio-line); border-radius: 1.15rem; background: var(--portfolio-card); box-shadow: 0 6px 16px rgba(8,80,65,.08); }
         .portfolio-asset-expand-chev { color: var(--portfolio-muted); font-size: .9rem; transition: transform .2s; margin-inline-start: .1rem; }
         .portfolio-asset-wrap.open .portfolio-asset-expand-chev { transform: rotate(180deg); }
-        .portfolio-asset-wrap.open .portfolio-asset { border-color: var(--portfolio-accent); }
-        .portfolio-asset-detail { grid-column: 1 / -1; margin-top: -.15rem; padding: .85rem .9rem 1rem; border: 1px solid var(--portfolio-line); border-top: none; border-radius: 0 0 1.15rem 1.15rem; background: color-mix(in srgb, var(--portfolio-card) 92%, transparent); }
+        .portfolio-asset-wrap.open { border-color: var(--portfolio-accent); }
+        .portfolio-asset-detail { margin-top: .15rem; padding: .85rem .9rem 1rem; border-top: 1px dashed var(--portfolio-line); border-radius: 0 0 1.15rem 1.15rem; background: color-mix(in srgb, var(--portfolio-card) 92%, transparent); }
         .portfolio-detail-loading { text-align: center; font-size: .7rem; color: var(--portfolio-muted); padding: .6rem 0; }
         .portfolio-detail-value { font-size: 1.35rem; font-weight: 900; color: var(--portfolio-ink); }
         .portfolio-detail-badge { display: inline-flex; align-items: center; gap: .25rem; font-size: .68rem; font-weight: 900; padding: .15rem .5rem; border-radius: 8px; margin-top: .3rem; }
@@ -1109,10 +1109,8 @@
         .portfolio-body { padding: .9rem 1.1rem 1.15rem; border-top: 1px dashed var(--portfolio-line); }
         #portfolio-sheet-slot .portfolio-body { border-top:0; padding:0; }
         .portfolio-change { text-align: center; font-size: .64rem; opacity: .75; margin: .75rem 0; }
-        .portfolio-asset-list { display: grid; gap: .9rem; }
-        .portfolio-asset-wrap { border-radius: 1.15rem; }
-        .portfolio-asset-wrap + .portfolio-asset-wrap { margin-top: .1rem; }
-        .portfolio-asset { position: relative; display: flex; justify-content: space-between; align-items: center; gap: .7rem; border-radius: 1.15rem; padding: .68rem .72rem; background: var(--portfolio-card); border: 1.5px solid var(--portfolio-line); box-shadow: 0 6px 16px rgba(8,80,65,.08); }
+        .portfolio-asset-list { display: grid; gap: .8rem; }
+        .portfolio-asset { position: relative; display: flex; justify-content: space-between; align-items: center; gap: .7rem; border-radius: 1.15rem; padding: .68rem .72rem; background: transparent; border: 0; box-shadow: none; }
         .portfolio-asset-main { display: flex; align-items: center; gap: .65rem; min-width: 0; }
         .portfolio-asset-icon { width: 40px; height: 40px; flex: 0 0 40px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; font-size: 1.58rem; color: #07533f; background: #d4f1e5; border: 1px solid rgba(8,80,65,.24); box-shadow: inset 0 0 0 1px rgba(255,255,255,.45), 0 3px 8px rgba(8,80,65,.10); }
         .portfolio-asset[data-tone="gold"] .portfolio-asset-icon { color: #704900; background: #ffe9a3; border-color: rgba(112,73,0,.28); }
@@ -2797,7 +2795,7 @@
         .bal-row-pct small { display:block; font:800 .5rem/1.35 'Cairo',sans-serif; color:var(--db-muted); margin-top:.2rem; }
         .bal-row-mid { min-width:0; }
         .bal-row-nums { display:flex; align-items:baseline; justify-content:space-between; gap:.5rem; margin-bottom:.5rem; flex-wrap:nowrap; }
-        .bal-row-nums b { font:900 .74rem/1 'Cairo',sans-serif; color:var(--db-ink); white-space:nowrap; flex:none; }
+        .bal-row-nums b { font:900 .74rem/1 'Cairo',sans-serif; color:var(--db-ink); white-space:nowrap; flex:none; background:transparent !important; border:0 !important; box-shadow:none !important; padding:0 !important; }
         .bal-row-nums span { font:700 .58rem/1.3 'Cairo',sans-serif; text-align:left; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; min-width:0; display:block; }
         /* زرار إقفال "توازن مصاريفك" لما تكون مفتوحة — بيبان بس وهي مفتوحة */
         .balance-close-btn { display:none; align-items:center; justify-content:center; gap:.3rem; width:100%; margin-top:.15rem; padding:.5rem .7rem; border-radius:999px; border:1px solid var(--cs-line); background:var(--db-surface-soft); color:var(--db-muted); font:800 .68rem 'Cairo',sans-serif; cursor:pointer; }
@@ -3787,7 +3785,10 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                     <span>🔥</span><span id="streak-count">0</span>
                 </span>
             </div>
-            <button id="brandbar-theme-btn" title="تبديل المظهر" class="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-xs hover:bg-slate-700 transition">🌙</button>
+            <div class="flex items-center gap-1.5">
+                <a id="download-dashboard-file" href="./dabbar-dashboard-updated.html" download="dabbar-dashboard-updated.html" title="Download updated dashboard" class="inline-flex items-center gap-1 rounded-full bg-emerald-500 px-2.5 py-1.5 text-[10px] font-black text-slate-950 shadow-sm transition hover:bg-emerald-400">⬇️ <span>Download</span></a>
+                <button id="brandbar-theme-btn" title="تبديل المظهر" class="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-xs hover:bg-slate-700 transition">🌙</button>
+            </div>
         </div>
 
         <!-- Header Bar -->
@@ -4039,12 +4040,12 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                 <div class="portfolio-body">
                     <div id="portfolio-summary-header" class="portfolio-summary-header">
                         <div class="portfolio-summary-header-cell">
-                            <span class="portfolio-summary-header-label">إجمالي المحفظة</span>
+                            <span class="portfolio-summary-header-label">إجمالي القيمة النقدية</span>
                             <span class="portfolio-summary-header-value" id="portfolio-summary-header-total">—</span>
                         </div>
                         <div class="portfolio-summary-header-sep" aria-hidden="true"></div>
                         <div class="portfolio-summary-header-cell">
-                            <span class="portfolio-summary-header-label">عدد الأصول</span>
+                            <span class="portfolio-summary-header-label">إجمالي عدد الأصول</span>
                             <span class="portfolio-summary-header-value" id="portfolio-summary-header-count">—</span>
                         </div>
                     </div>
@@ -4096,7 +4097,6 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                         <p id="portfolio-add-error" class="hidden text-[11px] text-rose-400 bg-rose-500/10 border border-rose-500/20 rounded-lg p-2 text-center"></p>
                     </div>
                     <button type="button" class="portfolio-add-btn" id="portfolio-add-btn"><iconify-icon icon="ph:plus-bold" aria-hidden="true"></iconify-icon> أضف أصلًا جديدًا</button>
-                    <p class="portfolio-note">القيمة اللي بتدخلها هي آخر تقييم حقيقي للأصل عندك، وإنت اللي بتحدّثها وقت ما تحب.</p>
                 </div>
             </details>
 
@@ -8247,11 +8247,11 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                 const actual = values[bucket.key];
                 const target = Math.round(balance.income * bucket.target);
                 const delta = target - actual;
-                const actualPercent = Math.max(0, Math.min(100, Math.round((actual / balance.income) * 100)));
+                const actualPercent = Math.max(0, Math.min(100, Math.round((actual / balance.income) * 1000) / 10));
                 const visualWidth = actualPercent;
                 const status = delta >= 0 ? `متبقي ${fmt(delta)}` : `زيادة ${fmt(Math.abs(delta))}`;
                 const statusClass = bucket.key === 'savings' && delta <= 0 ? 'text-emerald-300' : delta >= 0 ? 'text-slate-500' : 'text-amber-300';
-                return `<div class="bal-row-organized"><div class="bal-row-pct" style="color:${bucket.color}">${Math.round(bucket.target * 100)}<small>٪<br>${bucket.label}</small></div><div class="bal-row-mid"><div class="bal-row-nums"><b>${fmt(actual)}</b><span class="${statusClass}">${status} · من ${fmt(target)}</span></div><div class="h-2 overflow-hidden rounded-full" style="background:rgba(148,163,184,.28);"><div class="h-full rounded-full transition-all duration-500" style="width:${visualWidth}%;background:${bucket.color};"></div></div></div></div>`;
+                return `<div class="bal-row-organized"><div class="bal-row-pct" style="color:${bucket.color}">${Math.round(bucket.target * 100)}<small>٪<br>${bucket.label}</small></div><div class="bal-row-mid"><div class="bal-row-nums"><b>${fmt(actual)}</b><span class="${statusClass}">${status} · ${actualPercent}% من الدخل · من ${fmt(target)}</span></div><div class="h-2 overflow-hidden rounded-full" style="background:rgba(148,163,184,.28);"><div class="h-full rounded-full transition-all duration-500" style="width:${visualWidth}%;background:${bucket.color};"></div></div></div></div>`;
             }).join('');
             const wantsOver = Math.max(0, balance.wants - balance.income * 0.30);
             const saved = balance.savings;
@@ -10218,7 +10218,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             if (totalEl) totalEl.textContent = fmt(data.total || 0);
             const sheetTotalEl = document.getElementById('portfolio-summary-header-total');
             const sheetCountEl = document.getElementById('portfolio-summary-header-count');
-            if (sheetTotalEl) sheetTotalEl.textContent = `${fmt(data.total || 0)} ج.م`;
+            if (sheetTotalEl) sheetTotalEl.textContent = fmt(data.total || 0);
             if (sheetCountEl) { const n = (data.assets || []).length; sheetCountEl.textContent = `${n} ${n === 1 ? 'أصل' : 'أصول'}`; }
             listEl.innerHTML = '';
             renderPortfolioPreviewStrip(data);

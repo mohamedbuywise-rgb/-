@@ -331,11 +331,13 @@
         .dabbar-savings-row2-chev { font-size:.65rem; color: var(--pm-muted, #7b8490); transition:.2s; flex:none; }
         .dabbar-savings-row2.expanded .dabbar-savings-row2-chev { transform: rotate(90deg); color: var(--pm-gold-bright, #10b981); }
         .dabbar-savings-detail2 { max-height:0; overflow:hidden; transition:max-height .22s ease; }
-        .dabbar-savings-detail2.open { max-height:220px; }
+        .dabbar-savings-detail2.open { max-height:280px; }
         .dabbar-savings-detail2-inner { padding:.1rem .1rem .6rem 2.55rem; font-size:.64rem; color: var(--pm-muted, #7b8490); line-height:1.6; }
         .dabbar-savings-tags2 { display:flex; flex-wrap:wrap; gap:.3rem; margin-top:.35rem; }
         .dabbar-savings-tag2 { font-size:.58rem; font-weight:700; color: var(--pm-gold-bright, #10b981); background: color-mix(in srgb, var(--pm-gold-bright, #10b981) 12%, transparent); border: 1px solid color-mix(in srgb, var(--pm-gold-bright, #10b981) 28%, transparent); border-radius:999px; padding:.15rem .5rem; }
-        .dabbar-savings-cta2 { display:inline-block; margin-top:.4rem; background:none; border:none; color: var(--pm-gold-bright, #10b981); font-size:.62rem; font-weight:900; cursor:pointer; padding:0; }
+        .dabbar-savings-cta-row { display:flex; align-items:center; gap:.6rem; flex-wrap:wrap; margin-top:.5rem; }
+        .dabbar-savings-cta-primary { display:inline-flex; align-items:center; gap:.25rem; background: var(--pm-gold-bright, #10b981); color:#04140f; border:none; border-radius:.7rem; font-size:.63rem; font-weight:900; cursor:pointer; padding:.42rem .7rem; }
+        .dabbar-savings-cta2 { display:inline-block; background:none; border:none; color: var(--pm-gold-bright, #10b981); font-size:.6rem; font-weight:800; cursor:pointer; padding:0; text-decoration:underline; text-underline-offset:2px; }
 
         /* أنيميشن سطر الحالة أثناء المعالجة (صوت/كتابة/فاتورة) — كل رسالة بتتمسح وتتغير بسرعة عالية بدل انتظار طويل */
         @keyframes dabbarStatusWipe {
@@ -753,7 +755,8 @@
         html[data-theme="light"] #balance-bars > div:nth-child(3) .bal-row-fill { background: #c58b17 !important; }
 
         #monthly-categories-card,
-        #daily-items-list,
+        #daily-income-list,
+        #daily-expense-list,
         #all-categories-list,
         #tips-list,
         #debts-owed-to-you-list,
@@ -1784,6 +1787,14 @@
         .commitment-icon iconify-icon { display:block; }
         /* ============ زرار "+ إضافة" الموحّد اللي بيفتح شيت بدل صف إدخال ثابت ============ */
         .dabbar-fab-add { width:100%; border-radius:.9rem; padding:.6rem; font-size:.68rem; font-weight:800; border:1px dashed var(--pm-hairline); background:transparent; color:var(--pm-gold-bright); }
+        .dabbar-hdr-ic { display:inline-flex; align-items:center; justify-content:center; width:1.5rem; height:1.5rem; border-radius:.55rem; background:color-mix(in srgb, var(--pm-gold-bright, #34d399) 16%, transparent); color:var(--pm-gold-bright, #34d399); flex:0 0 auto; }
+        .dabbar-row-hidden { display:none !important; }
+        .dabbar-list-toggle { width:100%; border-radius:.85rem; padding:.5rem; font-size:.66rem; font-weight:800; border:1px solid var(--pm-hairline); background:transparent; color:#8a97a8; margin-top:.3rem; transition:color .15s,border-color .15s; }
+        .dabbar-list-toggle:hover { color:var(--pm-gold-bright); border-color:var(--pm-gold-bright); }
+        .dabbar-list-toggle.hidden { display:none; }
+        .dabbar-daily-section-head { display:flex; align-items:center; justify-content:space-between; gap:.5rem; padding:.15rem 0; }
+        .dabbar-daily-section-title { font-size:.72rem; font-weight:800; color:#94a3b8; display:flex; align-items:center; gap:.35rem; }
+        .dabbar-daily-section-total { font-size:.72rem; font-weight:900; }
         /* ============ شيت الإضافة (bottom sheet) لحد الفئة والالتزام — خطوة واحدة: اسم + مبلغ ============ */
         .dabbar-sheet-backdrop { position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; align-items:flex-end; z-index:40; }
         .dabbar-sheet-backdrop.open { display:flex; }
@@ -1845,6 +1856,13 @@
             border-color: transparent !important;
             color: #ffffff !important;
             box-shadow: 0 6px 14px rgba(16,168,120,.35);
+        }
+        /* أيقونة "سجّل مصروفك بسرعة" في الوضع الليلي — نفس قوة التوهج اللي في الوضع النهاري، بس بلون الوضع الليلي (لايم) */
+        html:not([data-theme="light"]) #quick-entry-card .q-icon {
+            background: linear-gradient(145deg, var(--db-accent, #bdf23f), #8fc11a) !important;
+            border-color: transparent !important;
+            color: #0c1a06 !important;
+            box-shadow: 0 6px 18px color-mix(in srgb, var(--db-accent, #bdf23f) 55%, transparent);
         }
         /* بطاقة نتيجة "فاتورة/كتابة/صوت" السريعة — تُجبر على الألوان الفاتحة في الوضع النهاري بغض النظر عن ثيم نظام الجهاز */
         html[data-theme="light"] #quick-entry-draft { background: #ffffff !important; border-color: #b5dfcc !important; }
@@ -3938,7 +3956,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             <!-- كارت فرص التوفير — قابل للطي ومقفول افتراضيًا؛ بيفتح بس لما المستخدم يضغط عليه (والإجمالي ظاهر في العنوان) -->
             <details id="savings-opportunities-card" class="hidden relative overflow-hidden rounded-3xl p-4 shadow-lg dabbar-savings-card savings-opportunities-details">
                 <div class="dabbar-metric-glow" aria-hidden="true"></div>
-                <summary class="relative text-[11px] font-bold dabbar-metric-label"><span>💡</span><span>فرص التوفير الشهر ده</span><span id="savings-total-chip" class="dabbar-metric-value-accent text-[11px] font-black"></span></summary>
+                <summary class="relative text-[11px] font-bold dabbar-metric-label"><span class="dabbar-hdr-ic"><iconify-icon icon="ph:lightbulb-filament-duotone" width="16"></iconify-icon></span><span>فرص التوفير الشهر ده</span><span id="savings-total-chip" class="dabbar-metric-value-accent text-[11px] font-black"></span></summary>
                 <div class="relative savings-opportunities-body">
                     <p class="text-base font-black dabbar-metric-title leading-relaxed">دَبّر لقى لك <span id="savings-total" class="dabbar-metric-value-accent">—</span> ممكن توفرهم</p>
                     <div id="savings-breakdown" class="space-y-1.5"></div>
@@ -3962,7 +3980,8 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                 <div id="quick-expense-content"><div id="quick-expense-detail" class="qe2-detail">
                 <div id="quick-entry-subscription-lock" class="hidden items-center justify-between gap-3 rounded-2xl border px-3 py-2.5 text-[11px]" style="border-color:color-mix(in srgb,var(--pm-gold-bright) 40%,transparent);background:color-mix(in srgb,var(--pm-gold-bright) 10%,var(--pm-surface-hi));color:var(--pm-ink);"><div class="flex items-center gap-2"><span id="quick-entry-vip-badge" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-lg" style="background:linear-gradient(145deg,var(--pm-gold-bright),var(--pm-gold));color:var(--pm-ink);">💎</span><span><strong class="block" style="color:var(--pm-gold-bright);">التصنيف الذكي بقى ميزة VIP</strong><span style="color:var(--pm-muted);">الإدخال اليدوي شغال زي العادة — فعّل VIP للصوت والفواتير والـ AI.</span></span></div><button id="quick-entry-open-subscription" type="button" class="shrink-0 rounded-xl px-3 py-2 text-[10px] font-black" style="background:linear-gradient(145deg,var(--pm-gold-bright),var(--pm-gold));color:var(--pm-ink);">فعّل VIP</button></div>
                 
-                <div class="grid grid-cols-3 gap-2 q-modes"><button id="quick-entry-text" class="quick-entry-tab rounded-2xl border px-2 py-3 text-center shadow-sm transition" type="button" style="border-color:color-mix(in srgb,var(--pm-gold-bright) 50%,transparent);background:linear-gradient(145deg,color-mix(in srgb,var(--pm-gold-bright) 18%,var(--pm-surface-hi)),var(--pm-surface-hi));"><span class="mx-auto mb-1 flex h-9 w-9 items-center justify-center rounded-full text-xl" style="background:color-mix(in srgb,var(--pm-gold-bright) 18%,transparent);">✍️</span><span class="block text-[11px] font-bold" style="color:var(--pm-ink);">كتابة</span></button><button id="quick-entry-voice" class="quick-entry-tab rounded-2xl border px-2 py-3 text-center shadow-sm transition" type="button" style="border-color:var(--pm-hairline);background:var(--pm-surface-hi);"><span class="mx-auto mb-1 flex h-9 w-9 items-center justify-center rounded-full text-xl" style="background:color-mix(in srgb,var(--pm-gold-bright) 12%,transparent);">🎙️</span><span class="block text-[11px] font-bold" style="color:var(--pm-ink);">صوت</span></button><button id="quick-entry-invoice" class="quick-entry-tab rounded-2xl border px-2 py-3 text-center shadow-sm transition" type="button" style="border-color:var(--pm-hairline);background:var(--pm-surface-hi);"><span class="mx-auto mb-1 flex h-9 w-9 items-center justify-center rounded-full text-xl" style="background:color-mix(in srgb,var(--pm-gold-bright) 12%,transparent);">📸</span><span class="block text-[11px] font-bold" style="color:var(--pm-ink);">فاتورة</span></button></div><button id="quick-entry-manual" type="button" class="quick-entry-manual-link"><span class="quick-entry-manual-main"><span aria-hidden="true">✍️</span> إذا أردت من غير AI <span class="quick-entry-manual-arrow" aria-hidden="true">↘</span></span><span class="quick-entry-manual-sub">سجّلها يدويًا بدون تحليل ذكي</span></button><p class="q-foot text-[10px]" style="color:var(--pm-muted);"><span class="gem" aria-hidden="true">💎</span><span>اكتب بحرية، أو استخدم الصوت والفاتورة الذكية لو حسابك يدعم VIP.</span></p>
+                <div class="grid grid-cols-3 gap-2 q-modes"><button id="quick-entry-text" class="quick-entry-tab rounded-2xl border px-2 py-3 text-center shadow-sm transition" type="button" style="border-color:color-mix(in srgb,var(--pm-gold-bright) 50%,transparent);background:linear-gradient(145deg,color-mix(in srgb,var(--pm-gold-bright) 18%,var(--pm-surface-hi)),var(--pm-surface-hi));"><span class="mx-auto mb-1 flex h-9 w-9 items-center justify-center rounded-full text-xl" style="background:color-mix(in srgb,var(--pm-gold-bright) 18%,transparent);">✍️</span><span class="block text-[11px] font-bold" style="color:var(--pm-ink);">كتابة</span></button><button id="quick-entry-voice" class="quick-entry-tab rounded-2xl border px-2 py-3 text-center shadow-sm transition" type="button" style="border-color:var(--pm-hairline);background:var(--pm-surface-hi);"><span class="mx-auto mb-1 flex h-9 w-9 items-center justify-center rounded-full text-xl" style="background:color-mix(in srgb,var(--pm-gold-bright) 12%,transparent);">🎙️</span><span class="block text-[11px] font-bold" style="color:var(--pm-ink);">صوت</span></button><button id="quick-entry-invoice" class="quick-entry-tab rounded-2xl border px-2 py-3 text-center shadow-sm transition" type="button" style="border-color:var(--pm-hairline);background:var(--pm-surface-hi);"><span class="mx-auto mb-1 flex h-9 w-9 items-center justify-center rounded-full text-xl" style="background:color-mix(in srgb,var(--pm-gold-bright) 12%,transparent);">📸</span><span class="block text-[11px] font-bold" style="color:var(--pm-ink);">فاتورة</span></button></div><button id="quick-entry-manual" type="button" class="quick-entry-manual-link"><span class="quick-entry-manual-main"><span aria-hidden="true">✍️</span> إذا أردت من غير AI <span class="quick-entry-manual-arrow" aria-hidden="true">↘</span></span><span class="quick-entry-manual-sub">سجّلها يدويًا بدون تحليل ذكي</span></button><p class="q-foot text-[10px]" style="color:var(--pm-muted);"><span class="gem" aria-hidden="true">💎</span><span>اكتب بحرية، أو استخدم الصوت والفاتورة الذكية لو حسابك يدعم VIP.</span></p><button id="quick-entry-multi-btn" type="button" class="w-full mt-0.5 rounded-2xl border px-3 py-2 text-[11px] font-bold flex items-center justify-center gap-1.5" style="border-color:color-mix(in srgb,var(--pm-gold-bright) 45%,transparent);color:var(--pm-gold-bright);background:color-mix(in srgb,var(--pm-gold-bright) 8%,transparent);"><span>🧾📑</span><span>فاتورة طويلة (كذا صورة)</span></button>
+                <input type="file" id="quick-entry-multi-input" accept="image/*" multiple class="hidden">
                 <input type="file" id="quick-entry-invoice-input" accept="image/*" class="hidden">
                 <div id="quick-entry-scanning" class="hidden dabbar-scan-box rounded-2xl p-3 text-center"><div class="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl dabbar-scan-box-icon text-xl shadow-sm"><span style="display:inline-block;animation:dabbar-scan-spin 1s linear infinite">⟳</span></div><p class="text-xs font-bold dabbar-scan-box-title">بنقرأ الفاتورة...</p><p class="mt-1 text-[10px] dabbar-scan-box-sub">دبّر بيستخرج المبلغ والأصناف</p></div>
                 <div id="quick-entry-form" class="hidden space-y-3 rounded-2xl border p-3" style="border-color:var(--pm-hairline);background:var(--pm-surface-hi);"><div><div class="flex items-center gap-2 flex-wrap"><p class="text-xs font-black" style="color:var(--pm-ink);">اكتب عمليتك بطريقتك</p><span class="smart-write-badge"><svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor" aria-hidden="true"><path d="M12 2l1.9 5.6L19.5 9.5l-5.6 1.9L12 17l-1.9-5.6L4.5 9.5l5.6-1.9L12 2zm7 12l.9 2.6 2.6.9-2.6.9L19 21l-.9-2.6-2.6-.9 2.6-.9L19 14z"/></svg>كتابة ذكية</span></div><p class="mt-1 text-[10px]" style="color:var(--pm-muted);">مثال: «صرفت 50 جنيه على القهوة النهاردة»</p></div><textarea id="quick-entry-input" rows="1" maxlength="2500" placeholder="مثال: صرفت 50 جنيه على القهوة النهاردة" class="w-full resize-y rounded-2xl border px-3 py-3 text-sm leading-7 outline-none" style="border-color:var(--pm-hairline);background:var(--pm-surface-soft);color:var(--pm-ink);"></textarea><div class="q-ex-chips"><button type="button" class="q-ex-chip" data-ex="صرفت 50 جنيه على القهوة النهاردة">☕ قهوة ٥٠</button><button type="button" class="q-ex-chip" data-ex="دفعت 30 جنيه مواصلات">🚌 مواصلات ٣٠</button><button type="button" class="q-ex-chip" data-ex="قبضت 8000 جنيه مرتب">💰 مرتب</button></div><div class="flex gap-2"><button id="quick-entry-analyze" class="quick-entry-ai-save flex-1 rounded-xl py-2.5 text-xs font-black" type="button" style="background:linear-gradient(145deg,var(--pm-gold-bright),var(--pm-gold));color:var(--pm-ink);">حلّل وسجّل</button><button id="quick-entry-cancel" class="rounded-xl border px-3 py-2.5 text-xs" style="border-color:var(--pm-hairline);color:var(--pm-muted);" type="button">إلغاء</button></div></div>
@@ -4295,7 +4314,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                 <details id="balance-card" class="hidden rounded-[1.35rem] border border-emerald-500/20 bg-emerald-500/[0.045] p-3.5 space-y-3">
                     <summary class="balance-summary balance-summary--cta">
                         <div class="balance-summary-main">
-                            <div class="flex items-center gap-1.5"><span class="text-sm">⚖️</span><h4 class="text-sm font-black text-slate-100">توازن مصاريفك</h4></div>
+                            <div class="flex items-center gap-1.5"><span class="dabbar-hdr-ic"><iconify-icon icon="ph:scales-duotone" width="16"></iconify-icon></span><h4 class="text-sm font-black text-slate-100">توازن مصاريفك</h4></div>
                             <p class="mt-1 text-[10px] leading-relaxed text-slate-400">قارن احتياجاتك ورغباتك وادخارك</p>
                             <span class="balance-cta-btn" aria-hidden="true">اعرض <span class="balance-cta-chev">‹</span></span>
                         </div>
@@ -4304,7 +4323,6 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                     <div id="balance-bars" class="space-y-2.5"></div>
                     <div id="balance-insight" class="rounded-xl border border-emerald-500/15 bg-emerald-500/10 px-3 py-2 text-[10px] font-bold leading-relaxed text-emerald-300">الحسبة ببساطة: المستهدف = نسبة من دخلك، والفعلي = اللي صرفته</div>
 
-                    <p class="text-center text-[9px] text-slate-500">غيّر أي فئة من احتياجات لرغبات أو العكس</p>
                     <button type="button" id="balance-card-close-btn" class="balance-close-btn">اقفل <span style="display:inline-block;transform:rotate(180deg);">⌃</span></button>
                 </details>
                 <div class="flex items-center justify-between gap-2">
@@ -4552,8 +4570,16 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
 
             <div id="daily-items-card" class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3">
                 <h4 class="text-xs font-bold text-slate-300">عمليات النهاردة:</h4>
-                <div class="space-y-1" id="daily-items-list">
-                    <p class="text-xs text-slate-500">سجّل أول عملية النهاردة وهتظهر هنا.</p>
+                <div id="daily-items-empty" class="hidden"><p class="text-xs text-slate-500">سجّل أول عملية النهاردة وهتظهر هنا.</p></div>
+                <div id="daily-income-section" class="hidden space-y-1.5">
+                    <div class="dabbar-daily-section-head"><span class="dabbar-daily-section-title"><span class="dabbar-hdr-ic"><iconify-icon icon="ph:hand-coins-duotone" width="14"></iconify-icon></span>دخلك النهاردة</span><span class="dabbar-daily-section-total text-emerald-400" id="daily-income-total"></span></div>
+                    <div class="space-y-1" id="daily-income-list"></div>
+                    <button type="button" id="daily-income-toggle" class="dabbar-list-toggle hidden">عرض الكل</button>
+                </div>
+                <div id="daily-expense-section" class="hidden space-y-1.5">
+                    <div class="dabbar-daily-section-head"><span class="dabbar-daily-section-title"><span class="dabbar-hdr-ic"><iconify-icon icon="ph:receipt-duotone" width="14"></iconify-icon></span>مصاريفك النهاردة</span><span class="dabbar-daily-section-total text-rose-400" id="daily-expense-total"></span></div>
+                    <div class="space-y-1" id="daily-expense-list"></div>
+                    <button type="button" id="daily-expense-toggle" class="dabbar-list-toggle hidden">عرض الكل</button>
                 </div>
             </div>
 
@@ -4576,19 +4602,21 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             </div>
 
             <details id="subscriptions-card" class="rounded-3xl p-4">
-                <summary class="text-xs font-bold flex items-center justify-between gap-1.5 cursor-pointer list-none" id="subscriptions-title"><span class="flex items-center gap-1.5">🔁 اشتراكاتك الثابتة <span id="subscriptions-count" class="hidden text-[10px] font-bold rounded-full px-1.5 py-0.5"></span></span><span class="subscriptions-chevron text-slate-500 transition-transform">⌄</span></summary>
+                <summary class="text-xs font-bold flex items-center justify-between gap-1.5 cursor-pointer list-none" id="subscriptions-title"><span class="flex items-center gap-1.5"><span class="dabbar-hdr-ic"><iconify-icon icon="ph:arrows-clockwise-duotone" width="16"></iconify-icon></span> اشتراكاتك الثابتة <span id="subscriptions-count" class="hidden text-[10px] font-bold rounded-full px-1.5 py-0.5"></span></span><span class="subscriptions-chevron text-slate-500 transition-transform">⌄</span></summary>
                 <p id="subscriptions-total-line" class="hidden text-[10px] text-slate-500 pt-1"></p>
                 <div class="space-y-1 pt-3" id="subscriptions-list">
                     <p class="text-xs" id="subscriptions-empty">لسه دبّر ما لاقاش اشتراك ثابت — لما تسجّل نفس الاسم بنفس القيمة تقريبًا شهرين متتاليين، هيظهر هنا كتنبيه بس، مش تسجيل تلقائي.</p>
                 </div>
+                <button type="button" id="subscriptions-list-toggle" class="dabbar-list-toggle hidden">عرض الكل</button>
             </details>
 
             <details id="recurring-purchases-card" class="rounded-3xl p-4">
-                <summary class="text-xs font-bold flex items-center justify-between gap-1.5 cursor-pointer list-none"><span class="flex items-center gap-1.5">🛒 مشتريات بتتكرر عندك <span id="recurring-purchases-count" class="hidden text-[10px] font-bold rounded-full px-1.5 py-0.5"></span></span><span class="subscriptions-chevron text-slate-500 transition-transform">⌄</span></summary>
+                <summary class="text-xs font-bold flex items-center justify-between gap-1.5 cursor-pointer list-none"><span class="flex items-center gap-1.5"><span class="dabbar-hdr-ic"><iconify-icon icon="ph:shopping-cart-duotone" width="16"></iconify-icon></span> مشتريات بتتكرر عندك <span id="recurring-purchases-count" class="hidden text-[10px] font-bold rounded-full px-1.5 py-0.5"></span></span><span class="subscriptions-chevron text-slate-500 transition-transform">⌄</span></summary>
                 <p class="text-[10px] text-slate-500 pt-1">مش اشتراكات — بس دبّر لاحظ إنها بترجع تشتريها بنفس القيمة تقريبًا كل شهرين.</p>
                 <div class="space-y-1 pt-3" id="recurring-purchases-list">
                     <p class="text-xs text-slate-500" id="recurring-purchases-empty">لسه مفيش حاجة متكررة بنفس القيمة تقريبًا.</p>
                 </div>
+                <button type="button" id="recurring-purchases-toggle" class="dabbar-list-toggle hidden">عرض الكل</button>
             </details>
 
             <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-4">
@@ -4708,8 +4736,10 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                     <button type="button" id="gameya-add-btn" class="text-[11px] font-bold text-emerald-400">+ جمعية جديدة</button>
                 </div>
                 <div id="gameya-list" class="space-y-3"><p class="text-[11px] text-slate-500 text-center py-2">مفيش جمعيات مسجلة لسه.</p></div>
+                <button type="button" id="gameya-list-toggle" class="dabbar-list-toggle hidden"></button>
 
                 <div id="gameya-form" class="hidden rounded-3xl border border-slate-800 bg-slate-950/50 p-4 space-y-2.5">
+                    <p id="gameya-form-title" class="text-xs font-black text-slate-200">جمعية جديدة</p>
                     <label class="block text-[10px] font-bold text-slate-400">اسم الجمعية</label>
                     <input type="text" id="gameya-name-input" placeholder="مثال: جمعية الشغل" class="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2.5 text-xs text-slate-100 outline-none focus:border-emerald-400">
                     <div class="grid grid-cols-2 gap-2">
@@ -4747,8 +4777,10 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                     </div>
                 </div>
                 <div id="occasions-list" class="space-y-2"><p class="text-[11px] text-slate-500 text-center py-2">مفيش مناسبات مسجلة لسه.</p></div>
+                <button type="button" id="occasions-list-toggle" class="dabbar-list-toggle hidden"></button>
 
                 <div id="occasion-form" class="hidden rounded-3xl border border-slate-800 bg-slate-950/50 p-4 space-y-2.5">
+                    <p id="occasion-form-title" class="text-xs font-black text-slate-200">نقطة جديدة</p>
                     <label class="block text-[10px] font-bold text-slate-400">اسم الشخص</label>
                     <input type="text" id="occasion-name-input" placeholder="مثال: أحمد علي" class="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2.5 text-xs text-slate-100 outline-none focus:border-emerald-400">
                     <label class="block text-[10px] font-bold text-slate-400">المبلغ</label>
@@ -4944,6 +4976,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                 <p class="text-[11px] text-slate-500">صوّر فاتورة أو إيصال، ودبّر هيقرأ المبلغ والفئة ويسجله تلقائي.</p>
                 <input type="file" id="asst-receipt-camera-input" accept="image/*" capture="environment" class="hidden">
                 <input type="file" id="asst-receipt-gallery-input" accept="image/*" class="hidden">
+                <input type="file" id="asst-receipt-multi-input" accept="image/*" multiple class="hidden">
                 <div class="grid grid-cols-2 gap-2">
                     <button id="asst-receipt-camera-btn" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-3 rounded-2xl text-xs transition border border-slate-700 flex items-center justify-center gap-2">
                         <span id="asst-receipt-camera-icon">📷</span> <span>صوّر الفاتورة</span>
@@ -4951,6 +4984,25 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                     <button id="asst-receipt-gallery-btn" class="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold py-3 rounded-2xl text-xs transition border border-slate-700 flex items-center justify-center gap-2">
                         <span id="asst-receipt-gallery-icon">🖼️</span> <span>ارفع من المعرض</span>
                     </button>
+                </div>
+                <button id="asst-receipt-multi-btn" class="w-full bg-slate-900 hover:bg-slate-800 text-emerald-300 font-bold py-2.5 rounded-2xl text-[11.5px] transition border border-emerald-500/30 flex items-center justify-center gap-1.5">
+                    <span>🧾📑</span> <span>فاتورة طويلة (كذا صورة)</span>
+                </button>
+                <!-- مسودة "فاتورة طويلة": كل صورة بتتحلل لوحدها وبترجع أصنافها من غير ما تتسجل، وبنجمعهم هنا في مسودة واحدة قبل تأكيد التسجيل مرة واحدة -->
+                <div id="asst-multi-draft" class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-3.5 space-y-2.5">
+                    <div class="flex items-center justify-between gap-2">
+                        <p id="asst-multi-draft-title" class="text-xs font-bold text-slate-100">بيقرا الصور...</p>
+                        <button type="button" id="asst-multi-cancel" aria-label="اقفل" class="shrink-0 w-6 h-6 flex items-center justify-center rounded-full text-slate-400 hover:bg-slate-800 transition text-sm font-bold">✕</button>
+                    </div>
+                    <p id="asst-multi-status" class="text-[10.5px] text-slate-500"></p>
+                    <div id="asst-multi-draft-list"></div>
+                    <div class="flex items-center justify-between font-bold text-xs text-slate-100 border-t border-slate-800 pt-2">
+                        <span>الإجمالي</span>
+                        <span id="asst-multi-draft-total">0</span>
+                    </div>
+                    <div id="asst-multi-draft-actions" class="hidden flex gap-2 pt-1">
+                        <button id="asst-multi-confirm" type="button" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950">تأكيد التسجيل — عملية واحدة</button>
+                    </div>
                 </div>
                 <div id="asst-receipt-scanning" class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-3.5">
                     <div class="flex items-center gap-3 mb-3">
@@ -7957,10 +8009,10 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                 <p class="text-[10px] text-slate-500 leading-relaxed">اكتب دخلك و/أو سقف صرفك الشهري، ودبّر يحسبلك المتاح تلقائيًا في الكارت اللي تحت.</p>
                 <div class="grid grid-cols-2 gap-2"><label class="text-[10px] text-slate-400">💰 دخلك الشهري<input id="planning-income" type="text" inputmode="numeric" placeholder="مثال: 12,000" class="mt-1 w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-100 outline-none focus:border-emerald-400 text-center"></label><label class="text-[10px] text-slate-400">🎯 ميزانيتك الشهرية<input id="planning-budget" type="text" inputmode="numeric" placeholder="مثال: 9,000" class="mt-1 w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-100 outline-none focus:border-emerald-400 text-center"></label></div>
                 <div id="planning-summary" class="rounded-2xl bg-emerald-500/10 px-3 py-3 text-[11px] text-emerald-200"></div>
-                <details class="group"><summary class="flex cursor-pointer list-none items-center gap-2.5 rounded-xl bg-slate-900/60 px-3 py-2.5 text-[10px] font-bold text-slate-400"><span class="planning-collapse-ic">📊</span><span class="flex-1">حدود مصروف لكل فئة (اختياري)</span><span class="text-slate-600 transition group-open:rotate-180">⌄</span></summary>
-                <div class="mt-2 space-y-2"><p class="text-[9.5px] leading-relaxed text-slate-500">حد تخطيطي بس، مش مصروف بيتسجل — دبّر ينبهك لما توصل لـ <b class="text-amber-300">80%</b> منه.</p><div id="category-budgets-list" class="space-y-1.5"></div><button id="category-budget-add" type="button" class="dabbar-fab-add">+ إضافة حد لفئة</button></div></details>
-                <details class="group border-t border-slate-800 pt-3"><summary class="flex cursor-pointer list-none items-center gap-2.5 rounded-xl bg-slate-900/60 px-3 py-2.5 text-[10px] font-bold text-slate-400"><span class="planning-collapse-ic">📌</span><span class="flex-1">التزامات شهرية متوقعة (إيجار / اشتراكات)</span><span class="text-slate-600 transition group-open:rotate-180">⌄</span></summary>
-                <div class="mt-2 space-y-2"><p class="text-[9px] text-slate-500">للتخطيط فقط — لا تُضاف للصرف الفعلي إلا عند تسجيلها.</p><div id="recurring-list" class="space-y-1.5"></div><button id="recurring-add" type="button" class="dabbar-fab-add">+ إضافة التزام جديد</button></div></details>
+                <details class="group"><summary class="flex cursor-pointer list-none items-center gap-2.5 rounded-xl bg-slate-900/60 px-3 py-2.5 text-[10px] font-bold text-slate-400"><span class="planning-collapse-ic"><iconify-icon icon="ph:chart-bar-duotone" width="15"></iconify-icon></span><span class="flex-1">حدود مصروف لكل فئة (اختياري)</span><span class="text-slate-600 transition group-open:rotate-180">⌄</span></summary>
+                <div class="mt-2 space-y-2"><p class="text-[9.5px] leading-relaxed text-slate-500">حد تخطيطي بس، مش مصروف بيتسجل — دبّر ينبهك لما توصل لـ <b class="text-amber-300">80%</b> منه.</p><div id="category-budgets-list" class="space-y-1.5"></div><button type="button" id="category-budgets-toggle" class="dabbar-list-toggle hidden">عرض الكل</button><button id="category-budget-add" type="button" class="dabbar-fab-add">+ إضافة حد لفئة</button></div></details>
+                <details class="group border-t border-slate-800 pt-3"><summary class="flex cursor-pointer list-none items-center gap-2.5 rounded-xl bg-slate-900/60 px-3 py-2.5 text-[10px] font-bold text-slate-400"><span class="planning-collapse-ic"><iconify-icon icon="ph:push-pin-duotone" width="15"></iconify-icon></span><span class="flex-1">التزامات شهرية متوقعة (إيجار / اشتراكات)</span><span class="text-slate-600 transition group-open:rotate-180">⌄</span></summary>
+                <div class="mt-2 space-y-2"><p class="text-[9px] text-slate-500">للتخطيط فقط — لا تُضاف للصرف الفعلي إلا عند تسجيلها.</p><div id="recurring-list" class="space-y-1.5"></div><button type="button" id="recurring-list-toggle" class="dabbar-list-toggle hidden">عرض الكل</button><button id="recurring-add" type="button" class="dabbar-fab-add">+ إضافة التزام جديد</button></div></details>
                 <div class="flex gap-2 border-t border-slate-800 pt-3"><button id="planning-save" type="button" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950">حفظ خطتي</button><button id="planning-reset" type="button" title="إدارة ومسح خطة الدخل والميزانية" class="rounded-xl border border-slate-700/60 px-3 py-2.5 text-xs text-slate-500">إدارة</button></div>
                 <div class="dabbar-sheet-backdrop" id="limit-sheet"><div class="dabbar-sheet"><h3 class="text-xs font-black text-slate-100 mb-2">إضافة حد لفئة</h3><label class="dabbar-sheet-label">اسم الفئة</label><input id="limit-sheet-name" type="text" maxlength="40" placeholder="اكتب اسم الفئة أو اختار من تحت" class="dabbar-sheet-input"><div id="limit-sheet-chips" class="dabbar-chip-row"></div><label class="dabbar-sheet-label">الحد الشهري</label><input id="limit-sheet-amount" type="number" min="0" placeholder="مثال: 1500" class="dabbar-sheet-input"><div class="dabbar-sheet-btns"><button type="button" id="limit-sheet-cancel" class="dabbar-sheet-cancel">إلغاء</button><button type="button" id="limit-sheet-save" class="dabbar-sheet-save">حفظ الحد</button></div></div></div>
                 <div class="dabbar-sheet-backdrop" id="commit-sheet"><div class="dabbar-sheet"><h3 class="text-xs font-black text-slate-100 mb-2">إضافة التزام جديد</h3><label class="dabbar-sheet-label">اسم الالتزام</label><input id="commit-sheet-name" type="text" placeholder="مثال: اشتراك نتفليكس، إيجار الشقة..." class="dabbar-sheet-input"><div class="dabbar-live-preview"><span class="commitment-icon" data-tone="default" id="commit-sheet-icon-wrap"><iconify-icon id="commit-sheet-icon" icon="ph:push-pin-duotone" width="18"></iconify-icon></span><span class="dabbar-live-preview-tag" id="commit-sheet-tag">اكتب اسم عشان الأيقونة تتحدد تلقائي</span></div><label class="dabbar-sheet-label">المبلغ الشهري</label><input id="commit-sheet-amount" type="number" min="0" placeholder="مثال: 250" class="dabbar-sheet-input"><div class="dabbar-sheet-btns"><button type="button" id="commit-sheet-cancel" class="dabbar-sheet-cancel">إلغاء</button><button type="button" id="commit-sheet-save" class="dabbar-sheet-save">حفظ الالتزام</button></div></div></div>`;
@@ -7992,6 +8044,8 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             // ============ الإضافة بقت خطوة واحدة عن طريق شيت (اسم + مبلغ سوا) بدل صف إدخال ثابت + زرار منفصل ============
             document.getElementById('recurring-add').addEventListener('click', openCommitSheet);
             document.getElementById('category-budget-add').addEventListener('click', openLimitSheet);
+            bindDabbarListToggle(document.getElementById('category-budgets-list'), document.getElementById('category-budgets-toggle'), 4);
+            bindDabbarListToggle(document.getElementById('recurring-list'), document.getElementById('recurring-list-toggle'), 4);
             document.getElementById('limit-sheet-cancel').addEventListener('click', closeLimitSheet);
             document.getElementById('limit-sheet-save').addEventListener('click', saveLimitFromSheet);
             document.getElementById('limit-sheet-name').addEventListener('input', renderLimitSheetChips);
@@ -8036,15 +8090,16 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             if (input) input.value = '';
         }
 
-        // ============ شيت إضافة حد فئة — خطوة واحدة (اسم + مبلغ) مع اقتراحات من فئات الشهر اللي لسه مالهاش حد ============
-        function openLimitSheet() {
+        // ============ شيت إضافة حد فئة — خطوة واحدة (اسم + مبلغ) مع اقتراحات من فئات الشهر اللي لسه مالهاش حد
+        // بيقبل تعبئة مبدئية (اسم + مبلغ مقترح) عشان كارت "فرص التوفير" يفتحه بالأرقام الحقيقية جاهزة، فيبقى ضغطة واحدة = حفظ فعلي ============
+        function openLimitSheet(prefillName, prefillAmount) {
             const nameEl = document.getElementById('limit-sheet-name');
             const amtEl = document.getElementById('limit-sheet-amount');
-            if (nameEl) nameEl.value = '';
-            if (amtEl) amtEl.value = '';
+            if (nameEl) nameEl.value = prefillName || '';
+            if (amtEl) amtEl.value = prefillAmount ? Math.max(0, Math.round(prefillAmount)) : '';
             renderLimitSheetChips();
             document.getElementById('limit-sheet')?.classList.add('open');
-            setTimeout(() => nameEl?.focus(), 150);
+            setTimeout(() => { if (prefillName && amtEl) amtEl.focus(); else nameEl?.focus(); }, 150);
         }
         function closeLimitSheet() { document.getElementById('limit-sheet')?.classList.remove('open'); }
         function renderLimitSheetChips() {
@@ -8118,7 +8173,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
         // الاستجابات تأتي بدون timezone أو بتأخير بسيط بين الحفظ وإعادة تحميل الداشبورد.
         let __ledgerHighlightCount = 0;
         let __ledgerHighlightUntil = 0;
-        function armLedgerHighlight(count = 1) {
+        function armLedgerHighlight(count = 1, isExpense = false) {
             const normalizedCount = Math.max(1, Number(count) || 1);
             // ملحوظة: هنا كانت Math.max(__ledgerHighlightCount, normalizedCount) وده كان البق —
             // لو دفعة قديمة سجّلت مثلاً 6 عمليات مرة واحدة، العدد كان يفضل 6 للأبد (Math.max ما بينزلش تاني)،
@@ -8127,9 +8182,34 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             __ledgerHighlightCount = normalizedCount;
             // المدة أطول من مدة طلب إعادة التحميل، لكن التوهج المرئي نفسه 10 ثوانٍ.
             __ledgerHighlightUntil = Date.now() + 30000;
-            // ============ متنزلش المستخدم إجباريًا لـ"آخر عملياتك" بعد كل تسجيل — الهايلايت وحده كفاية إنه يتأكد إنها اتسجلت، وهو حر ينزل يشوفها وقت ما يحب ============
+            // ============ متنزلش المستخدم إجباريًا لـ"آخر عملياتك" ولا ننقله بين التابات بعد كل تسجيل —
+            // لو بيسجل كذا عملية وراء بعض، النقلة الإجبارية هتقطع عليه وهو بيسجل. الهايلايت وحده كفاية إنه يتأكد إنها اتسجلت،
+            // وهو حر ينزل يشوفها وقت ما يحب ============
         }
 
+        // ============ بريفيو موحّد لأي ليستة طويلة: بيورّي أول N عنصر بس ويسيب زرار "عرض الكل" — الصفوف كلها لسه موجودة في الـ DOM (عشان منكسرش أي reconciliation)، بس متخبّية بـ CSS ============
+        function applyDabbarListPreview(containerEl, toggleBtnEl, limit) {
+            if (!containerEl || !toggleBtnEl) return;
+            const rows = Array.from(containerEl.children).filter((el) => el.tagName !== 'P');
+            const total = rows.length;
+            if (total <= limit) {
+                toggleBtnEl.classList.add('hidden');
+                rows.forEach((r) => r.classList.remove('dabbar-row-hidden'));
+                return;
+            }
+            toggleBtnEl.classList.remove('hidden');
+            const expanded = containerEl.dataset.expanded === '1';
+            rows.forEach((r, i) => r.classList.toggle('dabbar-row-hidden', !expanded && i >= limit));
+            toggleBtnEl.textContent = expanded ? 'إخفاء ‹' : `+ عرض الكل (${total}) ›`;
+        }
+        function bindDabbarListToggle(containerEl, toggleBtnEl, limit) {
+            if (!toggleBtnEl || toggleBtnEl.dataset.bound) return;
+            toggleBtnEl.dataset.bound = '1';
+            toggleBtnEl.addEventListener('click', () => {
+                containerEl.dataset.expanded = containerEl.dataset.expanded === '1' ? '' : '1';
+                applyDabbarListPreview(containerEl, toggleBtnEl, limit);
+            });
+        }
         function renderPlanning(data) {
             ensurePlanningUI();
             const settings = planningSettings();
@@ -8231,6 +8311,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                     });
                 }
             }
+            applyDabbarListPreview(categoryBudgetList, document.getElementById('category-budgets-toggle'), 4);
             const recurringList = document.getElementById('recurring-list');
             if (recurringList) recurringList.innerHTML = (settings.recurringExpenses || []).length ? settings.recurringExpenses.map((item, i) => {
                 const cIcon = getCommitmentIcon(item.name);
@@ -8242,6 +8323,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                 settings.recurringExpenses.splice(Number(btn.dataset.recurringRemove), 1);
                 savePlanningSettings();
             }));
+            applyDabbarListPreview(recurringList, document.getElementById('recurring-list-toggle'), 4);
             const list = document.getElementById('expense-ledger-list');
             // ============ لازم ترتيب صريح بالأحدث أولًا هنا: مفيش ضمان إن الـ API راجع العمليات بترتيب زمني تنازلي،
             // (بالظبط زي الفرز اللي بيحصل لنفس السبب في renderDaily) — من غيره العملية الجديدة ممكن متطلعش في أول ٥/١٠ صفوف
@@ -8701,7 +8783,15 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             const incomeSheetCount = document.getElementById('income-sheet-count');
             const incomeSheetTotal = document.getElementById('income-sheet-total');
 
+            // ============ مهم: incomeItems/incomeTotal هنا متغيرات محلية بتتحسب من جديد كل مرة renderMonthly تتنفذ،
+            // لكن زرار فتح الشاشة بيتربط بحدث الضغط مرة واحدة بس (أول تحميل) بسبب حارس dataset.bound تحت.
+            // لو الفانكشنز اللي جاية (renderIncomeSheetBody/openIncomeSheet) قرأت incomeItems/incomeTotal
+            // مباشرة، هيفضل الزرار قافل على نسخة أول تحميل للأبد وأي دخل جديد متسجل بعد كده مش هيظهر خالص.
+            // الحل: نحفظ آخر نسخة في متغير عام (window)، والفانكشنز تقرا منه وقت الضغط الفعلي مش وقت التعريف. ============
+            window.__incomeSheetData = { incomeItems, incomeTotal };
+
             const renderIncomeSheetBody = () => {
+                const { incomeItems } = window.__incomeSheetData;
                 if (!incomeItems.length) {
                     incomeSheetBody.innerHTML = '<p class="text-[11px] text-center py-6" style="color:var(--db-muted);">لسه مفيش عمليات دخل الشهر ده.</p>';
                     return;
@@ -8740,6 +8830,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             };
 
             const openIncomeSheet = () => {
+                const { incomeItems, incomeTotal } = window.__incomeSheetData;
                 incomeSheetMonth.textContent = new Date().toLocaleDateString('ar-EG', { month: 'long' });
                 incomeSheetCount.textContent = incomeItems.length > 0 ? `${incomeItems.length} ${incomeItems.length === 1 ? 'عملية' : 'عمليات'}` : '— عملية';
                 incomeSheetTotal.textContent = incomeTotal > 0 ? fmt(incomeTotal) : '—';
@@ -8996,7 +9087,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             });
         }
         setupInsightCardActions('');
-        setupInsightCardActions('-daily', { moreAction: () => document.getElementById('daily-items-list')?.scrollIntoView({ behavior: 'smooth', block: 'center' }) });
+        setupInsightCardActions('-daily', { moreAction: () => document.getElementById('daily-items-card')?.scrollIntoView({ behavior: 'smooth', block: 'center' }) });
         setupInsightCardActions('-newmonth', { moreAction: () => document.getElementById('open-archive')?.click() });
 
         // ============ عداد "المرتب لسه فاضل كام" — بيتنادى من loadPlanningSettings (محتاج monthlyBudget) ============
@@ -9172,9 +9263,10 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                 document.getElementById('flow-net').className = `text-base font-bold ${flow.net >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
             }
 
-            const listEl = document.getElementById('daily-items-list');
+            const incomeListEl = document.getElementById('daily-income-list');
+            const expenseListEl = document.getElementById('daily-expense-list');
             // بنفتكر الفئات المفتوحة قبل إعادة الرسم (كل 20 ثانية بيتحدث الكارت تلقائيًا) عشان ميقفلوش فجأة تحت إيد المستخدم
-            const prevOpenLabels = new Set(Array.from(listEl?.querySelectorAll('details.daily-group[open]') || [])
+            const prevOpenLabels = new Set([...(incomeListEl?.querySelectorAll('details.daily-group[open]') || []), ...(expenseListEl?.querySelectorAll('details.daily-group[open]') || [])]
                 .map((d) => d.querySelector('[data-group-label]')?.getAttribute('data-group-label')).filter(Boolean));
             // ============ عمليات النهاردة = مصاريف + كل الحركات البنكية (دخل/إيداع/سحب/تحويل) مرتبة بالوقت ============
             const todayMovements = Array.isArray(today.movements) ? today.movements : [];
@@ -9238,10 +9330,16 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                 const sign = inflow ? '+' : outflow ? '-' : '';
                 return { icon, label, color, sign };
             };
+            const emptyEl = document.getElementById('daily-items-empty');
+            const incomeSection = document.getElementById('daily-income-section');
+            const expenseSection = document.getElementById('daily-expense-section');
             if (todayRows.length === 0) {
-                listEl.innerHTML = '<p class="text-xs text-slate-500">سجّل أول عملية النهاردة وهتظهر هنا.</p>';
+                emptyEl?.classList.remove('hidden');
+                incomeSection?.classList.add('hidden');
+                expenseSection?.classList.add('hidden');
             } else {
-                // ============ تجميع عمليات النهاردة حسب الفئة (مصاريف) أو النوع (حركات بنكية) ============
+                emptyEl?.classList.add('hidden');
+                // ============ تجميع عمليات النهاردة حسب الفئة (مصاريف) أو النوع (حركات بنكية)، وفصل الدخل عن المصروفات في قسمين منفصلين ============
                 const groupsMap = new Map();
                 todayRows.forEach((it) => {
                     let key, emoji, label, color, sign;
@@ -9260,7 +9358,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                     g.count += 1;
                     g.items.push(it);
                 });
-                listEl.innerHTML = Array.from(groupsMap.values()).map((g) => {
+                const renderGroup = (g) => {
                     const rowsHtml = g.items.map((it, i) => it.__movement ? renderTodayMovementRow(it, i, g.items.length) : renderExpenseRow(it, i, g.items.length)).join('');
                     const currency = g.items[0]?.currency_code;
                     const wasOpen = prevOpenLabels.has(g.label);
@@ -9281,13 +9379,36 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                         </summary>
                         <div class="pr-2">${rowsHtml}</div>
                     </details>`;
-                }).join('');
+                };
+                const allGroups = Array.from(groupsMap.values());
+                const incomeGroups = allGroups.filter((g) => g.sign === '+');
+                const expenseGroups = allGroups.filter((g) => g.sign !== '+');
+                if (incomeGroups.length) {
+                    incomeSection?.classList.remove('hidden');
+                    incomeListEl.innerHTML = incomeGroups.map(renderGroup).join('');
+                    const incomeTotal = incomeGroups.reduce((s, g) => s + g.total, 0);
+                    const incomeTotalEl = document.getElementById('daily-income-total');
+                    if (incomeTotalEl) incomeTotalEl.textContent = `+${fmt(incomeTotal)}`;
+                } else {
+                    incomeSection?.classList.add('hidden');
+                }
+                if (expenseGroups.length) {
+                    expenseSection?.classList.remove('hidden');
+                    expenseListEl.innerHTML = expenseGroups.map(renderGroup).join('');
+                    const expenseTotal = expenseGroups.reduce((s, g) => s + g.total, 0);
+                    const expenseTotalEl = document.getElementById('daily-expense-total');
+                    if (expenseTotalEl) expenseTotalEl.textContent = `-${fmt(expenseTotal)}`;
+                } else {
+                    expenseSection?.classList.add('hidden');
+                }
             }
-            listEl?.querySelectorAll('[data-expense-edit]').forEach((btn) => btn.addEventListener('click', () => editExpense(btn.dataset.expenseEdit, btn.dataset.expenseAmount, btn.dataset.expenseDescription)));
-            listEl?.querySelectorAll('[data-expense-delete]').forEach((btn) => btn.addEventListener('click', () => deleteExpense(btn.dataset.expenseDelete)));
+            [incomeListEl, expenseListEl].forEach((el) => {
+                el?.querySelectorAll('[data-expense-edit]').forEach((btn) => btn.addEventListener('click', () => editExpense(btn.dataset.expenseEdit, btn.dataset.expenseAmount, btn.dataset.expenseDescription)));
+                el?.querySelectorAll('[data-expense-delete]').forEach((btn) => btn.addEventListener('click', () => deleteExpense(btn.dataset.expenseDelete)));
+            });
 
-            // ============ هايلايت الفئة المفتوحة في "عمليات النهاردة": فتح فئة يقفل غيرها ويظللها ============
-            const dailyGroups = Array.from(listEl?.querySelectorAll('details.daily-group') || []);
+            // ============ هايلايت الفئة المفتوحة في "عمليات النهاردة": فتح فئة يقفل غيرها ويظللها (على مستوى القسمين مع بعض) ============
+            const dailyGroups = [...(incomeListEl?.querySelectorAll('details.daily-group') || []), ...(expenseListEl?.querySelectorAll('details.daily-group') || [])];
             dailyGroups.forEach((det) => {
                 det.addEventListener('toggle', () => {
                     if (det.open) {
@@ -9300,6 +9421,14 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                     }
                 });
             });
+
+            // ============ بريفيو: نفس فكرة الليستات التانية — نعرض أول 4 فئات بس في كل قسم ونسيب زرار "عرض الكل" ============
+            const incomeToggleBtn = document.getElementById('daily-income-toggle');
+            const expenseToggleBtn = document.getElementById('daily-expense-toggle');
+            bindDabbarListToggle(incomeListEl, incomeToggleBtn, 4);
+            bindDabbarListToggle(expenseListEl, expenseToggleBtn, 4);
+            applyDabbarListPreview(incomeListEl, incomeToggleBtn, 4);
+            applyDabbarListPreview(expenseListEl, expenseToggleBtn, 4);
         }
 
         // ============ كارت "فرص التوفير" فوق تبويب يومي — بيتحمّل لوحده (مش جزء من /api/dashboard-data الأساسي) ============
@@ -9316,6 +9445,8 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                 const allSubs = window.__dabbarSubscriptions || [];
                 const flaggedSubs = allSubs.filter((s) => s.flagged);
                 const raisedSubs = allSubs.filter((s) => s.priceChangePercent > 5);
+                const subsOnly = allSubs.filter((s) => s.type !== 'purchase');
+                const subsTotal = subsOnly.reduce((sum, s) => sum + Number(s.amount || 0), 0);
                 const monthData = window.__dashboardData?.month;
                 const topCat = monthData?.topCategory;
                 const topCatPercent = topCat && monthData?.total ? Math.round((topCat.amount / monthData.total) * 100) : null;
@@ -9326,23 +9457,29 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                     data.breakdown.unusedSubscriptions > 0 ? {
                         icon: '🚫', label: 'اشتراكات علّمتها كمش مستخدمة', amount: data.breakdown.unusedSubscriptions,
                         hint: flaggedSubs.length ? flaggedSubs.slice(0, 2).map((s) => escHtmlLocal(s.label)).join('، ') : 'اشتراكات ثابتة',
-                        detail: flaggedSubs.length ? `عندك ${flaggedSubs.length === 1 ? 'اشتراك واحد' : flaggedSubs.length + ' اشتراكات'} علّمت عليهم إنك مش بتستخدمهم، وبتفضل بتدفعهم شهريًا.` : 'اشتراكات علّمت عليها إنك مش بتستخدمها، وبتفضل بتتخصم شهريًا.',
+                        detail: flaggedSubs.length ? `عندك ${flaggedSubs.length === 1 ? 'اشتراك واحد' : flaggedSubs.length + ' اشتراكات'} علّمت عليهم إنك مش بتستخدمهم، وبتفضل بتدفعهم شهريًا. حدّ نفسك سقف اشتراكات أقل عشان دبّر ينبهك أول ما تقرب منه.` : 'اشتراكات علّمت عليها إنك مش بتستخدمها، وبتفضل بتتخصم شهريًا.',
                         tags: flaggedSubs.slice(0, 4).map((s) => `${escHtmlLocal(s.label)} — ${fmt(s.amount)}`),
-                        cta: '🚫 وريني الاشتراكات', ctaTarget: 'subscriptions',
+                        actionCta: `🎯 حدّ الاشتراكات بـ ${fmt(Math.max(0, subsTotal - data.breakdown.unusedSubscriptions))}`,
+                        actionName: 'اشتراكات', actionAmount: Math.max(0, subsTotal - data.breakdown.unusedSubscriptions),
+                        cta: 'وريني الاشتراكات', ctaTarget: 'subscriptions',
                     } : null,
                     data.breakdown.priceIncreases > 0 ? {
                         icon: '📈', label: 'اشتراكات غلت من غير ما تاخد بالك', amount: data.breakdown.priceIncreases,
                         hint: raisedSubs.length ? raisedSubs.slice(0, 2).map((s) => escHtmlLocal(s.label)).join('، ') : 'زيادة أسعار',
-                        detail: raisedSubs.length ? `${raisedSubs.length === 1 ? 'اشتراك واحد زاد' : raisedSubs.length + ' اشتراكات زادوا'} سعرهم عن الشهر اللي فات — يستاهل تراجعهم.` : 'في اشتراكات زادت في السعر عن الشهر اللي فات.',
+                        detail: raisedSubs.length ? `${raisedSubs.length === 1 ? 'اشتراك واحد زاد' : raisedSubs.length + ' اشتراكات زادوا'} سعرهم عن الشهر اللي فات — يستاهل تراجعهم أو تحديد سقف يوقّفهم عند حد معين.` : 'في اشتراكات زادت في السعر عن الشهر اللي فات.',
                         tags: raisedSubs.slice(0, 4).map((s) => `${escHtmlLocal(s.label)} +${s.priceChangePercent}%`),
-                        cta: '📈 وريني الاشتراكات اللي غلت', ctaTarget: 'subscriptions',
+                        actionCta: `🎯 حدّ الاشتراكات بـ ${fmt(Math.max(0, subsTotal - data.breakdown.priceIncreases))}`,
+                        actionName: 'اشتراكات', actionAmount: Math.max(0, subsTotal - data.breakdown.priceIncreases),
+                        cta: 'وريني الاشتراكات اللي غلت', ctaTarget: 'subscriptions',
                     } : null,
                     data.breakdown.discretionaryEstimate > 0 ? {
                         icon: '🛍️', label: 'تقليل بسيط في الفئات الكمالية', amount: data.breakdown.discretionaryEstimate,
                         hint: topCat ? `${escHtmlLocal(topCat.name)} — أكبر فئة صرف` : 'فئات كمالية',
-                        detail: topCat ? `صرفت الشهر ده ${fmt(topCat.amount)} على "${escHtmlLocal(topCat.name)}" — أكتر فئة في مصروفك. تقليل بسيط فيها ممكن يوفر لك المبلغ ده.` : 'تقليل بسيط في الفئات الكمالية زي التسوق والترفيه ممكن يوفر لك المبلغ ده.',
+                        detail: topCat ? `صرفت الشهر ده ${fmt(topCat.amount)} على "${escHtmlLocal(topCat.name)}" — أكتر فئة في مصروفك. حدّ نفسك سقف أقل بـ ${fmt(data.breakdown.discretionaryEstimate)} عشان دبّر يفكّرك أول ما تقرب منه.` : 'تقليل بسيط في الفئات الكمالية زي التسوق والترفيه ممكن يوفر لك المبلغ ده.',
                         tags: topCat ? [`${escHtmlLocal(topCat.name)}${topCatPercent !== null ? `: ${topCatPercent}% من مصروفك` : ''}`] : [],
-                        cta: '🛍️ وريني تفاصيل الفئة', ctaTarget: 'category', ctaCategory: topCat?.name || '',
+                        actionCta: topCat ? `🎯 حدّ فئة ${escHtmlLocal(topCat.name)} بـ ${fmt(Math.max(0, Math.round(topCat.amount - data.breakdown.discretionaryEstimate)))}` : null,
+                        actionName: topCat?.name || '', actionAmount: topCat ? Math.max(0, Math.round(topCat.amount - data.breakdown.discretionaryEstimate)) : 0,
+                        cta: 'وريني تفاصيل الفئة', ctaTarget: 'category', ctaCategory: topCat?.name || '',
                     } : null,
                 ].filter(Boolean);
 
@@ -9360,7 +9497,10 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                         <div class="dabbar-savings-detail2-inner">
                             ${r.detail}
                             ${r.tags.length ? `<div class="dabbar-savings-tags2">${r.tags.map((t) => `<span class="dabbar-savings-tag2">${t}</span>`).join('')}</div>` : ''}
-                            <button type="button" class="dabbar-savings-cta2" data-savings-cta="${r.ctaTarget}" data-savings-cat="${escHtmlLocal(r.ctaCategory || '')}">${r.cta} ›</button>
+                            <div class="dabbar-savings-cta-row">
+                                ${r.actionCta ? `<button type="button" class="dabbar-savings-cta-primary" data-savings-limit-name="${escHtmlLocal(r.actionName)}" data-savings-limit-amount="${r.actionAmount}">${r.actionCta}</button>` : ''}
+                                <button type="button" class="dabbar-savings-cta2" data-savings-cta="${r.ctaTarget}" data-savings-cat="${escHtmlLocal(r.ctaCategory || '')}">${r.cta} ›</button>
+                            </div>
                         </div>
                     </div>
                 `).join('');
@@ -9381,6 +9521,17 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                     btn.addEventListener('click', (e) => {
                         e.stopPropagation();
                         goToSavingsTarget(btn.dataset.savingsCta, btn.dataset.savingsCat);
+                    });
+                });
+                // ============ CTA حقيقي: مش بس "وريني" — بيفتح شيت حد الفئة جاهز بالاسم والمبلغ المقترح، فحفظه بيبقى ضغطة واحدة ============
+                breakdownEl.querySelectorAll('[data-savings-limit-name]').forEach((btn) => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const monthlyTabBtn = document.querySelector('.tab-btn[data-tab="monthly"]');
+                        if (monthlyTabBtn && !monthlyTabBtn.classList.contains('active-tab')) monthlyTabBtn.click();
+                        setTimeout(() => {
+                            openLimitSheet(btn.dataset.savingsLimitName, Number(btn.dataset.savingsLimitAmount || 0));
+                        }, 150);
                     });
                 });
 
@@ -9498,6 +9649,9 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                     toggleSubscriptionFlag(btn.dataset.subFlagToggle, btn.dataset.subFlagLabel, btn.dataset.subFlagAmount, btn.dataset.subFlagNow === '1');
                 }));
             }
+            const subsToggleBtn = document.getElementById('subscriptions-list-toggle');
+            bindDabbarListToggle(listEl, subsToggleBtn, 4);
+            applyDabbarListPreview(listEl, subsToggleBtn, 4);
 
             if (purchasesCountEl) {
                 if (purchases.length) { purchasesCountEl.textContent = purchases.length; purchasesCountEl.classList.remove('hidden'); }
@@ -9513,13 +9667,16 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                             ${renderSubIcon(s.label)}
                             <div class="min-w-0 flex-1">
                                 <p class="subscription-name text-xs font-bold truncate">${debtEscape(s.label)}</p>
-                                <p class="subscription-meta text-[9px] mt-0.5">بتسجّله بنفسك بقاله ${s.monthsRecurring} ${s.monthsRecurring === 2 ? 'شهرين متتاليين' : 'شهور متتالية'}</p>
+                                <p class="subscription-meta text-[9px] mt-0.5">🔁 بيتكرر من ${s.monthsRecurring} ${s.monthsRecurring === 2 ? 'شهرين' : 'شهور'}</p>
                             </div>
                             <span class="subscription-amount text-xs font-black shrink-0">${fmt(s.amount)}</span>
                         </div>`;
                     }).join('');
                 }
             }
+            const purchasesToggleBtn = document.getElementById('recurring-purchases-toggle');
+            bindDabbarListToggle(purchasesListEl, purchasesToggleBtn, 3);
+            applyDabbarListPreview(purchasesListEl, purchasesToggleBtn, 3);
         }
 
         // ============ تجميع عمليات الفئة حسب اليوم + كارت الإحصائيات + صندوق سكرول داخلي بدل الليستة المسطّحة اللي كانت بتطوّل الصفحة كلها ============
@@ -10267,7 +10424,10 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                 <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3">
                     <div class="flex items-center justify-between">
                         <div><p class="text-[10px] text-slate-500">جمعية</p><h4 class="text-sm font-black text-slate-100">${debtEscape(g.groupName)} - ${g.groupSize} أفراد</h4></div>
-                        <button type="button" class="gameya-delete-btn text-slate-500 text-xs" data-gameya-id="${g.id}">🗑</button>
+                        <div class="flex items-center gap-2.5">
+                            <button type="button" class="gameya-edit-btn text-slate-500 text-xs" data-gameya-id="${g.id}" aria-label="تعديل الجمعية">✎</button>
+                            <button type="button" class="gameya-delete-btn text-slate-500 text-xs" data-gameya-id="${g.id}">🗑</button>
+                        </div>
                     </div>
                     <div><span class="text-xl font-black text-emerald-400">${fmt(g.installment)}</span> <span class="text-[11px] text-slate-500">ج.م القسط الشهري</span></div>
                     <div class="flex items-center justify-between text-[10px] text-slate-500">
@@ -10279,6 +10439,8 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                     ${membersHtml ? `<div class="pt-1"><p class="text-[10px] text-slate-500 mb-1">أعضاء الجمعية - الشهر ده</p>${membersHtml}</div>` : ''}
                 </div>`;
             }).join('');
+            applyDabbarListPreview(listEl, document.getElementById('gameya-list-toggle'), 2);
+            bindDabbarListToggle(listEl, document.getElementById('gameya-list-toggle'), 2);
             listEl.querySelectorAll('.gameya-member-toggle').forEach((btn) => btn.addEventListener('click', async () => {
                 try { const res = await asstApi('gameya_mark_paid', { gameyaId: Number(btn.dataset.gameyaId), memberName: btn.dataset.member }); renderGameyaList(res.gameyaList); } catch (e) {}
             }));
@@ -10286,9 +10448,38 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                 if (!(await dabbarConfirm('متأكد عايز تمسح الجمعية دي؟'))) return;
                 try { const res = await asstApi('gameya_delete', { gameyaId: Number(btn.dataset.gameyaId) }); renderGameyaList(res.gameyaList); } catch (e) {}
             }));
+            listEl.querySelectorAll('.gameya-edit-btn').forEach((btn) => btn.addEventListener('click', () => openGameyaFormForEdit(Number(btn.dataset.gameyaId))));
         }
-        document.getElementById('gameya-add-btn')?.addEventListener('click', () => document.getElementById('gameya-form')?.classList.toggle('hidden'));
-        document.getElementById('gameya-cancel-btn')?.addEventListener('click', () => document.getElementById('gameya-form')?.classList.add('hidden'));
+        let __gameyaEditId = null;
+        function openGameyaFormForEdit(gameyaId) {
+            const g = (window.__gameyaList || []).find((x) => x.id === gameyaId);
+            if (!g) return;
+            __gameyaEditId = gameyaId;
+            document.getElementById('gameya-form-title').textContent = 'تعديل الجمعية';
+            document.getElementById('gameya-save-btn').textContent = 'حفظ التعديل';
+            document.getElementById('gameya-name-input').value = g.groupName || '';
+            document.getElementById('gameya-size-input').value = g.groupSize || '';
+            document.getElementById('gameya-turn-input').value = g.myTurn || '';
+            document.getElementById('gameya-installment-input').value = g.installment || '';
+            document.getElementById('gameya-start-input').value = (g.startDate || '').slice(0, 10);
+            document.getElementById('gameya-members-input').value = (g.memberNames || []).join(', ');
+            const form = document.getElementById('gameya-form');
+            form?.classList.remove('hidden');
+            form?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        function resetGameyaForm() {
+            __gameyaEditId = null;
+            document.getElementById('gameya-form-title').textContent = 'جمعية جديدة';
+            document.getElementById('gameya-save-btn').textContent = 'حفظ الجمعية';
+            ['gameya-name-input','gameya-size-input','gameya-turn-input','gameya-installment-input','gameya-start-input','gameya-members-input'].forEach((id) => { document.getElementById(id).value = ''; });
+        }
+        document.getElementById('gameya-add-btn')?.addEventListener('click', () => {
+            resetGameyaForm();
+            const form = document.getElementById('gameya-form');
+            form?.classList.remove('hidden');
+            form?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+        document.getElementById('gameya-cancel-btn')?.addEventListener('click', () => { document.getElementById('gameya-form')?.classList.add('hidden'); resetGameyaForm(); });
         document.getElementById('gameya-save-btn')?.addEventListener('click', async () => {
             const statusEl = document.getElementById('gameya-form-status');
             const groupName = document.getElementById('gameya-name-input').value.trim();
@@ -10300,12 +10491,15 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             if (!groupName || !groupSize || !myTurn || !installment || !startDate) { statusEl.textContent = 'كمّل كل الحقول الأساسية الأول.'; return; }
             statusEl.textContent = '';
             try {
-                const res = await asstApi('gameya_create', { groupName, groupSize, myTurn, installment, startDate, memberNames });
+                const payload = { groupName, groupSize, myTurn, installment, startDate, memberNames };
+                const isEdit = !!__gameyaEditId;
+                if (isEdit) payload.gameyaId = __gameyaEditId;
+                const res = await asstApi(isEdit ? 'gameya_update' : 'gameya_create', payload);
                 if (res.error) { statusEl.textContent = res.error; return; }
                 renderGameyaList(res.gameyaList);
                 document.getElementById('gameya-form').classList.add('hidden');
-                ['gameya-name-input','gameya-size-input','gameya-turn-input','gameya-installment-input','gameya-start-input','gameya-members-input'].forEach((id) => { document.getElementById(id).value = ''; });
-                quickStatus('اتضافت الجمعية!', 'success');
+                resetGameyaForm();
+                quickStatus(isEdit ? 'اتعدلت الجمعية!' : 'اتضافت الجمعية!', 'success');
             } catch (e) { statusEl.textContent = 'حصل خطأ، حاول تاني.'; }
         });
 
@@ -10332,15 +10526,54 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             listEl.innerHTML = summary.items.map((it) => `
                 <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-3 flex items-center justify-between">
                     <div><p class="text-xs font-semibold text-slate-200">${debtEscape(it.personName)}</p><p class="text-[10px] text-slate-500">${debtEscape(it.occasionType)} · ${new Date(it.date).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' })}${it.linkedToDebt ? ' · مربوطة بدين' : ''}</p></div>
-                    <div class="flex items-center gap-2"><span class="text-xs font-bold text-emerald-400">${fmt(it.amount)}</span><button type="button" class="occasion-delete-btn text-slate-500 text-xs" data-occasion-id="${it.id}">🗑</button></div>
+                    <div class="flex items-center gap-2"><span class="text-xs font-bold text-emerald-400">${fmt(it.amount)}</span><button type="button" class="occasion-edit-btn text-slate-500 text-xs" data-occasion-id="${it.id}" aria-label="تعديل المناسبة">✎</button><button type="button" class="occasion-delete-btn text-slate-500 text-xs" data-occasion-id="${it.id}">🗑</button></div>
                 </div>`).join('');
+            applyDabbarListPreview(listEl, document.getElementById('occasions-list-toggle'), 2);
+            bindDabbarListToggle(listEl, document.getElementById('occasions-list-toggle'), 2);
             listEl.querySelectorAll('.occasion-delete-btn').forEach((btn) => btn.addEventListener('click', async () => {
                 if (!(await dabbarConfirm('متأكد عايز تمسح المناسبة دي؟'))) return;
                 try { const res = await asstApi('occasion_delete', { occasionId: Number(btn.dataset.occasionId) }); renderOccasionsList(res.occasionsSummary); } catch (e) {}
             }));
+            listEl.querySelectorAll('.occasion-edit-btn').forEach((btn) => btn.addEventListener('click', () => openOccasionFormForEdit(Number(btn.dataset.occasionId))));
         }
-        document.getElementById('occasion-add-btn')?.addEventListener('click', () => document.getElementById('occasion-form')?.classList.toggle('hidden'));
-        document.getElementById('occasion-cancel-btn')?.addEventListener('click', () => document.getElementById('occasion-form')?.classList.add('hidden'));
+        let __occasionEditId = null;
+        function openOccasionFormForEdit(occasionId) {
+            const summary = window.__dashboardData?.occasionsSummary || { items: [] };
+            const it = (summary.items || []).find((x) => x.id === occasionId);
+            if (!it) return;
+            __occasionEditId = occasionId;
+            document.getElementById('occasion-form-title').textContent = 'تعديل المناسبة';
+            document.getElementById('occasion-save-btn').textContent = 'حفظ التعديل';
+            document.getElementById('occasion-name-input').value = it.personName || '';
+            document.getElementById('occasion-amount-input').value = it.amount || '';
+            document.getElementById('occasion-as-debt-input').checked = !!it.linkedToDebt;
+            const knownTypes = ['فرح','خطوبة','سبوع','عزومة'];
+            const isKnown = knownTypes.includes(it.occasionType);
+            document.getElementById('occasion-type-input').value = it.occasionType || 'فرح';
+            document.querySelectorAll('#occasion-type-pills .occ-type-pill').forEach((p) => p.classList.toggle('active', p.dataset.occType === (isKnown ? it.occasionType : 'تاني')));
+            const customInput = document.getElementById('occasion-type-custom-input');
+            if (!isKnown && customInput) { customInput.classList.remove('hidden'); customInput.value = it.occasionType || ''; }
+            else resetOccasionTypeCustomField();
+            const form = document.getElementById('occasion-form');
+            form?.classList.remove('hidden');
+            form?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        function resetOccasionForm() {
+            __occasionEditId = null;
+            document.getElementById('occasion-form-title').textContent = 'نقطة جديدة';
+            document.getElementById('occasion-save-btn').textContent = 'حفظ';
+            document.getElementById('occasion-name-input').value = ''; document.getElementById('occasion-amount-input').value = ''; document.getElementById('occasion-as-debt-input').checked = false;
+            document.getElementById('occasion-type-input').value = 'فرح';
+            document.querySelectorAll('#occasion-type-pills .occ-type-pill').forEach((p) => p.classList.toggle('active', p.dataset.occType === 'فرح'));
+            resetOccasionTypeCustomField();
+        }
+        document.getElementById('occasion-add-btn')?.addEventListener('click', () => {
+            resetOccasionForm();
+            const form = document.getElementById('occasion-form');
+            form?.classList.remove('hidden');
+            form?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        });
+        document.getElementById('occasion-cancel-btn')?.addEventListener('click', () => { document.getElementById('occasion-form')?.classList.add('hidden'); resetOccasionForm(); });
         function resetOccasionTypeCustomField() {
             const customInput = document.getElementById('occasion-type-custom-input');
             if (customInput) { customInput.value = ''; customInput.classList.add('hidden'); }
@@ -10354,15 +10587,15 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             if (!personName || !amount) { statusEl.textContent = 'اكتب اسم الشخص والمبلغ.'; return; }
             statusEl.textContent = '';
             try {
-                const res = await asstApi('occasion_create', { personName, amount, occasionType, asDebt, direction: 'lent' });
+                const payload = { personName, amount, occasionType, asDebt, direction: 'lent' };
+                const isEdit = !!__occasionEditId;
+                if (isEdit) payload.occasionId = __occasionEditId;
+                const res = await asstApi(isEdit ? 'occasion_update' : 'occasion_create', payload);
                 if (res.error) { statusEl.textContent = res.error; return; }
                 renderOccasionsList(res.occasionsSummary);
                 document.getElementById('occasion-form').classList.add('hidden');
-                document.getElementById('occasion-name-input').value = ''; document.getElementById('occasion-amount-input').value = ''; document.getElementById('occasion-as-debt-input').checked = false;
-                document.getElementById('occasion-type-input').value = 'فرح';
-                document.querySelectorAll('#occasion-type-pills .occ-type-pill').forEach((p) => p.classList.toggle('active', p.dataset.occType === 'فرح'));
-                resetOccasionTypeCustomField();
-                quickStatus('اتسجلت المناسبة!', 'success');
+                resetOccasionForm();
+                quickStatus(isEdit ? 'اتعدلت المناسبة!' : 'اتسجلت المناسبة!', 'success');
                 if (asDebt) loadDashboard(); // عشان صافي الديون يتحدث فورًا لو المستخدم اعتبرها دين
             } catch (e) { statusEl.textContent = 'حصل خطأ، حاول تاني.'; }
         });
@@ -11797,7 +12030,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                 if (!response.ok) throw new Error(data.error || 'تعذر حفظ العملية.');
                 quickStatus(type === 'income' ? 'تم حفظ الدخل بنجاح.' : 'تم حفظ المصروف بنجاح.', 'success'); hideProcessMoney(() => celebrateSave('quick-manual-success-fx'));
                 document.getElementById('quick-manual-amount').value = ''; document.getElementById('quick-manual-description').value = ''; document.getElementById('quick-manual-custom-category').value = ''; document.getElementById('quick-manual-custom-category').classList.add('hidden');
-                armLedgerHighlight(1);
+                armLedgerHighlight(1, type === 'expense');
                 setTimeout(closeQuickManualPopup, 900);
                 await loadDashboard();
             } catch (error) {
@@ -11807,7 +12040,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                     quickStatus(`📦 مفيش نت دلوقتي — ${type === 'income' ? 'الدخل' : 'المصروف'} اتحفظ على جهازك وهيتسجل تلقائيًا لما النت يرجع.`, 'success');
                     hideProcessMoney(() => celebrateSave('quick-manual-success-fx'));
                     document.getElementById('quick-manual-amount').value = ''; document.getElementById('quick-manual-description').value = ''; document.getElementById('quick-manual-custom-category').value = ''; document.getElementById('quick-manual-custom-category').classList.add('hidden');
-                    armLedgerHighlight(1);
+                    armLedgerHighlight(1, type === 'expense');
                     setTimeout(closeQuickManualPopup, 900);
                 } else {
                     hideProcessMoney();
@@ -11838,7 +12071,8 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                 quickShow('quick-entry-draft', false);
                 hideProcessConfirm(() => celebrateSave(btn));
                 quickStatus(result.message || 'تم التسجيل بنجاح.', 'success');
-                armLedgerHighlight(Math.max(1, quickEntryDrafts.length));
+                const hasExpenseDraft = quickEntryDrafts.some((d) => d.type === 'expense');
+                armLedgerHighlight(Math.max(1, quickEntryDrafts.length), hasExpenseDraft);
                 await loadDashboard();
             } catch (e) {
                 hideProcessConfirm();
@@ -11876,7 +12110,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                 quickShow('quick-entry-draft', true);
                 celebrateSave(document.getElementById('quick-entry-invoice'));
                 quickStatus('تم الحفظ في كل الفواتير ✅', 'success');
-                armLedgerHighlight(1);
+                armLedgerHighlight(1, true);
                 await loadDashboard();
                 await loadInvoicesCount?.();
             } catch (e) {
@@ -11885,6 +12119,75 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             }
         }
         document.getElementById('quick-entry-invoice-input')?.addEventListener('change', (event) => { const file = event.target.files?.[0]; analyzeQuickInvoice(file); event.target.value = ''; });
+
+        // ============ فاتورة طويلة (كذا صورة) في كارت "سجّل مصروفك بسرعة" ============
+        // نفس فكرة كارت "امسح فاتورة" في تاب المساعد: كل صورة بتتبعت لوحدها لـ entry_invoice_draft
+        // (بيرجع الأصناف كمسودة من غير تسجيل)، وبنجمع كل الأصناف في quickEntryDrafts نفسها، ونعرضها
+        // في نفس مسودة "راجع قبل الحفظ" (quick-entry-draft) بس مع زرار حذف لكل صنف. زرار "تأكيد التسجيل"
+        // الموجود أصلًا بيبعت entry_confirm بكل الأصناف مع بعض من غير أي تعديل عليه.
+        function quickMultiRenderList() {
+            const list = document.getElementById('quick-entry-draft-list');
+            if (!list) return;
+            list.innerHTML = quickEntryDrafts.map((draft, idx) => {
+                const isDebt = draft.type === 'debt';
+                const emoji = isDebt ? (draft.direction === 'lent' ? '📤' : '📥') : (draft.type === 'income' ? '💰' : draft.type === 'asset' ? '📦' : getCategoryEmoji(draft.category));
+                const title = (draft.note && draft.note.trim()) || (isDebt ? draft.person : draft.category) || quickDraftLabel(draft.type);
+                return `
+                    <div class="flex items-center gap-2.5 rounded-xl bg-emerald-50 dark:bg-slate-800 px-3 py-2.5" data-idx="${idx}">
+                        <span class="shrink-0 w-8 h-8 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-sm">${emoji}</span>
+                        <div class="min-w-0 flex-1">
+                            <p class="truncate text-sm font-bold text-slate-800 dark:text-slate-100">${title}</p>
+                        </div>
+                        <span class="shrink-0 text-sm font-black text-emerald-600 dark:text-emerald-300">${fmt(draft.amount, draft.currency_code)}</span>
+                        <button type="button" class="quick-multi-remove shrink-0 w-6 h-6 rounded-full bg-slate-200 dark:bg-slate-700 text-rose-500 text-xs flex items-center justify-center" aria-label="شيل الصنف ده">✕</button>
+                    </div>`;
+            }).join('');
+            list.querySelectorAll('.quick-multi-remove').forEach((btn) => {
+                btn.addEventListener('click', (e) => {
+                    const idx = Number(e.currentTarget.closest('[data-idx]').dataset.idx);
+                    quickEntryDrafts.splice(idx, 1);
+                    if (!quickEntryDrafts.length) { quickShow('quick-entry-draft', false); quickStatus(''); return; }
+                    quickMultiRenderList();
+                    document.getElementById('quick-entry-draft-title').textContent = `راجع ${quickEntryDrafts.length} صنف قبل الحفظ`;
+                });
+            });
+        }
+
+        async function analyzeQuickLongInvoice(files) {
+            if (!requireQuickEntryAccess() || !files || !files.length) return;
+            quickShow('quick-entry-form', false);
+            quickShow('quick-entry-draft', true);
+            document.getElementById('quick-entry-draft-actions')?.classList.add('hidden');
+            quickEntryDrafts = [];
+            document.getElementById('quick-entry-draft-list').innerHTML = '';
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                document.getElementById('quick-entry-draft-title').textContent = `بنقرا صورة ${i + 1} من ${files.length}...`;
+                if (!file.type.startsWith('image/')) { quickStatus(`⚠️ الملف ${i + 1} مش صورة — اتجاهل.`, 'error'); continue; }
+                if (file.size > 8 * 1024 * 1024) { quickStatus(`⚠️ الصورة ${i + 1} أكبر من 8 ميجابايت — اتجاهلت.`, 'error'); continue; }
+                quickStatus(`📸 بنقرا صورة ${i + 1} من ${files.length}...`);
+                try {
+                    const base64 = await new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = reject; reader.readAsDataURL(file); });
+                    const result = await asstApi('entry_invoice_draft', { imageBase64: base64 });
+                    const drafts = Array.isArray(result.drafts) ? result.drafts : (result.drafts ? [result.drafts] : []);
+                    quickEntryDrafts.push(...drafts);
+                    quickMultiRenderList();
+                } catch (e) {
+                    quickStatus(`⚠️ تعذرت قراءة صورة ${i + 1}: ${e.message || 'حصل خطأ'}`, 'error');
+                }
+            }
+            document.getElementById('quick-entry-draft-title').textContent = quickEntryDrafts.length ? `راجع ${quickEntryDrafts.length} صنف قبل الحفظ` : 'مفيش أصناف اتقرت';
+            document.getElementById('quick-entry-draft-actions')?.classList.toggle('hidden', !quickEntryDrafts.length);
+            quickStatus(quickEntryDrafts.length
+                ? `تم تحليل ${files.length} صورة — شيل أي صنف اتكرر بين صورتين ثم أكد التسجيل.`
+                : 'معرفناش نقرا أي صنف من الصور دي. جرب صور أوضح.', quickEntryDrafts.length ? undefined : 'error');
+        }
+        document.getElementById('quick-entry-multi-btn')?.addEventListener('click', () => { if (!requireQuickEntryAccess()) return; document.getElementById('quick-entry-multi-input')?.click(); });
+        document.getElementById('quick-entry-multi-input')?.addEventListener('change', (event) => {
+            const files = Array.from(event.target.files || []);
+            event.target.value = '';
+            analyzeQuickLongInvoice(files);
+        });
         // ============ الحركات البنكية — Bottom Sheet جوه نفس الداشبورد (بدل صفحة منفصلة كانت بتعمل بطء وأخطاء 404) ============
         const BM_TYPE_LABELS = { withdrawal: 'سحب', deposit: 'إيداع', transfer: 'تحويل', expense: 'مصروف', income: 'دخل', purchase: 'شراء', asset: 'أصل', refund: 'استرداد' };
         const BM_BANK_BRANDS = {
@@ -12529,6 +12832,117 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             const file = asstReceiptGalleryInput.files[0];
             asstReceiptGalleryInput.value = '';
             handleReceiptFile(file, 'asst-receipt-gallery-btn', 'asst-receipt-gallery-icon', '🖼️');
+        });
+
+        // ============ فاتورة طويلة (كذا صورة) ============
+        // كل صورة بتتبعت لوحدها لنفس أكشن السيرفر "entry_invoice_draft" (نفس اللي بيستخدمه الكتابة الذكية
+        // لما ترفق صورة فاتورة) وهو أكشن بيرجع الأصناف كمسودة (drafts) من غير ما يسجلها في قاعدة البيانات.
+        // بنجمع الأصناف الراجعة من كل الصور في مصفوفة واحدة، والمستخدم يقدر يشيل أي صنف اتكرر بين صورتين،
+        // وبعدين بنبعت طلب "entry_confirm" واحد بس بكل الأصناف مع بعض — فتتسجل عملية واحدة متكاملة.
+        // مفيش أي تعديل في السيرفر: نفس الأكشنين entry_invoice_draft و entry_confirm مستخدمين بالفعل في الكتابة الذكية.
+        const asstMultiInput = document.getElementById('asst-receipt-multi-input');
+        document.getElementById('asst-receipt-multi-btn')?.addEventListener('click', () => asstMultiInput.click());
+        let asstMultiDrafts = [];
+
+        function asstMultiRenderList() {
+            const list = document.getElementById('asst-multi-draft-list');
+            if (!list) return;
+            list.innerHTML = asstMultiDrafts.map((draft, idx) => {
+                const emoji = draft.type === 'income' ? '💰' : draft.type === 'asset' ? '📦' : getCategoryEmoji(draft.category);
+                const title = (draft.note && draft.note.trim()) || draft.category || 'صنف';
+                return `
+                    <div class="flex items-center gap-2.5 rounded-xl bg-slate-950 border border-slate-800 px-3 py-2 mb-1.5" data-idx="${idx}">
+                        <span class="shrink-0 w-7 h-7 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-xs">${emoji}</span>
+                        <div class="min-w-0 flex-1">
+                            <p class="truncate text-xs font-bold text-slate-100">${title}</p>
+                            ${draft.category ? `<p class="text-[10px] text-slate-500">${draft.category}</p>` : ''}
+                        </div>
+                        <span class="shrink-0 text-xs font-black text-emerald-400">${fmt(draft.amount, draft.currency_code)}</span>
+                        <button type="button" class="asst-multi-remove shrink-0 w-6 h-6 rounded-full bg-slate-800 border border-slate-700 text-rose-400 text-xs flex items-center justify-center" aria-label="شيل الصنف ده">✕</button>
+                    </div>`;
+            }).join('');
+            list.querySelectorAll('.asst-multi-remove').forEach((btn) => {
+                btn.addEventListener('click', (e) => {
+                    const idx = Number(e.currentTarget.closest('[data-idx]').dataset.idx);
+                    asstMultiDrafts.splice(idx, 1);
+                    asstMultiRenderList();
+                });
+            });
+            const total = asstMultiDrafts.reduce((s, d) => s + (Number(d.amount) || 0), 0);
+            const totalEl = document.getElementById('asst-multi-draft-total');
+            if (totalEl) totalEl.textContent = fmt(total);
+            const confirmBtn = document.getElementById('asst-multi-confirm');
+            if (confirmBtn) confirmBtn.disabled = !asstMultiDrafts.length;
+            document.getElementById('asst-multi-draft-actions')?.classList.toggle('hidden', !asstMultiDrafts.length);
+        }
+
+        async function analyzeLongInvoice(files) {
+            if (!files || !files.length) return;
+            const box = document.getElementById('asst-multi-draft');
+            const titleEl = document.getElementById('asst-multi-draft-title');
+            const statusEl = document.getElementById('asst-multi-status');
+            asstMultiDrafts = [];
+            box.classList.remove('hidden');
+            document.getElementById('asst-multi-draft-actions')?.classList.add('hidden');
+            asstMultiRenderList();
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                if (!file.type.startsWith('image/')) { if (statusEl) statusEl.textContent = `⚠️ الملف ${i + 1} مش صورة — اتجاهل.`; continue; }
+                if (file.size > 8 * 1024 * 1024) { if (statusEl) statusEl.textContent = `⚠️ الصورة ${i + 1} أكبر من 8 ميجابايت — اتجاهلت.`; continue; }
+                if (titleEl) titleEl.textContent = `بنقرا صورة ${i + 1} من ${files.length}...`;
+                if (statusEl) statusEl.textContent = '📸 بنستخرج الأصناف...';
+                try {
+                    const base64 = await new Promise((resolve, reject) => { const reader = new FileReader(); reader.onload = () => resolve(reader.result); reader.onerror = reject; reader.readAsDataURL(file); });
+                    const result = await asstApi('entry_invoice_draft', { imageBase64: base64 });
+                    const drafts = Array.isArray(result.drafts) ? result.drafts : (result.drafts ? [result.drafts] : []);
+                    asstMultiDrafts.push(...drafts);
+                    asstMultiRenderList();
+                } catch (e) {
+                    if (statusEl) statusEl.textContent = `⚠️ تعذرت قراءة صورة ${i + 1}: ${e.message || 'حصل خطأ'}`;
+                }
+            }
+            if (titleEl) titleEl.textContent = asstMultiDrafts.length ? `راجع ${asstMultiDrafts.length} صنف قبل الحفظ` : 'مفيش أصناف اتقرت';
+            if (statusEl) statusEl.textContent = asstMultiDrafts.length
+                ? `تم تحليل ${files.length} صورة — شيل أي صنف اتكرر بين صورتين ثم أكد التسجيل.`
+                : 'معرفناش نقرا أي صنف من الصور دي. جرب صور أوضح.';
+        }
+
+        asstMultiInput?.addEventListener('change', () => {
+            const files = Array.from(asstMultiInput.files || []);
+            asstMultiInput.value = '';
+            analyzeLongInvoice(files);
+        });
+
+        document.getElementById('asst-multi-cancel')?.addEventListener('click', () => {
+            asstMultiDrafts = [];
+            document.getElementById('asst-multi-draft')?.classList.add('hidden');
+        });
+
+        let asstMultiConfirmInFlight = false;
+        document.getElementById('asst-multi-confirm')?.addEventListener('click', async () => {
+            if (asstMultiConfirmInFlight || !asstMultiDrafts.length) return;
+            asstMultiConfirmInFlight = true;
+            const btn = document.getElementById('asst-multi-confirm');
+            btn.disabled = true;
+            btn.style.pointerEvents = 'none';
+            const statusEl = document.getElementById('asst-multi-status');
+            if (statusEl) statusEl.textContent = '💾 بنسجل العملية...';
+            try {
+                const result = await asstApi('entry_confirm', { drafts: asstMultiDrafts });
+                document.getElementById('asst-multi-draft')?.classList.add('hidden');
+                asstMultiDrafts = [];
+                updateUsageBadge('asst-receipt-usage', result.usage);
+                if (statusEl) statusEl.textContent = '';
+                celebrateSave(document.getElementById('asst-receipt-multi-btn'));
+                await loadDashboard();
+                await loadInvoicesCount?.();
+            } catch (e) {
+                if (statusEl) statusEl.textContent = `⚠️ ${e.message || 'تعذر الحفظ.'}`;
+            } finally {
+                asstMultiConfirmInFlight = false;
+                btn.disabled = false;
+                btn.style.pointerEvents = '';
+            }
         });
 
         // ============ كل الفواتير: ليستة + تفاصيل ============

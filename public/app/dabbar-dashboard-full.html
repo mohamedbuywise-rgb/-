@@ -1741,6 +1741,46 @@
         .planning-forecast { margin-top:.7rem; display:flex; align-items:center; justify-content:space-between; gap:.6rem; background:rgba(127,127,127,.08); border-radius:.9rem; padding:.55rem .7rem; text-align:right; }
         .planning-forecast span { font-size:.64rem; opacity:.8; line-height:1.5; }
         .planning-forecast strong { font-size:.92rem; font-weight:900; white-space:nowrap; color:#d79a3c; }
+        /* ============ الوضع الليلي لكارت "الدخل والميزانية الشهر ده": نفس روح اللون الليموني بتاع باقي التطبيق ============ */
+        html[data-theme="dark"] .planning-hero-label { color:#bdf23f; opacity:1; }
+        html[data-theme="dark"] .planning-hero-value { color:#eaffb0; }
+        html[data-theme="dark"] .planning-progress-track { background:rgba(0,0,0,.45); }
+        html[data-theme="dark"] .planning-progress-fill { background:#bdf23f; }
+        html[data-theme="dark"] .planning-progress-pct { color:#9fe870; opacity:1; }
+        html[data-theme="dark"] .planning-breakdown-row .v.pos { color:#9fe870; }
+        html[data-theme="dark"] .planning-breakdown-row .v.neg { color:#ff9a8f; }
+        html[data-theme="dark"] .planning-forecast { background:rgba(189,242,63,.08); }
+        html[data-theme="dark"] .planning-forecast strong { color:#f4ce62; }
+        /* ============ أيقونة مناسبة تلقائيًا لكل التزام شهري (إيجار/كهرباء/مياه/نت... إلخ) ============ */
+        .commitment-icon { display:inline-flex; align-items:center; justify-content:center; flex:0 0 1.5rem; width:1.5rem; height:1.5rem; border-radius:50%; font-size:.82rem; margin-inline-end:.4rem; }
+        .commitment-icon[data-tone="rent"] { color:#0a5d49; background:#d4f1e5; }
+        .commitment-icon[data-tone="electric"] { color:#8a6d00; background:#fff1c2; }
+        .commitment-icon[data-tone="water"] { color:#0b5f82; background:#d7eef7; }
+        .commitment-icon[data-tone="internet"] { color:#3b3b8f; background:#e3e3fb; }
+        .commitment-icon[data-tone="phone"] { color:#0a5d49; background:#d4f1e5; }
+        .commitment-icon[data-tone="subscription"] { color:#7a2e8f; background:#f2def7; }
+        .commitment-icon[data-tone="insurance"] { color:#1d5f8a; background:#dceefb; }
+        .commitment-icon[data-tone="transport"] { color:#a64e00; background:#ffe2bd; }
+        .commitment-icon[data-tone="education"] { color:#463bb2; background:#e4e1ff; }
+        .commitment-icon[data-tone="health"] { color:#a32d2d; background:#fbdcdc; }
+        .commitment-icon[data-tone="fitness"] { color:#0a7a52; background:#d7f3e4; }
+        .commitment-icon[data-tone="debt"] { color:#704900; background:#ffe9a3; }
+        .commitment-icon[data-tone="maintenance"] { color:#5b5b5b; background:#e7e7e7; }
+        .commitment-icon[data-tone="default"] { color:#5b756d; background:rgba(148,163,184,.22); }
+        html[data-theme="dark"] .commitment-icon[data-tone="rent"] { color:#7de4bd; background:rgba(70,215,165,.16); }
+        html[data-theme="dark"] .commitment-icon[data-tone="electric"] { color:#f4ce62; background:rgba(244,198,72,.16); }
+        html[data-theme="dark"] .commitment-icon[data-tone="water"] { color:#7fc4e8; background:rgba(70,150,215,.16); }
+        html[data-theme="dark"] .commitment-icon[data-tone="internet"] { color:#b3adff; background:rgba(99,91,255,.16); }
+        html[data-theme="dark"] .commitment-icon[data-tone="phone"] { color:#7de4bd; background:rgba(70,215,165,.16); }
+        html[data-theme="dark"] .commitment-icon[data-tone="subscription"] { color:#e6a8f0; background:rgba(180,80,200,.16); }
+        html[data-theme="dark"] .commitment-icon[data-tone="insurance"] { color:#9aaaff; background:rgba(98,126,234,.16); }
+        html[data-theme="dark"] .commitment-icon[data-tone="transport"] { color:#ffad4a; background:rgba(247,147,26,.16); }
+        html[data-theme="dark"] .commitment-icon[data-tone="education"] { color:#b3adff; background:rgba(99,91,255,.16); }
+        html[data-theme="dark"] .commitment-icon[data-tone="health"] { color:#ff8e8e; background:rgba(255,90,75,.16); }
+        html[data-theme="dark"] .commitment-icon[data-tone="fitness"] { color:#7de4bd; background:rgba(70,215,165,.16); }
+        html[data-theme="dark"] .commitment-icon[data-tone="debt"] { color:#f4ce62; background:rgba(244,198,72,.16); }
+        html[data-theme="dark"] .commitment-icon[data-tone="maintenance"] { color:#c7c7c7; background:rgba(200,200,200,.14); }
+        html[data-theme="dark"] .commitment-icon[data-tone="default"] { color:#9bb8ad; background:rgba(148,163,184,.14); }
         html[data-theme="light"] #quick-entry-card { border-color:#a8dec4 !important; box-shadow:0 12px 28px rgba(22,128,82,.12) !important; }
         html[data-theme="light"] #quick-entry-card .quick-entry-eyebrow { color:#087b50 !important; font-weight:900; }
         html[data-theme="light"] #quick-entry-card h3 { color:#092d20 !important; font-size:1.05rem !important; }
@@ -3481,7 +3521,11 @@ html #quick-entry-card #quick-entry-form #quick-entry-input, html[data-theme] #q
 }
 
 /* ---------- المحفظة الاستثمارية: ألوان هادية ---------- */
-html #portfolio-collapsible, html[data-theme="dark"] #portfolio-collapsible, html[data-theme="light"] #portfolio-collapsible {
+/* المتغيّرات لازم تتحط على #portfolio-sheet كمان، لأن .portfolio-body بتتنقل فعليًا (appendChild) لجوه الـ bottom sheet
+   لما المستخدم يفتح المحفظة، وبتخرج برة نطاق #portfolio-collapsible، فلو المتغيّرات معرّفة عليه بس هتتفقد هناك
+   ويرجع كل حاجة تتلون افتراضي (أسود/أبيض بلا تباين) — وده بالظبط سبب الفرق عن المعاينة. */
+html #portfolio-collapsible, html[data-theme="dark"] #portfolio-collapsible, html[data-theme="light"] #portfolio-collapsible,
+html #portfolio-sheet, html[data-theme="dark"] #portfolio-sheet, html[data-theme="light"] #portfolio-sheet {
     --portfolio-accent: var(--db-accent);
     --portfolio-accent-strong: var(--db-ink);
     --portfolio-surface: var(--cs-panel);
@@ -3489,6 +3533,8 @@ html #portfolio-collapsible, html[data-theme="dark"] #portfolio-collapsible, htm
     --portfolio-line: var(--cs-line);
     --portfolio-ink: var(--db-ink);
     --portfolio-muted: var(--db-muted);
+}
+html #portfolio-collapsible, html[data-theme="dark"] #portfolio-collapsible, html[data-theme="light"] #portfolio-collapsible {
     background: var(--cs-panel) !important;
     border: 1px solid var(--cs-line);
     border-radius: 1.25rem;
@@ -8023,7 +8069,10 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             if (categoryBudgetList) categoryBudgetList.innerHTML = selectedCategories.length ? selectedCategories.map((name) => `<label class="flex items-center gap-2 rounded-xl bg-slate-900/60 px-2.5 py-1.5 text-[10px] text-slate-400"><span class="flex-1">${getCategoryEmoji(name)} ${name}</span><input data-category-budget="${name}" type="number" min="0" placeholder="حد الفئة" value="${settings.categoryBudgets?.[name] || ''}" class="w-20 rounded-lg border border-slate-700 bg-slate-950 px-2 py-1 text-left text-[10px] text-slate-100 outline-none"><button type="button" data-category-budget-remove="${name}" class="text-slate-600 hover:text-rose-400" aria-label="إزالة حد الفئة">×</button></label>`).join('') : '<p class="text-[10px] text-slate-500">مفيش فئات محددة؛ اختار فئة من القائمة لو عايز تتابعها.</p>';
             categoryBudgetList?.querySelectorAll('[data-category-budget-remove]').forEach((btn) => btn.addEventListener('click', () => removeCategoryBudget(btn.dataset.categoryBudgetRemove)));
             const recurringList = document.getElementById('recurring-list');
-            if (recurringList) recurringList.innerHTML = (settings.recurringExpenses || []).length ? settings.recurringExpenses.map((item, i) => `<div class="flex items-center justify-between rounded-xl bg-slate-900/70 px-2.5 py-2 text-[10px]"><span>${item.name}</span><span class="text-emerald-300">${fmt(item.amount)} <button type="button" data-recurring-remove="${i}" aria-label="حذف الالتزام" class="mr-1 text-slate-600 hover:text-rose-400 transition">✕</button></span></div>`).join('') : '<p class="text-[10px] text-slate-500">أضف الإيجار أو الاشتراكات عشان تشوف التزاماتك الشهرية قدامك.</p>';
+            if (recurringList) recurringList.innerHTML = (settings.recurringExpenses || []).length ? settings.recurringExpenses.map((item, i) => {
+                const cIcon = getCommitmentIcon(item.name);
+                return `<div class="flex items-center justify-between rounded-xl bg-slate-900/70 px-2.5 py-2 text-[10px]"><span class="flex items-center"><span class="commitment-icon" data-tone="${cIcon.tone}"><iconify-icon icon="${cIcon.icon}"></iconify-icon></span>${item.name}</span><span class="text-emerald-300">${fmt(item.amount)} <button type="button" data-recurring-remove="${i}" aria-label="حذف الالتزام" class="mr-1 text-slate-600 hover:text-rose-400 transition">✕</button></span></div>`;
+            }).join('') : '<p class="text-[10px] text-slate-500">أضف الإيجار أو الاشتراكات عشان تشوف التزاماتك الشهرية قدامك.</p>';
             recurringList?.querySelectorAll('[data-recurring-remove]').forEach((btn) => btn.addEventListener('click', async () => {
                 const item = settings.recurringExpenses[Number(btn.dataset.recurringRemove)];
                 if (!item || !(await dabbarConfirm(`تحذف الالتزام «${item.name}» من خطة الشهر؟`))) return;
@@ -8232,6 +8281,27 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                 quickStatus('حصلت مشكلة في حفظ الخطة على السيرفر. اتحفظت مؤقتًا على جهازك بس وهنحاول تاني.', 'error');
             }
         }
+        // ============ مكتبة أيقونات الالتزامات الشهرية — بتديله أيقونة مناسبة أوتوماتيك حسب اسم الالتزام ============
+        function getCommitmentIcon(name) {
+            const s = String(name || '').trim().toLowerCase();
+            if (/إيجار|ايجار|شقة|سكن|عقار/.test(s)) return { tone: 'rent', icon: 'ph:house-duotone' };
+            if (/كهرباء|كهربا/.test(s)) return { tone: 'electric', icon: 'ph:lightning-duotone' };
+            if (/مياه معدنية|مياه المعدنية|مياة معدنية/.test(s)) return { tone: 'water', icon: 'ph:bottle-duotone' };
+            if (/مياه|مياة|صرف صحي/.test(s)) return { tone: 'water', icon: 'ph:drop-duotone' };
+            if (/غاز/.test(s)) return { tone: 'electric', icon: 'ph:flame-duotone' };
+            if (/نت|انترنت|إنترنت|واي فاي|wifi|internet/.test(s)) return { tone: 'internet', icon: 'ph:wifi-high-duotone' };
+            if (/موبايل|تليفون|فودافون|اورانج|أورنج|اتصالات|we\b|etisalat|vodafone|orange/.test(s)) return { tone: 'phone', icon: 'ph:phone-duotone' };
+            if (/اشتراك|نتفلكس|netflix|شاهد|spotify|سبوتيفاي|osn|يوتيوب|youtube/.test(s)) return { tone: 'subscription', icon: 'ph:repeat-duotone' };
+            if (/تأمين|تامين|insurance/.test(s)) return { tone: 'insurance', icon: 'ph:shield-check-duotone' };
+            if (/قسط|تقسيط|سيارة|عربية|بنزين|مواصلات/.test(s)) return { tone: 'transport', icon: 'ph:car-duotone' };
+            if (/مدرسة|مصاريف مدرسة|تعليم|جامعة|حضانة/.test(s)) return { tone: 'education', icon: 'ph:graduation-cap-duotone' };
+            if (/صحة|دوا|دواء|علاج|تحاليل|دكتور/.test(s)) return { tone: 'health', icon: 'ph:heartbeat-duotone' };
+            if (/جيم|نادي|رياضة|gym/.test(s)) return { tone: 'fitness', icon: 'ph:barbell-duotone' };
+            if (/دين|قرض|سلف|تقسيط بنك/.test(s)) return { tone: 'debt', icon: 'ph:handshake-duotone' };
+            if (/صيانة|إصلاح|اصلاح/.test(s)) return { tone: 'maintenance', icon: 'ph:wrench-duotone' };
+            return { tone: 'default', icon: 'ph:push-pin-duotone' };
+        }
+
         function addRecurringExpense() { const name = document.getElementById('recurring-name')?.value.trim(); const amount = Number(document.getElementById('recurring-amount')?.value || 0); if (!name || amount <= 0) return quickStatus('اكتب اسم ومبلغ المصروف المتكرر.', 'error'); const settings = planningSettings(); settings.recurringExpenses = [...(settings.recurringExpenses || []), { id: crypto.randomUUID(), name, amount, day: 1, category: 'أخرى', active: true }]; document.getElementById('recurring-name').value = ''; document.getElementById('recurring-amount').value = ''; savePlanningSettings(); }
         async function deleteExpense(id, isEvent = false) { if (!id) return; if (!(await dabbarConfirm('بعد الحذف هتتخصم من إجمالي اليوم والشهر، ومش هتقدر ترجعها.', { title: 'تحذف العملية دي؟' }))) return; try { const typeQuery = isEvent ? '&type=event' : ''; const res = await fetch(`/api/financial-actions?id=${encodeURIComponent(id)}${typeQuery}`, { method: 'DELETE', headers: { Authorization: `Bearer ${accessToken}` } }); const body = await res.json().catch(() => ({})); if (!res.ok) throw new Error(body.error || 'معرفناش نحذف العملية دلوقتي.'); await loadDashboard(); quickStatus('اتحذفت العملية واتخصمت من إجمالياتك.', 'success'); } catch (error) { quickStatus(error.message || 'معرفناش نحذف العملية دلوقتي.', 'error'); } }
         const BALANCE_BUCKETS = [

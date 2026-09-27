@@ -315,6 +315,13 @@
         .dabbar-metric-cta-btn { border-radius:.85rem; padding:.4rem .85rem; font-size:.68rem; font-weight:900; background: var(--pm-gold, #10b981); color: var(--pm-surface, #06271a); }
         .dabbar-metric-cta-btn--ghost { background: color-mix(in srgb, var(--pm-clay, #d36a56) 16%, transparent); color: var(--pm-clay, #d36a56); }
 
+        /* كارت "صرف النهاردة" — مدموج مع إحصائياته (عدد العمليات + المتوسط) جوه نفس الكارت بدل ما يكونوا منفصلين */
+        .dabbar-spend-stats { display:grid; grid-template-columns:1fr 1fr; gap:.5rem; }
+        .dabbar-spend-stat { background: var(--pm-surface-soft, rgba(0,0,0,.2)); border:1px solid var(--pm-hairline); border-radius:.9rem; padding:.5rem .6rem; display:flex; flex-direction:column; gap:.15rem; }
+        .dabbar-spend-stat-label { font-size:.6rem; font-weight:700; color: var(--pm-muted, #aaa39b); }
+        .dabbar-spend-stat-value { font-size:.86rem; font-weight:800; color: var(--pm-ink-dim, #d7d0c3); }
+        .dabbar-spend-stat-value--accent { color: var(--pm-gold-bright, #10b981); }
+
         /* كارت فرص التوفير */
         .dabbar-savings-card { border: 1px solid var(--pm-hairline); background: linear-gradient(160deg, color-mix(in srgb, var(--pm-gold, #10b981) 10%, var(--pm-surface-hi, #0b0e18)) 0%, var(--pm-surface-hi, #0b0e18) 65%); }
         .dabbar-savings-row { display:flex; align-items:center; justify-content:space-between; font-size:.66rem; background: var(--pm-surface-soft, rgba(0,0,0,.18)); border-radius:.7rem; padding:.4rem .6rem; }
@@ -1795,6 +1802,25 @@
         .dabbar-daily-section-head { display:flex; align-items:center; justify-content:space-between; gap:.5rem; padding:.15rem 0; }
         .dabbar-daily-section-title { font-size:.72rem; font-weight:800; color:#94a3b8; display:flex; align-items:center; gap:.35rem; }
         .dabbar-daily-section-total { font-size:.72rem; font-weight:900; }
+
+        /* ============ "دخلك النهاردة" و"مصاريفك النهاردة" — شريطين بنفس القياس والارتفاع بدل بلوكات مختلفة الحجم تحت بعض ============ */
+        #daily-income-section, #daily-expense-section {
+            border-radius: .9rem; padding: .55rem .65rem;
+        }
+        #daily-income-section {
+            background: color-mix(in srgb, var(--pm-gold-bright, #10b981) 10%, transparent);
+            border: 1px solid color-mix(in srgb, var(--pm-gold-bright, #10b981) 24%, transparent);
+        }
+        #daily-expense-section {
+            background: color-mix(in srgb, var(--pm-clay, #d36a56) 10%, transparent);
+            border: 1px solid color-mix(in srgb, var(--pm-clay, #d36a56) 24%, transparent);
+        }
+        #daily-income-section .dabbar-daily-section-head { padding: 0 0 .4rem; margin-bottom: .1rem; border-bottom: 1px solid color-mix(in srgb, var(--pm-gold-bright, #10b981) 20%, transparent); }
+        #daily-expense-section .dabbar-daily-section-head { padding: 0 0 .4rem; margin-bottom: .1rem; border-bottom: 1px solid color-mix(in srgb, var(--pm-clay, #d36a56) 20%, transparent); }
+        #daily-income-section .dabbar-daily-section-title { color: var(--pm-gold-bright, #10b981); font-size: .74rem; }
+        #daily-expense-section .dabbar-daily-section-title { color: var(--pm-clay, #d36a56); font-size: .74rem; }
+        #daily-income-section .dabbar-hdr-ic { width:1.85rem; height:1.85rem; border-radius:.65rem; background: color-mix(in srgb, var(--pm-gold-bright, #10b981) 26%, transparent); color: var(--pm-gold-bright, #10b981); }
+        #daily-expense-section .dabbar-hdr-ic { width:1.85rem; height:1.85rem; border-radius:.65rem; background: color-mix(in srgb, var(--pm-clay, #d36a56) 22%, transparent); color: var(--pm-clay, #d36a56); }
         /* ============ شيت الإضافة (bottom sheet) لحد الفئة والالتزام — خطوة واحدة: اسم + مبلغ ============ */
         .dabbar-sheet-backdrop { position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; align-items:flex-end; z-index:40; }
         .dabbar-sheet-backdrop.open { display:flex; }
@@ -2781,49 +2807,6 @@
         html[data-theme="dark"] .dabbar-flow-row .flow-amount.is-in { color:#34d399; }
         html[data-theme="dark"] .dabbar-flow-row .flow-amount.is-out { color:#fb7185; }
         html[data-theme="light"] .bg-slate-900\/80 { background-color: rgba(255,255,255,0.92) !important; }
-
-        /* ============ كارت "صرف النهاردة" الأخضر — نفس التصميم في الغامق والفاتح ============ */
-        .dabbar-hero-spend {
-            position: relative; overflow: hidden; border-radius: 1.5rem; padding: 1.15rem 1.1rem;
-            color: #fff; box-shadow: 0 16px 34px rgba(6,60,38,.28);
-            background: linear-gradient(150deg, #0A6E45, #12A06A);
-        }
-        html[data-theme="dark"] .dabbar-hero-spend {
-            background: linear-gradient(150deg, #0B5C3B, #189A66);
-            box-shadow: 0 16px 34px rgba(0,0,0,.4), 0 0 0 1px rgba(255,255,255,.05) inset;
-        }
-        .dabbar-hero-spend::after {
-            content: ""; position: absolute; inset: auto -30px -50px auto; width: 160px; height: 160px;
-            background: rgba(255,255,255,.08); border-radius: 50%; pointer-events: none;
-        }
-        .dabbar-hero-spend .hero-label { font-size: .72rem; color: rgba(255,255,255,.85); font-weight: 700; }
-        .dabbar-hero-spend .hero-date { font-size: .62rem; color: rgba(255,255,255,.7); }
-        .dabbar-hero-spend .hero-amount { font-size: 1.85rem; font-weight: 900; margin-top: .2rem; letter-spacing: -.02em; }
-        .dabbar-hero-spend .hero-note { font-size: .68rem; color: rgba(255,255,255,.85); margin-top: .35rem; }
-        .dabbar-hero-spend .hero-stats { display: flex; gap: .6rem; margin-top: .9rem; position: relative; z-index: 1; }
-        .dabbar-hero-spend .hero-stat { flex: 1; background: rgba(255,255,255,.15); border-radius: .9rem; padding: .55rem .7rem; }
-        .dabbar-hero-spend .hero-stat .n { font-size: 1.02rem; font-weight: 800; color:#fff; }
-        .dabbar-hero-spend .hero-stat .l { font-size: .6rem; color: rgba(255,255,255,.85); margin-top: .1rem; }
-
-        /* ============ كارت "حركة السيولة" — نسخة متجاوبة مع الثيم بدل الغامق الثابت ============ */
-        .dabbar-flow-card { background: var(--pm-surface-hi); border: 1px solid var(--pm-hairline); border-radius: 1.5rem; padding: 1rem; }
-        .dabbar-flow-card .flow-card-title { color: var(--pm-ink); }
-        .dabbar-flow-card .flow-card-sub { color: var(--pm-muted); }
-        .dabbar-flow-card .flow-badge { color: var(--pm-gold-bright); }
-        .dabbar-flow-card .flow-box-in { background: color-mix(in srgb, #10b981 14%, transparent); border: 1px solid color-mix(in srgb, #10b981 30%, transparent); }
-        .dabbar-flow-card .flow-box-out { background: color-mix(in srgb, #f43f5e 12%, transparent); border: 1px solid color-mix(in srgb, #f43f5e 28%, transparent); }
-        .dabbar-flow-card .flow-box-label-in { color: #0e9f6e; }
-        .dabbar-flow-card .flow-box-label-out { color: #e11d48; }
-        html[data-theme="dark"] .dabbar-flow-card .flow-box-label-in,
-        html[data-theme="dark"] .dabbar-flow-card #flow-in { color: #34d399; }
-        html[data-theme="dark"] .dabbar-flow-card .flow-box-label-out,
-        html[data-theme="dark"] .dabbar-flow-card #flow-out { color: #fb7185; }
-        html[data-theme="light"] .dabbar-flow-card #flow-in { color: #047857; }
-        html[data-theme="light"] .dabbar-flow-card #flow-out { color: #be123c; }
-        .dabbar-flow-card .flow-net-row { background: var(--pm-surface-soft); border: 1px solid var(--pm-hairline); border-radius: .9rem; padding: .6rem .8rem; }
-        .dabbar-flow-card .flow-net-row .l { color: var(--pm-muted); }
-        .dabbar-flow-card .flow-net-row .v { color: var(--pm-ink); }
-        .dabbar-flow-card .flow-formula { color: var(--pm-muted); }
 </style>
     <style>
         #bank-movements-sheet.flex { display: flex; }
@@ -4527,21 +4510,24 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             </div>
 
 
-            <div id="daily-spend-card" class="dabbar-hero-spend">
-                <div class="flex justify-between items-center relative z-[1]">
-                    <span class="hero-label">صرف النهاردة</span>
-                    <span class="hero-date" id="daily-date"></span>
-                </div>
-                <h3 class="hero-amount relative z-[1]" id="daily-total">—</h3>
-                <p class="hero-note relative z-[1]" id="daily-note">سجّل أول عملية النهاردة وهتلاقيها هنا.</p>
-                <div class="hero-stats">
-                    <div class="hero-stat">
-                        <span class="n block" id="daily-count">—</span>
-                        <span class="l block">عدد العمليات</span>
+            <div id="daily-spend-card" class="dabbar-metric-card relative overflow-hidden rounded-3xl p-4 shadow-lg space-y-3">
+                <div class="dabbar-metric-glow" aria-hidden="true"></div>
+                <div class="relative">
+                    <div class="flex justify-between items-center">
+                        <span class="text-[11px] font-semibold dabbar-metric-label">صرف النهاردة</span>
+                        <span class="text-[10px] dabbar-metric-label" id="daily-date"></span>
                     </div>
-                    <div class="hero-stat">
-                        <span class="n block" id="daily-avg">—</span>
-                        <span class="l block">متوسط يومك (الشهر ده)</span>
+                    <h3 class="text-xl font-black dabbar-metric-value mt-0.5" id="daily-total">—</h3>
+                    <p class="hidden text-[10px] dabbar-metric-label mt-0.5" id="daily-note">سجّل أول عملية النهاردة وهتلاقيها هنا.</p>
+                </div>
+                <div class="dabbar-spend-stats relative">
+                    <div class="dabbar-spend-stat">
+                        <span class="dabbar-spend-stat-label">عدد العمليات</span>
+                        <span class="dabbar-spend-stat-value" id="daily-count">—</span>
+                    </div>
+                    <div class="dabbar-spend-stat">
+                        <span class="dabbar-spend-stat-label">متوسط يومك (الشهر ده)</span>
+                        <span class="dabbar-spend-stat-value dabbar-spend-stat-value--accent" id="daily-avg">—</span>
                     </div>
                 </div>
             </div>
@@ -4564,44 +4550,44 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             </div>
 
             <!-- حركة السيولة اليومية (واصل من / واصل لـ) -->
-            <div id="daily-flow-card" role="button" tabindex="0" aria-label="عرض تفاصيل حركة السيولة" class="dabbar-flow-card cursor-pointer space-y-3 transition">
+            <div id="daily-flow-card" role="button" tabindex="0" aria-label="عرض تفاصيل حركة السيولة" class="cursor-pointer bg-gradient-to-br from-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-4 space-y-3 shadow-lg transition hover:border-emerald-500/50">
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-2">
                         <div class="w-7 h-7 rounded-lg bg-emerald-500/15 flex items-center justify-center text-emerald-400 text-sm">⇄</div>
-                        <span class="text-xs font-bold flow-card-title">حركة السيولة (النهاردة)</span>
+                        <span class="text-xs font-bold text-slate-200">حركة السيولة (النهاردة)</span>
                     </div>
                     <div class="flex items-center gap-2">
-                        <span class="text-[9px] font-normal flow-card-sub">تتصفّر الساعة 12م</span>
-                        <span class="flex items-center gap-1 text-[9px] font-bold flow-badge" aria-hidden="true"><span>التفاصيل</span><span style="transform:scaleX(-1);display:inline-block;">›</span></span>
+                        <span class="text-[9px] text-slate-500 font-normal">تتصفّر الساعة 12م</span>
+                        <span class="flex items-center gap-1 text-[9px] font-bold text-emerald-400/90" aria-hidden="true"><span>التفاصيل</span><span style="transform:scaleX(-1);display:inline-block;">›</span></span>
                     </div>
                 </div>
 
                 <div class="grid grid-cols-2 gap-2.5">
-                    <div class="flow-box-in rounded-2xl p-3">
+                    <div class="bg-gradient-to-b from-emerald-500/10 to-emerald-500/0 border border-emerald-500/30 rounded-2xl p-3">
                         <div class="flex items-center gap-1.5 mb-2">
-                            <span class="flow-box-label-in text-xs">↙</span>
-                            <span class="flow-box-label-in text-[10px] opacity-80">داخل (واصل من)</span>
+                            <span class="text-emerald-400 text-xs">↙</span>
+                            <span class="text-[10px] text-emerald-300/80">داخل (واصل من)</span>
                         </div>
-                        <span class="text-xl font-bold flow-box-label-in" id="flow-in">0 ج.م</span>
+                        <span class="text-xl font-bold text-emerald-400" id="flow-in">0 ج.م</span>
                     </div>
-                    <div class="flow-box-out rounded-2xl p-3">
+                    <div class="bg-gradient-to-b from-rose-500/10 to-rose-500/0 border border-rose-500/30 rounded-2xl p-3">
                         <div class="flex items-center gap-1.5 mb-2">
-                            <span class="flow-box-label-out text-xs">↗</span>
-                            <span class="flow-box-label-out text-[10px] opacity-80">خارج (واصل لـ)</span>
+                            <span class="text-rose-400 text-xs">↗</span>
+                            <span class="text-[10px] text-rose-300/80">خارج (واصل لـ)</span>
                         </div>
-                        <span class="text-xl font-bold flow-box-label-out" id="flow-out">0 ج.م</span>
+                        <span class="text-xl font-bold text-rose-400" id="flow-out">0 ج.م</span>
                     </div>
                 </div>
 
-                <div class="flow-net-row flex items-center justify-between">
+                <div class="bg-slate-800/30 border border-slate-700/60 rounded-2xl px-3.5 py-2.5 flex items-center justify-between">
                     <div class="flex items-center gap-2">
-                        <span class="text-sm">⚖️</span>
-                        <span class="text-[11px] l">صافي الحركة</span>
+                        <span class="text-slate-400 text-sm">⚖️</span>
+                        <span class="text-[11px] text-slate-400">صافي الحركة</span>
                     </div>
-                    <span class="text-base font-bold v" id="flow-net">0 ج.م</span>
+                    <span class="text-base font-bold text-slate-200" id="flow-net">0 ج.م</span>
                 </div>
 
-                <p class="text-[9px] flow-formula text-center">الصافي = الداخل − الخارج خلال النهاردة بس</p>
+                <p class="text-[9px] text-slate-500 text-center">الصافي = الداخل − الخارج خلال النهاردة بس</p>
             </div>
             <div id="daily-flow-sheet" class="hidden fixed inset-0 z-[80] items-center justify-center p-3 dabbar-premium-modal-backdrop" role="dialog" aria-modal="true" aria-labelledby="daily-flow-sheet-title">
                 <div id="daily-flow-sheet-panel" class="w-full max-w-lg rounded-[28px] border border-slate-700 bg-slate-950 p-4 shadow-2xl">
@@ -14316,12 +14302,11 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             function setupDailyDetails() {
                 const daily = document.getElementById('tab-daily');
                 const explainer = document.getElementById('daily-explainer-card');
-                const stats = document.getElementById('daily-stats-grid');
                 const flow = document.getElementById('daily-flow-card');
                 const items = document.getElementById('daily-items-card');
                 const pdf = document.getElementById('download-daily-pdf');
                 const pdfNote = document.getElementById('daily-pdf-note');
-                if (!daily || !explainer || !stats || !flow || !items || !pdf || !pdfNote || daily.dataset.detailsReady) return;
+                if (!daily || !explainer || !flow || !items || !pdf || !pdfNote || daily.dataset.detailsReady) return;
 
                 const details = document.createElement('details');
                 details.id = 'daily-details';
@@ -14330,7 +14315,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                     <div class="daily-details-body"></div>`;
                 explainer.before(details);
                 const body = details.querySelector('.daily-details-body');
-                body.append(explainer, stats, flow, items, pdf, pdfNote);
+                body.append(explainer, flow, items, pdf, pdfNote);
                 daily.dataset.detailsReady = 'true';
             }
             function setupDailyFlowSheet() {

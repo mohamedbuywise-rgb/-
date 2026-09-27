@@ -357,22 +357,39 @@
         .dabbar-goal-form { border: 1px solid var(--pm-hairline); border-radius: 1.1rem; padding: .85rem; margin-top: .6rem; background: var(--pm-surface-soft, rgba(0,0,0,.18)); }
         .dabbar-goal-form-close { display: block; width: 100%; text-align: center; background: none; border: none; color: var(--pm-muted, #7b8490); font-family: inherit; font-size: .62rem; font-weight: 700; padding: .5rem 0 0; cursor: pointer; }
 
-        /* كارت "صرف النهاردة" — أخضر كامل بألوان البراند (تيل نهاري / لايم ليلي) بدل التوهج الخفيف في الزاوية */
-        #daily-spend-card.dabbar-metric-card {
+        /* كارت "صرف النهاردة" — ألوان صريحة ثابتة لكل وضع (بدل السلاسل المتغيرة اللي كانت بتخلي الكارت يختفي) */
+        html:not([data-theme="light"]) #daily-spend-card.dabbar-metric-card {
             border: none;
-            background: linear-gradient(155deg, var(--pm-gold-bright, #10b981) 0%, var(--pm-gold, #0e8f68) 100%);
-            box-shadow: 0 16px 34px color-mix(in srgb, var(--pm-gold, #10b981) 40%, transparent);
+            background: linear-gradient(155deg, #d0ff52 0%, #bdf23f 100%);
+            box-shadow: 0 16px 34px rgba(189,242,63,.35);
         }
-        #daily-spend-card .dabbar-metric-glow { background: radial-gradient(circle, color-mix(in srgb, var(--pm-gold-ink-on, #fff) 22%, transparent) 0%, transparent 72%); }
-        #daily-spend-card .dabbar-metric-label { color: var(--pm-gold-ink-on, #fff); opacity: .82; }
-        #daily-spend-card .dabbar-metric-value { color: var(--pm-gold-ink-on, #fff); }
-        #daily-spend-card .dabbar-spend-stat {
-            background: color-mix(in srgb, var(--pm-gold-ink-on, #fff) 14%, transparent);
-            border-color: color-mix(in srgb, var(--pm-gold-ink-on, #fff) 20%, transparent);
+        html[data-theme="light"] #daily-spend-card.dabbar-metric-card {
+            border: none;
+            background: linear-gradient(155deg, #0e8f68 0%, #0a6b4e 100%);
+            box-shadow: 0 16px 34px rgba(14,143,104,.35);
         }
-        #daily-spend-card .dabbar-spend-stat-label { color: var(--pm-gold-ink-on, #fff); opacity: .78; }
-        #daily-spend-card .dabbar-spend-stat-value,
-        #daily-spend-card .dabbar-spend-stat-value--accent { color: var(--pm-gold-ink-on, #fff); }
+        html:not([data-theme="light"]) #daily-spend-card .dabbar-metric-glow { background: radial-gradient(circle, rgba(12,31,10,.18) 0%, transparent 72%); }
+        html[data-theme="light"] #daily-spend-card .dabbar-metric-glow { background: radial-gradient(circle, rgba(255,255,255,.22) 0%, transparent 72%); }
+        html:not([data-theme="light"]) #daily-spend-card .dabbar-metric-label,
+        html:not([data-theme="light"]) #daily-spend-card .dabbar-metric-value,
+        html:not([data-theme="light"]) #daily-spend-card .dabbar-spend-stat-label,
+        html:not([data-theme="light"]) #daily-spend-card .dabbar-spend-stat-value,
+        html:not([data-theme="light"]) #daily-spend-card .dabbar-spend-stat-value--accent { color: #0c1f0a !important; }
+        html[data-theme="light"] #daily-spend-card .dabbar-metric-label,
+        html[data-theme="light"] #daily-spend-card .dabbar-metric-value,
+        html[data-theme="light"] #daily-spend-card .dabbar-spend-stat-label,
+        html[data-theme="light"] #daily-spend-card .dabbar-spend-stat-value,
+        html[data-theme="light"] #daily-spend-card .dabbar-spend-stat-value--accent { color: #ffffff !important; }
+        #daily-spend-card .dabbar-metric-label { opacity: .85; }
+        #daily-spend-card .dabbar-spend-stat-label { opacity: .8; }
+        html:not([data-theme="light"]) #daily-spend-card .dabbar-spend-stat { background: rgba(12,31,10,.12); border-color: rgba(12,31,10,.18); }
+        html[data-theme="light"] #daily-spend-card .dabbar-spend-stat { background: rgba(255,255,255,.16); border-color: rgba(255,255,255,.24); }
+
+        /* كارت "إجمالي الأقساط الشهرية" — لون مميز (كهرماني) عن باقي كروت الأقساط */
+        #installments-summary-card {
+            background: linear-gradient(155deg, #fcd34d 0%, #d97706 100%);
+            box-shadow: 0 12px 26px rgba(217,119,6,.32);
+        }
 
         /* كارت فرص التوفير */
         .dabbar-savings-card { border: 1px solid var(--pm-hairline); background: linear-gradient(160deg, color-mix(in srgb, var(--pm-gold, #10b981) 10%, var(--pm-surface-hi, #0b0e18)) 0%, var(--pm-surface-hi, #0b0e18) 65%); }
@@ -2284,6 +2301,11 @@
         .quick-entry-manual-arrow { color:var(--pm-gold-bright); font-size:.8rem; line-height:1; transition:transform .18s ease; }
         .quick-entry-manual-link:hover .quick-entry-manual-arrow { transform:translateY(2px); }
         .quick-entry-manual-sub { color:var(--pm-muted); font-size:.48rem; font-weight:700; }
+        /* صف "يدوي من غير AI" و"فاتورة طويلة" — أصغر من التابات اللي فوق، جنب بعض بدل بلوكين كاملين */
+        .quick-secondary-row { margin:.3rem 0 .35rem; }
+        .quick-secondary-btn { display:flex; align-items:center; justify-content:center; gap:.3rem; padding:.32rem .4rem; border:1px dashed var(--pm-hairline); border-radius:.75rem; background:transparent; color:var(--pm-muted); font-size:.62rem; font-weight:800; font-family:inherit; cursor:pointer; transition:border-color .15s ease, color .15s ease; }
+        .quick-secondary-btn span:first-child { font-size:.75rem; }
+        .quick-secondary-btn:hover, .quick-secondary-btn:active { border-color: color-mix(in srgb, var(--pm-gold-bright) 45%, transparent); color: var(--pm-gold-bright); }
         #quick-manual-success-fx.is-manual-success { background:radial-gradient(circle at 50% 48%,color-mix(in srgb,var(--pm-gold-bright) 19%,transparent),transparent 58%); animation:manualSuccessFlash .42s ease-out both; }
         #quick-manual-success-fx.is-manual-success .dabbar-celebrate-ring { width:5.8rem !important; height:5.8rem !important; border-width:2px; }
         #quick-manual-success-fx.is-manual-success .dabbar-celebrate-badge { width:5.25rem; height:5.25rem; box-shadow:0 0 0 7px color-mix(in srgb,var(--pm-gold-bright) 12%,transparent),0 14px 36px rgba(0,0,0,.32),inset 0 1px 2px rgba(255,255,255,.4); animation:manualSuccessBadgeIn .6s cubic-bezier(.2,.8,.3,1) both, dabbarCelebrateBadgeOut .45s ease 1.55s forwards; }
@@ -3178,6 +3200,9 @@
         .dabbar-goal-row-percent { color:#10b981; font:900 .68rem 'Cairo',sans-serif; flex-shrink:0; }
         .dabbar-goal-row-track { width:100%; height:.4rem; border-radius:999px; background:rgba(148,163,184,.18); overflow:hidden; }
         .dabbar-goal-row-bar { height:100%; border-radius:999px; background:linear-gradient(90deg,#10b981,#34d399); }
+        /* في الوضع الليلي بس: نفس اللون الأخضر الليموني بتاع براند التطبيق بدل التيل */
+        html:not([data-theme="light"]) .dabbar-goal-row-percent { color: var(--pm-gold-bright, #d0ff52); }
+        html:not([data-theme="light"]) .dabbar-goal-row-bar { background: linear-gradient(90deg, var(--pm-gold, #bdf23f), var(--pm-gold-bright, #d0ff52)); }
         .dabbar-goal-row-amounts { margin-top:.3rem; color:var(--db-muted); font:700 .6rem 'Cairo',sans-serif; }
 
         /* كارت ربط تليجرام — هوية تليجرام الحقيقية (أزرق فاتح) بدل الأيقونة الرمادية القديمة، واضح ليلي/نهاري */
@@ -4105,7 +4130,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                 <div id="quick-expense-content"><div id="quick-expense-detail" class="qe2-detail">
                 <div id="quick-entry-subscription-lock" class="hidden items-center justify-between gap-3 rounded-2xl border px-3 py-2.5 text-[11px]" style="border-color:color-mix(in srgb,var(--pm-gold-bright) 40%,transparent);background:color-mix(in srgb,var(--pm-gold-bright) 10%,var(--pm-surface-hi));color:var(--pm-ink);"><div class="flex items-center gap-2"><span id="quick-entry-vip-badge" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-lg" style="background:linear-gradient(145deg,var(--pm-gold-bright),var(--pm-gold));color:var(--pm-ink);">💎</span><span><strong class="block" style="color:var(--pm-gold-bright);">التصنيف الذكي بقى ميزة VIP</strong><span style="color:var(--pm-muted);">الإدخال اليدوي شغال زي العادة — فعّل VIP للصوت والفواتير والـ AI.</span></span></div><button id="quick-entry-open-subscription" type="button" class="shrink-0 rounded-xl px-3 py-2 text-[10px] font-black" style="background:linear-gradient(145deg,var(--pm-gold-bright),var(--pm-gold));color:var(--pm-ink);">فعّل VIP</button></div>
                 
-                <div class="grid grid-cols-3 gap-2 q-modes"><button id="quick-entry-text" class="quick-entry-tab rounded-2xl border px-2 py-3 text-center shadow-sm transition" type="button" style="border-color:color-mix(in srgb,var(--pm-gold-bright) 50%,transparent);background:linear-gradient(145deg,color-mix(in srgb,var(--pm-gold-bright) 18%,var(--pm-surface-hi)),var(--pm-surface-hi));"><span class="mx-auto mb-1 flex h-9 w-9 items-center justify-center rounded-full text-xl" style="background:color-mix(in srgb,var(--pm-gold-bright) 18%,transparent);">✍️</span><span class="block text-[11px] font-bold" style="color:var(--pm-ink);">كتابة</span></button><button id="quick-entry-voice" class="quick-entry-tab rounded-2xl border px-2 py-3 text-center shadow-sm transition" type="button" style="border-color:var(--pm-hairline);background:var(--pm-surface-hi);"><span class="mx-auto mb-1 flex h-9 w-9 items-center justify-center rounded-full text-xl" style="background:color-mix(in srgb,var(--pm-gold-bright) 12%,transparent);">🎙️</span><span class="block text-[11px] font-bold" style="color:var(--pm-ink);">صوت</span></button><button id="quick-entry-invoice" class="quick-entry-tab rounded-2xl border px-2 py-3 text-center shadow-sm transition" type="button" style="border-color:var(--pm-hairline);background:var(--pm-surface-hi);"><span class="mx-auto mb-1 flex h-9 w-9 items-center justify-center rounded-full text-xl" style="background:color-mix(in srgb,var(--pm-gold-bright) 12%,transparent);">📸</span><span class="block text-[11px] font-bold" style="color:var(--pm-ink);">فاتورة</span></button></div><button id="quick-entry-manual" type="button" class="quick-entry-manual-link"><span class="quick-entry-manual-main"><span aria-hidden="true">✍️</span> إذا أردت من غير AI <span class="quick-entry-manual-arrow" aria-hidden="true">↘</span></span><span class="quick-entry-manual-sub">سجّلها يدويًا بدون تحليل ذكي</span></button><p class="q-foot text-[10px]" style="color:var(--pm-muted);"><span class="gem" aria-hidden="true">💎</span><span>اكتب بحرية، أو استخدم الصوت والفاتورة الذكية لو حسابك يدعم VIP.</span></p><button id="quick-entry-multi-btn" type="button" class="w-full mt-0.5 rounded-2xl border px-3 py-2 text-[11px] font-bold flex items-center justify-center gap-1.5" style="border-color:color-mix(in srgb,var(--pm-gold-bright) 45%,transparent);color:var(--pm-gold-bright);background:color-mix(in srgb,var(--pm-gold-bright) 8%,transparent);"><span>🧾📑</span><span>فاتورة طويلة (كذا صورة)</span></button>
+                <div class="grid grid-cols-3 gap-2 q-modes"><button id="quick-entry-text" class="quick-entry-tab rounded-2xl border px-2 py-3 text-center shadow-sm transition" type="button" style="border-color:color-mix(in srgb,var(--pm-gold-bright) 50%,transparent);background:linear-gradient(145deg,color-mix(in srgb,var(--pm-gold-bright) 18%,var(--pm-surface-hi)),var(--pm-surface-hi));"><span class="mx-auto mb-1 flex h-9 w-9 items-center justify-center rounded-full text-xl" style="background:color-mix(in srgb,var(--pm-gold-bright) 18%,transparent);">✍️</span><span class="block text-[11px] font-bold" style="color:var(--pm-ink);">كتابة</span></button><button id="quick-entry-voice" class="quick-entry-tab rounded-2xl border px-2 py-3 text-center shadow-sm transition" type="button" style="border-color:var(--pm-hairline);background:var(--pm-surface-hi);"><span class="mx-auto mb-1 flex h-9 w-9 items-center justify-center rounded-full text-xl" style="background:color-mix(in srgb,var(--pm-gold-bright) 12%,transparent);">🎙️</span><span class="block text-[11px] font-bold" style="color:var(--pm-ink);">صوت</span></button><button id="quick-entry-invoice" class="quick-entry-tab rounded-2xl border px-2 py-3 text-center shadow-sm transition" type="button" style="border-color:var(--pm-hairline);background:var(--pm-surface-hi);"><span class="mx-auto mb-1 flex h-9 w-9 items-center justify-center rounded-full text-xl" style="background:color-mix(in srgb,var(--pm-gold-bright) 12%,transparent);">📸</span><span class="block text-[11px] font-bold" style="color:var(--pm-ink);">فاتورة</span></button></div><div class="grid grid-cols-2 gap-2 quick-secondary-row"><button id="quick-entry-manual" type="button" class="quick-secondary-btn"><span aria-hidden="true">✍️</span><span>يدوي من غير AI</span></button><button id="quick-entry-multi-btn" type="button" class="quick-secondary-btn"><span aria-hidden="true">🧾</span><span>فاتورة طويلة</span></button></div><p class="q-foot text-[10px]" style="color:var(--pm-muted);"><span class="gem" aria-hidden="true">💎</span><span>الصوت والفاتورة الذكية VIP — الكتابة والتسجيل اليدوي متاحين دايمًا.</span></p>
                 <input type="file" id="quick-entry-multi-input" accept="image/*" multiple class="hidden">
                 <input type="file" id="quick-entry-invoice-input" accept="image/*" class="hidden">
                 <div id="quick-entry-scanning" class="hidden dabbar-scan-box rounded-2xl p-3 text-center"><div class="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl dabbar-scan-box-icon text-xl shadow-sm"><span style="display:inline-block;animation:dabbar-scan-spin 1s linear infinite">⟳</span></div><p class="text-xs font-bold dabbar-scan-box-title">بنقرأ الفاتورة...</p><p class="mt-1 text-[10px] dabbar-scan-box-sub">دبّر بيستخرج المبلغ والأصناف</p></div>
@@ -4204,7 +4229,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
 
             <!-- كارت "المتاح ليك تصرفه" الموحّد: بديل صافي ثروتك، بيظهر بس لما العميل يحدد دخله أو ميزانيته -->
             <details id="available-collapsible" class="dabbar-collapsible-section relative overflow-hidden rounded-3xl p-4 shadow-lg dabbar-savings-card" open>
-                <summary class="dabbar-collapsible-summary">
+                <summary class="dabbar-collapsible-summary" id="available-collapsible-summary">
                     <span class="dabbar-collapsible-summary-label">💰 الدخل والميزانية الشهر ده</span>
                     <span class="dabbar-collapsible-chev" aria-hidden="true">⌄</span>
                 </summary>
@@ -5893,15 +5918,15 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
     <!-- Person Debt Detail Overlay -->
     <div id="person-debt-overlay" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
         <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col h-[80vh]">
-            <div class="bg-slate-900/90 border-b border-slate-800/80 p-5 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-slate-700 to-slate-600 flex items-center justify-center text-slate-100 font-black text-xl">🧑</div>
-                    <div>
-                        <h2 class="font-bold text-base text-slate-100 leading-tight" id="person-debt-name">—</h2>
-                        <span class="text-xs font-semibold" id="person-debt-net-line">—</span>
+            <div class="bg-slate-900/90 border-b border-slate-800/80 p-5 flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-white font-black text-base shrink-0" id="person-debt-avatar" style="background:linear-gradient(145deg,#64748b,#334155)">🧑</div>
+                    <div class="min-w-0">
+                        <h2 class="font-black text-[15px] text-slate-100 leading-tight truncate" id="person-debt-name">—</h2>
+                        <span class="inline-flex items-center mt-1.5 rounded-full px-2.5 py-1 text-[11px] font-black" id="person-debt-net-line">—</span>
                     </div>
                 </div>
-                <button id="close-person-debt" class="w-9 h-9 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-sm">✕</button>
+                <button id="close-person-debt" class="w-9 h-9 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-sm shrink-0">✕</button>
             </div>
 
             <div class="flex-1 overflow-y-auto p-5 space-y-2.5" id="person-debt-list">
@@ -8263,6 +8288,11 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             document.getElementById('commit-sheet-name').addEventListener('input', updateCommitSheetPreview);
             document.getElementById('commit-sheet').addEventListener('click', (e) => { if (e.target.id === 'commit-sheet') closeCommitSheet(); });
             document.getElementById('balance-edit-link')?.addEventListener('click', openBalanceCategoryEditor);
+            document.getElementById('available-collapsible-summary')?.addEventListener('click', (e) => {
+                e.preventDefault();
+                const details = document.getElementById('available-collapsible');
+                if (details) details.open = !details.open;
+            });
             document.getElementById('available-empty-cta')?.addEventListener('click', () => {
                 const details = document.getElementById('available-collapsible');
                 if (details && !details.open) details.open = true;
@@ -10483,9 +10513,9 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                     } else {
                         const next = sorted[0];
                         const summary = `
-                            <div class="rounded-2xl bg-slate-950/60 border border-slate-800 p-3.5 flex items-center justify-between gap-3">
-                                <div><p class="text-[10px] text-slate-500">إجمالي الأقساط الشهرية</p><p class="text-lg font-black text-amber-300">${fmt(monthlyTotal)}</p></div>
-                                <div class="min-w-0 text-left"><p class="text-[10px] text-slate-500">أقرب قسط</p><p class="text-[11px] font-bold text-slate-300 truncate">${debtEscape(next.title)} · ${reminderDaysLabel(next.due_date)}</p></div>
+                            <div id="installments-summary-card" class="rounded-2xl p-3.5 flex items-center justify-between gap-3">
+                                <div><p class="text-[10px] font-bold" style="color:#4a2b06;opacity:.75">إجمالي الأقساط الشهرية</p><p class="text-lg font-black" style="color:#3a2205">${fmt(monthlyTotal)}</p></div>
+                                <div class="min-w-0 text-left"><p class="text-[10px] font-bold" style="color:#4a2b06;opacity:.75">أقرب قسط</p><p class="text-[11px] font-bold truncate" style="color:#3a2205">${debtEscape(next.title)} · ${reminderDaysLabel(next.due_date)}</p></div>
                             </div>`;
                         installmentsListEl.innerHTML = summary + sorted.map((r) => {
                             const st = statusOf(r);
@@ -10505,7 +10535,8 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                                     </div>
                                     <span class="installment-chev text-slate-500 text-sm transition-transform shrink-0" data-inst-chev="${debtEscape(r.id)}">⌄</span>
                                 </div>
-                                <div class="installment-body px-3.5 pb-3.5" data-inst-body="${debtEscape(r.id)}" style="max-height:0; overflow:hidden; transition:max-height .22s ease;">
+                                <div class="installment-body" data-inst-body="${debtEscape(r.id)}" style="max-height:0; overflow:hidden; transition:max-height .22s ease;">
+                                  <div class="px-3.5 pb-3.5">
                                     <div class="flex items-center justify-between gap-2 text-[10.5px] mb-2.5">
                                         <span class="rounded-full px-2.5 py-1 font-black ${st.cls}">${st.text}</span>
                                         <span class="text-slate-500">${left === 1 ? 'آخر قسط 🎉' : `باقي ${left} قسط`}${totalLeft > 0 && left > 1 ? ` · ${fmt(totalLeft)}` : ''}</span>
@@ -10516,6 +10547,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                                         <button type="button" class="edit-installment-btn premium-edit-btn shrink-0" data-reminder-id="${debtEscape(r.id)}" aria-label="تعديل القسط"><iconify-icon icon="ph:pencil-simple-line-duotone"></iconify-icon><span>تعديل</span></button>
                                         <button type="button" class="delete-installment-btn icon-delete-btn shrink-0" data-reminder-id="${debtEscape(r.id)}" aria-label="حذف القسط"><iconify-icon icon="ph:trash-simple-duotone"></iconify-icon></button>
                                     </div>
+                                  </div>
                                 </div>
                             </div>`;
                         }).join('');
@@ -10571,12 +10603,14 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                             ${amountText}
                             <span class="reminder-item-chev text-slate-500 text-sm transition-transform shrink-0" data-rem-chev="${debtEscape(r.id)}">⌄</span>
                         </div>
-                        <div class="reminder-item-body px-3.5 pb-3.5" data-rem-body="${debtEscape(r.id)}" style="max-height:0; overflow:hidden; transition:max-height .22s ease;">
+                        <div class="reminder-item-body" data-rem-body="${debtEscape(r.id)}" style="max-height:0; overflow:hidden; transition:max-height .22s ease;">
+                          <div class="px-3.5 pb-3.5">
                             <p class="text-[11px] text-slate-500 text-center mb-2.5">${fullDateText}</p>
                             <div class="flex items-center gap-2">
                                 <button type="button" class="icon-delete-btn shrink-0" data-delete-reminder="${debtEscape(r.id)}" aria-label="حذف التذكير"><iconify-icon icon="ph:trash-simple-duotone"></iconify-icon></button>
                                 <button type="button" class="edit-reminder-btn premium-edit-btn-wide flex-1" data-edit-reminder="${debtEscape(r.id)}"><iconify-icon icon="ph:pencil-simple-line-duotone"></iconify-icon> تعديل</button>
                             </div>
+                          </div>
                         </div>
                     </div>`;
                 }).join('') : '<div class="rounded-2xl border border-dashed border-slate-800 p-5 text-xs text-slate-500 text-center">مفيش تذكيرات قادمة، ضيف واحد من الزرار فوق.</div>';
@@ -10745,7 +10779,8 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                             <span class="gameya-chevron inline-block text-slate-500 transition-transform" data-gameya-chevron="${g.id}">⌄</span>
                         </div>
                     </div>
-                    <div class="gameya-card-body px-4 pb-4 space-y-3" data-gameya-body="${g.id}" style="max-height:0; overflow:hidden; transition: max-height .25s ease;">
+                    <div class="gameya-card-body" data-gameya-body="${g.id}" style="max-height:0; overflow:hidden; transition: max-height .25s ease;">
+                      <div class="px-4 pb-4 space-y-3">
                         <div class="grid grid-cols-2 gap-2">
                             <div class="bg-slate-900/60 rounded-2xl p-3">
                                 <p class="text-[10px] text-slate-500 mb-1">القسط الشهري</p>
@@ -10765,6 +10800,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                         </div>
                         ${!g.hasReceivedTurn ? `<div class="bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-3 py-2 flex items-center gap-2"><span class="text-[11px]">📅</span><span class="text-[11px] text-emerald-300 font-bold">دورك جاي في ${turnDateLabel}</span></div>` : ''}
                         ${membersHtml ? `<div class="pt-1"><p class="text-[10px] text-slate-500 mb-1">أعضاء الجمعية - الشهر ده</p>${membersHtml}</div>` : ''}
+                      </div>
                     </div>
                 </div>`;
             }).join('');
@@ -11034,12 +11070,15 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
         }
         window.__personDebtCurrent = null;
         async function openPersonDebtDetail(personName, eternal = false) {
-            const overlay = document.getElementById('person-debt-overlay'), nameEl = document.getElementById('person-debt-name'), netLineEl = document.getElementById('person-debt-net-line'), listEl = document.getElementById('person-debt-list'), settleBtn = document.getElementById('person-debt-settle-btn');
-            nameEl.textContent = personName; netLineEl.textContent = '—'; listEl.innerHTML = '<p class="text-xs text-slate-500 text-center p-4">جاري التحميل...</p>'; settleBtn?.classList.add('hidden'); overlay.classList.remove('hidden'); overlay.classList.add('flex');
+            const overlay = document.getElementById('person-debt-overlay'), nameEl = document.getElementById('person-debt-name'), netLineEl = document.getElementById('person-debt-net-line'), avatarEl = document.getElementById('person-debt-avatar'), listEl = document.getElementById('person-debt-list'), settleBtn = document.getElementById('person-debt-settle-btn');
+            nameEl.textContent = personName;
+            if (avatarEl) avatarEl.textContent = (personName || '').trim().charAt(0) || '🧑';
+            netLineEl.textContent = '—'; netLineEl.className = 'inline-flex items-center mt-1.5 rounded-full px-2.5 py-1 text-[11px] font-black bg-slate-700/40 text-slate-400';
+            listEl.innerHTML = '<p class="text-xs text-slate-500 text-center p-4">جاري التحميل...</p>'; settleBtn?.classList.add('hidden'); overlay.classList.remove('hidden'); overlay.classList.add('flex');
             try {
                 const res = await fetch(`/api/reports?type=person&name=${encodeURIComponent(personName)}${eternal ? '&all=1' : ''}`, { headers: { Authorization: `Bearer ${accessToken}` } });
                 const data = await res.json(); if (!res.ok) throw new Error(data.error || 'فشل تحميل البيانات');
-                const net = data.relevantNet; netLineEl.textContent = net === 0 ? 'متصفي 🤝 مفيش حد ليه على التاني حاجة' : (net > 0 ? `ليك عنده ${fmt(net)}` : `عليك له ${fmt(Math.abs(net))}`); netLineEl.className = `text-xs font-semibold ${net > 0 ? 'text-emerald-400' : net < 0 ? 'text-rose-400' : 'text-slate-400'}`;
+                const net = data.relevantNet; netLineEl.textContent = net === 0 ? 'متصفي 🤝' : (net > 0 ? `ليك عنده ${fmt(net)}` : `عليك له ${fmt(Math.abs(net))}`); netLineEl.className = `inline-flex items-center mt-1.5 rounded-full px-2.5 py-1 text-[11px] font-black ${net > 0 ? 'bg-emerald-500/15 text-emerald-400' : net < 0 ? 'bg-rose-500/15 text-rose-400' : 'bg-slate-700/40 text-slate-400'}`;
                 window.__personDebtCurrent = { name: personName, net };
                 if (settleBtn) { settleBtn.classList.toggle('hidden', net === 0); settleBtn.textContent = net > 0 ? 'تسجيل تسديد — استلمت الفلوس' : 'تسجيل تسديد — إنت رجّعتله'; }
                 listEl.innerHTML = data.transactions.length ? data.transactions.map((t) => `<div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-3 flex items-center gap-2.5"><span class="w-9 h-9 shrink-0 rounded-xl bg-slate-800/70 flex items-center justify-center text-sm">${t.isRepayment ? '↩️' : (t.direction === 'lent' ? '📤' : '📥')}</span><div class="min-w-0 flex-1"><p class="text-xs font-semibold text-slate-200 truncate">${t.isRepayment ? (t.direction === 'lent' ? 'إنت رجّعت' : 'رجّعلك') : (t.direction === 'lent' ? 'إنت ديت' : 'إنت استلفت')}${t.note ? ` — ${debtEscape(t.note)}` : ''}</p><p class="text-[10px] text-slate-500 mt-0.5">${new Date(t.createdAt).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' })}</p></div><div class="flex items-center gap-2 shrink-0"><span class="text-xs font-bold ${t.direction === 'lent' ? 'text-emerald-400' : 'text-rose-400'}">${fmt(t.amount)}</span>${eternal && t.id ? `<button type="button" class="text-slate-400 hover:text-rose-400 text-lg" data-delete-debt="${debtEscape(t.id)}" aria-label="حذف المعاملة">×</button>` : ''}</div></div>`).join('') : '<p class="text-xs text-slate-500 text-center p-4">مفيش عمليات.</p>';

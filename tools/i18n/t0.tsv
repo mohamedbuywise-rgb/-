@@ -1,0 +1,230 @@
+0	Dashboard and reports - your personal accountant
+1	Loading your data...
+2	Try again
+3	Good morning
+4	Your financial summary
+5	End-of-month report
+6	You haven't logged an expense today yet
+7	Log now
+8	Your total active days — this number only goes up
+9	Keeping up with you 🎯
+10	0 days
+11	This month's savings opportunities
+12	Dabbar found for you
+13	You could save
+14	Turn on Dabbar notifications
+15	We'll remind you about your spending and warn you before you go over budget.
+16	Turn on
+17	Start here
+18	Log your transaction now
+19	Voice, text, or a photo of the receipt — in seconds
+20	Ready to understand it
+21	Log your expense fast
+22	Investment portfolio
+23	Bank movements
+24	Smart categorization is a VIP feature
+25	Manual entry works as usual — turn on VIP for voice, receipts, and AI.
+26	Turn on VIP
+27	Type
+28	Voice
+29	Receipt
+30	If you want it without AI
+31	Log it manually with no smart analysis
+32	Write freely, or use voice and smart receipts if your account has VIP.
+33	Food
+34	Transport
+35	Bills
+36	Shopping
+37	Entertainment
+38	Health
+39	Education
+40	Home & furniture
+41	Clothing
+42	Subscriptions
+43	Gifts & donations
+44	Personal & care
+45	
+46	
+47	
+48	
+49	
+50	
+51	
+52	
+53	
+54	
+55	
+56	
+57	
+58	
+59	
+60	
+61	January
+62	February
+63	March
+64	April
+65	May
+66	June
+67	July
+68	August
+69	September
+70	October
+71	November
+72	December
+73	Try setting a food budget before your next order
+74	A home-cooked meal can make a nice difference
+75	Plan your meals and you'll order with less stress
+76	Combine your trips — it can cut your travel costs
+77	Pick the cheapest route for repeated trips
+78	Plan your trips early and keep your budget comfortable
+79	Review your subscriptions — you may find something you don't use
+80	Keep bill due dates clear so you can plan calmly
+81	Compare plans from time to time and pick what suits you
+82	Write down what you need before you go shopping
+83	Compare prices and take your time before buying
+84	Leave a small space in your budget for nice surprises
+85	Set aside an amount for fun and make it part of your plan
+86	Pick a nice outing without straining your budget
+87	Fun is better when it's planned and comfortable
+88	Your health comes first — plan its costs calmly
+89	Compare suitable alternatives before you buy
+90	Keep a health line in your plan every month
+91	Invest in your education and plan the amount early
+92	Split the course cost over several months if possible
+93	Every small learning step brings you closer to your goal
+94	Split your home purchases and prioritize
+95	Compare materials and prices before buying
+96	Start with what matters most and do the rest in stages
+97	Choose practical pieces that complete your wardrobe easily
+98	Set a clothing budget before sale season
+99	A well-chosen piece you'll wear often is a smart pick
+100	Review your subscriptions every month and keep only the useful ones
+101	Try stopping any service you don't use
+102	Pick the plan that actually fits your usage
+103	Set a fixed giving amount that suits you
+104	Plan your gifts early and pick what will make them happy
+105	A kind gesture doesn't have to be expensive
+106	Set aside a comfortable amount for personal care in your budget
+107	Compare alternatives and pick what fits your need
+108	Take care of yourself without straining your plan
+109	Split the category into small limits and keep your plan flexible
+110	Every small step makes a difference by month-end
+111	Keep tracking and your choices will get clearer
+112	EGP
+113	US dollar
+114	Euro
+115	British pound
+116	Saudi riyal
+117	Dirham
+118	Kuwaiti dinar
+119	Qatari riyal
+120	Expense
+121	Income
+122	Purchase
+123	Asset
+124	Transfer
+125	Refund
+126	Debt
+127	Financial transaction
+128	Light mode is on
+129	Dark mode is on
+130	Log from outside the app - Dabbar
+131	Banks and wallets - Dabbar
+132	Fix bank and wallet issues - Dabbar
+133	Dabbar
+134	Checked {} of {} rows...
+135	Couldn't start the import.
+136	Something went wrong during the import.
+137	Done! {} transactions added{}.
+138	Reading the file...
+139	The file is empty or couldn't be read.
+140	Choose the import file
+141	There's an import for a file
+142	Stopped at row {}/{} — upload the same file again to continue from here.
+143	Couldn't read the file.
+144	Reading the statement...
+145	Extracting transactions from the statement, this may take a few seconds...
+146	Something went wrong while reading the statement.
+147	Import complete.
+148	{}/{} left this month
+149	Choose a PDF account statement
+150	Your account is linked to Telegram — send the bot text, voice, or a receipt.
+151	Your account isn't linked to Telegram yet.
+152	Linked
+153	Not linked
+154	⬇️ Download your token file
+155	⚠️ You need to be signed in to download the file. Sign in and try again.
+156	Preparing the file...
+157	The file isn't ready right now, try again in a moment. If the problem continues, contact support.
+158	⚠️ Connection error ({}), try again.
+159	Is the app actually installed?
+160	First, let's make sure the installation went through
+161	Look for the icon
+162	Dabbar — Bank Tracker
+163	in your phone's app list.
+164	Some devices (especially Samsung/Xiaomi) block the installation if
+165	unknown sources
+166	isn't enabled for your browser.
+167	If you can't find it: go back to Dabbar, tap the message automation button again, then choose MacroDroid to open the macro file.
+168	Notification access permission
+169	The most important permission and the most common cause of problems
+170	Device settings → Apps → Special access → Notification access → you should find
+171	turned on.
+172	This permission must be enabled manually once from system settings, and some devices turn it off automatically after a system update.
+173	Enable it manually from that page, or tap
+174	Enable notification permission
+175	inside the app itself.
+176	Battery settings
+177	The most common reason receiving stops in the background
+178	Device settings → Battery → Dabbar — Bank Tracker, and on Samsung: Device care → Battery.
+179	Power saving freezes background apps, which stops notifications from being received.
+180	Choose
+181	Unrestricted
+182	, and remove the app from the unused apps list if it's there.
+183	Is receiving turned on inside Dabbar?
+184	The last step that connects both sides
+185	Card
+186	Banks and wallets
+187	in Dabbar → the toggle
+188	Turn on automatic receiving
+189	The app may be running fine on your phone, but receiving is paused from inside Dabbar.
+190	Turn the toggle on until it's green, then send a real test SMS.
+191	Testing with a real message?
+192	The difference between SMS and app notifications
+193	Try a regular SMS from another number, not a WhatsApp or Telegram notification.
+194	The app only picks up SMS notifications from the default messages app; RCS messages or other apps look different and may not be recognized.
+195	If your bank sends RCS, use
+196	Log your expense from outside the app
+197	manually by copy and paste.
+198	📍 Where to look
+199	❓ The cause
+200	✅ The fix
+201	{} of {}
+202	Send to support
+203	Write your problem first.
+204	Sending...
+205	Something went wrong while sending, try again.
+206	A smart step to protect your plan
+207	You've used {}% of your budget ({} of {} EGP). You have a good chance to finish the month calmly; try reviewing your biggest spending category.
+208	Set your monthly budget
+209	You've spent {} EGP so far this month with no set limit. Set a budget from
+210	Planning
+211	so I can warn you before you go over it.
+212	Great savings achievement
+213	You kept {} EGP of your income — nearly hitting the 20% goal. Dabbar is proud of your consistency!
+214	Needs are under control
+215	You reached the needs target calmly ({} EGP). Keep the same awareness.
+216	A smart pause on wants
+217	Wants reached {} EGP. If you pause here a bit, your savings get a chance to grow.
+218	Your biggest spending item
+219	category
+220	alone takes {}% of this month's spending ({} EGP). That's not necessarily a problem, but it deserves a quick look.
+221	Excellent tracking
+222	Your latest entry: {} · {}. Staying consistent is the first step to controlling your plan.
+223	Better than last month
+224	You spent less than {} by {}% ({} instead of {}). Keep it up 👏
+225	Strong tracking streak
+226	You've been logging your expenses regularly for {} days in a row. That consistency is the secret to controlling any financial plan 🙌
+227	A new step toward your goal
+228	You reached {}% of the goal
+229	({} of {}). Keep the same spirit, you're getting closer 💪

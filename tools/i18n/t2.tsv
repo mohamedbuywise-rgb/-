@@ -1,0 +1,250 @@
+470	Incoming transfer
+471	Outgoing transfer
+472	⚠️ Needs review
+473	Log your first transaction today and it will show up here.
+474	🏦 Automatic: {}{}
+475	Subscriptions you marked as unused
+476	Subscriptions that got pricier without you noticing
+477	A small cut in non-essential categories
+478	You spend {} monthly on fixed subscriptions
+479	Dabbar hasn't found a fixed subscription yet — when you log the same name at roughly the same amount two months in a row, it will show here as an alert only, not an automatic entry.
+480	Up {}% from last month
+481	Fixed for {} {}
+482	Nothing recurring at roughly the same amount yet.
+483	You've logged it yourself for {} {}
+484	{} of a total of {}
+485	No data yet
+486	Whole month
+487	Last 7 days
+488	No details available for this category.
+489	Not enough data yet
+490	Log your first two or three expenses and savings suggestions based on your numbers will show up here.
+491	You spent {} across {} transactions this month
+492	Biggest expense: {}
+493	{} took {}% of your spending ({}). Cutting it by 10% would save you about {}.
+494	Next month's challenge
+495	Try cutting {} by 20%. That would save you about {}.
+496	Second biggest expense: {}
+497	You spent {} on it ({}%). Cutting just 10% would save about {}.
+498	Your spending is up from {}
+499	You spent {}% more than {}. Start by cutting 10% of {} and save about {}.
+500	Your spending is lower than {} 👏
+501	Down {}% from {}. Keep it up, and if you like, set a cap for {} of about {}.
+502	Saturday
+503	Sunday
+504	Monday
+505	Tuesday
+506	Wednesday
+507	Thursday
+508	Friday
+509	No spending on this day
+510	Show less ⌃
+511	Show all ({}) ⌄
+512	You don't have any debts recorded yet.
+513	You're owed {} more than you owe
+514	You owe {} more than you're owed
+515	⏰ {} days overdue
+516	⏰ Due today
+517	Due in {} days
+518	Overdue
+519	Today
+520	Tomorrow
+521	In {} days
+522	Overdue:
+523	Due today:
+524	One day left until
+525	Two days left until
+526	Overdue
+527	In two days
+528	{} reminders
+529	{} installments
+530	⚠️ Overdue {} {}
+531	🚨 Today
+532	⏰ Tomorrow
+533	⏰ In {} days
+534	In a week
+535	No installments recorded.
+536	Add an installment from
+537	Add a new reminder
+538	and choose
+539	This is a fixed installment
+540	, and we'll remind you before every due date.
+541	Total monthly installments
+542	Next installment
+543	🔔 We'll send you a notification before each installment — a week, 3 days, and 1 day ahead, and on the due date. If it's overdue we'll remind you too.
+544	Next installment: {}
+545	monthly
+546	✓ I paid the installment
+547	Edit
+548	Confirm that you paid the installment
+549	? We'll reduce the remaining installments and move the due date to next month.
+550	Record installment payment
+551	Yes, I paid it
+552	🎉 Congratulations! You've finished the whole installment.
+553	✅ Payment recorded{}
+554	Couldn't record the payment, try again.
+555	No connection right now, try again.
+556	Delete installment
+557	permanently?
+558	Delete installment
+559	Delete
+560	No upcoming reminders, add one with the button above.
+561	Reminder
+562	Deleted
+563	Couldn't load reminders.
+564	Save reminder
+565	Edit installment
+566	Edit reminder
+567	Save changes
+568	Enter the reminder title first.
+569	Choose a date.
+570	Enter a valid amount or leave it empty.
+571	Enter the number of remaining installments.
+572	An error occurred.
+573	Updated successfully!
+574	Added successfully!
+575	Something went wrong, try again.
+576	No savings circles recorded yet.
+577	Me
+578	Savings circle
+579	{} - {} members
+580	EGP monthly installment
+581	Your turn is number {} of {}
+582	Are you sure you want to delete this savings circle?
+583	Fill in all the required fields first.
+584	Savings circle added!
+585	Another
+586	No occasions recorded yet.
+587	Are you sure you want to delete this occasion?
+588	Enter the person's name and the amount.
+589	Wedding
+590	Occasion recorded!
+591	Couldn't load the account statement
+592	The account between you and
+593	is settled, and all financial transactions are in the account statement
+594	No settlement messages right now
+595	Active
+596	Settled
+597	No people in the account statement
+598	Are you sure you want to delete the account statement of
+599	permanently? This step can't be undone.
+600	Couldn't delete the account statement right now.
+601	Loading...
+602	Settled 🤝 nobody owes anyone anything
+603	They owe you {}
+604	You owe them {}
+605	No transactions.
+606	Delete transaction
+607	Are you sure you want to delete this transaction? This action can't be undone
+608	Cancel
+609	Confirm delete
+610	Transaction deleted
+611	Couldn't delete the transaction
+612	Something went wrong while deleting.
+613	You don't have earlier months with recorded expenses yet.
+614	📄 Download the statement as PDF
+615	Couldn't download the file.
+616	Something went wrong while downloading the file.
+617	
+618	
+619	
+620	
+621	
+622	
+623	
+624	
+625	
+626	{} {} · tap for details
+627	{} {}{}% last 3 days
+628	Fetching the market price now...
+629	Purchase value
+630	Last 3 days
+631	Last updated
+632	Edit value
+633	Investment asset
+634	Current value
+635	Are you sure you want to delete
+636	from your portfolio?
+637	No assets (gold/crypto) with a set quantity to refresh the price for right now
+638	Couldn't update prices, try again.
+639	Edit asset value
+640	Add a new asset
+641	Save asset
+642	The asset needs a name and a valid value greater than zero.
+643	We noticed you're on track to save about {} this month compared to your usual rate. Want to turn it into a goal?
+644	Add {} to my goal
+645	We noticed you could save about {} this month. Want to start a savings goal with it?
+646	Start a goal with this amount
+647	Log a few more transactions and we'll be able to forecast your month-end.
+648	At the current rate, your spending is expected to reach about
+649	by the end of {} ({} spent over {} days).
+650	That's more than {} ({}).
+651	That's less than {} ({}) — great! 👏
+652	
+653	
+654	
+655	
+656	
+657	
+658	
+659	
+660	
+661	
+662	
+663	
+664	
+665	
+666	
+667	
+668	
+669	
+670	
+671	
+672	
+673	
+674	
+675	
+676	
+677	
+678	
+679	
+680	
+681	
+682	
+683	
+684	
+685	
+686	
+687	
+688	
+689	
+690	
+691	
+692	
+693	
+694	
+695	
+696	
+697	
+698	
+699	
+700	
+701	
+702	
+703	
+704	You can add another goal ({}/{}).
+705	Couldn't update the goal date.
+706	📅 You need to save {} per day to reach your goal ({} days left)
+707	⚠️ The goal date has passed — you can update the date.
+708	Enter a valid amount.
+709	Are you sure you want to cancel the goal
+710	Your free trial has ended — subscribe first to log an expense.
+711	The request took longer than expected. Try again in a moment.
+712	The reports and numbers you see below are frozen since {} — subscribe to keep tracking and stay up to date.
+713	Smart categorization is a VIP feature — manual entry works as usual.
+714	Understanding it...
+715	Listening...
+716	Are you sure?
+717	Confirm
+718	
+719	Undo

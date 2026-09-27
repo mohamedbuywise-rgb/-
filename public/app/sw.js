@@ -1,6 +1,6 @@
 // v2: لازم نغيّر الاسم عشان أي جهاز عنده الكاش القديم (اللي كان بيحفظ ردود الـ API غلط)
 // يمسحه فورًا ويبدأ من كاش جديد فاضي — خطوة activate تحت بتمسح أي CACHE_NAME قديم تلقائي.
-const CACHE_NAME = 'dabbar-cache-v7';
+const CACHE_NAME = 'dabbar-cache-v9';
 const PRECACHE_URLS = [
   './dabbar-onboarding.html',
   './dabbar-dashboard-full.html',
@@ -9,8 +9,15 @@ const PRECACHE_URLS = [
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/badge-mono-96.png',
-  './dabbar-offline-queue.js'
+  './dabbar-offline-queue.js',
+  './dabbar-i18n.js',
+  './i18n-en.js'
 ];
+
+// لغة المستخدم (بتتبعت من الصفحة) — عشان نصوص الإشعارات اللي بيرسمها الـ SW نفسه تطلع بلغته
+async function getLang() {
+  try { const c = await caches.open('dabbar-lang'); const r = await c.match('lang'); return r ? (await r.text()) : 'ar'; } catch { return 'ar'; }
+}
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -31,18 +38,21 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('push', (event) => {
   let payload = {};
   try { payload = event.data ? event.data.json() : {}; } catch { payload = { body: event.data?.text() || '' }; }
-  const title = payload.title || 'دبّر';
-  const options = {
-    body: payload.body || 'عندك تحديث جديد في دبّر.',
-    icon: payload.icon || './icons/icon-192.png',
-    badge: payload.badge || './icons/badge-mono-96.png',
-    tag: payload.tag || 'dabbar-notification',
-    renotify: Boolean(payload.renotify),
-    dir: 'rtl',
-    lang: 'ar',
-    data: { url: payload.url || './dabbar-dashboard-full.html' },
-  };
-  event.waitUntil(self.registration.showNotification(title, options));
+  event.waitUntil((async () => {
+    const en = (await getLang()) === 'en';
+    const title = payload.title || (en ? 'Dabbar' : 'دبّر');
+    const options = {
+      body: payload.body || (en ? 'You have a new update in Dabbar.' : 'عندك تحديث جديد في دبّر.'),
+      icon: payload.icon || './icons/icon-192.png',
+      badge: payload.badge || './icons/badge-mono-96.png',
+      tag: payload.tag || 'dabbar-notification',
+      renotify: Boolean(payload.renotify),
+      dir: en ? 'ltr' : 'rtl',
+      lang: en ? 'en' : 'ar',
+      data: { url: payload.url || './dabbar-dashboard-full.html' },
+    };
+    await self.registration.showNotification(title, options);
+  })());
 });
 
 self.addEventListener('notificationclick', (event) => {
@@ -68,26 +78,28 @@ self.addEventListener('notificationclick', (event) => {
 // في شريط الإشعارات (requireInteraction بيمنعه يختفي لوحده). مش بلاطة حقيقية فوق كل حاجة زي واي فاي،
 // لكنه أسرع طريق موجود فعليًا على الويب لتسجيل صوت أو كتابة من غير ما تفتح التطبيق وتدور على الأيقونة.
 const QUICK_ACCESS_TAG = 'dabbar-quick-access';
-function showQuickAccessNotification() {
-  return self.registration.showNotification('دبّر — وصول سريع', {
-    body: 'سجّل عملية بصوتك أو بالكتابة على طول',
+async function showQuickAccessNotification() {
+  const en = (await getLang()) === 'en';
+  return self.registration.showNotification(en ? 'Dabbar — Quick access' : 'دبّر — وصول سريع', {
+    body: en ? 'Log a transaction by voice or typing right away' : 'سجّل عملية بصوتك أو بالكتابة على طول',
     icon: './icons/icon-192.png',
     badge: './icons/badge-mono-96.png',
     tag: QUICK_ACCESS_TAG,
     renotify: false,
     silent: true,
     requireInteraction: true,
-    dir: 'rtl',
-    lang: 'ar',
+    dir: en ? 'ltr' : 'rtl',
+    lang: en ? 'en' : 'ar',
     actions: [
-      { action: 'quick-voice', title: '🎙️ صوت' },
-      { action: 'quick-text', title: '✍️ كتابة' },
+      { action: 'quick-voice', title: en ? '🎙️ Voice' : '🎙️ صوت' },
+      { action: 'quick-text', title: en ? '✍️ Type' : '✍️ كتابة' },
     ],
     data: { url: './dabbar-dashboard-full.html' },
   });
 }
 self.addEventListener('message', (event) => {
-  if (event.data?.type === 'SHOW_QUICK_ACCESS') event.waitUntil(showQuickAccessNotification());
+  if (event.data?.type === 'SET_LANG') event.waitUntil(caches.open('dabbar-lang').then((c) => c.put('lang', new Response(event.data.lang === 'en' ? 'en' : 'ar'))));
+  else if (event.data?.type === 'SHOW_QUICK_ACCESS') event.waitUntil(showQuickAccessNotification());
   else if (event.data?.type === 'HIDE_QUICK_ACCESS') {
     event.waitUntil(
       self.registration.getNotifications({ tag: QUICK_ACCESS_TAG }).then((list) => list.forEach((n) => n.close()))

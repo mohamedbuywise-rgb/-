@@ -1,0 +1,328 @@
+980	📊 Budget
+981	🏠 Fixed commitments
+982	Category limits
+983	Set a limit for each category, and Dabbar alerts you
+984	Pick a monthly limit for each category you spend on (food, entertainment, transport...), and we'll alert you as soon as you reach 80% of it, so you don't get surprised at month-end.
+985	🍔 Food
+986	🚌 Transport
+987	🎬 Entertainment
+988	🔔 80% alert
+989	Goals
+990	Set your goal, and Dabbar walks you there step by step
+991	Want to save for a trip, a car, or any goal? Set it in Dabbar and it helps you organize your saving so you reach it on time.
+992	✈️ Travel
+993	🚗 Car
+994	🎯 Any other goal
+995	Reports
+996	A full report, daily and monthly
+997	You can export a PDF report showing all your spending and income day by day or month by month, ready to review or share whenever you like.
+998	📅 Daily
+999	🗓️ Monthly
+1000	Notifications
+1001	All your alerts in one place
+1002	Turn on Dabbar notifications so your alerts reach your phone screen even when you're outside the app (budget alerts, daily and weekly summaries), link Telegram to get them instantly, and there's also an in-app notification center.
+1003	🔔 Notifications outside the app
+1004	💬 Telegram
+1005	📣 In-app notification center
+1006	Piggy bank
+1007	Save your money in Dabbar's piggy bank
+1008	Set aside any amount you want to save, and track it until it reaches the amount you want.
+1009	🐷 Piggy bank
+1010	🎯 Savings goal
+1011	Debts and occasions
+1012	Who owes you, who you owe, and all your occasions
+1013	Record your debts (what you're owed and what you owe), your savings circles, and your occasions like weddings and engagements — all tracked in one place.
+1014	🤝 Debts
+1015	👥 Savings circles
+1016	💍 Occasions
+1017	Reminders
+1018	Stay ahead of your due dates
+1019	Dabbar reminds you of your installment dates and any commitment before it arrives, so nothing catches you off guard.
+1020	⏰ Installment dates
+1021	📅 Any other commitment
+1022	Let's get started, champ
+1023	Those were Dabbar's most important features. You can see them again whenever you like from
+1024	My account
+1025	Let's start
+1026	Let's go 🚀
+1027	Next
+1028	🎁 You completed a full week!
+1029	days in a row!
+1030	🔥 Your streak has started!
+1031	Morning bonus ×2 counted ⚡
+1032	Log tomorrow before 10 AM
+1033	Points ×2 ⚡
+1034	point ⚡
+1035	Toggle theme
+1036	Refresh now
+1037	Today's logging reminder
+1038	Active days
+1039	Last 7 days activity
+1040	Turn on Dabbar notifications
+1041	Close
+1042	Add a financial transaction
+1043	Quick logging sections
+1044	Example: 12000
+1045	Example: 9000
+1046	Type any category: coffee, travel...
+1047	Rent / subscription
+1048	Amount
+1049	Manage and clear the income and budget plan
+1050	Category limit
+1051	Remove category limit
+1052	Delete commitment
+1053	Edit transaction
+1054	Delete transaction
+1055	Edit income
+1056	Delete income
+1057	Delete reminder
+1058	Account name
+1059	Close
+1060	Collapse or expand income and budget
+1061	New notifications
+1062	Dabbar — start now
+1063	Setting up your account...
+1064	⚠️ Open the link in the browser so you can install Dabbar
+1065	You opened the link inside an app, which blocks installation. Tap the button and it will open in the browser.
+1066	🌐 Open in browser
+1067	Your progress
+1068	Install Dabbar
+1069	My data
+1070	Done
+1071	Welcome to Dabbar
+1072	Sign in or create a new account to continue.
+1073	Sign in
+1074	New account
+1075	Name
+1076	Email
+1077	Use a real email you can open, because it's how you recover your account and data.
+1078	Password
+1079	🔐 Sign in with fingerprint or Passkey
+1080	Turn on fingerprint sign-in
+1081	Register a Passkey on your device so you can sign in quickly after reinstalling the app, using fingerprint, Face ID, or your device code.
+1082	Turn on Passkey now
+1083	Sign in with Google
+1084	Google manages the password on its side; Dabbar doesn't store bank passwords or card numbers.
+1085	Forgot your password?
+1086	Recover password
+1087	Enter the email linked to your account, and a secure link will reach you that opens the change-password page directly.
+1088	Send recovery link
+1089	Back to sign in
+1090	Choose a new password
+1091	Enter a new password of at least 6 characters.
+1092	New password
+1093	Confirm password
+1094	Save password
+1095	Install Dabbar on your screen
+1096	One last required step so you can use Dabbar easily like any other app:
+1097	Required step before sign-in
+1098	You need to install
+1099	on your home screen and open it from there — this step is essential and can't be skipped so we can continue.
+1100	➕ Install
+1101	now
+1102	How to install it manually:
+1103	🕐 Stay with us a few seconds...
+1104	The app is installing on your device now. As soon as you see it as an icon on your home screen, open it from there and continue your details inside it so your experience is just like any other app.
+1105	Installed successfully!
+1106	One last simple step: sign in or create your account...
+1107	Couldn't load the sign-in service. Open the page in Chrome, make sure you're connected to the internet, then try again.
+1108	You opened the link inside an app, which blocks installation. Follow these steps to open it in Safari:
+1109	Tap
+1110	at the top right of the screen
+1111	Open in browser
+1112	The link will open in Safari and you can continue installing as usual
+1113	The action was cancelled. You can use email and password instead.
+1114	Passkey isn't enabled for the project right now. Enable it from Authentication → Passkeys in Supabase and try again.
+1115	Passkey requires opening the app over HTTPS or from localhost.
+1116	Couldn't complete the Passkey process. Try again or use email and password.
+1117	Secure your sign-in with fingerprint
+1118	Turn on Passkey now so you can sign in easily after reinstalling the app.
+1119	Passkey isn't available in the current authentication library version.
+1120	The authentication server didn't return valid Passkey data.
+1121	Create your Dabbar account
+1122	Welcome back to Dabbar
+1123	Your name, email, and password to enter the dashboard.
+1124	Sign in with your email and password.
+1125	Create account
+1126	Change your password
+1127	Enter a new password for your account.
+1128	The sign-in service isn't available right now.
+1129	Enter the email first.
+1130	Sending the link...
+1131	If the email is registered with us, you'll receive a message with a link to change your password. Check your Inbox and Spam.
+1132	Couldn't send the recovery link right now.
+1133	The password must be at least 6 characters.
+1134	The passwords don't match.
+1135	Saving...
+1136	Password changed successfully. You can sign in now.
+1137	Couldn't change the password right now.
+1138	The recovery link is expired or invalid. Request a new one.
+1139	Opening with fingerprint...
+1140	No valid sign-in session was created.
+1141	Turning on Passkey...
+1142	Passkey turned on successfully. Next time you can sign in with fingerprint or Face ID.
+1143	Redirecting you to Google...
+1144	Couldn't sign in with Google.
+1145	Enter your first name.
+1146	Failed to create the account.
+1147	Supabase didn't return a user. Check the project settings.
+1148	The account was created. Open the confirmation message in your email, then sign in.
+1149	The email or password is wrong.
+1150	A sign-in error occurred, try again.
+1151	📱 On iPhone (Safari):
+1152	Tap the
+1153	Share button 􀈂
+1154	at the bottom of the browser
+1155	Scroll until you find
+1156	and tap it
+1157	Tap
+1158	at the top right
+1159	Close this page and open Dabbar from the icon on your screen
+1160	— you can't continue from here
+1161	📱 On Android:
+1162	The three dots ⋮
+1163	at the top right of the browser
+1164	Install app
+1165	Confirm by tapping
+1166	Install
+1167	💻 On a computer:
+1168	Tap the
+1169	install ⊕ icon
+1170	in the browser's address bar
+1171	or from the browser menu choose
+1172	Then open Dabbar from the icon that was installed
+1173	so you can continue
+1174	Your name
+1175	Quick log — Dabbar
+1176	Quick expense log
+1177	Dabbar is understanding the transaction...
+1178	Analyze transaction
+1179	Tap and start talking: say the amount and category clearly
+1180	Listening now... tap again to stop
+1181	Record again
+1182	Analyze audio
+1183	Snap the receipt or upload an existing photo, and Dabbar will read the items and amount
+1184	📷 Snap the receipt
+1185	Upload a photo from the gallery
+1186	Another photo
+1187	Analyze receipt
+1188	Sign in to the Dabbar app first so you can log an expense from here.
+1189	Open Dabbar to sign in
+1190	Open Dabbar
+1191	Confirm logging
+1192	Edit transaction
+1193	Type the transaction
+1194	Recording is longer than allowed
+1195	The voice note went over 30 seconds. Send a recording shorter than 30 seconds and try again.
+1196	Transcribing the audio and understanding the transaction...
+1197	Couldn't understand the voice recording.
+1198	Type or record the transaction
+1199	Recorded successfully
+1200	Couldn't save, try again.
+1201	We didn't capture any sound — check the microphone permission and try again.
+1202	You need to allow the site to use the microphone.
+1203	Reading the receipt...
+1204	Couldn't read the receipt. Try a clearer photo.
+1205	This file isn't an image
+1206	Dabbar accepts text, audio, or a receipt photo. Try a clear photo of the receipt.
+1207	We received the receipt photo
+1208	This file isn't audio
+1209	Dabbar accepts text, audio, or a receipt photo. Try a voice recording or a receipt photo and try sharing again.
+1210	We received the voice recording
+1211	Sign in first
+1212	Type the transaction here, like: paid 50 EGP coffee
+1213	Start recording
+1214	Stop recording
+1215	Sound wave while recording
+1216	Audio recording player
+1217	Play recording
+1218	The sound wave; tap it to jump within the recording
+1219	Bank movements — Dabbar
+1220	Bank movements classification guide
+1221	Withdrawals, deposits, and transfers between your accounts are recorded here for tracking only, without entering your total expenses.
+1222	Subscriptions and purchases count as real, direct expenses like anything else.
+1223	Any unclear movement goes under
+1224	Needs review
+1225	until you set it yourself.
+1226	All
+1227	Withdrawals / purchases
+1228	Deposits / incoming
+1229	Needs review ⚠️
+1230	You haven't made any financial transactions.
+1231	No movements in this category.
+1232	Dabbar — your trial summary
+1233	Fetching your real data...
+1234	You tried Dabbar for
+1235	days!
+1236	And this is what we saw from you 👇
+1237	0 EGP
+1238	Total you logged
+1239	transactions logged
+1240	Biggest leak in your days
+1241	The free trial is over 🎁
+1242	Keep going so you don't miss any detail —
+1243	Monthly subscription
+1244	Subscribe now
+1245	Let me think
+1246	Transfer the amount via InstaPay to the number below
+1247	Copy
+1248	Upload the receipt photo and write the name you transferred with
+1249	Upload the transfer receipt photo
+1250	Send the proof, and your subscription will be activated as soon as we confirm the transfer
+1251	Send proof
+1252	Received! We'll verify on InstaPay and activate you as soon as possible.
+1253	We can't find your data. Try opening the link from the bot button again.
+1254	This link is incomplete. Go back and open the bot on Telegram again.
+1255	Something went wrong fetching your data.
+1256	A connection error occurred. Try again.
+1257	You haven't made any transaction yet — log your first expense by voice or text and start taking control of your money.
+1258	{} the biggest transaction you logged was
+1259	{} EGP
+1260	on
+1261	. If you trim some of your non-essential spending, you could save
+1262	monthly.
+1263	{} EGP · {}%
+1264	Copied ✓
+1265	Upload the receipt photo first.
+1266	Sending...
+1267	A connection error occurred, try again.
+1268	The name you transferred with
+1269	Dabbar — quick access on iPhone (Siri Shortcuts)
+1270	⚡ iPhone
+1271	Quick access to log an expense — without opening Dabbar
+1272	iPhone doesn't have a notification tile like Android, but the
+1273	Shortcuts
+1274	app (built into every iPhone) gives you the same speed: a shortcut on the home screen, or even by voice with Siri.
+1275	Open the
+1276	app — it's built into every iPhone from Apple — if you can't find it, search for
+1277	Tap + to create a new shortcut
+1278	Then tap
+1279	Add Action
+1280	and search for an action called
+1281	Open URLs
+1282	Paste this link if you want to log by voice directly
+1283	Or this link if you want typing instead of voice
+1284	You can make both as two separate shortcuts, and give each a clear name (for example
+1285	Log by voice
+1286	Log by typing
+1287	Name the shortcut and save it to the home screen
+1288	From the shortcut settings (the ⓘ icon) choose
+1289	so it becomes an icon you tap like any app, or leave it in the Shortcuts app and run it from there.
+1290	(Optional) Turn on voice launch with Siri
+1291	From the same settings screen tap
+1292	Add to Siri
+1293	and save a phrase like
+1294	Log an expense by voice
+1295	— then say this phrase to Siri from anywhere and it opens Dabbar straight into recording mode.
+1296	🧩 Home screen widget
+1297	Download the Scriptable app (free)
+1298	from the App Store. It's what draws the widget on the iPhone home screen.
+1299	Download the Dabbar script and add it to Scriptable
+1300	Download dabbar-ios-widget.js
+1301	then open it with Scriptable (Share then Scriptable) or copy its contents into a new script.
+1302	Add a Scriptable widget (medium)
+1303	Long-press the home screen, then +, then Scriptable, then the medium size. Tap the widget then Edit: Script
+1304	dabbar-ios-widget, and in Parameter paste the account link token (you'll find it in Dabbar then My account then Banks).
+1305	The link opens Dabbar directly in recording or typing mode. If you're not signed in, it takes you to sign-in first and after you sign in it continues in the same mode automatically.
+1306	Need help?
+1307	Back to the Dabbar dashboard

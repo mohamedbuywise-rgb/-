@@ -1,0 +1,254 @@
+0	Welcome back! Your session ended, sign in again so we can continue together.
+1	A goal name and a valid amount greater than zero are required.
+2	You have {} active goals right now (the maximum). Cancel one of them first to start a new goal.
+3	You already have {} active goals.
+4	Something went wrong while recording the goal, try again.
+5	A valid amount greater than zero is required.
+6	You don't have an active goal right now.
+7	That goal isn't active or doesn't exist.
+8	You have more than one goal, you need to specify which one with the goalId.
+9	Something went wrong while updating your goal, try again.
+10	You don't have an active goal at all.
+11	Something went wrong while updating the goal date, try again.
+12	Something went wrong while canceling the goal, try again.
+13	No image was sent.
+14	You've used up your receipt-scan limits in the free trial. Subscribe to continue.
+15	You've reached this month's receipt-scan limit. It resets at the start of next month.
+16	I couldn't read this image even after more than one attempt{}. Try a clearer photo of the receipt or invoice.
+17	I read the receipt but something went wrong while recording it, try again.
+18	Roast me playfully 😂
+19	Write your question first.
+20	The question is too long, shorten it a bit.
+21	You've used up your question limits in the free trial. Subscribe to continue.
+22	You've reached this month's question limit. It resets at the start of next month.
+23	Couldn't load the expenses summary for now.
+24	Couldn't load the debts summary for now.
+25	
+26	
+27	
+28	
+29	Sorry
+30	Write the transaction description first.
+31	You've used up your text-entry limits in the free trial. Subscribe to continue.
+32	You've reached this month's text-entry limit. It resets at the start of next month.
+33	The voice note went over 30 seconds. Send a recording shorter than 30 seconds.
+34	The recording is too long. The maximum is 30 seconds.
+35	You've used up your voice-recording limits in the free trial. Subscribe to continue.
+36	You've reached this month's voice-recording limit. It resets at the start of next month.
+37	Type or record a clear description of the expense.
+38	I need a clear amount to understand the transaction.
+39	The image is empty.
+40	You've reached this month's maximum of 50 receipts. It resets at the start of next month.
+41	General expense
+42	Photographed receipt
+43	The amount isn't valid.
+44	Couldn't save the expense.
+45	Recorded an expense of {} {} on {}.
+46	I need the asset name to record it in your portfolio.
+47	Purchase of {}
+48	Recorded the purchase of {} worth {} {} in your investment portfolio.
+49	I don't have an asset named
+50	in your portfolio. Record it first from the portfolio screen.
+51	Investment asset sale
+52	Sale of {}
+53	— a gain of about {} EGP.
+54	— a loss of about {} EGP.
+55	Recorded the sale of {} worth {} {}{}
+56	Recorded {} worth {} {}.
+57	The person's name is required to record the debt.
+58	Recorded: you paid back {} {}.
+59	Recorded: {} paid you back {}.
+60	Recorded: {} now owes you {}.
+61	Recorded: you now owe {} {}.
+62	Couldn't save the receipt.
+63	Recorded the receipt with a total of {} EGP.
+64	The transaction type isn't supported.
+65	No asset number was sent.
+66	No transaction to record.
+67	✅ Recorded {} transactions successfully.
+68	No receipt number was sent.
+69	This receipt doesn't exist or was deleted before.
+70	The circle number and member name are required.
+71	No circle number.
+72	No occasion number.
+73	No debt number.
+74	No piggy bank number.
+75	No subscription name.
+76	Unknown action.
+77	One-time password (OTP) message — ignored.
+78	Rejected/failed transaction — ignored.
+79	Promotional message — ignored.
+80	Balance message without a transaction — ignored.
+81	Balance inquiry — ignored.
+82	The message doesn't have a clear amount and currency — ignored.
+83	No clear transaction amount in the message — ignored.
+84	The message isn't a completed transaction (no debit/deposit/transfer...) — ignored.
+85	The amount isn't valid — ignored.
+86	Empty message.
+87	Couldn't read the request. Make sure the message text is sent correctly (preferably download the new macro from the dashboard).
+88	A token and text are required.
+89	The token isn't valid.
+90	This feature is turned off on your account.
+91	Ignored.
+92	The sender isn't known as a bank/wallet, ignored.
+93	You've reached the daily SMS limit.
+94	The same message arrived twice within seconds, we recorded only one.
+95	You've used up your text-entry limits in the free trial.
+96	You've reached this month's text-entry limit.
+97	I couldn't understand the message as a completed transaction, ignored.
+98	🏦 Recorded automatically from a {} message{}
+99	Couldn't process the message.
+100	The person's name is required.
+101	You don't have any transactions recorded with
+102	The transaction ID is required.
+103	The transaction doesn't exist or doesn't belong to your account.
+104	You don't have any outstanding debts right now.
+105	You don't have any expenses recorded in {} yet.
+106	Compared to {}: you spent {}% {}
+107	Monthly report
+108	Month of {}
+109	report-{}.pdf
+110	You don't have any expenses recorded today yet.
+111	Daily report
+112	Day {}
+113	daily-report-{}.pdf
+114	Unknown type. Use person, debt-history, debts, monthly, or daily.
+115	Something went wrong generating the report, try again.
+116	A token is required.
+117	Text, a voice recording, or a receipt image is required.
+118	This feature is turned off on your account. Turn it on from My account.
+119	You've reached the daily limit.
+120	📤 Recorded from the iPhone Share Sheet
+121	You've used up your receipt-reading limits in the free trial.
+122	You've reached this month's receipt-reading limit.
+123	I couldn't read the receipt, try a clearer photo.
+124	You've used up your voice-recording limits in the free trial.
+125	You've reached this month's voice-recording limit.
+126	I couldn't hear the voice recording well, try again in a quieter place.
+127	No clear text.
+128	Something went wrong while processing the share, try again.
+129	This receipt doesn't exist.
+130	Monday
+131	Week {}
+132	Borrowed from {}{}
+133	Something went wrong fetching the data, try again.
+134	Enter the reminder title.
+135	Choose a valid date.
+136	No id.
+137	This installment doesn't exist.
+138	The date isn't valid.
+139	The transaction ID isn't valid.
+140	The transaction doesn't exist or was already deleted.
+141	The currency isn't valid.
+142	No data to update.
+143	Something went wrong while updating your data.
+144	You need to sign in first.
+145	Something went wrong setting up notifications.
+146	Sign-in is required.
+147	This account isn't linked to a Dabbar Telegram account yet.
+148	The account data is incomplete.
+149	Couldn't save the account name. Make sure you ran sql/bank-account-aliases.sql.
+150	Missing data.
+151	Couldn't set the account. Make sure you ran sql/bank-account-aliases.sql.
+152	The movement doesn't exist.
+153	Couldn't set the account.
+154	Not set
+155	Couldn't fetch the data.
+156	Couldn't update the status.
+157	Couldn't save the debt, try again.
+158	An unexpected error occurred, try again.
+159	The file is empty.
+160	For now we only support PDF account statements (exported directly from the bank's app). Image support is coming soon.
+161	You've used up your statement-upload limits in the free trial. Subscribe to continue.
+162	You've reached this month's statement limit. It resets at the start of next month.
+163	The file is corrupted or I can't read it.
+164	The file is too large (3 MB maximum). Try exporting a shorter period (one month instead of several).
+165	I couldn't open the file. Make sure it's a valid PDF and not password-protected.
+166	The statement is too long ({} pages). We currently support up to {} pages — try uploading a shorter period (one month, for example).
+167	This file looks like a scanned image, not a text PDF, so I couldn't read it. Try exporting the statement again as a PDF
+168	directly from the bank's app instead of scanning it.
+169	Bank statement
+170	Couldn't start the import.
+171	Recorded {} new transactions, and skipped {} that you already had (like bank messages).
+172	Recorded {} transactions from the statement.
+173	This import doesn't exist.
+174	The batch data is incomplete.
+175	The token isn't valid.
+176	Couldn't load the summary.
+177	
+178	
+179	
+180	
+181	
+182	🏦 A problem linking banks and wallets (SMS)
+183	💬 A support message from the website
+184	Write your message first.
+185	
+186	The service isn't set up correctly right now, try again later.
+187	🆔 Telegram:
+188	📧 Email: {}
+189	✉️ Message:
+190	Something went wrong sending the message, try again.
+191	This link is expired or invalid. Go back to the bot on Telegram and request a new link.
+192	An unexpected error occurred, try again.
+193	Enter the 6-digit link code.
+194	Something went wrong while checking the link code.
+195	The link code is invalid or expired. Request a new code from the bot.
+196	This account is already linked to a different Telegram account.
+197	Something went wrong while linking the account. Try again.
+198	A server error occurred. Try again.
+199	The notification subscription isn't valid.
+200	You're close to your monthly budget
+201	Your spending reached {} of {} EGP ({}%).
+202	Your {} budget is almost used up
+203	Your spending on {} reached {} of {} EGP.
+204	You calmly reached the needs limit
+205	Your needs reached {} EGP. Keep an eye on them calmly — you still have your plan under control.
+206	You're close to balancing your wants
+207	Wants reached {} EGP. A small pause now helps you protect the rest of the month.
+208	Bravo — you hit your savings goal
+209	You have {} EGP left from your income, so you nearly reached the 20% savings goal. Keep it up!
+210	Dabbar — {}
+211	EGP
+212	Riyal
+213	Incoming
+214	Debit
+215	Balance: {} {}
+216	Dabbar — money came into your account 💰
+217	Dabbar — a new movement on your account 💳
+218	Dabbar — a larger-than-usual expense 🚨
+219	{} EGP{}
+220	That's about {} {} your average spending ({} EGP).
+221	Dabbar — test notification ✅
+222	If you can see this message, notifications are working fine on your device.
+223	Dabbar is with you 🌱
+224	Great, Dabbar sees your tracking today. A small step every day makes a big difference.
+225	Dabbar is with you 🤝
+226	No expenses logged today yet. If you spent anything, log it in seconds.
+227	If you need to organize your money today, Dabbar is with you.
+228	Dabbar — remember your expenses?
+229	No expenses logged today yet. Log your first transaction in seconds.
+230	Number of transactions: {}
+231	Total: {} EGP
+232	Top category: {} — {} EGP
+233	Your day is nicely ready — open Dabbar and share it with your friends.
+234	No transactions were logged yesterday. Total spending: 0 EGP.
+235	Dabbar — your day is ready 🎉
+236	Dabbar — your week summary
+237	You logged {} transactions totaling {} EGP last week.
+238	Last week had no logged expenses.
+239	Dabbar — installment overdue ⚠️
+240	Dabbar — payment due reminder 🗓️
+241	Reminder: {}
+242	— {} EGP
+243	{} installments left
+244	The installment is overdue
+245	If you paid it, mark it
+246	I paid the installment
+247	from the app.
+248	{} is due today
+249	One day left
+250	{}{} — tomorrow.{}
+251	3 days left
+252	A week left
+253	Reminder in two days

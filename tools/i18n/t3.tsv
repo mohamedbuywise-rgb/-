@@ -1,0 +1,260 @@
+720	Recorded
+721	Transaction saved successfully
+722	Review before saving
+723	Settlement
+724	Owes you
+725	You owe
+726	We understood {} transactions — review them then confirm.
+727	Review the amount and category, then confirm.
+728	🎙️ Listening to you
+729	🧠 Understanding the transaction
+730	📝 Preparing the review
+731	📸 Reading the receipt
+732	🔎 Itemizing the products
+733	🧮 Preparing the total
+734	🧠 Understanding what you wrote
+735	🏷️ Choosing the category
+736	Couldn't understand the transaction.
+737	No internet right now — voice and receipts need internet. Type the transaction or use manual entry and it will be saved on your device.
+738	
+739	
+740	
+741	No internet, and I couldn't read the amount from your text. Type the amount in numbers (example: lunch 120).
+742	
+743	📦 No internet — {} ({}) was saved on your device and will be recorded when the internet returns. The category will be "Other" and you can edit it later.
+744	To log without AI, tap "If you want it without AI".
+745	Note — example: phone price
+746	Description — example: lunch or salary
+747	Syncing {} transactions...
+748	{} pending transactions, {} of them need review (saved on the device, not on the server yet).
+749	📦 {} transactions will be recorded automatically when the internet returns.
+750	📦 {} transactions are waiting.
+751	Enter a valid amount greater than zero.
+752	Enter the person's name first.
+753	Saving the debt...
+754	Couldn't save the debt.
+755	Debt saved successfully.
+756	Debt {} — {}
+757	📦 No internet right now — the debt was saved on your device and will be recorded automatically when the internet returns.
+758	Saving the transaction...
+759	Couldn't save the transaction.
+760	Income saved successfully.
+761	Expense saved successfully.
+762	📦 No internet right now — {} was saved on your device and will be recorded automatically when the internet returns.
+763	Enter the transaction first.
+764	Recorded successfully.
+765	Couldn't save.
+766	Please choose an image file.
+767	The image is too large, choose one smaller than 8 MB.
+768	Reading the receipt...
+769	Dabbar is reading the receipt...
+770	📥 Also recorded as a debt you owe to {}
+771	{} — recorded ({} items)
+772	Total
+773	Saved to all receipts ✅
+774	Couldn't read the receipt. Try a clearer photo.
+775	National Bank of Egypt
+776	Banque Misr
+777	QNB Alahli
+778	Vodafone Cash
+779	Etisalat Cash
+780	Orange Cash
+781	InstaPay
+782	Fawry
+783	
+784	Fetching your movements...
+785	No movements in this period.
+786	Show all
+787	{}{} EGP
+788	{} movements
+789	{} movements · {}
+790	{} EGP
+791	All banks and wallets
+792	Today
+793	Yesterday
+794	No matching movements.
+795	? Choose the account
+796	Name the account ••{}
+797	A short name that helps you tell your accounts apart within the same bank (e.g. salary, savings, shopping).
+798	Save
+799	Which account is this movement from?
+800	The bank message doesn't include the account number. Choose the right account.
+801	What is this movement really?
+802	{} — {} EGP. Set its type so it's recorded in the right place.
+803	They owe me (a debt owed to you)
+804	I owe them (a debt you owe)
+805	It was an expense / I paid for something
+806	Income I received
+807	No, leave it as a regular bank movement
+808	Something went wrong while stopping the recording. Try recording again.
+809	This browser doesn't support voice recording.
+810	The microphone isn't available right now. Make sure it isn't used by another app and try again.
+811	The microphone route was closed — check the microphone permission or disconnect Bluetooth and try again.
+812	The microphone was muted during recording — make sure another app isn't using it.
+813	The audio recorder hit an error. Try closing any app that uses the microphone and record again.
+814	We didn't record any sound at all — try allowing the browser to use the microphone from site settings and try again.
+815	We didn't record any sound at all — check the microphone permission and try again.
+816	Speak clearly: the amount, then the category.
+817	Microphone permission denied. Open site settings, allow the microphone, then try again.
+818	The microphone is in use or unavailable right now. Close any app using it and try again.
+819	We can't open the microphone right now. Check the permission and try again.
+820	Remaining: {}/{}
+821	🎉 Congratulations! You reached your goal in full.
+822	Reading the receipt
+823	Itemizing each product
+824	Reviewing the total
+825	Pharmacist
+826	Medicine
+827	Pharma
+828	Installment
+829	Deferred
+830	Fetching the receipts...
+831	Opening the receipt...
+832	No items recorded for this receipt.
+833	Total — {} items
+834	📥 This receipt was also recorded as a debt you owe to {}
+835	All items and expenses linked to it will be deleted.
+836	Delete this receipt?
+837	Dabbar finally helped me see where my money is going 🌱 Try it, it'll make a difference for you: {}
+838	Copied ✅
+839	Your week
+840	Best day of the week
+841	Your month
+842	Best week of the month
+843	Your year
+844	Best month financially
+845	I can't prepare the card image right now. Open the card and try again.
+846	Dabbar Wrapped
+847	The card image was copied. Paste it into WhatsApp or anywhere you like.
+848	The image was prepared and saved. Pick it from your phone's share button or send it from the gallery.
+849	In {}
+850	💰 Spent {}
+851	🔝 Biggest item: {}
+852	💡 Saved about {}
+853	With Dabbar — your personal accountant
+854	There was a problem sharing the image.
+855	+ {} more transactions
+856	Day {}:
+857	📊 {} transactions
+858	Working it out for you... 😏
+859	Typing...
+860	🔄 Try again
+861	No reply came this time.
+862	
+863	A small error happened while I was answering.
+864	I couldn't reply right now.
+865	Spent
+866	{} categories
+867	{}{} net
+868	{}% of goal
+869	New
+870	Good evening
+871	{}, {}
+872	Today's summary
+873	Your daily financial activity
+874	Your spending breakdown
+875	The most impactful categories
+876	Smarter savings steps
+877	Suggestions made for you
+878	Debts and loans
+879	Track what you're owed and what you owe
+880	Your important dates
+881	Your upcoming reminders
+882	Your financial assistant
+883	Ask and make a clearer decision
+884	Your account and settings
+885	Your data and preferences
+886	monthly-report.pdf
+887	daily-report.pdf
+888	Daily report — Dabbar
+889	Your free trial ends today
+890	Only {} {} left on your free trial
+891	After today you'll still see your data but won't be able to log new transactions. Subscribe now so nothing gets interrupted.
+892	Subscribe now so logging and tracking keep running without any pause.
+893	Subscribe now — that's only {} EGP a day
+894	🎁 {} days left on your free trial
+895	So far you've logged {} {} and been active {} {} — subscribe now so the service isn't interrupted.
+896	Over these days you'll see for yourself how Dabbar saves you time and keeps you on top of every pound you spend — without opening a spreadsheet or typing a number by hand. Subscribe now so the service isn't interrupted.
+897	⏳ Your free trial days are over
+898	You logged {} {} and saw how Dabbar tracks your expenses and debts as they happen — now keep going so you don't miss any detail of your accounts, for only {} EGP a month.
+899	You tried Dabbar and saw how it tracks your expenses and debts as they happen — now keep going so you don't miss any detail of your accounts, for only {} EGP a month.
+900	Just getting started
+901	You logged it on {} {} active
+902	Log your first transaction
+903	The category you spent the most on ({})
+904	You've spent {} so far
+905	Not enough transactions yet
+906	Copy 📋
+907	Image selected — tap to change it
+908	Sending the proof...
+909	🌱 Trial subscriber
+910	👑 Active subscriber
+911	🏅 Among {} active subscribers supporting Dabbar
+912	🏅 One of Dabbar's active subscribers
+913	Thank you,
+914	🙏 Your staying with us ({} active days so far) is what keeps us going and improving.
+915	Renew your subscription and keep your place among the supporters 🚀
+916	Preparing...
+917	dabbar-honor-board-card.png
+918	I'm one of Dabbar's active subscribers 🏅
+919	Dabbar user
+920	Linked to Telegram account #{}
+921	✅ Connected
+922	Linking is optional — the dashboard works for you as usual. Tap if you'd like to link it
+923	Optional
+924	Linking your account...
+925	The Telegram link was moved to this account, and your old data is safe.
+926	Linked successfully ✅
+927	Couldn't reach the server right now. Try again.
+928	✅ Confirm link
+929	Your account data in the cloud won't be deleted.
+930	Clear the saved plan settings on this device?
+931	Plan settings cleared from the device after confirmation.
+932	Saving the photo...
+933	Something went wrong while preparing the photo.
+934	Couldn't save the photo. Make sure you ran sql/profiles.sql on Supabase (it creates the photos bucket), and try again.
+935	Save photo
+936	Remaining this month and today's piggy bank
+937	💰 Remaining this month
+938	🐷 Today's piggy bank
+939	📋 Your day in detail
+940	No cash movement recorded today.
+941	Banks, wallets, and quick logging
+942	Link your bank or log your expense from outside the app
+943	Share Dabbar
+944	Share the app with your friends
+945	Notification center
+946	Your plan summary and alerts as they happen
+947	Turn on notifications
+948	Turn them on so your alerts reach your device
+949	Preferences and alerts
+950	Appearance and installation
+951	Privacy and subscription
+952	Security, premium, and data control
+953	Skip
+954	Welcome to Dabbar
+955	Before you start, give us half a minute to show you the most important things Dabbar can do for you.
+956	Logging expenses
+957	Log your expense the way that suits you
+958	By voice, plain typing, or a photo of a receipt — Dabbar understands and categorizes it on its own. Even from another app, you can Share the audio, image, or message straight to Dabbar.
+959	🎙️ Voice
+960	⌨️ Typing
+961	🧾 Receipt
+962	↗️ Share from any app
+963	Investment portfolio
+964	Track your assets moment by moment
+965	Add your stocks, currencies, or any assets you have, and Dabbar tracks their market prices as they change without opening 10 apps.
+966	📈 Stocks
+967	💱 Currencies
+968	🪙 Other assets
+969	⏱️ Live prices
+970	Total safety
+971	Dabbar reads your bank messages, with no password
+972	No card linking and no personal password — just a simple permission for Dabbar to read bank or wallet messages, and your expenses log themselves. The whole thing takes under a minute.
+973	🔒 No password
+974	📩 SMS reading only
+975	⚡ Under a minute
+976	Financial planning
+977	Your income, budget, and commitments in one place
+978	Write down your monthly income, set your budget, and record your fixed commitments like rent and installments — and Dabbar builds you the full picture of your money.
+979	💵 Monthly income

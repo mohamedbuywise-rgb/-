@@ -1,0 +1,240 @@
+230	— that's day {} of your tracking streak 🔥
+231	You documented your day today
+232	You logged {} transactions totaling {} today{}. Every day you log brings you closer to a full, clear picture of your money.
+233	This is where the value shows up, step by step
+234	You'll find a summary of your tracking, a gentle alert when you near a category limit, and a small suggestion to help you stay on plan.
+235	Simple summaries and suggestions to help you stay close to your plan.
+236	{} helpful messages are waiting for you.
+237	You're caught up on all current messages.
+238	No new notifications right now.
+239	Couldn't reach the notifications service.
+240	Turn off
+241	This browser doesn't support notifications.
+242	Notifications are blocked in the browser's site settings — allow them first, then come back and tap Turn on.
+243	Couldn't start the notifications service right now. Refresh the page and try again.
+244	Active — you'll see a notification with 🎙️ Voice and ✍️ Type; tap it from anywhere.
+245	This device isn't subscribed. Tap
+246	first.
+247	Test notification sent ✅ If it doesn't appear within seconds: in Android Settings → Apps → Chrome → Notifications make sure they're on, and turn off battery saver for Chrome.
+248	VAPID keys aren't configured on the server (VAPID_PUBLIC_KEY / VAPID_PRIVATE_KEY).
+249	The server doesn't see an active subscription for your device. Tap
+250	then
+251	again.
+252	The subscription was created with old keys — refresh the page and it will renew automatically, or tap
+253	The subscription expired in the browser — tap
+254	There's a problem with the browser's notification service.
+255	Sending failed (error {}). {}
+256	No notification was sent. Refresh the page and try again.
+257	Couldn't send the test notification.
+258	🔔 Try a notification now
+259	Notifications will be available once VAPID keys are set on the server.
+260	This browser doesn't support push notifications. Try Chrome or Edge over HTTPS.
+261	(the device subscription was renewed with the server)
+262	(the device subscription was registered on the server)
+263	Notifications are on for this device.{}
+264	Chrome is blocking notifications for this site. Allow them from site settings, then try turning them on again.
+265	Turn them on so we can remind you about your spending and warn you before you go over budget.
+266	Couldn't load notification settings.
+267	Chrome is blocking notifications for this site. Open site settings and change it to Allow.
+268	Notifications weren't turned on.
+269	Notifications turned on successfully.
+270	Couldn't turn on notifications right now.
+271	Notifications were turned off on this device.
+272	Couldn't turn off notifications right now.
+273	Save notification settings
+274	Saving...
+275	Saved
+276	Notification settings saved.
+277	Couldn't save
+278	Couldn't save notification settings.
+279	Fingerprint / Face ID
+280	Local pattern
+281	On: {}
+282	Choose a fingerprint or a local pattern before opening your data
+283	Dabbar is locked
+284	Unlock with your local lock to access your financial data.
+285	Draw the pattern to open Dabbar.
+286	Choose a pattern with at least 4 dots.
+287	Clear selection
+288	Confirm pattern
+289	The patterns don't match. Draw the same pattern twice.
+290	The patterns don't match. Try creating the pattern again.
+291	Local pattern turned on for this device.
+292	This device or browser doesn't support fingerprint here. Try the local pattern.
+293	Fingerprint / Face ID turned on for this device.
+294	Couldn't turn on fingerprint. Make sure a screen lock is set, or try the local pattern.
+295	Unlock with fingerprint / Face ID
+296	Couldn't verify. Try again or use the pattern.
+297	Unlock with pattern
+298	Incorrect pattern.
+299	Turn off the local lock on this device?
+300	Local lock turned off.
+301	Back again? Unlock with your local lock to access your financial data.
+302	You said
+303	Not now
+304	recently. We'll ask again in {} {} — or tap here again after that if you change your mind.
+305	From Chrome: ⋮ → Settings → Site settings → Notifications → Dabbar → Allow, then come back and tap Turn on.
+306	The browser doesn't allow opening it automatically — we copied the link, open a new tab and paste it in the bar at the top.
+307	A new tab opened with site settings — if it didn't, the link was copied for you too.
+308	Open a new tab and paste this link: {}
+309	A new tab opened with site settings.
+310	Sign out of Dabbar on this device?
+311	Sign out
+312	Tap the
+313	Share
+314	button at the bottom of the browser, then choose
+315	Add to Home Screen
+316	Open the browser menu (3 dots at the top right), and choose
+317	Add to Home screen
+318	or
+319	Preparing the file...
+320	Couldn't download the file
+321	debts-full-statement.pdf
+322	Something went wrong, try again.
+323	Couldn't load data
+324	There's a delay loading your data right now. Try again or check your internet.
+325	Couldn't fetch your data right now.
+326	📴 Offline — showing your last saved data. Your new transactions will be recorded when the internet returns.
+327	Data saved on your device (offline)
+328	Last updated {}
+329	{} days
+330	Your financial position
+331	Income and budget
+332	Enter your income and/or monthly spending limit, and Dabbar will calculate what's available in the card below.
+333	💰 Your monthly income
+334	🎯 Your monthly budget
+335	Spending limits per category (optional)
+336	A planning limit only, not a logged expense — Dabbar warns you when you reach
+337	of it.
+338	Add
+339	📌 Expected monthly commitments (rent / subscriptions)
+340	For planning only — not added to actual spending until you log them.
+341	Save my plan
+342	Manage
+343	Quick review
+344	Your latest transactions
+345	Clear the income, budget, and expected commitments plan from this account? This can't be undone.
+346	Clear permanently
+347	Income and budget plan cleared after confirmation.
+348	Enter the category name first so we can add a limit for it.
+349	from your income and budget, minus what you've actually spent so far today
+350	from your income this month, minus what you've actually spent so far today
+351	from your monthly budget, minus what you've actually spent so far today
+352	{}% still available to you
+353	Available to you now
+354	💸 Actually spent:
+355	Available
+356	Your income or budget, minus only what you've actually spent.
+357	Enter your income or spending limit so Dabbar can calculate what's available.
+358	Recurring commitments are for planning only and aren't deducted automatically.
+359	Available now: {}
+360	Tap to add your income or budget
+361	No categories set; pick a category from the list if you want to track it.
+362	Add rent or subscriptions to see your monthly commitments in front of you.
+363	Remove the commitment "{}" from this month's plan?
+364	Expense · {}
+365	Log your first transaction and it will show up here for review
+366	Enter a valid amount greater than zero.
+367	Transaction updated.
+368	Couldn't update the transaction right now.
+369	Your financial plan was saved.
+370	There was a problem saving the plan on the server. It was saved on your device only for now and we'll retry.
+371	Enter a name and amount for the recurring expense.
+372	Other
+373	After deleting, it will be deducted from today's and this month's totals, and you won't be able to restore it.
+374	Delete this transaction?
+375	Couldn't delete the transaction right now.
+376	Transaction deleted and deducted from your totals.
+377	Needs
+378	Wants
+379	Savings
+380	{} left
+381	{} over
+382	{}%
+383	Gently: wants went {} over target — you have a chance to get back to balance.
+384	Great — your savings went {} over target.
+385	You're doing well — {} left to reach your savings goal.
+386	Log an expense first so we can show its categories here.
+387	Category classification saved and the card was updated.
+388	Coffee
+389	Cafe
+390	Coffee is starting to change your habits
+391	Your coffee spending rose about {}% compared to last week. It looks like cafes have become part of your regular budget.
+392	Dabbar suggestion: try two days of home-brewed coffee this week.
+393	Restaurants
+394	Delivery
+395	The home kitchen went on vacation
+396	Your spending on {} rose about {}% compared to last week. Delivery seems to be taking over.
+397	Dabbar suggestion: cook two meals at home before your next order.
+398	Looks like {} has become a habit
+399	Your spending on {} rose about {}% compared to last week. Dabbar noticed the change before it becomes routine.
+400	Dabbar suggestion: review any new payment in {} before you confirm it.
+401	{} is running the month
+402	{} alone took {}% of your current spending. Dabbar sees who's become the finance manager.
+403	Dabbar suggestion: set a small cap for {} in the coming period.
+404	Your stomach became a budget partner 🍔
+405	Food, delivery, and restaurants took the biggest share of today's spending — looks like the home kitchen is on vacation.
+406	A whole day between taxis and rides 🚕
+407	Transport took the biggest share of today's spending — maybe consider a public transport pass?
+408	Bills took your whole day 🧾
+409	Bills were the biggest item you spent on today — at least there are no surprises next month.
+410	Your hand was on the card all day 🛍️
+411	Shopping took the biggest share of today's spending — did you really need those pants?
+412	An official fun day 🎬
+413	Entertainment took the biggest share of today's spending — did you enjoy it? Then it's worth it.
+414	Your body cost you today 💊
+415	Health was the biggest item you spent on today — an investment in yourself, and that's good.
+416	A day of investing in your mind 📚
+417	Education took the biggest share of today's spending — Dabbar is proud of you.
+418	The house is eating from your pocket 🏠
+419	Home and furniture were the biggest item you spent on today — the house is getting nicer bit by bit.
+420	Your wardrobe grew today 👕
+421	Clothing took the biggest share of today's spending — a new look is worth it.
+422	Monthly subscriptions day 🔁
+423	Your subscriptions took the biggest share of today's spending — worth reviewing to see what you actually use.
+424	An official generosity day 🎁
+425	Gifts and donations took the biggest share of today's spending — hand on heart, that's nice.
+426	A pamper-yourself day 🧴
+427	Personal care took the biggest share of today's spending — you deserve to pamper yourself sometimes.
+428	{} was the star of your day today
+429	{} took the biggest share of your spending today.
+430	{} ({} of a total of {}, about {}%)
+431	Dabbar suggestion: tomorrow try cutting back a little on {} and see the difference.
+432	{} transactions
+433	From {} {} (sales/income + borrowed loans)
+434	No income recorded yet this month.
+435	Nothing yet ⌄
+436	Exactly the same as last month's income
+437	You earned {}% more than {}
+438	You earned {}% less than {}
+439	No income transactions yet this month.
+440	more
+441	less
+442	You spent {}% {} than {}
+443	Log a few more transactions and we'll compare with last month.
+444	{} — {}% of this month's spending
+445	Total
+446	Log your first transaction and you'll see the category you spend on most here.
+447	No goal set right now. Set a goal and start saving for it.
+448	Start a goal
+449	A new month has officially begun 🎉
+450	The numbers went back to zero — not because anything was lost; you finished {} last month and it's recorded and safe in the archive. Now it's a fresh page, let's start right.
+451	Dabbar suggestion: open the archive and see how last month went before you start.
+452	Preparing the image...
+453	Dabbar — your personal accountant
+454	Something went wrong while preparing the image.
+455	Share the insight
+456	{} days left until month-end
+457	You went over by {}
+458	0 EGP
+459	{}/day
+460	+ Add to wallet
+461	📅 from {} days
+462	Day-by-day wallet
+463	Choose or enter an amount first.
+464	Added to the wallet! 🐷
+465	The wallet was reset, start again whenever you like 🐷
+466	You logged {} transactions today.
+467	Log your first transaction today and you'll find it here.
+468	Deposit
+469	Withdrawal

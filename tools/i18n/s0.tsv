@@ -1,0 +1,467 @@
+0	Reading the receipt...
+1	Dabbar extracts the amount and items
+2	Write your transaction your own way
+3	Smart typing
+4	Example: "I spent 50 EGP on coffee today"
+5	Example: I spent 50 EGP on coffee today
+6	☕ Coffee 50
+7	🚌 Transport 30
+8	💰 Salary
+9	Analyze and log
+10	Quick manual entry
+11	Choose the type and category and save without AI.
+12	Available to everyone
+13	🧾 Expense
+14	💰 Income
+15	🤝 Debt
+16	Category
+17	🚗 Transport
+18	🧾 Bills
+19	🛍️ Shopping
+20	💊 Health
+21	📚 Education
+22	🛋️ Home
+23	👕 Clothing
+24	🔁 Subscriptions
+25	🎁 Gifts & donations
+26	✨ Other
+27	💼 Salary
+28	🤝 Service sale
+29	📈 Investment returns
+30	↩️ Money refund
+31	🧾 Miscellaneous income
+32	Type the category name yourself
+33	Enter the category name first
+34	Person's name — example: Ahmed
+35	📤 They owe me (I lent them)
+36	📥 I owe them (I borrowed from them)
+37	Sync now
+38	Save transaction
+39	Recording...
+40	Cancel recording
+41	Stop and analyze
+42	Listen to your recording to make sure it's clear before we send it — it will be recorded as
+43	Send for analysis
+44	Record again
+45	💰 Income and budget this month
+46	💡 You haven't set your monthly income or budget yet.
+47	Set it from the "Income and budget" section below, and "What you can spend this month" will show up here automatically.
+48	🎯 Set your income and budget now
+49	💸 What you can spend this month
+50	from your income or budget, minus what you've actually spent so far today
+51	💰 Your income this month
+52	Your total spending this month
+53	Your real data
+54	Your investment portfolio
+55	Current total
+56	Update market prices (gold/crypto)
+57	Update market prices
+58	No assets recorded yet. Add your first asset (gold, funds, crypto... etc.) and we'll total up your portfolio automatically.
+59	Asset actions
+60	Delete asset
+61	Asset name (e.g. gold, Banque Misr funds)
+62	Optional description (e.g. 120 grams or 24 karat)
+63	Quantity (optional)
+64	Unit/symbol — grams, BTC, or a stock ticker like COMI.CA
+65	If you enter a quantity and a supported symbol (gold, crypto, or a stock ticker), we'll update the value automatically every day from the market price.
+66	Current value in EGP
+67	Purchase value in EGP (optional — so we can calculate profit/loss)
+68	Alert me if it moves more than % in a day (optional)
+69	Choose the asset icon
+70	Add a new asset
+71	The value you enter is the latest real valuation of the asset you own, and you update it whenever you like.
+72	Withdrawals, deposits, and transfers — without affecting your spending
+73	Balance your spending
+74	Compare your needs, wants, and savings
+75	View
+76	Your monthly income
+77	The math is simple: target = a share of your income, actual = what you spent
+78	Change any category from needs to wants or vice versa
+79	Categories
+80	View all ‹
+81	Tap any category in the circle
+82	🎯 Your goals
+83	Edit category classification
+84	Choose whether each category counts as needs or wants
+85	Save classification
+86	Dabbar reads you
+87	Your personal accountant
+88	Close the card
+89	Honestly, champ...
+90	Dabbar reads your habits
+91	Log a few expenses and I'll tell you a personal note worth sharing.
+92	Dabbar suggestion: stay aware of your next habit.
+93	Tell me more
+94	A new page, champ...
+95	The numbers went back to zero — not because anything was lost, that's normal, every month comes with a fresh page.
+96	Dabbar suggestion: open the archive and see how last month went.
+97	See the months archive
+98	The category you spent the most on
+99	PDF report
+100	Archive
+101	You can request the report at any time during the month, no need to wait for the end.
+102	Dabbar reads you at night
+103	Last updated today...
+104	Dabbar reads your day
+105	Log today's expenses and I'll tell you what took the biggest share.
+106	See all of today's expenses
+107	How much is left of the month's budget?
+108	Remaining from the budget
+109	You can spend daily
+110	Set your monthly budget so we can show you how much you can spend daily until month-end.
+111	Set your budget from here ←
+112	A motivational number only, not a real deduction from any account.
+113	Add a coin today
+114	Another amount
+115	↺ Start over
+116	Try the "Today's coin" wallet — a small amount that builds up every day.
+117	Start
+118	Today's spending
+119	See your day beautifully
+120	A card ready to share with your friends
+121	These are
+122	today only
+123	expenses and reset daily — your transactions aren't deleted, you'll find them all in the
+124	"Monthly"
+125	tab and in the month's PDF report.
+126	Number of transactions
+127	Your daily average (this month)
+128	View cash movement details
+129	Cash movement (today)
+130	Resets at 12 PM
+131	In (received from)
+132	Out (sent to)
+133	Net movement
+134	Net = In − Out for today only
+135	Cash movement details
+136	Loans and debts recorded today
+137	Today's transactions:
+138	PDF report for today
+139	A report of today's transactions only — you can share it or keep it.
+140	→ Back to assistant
+141	The category that takes the most from your budget
+142	🔁 Your fixed subscriptions
+143	🛒 Purchases that keep repeating
+144	Not subscriptions — but Dabbar noticed you buy them again at roughly the same amount every couple of months.
+145	All categories in detail:
+146	Tap any category ‹
+147	A look at your spending
+148	Analyzing...
+149	📊 Spending distribution by day of the week
+150	Total:
+151	🔄 Updates every week
+152	👆 Tap any bar to see the number of transactions
+153	Log a few more transactions and we'll start giving you tips based on your actual spending.
+154	Your net position now
+155	Owed to you by people
+156	You owe people
+157	📚 Debt files
+158	Debt sections
+159	Active debts
+160	Savings circles and occasions
+161	Settlement message
+162	Account statement
+163	Search by name...
+164	To record a new loan, send a message like "gave Mohamed 200 EGP" or "borrowed from Sara 100 EGP".
+165	Download the full debts statement (PDF)
+166	Active savings circles
+167	+ New savings circle
+168	Circle name
+169	Example: work savings circle
+170	Number of members
+171	Your turn number
+172	Monthly installment
+173	Circle start date
+174	Members' names
+175	(optional, separated by commas)
+176	Mohamed Saeed, Me, Sara Hassan
+177	Save circle
+178	Occasions (weddings and gatherings)
+179	+ New entry
+180	💸 Total I gave at occasions
+181	📋 Number of recorded occasions
+182	Person's name
+183	Example: Ahmed Ali
+184	Occasion type
+185	Engagement
+186	Newborn celebration
+187	Feast
+188	Type the occasion type
+189	Count it as a debt they'll pay back to me (goes into the debts account)
+190	Reminders will reach you as a Telegram message on time
+191	Telegram isn't linked yet — link it so they reach you outside the app
+192	Link Telegram
+193	All your important reminders in one place, so you never forget a commitment.
+194	Upcoming reminders (a day or two)
+195	📆 Fixed installments
+196	Loading...
+197	Upcoming reminders
+198	Reminder name
+199	Example: car installment payment
+200	Date
+201	(optional)
+202	Enter the amount if you like
+203	This is a fixed installment (not a regular reminder)
+204	Number of remaining installments
+205	Cancel editing
+206	The amount is optional, you can add the reminder without it.
+207	Your personal financial assistant
+208	Dabbar thinks with you 🧠
+209	Suggestions, forecasts, and a chat based only on your real data
+210	Dabbar assistant sections
+211	Categories
+212	Tips
+213	Close the suggestion
+214	Calculating the forecast...
+215	🎯 Your financial goal
+216	Goal name (e.g. a BMW car or a trip to Turkey)
+217	Amount needed
+218	Example: 20000
+219	📅 Date to reach the goal
+220	Start this goal
+221	Choose the goal icon
+222	Just write your goal's name and leave the rest to us — Dabbar is with you step by step until you reach it 💪
+223	You have 3 active goals right now (the maximum). Cancel one of them to start a new goal.
+224	Saved:
+225	Goal:
+226	🗓️ Goal date
+227	How much did you save?
+228	Cancel goal
+229	📸 Scan a receipt
+230	Snap a receipt or invoice, and Dabbar will read the amount and category and log it automatically.
+231	Snap the receipt
+232	Upload from gallery
+233	Dabbar analyzes each item and its price
+234	Extracting receipt data
+235	Splitting items and prices
+236	Preparing the entry
+237	🧾 All receipts
+238	Your spending Wrapped
+239	A summary of your weekly, monthly, and yearly spending — ready to share
+240	💬 Ask Dabbar
+241	Hi! Ask me anything about your spending, debts, or goal, and I'll answer from your real data.
+242	😂 Roast me playfully
+243	Why did I spend more this month?
+244	How can I save more?
+245	Can I afford to buy something for 1000 EGP?
+246	Type your question...
+247	Change your photo
+248	Profile photo
+249	🏅 Loyalty
+250	Share my badge
+251	Get to know Dabbar
+252	A quick intro to all of Dabbar's features
+253	Link your account to Telegram
+254	Checking the link status...
+255	We're a fully web app, and Telegram is the only way we deliver your personal messages and alerts 💬 Tap here and start linking in half a minute.
+256	Import your data from another app
+257	Upload the export file (CSV / Excel) and we'll understand it and take your data without you typing it by hand
+258	The name of the app you're importing from (optional)
+259	If the page closes in the middle of the import, open the "My account" tab again and it will continue from where it stopped without repeating any transaction.
+260	Upload a bank statement
+261	Export the PDF statement from your bank's app and upload it here — we'll record all its transactions at once
+262	It must be a text PDF statement (not a scanned image) — the option exists in almost every Egyptian bank app under "Account statement" or "Statement". If you have bank SMS turned on, we won't duplicate any transaction you already have.
+263	Share Dabbar with your friends
+264	Your money deserves organizing — and so do your friends' 🌱
+265	From WhatsApp or anywhere — without opening Dabbar
+266	Back
+267	Log from outside the app
+268	Select a text with an expense in any app, or use a quick shortcut from the home screen — without opening the app at all.
+269	✈️ Telegram
+270	Android
+271	iPhone
+272	Easiest on Android and iPhone: log from Telegram
+273	Link your account to Telegram once (with a 6-digit code)
+274	✍️ Text: send the bot "I spent 50 EGP on coffee"
+275	🎙️ Voice: send a voice message and say "I paid 200 for electricity"
+276	🧾 Receipt: snap the receipt and send it as a photo — Dabbar reads the amount and items
+277	Link and enable Telegram
+278	Open the bot
+279	Voice and smart receipts depend on your plan (VIP), and text is always available. And you can Share any text or image to Telegram and choose the bot.
+280	Method one: share text
+281	Select any text with an expense in any app
+282	Tap the Share button
+283	Choose Dabbar from the list
+284	Review and confirm — it's recorded instantly
+285	Method two: a shortcut from the home screen
+286	Long-press the Dabbar icon
+287	Choose "Quick entry" from the menu that appears
+288	Type your expense — it's recorded instantly without opening the app
+289	Works on most modern Android devices, and needs Dabbar installed on the home screen.
+290	Tap the "Install iPhone shortcut" button below
+291	Tap Add Shortcut in the message that appears
+292	Use it from the home screen or with Siri
+293	Type or say your expense — it's recorded instantly
+294	⬇️ Install iPhone shortcut
+295	Note: direct Sharing to Dabbar isn't available on iPhone. Use the shortcut, or Share any text or image to Telegram and choose the bot.
+296	Automatically log bank and wallet messages — Android and iPhone
+297	💳 Link automatic bank movements
+298	Dabbar gives you a smart, fast way to log your spending and banks automatically in the background as it happens, without entering any data by hand. Pick your phone's operating system below and start.
+299	First: Android (fully automatic via MacroDroid)
+300	Install the official MacroDroid app from Google Play
+301	Download your token file (it has the token and webhook link ready)
+302	Open the file to import it automatically inside MacroDroid, then tap "Enable" and grant notification-reading permission once
+303	From this moment, any bank message or notification is recorded in Dabbar automatically and instantly in the background
+304	🎬 Watch the video guide (step by step)
+305	80 seconds
+306	Your browser doesn't support video playback, download the file directly from
+307	here
+308	🔲 Play floating (you can follow it while applying the steps in MacroDroid)
+309	▶️ Install MacroDroid from Google Play
+310	🔗 Already have the app? Open the token setup directly
+311	MacroDroid is available on Google Play. After installing it needs notification-reading permission depending on your device settings, and Dabbar identifies your bank/wallet automatically from the message sender's name.
+312	Second: iPhone (via Apple Shortcuts)
+313	Tap "Download Dabbar shortcut" — it opens the Shortcuts app and loads the shortcut ready with your token
+314	From the Shortcuts app ⬅️ Automation ⬅️ (+) ⬅️ choose a "Message" or "Notification" trigger
+315	Set a keyword like EGP or your bank's name, and choose to run the "Dabbar" shortcut
+316	Turn off "Ask Before Running" so it runs in the background without interruption
+317	iPhone doesn't let an outside app silently read all bank SMS like Android — but with this automation your phone safely sends your bank messages to Dabbar as soon as they arrive.
+318	📱 Download the Dabbar direct shortcut
+319	🏦 Currently supported banks and wallets
+320	🛠️ Not working for me?
+321	Not working for me?
+322	Open the step that matches your problem. You'll find where to set it, the common cause, and the practical fix in short form.
+323	Pick one step and open it, and you'll find the fix organized in 3 simple parts.
+324	Still not working after all the steps?
+325	Send us the details of the problem (and a screenshot of the notification settings screen if you like), and we'll look at it with you.
+326	📩 Contact support
+327	Write your problem here... (e.g. I did all the steps and the expense still doesn't get recorded from CIB messages)
+328	Your message arrived!
+329	We'll reply on Telegram — you can continue the conversation there with voice, photos, or video as you like.
+330	💬 Open the Telegram chat
+331	Light / Dark mode
+332	Dabbar notifications
+333	Turn them on so we remind you about your spending and warn you before you go over your budget. End-of-day summary at 12:00 AM.
+334	Chrome blocks notifications for the site automatically. Tap the button below — it will try to open the site settings page in a new tab, and if the browser refuses to open it automatically (this often happens for security reasons), we'll copy the link for you and you paste it yourself in a new tab.
+335	Open site settings
+336	Daily reminder if there are no expenses
+337	End-of-day summary — 12:00 AM
+338	Weekly summary
+339	Budget-limit alert
+340	Instant bank (SMS) movements
+341	Payment due reminders
+342	Dabbar's daily message — a gentle reminder that Dabbar is here
+343	Trial or subscription ending
+344	A much bigger than usual expense
+345	⏰ Reminder time
+346	8:00 AM
+347	Reminder time
+348	🎯 Alert threshold
+349	of the budget
+350	Decrease
+351	Increase
+352	Alert threshold
+353	Quick access (voice / text)
+354	A fixed notification in the notification bar with a 🎙️ Voice button and a ✍️ Type button, so you can log from anywhere without opening Dabbar and looking for the icon.
+355	On iPhone: the closest solution is a Siri shortcut —
+356	Learn how from here
+357	Here you'll find your plan summary, a near-limit alert, and a small suggestion to help you manage better.
+358	Mark all as read
+359	Install Dabbar on your home screen
+360	Open the dashboard in one tap without looking for the link again.
+361	Hide
+362	Install now
+363	Dabbar Premium
+364	Unlock all of Dabbar's power
+365	Smart tracking, detailed reports, and bank-grade security for your data — with no monthly limits.
+366	📊 Smart tracking
+367	Every expense, clearly
+368	📈 Reports
+369	A deeper understanding of your money
+370	🔒 Bank-grade security
+371	Your data is encrypted
+372	♾️ No limits
+373	All features unlocked
+374	Subscribe now — less than the price of a cup of coffee a day ☕
+375	Transfer
+376	via InstaPay to the number:
+377	Upload the transfer receipt photo:
+378	Tap to upload the receipt photo
+379	Receipt preview
+380	The name you transferred with (if different from your name here):
+381	Example: Mohamed Ahmed
+382	Send transfer proof
+383	Reviewing the proof
+384	Your subscription will be activated within a few minutes, and a confirmation message will reach you on Telegram
+385	💬 Or send the receipt directly to the Telegram bot
+386	Privacy and control
+387	Your data is under your control at any time
+388	Lock Dabbar on the device
+389	Turn on fingerprint / Face ID
+390	Create a pattern
+391	Turn off the local lock
+392	The lock is stored on this device only. We don't send your fingerprint, face, or pattern to the server.
+393	Export my data
+394	Clear device settings
+395	🚪 Sign out
+396	Main navigation
+397	Upcoming reminders
+398	Reminders
+399	New messages
+400	Months archive
+401	● Summaries only, no daily details
+402	An optional step — if you link your account, anything you log in Telegram shows up in the dashboard right away, and vice versa.
+403	Open
+404	Dabbar on Telegram
+405	in one tap
+406	will send you
+407	a 6-digit code
+408	automatically
+409	Type it here — and
+410	your account links right away
+411	💬 Open Dabbar and it will send me the code
+412	Later
+413	Description
+414	Transaction description
+415	Adjust your photo
+416	Drag the photo to move it, and use the slider to zoom
+417	Turn on Dabbar notifications?
+418	We'll remind you about your spending, warn you before you go over your budget, and send you your day's summary — all without bothering you.
+419	Weekly
+420	Yearly
+421	Total you spent
+422	Biggest item
+423	You saved about
+424	Dabbar · your personal accountant
+425	Share the card
+426	Log your expenses in this period and we'll prepare a Wrapped for it.
+427	Your day's Wrapped
+428	Day
+429	Spent today
+430	Top category
+431	Your top transactions today
+432	Share your day
+433	Log your first transaction today and we'll prepare the card right away.
+434	All receipts
+435	You don't have any receipts recorded yet. Snap a receipt to start.
+436	Receipt details
+437	Payment method
+438	Delete this receipt
+439	Clear the wallet and start over?
+440	The collected amount will reset now, and you can start a new wallet right away with a new daily amount.
+441	Reset and start new
+442	How much will you save per day?
+443	A simple motivational number to start with — you can change it or add a different amount any time.
+444	e.g. 10
+445	Start the wallet
+446	Your accounts and wallets movements in one place
+447	This month
+448	Out
+449	Transfers
+450	Search by name, number, or bank
+451	Review
+452	How are movements classified?
+453	⚠️ Any unclear movement goes under "Review" until you set it yourself.
+454	Those were Dabbar's most important features. You can see them again whenever you like from "My account".
+455	"Dabbar"
+456	➕ Install "Dabbar" now
+457	Any unclear movement goes under "Needs review" until you set it yourself.
+458	iPhone doesn't have a notification tile like Android, but the "Shortcuts" app (built into every iPhone) gives you the same speed: a shortcut on the home screen, or even by voice with Siri.
+459	Open the "Shortcuts" app
+460	It's built into every iPhone from Apple — if you can't find it, search for "Shortcuts".
+461	Then tap "Add Action" and search for an action called
+462	"Open URLs"
+463	You can make both as two separate shortcuts, and give each a clear name (for example "Log by voice" and "Log by typing").
+464	From the shortcut settings (the ⓘ icon) choose "Add to Home Screen" so it becomes an icon you tap like any app, or leave it in the Shortcuts app and run it from there.
+465	From the same settings screen tap "Add to Siri" and save a phrase like "Log an expense by voice" — then say this phrase to Siri from anywhere and it opens Dabbar straight into recording mode.
+466	Long-press the home screen, then +, then Scriptable, then the medium size. Tap the widget then Edit: Script = dabbar-ios-widget, and in Parameter paste the account link token (you'll find it in Dabbar then My account then Banks).

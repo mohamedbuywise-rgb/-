@@ -1200,7 +1200,16 @@
         .portfolio-detail-stat strong { font-size: .8rem; color: var(--portfolio-ink); }
         .portfolio-detail-meta-row { display: flex; justify-content: space-between; font-size: .68rem; padding: .4rem 0; border-top: 1px dashed var(--portfolio-line); color: var(--portfolio-muted); }
         .portfolio-detail-meta-row strong { color: var(--portfolio-ink); font-weight: 800; }
-        .portfolio-detail-edit-btn { width: 100%; margin-top: .6rem; padding: .55rem; border-radius: 10px; border: 1px solid var(--portfolio-line); background: transparent; color: var(--portfolio-accent-strong); font-family: inherit; font-size: .72rem; font-weight: 900; cursor: pointer; }
+        .portfolio-detail-actions { display: flex; gap: .5rem; margin-top: .6rem; }
+        .portfolio-detail-edit-btn { flex: 1; padding: .55rem; border-radius: 10px; border: 1px solid var(--portfolio-line); background: transparent; color: var(--portfolio-accent-strong); font-family: inherit; font-size: .72rem; font-weight: 900; cursor: pointer; }
+        .portfolio-detail-delete-btn { flex: 0 0 2.6rem; display: inline-flex; align-items: center; justify-content: center; border-radius: 10px; border: 1px solid rgba(220,60,45,.28); background: rgba(220,60,45,.08); color: #a32d2d; font-size: 1rem; cursor: pointer; }
+        html[data-theme="dark"] .portfolio-detail-delete-btn { color: #ff8e8e; background: rgba(255,90,75,.1); border-color: rgba(255,90,75,.3); }
+        .portfolio-detail-weight { background: rgba(120,120,120,.08); border-radius: 10px; padding: .55rem .65rem; margin: .6rem 0; }
+        .portfolio-detail-weight-top { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: .4rem; }
+        .portfolio-detail-weight-top span:first-child { font-size: .78rem; font-weight: 900; color: var(--portfolio-accent-strong); }
+        .portfolio-detail-weight-top span:last-child { font-size: .64rem; color: var(--portfolio-muted); }
+        .portfolio-detail-weight-bar { height: 6px; border-radius: 999px; background: rgba(120,120,120,.22); overflow: hidden; }
+        .portfolio-detail-weight-fill { height: 100%; border-radius: 999px; background: var(--portfolio-accent-strong); }
         .portfolio-chev { color: var(--portfolio-muted); transition: transform .2s; font-size: 1.1rem; }
         #portfolio-collapsible[open] .portfolio-chev { transform: rotate(180deg); }
         /* المحتوى بقى بيتفتح في بوب أب مستقل (#portfolio-sheet) مش جوه الصفحة، فبنمنع البريفيو الصغير إنه يفضل ظاهر تحت العنوان وقت ما يكون مفتوح */
@@ -1269,6 +1278,9 @@
         .portfolio-form-cancel { border: 1px solid var(--portfolio-line); border-radius: .75rem; padding: .58rem .8rem; background: transparent; color: var(--portfolio-muted); font: inherit; font-size: .68rem; font-weight: 800; cursor: pointer; }
         .portfolio-form-submit { flex: 1; border: 0; border-radius: .75rem; padding: .62rem .8rem; background: var(--portfolio-accent); color: #062a21; font: inherit; font-size: .68rem; font-weight: 900; cursor: pointer; }
         .portfolio-form-submit:disabled { opacity: .6; cursor: wait; }
+        .icon-library-row { display: flex; gap: .4rem; flex-wrap: wrap; }
+        .icon-library-btn { width: 2.1rem; height: 2.1rem; display: flex; align-items: center; justify-content: center; border-radius: .65rem; border: 1px solid var(--portfolio-line); background: var(--portfolio-card); color: var(--portfolio-muted); font-size: .95rem; cursor: pointer; transition: border-color .15s, color .15s, background .15s; }
+        .icon-library-btn.selected { border-color: var(--portfolio-accent); color: var(--portfolio-accent); background: color-mix(in srgb, var(--portfolio-accent) 14%, transparent); }
         @media (max-width: 420px) { #portfolio-summary { padding-inline: .85rem; } .portfolio-body { padding-inline: .85rem; } .portfolio-total-quick { font-size: .95rem; } .portfolio-asset { padding-inline: .58rem; } }
         .portfolio-refresh-prices-btn { width: 1.9rem; height: 1.9rem; flex: 0 0 1.9rem; display: inline-flex; align-items: center; justify-content: center; border-radius: .6rem; border: 1px solid var(--portfolio-line); background: color-mix(in srgb, var(--portfolio-accent) 10%, transparent); color: var(--portfolio-accent-strong); font-size: .85rem; cursor: pointer; transition: transform .5s ease; }
         .portfolio-refresh-prices-btn:active { transform: scale(.92); }
@@ -4342,21 +4354,29 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                         </div>
                     </template>
 
-                    <div id="portfolio-add-form" class="hidden portfolio-add-form-panel" style="margin-top:.8rem;flex-direction:column;gap:.5rem;">
+                    <div id="portfolio-add-form" class="hidden portfolio-add-form-panel" style="margin-top:.8rem;flex-direction:column;gap:.55rem;">
                         <span id="portfolio-form-title" class="portfolio-form-title">إضافة أصل جديد</span>
-                        <input id="portfolio-add-name" type="text" placeholder="اسم الأصل (مثلاً: ذهب، صناديق بنك مصر)" class="portfolio-form-input">
-                        <input id="portfolio-add-sub" type="text" placeholder="وصف اختياري (مثلاً: 120 جرام أو عيار 24)" class="portfolio-form-input">
-                        <div style="display:flex;gap:.5rem;">
-                            <input id="portfolio-add-quantity" type="number" inputmode="decimal" min="0" step="any" placeholder="الكمية (اختياري)" class="portfolio-form-input" style="flex:1;">
-                            <input id="portfolio-add-unit" type="text" placeholder="الوحدة/الرمز — جرام، BTC، أو رمز سهم زي COMI.CA" class="portfolio-form-input" style="flex:1.4;">
-                        </div>
-                        <p class="text-[10px] text-slate-500 -mt-1">لو حطيت كمية ورمز مدعوم (ذهب، عملة رقمية، أو سهم بالتيكر بتاعه) هنحدّثلك القيمة تلقائيًا كل يوم من سعر السوق.</p>
-                        <input id="portfolio-add-amount" type="number" inputmode="numeric" placeholder="القيمة الحالية بالجنيه" class="portfolio-form-input">
-                        <input id="portfolio-add-cost" type="number" inputmode="numeric" min="0" placeholder="قيمة الشراء بالجنيه (اختياري — عشان نحسبلك الربح/الخسارة)" class="portfolio-form-input">
-                        <input id="portfolio-add-alert" type="number" inputmode="numeric" min="0" placeholder="نبهني لو تحرك أكثر من % في اليوم (اختياري)" class="portfolio-form-input">
 
+                        <div style="display:flex;gap:.5rem;">
+                            <input id="portfolio-add-name" type="text" placeholder="اسم الأصل (مثلاً: ذهب، صناديق بنك مصر)" class="portfolio-form-input" style="flex:1.6;">
+                            <input id="portfolio-add-sub" type="text" placeholder="وصف (120 جرام)" class="portfolio-form-input" style="flex:1;">
+                        </div>
 
                         <div class="icon-library-row" id="portfolio-icon-picker" aria-label="اختار أيقونة الأصل"></div>
+
+                        <div style="display:flex;gap:.5rem;">
+                            <input id="portfolio-add-amount" type="number" inputmode="numeric" placeholder="القيمة الحالية بالجنيه" class="portfolio-form-input">
+                            <input id="portfolio-add-cost" type="number" inputmode="numeric" min="0" placeholder="قيمة الشراء (اختياري)" class="portfolio-form-input">
+                        </div>
+
+                        <div style="display:flex;gap:.5rem;">
+                            <input id="portfolio-add-quantity" type="number" inputmode="decimal" min="0" step="any" placeholder="الكمية (اختياري)" class="portfolio-form-input" style="flex:1;">
+                            <input id="portfolio-add-unit" type="text" placeholder="الوحدة/الرمز — جرام، BTC، أو COMI.CA" class="portfolio-form-input" style="flex:1.4;">
+                        </div>
+                        <p class="text-[10px] text-slate-500 -mt-1">لو حطيت كمية ورمز مدعوم هنحدّث القيمة يوميًا تلقائيًا من سعر السوق.</p>
+
+                        <input id="portfolio-add-alert" type="number" inputmode="numeric" min="0" placeholder="نبهني لو تحرك أكثر من % في اليوم (اختياري)" class="portfolio-form-input">
+
                         <div style="display:flex;gap:.5rem;">
                             <button type="button" id="portfolio-add-confirm" class="portfolio-form-submit">حفظ الأصل</button>
                             <button type="button" id="portfolio-add-cancel" class="portfolio-form-cancel">إلغاء</button>
@@ -7905,9 +7925,9 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             // قبل أي تحديث بعد رجوع المستخدم للصفحة، نتأكد إن الجلسة لسه سليمة (وده بيجدد التوكن لو خلصت صلاحيتها)
             // بياناتك أصلًا معروضة على الشاشة من آخر مرة، فمفيش داعي نستنى تحميل جديد كل مرة ترجع فيها للتطبيق
             // لثواني قليلة (تبديل تطبيقات، فتح إشعار...). بنأجل أي تحديث فعلي لحد ما يعدي 15 ثانية بعيد.
-            let __lastDashboardLoadAt = 0;
+            window.__lastDashboardLoadAt = window.__lastDashboardLoadAt || 0; // إصلاح: كانت let محلية هنا فمكنش loadDashboard (تحت في الملف) بيحدّثها فعليًا — النتيجة إن الـ 15 ثانية دي متنفعش أبدًا، وكل رجوع/فوكس للتاب كان بيعمل تحميل كامل فورًا
             async function ensureFreshSessionThenLoad() {
-                if (Date.now() - __lastDashboardLoadAt < 15000) return; // رجوع سريع: البيانات المعروضة لسه طازة، متعملش حاجة
+                if (Date.now() - window.__lastDashboardLoadAt < 15000) return; // رجوع سريع: البيانات المعروضة لسه طازة، متعملش حاجة
 
                 // Stale-While-Revalidate: أول ما ترجع للتطبيق، اعرض آخر بيانات محفوظة فورًا (من غير ما تستنى النت خالص)،
                 // وبعدين حدّث البيانات في الخلفية بهدوء من غير أي مؤشر تحميل يوقف حاجة على الشاشة.
@@ -11271,8 +11291,30 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             const nx = (i) => pad + (i / (points.length - 1)) * (w - pad * 2);
             const ny = (v) => h - pad - ((v - min) / range) * (h - pad * 2);
             const d = points.map((p, i) => `${i === 0 ? 'M' : 'L'}${nx(i).toFixed(1)},${ny(p.amount).toFixed(1)}`).join(' ');
+            const lastX = nx(points.length - 1);
+            const areaD = `${d} L${lastX.toFixed(1)},${h} L${pad},${h} Z`;
             const color = isUp ? '#6fbf9d' : '#e2786b';
-            return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="100%" preserveAspectRatio="none"><path d="${d}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+            const gradId = `pfSparkGrad${Math.random().toString(36).slice(2, 8)}`;
+            return `<svg viewBox="0 0 ${w} ${h}" width="100%" height="100%" preserveAspectRatio="none">
+                <defs><linearGradient id="${gradId}" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stop-color="${color}" stop-opacity=".4"/>
+                    <stop offset="100%" stop-color="${color}" stop-opacity="0"/>
+                </linearGradient></defs>
+                <path d="${areaD}" fill="url(#${gradId})" stroke="none"/>
+                <path d="${d}" fill="none" stroke="${color}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="${lastX.toFixed(1)}" cy="${ny(values[values.length - 1]).toFixed(1)}" r="3.2" fill="${color}"/>
+            </svg>`;
+        }
+
+        // ============ حذف أصل من المحفظة (بيتصدى من زرار الحذف جوه التفاصيل أو من قايمة التلات نقط) ============
+        async function deletePortfolioAssetWithConfirm(asset, event) {
+            event?.preventDefault();
+            event?.stopPropagation();
+            if (!(await dabbarConfirm(`متأكد عايز تحذف "${asset.name}" من محفظتك؟`))) return;
+            try {
+                await asstApi('portfolio_asset_delete', { assetId: asset.id });
+                await loadDashboard();
+            } catch (err) { alert(err.message); }
         }
 
         // ============ فتح/قفل تفاصيل أصل جوه المحفظة نفسها (بدون بوب أب) — بيجيب سعر السوق اللحظي وتاريخ القيمة أوتوماتيك ============
@@ -11287,7 +11329,14 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             __expandedPortfolioAssetId = asset.id;
             wrapEl.classList.add('open');
             detailEl.hidden = false;
-            detailEl.innerHTML = `<div class="portfolio-detail-loading">بنجيب سعر السوق دلوقتي...</div>`;
+            // ============ إصلاح: التحديث التلقائي كان بيمسح الكارت ويعيد بناءه، فأي أصل مفتوح كان بيرجع يفتح من الصفر
+            // ويوري شاشة "بنجيب سعر السوق دلوقتي..." تاني حتى لو المستخدم واقف بيقرا فيه — ده اللي كان حاسس إنه "تحميل" مقرف كل شوية.
+            // دلوقتي: لو عندنا نسخة سابقة متخزنة لنفس الأصل، نوريها فورًا (Stale-While-Revalidate) من غير أي فلاش تحميل،
+            // وبعدين نحدّثها بهدوء لما بيانات السوق الجديدة توصل — نفس أسلوب تحديث الداشبورد نفسه. ============
+            window.__portfolioDetailCache = window.__portfolioDetailCache || {};
+            const cachedDetailHtml = window.__portfolioDetailCache[asset.id];
+            detailEl.innerHTML = cachedDetailHtml || `<div class="portfolio-detail-loading">بنجيب سعر السوق دلوقتي...</div>`;
+            if (cachedDetailHtml) detailEl.querySelector('.portfolio-detail-edit-btn')?.addEventListener('click', () => openPortfolioForm(asset));
 
             const costBasis = Number(asset.cost_basis);
             const currentAmount = Number(asset.amount);
@@ -11306,19 +11355,32 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             if (!wrapEl.classList.contains('open')) return; // المستخدم قفلها وهو مستني الرد
 
             const isUp = gainAmount == null ? true : gainAmount >= 0;
+            // ============ % من إجمالي المحفظة — مؤشر تنويع عملي (مثلاً لو أصل واحد بقى 99% من محفظتك) ============
+            const portfolioTotal = Number(window.__portfolioState?.total) || 0;
+            const weightPct = portfolioTotal > 0 ? Math.min(100, Math.round((currentAmount / portfolioTotal) * 1000) / 10) : null;
+
             detailEl.innerHTML = `
                 <div class="portfolio-detail-value">${fmt(currentAmount)}</div>
                 ${hasCostBasis ? `<span class="portfolio-detail-badge ${isUp ? 'up' : 'down'}">${trendArrowSvg(isUp)} ${Math.abs(gainPct)}% (${isUp ? '+' : '-'}${fmt(Math.abs(gainAmount))} منذ الشراء)</span>` : ''}
                 <div class="portfolio-detail-chart">${buildPortfolioSparkline(history, isUp)}</div>
                 <div class="portfolio-detail-stat-grid">
+                    <div class="portfolio-detail-stat"><span>سعر الوحدة الآن</span><strong>${unitPriceEgp ? `${fmt(unitPriceEgp)}` : fmt(currentAmount)}</strong></div>
                     <div class="portfolio-detail-stat"><span>قيمة الشراء</span><strong>${hasCostBasis ? fmt(costBasis) : '—'}</strong></div>
-                    <div class="portfolio-detail-stat"><span>آخر 3 أيام</span><strong style="color:${digestAsset?.changePct == null ? 'inherit' : (digestAsset.changePct >= 0 ? '#0a7a52' : '#c0362c')};">${digestAsset?.changePct == null ? '—' : `${digestAsset.changePct >= 0 ? '▲' : '▼'} ${digestAsset.changePct >= 0 ? '+' : ''}${digestAsset.changePct}%`}</strong></div>
                 </div>
-                ${unitPriceEgp ? `<div class="portfolio-detail-meta-row"><span>سعر الوحدة دلوقتي من السوق</span><strong>${fmt(unitPriceEgp)} / ${asset.unit || 'وحدة'}</strong></div>` : ''}
+                ${weightPct != null ? `<div class="portfolio-detail-weight">
+                    <div class="portfolio-detail-weight-top"><span>${weightPct}%</span><span>بيمثل كام % من محفظتك</span></div>
+                    <div class="portfolio-detail-weight-bar"><div class="portfolio-detail-weight-fill" style="width:${weightPct}%"></div></div>
+                </div>` : ''}
                 <div class="portfolio-detail-meta-row"><span>تاريخ آخر تحديث</span><strong>${new Date(asset.updated_at || asset.created_at).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}</strong></div>
-                <button type="button" class="portfolio-detail-edit-btn">تعديل القيمة</button>`;
+                <div class="portfolio-detail-actions">
+                    <button type="button" class="portfolio-detail-edit-btn">تعديل القيمة</button>
+                    <button type="button" class="portfolio-detail-delete-btn" aria-label="حذف الأصل"><iconify-icon icon="ph:trash-duotone"></iconify-icon></button>
+                </div>`;
+
+            window.__portfolioDetailCache[asset.id] = detailEl.innerHTML; // نخزّن آخر نسخة عشان الفتحة الجاية (أو التحديث التلقائي) يبدأ بيها فورًا من غير فلاش
 
             detailEl.querySelector('.portfolio-detail-edit-btn')?.addEventListener('click', () => openPortfolioForm(asset));
+            detailEl.querySelector('.portfolio-detail-delete-btn')?.addEventListener('click', (event) => deletePortfolioAssetWithConfirm(asset, event));
         }
 
         // ============ سهم اتجاه احترافي (SVG) بدل الرمز النصي ▲/▼ — بيتلون تلقائي حسب كلاس up/down اللي حاطينه على الأب ============
@@ -11402,15 +11464,9 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                     closePortfolioMenus();
                     openPortfolioForm(asset);
                 });
-                deleteBtn.addEventListener('click', async (event) => {
-                    event.preventDefault();
-                    event.stopPropagation();
+                deleteBtn.addEventListener('click', (event) => {
                     closePortfolioMenus();
-                    if (!(await dabbarConfirm(`متأكد عايز تحذف "${asset.name}" من محفظتك؟`))) return;
-                    try {
-                        await asstApi('portfolio_asset_delete', { assetId: asset.id });
-                        await loadDashboard();
-                    } catch (err) { alert(err.message); }
+                    deletePortfolioAssetWithConfirm(asset, event);
                 });
                 listEl.appendChild(wrap);
             });
@@ -15232,6 +15288,40 @@ function dabbarReward(){
   clearTimeout(el._t);
   setTimeout(function(){void el.offsetWidth;el.classList.add('on');el._t=setTimeout(function(){el.classList.remove('on')},3800)},1000);
 }
+</script>
+
+<!-- ============ تأكيد الخروج من التطبيق: بيعترض زرار الرجوع (Back) في الموبايل/المتصفح، وبيستخدم مودال dabbarConfirm() الموجود بالفعل عشان يطلع بألوان وشكل الموقع الحقيقي من غير أي كود تصميم جديد ============ -->
+<script id="dabbar-exit-guard">
+(function () {
+    if (typeof dabbarConfirm !== 'function') return; // احتياط لو الملف اتحمّل بترتيب مختلف يوم ما
+
+    // أي Sheet/Modal معروف في التطبيق مفتوح دلوقتي؟ لو فيه، زرار الرجوع يقفله هو بس، من غير ما يسألنا "هتخرج؟"
+    function dabbarOpenOverlay() {
+        return Array.from(document.querySelectorAll('[id$="-sheet"], [id$="-modal"], [id$="-overlay"], #dbo-root'))
+            .find((el) => el.id !== 'dabbar-confirm-modal' && !el.classList.contains('hidden') && getComputedStyle(el).display !== 'none');
+    }
+
+    let exitConfirmed = false;
+    try { history.pushState({ dabbarRoot: true }, ''); } catch (e) {}
+
+    window.addEventListener('popstate', async function () {
+        if (exitConfirmed) return; // اتأكد الخروج فعلاً، سيبه يمشي عادي
+        const openOverlay = dabbarOpenOverlay();
+        try { history.pushState({ dabbarRoot: true }, ''); } catch (e) {} // نمسك مكاننا فورًا لحد ما نعرف نرد
+
+        if (openOverlay) {
+            openOverlay.classList.add('hidden');
+            openOverlay.classList.remove('flex');
+            return;
+        }
+
+        const wantsExit = await dabbarConfirm(
+            'بياناتك محفوظة أصلًا، تقدر ترجع تكمل من غير ما تفتح من الأول.',
+            { title: 'هتخرج من دبّر؟', tone: 'neutral', confirmText: 'أيوه، اخرج', cancelText: 'لأ، كمّل' }
+        );
+        if (wantsExit) { exitConfirmed = true; history.back(); }
+    });
+})();
 </script>
 </body>
 </html>

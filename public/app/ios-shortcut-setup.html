@@ -88,6 +88,59 @@
     <div class="step"><span class="num">٣</span><div class="step-body"><p>ضيف ويدجت Scriptable (متوسط)</p><span>اضغط مطولاً على الشاشة الرئيسية، ثم +، ثم Scriptable، ثم الحجم المتوسط. اضغط على الويدجت ثم Edit: Script = dabbar-ios-widget، وفي Parameter الصق توكن ربط الحساب (بتلاقيه في دبّر ثم حسابي ثم البنوك).</span></div></div>
   </div>
 
+  <div class="card">
+    <span class="badge">🏦 أتمتة رسائل البنوك والمحافظ (SMS)</span>
+    <p class="sub" style="margin-bottom:16px;">
+      أتمتة واحدة بس تكفي لكل البنوك والمحافظ مع بعض — مش محتاج توعمل واحدة لكل بنك.
+      آيفون بيبعتلنا اسم المرسل ونص أي رسالة توصلك، ودبّر هو اللي بيتعرف على البنك ويحلل
+      المبلغ والعملة تلقائي.
+    </p>
+    <div class="step">
+      <span class="num">١</span>
+      <div class="step-body">
+        <p>افتح تطبيق "الاختصارات" (Shortcuts) ← تبويب "الأتمتة" (Automation)</p>
+        <span>دوس + أعلى الشاشة ← Create Personal Automation.</span>
+      </div>
+    </div>
+    <div class="step">
+      <span class="num">٢</span>
+      <div class="step-body">
+        <p>اختار نوع "Message"</p>
+        <span>سيب Sender على "Any Sender" زي ما هو، وسيب Message Contains فاضي تمامًا، بعدين دوس Next.</span>
+      </div>
+    </div>
+    <div class="step">
+      <span class="num">٣</span>
+      <div class="step-body">
+        <p>ضيف إجراء "Get Contents of URL"</p>
+        <div class="url-box"><span id="webhook-url">https://www.dabbar.online/api/sms-webhook</span><button class="copy-btn" data-copy="webhook-url">نسخ</button></div>
+      </div>
+    </div>
+    <div class="step">
+      <span class="num">٤</span>
+      <div class="step-body">
+        <p>اضبط الإجراء: Method = POST، Request Body = JSON</p>
+        <span>وضيف 3 مفاتيح بالظبط:</span>
+        <ul style="margin:8px 0 0; padding-inline-start:18px; font-size:.75rem; color:#94a3b8; line-height:1.9;">
+          <li><b style="color:#e2e8f0;">token</b> — النص: توكنك الشخصي (من صفحة "حسابي" ← البنوك، انسخه من هناك والصقه هنا)</li>
+          <li><b style="color:#e2e8f0;">sender</b> — دوس على الحقل واختار Shortcut Input، وبعدين دوس عليه تاني واختار خاصية <b>Sender</b></li>
+          <li><b style="color:#e2e8f0;">text</b> — نفس الخطوة، بس اختار خاصية <b>Message</b></li>
+        </ul>
+      </div>
+    </div>
+    <div class="step">
+      <span class="num">٥</span>
+      <div class="step-body">
+        <p>دوس Next ← فعّل "Run Immediately" ← Done</p>
+        <span>من دلوقتي، أي رسالة SMS توصلك من أي بنك أو محفظة هتتبعت لدبّر تلقائي من غير ما تلمس حاجة.</span>
+      </div>
+    </div>
+    <p class="note" style="margin-top:14px;">
+      ⚠️ آبل بتفرض إشعار صغير في كل مرة تشتغل فيه الأتمتة دي (إجراء أمان من النظام نفسه لأنه بيوصل لرسايلك)،
+      مينفعش نلغيه بالكامل، بس مش محتاج تلمسه أو توافق عليه — هيشتغل ويسجل لوحده.
+    </p>
+  </div>
+
   <p class="note">
     الرابط بيفتح دبّر مباشرة على وضع التسجيل أو الكتابة. لو مش مسجّل دخول، هيوديك لصفحة الدخول الأول وبعد ما تدخل هيكمّل نفس الوضع تلقائي.
     <br><br>

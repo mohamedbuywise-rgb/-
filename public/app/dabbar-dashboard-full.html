@@ -518,14 +518,6 @@
         .dabbar-reminder-banner-cta { display:inline-block; margin-top:.5rem; border:none; border-radius:.75rem; padding:.42rem .8rem; font-size:.66rem; font-weight:900; cursor:pointer; background: var(--pm-gold, #10b981); color: var(--pm-surface, #06271a); }
         #trial-ending-banner.due-0 .dabbar-reminder-banner-cta,
         #reports-frozen-banner .dabbar-reminder-banner-cta { background: #b3432f; color: #fff; }
-        /* ============ تجميد بصري للتقارير بعد انتهاء التجربة/الاشتراك — بيوضّح إن اللي بيتعرض بيانات قديمة ============ */
-        body.db-reports-frozen .flex-1.overflow-y-auto .tab-content > section:not(#reports-frozen-banner):not(#quick-entry-card):not(#daily-reminder-card):not(#trial-ending-banner),
-        body.db-reports-frozen .flex-1.overflow-y-auto .tab-content > div:not(#reports-frozen-banner):not(#quick-entry-card):not(#trial-ending-banner) {
-            filter: grayscale(.65) contrast(.94);
-            opacity: .68;
-            position: relative;
-        }
-        body.db-reports-frozen #reports-frozen-banner { filter: none !important; opacity: 1 !important; }
         .dabbar-soon-pulse { width:.45rem; height:.45rem; border-radius:99px; background:#b3432f; display:inline-block; animation: dabbarSoonPulse 1.4s infinite; }
         @keyframes dabbarSoonPulse { 0%,100% { opacity:1; transform:scale(1); } 50% { opacity:.4; transform:scale(1.3); } }
         .dabbar-soon-card { display:flex; align-items:center; justify-content:space-between; gap:.6rem; border-radius:1.1rem; padding:.75rem .9rem; border:1px solid var(--pm-hairline); background: var(--pm-surface-hi, transparent); }
@@ -828,7 +820,6 @@
             transform: translateY(-2px);
             box-shadow: 0 12px 24px rgba(16,185,129,.12) !important;
         }
-        #quick-entry-card.is-subscription-locked > .grid { opacity: .42; filter: grayscale(.35); pointer-events: none; }
         #quick-entry-subscription-lock { display:none; }
         #quick-entry-subscription-lock:not(.hidden) { display:flex; }
         #quick-entry-subscription-lock button { background:#08b878; color:#06271a; }
@@ -2996,6 +2987,23 @@
         .speech-mic-btn { position:absolute; inset-inline-end:.45rem; top:50%; transform:translateY(-50%); width:2.35rem; height:2.35rem; display:grid; place-items:center; border:1px solid var(--pm-hairline, #cbd5e1); border-radius:.75rem; background:var(--pm-surface-hi, #fff); color:var(--pm-gold-bright, #087a59); cursor:pointer; touch-action:manipulation; }
         .speech-mic-btn.is-listening { background:#b91c1c !important; border-color:#b91c1c !important; color:#fff !important; animation:speechPulse 1.1s ease-in-out infinite; }
         .speech-mic-btn:disabled { opacity:.55; cursor:not-allowed; }
+
+        /* ============ الاشتراك: قسم قابل للطي ============ */
+        .acct-sub-collapse { border:1px solid var(--pm-hairline, rgba(148,163,184,.3)); border-radius:1.35rem; background:var(--pm-surface-hi, transparent); overflow:hidden; }
+        .acct-sub-collapse.hidden { display:none; }
+        .acct-sub-summary { list-style:none; cursor:pointer; display:flex; align-items:center; gap:.75rem; padding:.85rem 1rem; -webkit-tap-highlight-color:transparent; }
+        .acct-sub-summary::-webkit-details-marker { display:none; }
+        .acct-sub-summary::marker { content:''; }
+        .acct-sub-summary-ic { width:2.1rem; height:2.1rem; border-radius:.8rem; display:flex; align-items:center; justify-content:center; background:rgba(16,185,129,.14); flex:none; }
+        .acct-sub-summary-txt { flex:1; min-width:0; display:flex; flex-direction:column; gap:.1rem; }
+        .acct-sub-summary-txt b { font-size:.82rem; font-weight:900; color:var(--pm-ink, #f1f5f9); }
+        .acct-sub-summary-txt small { font-size:.66rem; font-weight:700; color:var(--pm-muted, #94a3b8); }
+        .acct-sub-chev { transition:transform .2s ease; color:var(--pm-muted, #94a3b8); font-weight:900; font-size:1rem; display:inline-block; }
+        .acct-sub-collapse[open] .acct-sub-chev { transform:rotate(180deg); }
+        .acct-sub-body { padding:0 .85rem .9rem; }
+        /* ============ ميك الإملاء: لو المتصفح مش بيدعمه بنخفيه بدل ما نسيبه يعطّل الخانة ============ */
+        .quick-description-wrap.no-mic #quick-manual-description { padding-inline-end: .75rem !important; }
+        .quick-description-wrap.no-mic .speech-mic-btn { display:none !important; }
         @keyframes speechPulse { 50% { box-shadow:0 0 0 7px rgba(185,28,28,.18); } }
         .dabbar-savings-cta-row { display:none !important; }
         .dabbar-savings-detail2-inner { color: var(--pm-ink-dim, #29483c) !important; }
@@ -3049,7 +3057,6 @@
         }
         #quick-expense-content > .grid > button span:first-child { transition:transform .18s ease; }
         #quick-expense-content > .grid > button:hover span:first-child { transform:scale(1.08) translateY(-1px); }
-        #quick-entry-card.is-subscription-locked #quick-expense-content > .grid { opacity:.42; filter:grayscale(.35); pointer-events:none; }
         html:not([data-theme="light"]) #quick-expense-content > .grid > button {
             background:rgba(255,255,255,.055); box-shadow:none;
         }
@@ -5931,6 +5938,17 @@ body { height: 100vh; }
                 </button>
             </div>
 
+            <!-- الاشتراك: قسم قابل للطي، مقفول افتراضيًا (بيتفتح تلقائيًا بس لما المستخدم يدوس "اشترك") -->
+            <details id="account-sub-collapse" class="hidden acct-sub-collapse">
+                <summary class="acct-sub-summary">
+                    <span class="acct-sub-summary-ic" aria-hidden="true">💎</span>
+                    <span class="acct-sub-summary-txt">
+                        <b>الاشتراك</b>
+                        <small id="account-sub-summary-status">—</small>
+                    </span>
+                    <span class="acct-sub-chev" aria-hidden="true">⌄</span>
+                </summary>
+                <div class="acct-sub-body space-y-4">
             <!-- كارت البريميوم — الماسكوت الحقيقي بحركة مستمرة (مش ثابت) عشان يشجّع على الاشتراك -->
             <div id="premium-hero-card" class="hidden bg-gradient-to-b from-[#052e22] to-[#031a14] border border-amber-500/25 rounded-3xl p-5 text-center overflow-hidden relative">
                 <img src="branding/dabbar-mascot.png" alt="دبّر بريميوم" class="w-36 h-auto mx-auto mb-2 mascot-float">
@@ -6021,6 +6039,9 @@ body { height: 100vh; }
                     💬 أو ابعت الإيصال مباشرة على بوت تليجرام
                 </a>
             </div>
+
+                </div>
+            </details>
 
             <div id="account-privacy-card" class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3">
                 <div class="flex items-center justify-between"><div><p class="text-xs font-bold text-slate-200">الخصوصية والتحكم</p><p class="text-[11px] text-slate-500">بياناتك تحت سيطرتك في أي وقت</p></div><span class="text-lg">🔐</span></div>
@@ -8145,11 +8166,11 @@ body { height: 100vh; }
             });
             window.addEventListener('focus', () => ensureFreshSessionThenLoad());
 
-            // تحديث هادي في الخلفية كل دقيقة بدل كل 20 ثانية، عشان يقلل الريفريش المستمر اللي بيحس التطبيق بطيء
+            // تحديث هادي في الخلفية كل 5 دقايق (اتبطّأ عشان مايزعجش وقت الكتابة/التصفح)، عشان يقلل الريفريش المستمر اللي بيحس التطبيق بطيء
             setInterval(() => {
                 if (document.visibilityState !== 'visible') return;
                 if (window.DabbarTyping) window.DabbarTyping.whenIdle(() => loadDashboard()); else loadDashboard();
-            }, 60000);
+            }, 300000);
 
             document.getElementById('refresh-btn').addEventListener('click', async (e) => {
                 const btn = e.currentTarget;
@@ -8371,6 +8392,11 @@ body { height: 100vh; }
         }
 
         async function loadDashboard(isInitialLoad = false, attempt = 1) {
+            // حارس الكيبورد: لو المستخدم بيكتب دلوقتي، أجّل التحديث/الرسم لحد ما يخلّص عشان الخانة ما تتقفلش
+            if (!isInitialLoad && window.DabbarTyping && window.DabbarTyping.isTyping()) {
+                window.DabbarTyping.whenIdle(() => loadDashboard(isInitialLoad, attempt));
+                return;
+            }
             const MAX_ATTEMPTS = 3;
             const TIMEOUT_MS = attempt === 1 ? 12000 : 20000; // أول محاولة أسرع عشان نحس بالمشكلة بدري ونعيد المحاولة، الباقي أطول احتياطًا لشبكة بطيئة
             clearTimeout(__dashboardRetryTimer);
@@ -12086,25 +12112,11 @@ body { height: 100vh; }
         let quickEntrySubscription = { active: true, inTrial: true };
         // ============ تجميد بصري للتقارير بعد انتهاء التجربة/الاشتراك — مش بس قفل زرار الإدخال ============
         const REPORTS_FROZEN_SINCE_KEY = 'dabbar-reports-frozen-since';
-        function updateReportsFrozenState(locked) {
-            document.body.classList.toggle('db-reports-frozen', locked);
-            const banner = document.getElementById('reports-frozen-banner');
-            const subEl = document.getElementById('reports-frozen-banner-sub');
-            if (!banner) return;
-            if (!locked) {
-                banner.classList.add('hidden');
-                try { localStorage.removeItem(REPORTS_FROZEN_SINCE_KEY); } catch (e) {}
-                return;
-            }
-            let since = null;
-            try { since = localStorage.getItem(REPORTS_FROZEN_SINCE_KEY); } catch (e) {}
-            if (!since) {
-                since = new Date().toISOString();
-                try { localStorage.setItem(REPORTS_FROZEN_SINCE_KEY, since); } catch (e) {}
-            }
-            const sinceLabel = new Date(since).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' });
-            if (subEl) subEl.textContent = `التقارير والأرقام اللي شايفها تحت دي واقفة من ${sinceLabel} — اشترك عشان تكمل المتابعة وتتحدث أول بأول.`;
-            banner.classList.remove('hidden');
+        function updateReportsFrozenState() {
+            // اتلغى البهتان: الألوان والتقارير طبيعية دايمًا، والقفل بس على الميزات الذكية.
+            document.body.classList.remove('db-reports-frozen');
+            document.getElementById('reports-frozen-banner')?.classList.add('hidden');
+            try { localStorage.removeItem(REPORTS_FROZEN_SINCE_KEY); } catch (e) {}
         }
         function setQuickEntrySubscription(subscription) {
             quickEntrySubscription = subscription || { active: true, inTrial: true };
@@ -12113,14 +12125,17 @@ body { height: 100vh; }
             const card = document.getElementById('quick-entry-card');
             const lock = document.getElementById('quick-entry-subscription-lock');
             card?.classList.toggle('is-subscription-locked', locked);
-            lock?.classList.toggle('hidden', !locked);
+            lock?.classList.add('hidden');
             updateReportsFrozenState(locked);
+        }
+        function goToSubscriptionSection() {
+            document.querySelector('.tab-btn[data-tab="account"]')?.click();
+            openSubscriptionCollapse();
+            setTimeout(() => document.getElementById('account-sub-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
         }
         function requireQuickEntryAccess() {
             if (quickEntrySubscription.active || quickEntrySubscription.inTrial) return true;
-            quickStatus('التصنيف الذكي بقى ميزة VIP — الإدخال اليدوي شغال زي العادة.', 'error');
-            document.getElementById('quick-entry-subscription-lock')?.classList.remove('hidden');
-            document.querySelector('.tab-btn[data-tab="account"]')?.click();
+            goToSubscriptionSection();
             return false;
         }
         let quickEntryDrafts = [], quickEntrySourceText = '', quickEntryRecorder = null, quickEntryChunks = [], quickEntryTimer = null, quickEntrySeconds = 0, quickEntryVoiceBlob = null, quickEntryVoiceCancelled = false;
@@ -12558,7 +12573,7 @@ body { height: 100vh; }
             return true;
         }
         setQuickEntryType();
-        document.getElementById('quick-entry-text')?.addEventListener('click', () => { document.getElementById('quick-entry-input').value = ''; const locked = !quickEntrySubscription.active && !quickEntrySubscription.inTrial; quickShow('quick-entry-form', !locked); quickShow('quick-entry-manual-form', false); if (locked) quickStatus('للتسجيل بدون AI اضغط «إذا أردت من غير AI».'); else document.getElementById('quick-entry-input')?.focus(); });
+        document.getElementById('quick-entry-text')?.addEventListener('click', () => { if (!requireQuickEntryAccess()) return; document.getElementById('quick-entry-input').value = ''; const locked = !quickEntrySubscription.active && !quickEntrySubscription.inTrial; quickShow('quick-entry-form', !locked); quickShow('quick-entry-manual-form', false); if (locked) quickStatus('للتسجيل بدون AI اضغط «إذا أردت من غير AI».'); else document.getElementById('quick-entry-input')?.focus(); });
         // ============ فتح "إدخال يدوي سريع" كبوب أب مستقل بدل التمدد جوه الكارت — بننقل نفس عنصر الفورم جوه Backdrop ثابت مرة واحدة ونعيد استخدامه ============
         function quickManualPopupEl() {
             let backdrop = document.getElementById('quick-manual-popup-backdrop');
@@ -12579,7 +12594,10 @@ body { height: 100vh; }
             quickShow('quick-entry-form', false); quickShow('quick-entry-draft', false);
             quickShow('quick-entry-manual-form', true);
             backdrop.classList.add('show');
-            document.getElementById('quick-manual-amount')?.focus();
+            const amountEl = document.getElementById('quick-manual-amount');
+            try { amountEl?.focus({ preventScroll: true }); } catch (e) { amountEl?.focus(); }
+            // لو الكيبورد ما فتحش (المتصفح لسه بيرسم الشيت)، نحاول تاني بعد ما الحركة تخلص
+            setTimeout(() => { if (backdrop.classList.contains('show') && document.activeElement !== amountEl) { try { amountEl?.focus({ preventScroll: true }); } catch (e) {} } }, 320);
             const monthLbl = document.getElementById('quick-manual-month-label');
             if (monthLbl) monthLbl.textContent = `📅 هتتسجّل في: ${new Date().toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' })}`;
         }
@@ -12660,7 +12678,14 @@ body { height: 100vh; }
             return { count: rows.length, failedCount: rows.filter((r) => r.attempts >= 5).length };
         }
         if (window.DabbarOfflineQueue) {
-            window.DabbarOfflineQueue.onStateChange((state) => { updateOfflineBanner(state); if (state.count === 0) loadDashboard().catch(() => {}); });
+            let __prevQueueCount = null;
+            window.DabbarOfflineQueue.onStateChange((state) => {
+                updateOfflineBanner(state);
+                // نحدّث الداشبورد بس لما الطابور يتفضّى فعلًا (كان فيه عمليات معلّقة واتزامنت)، مش كل ما نلاقيه فاضي
+                const justDrained = __prevQueueCount !== null && __prevQueueCount > 0 && state.count === 0;
+                __prevQueueCount = state.count;
+                if (justDrained) loadDashboard().catch(() => {});
+            });
             window.DabbarOfflineQueue.refreshUI();
             document.getElementById('quick-manual-offline-sync')?.addEventListener('click', () => dabbarOfflineFlush(true));
             window.addEventListener('online', () => dabbarOfflineFlush(false));
@@ -12676,22 +12701,45 @@ body { height: 100vh; }
         (function setupManualSpeechInput() {
             const mic = document.getElementById('quick-manual-mic');
             const input = document.getElementById('quick-manual-description');
-            const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             if (!mic || !input) return;
-            if (!Recognition) { mic.disabled = true; mic.title = 'الإملاء الصوتي غير مدعوم في هذا المتصفح'; return; }
-            const recognition = new Recognition();
-            recognition.lang = 'ar-EG'; recognition.continuous = false; recognition.interimResults = true; recognition.maxAlternatives = 1;
+            const wrap = mic.closest('.quick-description-wrap');
+            const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            const ua = navigator.userAgent || '';
+            const isIOS = /iP(hone|ad|od)/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+            const standalone = navigator.standalone === true || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+            // iOS (خصوصًا وهو متثبّت PWA) الإملاء فيه مش مضمون — نخفي الميك تمامًا بدل ما يبقى زرار ميت فوق الخانة.
+            if (!Recognition || (isIOS && standalone)) { wrap?.classList.add('no-mic'); return; }
+            // الميك مجرد زرار: ميخطفش الفوكس من الخانة ولا يقفل الكيبورد، ومش داخل في ترتيب التاب.
+            mic.setAttribute('tabindex', '-1');
+            mic.addEventListener('pointerdown', (e) => e.preventDefault());
+            mic.addEventListener('mousedown', (e) => e.preventDefault());
+            let recognition = null; // بنبنيه عند أول ضغطة بس (جوه لمسة المستخدم)، مش وقت تحميل الصفحة
             let baseText = '';
-            recognition.onstart = () => { baseText = input.value.trim(); mic.classList.add('is-listening'); mic.setAttribute('aria-label', 'إيقاف الإملاء'); };
-            recognition.onresult = (event) => {
-                let transcript = '';
-                for (let i = event.resultIndex; i < event.results.length; i++) transcript += event.results[i][0].transcript;
-                input.value = [baseText, transcript.trim()].filter(Boolean).join(' ');
-                input.dispatchEvent(new Event('input', { bubbles: true }));
-            };
-            recognition.onerror = (event) => { if (event.error !== 'aborted') quickStatus('تعذر التقاط الصوت. تأكد من إذن الميكروفون وجرب تاني.', 'error'); };
-            recognition.onend = () => { mic.classList.remove('is-listening'); mic.setAttribute('aria-label', 'إملاء صوتي'); input.focus({ preventScroll: true }); };
-            mic.addEventListener('click', () => { try { mic.classList.contains('is-listening') ? recognition.stop() : recognition.start(); } catch (e) {} });
+            function build() {
+                const r = new Recognition();
+                r.lang = 'ar-EG'; r.continuous = false; r.interimResults = true; r.maxAlternatives = 1;
+                r.onstart = () => { baseText = input.value.trim(); mic.classList.add('is-listening'); mic.setAttribute('aria-label', 'إيقاف الإملاء'); };
+                r.onresult = (event) => {
+                    let transcript = '';
+                    for (let i = event.resultIndex; i < event.results.length; i++) transcript += event.results[i][0].transcript;
+                    input.value = [baseText, transcript.trim()].filter(Boolean).join(' ');
+                    input.dispatchEvent(new Event('input', { bubbles: true }));
+                };
+                r.onerror = (event) => {
+                    mic.classList.remove('is-listening');
+                    if (event.error !== 'aborted' && event.error !== 'no-speech') quickStatus('تعذر التقاط الصوت. تأكد من إذن الميكروفون وجرب تاني.', 'error');
+                };
+                // مفيش input.focus() هنا: الخانة أصلاً في إيدك، وإجبار الفوكس بعد الإملاء كان بيلخبط الكيبورد.
+                r.onend = () => { mic.classList.remove('is-listening'); mic.setAttribute('aria-label', 'إملاء صوتي'); };
+                return r;
+            }
+            mic.addEventListener('click', () => {
+                try {
+                    if (mic.classList.contains('is-listening') && recognition) { recognition.stop(); return; }
+                    recognition = build();
+                    recognition.start();
+                } catch (e) { mic.classList.remove('is-listening'); }
+            });
         })();
         document.getElementById('quick-manual-save')?.addEventListener('click', async () => {
             const type = document.querySelector('.quick-manual-type.active')?.dataset.type || 'expense';
@@ -14114,6 +14162,7 @@ body { height: 100vh; }
 
         async function sendAsstChat(question, { roast = false, reuseBubble = null } = {}) {
             if (!question) return;
+            if (!requireQuickEntryAccess()) return;
             if (!reuseBubble) appendChatBubble(question, 'user');
             const typingBubble = reuseBubble || appendChatBubble('', 'bot');
             typingBubble.lastElementChild.textContent = roast ? 'بدبّر بحسبلك... 😏' : 'بيكتب...';
@@ -14148,6 +14197,7 @@ body { height: 100vh; }
             const input = document.getElementById('asst-chat-input');
             const q = input.value.trim();
             if (!q) return;
+            if (!requireQuickEntryAccess()) return;
             input.value = '';
             sendAsstChat(q);
         });
@@ -14312,7 +14362,9 @@ body { height: 100vh; }
         });
 
         // ============ تاب "حسابي": بيانات البروفايل + حالة ربط تليجرام ============
+        function openSubscriptionCollapse() { const d = document.getElementById('account-sub-collapse'); if (d) { d.classList.remove('hidden'); d.open = true; } }
         document.getElementById('premium-hero-cta')?.addEventListener('click', () => {
+            openSubscriptionCollapse();
             document.getElementById('account-sub-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
         });
 
@@ -14363,6 +14415,7 @@ body { height: 100vh; }
                 ctaBtn.dataset.bound = '1';
                 ctaBtn.addEventListener('click', () => {
                     document.querySelector('.tab-btn[data-tab="account"]')?.click();
+                    openSubscriptionCollapse();
                     setTimeout(() => document.getElementById('account-sub-form')?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 150);
                 });
             }
@@ -14371,6 +14424,15 @@ body { height: 100vh; }
             const card = document.getElementById('account-subscription-card');
             const hero = document.getElementById('premium-hero-card');
             if (!card) return;
+            const subWrap = document.getElementById('account-sub-collapse');
+            const subStatus = document.getElementById('account-sub-summary-status');
+            if (subWrap) subWrap.classList.remove('hidden');
+            if (subStatus) {
+                subStatus.textContent = !subscription ? 'حالة الاشتراك'
+                    : subscription.active ? '✅ مُفعّل'
+                    : subscription.inTrial ? `🎁 تجربة مجانية — باقي ${subscription.trialDaysLeft} يوم`
+                    : '⏳ خلصت التجربة — اضغط للاشتراك';
+            }
             if (!subscription) {
                 card.classList.remove('hidden');
                 const h0 = document.getElementById('account-sub-headline');
@@ -15151,10 +15213,10 @@ body { height: 100vh; }
                     'الحماية والتحكم في بياناتك',
                     ['account-privacy-card']
                 );
-                // كارت الاشتراك بقى ظاهر دايمًا في أول "حسابي" تحت البروفايل، مش جوه قسم مقفول
+                // الاشتراك بقى قسم قابل للطي (مقفول افتراضيًا) في أول "حسابي" تحت البروفايل
                 (function placeSubscriptionCards() {
                     let anchor = document.getElementById('account-profile-card');
-                    ['premium-hero-card', 'account-subscription-card'].forEach((id) => {
+                    ['account-sub-collapse'].forEach((id) => {
                         const el = document.getElementById(id);
                         if (el && anchor && anchor.parentNode) { anchor.parentNode.insertBefore(el, anchor.nextSibling); anchor = el; }
                     });

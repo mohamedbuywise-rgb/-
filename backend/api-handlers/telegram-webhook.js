@@ -533,7 +533,7 @@ export default async function handler(req, res) {
         await sendTelegramMessage(
           chatId,
           'أهلاً بيك في دبّر 👋\n\n' +
-            '🎁 عندك 3 أيام تجربة مجانية بكل المميزات، وبعدها الاشتراك الشهري ' +
+            '🎁 عندك 7 أيام تجربة مجانية بكل المميزات، وبعدها الاشتراك الشهري ' +
             `<b>${SUBSCRIPTION_PRICE_EGP} ج.م</b>.\n\n` +
             buildCommandsGuide() +
             '\n\n' +

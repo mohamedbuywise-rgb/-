@@ -43,8 +43,8 @@ export default async function handler(req, res) {
     }
 
     const { dataUserId, telegramUserId, linked } = dashboardUser;
-    // فتح لوحة الحساب/ربطها يهيّئ التجربة للحسابات القديمة التي لم تُسجّل تاريخ البداية بعد.
-    if (linked) await ensureTrialStarted(dataUserId);
+    // فتح لوحة الحساب يهيّئ التجربة (7 أيام) لأي حساب لم يُسجّل تاريخ البداية بعد — مربوط بتليجرام أو حساب إيميل مستقل.
+    await ensureTrialStarted(dataUserId);
     console.log(
       `dashboard-data: ${linked ? 'linked to telegram_user_id' : 'standalone auth user'}:`,
       linked ? telegramUserId : dashboardUser.authUserId

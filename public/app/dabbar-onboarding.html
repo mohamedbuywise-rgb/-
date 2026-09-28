@@ -285,6 +285,17 @@
     animation: bootFadeUp .6s ease-out .45s forwards;
   }
 
+  .install-progress{margin-top:12px;background:#fff;border:1.5px solid var(--green-tint-2);border-radius:14px;padding:12px 14px;text-align:right;}
+  .install-progress[hidden]{display:none;}
+  .ip-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;}
+  .ip-stage{font-family:'Cairo',sans-serif;font-weight:800;font-size:12px;color:var(--ink);}
+  .ip-pct{font-family:'Cairo',sans-serif;font-weight:800;font-size:12px;color:var(--green-deep);font-variant-numeric:tabular-nums;min-width:34px;text-align:left;}
+  .ip-track{height:8px;border-radius:999px;background:var(--green-tint);overflow:hidden;}
+  .ip-fill{height:100%;width:0;border-radius:inherit;background:linear-gradient(90deg,var(--green),#73e1ab,var(--green));background-size:200% 100%;animation:ipShimmer 1.4s linear infinite;transition:width .25s linear;}
+  .install-progress.is-done .ip-fill{animation:none;background:var(--green);}
+  .ip-note{margin-top:9px;font-size:11.5px;line-height:1.8;color:var(--muted);}
+  @keyframes ipShimmer{from{background-position:200% 0}to{background-position:0 0}}
+  @media(prefers-reduced-motion:reduce){.ip-fill{animation:none}}
   /* ===== Safari iOS install guide: animated, explicit, and honest about manual installation ===== */
   .ios-install-modal{display:none;position:fixed;inset:0;z-index:200;background:rgba(7,24,16,.72);padding:18px;align-items:center;justify-content:center;backdrop-filter:blur(7px);}
   .ios-install-modal.show{display:flex;animation:iosModalIn .24s ease-out both;}
@@ -311,6 +322,7 @@
   @keyframes installButtonPulse{50%{box-shadow:0 0 0 6px rgba(31,170,110,.14),0 12px 24px -12px rgba(31,170,110,.7)}}
   @media(prefers-reduced-motion:reduce){.ios-install-modal.show,.ios-install-icon,.ios-install-progress-bar,.install-btn.is-guiding{animation:none}.ios-install-progress-bar{width:62%}}
 </style>
+<script src="./dabbar-compat.js"></script>
 </head>
 <body>
 
@@ -462,10 +474,14 @@
         <div class="install-notice-title">خطوة إجبارية قبل الدخول</div>
         <div class="install-notice-txt">لازم تثبّت <b>"دبّر"</b> على شاشتك الرئيسية وتفتحه منها — الخطوة دي أساسية ومفيش غنى عنها عشان نقدر نكمل.</div>
         <button type="button" class="install-btn" id="installBtn">➕ تثبّت "دبّر" دلوقتي</button>
+        <div class="install-progress" id="installProgress" hidden aria-live="polite">
+          <div class="ip-row"><span class="ip-stage" id="ipStage">بنجهّز التثبيت…</span><span class="ip-pct" id="ipPct">0%</span></div>
+          <div class="ip-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="ipTrack"><div class="ip-fill" id="ipFill"></div></div>
+          <div class="ip-note">خليك معانا ثواني — التطبيق بيتثبّت على جهازك. أول ما تلاقي أيقونة دبّر على شاشتك الرئيسية افتحه منها وكمّل بياناتك من جوّاه.</div>
+        </div>
         <div class="manual-install" id="manualInstall">
           <div class="manual-install-title" id="manualInstallTitle">إزاي تثبّته يدوي:</div>
           <ol id="manualInstallSteps"></ol>
-          <div class="manual-install" id="installPendingNotice"><div class="manual-install-title">🕐 خليك معانا ثواني...</div><div class="manual-install-txt">التطبيق بيتثبّت دلوقتي على جهازك. بمجرد ما تلاقيه ظاهر كأيقونة على شاشتك الرئيسية، افتحه من هناك وكمّل بياناتك من جوّاه عشان تجربتك تبقى زي أي تطبيق تاني بالظبط.</div></div>
       </div>
         
         
@@ -1067,6 +1083,37 @@
     if (isAndroid) return 'android';
     return 'other';
   }
+  // ============ شريط تقدّم التثبيت — بيظهر لحد ما التثبيت يتأكد فعليًا (standalone)، ومش بيوصل 100% قبل كده ============
+  const ipBox = document.getElementById('installProgress'), ipFill = document.getElementById('ipFill'), ipPct = document.getElementById('ipPct'), ipStage = document.getElementById('ipStage'), ipTrack = document.getElementById('ipTrack');
+  let ipRaf = 0, ipStart = 0, ipDone = false;
+  function ipSet(v, text) {
+    const r = Math.round(v);
+    if (ipFill) ipFill.style.width = v + '%';
+    if (ipPct) ipPct.textContent = r + '%';
+    if (ipTrack) ipTrack.setAttribute('aria-valuenow', String(r));
+    if (text && ipStage) ipStage.textContent = text;
+  }
+  function startInstallProgress() {
+    if (!ipBox || ipRaf || ipDone) return;
+    ipBox.hidden = false; ipBox.classList.remove('is-done'); ipStart = performance.now();
+    const tick = (now) => {
+      const t = (now - ipStart) / 1000;
+      const v = 90 * (1 - Math.exp(-t / 6)) + 6 * (1 - Math.exp(-t / 60)); // يقرب من 96% ويستنى التأكيد الحقيقي
+      ipSet(v, v < 30 ? 'بنجهّز التثبيت…' : v < 70 ? 'بنضيف دبّر لشاشتك الرئيسية…' : 'قربنا — دوّر على أيقونة دبّر وافتحه منها');
+      ipRaf = requestAnimationFrame(tick);
+    };
+    ipRaf = requestAnimationFrame(tick);
+  }
+  function stopInstallProgress() {
+    cancelAnimationFrame(ipRaf); ipRaf = 0;
+    if (ipBox && !ipDone) { ipBox.hidden = true; ipSet(0, 'بنجهّز التثبيت…'); }
+  }
+  function completeInstallProgress() {
+    if (!ipBox || ipBox.hidden || ipDone) return Promise.resolve();
+    ipDone = true; cancelAnimationFrame(ipRaf); ipRaf = 0;
+    ipBox.classList.add('is-done'); ipSet(100, 'تم التثبيت ✓');
+    return new Promise((r) => setTimeout(r, 750));
+  }
   function closeInstallGuide() {
     iosInstallModal?.classList.remove('show');
     iosInstallModal?.setAttribute('aria-hidden','true');
@@ -1076,6 +1123,7 @@
   function showInstallGuide(kind = platformKey(), state = 'ready') {
     if (isStandalone()) { finishInstallStep(); return; }
     installPlatform = kind;
+    if (state === 'waiting') startInstallProgress();
     const configs = {
       'ios-safari': {
         title: 'تثبيت دبّر من Safari',
@@ -1116,6 +1164,7 @@
   // ============ لا نعرض نجاحاً إلا بعد اكتشاف Standalone فعلياً ============
   async function finishInstallStep() {
     if (!isStandalone()) { showInstallGuide(installPlatform || platformKey(), 'waiting'); return; }
+    await completeInstallProgress();
     closeInstallGuide();
     linkFormState.style.display = 'none'; successState.classList.add('show');
     try { const { data: { session } } = sb ? await sb.auth.getSession() : { data: { session: null } }; if (session) { window.location.href = dashboardUrlWithQuick(); return; } } catch (e) {}
@@ -1131,7 +1180,7 @@
       deferredPrompt.prompt();
       const choice = await deferredPrompt.userChoice; deferredPrompt = null;
       if (choice?.outcome === 'accepted') { showInstallGuide(kind, 'waiting'); return; }
-      closeInstallGuide();
+      closeInstallGuide(); stopInstallProgress();
     } else { showManualInstallSteps(); }
   });
   iosInstallClose?.addEventListener('click', closeInstallGuide);

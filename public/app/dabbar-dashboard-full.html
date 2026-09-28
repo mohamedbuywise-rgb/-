@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
-    <meta name="color-scheme" content="light dark">
     <script src="./dabbar-i18n.js"></script>
     <title>لوحة التحكم والتقارير - محاسبك الشخصي</title>
     <!-- Embedded brand logo sources (logos remain their owners' trademarks; source references):
@@ -26,7 +25,7 @@
 
     <!-- PWA -->
     <link rel="manifest" href="./manifest.json">
-    <meta name="theme-color" content="#f4f5f7">
+    <meta name="theme-color" content="#08090a">
     <link rel="icon" href="./icons/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="./icons/icon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="./icons/icon-180.png">
@@ -35,8 +34,20 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="دبّر">
 
-    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
-    <script>tailwind.config = { darkMode: ['selector', '[data-theme="dark"]'] };</script>
+    <script>
+    /* دبّر: Tailwind 4 بيحتاج متصفح حديث (Chrome 111+/Safari 16.4+). المتصفحات القديمة بتاخد Tailwind 3 المتوافق معاها بدل ألوان باهتة/ناقصة. */
+    (function () {
+      var modern = false;
+      try {
+        modern = !!(window.CSS && CSS.supports && typeof CSS.registerProperty === 'function' &&
+          CSS.supports('color', 'oklch(50% .1 200)') && CSS.supports('color', 'color-mix(in srgb, red 50%, blue)'));
+      } catch (e) {}
+      document.documentElement.className += modern ? ' tw-modern' : ' tw-legacy';
+      document.write(modern
+        ? '<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"><\/script>'
+        : '<script src="https://cdn.tailwindcss.com/3.4.17"><\/script>');
+    })();
+  </script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
     <script src="../vendor/modern-screenshot.js"></script>
@@ -47,11 +58,7 @@
             try {
                 var saved = localStorage.getItem('dabbar-theme');
                 // لو مفيش حاجة محفوظة، أو المحفوظ "فاتح"، نطبق الفاتح. الغامق بيتطبّق صراحةً لو هو اللي اختاره.
-                var theme = saved === 'dark' ? 'dark' : 'light';
-                document.documentElement.setAttribute('data-theme', theme);
-                document.documentElement.style.colorScheme = theme;
-                var themeMeta = document.querySelector('meta[name="theme-color"]');
-                if (themeMeta) themeMeta.setAttribute('content', theme === 'light' ? '#f4f5f7' : '#1f2022');
+                document.documentElement.setAttribute('data-theme', saved === 'dark' ? 'dark' : 'light');
             } catch (e) {}
         })();
     </script>
@@ -73,7 +80,7 @@
         .daily-group[open] .daily-group-chev { transform: rotate(180deg); }
 
         /* ============ شيت "عمليات الدخل" — بديل العرض الإن-لاين القديم ============ */
-        #income-sheet-summary { background: color-mix(in srgb, var(--cs-up) 10%, transparent); border: 1px solid color-mix(in srgb, var(--cs-up) 28%, transparent); }
+        #income-sheet-summary { background: rgba(59,122,99,0.1); background: color-mix(in srgb, var(--cs-up) 10%, transparent); border: 1px solid rgba(59,122,99,0.28); border: 1px solid color-mix(in srgb, var(--cs-up) 28%, transparent); }
         #income-sheet-summary strong { color: var(--cs-up); }
         .income-day-group { margin-bottom: 1rem; }
         .income-day-group:last-child { margin-bottom: 0; }
@@ -84,7 +91,7 @@
         .income-day-card { background: var(--cs-panel); border: 1px solid var(--cs-line); border-radius: 1.1rem; overflow: hidden; }
         .income-row { display: flex; align-items: center; gap: .6rem; padding: .7rem .85rem; border-bottom: 1px solid var(--cs-line); }
         .income-row:last-child { border-bottom: none; }
-        .income-row-icon { width: 2.1rem; height: 2.1rem; flex: none; border-radius: .7rem; background: color-mix(in srgb, var(--cs-up) 14%, transparent); border: 1px solid color-mix(in srgb, var(--cs-up) 26%, transparent); display: flex; align-items: center; justify-content: center; font-size: .85rem; }
+        .income-row-icon { width: 2.1rem; height: 2.1rem; flex: none; border-radius: .7rem; background: rgba(59,122,99,0.14); background: color-mix(in srgb, var(--cs-up) 14%, transparent); border: 1px solid rgba(59,122,99,0.26); border: 1px solid color-mix(in srgb, var(--cs-up) 26%, transparent); display: flex; align-items: center; justify-content: center; font-size: .85rem; }
         .income-row-mid { min-width: 0; flex: 1; }
         .income-row-title { font-size: .74rem; font-weight: 800; color: var(--db-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
         .income-row-tag { font-size: .6rem; color: var(--db-muted); margin-top: .1rem; font-weight: 600; }
@@ -94,7 +101,9 @@
         .daily-group:last-child { border-bottom: none; margin-bottom: 0; }
         /* هايلايت واضح للفئة المفتوحة — بلون البراند (لايم في الغامق / أخضر في الفاتح) بدل الرمادي العادي */
         .daily-group[open] {
+            background: rgba(8,122,89,0.08);
             background: color-mix(in srgb, var(--pm-gold-bright, #d0ff52) 8%, transparent);
+            border: 1px solid rgba(8,122,89,0.35);
             border: 1px solid color-mix(in srgb, var(--pm-gold-bright, #d0ff52) 35%, transparent);
             border-radius: .9rem; padding: 0 .5rem; margin-inline: -.5rem; margin-top: .3rem;
         }
@@ -195,7 +204,7 @@
         }
 
         /* ============ شاشة "مش شغال معايا؟" (البنوك والمحافظ) — glow خفيف + نبضة الأيقونة الرئيسية ============ */
-        .bg-glow-ts { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+        .bg-glow-ts { position: absolute; top:0;right:0;bottom:0;left:0;inset:0; z-index: 0; pointer-events: none; overflow: hidden; }
         .bg-glow-ts::before { content: ''; position: absolute; top: -10%; right: -10%; width: 60vw; height: 60vw; max-width: 420px; max-height: 420px; background: radial-gradient(circle, rgba(16,185,129,.16), transparent 70%); }
         .bg-glow-ts::after { content: ''; position: absolute; bottom: -15%; left: -15%; width: 60vw; height: 60vw; max-width: 380px; max-height: 380px; background: radial-gradient(circle, rgba(20,184,166,.12), transparent 70%); }
         html[data-theme="light"] .bg-glow-ts::before { background: radial-gradient(circle, rgba(16,185,129,.12), transparent 70%); }
@@ -238,7 +247,7 @@
         .weekday-bar { position: relative; overflow: hidden; cursor: pointer; }
         .weekday-bar::after {
             content: '';
-            position: absolute; inset: 0;
+            position: absolute; top:0;right:0;bottom:0;left:0;inset:0;
             background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.55) 50%, transparent 70%);
             transform: translateX(-120%);
             opacity: 0;
@@ -321,24 +330,25 @@
         /* كارتي "باقيلك من الميزانية" و"الحصالة اليومية" — تصميم أغنى بدل الجراديانت البدائي القديم */
         .dabbar-metric-card {
             border: 1px solid var(--pm-hairline, rgba(16,185,129,.25));
+            background: linear-gradient(160deg, rgb(236,246,243) 0%, var(--pm-surface-hi, #0b0e18) 65%);
             background: linear-gradient(160deg, color-mix(in srgb, var(--pm-gold, #10b981) 8%, var(--pm-surface-hi, #0b0e18)) 0%, var(--pm-surface-hi, #0b0e18) 65%);
         }
-        .dabbar-metric-glow { position:absolute; inset:-40% -30% auto auto; width:9rem; height:9rem; border-radius:999px; background: radial-gradient(circle, color-mix(in srgb, var(--pm-gold, #10b981) 30%, transparent) 0%, transparent 70%); pointer-events:none; }
-        .dabbar-metric-glow--piggy { background: radial-gradient(circle, color-mix(in srgb, var(--pm-clay, #d36a56) 30%, transparent) 0%, transparent 70%); }
-        .dabbar-metric-icon { display:inline-flex; align-items:center; justify-content:center; width:1.9rem; height:1.9rem; border-radius:.85rem; font-size:1rem; background: color-mix(in srgb, var(--pm-gold, #10b981) 16%, transparent); border:1px solid var(--pm-hairline); }
-        .dabbar-metric-icon--piggy { background: color-mix(in srgb, var(--pm-clay, #d36a56) 16%, transparent); }
+        .dabbar-metric-glow { position:absolute; top:-40%;right:-30%;bottom:auto;left:auto;inset:-40% -30% auto auto; width:9rem; height:9rem; border-radius:999px; background: radial-gradient(circle, rgba(14,143,104,0.3) 0%, transparent 70%); background: radial-gradient(circle, color-mix(in srgb, var(--pm-gold, #10b981) 30%, transparent) 0%, transparent 70%); pointer-events:none; }
+        .dabbar-metric-glow--piggy { background: radial-gradient(circle, rgba(169,76,58,0.3) 0%, transparent 70%); background: radial-gradient(circle, color-mix(in srgb, var(--pm-clay, #d36a56) 30%, transparent) 0%, transparent 70%); }
+        .dabbar-metric-icon { display:inline-flex; align-items:center; justify-content:center; width:1.9rem; height:1.9rem; border-radius:.85rem; font-size:1rem; background: rgba(14,143,104,0.16); background: color-mix(in srgb, var(--pm-gold, #10b981) 16%, transparent); border:1px solid var(--pm-hairline); }
+        .dabbar-metric-icon--piggy { background: rgba(169,76,58,0.16); background: color-mix(in srgb, var(--pm-clay, #d36a56) 16%, transparent); }
         .dabbar-metric-title { color: var(--pm-ink, #f6f1e5); }
         .dabbar-metric-pill { font-size:.62rem; font-weight:700; color: var(--pm-muted, #aaa39b); background: var(--pm-surface-soft, rgba(0,0,0,.2)); border-radius:999px; padding:.2rem .55rem; }
         .dabbar-metric-pill--piggy { color: var(--pm-clay, #d36a56); }
         .dabbar-metric-label { color: var(--pm-muted, #aaa39b); }
         .dabbar-metric-value { color: var(--pm-ink, #f6f1e5); }
         .dabbar-metric-value-accent { color: var(--pm-gold-bright, #10b981); }
-        .dabbar-metric-track { background: color-mix(in srgb, var(--pm-gold, #10b981) 14%, transparent); }
-        .dabbar-metric-empty { border:1px dashed var(--pm-hairline); background: color-mix(in srgb, var(--pm-gold, #10b981) 5%, var(--pm-surface-hi, transparent)); }
-        .dabbar-metric-empty--piggy { background: color-mix(in srgb, var(--pm-clay, #d36a56) 5%, var(--pm-surface-hi, transparent)); }
+        .dabbar-metric-track { background: rgba(14,143,104,0.14); background: color-mix(in srgb, var(--pm-gold, #10b981) 14%, transparent); }
+        .dabbar-metric-empty { border:1px dashed var(--pm-hairline); background: rgb(243,249,247); background: color-mix(in srgb, var(--pm-gold, #10b981) 5%, var(--pm-surface-hi, transparent)); }
+        .dabbar-metric-empty--piggy { background: rgb(251,246,245); background: color-mix(in srgb, var(--pm-clay, #d36a56) 5%, var(--pm-surface-hi, transparent)); }
         .dabbar-metric-cta { color: var(--pm-gold-bright, #10b981); }
         .dabbar-metric-cta-btn { border-radius:.85rem; padding:.4rem .85rem; font-size:.68rem; font-weight:900; background: var(--pm-gold, #10b981); color: var(--pm-surface, #06271a); }
-        .dabbar-metric-cta-btn--ghost { background: color-mix(in srgb, var(--pm-clay, #d36a56) 16%, transparent); color: var(--pm-clay, #d36a56); }
+        .dabbar-metric-cta-btn--ghost { background: rgba(169,76,58,0.16); background: color-mix(in srgb, var(--pm-clay, #d36a56) 16%, transparent); color: var(--pm-clay, #d36a56); }
 
         /* كارت "صرف النهاردة" — مدموج مع إحصائياته (عدد العمليات + المتوسط) جوه نفس الكارت بدل ما يكونوا منفصلين */
         .dabbar-spend-stats { display:grid; grid-template-columns:1fr 1fr; gap:.5rem; }
@@ -357,6 +367,7 @@
         .dabbar-goal-add-trigger:hover, .dabbar-goal-add-trigger:focus-visible { border-color: var(--pm-gold-bright, #10b981); color: var(--pm-gold-bright, #10b981); }
         .dabbar-goal-add-trigger-plus {
             width: 1.7rem; height: 1.7rem; border-radius: 999px; flex: none;
+            background: rgba(14,143,104,0.14);
             background: color-mix(in srgb, var(--pm-gold, #10b981) 14%, transparent); color: var(--pm-gold-bright, #10b981);
             display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: .95rem;
         }
@@ -401,14 +412,14 @@
         }
 
         /* كارت فرص التوفير */
-        .dabbar-savings-card { border: 1px solid var(--pm-hairline); background: linear-gradient(160deg, color-mix(in srgb, var(--pm-gold, #10b981) 10%, var(--pm-surface-hi, #0b0e18)) 0%, var(--pm-surface-hi, #0b0e18) 65%); }
+        .dabbar-savings-card { border: 1px solid var(--pm-hairline); background: linear-gradient(160deg, rgb(231,244,240) 0%, var(--pm-surface-hi, #0b0e18) 65%); background: linear-gradient(160deg, color-mix(in srgb, var(--pm-gold, #10b981) 10%, var(--pm-surface-hi, #0b0e18)) 0%, var(--pm-surface-hi, #0b0e18) 65%); }
         .dabbar-savings-row { display:flex; align-items:center; justify-content:space-between; font-size:.66rem; background: var(--pm-surface-soft, rgba(0,0,0,.18)); border-radius:.7rem; padding:.4rem .6rem; }
         .dabbar-savings-row-label { color: var(--pm-ink-dim, #d7d0c3); font-weight:700; }
         .dabbar-savings-row-amount { color: var(--pm-gold-bright, #10b981); font-weight:900; }
         /* ============ كارت فرص التوفير — تصميم مضغوط: سطر واحد لكل بند، والتفاصيل بتتفتح بالدوس بس ============ */
         .dabbar-savings-row2 { display:flex; align-items:center; gap:.55rem; padding:.55rem .1rem; border-top:1px solid var(--pm-hairline); cursor:pointer; }
         .dabbar-savings-row2:first-of-type { border-top:none; }
-        .dabbar-savings-row2-ic { width:1.9rem; height:1.9rem; border-radius:.7rem; background: color-mix(in srgb, var(--pm-gold, #10b981) 14%, transparent); display:flex; align-items:center; justify-content:center; font-size:.9rem; flex:none; }
+        .dabbar-savings-row2-ic { width:1.9rem; height:1.9rem; border-radius:.7rem; background: rgba(14,143,104,0.14); background: color-mix(in srgb, var(--pm-gold, #10b981) 14%, transparent); display:flex; align-items:center; justify-content:center; font-size:.9rem; flex:none; }
         .dabbar-savings-row2-mid { flex:1; min-width:0; }
         .dabbar-savings-row2-label { font-size:.72rem; font-weight:800; color: var(--pm-ink, #17202b); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
         .dabbar-savings-row2-hint { font-size:.6rem; color: var(--pm-muted, #7b8490); margin-top:1px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
@@ -419,7 +430,7 @@
         .dabbar-savings-detail2.open { max-height:280px; }
         .dabbar-savings-detail2-inner { padding:.1rem .1rem .6rem 2.55rem; font-size:.64rem; color: var(--pm-muted, #7b8490); line-height:1.6; }
         .dabbar-savings-tags2 { display:flex; flex-wrap:wrap; gap:.3rem; margin-top:.35rem; }
-        .dabbar-savings-tag2 { font-size:.58rem; font-weight:700; color: var(--pm-gold-bright, #10b981); background: color-mix(in srgb, var(--pm-gold-bright, #10b981) 12%, transparent); border: 1px solid color-mix(in srgb, var(--pm-gold-bright, #10b981) 28%, transparent); border-radius:999px; padding:.15rem .5rem; }
+        .dabbar-savings-tag2 { font-size:.58rem; font-weight:700; color: var(--pm-gold-bright, #10b981); background: rgba(8,122,89,0.12); background: color-mix(in srgb, var(--pm-gold-bright, #10b981) 12%, transparent); border: 1px solid rgba(8,122,89,0.28); border: 1px solid color-mix(in srgb, var(--pm-gold-bright, #10b981) 28%, transparent); border-radius:999px; padding:.15rem .5rem; }
         .dabbar-savings-cta-row { display:flex; align-items:center; gap:.6rem; flex-wrap:wrap; margin-top:.5rem; }
         .dabbar-savings-cta-primary { display:inline-flex; align-items:center; gap:.25rem; background: var(--pm-gold-bright, #10b981); color:#04140f; border:none; border-radius:.7rem; font-size:.63rem; font-weight:900; cursor:pointer; padding:.42rem .7rem; }
         .dabbar-savings-cta2 { display:inline-block; background:none; border:none; color: var(--pm-gold-bright, #10b981); font-size:.6rem; font-weight:800; cursor:pointer; padding:0; text-decoration:underline; text-underline-offset:2px; }
@@ -434,7 +445,7 @@
         .dabbar-status-processing { color: var(--pm-gold-bright, #10b981) !important; font-weight: 800; }
 
         /* كارت "بنقرأ الفاتورة" — بألوان الموقع بدل الأزرق الغريب، ومتماشي مع الوضعين */
-        .dabbar-scan-box { border: 1px solid var(--pm-hairline); background: color-mix(in srgb, var(--pm-gold, #10b981) 8%, var(--pm-surface-hi, transparent)); }
+        .dabbar-scan-box { border: 1px solid var(--pm-hairline); background: rgb(236,246,243); background: color-mix(in srgb, var(--pm-gold, #10b981) 8%, var(--pm-surface-hi, transparent)); }
         .dabbar-scan-box-icon { background: var(--pm-surface-hi, #fff); }
         .dabbar-scan-box-title { color: var(--pm-gold-bright, #0e9f6e); }
         .dabbar-scan-box-sub { color: var(--pm-muted, #7d8e87); }
@@ -442,13 +453,14 @@
         /* محفظة يوم بيوم — كارت وأزرار ومبالغ سريعة */
         .dabbar-wallet-card {
             border: 1px solid var(--pm-hairline, rgba(211,106,86,.3));
+            background: linear-gradient(160deg, rgb(248,241,239) 0%, var(--pm-surface-hi, #0b0e18) 65%);
             background: linear-gradient(160deg, color-mix(in srgb, var(--pm-clay, #d36a56) 8%, var(--pm-surface-hi, #0b0e18)) 0%, var(--pm-surface-hi, #0b0e18) 65%);
         }
         .dabbar-wallet-chip {
             border: 1px solid var(--pm-hairline); border-radius: .7rem; padding: .45rem 0; text-align:center;
             font-size: .74rem; font-weight: 800; color: var(--pm-ink-dim, #d7d0c3); background: var(--pm-surface-soft, rgba(0,0,0,.18));
         }
-        .dabbar-wallet-chip.active { background: color-mix(in srgb, var(--pm-clay, #d36a56) 20%, transparent); color: var(--pm-clay, #d36a56); border-color: color-mix(in srgb, var(--pm-clay, #d36a56) 45%, transparent); }
+        .dabbar-wallet-chip.active { background: rgba(169,76,58,0.2); background: color-mix(in srgb, var(--pm-clay, #d36a56) 20%, transparent); color: var(--pm-clay, #d36a56); border-color: rgba(169,76,58,0.45); border-color: color-mix(in srgb, var(--pm-clay, #d36a56) 45%, transparent); }
         .dabbar-wallet-chip--custom { padding: 0; display:flex; align-items:center; justify-content:center; }
         .dabbar-wallet-chip--custom input { width: 100%; background: transparent; border: none; outline: none; text-align: center; font-size: .7rem; font-weight: 800; color: var(--pm-ink-dim, #d7d0c3); padding: .45rem .2rem; }
         .dabbar-wallet-chip--custom input::placeholder { color: var(--pm-muted, #7d8e87); font-weight: 700; }
@@ -462,6 +474,9 @@
         .dabbar-premium-modal {
             border: 1px solid var(--pm-hairline);
             background:
+                radial-gradient(120% 140% at 100% 0%, rgba(14,143,104,0.12) 0%, transparent 55%),
+                var(--pm-surface-hi, #14161a);
+            background:
                 radial-gradient(120% 140% at 100% 0%, color-mix(in srgb, var(--pm-gold, #10b981) 12%, transparent) 0%, transparent 55%),
                 var(--pm-surface-hi, #14161a);
             box-shadow: 0 24px 60px rgba(0,0,0,.35);
@@ -470,10 +485,11 @@
         @keyframes dabbarModalPop { from { opacity:0; transform: translateY(10px) scale(.97); } to { opacity:1; transform: translateY(0) scale(1); } }
         .dabbar-premium-modal-icon {
             width: 2.6rem; height: 2.6rem; border-radius: 1rem; display:flex; align-items:center; justify-content:center; font-size:1.25rem;
+            background: rgba(14,143,104,0.16);
             background: color-mix(in srgb, var(--pm-gold, #10b981) 16%, transparent);
         }
         .dabbar-premium-modal-icon--danger { background: rgba(179,67,47,.16); }
-        .dabbar-premium-modal-icon--piggy { background: color-mix(in srgb, var(--pm-clay, #d36a56) 16%, transparent); }
+        .dabbar-premium-modal-icon--piggy { background: rgba(169,76,58,0.16); background: color-mix(in srgb, var(--pm-clay, #d36a56) 16%, transparent); }
         .dabbar-premium-modal-title { color: var(--pm-ink, #f6f1e5); }
         .dabbar-premium-modal-body { color: var(--pm-muted, #aaa39b); }
         .dabbar-premium-modal-input-wrap { position:relative; display:flex; align-items:center; }
@@ -481,17 +497,17 @@
             width:100%; border-radius: .9rem; border: 1px solid var(--pm-hairline); background: var(--pm-surface-soft, rgba(0,0,0,.2));
             color: var(--pm-ink, #f6f1e5); font-size: 1.05rem; font-weight: 900; padding: .7rem 3.2rem .7rem 1rem; text-align:left; direction:ltr; outline:none;
         }
-        .dabbar-premium-modal-input:focus { border-color: color-mix(in srgb, var(--pm-gold, #10b981) 55%, var(--pm-hairline)); }
+        .dabbar-premium-modal-input:focus { border-color: rgba(14,132,98,0.604); border-color: color-mix(in srgb, var(--pm-gold, #10b981) 55%, var(--pm-hairline)); }
         .dabbar-premium-modal-input-suffix { position:absolute; right:.9rem; font-size:.72rem; font-weight:800; color: var(--pm-muted, #aaa39b); pointer-events:none; }
         .dabbar-premium-modal-btn { border-radius: 1rem; padding: .75rem 0; font-size: .8rem; font-weight: 900; border:none; }
         .dabbar-premium-modal-btn--ghost { background: var(--pm-surface-soft, rgba(0,0,0,.18)); color: var(--pm-ink-dim, #d7d0c3); }
         .dabbar-premium-modal-btn--danger { background: linear-gradient(135deg, #c0503a, #8f3524); color: #fff; }
-        .dabbar-premium-modal-btn--piggy { background: linear-gradient(135deg, var(--pm-clay, #d36a56), color-mix(in srgb, var(--pm-clay, #d36a56) 60%, black)); color:#fff; }
+        .dabbar-premium-modal-btn--piggy { background: linear-gradient(135deg, var(--pm-clay, #d36a56), rgb(101,46,35)); background: linear-gradient(135deg, var(--pm-clay, #d36a56), color-mix(in srgb, var(--pm-clay, #d36a56) 60%, black)); color:#fff; }
 
         /* تنبيهات التذكيرات القريبة — بانرات قابلة للإغلاق + قسم "قريبة" */
         @keyframes dabbarBannerIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:translateY(0); } }
         .dabbar-reminder-banner { position:relative; display:flex; align-items:flex-start; gap:.65rem; border-radius:1.1rem; padding:.75rem .85rem; animation: dabbarBannerIn .3s ease both; }
-        .dabbar-reminder-banner.due-2 { border:1px solid color-mix(in srgb, var(--pm-gold, #10b981) 35%, var(--pm-hairline)); background: color-mix(in srgb, var(--pm-gold, #10b981) 10%, var(--pm-surface-hi, transparent)); }
+        .dabbar-reminder-banner.due-2 { border:1px solid rgba(14,121,93,0.428); border:1px solid color-mix(in srgb, var(--pm-gold, #10b981) 35%, var(--pm-hairline)); background: rgb(231,244,240); background: color-mix(in srgb, var(--pm-gold, #10b981) 10%, var(--pm-surface-hi, transparent)); }
         .dabbar-reminder-banner.due-1 { border:1px solid rgba(184,134,44,.4); background: rgba(184,134,44,.12); }
         .dabbar-reminder-banner.due-0 { border:1px solid rgba(179,67,47,.4); background: rgba(179,67,47,.12); }
         .dabbar-reminder-banner-icon { width:1.9rem; height:1.9rem; border-radius:.75rem; display:flex; align-items:center; justify-content:center; font-size:.9rem; flex-shrink:0; background: rgba(0,0,0,.15); }
@@ -590,7 +606,7 @@
         .active-days-badge { font: 800 .58rem/1 'Cairo', sans-serif; color:#167044; background:#eaf7ef; border:1px solid #ccebd8; padding:.32rem .55rem; border-radius:999px; white-space:nowrap; }
         .active-days-strip { display:flex; align-items:center; gap:.55rem; min-width:0; flex:none; }
         .active-days-flame-wrap { position:relative; width:2rem; height:2rem; flex:0 0 2rem; display:grid; place-items:center; }
-        .active-days-flame-wrap::before { content:''; position:absolute; inset:1px; border-radius:50%; background:radial-gradient(circle, rgba(255,122,24,.28), transparent 68%); animation:activeDaysGlow 2.8s ease-in-out infinite; }
+        .active-days-flame-wrap::before { content:''; position:absolute; top:1px;right:1px;bottom:1px;left:1px;inset:1px; border-radius:50%; background:radial-gradient(circle, rgba(255,122,24,.28), transparent 68%); animation:activeDaysGlow 2.8s ease-in-out infinite; }
         .active-days-flame { position:relative; width:1.55rem; height:1.75rem; z-index:1; animation:activeDaysFlicker 3.2s ease-in-out infinite; }
         .active-days-flame svg { width:100%; height:100%; display:block; }
         .active-days-number { font:900 1.15rem/1 'Cairo', sans-serif; white-space:nowrap; background:linear-gradient(135deg,#d6321f,#ff7a18 55%,#ffd54b); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
@@ -1008,7 +1024,7 @@
         /* responsive: الحواف تختفي تمامًا على الهاتف، مع تنفّس أفضل على سطح المكتب */
         @media (min-width: 768px) {
             body > .max-w-4xl.mx-auto.bg-slate-900.flex-1 {
-                min-height: 100dvh;
+                min-height:100vh;min-height:100dvh;
             }
             .flex-1.overflow-y-auto .tab-content {
                 padding-inline: 2rem !important;
@@ -1175,9 +1191,9 @@
         #portfolio-summary::-webkit-details-marker { display: none; }
         .portfolio-summary-copy { min-width: 0; }
         .portfolio-eyebrow { display: inline-flex; align-items: center; gap: .35rem; font-size: .61rem; font-weight: 900; color: var(--portfolio-accent); letter-spacing: .01em; }
-        .portfolio-live-dot { width: .38rem; height: .38rem; border-radius: 50%; background: var(--portfolio-accent); box-shadow: 0 0 0 .2rem color-mix(in srgb, var(--portfolio-accent) 14%, transparent); }
+        .portfolio-live-dot { width: .38rem; height: .38rem; border-radius: 50%; background: var(--portfolio-accent); box-shadow: 0 0 0 .2rem rgba(189,242,63,0.14); box-shadow: 0 0 0 .2rem color-mix(in srgb, var(--portfolio-accent) 14%, transparent); }
         .portfolio-title { display: flex; align-items: center; gap: .4rem; color: var(--portfolio-ink); font-size: .88rem; font-weight: 900; margin-top: .28rem; }
-        .portfolio-title-icon { width: 1.8rem; height: 1.8rem; display: inline-flex; align-items: center; justify-content: center; border-radius: .65rem; color: var(--portfolio-accent-strong); background: color-mix(in srgb, var(--portfolio-accent) 14%, transparent); font-size: 1.15rem; }
+        .portfolio-title-icon { width: 1.8rem; height: 1.8rem; display: inline-flex; align-items: center; justify-content: center; border-radius: .65rem; color: var(--portfolio-accent-strong); background: rgba(189,242,63,0.14); background: color-mix(in srgb, var(--portfolio-accent) 14%, transparent); font-size: 1.15rem; }
         .portfolio-right { display: flex; align-items: center; gap: .7rem; }
         .portfolio-summary-total { display: flex; flex-direction: column; align-items: flex-start; gap: .05rem; }
         .portfolio-total-caption { color: var(--portfolio-muted); font-size: .55rem; font-weight: 800; }
@@ -1193,7 +1209,7 @@
         .portfolio-asset-expand-chev { color: var(--portfolio-muted); font-size: .9rem; transition: transform .2s; margin-inline-start: .1rem; }
         .portfolio-asset-wrap.open .portfolio-asset-expand-chev { transform: rotate(180deg); }
         .portfolio-asset-wrap.open .portfolio-asset { border-color: var(--portfolio-accent); }
-        .portfolio-asset-detail { grid-column: 1 / -1; margin-top: -.15rem; padding: .85rem .9rem 1rem; border: 1px solid var(--portfolio-line); border-top: none; border-radius: 0 0 1.15rem 1.15rem; background: color-mix(in srgb, var(--portfolio-card) 92%, transparent); }
+        .portfolio-asset-detail { grid-column: 1 / -1; margin-top: -.15rem; padding: .85rem .9rem 1rem; border: 1px solid var(--portfolio-line); border-top: none; border-radius: 0 0 1.15rem 1.15rem; background: rgba(255,255,255,0.92); background: color-mix(in srgb, var(--portfolio-card) 92%, transparent); }
         .portfolio-detail-loading { text-align: center; font-size: .7rem; color: var(--portfolio-muted); padding: .6rem 0; }
         .portfolio-detail-value { font-size: 1.35rem; font-weight: 900; color: var(--portfolio-ink); }
         .portfolio-detail-badge { display: inline-flex; align-items: center; gap: .25rem; font-size: .68rem; font-weight: 900; padding: .15rem .5rem; border-radius: 8px; margin-top: .3rem; }
@@ -1249,22 +1265,23 @@
         .portfolio-asset .portfolio-asset-val { display: flex; align-items: center; gap: .45rem; flex-shrink: 0; }
         .portfolio-asset .portfolio-asset-val strong { color: var(--portfolio-accent-strong); font-size: .84rem; display: block; text-align: left; white-space: nowrap; }
         .portfolio-asset-menu { width: 2rem; height: 2rem; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: .65rem; color: var(--portfolio-muted); background: transparent; cursor: pointer; font-size: 1.1rem; }
-        .portfolio-asset-menu:hover, .portfolio-asset-menu[aria-expanded="true"] { color: var(--portfolio-accent-strong); background: color-mix(in srgb, var(--portfolio-accent) 12%, transparent); }
+        .portfolio-asset-menu:hover, .portfolio-asset-menu[aria-expanded="true"] { color: var(--portfolio-accent-strong); background: rgba(189,242,63,0.12); background: color-mix(in srgb, var(--portfolio-accent) 12%, transparent); }
         .portfolio-asset-menu-popover { position: absolute; z-index: 8; top: 2.8rem; inset-inline-end: .65rem; display: none; min-width: 9.5rem; padding: .3rem; border: 1px solid var(--portfolio-line); border-radius: .85rem; background: var(--portfolio-surface); box-shadow: 0 14px 28px rgba(0,0,0,.16); }
         .portfolio-asset-menu-popover.open { display: grid; gap: .15rem; }
         .portfolio-asset-menu-action { display: flex; align-items: center; gap: .45rem; width: 100%; border: 0; border-radius: .6rem; padding: .55rem .6rem; background: transparent; color: var(--portfolio-ink); font-family: inherit; font-size: .68rem; font-weight: 800; text-align: right; cursor: pointer; }
-        .portfolio-asset-menu-action:hover { background: color-mix(in srgb, var(--portfolio-accent) 10%, transparent); }
+        .portfolio-asset-menu-action:hover { background: rgba(189,242,63,0.1); background: color-mix(in srgb, var(--portfolio-accent) 10%, transparent); }
         .portfolio-asset-menu-action.edit { color: var(--portfolio-accent-strong); }
         .portfolio-asset-menu-action.delete { color: #a32d2d; }
         html[data-theme="dark"] .portfolio-asset-menu-action.delete { color: #ff8e8e; }
-        .portfolio-add-btn { display: flex; align-items: center; justify-content: center; gap: .4rem; margin-top: .8rem; width: 100%; border: 1px dashed color-mix(in srgb, var(--portfolio-accent) 62%, transparent); background: transparent; color: var(--portfolio-accent-strong); border-radius: 1rem; padding: .72rem; font-size: .72rem; font-weight: 900; cursor: pointer; transition: background .2s, border-color .2s; }
-        .portfolio-add-btn:hover { background: color-mix(in srgb, var(--portfolio-accent) 9%, transparent); border-color: var(--portfolio-accent); }
+        .portfolio-add-btn { display: flex; align-items: center; justify-content: center; gap: .4rem; margin-top: .8rem; width: 100%; border: 1px dashed rgba(189,242,63,0.62); border: 1px dashed color-mix(in srgb, var(--portfolio-accent) 62%, transparent); background: transparent; color: var(--portfolio-accent-strong); border-radius: 1rem; padding: .72rem; font-size: .72rem; font-weight: 900; cursor: pointer; transition: background .2s, border-color .2s; }
+        .portfolio-add-btn:hover { background: rgba(189,242,63,0.09); background: color-mix(in srgb, var(--portfolio-accent) 9%, transparent); border-color: var(--portfolio-accent); }
         .portfolio-add-form-panel { display: none; }
         .portfolio-add-form-panel:not(.hidden) { display: flex; }
-        .portfolio-add-form-panel { border: 1px solid var(--portfolio-line); border-radius: 1.15rem; padding: .9rem .95rem; background: color-mix(in srgb, var(--portfolio-card) 92%, transparent); }
+        .portfolio-add-form-panel { border: 1px solid var(--portfolio-line); border-radius: 1.15rem; padding: .9rem .95rem; background: rgba(255,255,255,0.92); background: color-mix(in srgb, var(--portfolio-card) 92%, transparent); }
         .portfolio-note { color: var(--portfolio-muted); font-size: .6rem; opacity: .9; margin-top: .6rem; text-align: center; line-height: 1.8; }
         .portfolio-summary-header {
             display: flex; align-items: center; gap: .3rem;
+            background: linear-gradient(135deg, rgb(247,253,232) 0%, var(--portfolio-card) 72%);
             background: linear-gradient(135deg, color-mix(in srgb, var(--portfolio-accent) 12%, var(--portfolio-card)) 0%, var(--portfolio-card) 72%);
             border: 1px solid var(--portfolio-line); border-radius: 1.35rem; padding: 1.05rem 1.15rem; margin-bottom: 1rem;
             box-shadow: 0 10px 22px rgba(8,80,65,.08);
@@ -1282,21 +1299,21 @@
         .portfolio-form-title { color: var(--portfolio-ink); font-size: .72rem; font-weight: 900; }
         .portfolio-form-input { width: 100%; box-sizing: border-box; border: 1px solid var(--portfolio-line); border-radius: .75rem; padding: .65rem .72rem; background: var(--portfolio-card); color: var(--portfolio-ink); font: inherit; font-size: .68rem; outline: none; }
         .portfolio-form-input::placeholder { color: var(--portfolio-muted); opacity: .85; }
-        .portfolio-form-input:focus { border-color: var(--portfolio-accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--portfolio-accent) 13%, transparent); }
+        .portfolio-form-input:focus { border-color: var(--portfolio-accent); box-shadow: 0 0 0 3px rgba(189,242,63,0.13); box-shadow: 0 0 0 3px color-mix(in srgb, var(--portfolio-accent) 13%, transparent); }
         .portfolio-form-cancel { border: 1px solid var(--portfolio-line); border-radius: .75rem; padding: .58rem .8rem; background: transparent; color: var(--portfolio-muted); font: inherit; font-size: .68rem; font-weight: 800; cursor: pointer; }
         .portfolio-form-submit { flex: 1; border: 0; border-radius: .75rem; padding: .62rem .8rem; background: var(--portfolio-accent); color: #062a21; font: inherit; font-size: .68rem; font-weight: 900; cursor: pointer; }
         .portfolio-form-submit:disabled { opacity: .6; cursor: wait; }
         .icon-library-row { display: flex; gap: .4rem; flex-wrap: wrap; }
         .icon-library-btn { width: 2.1rem; height: 2.1rem; display: flex; align-items: center; justify-content: center; border-radius: .65rem; border: 1px solid var(--portfolio-line); background: var(--portfolio-card); color: var(--portfolio-muted); font-size: .95rem; cursor: pointer; transition: border-color .15s, color .15s, background .15s; }
-        .icon-library-btn.selected { border-color: var(--portfolio-accent); color: var(--portfolio-accent); background: color-mix(in srgb, var(--portfolio-accent) 14%, transparent); }
+        .icon-library-btn.selected { border-color: var(--portfolio-accent); color: var(--portfolio-accent); background: rgba(189,242,63,0.14); background: color-mix(in srgb, var(--portfolio-accent) 14%, transparent); }
         @media (max-width: 420px) { #portfolio-summary { padding-inline: .85rem; } .portfolio-body { padding-inline: .85rem; } .portfolio-total-quick { font-size: .95rem; } .portfolio-asset { padding-inline: .58rem; } }
-        .portfolio-refresh-prices-btn { width: 1.9rem; height: 1.9rem; flex: 0 0 1.9rem; display: inline-flex; align-items: center; justify-content: center; border-radius: .6rem; border: 1px solid var(--portfolio-line); background: color-mix(in srgb, var(--portfolio-accent) 10%, transparent); color: var(--portfolio-accent-strong); font-size: .85rem; cursor: pointer; transition: transform .5s ease; }
+        .portfolio-refresh-prices-btn { width: 1.9rem; height: 1.9rem; flex: 0 0 1.9rem; display: inline-flex; align-items: center; justify-content: center; border-radius: .6rem; border: 1px solid var(--portfolio-line); background: rgba(189,242,63,0.1); background: color-mix(in srgb, var(--portfolio-accent) 10%, transparent); color: var(--portfolio-accent-strong); font-size: .85rem; cursor: pointer; transition: transform .5s ease; }
         .portfolio-refresh-prices-btn:active { transform: scale(.92); }
         .portfolio-refresh-prices-btn.is-syncing { animation: portfolio-refresh-spin 1s linear infinite; }
         /* ===== شريط توزيع الأصول + صف الأيقونات المتراكبة (بيبان وهي مقفولة) — بريميوم preview ===== */
         .portfolio-preview-strip { padding: 0 1.1rem .9rem; }
         .portfolio-preview-strip.hidden { display: none; }
-        .portfolio-allocation-bar { display: flex; height: .5rem; border-radius: 1rem; overflow: hidden; margin-bottom: .55rem; background: color-mix(in srgb, var(--portfolio-ink) 8%, transparent); }
+        .portfolio-allocation-bar { display: flex; height: .5rem; border-radius: 1rem; overflow: hidden; margin-bottom: .55rem; background: rgba(245,245,244,0.08); background: color-mix(in srgb, var(--portfolio-ink) 8%, transparent); }
         .portfolio-allocation-segment { height: 100%; }
         .portfolio-preview-row { display: flex; align-items: center; gap: .5rem; background: var(--portfolio-card); border: 1px solid var(--portfolio-line); border-radius: .95rem; padding: .5rem .7rem; cursor: pointer; }
         .portfolio-preview-stack { display: flex; }
@@ -1524,7 +1541,7 @@
         #quick-entry-card::before {
             content: '';
             position: absolute;
-            inset: 0 auto auto 0;
+            top:0;right:auto;bottom:auto;left:0;inset:0 auto auto 0;
             width: 42%;
             height: 100%;
             background: radial-gradient(circle at 0 0, rgba(52,211,153,.18), transparent 70%);
@@ -1884,7 +1901,7 @@
         .commitment-icon iconify-icon { display:block; }
         /* ============ زرار "+ إضافة" الموحّد اللي بيفتح شيت بدل صف إدخال ثابت ============ */
         .dabbar-fab-add { width:100%; border-radius:.9rem; padding:.6rem; font-size:.68rem; font-weight:800; border:1px dashed var(--pm-hairline); background:transparent; color:var(--pm-gold-bright); }
-        .dabbar-hdr-ic { display:inline-flex; align-items:center; justify-content:center; width:1.5rem; height:1.5rem; border-radius:.55rem; background:color-mix(in srgb, var(--pm-gold-bright, #34d399) 16%, transparent); color:var(--pm-gold-bright, #34d399); flex:0 0 auto; }
+        .dabbar-hdr-ic { display:inline-flex; align-items:center; justify-content:center; width:1.5rem; height:1.5rem; border-radius:.55rem; background:rgba(8,122,89,0.16); background:color-mix(in srgb, var(--pm-gold-bright, #34d399) 16%, transparent); color:var(--pm-gold-bright, #34d399); flex:0 0 auto; }
         .dabbar-row-hidden { display:none !important; }
         .dabbar-list-toggle { width:100%; border-radius:.85rem; padding:.5rem; font-size:.66rem; font-weight:800; border:1px solid var(--pm-hairline); background:transparent; color:#8a97a8; margin-top:.3rem; transition:color .15s,border-color .15s; }
         .dabbar-list-toggle:hover { color:var(--pm-gold-bright); border-color:var(--pm-gold-bright); }
@@ -1898,21 +1915,25 @@
             border-radius: .9rem; padding: .55rem .65rem;
         }
         #daily-income-section {
+            background: rgba(8,122,89,0.1);
             background: color-mix(in srgb, var(--pm-gold-bright, #10b981) 10%, transparent);
+            border: 1px solid rgba(8,122,89,0.24);
             border: 1px solid color-mix(in srgb, var(--pm-gold-bright, #10b981) 24%, transparent);
         }
         #daily-expense-section {
+            background: rgba(169,76,58,0.1);
             background: color-mix(in srgb, var(--pm-clay, #d36a56) 10%, transparent);
+            border: 1px solid rgba(169,76,58,0.24);
             border: 1px solid color-mix(in srgb, var(--pm-clay, #d36a56) 24%, transparent);
         }
-        #daily-income-section .dabbar-daily-section-head { padding: 0 0 .4rem; margin-bottom: .1rem; border-bottom: 1px solid color-mix(in srgb, var(--pm-gold-bright, #10b981) 20%, transparent); }
-        #daily-expense-section .dabbar-daily-section-head { padding: 0 0 .4rem; margin-bottom: .1rem; border-bottom: 1px solid color-mix(in srgb, var(--pm-clay, #d36a56) 20%, transparent); }
+        #daily-income-section .dabbar-daily-section-head { padding: 0 0 .4rem; margin-bottom: .1rem; border-bottom: 1px solid rgba(8,122,89,0.2); border-bottom: 1px solid color-mix(in srgb, var(--pm-gold-bright, #10b981) 20%, transparent); }
+        #daily-expense-section .dabbar-daily-section-head { padding: 0 0 .4rem; margin-bottom: .1rem; border-bottom: 1px solid rgba(169,76,58,0.2); border-bottom: 1px solid color-mix(in srgb, var(--pm-clay, #d36a56) 20%, transparent); }
         #daily-income-section .dabbar-daily-section-title { color: var(--pm-gold-bright, #10b981); font-size: .74rem; }
         #daily-expense-section .dabbar-daily-section-title { color: var(--pm-clay, #d36a56); font-size: .74rem; }
-        #daily-income-section .dabbar-hdr-ic { width:1.85rem; height:1.85rem; border-radius:.65rem; background: color-mix(in srgb, var(--pm-gold-bright, #10b981) 26%, transparent); color: var(--pm-gold-bright, #10b981); }
-        #daily-expense-section .dabbar-hdr-ic { width:1.85rem; height:1.85rem; border-radius:.65rem; background: color-mix(in srgb, var(--pm-clay, #d36a56) 22%, transparent); color: var(--pm-clay, #d36a56); }
+        #daily-income-section .dabbar-hdr-ic { width:1.85rem; height:1.85rem; border-radius:.65rem; background: rgba(8,122,89,0.26); background: color-mix(in srgb, var(--pm-gold-bright, #10b981) 26%, transparent); color: var(--pm-gold-bright, #10b981); }
+        #daily-expense-section .dabbar-hdr-ic { width:1.85rem; height:1.85rem; border-radius:.65rem; background: rgba(169,76,58,0.22); background: color-mix(in srgb, var(--pm-clay, #d36a56) 22%, transparent); color: var(--pm-clay, #d36a56); }
         /* ============ شيت الإضافة (bottom sheet) لحد الفئة والالتزام — خطوة واحدة: اسم + مبلغ ============ */
-        .dabbar-sheet-backdrop { position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; align-items:flex-end; z-index:40; }
+        .dabbar-sheet-backdrop { position:fixed; top:0;right:0;bottom:0;left:0;inset:0; background:rgba(0,0,0,.45); display:none; align-items:flex-end; z-index:40; }
         .dabbar-sheet-backdrop.open { display:flex; }
         .dabbar-sheet { background:var(--pm-surface-hi); width:100%; max-width:28rem; margin:0 auto; border-radius:1.2rem 1.2rem 0 0; padding:1rem; padding-bottom:calc(1rem + env(safe-area-inset-bottom,0px)); border:1px solid var(--pm-hairline); border-bottom:none; }
         .dabbar-sheet-label { font-size:.62rem; color:var(--pm-muted); display:block; margin:.5rem 0 .25rem; font-weight:700; }
@@ -1978,6 +1999,7 @@
             background: linear-gradient(145deg, var(--db-accent, #bdf23f), #8fc11a) !important;
             border-color: transparent !important;
             color: #0c1a06 !important;
+            box-shadow: 0 6px 18px rgba(189,242,63,0.55);
             box-shadow: 0 6px 18px color-mix(in srgb, var(--db-accent, #bdf23f) 55%, transparent);
         }
         /* بطاقة نتيجة "فاتورة/كتابة/صوت" السريعة — تُجبر على الألوان الفاتحة في الوضع النهاري بغض النظر عن ثيم نظام الجهاز */
@@ -2070,6 +2092,7 @@
         .from-slate-900, .from-slate-950, html[data-theme="light"] .from-slate-900 { --tw-gradient-from: var(--pm-surface-hi) var(--tw-gradient-from-position) !important; }
         .to-slate-950, .to-slate-900, html[data-theme="light"] .to-slate-950, html[data-theme="light"] .to-slate-900 { --tw-gradient-to: var(--pm-surface-soft) var(--tw-gradient-to-position) !important; }
         .from-emerald-950\/60, html[data-theme="light"] .from-emerald-950\/60 { --tw-gradient-from: color-mix(in srgb, var(--pm-gold) 14%, var(--pm-surface-hi)) var(--tw-gradient-from-position) !important; }
+@supports not (color: color-mix(in srgb, red 50%, blue)){.from-emerald-950\/60, html[data-theme="light"] .from-emerald-950\/60{--tw-gradient-from:rgb(221,239,234) var(--tw-gradient-from-position) !important}}
         .from-slate-700 { --tw-gradient-from: var(--pm-surface-soft) var(--tw-gradient-from-position) !important; }
         .to-slate-600 { --tw-gradient-to: var(--pm-muted-2) var(--tw-gradient-to-position) !important; }
 
@@ -2081,6 +2104,7 @@
         html:not([data-theme="light"]) #quick-add-tg-open-bot {
             border-color: var(--pm-gold) !important;
             color: var(--pm-gold-bright) !important;
+            background: rgba(14,143,104,0.12) !important;
             background: color-mix(in srgb, var(--pm-gold) 12%, transparent) !important;
         }
 
@@ -2097,6 +2121,7 @@
         }
         .bg-emerald-500, .bg-emerald-500\/10, .bg-emerald-500\/15, .bg-emerald-500\/20,
         html[data-theme="light"] .bg-emerald-500\/15, html[data-theme="light"] .bg-emerald-500\/10 {
+            background: rgba(14,143,104,0.16) !important;
             background: color-mix(in srgb, var(--pm-gold) 16%, transparent) !important;
         }
         button.bg-emerald-500, .bg-emerald-500.hover\:bg-emerald-400, #quick-entry-analyze, #quick-entry-confirm,
@@ -2116,14 +2141,14 @@
 
         /* الأحمر (روز) بيبقى طيني دافئ */
         .text-rose-400, html[data-theme="light"] .text-rose-400 { color: var(--pm-clay) !important; }
-        .bg-rose-500\/15, .bg-rose-500\/20, .bg-rose-500\/10, html[data-theme="light"] .bg-rose-500\/15 { background: color-mix(in srgb, var(--pm-clay) 14%, transparent) !important; }
-        .border-rose-500\/30, .border-rose-200, html[data-theme="light"] .border-rose-500\/30 { border-color: color-mix(in srgb, var(--pm-clay) 35%, transparent) !important; }
+        .bg-rose-500\/15, .bg-rose-500\/20, .bg-rose-500\/10, html[data-theme="light"] .bg-rose-500\/15 { background: rgba(169,76,58,0.14) !important; background: color-mix(in srgb, var(--pm-clay) 14%, transparent) !important; }
+        .border-rose-500\/30, .border-rose-200, html[data-theme="light"] .border-rose-500\/30 { border-color: rgba(169,76,58,0.35) !important; border-color: color-mix(in srgb, var(--pm-clay) 35%, transparent) !important; }
         .text-rose-500, .hover\:text-rose-300:hover { color: var(--pm-clay) !important; }
         .bg-rose-500 { background: var(--pm-clay) !important; }
 
         /* الكهرماني (أمبر) بيفضل قريب من الدهبي أصلاً — بس بنوحّد الدرجة */
         .text-amber-400, .text-amber-300 { color: var(--pm-gold-bright) !important; }
-        .bg-amber-500\/10, .bg-amber-500\/15 { background: color-mix(in srgb, var(--pm-gold) 14%, transparent) !important; }
+        .bg-amber-500\/10, .bg-amber-500\/15 { background: rgba(14,143,104,0.14) !important; background: color-mix(in srgb, var(--pm-gold) 14%, transparent) !important; }
         .border-amber-500\/25, .border-amber-500\/20 { border-color: var(--pm-hairline) !important; }
         .bg-amber-400, .hover\:bg-amber-300:hover { background: var(--pm-gold-bright) !important; }
 
@@ -2168,12 +2193,13 @@
             position: absolute;
             top: -70px; left: 50%; transform: translateX(-50%);
             width: 220px; height: 220px; border-radius: 50%;
+            background: radial-gradient(circle, rgba(14,143,104,0.22) 0%, transparent 70%);
             background: radial-gradient(circle, color-mix(in srgb, var(--pm-gold) 22%, transparent) 0%, transparent 70%);
             z-index: 0;
             pointer-events: none;
         }
         .from-emerald-950\/60.to-slate-900:has(#monthly-total) > * { position: relative; z-index: 1; }
-        #monthly-total { text-shadow: 0 8px 26px color-mix(in srgb, var(--pm-gold) 35%, transparent); }
+        #monthly-total { text-shadow: 0 8px 26px rgba(14,143,104,0.35); text-shadow: 0 8px 26px color-mix(in srgb, var(--pm-gold) 35%, transparent); }
 
         /* 2) عمق بالظل بدل الحدود الصريحة على كل الكروت الرئيسية — سطح واحد متصل */
         [class*="rounded-3xl"], [class*="rounded-2xl"] {
@@ -2205,12 +2231,12 @@
             box-shadow: 0 4px 12px rgba(0,0,0,.12) !important;
             transition: transform .2s ease, box-shadow .2s ease;
         }
-        #brandbar-theme-btn:hover, #brandbar-lang-btn:hover, #refresh-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px color-mix(in srgb, var(--pm-gold) 20%, transparent) !important; }
+        #brandbar-theme-btn:hover, #brandbar-lang-btn:hover, #refresh-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px rgba(14,143,104,0.2) !important; box-shadow: 0 6px 16px color-mix(in srgb, var(--pm-gold) 20%, transparent) !important; }
 
         /* 4) شارة الأيام النشطة — ميدالية دهبية بدل الخلفية العادية */
-        .active-days-flame-wrap::before { background: radial-gradient(circle, color-mix(in srgb, var(--pm-gold) 30%, transparent), transparent 68%) !important; }
+        .active-days-flame-wrap::before { background: radial-gradient(circle, rgba(14,143,104,0.3), transparent 68%) !important; background: radial-gradient(circle, color-mix(in srgb, var(--pm-gold) 30%, transparent), transparent 68%) !important; }
         .active-days-number { background: linear-gradient(135deg, var(--pm-gold-dim), var(--pm-gold-bright) 55%, var(--pm-gold)) !important; -webkit-background-clip: text !important; background-clip: text !important; -webkit-text-fill-color: transparent !important; font-family:'Fraunces','Cairo',sans-serif !important; }
-        .active-days-dot.is-active .active-days-dot-mark { background: linear-gradient(135deg,var(--pm-gold-bright),var(--pm-gold)) !important; border-color: var(--pm-gold) !important; box-shadow: 0 0 7px color-mix(in srgb, var(--pm-gold) 45%, transparent) !important; }
+        .active-days-dot.is-active .active-days-dot-mark { background: linear-gradient(135deg,var(--pm-gold-bright),var(--pm-gold)) !important; border-color: var(--pm-gold) !important; box-shadow: 0 0 7px rgba(14,143,104,0.45) !important; box-shadow: 0 0 7px color-mix(in srgb, var(--pm-gold) 45%, transparent) !important; }
         input, textarea, select { font-family: 'Cairo', sans-serif !important; }
 
         /* شريط التبويبات السفلي */
@@ -2278,6 +2304,7 @@
         .bg-emerald-500\/20, .bg-amber-400, .bg-amber-500\/10, .bg-amber-500\/15,
         html[data-theme="light"] .bg-emerald-50, html[data-theme="light"] .bg-emerald-500\/10,
         html[data-theme="light"] .bg-emerald-500\/15 {
+            background: rgb(224,240,235) !important;
             background: color-mix(in srgb, var(--pm-gold) 13%, var(--pm-surface-hi)) !important;
         }
         .border-emerald-200, .border-emerald-400, .border-emerald-500\/15,
@@ -2290,9 +2317,12 @@
         .from-emerald-500\/15, .from-emerald-950\/40 {
             --tw-gradient-from: color-mix(in srgb, var(--pm-gold) 14%, var(--pm-surface-hi)) var(--tw-gradient-from-position) !important;
         }
+@supports not (color: color-mix(in srgb, red 50%, blue)){.from-emerald-50, .from-emerald-400, .from-emerald-500, .from-emerald-500\/10,
+        .from-emerald-500\/15, .from-emerald-950\/40{--tw-gradient-from:rgb(221,239,234) var(--tw-gradient-from-position) !important}}
         .to-emerald-500, .to-emerald-500\/0, .to-teal-400, .to-teal-50, .to-teal-500\/5 {
             --tw-gradient-to: color-mix(in srgb, var(--pm-gold) 7%, var(--pm-surface-hi)) var(--tw-gradient-to-position) !important;
         }
+@supports not (color: color-mix(in srgb, red 50%, blue)){.to-emerald-500, .to-emerald-500\/0, .to-teal-400, .to-teal-50, .to-teal-500\/5{--tw-gradient-to:rgb(238,247,244) var(--tw-gradient-to-position) !important}}
         /* باگ: القاعدة فوق دي بتحول شريط تقدّم الهدف المالي (from-emerald-400/to-teal-400)
            لدرجة لون قريبة جدًا من خلفية الكارت نفسها (14%/7% دهبي بس فوق pm-surface-hi)،
            فبيبقى شبه مختفي في الوضعين الفاتح والغامق. بنرجّعله تدرّج دهبي واضح وعالي التباين
@@ -2309,10 +2339,10 @@
             border-color: transparent !important;
         }
         #quick-entry-card { position: relative; }
-        #dabbar-celebrate-fx { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 40; display:flex; align-items:center; justify-content:center; overflow:visible; }
+        #dabbar-celebrate-fx { position: absolute; top:0;right:0;bottom:0;left:0;inset:0; width: 100%; height: 100%; pointer-events: none; z-index: 40; display:flex; align-items:center; justify-content:center; overflow:visible; }
         #quick-entry-manual-form { position:relative; overflow:hidden; }
         /* ============ إدخال يدوي سريع يفتح كبوب أب احترافي (Bottom Sheet) زي باقي المودالات، بدل ما يفتح داخل الكارت ============ */
-        #quick-manual-popup-backdrop { position:fixed; inset:0; z-index:70; display:none; align-items:flex-end; justify-content:center; background:rgba(0,0,0,.68); backdrop-filter:blur(2px); }
+        #quick-manual-popup-backdrop { position:fixed; top:0;right:0;bottom:0;left:0;inset:0; z-index:70; display:none; align-items:flex-end; justify-content:center; background:rgba(0,0,0,.68); backdrop-filter:blur(2px); }
         #quick-manual-popup-backdrop.show { display:flex; }
         #quick-manual-popup-backdrop .quick-manual-sheet-shell { width:100%; max-width:34rem; max-height:88vh; overflow-y:auto; border-radius:1.5rem 1.5rem 0 0; padding:1rem 1rem calc(1rem + env(safe-area-inset-bottom,0px)); background:var(--pm-canvas); box-shadow:0 -18px 46px rgba(0,0,0,.35); transform:translateY(16px); opacity:0; transition:transform .26s cubic-bezier(.23,1,.32,1), opacity .22s ease; }
         #quick-manual-popup-backdrop.show .quick-manual-sheet-shell { transform:translateY(0); opacity:1; }
@@ -2320,10 +2350,10 @@
         #quick-manual-popup-backdrop #quick-entry-manual-form { border:0 !important; background:transparent !important; padding:0 !important; }
         .quick-manual-close-btn { width:1.7rem; height:1.7rem; flex:none; display:flex; align-items:center; justify-content:center; border-radius:50%; border:1px solid var(--pm-hairline); background:var(--pm-surface-soft); color:var(--pm-muted); font-size:.75rem; cursor:pointer; }
         .quick-manual-close-btn:active { transform:scale(.94); }
-        #quick-manual-success-fx { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:40; display:flex; align-items:center; justify-content:center; overflow:visible; }
-        .quick-entry-manual-link { position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.1rem; width:100%; min-height:1.9rem; margin:.06rem 0 .04rem; padding:.26rem .7rem; border:1px solid color-mix(in srgb,var(--pm-gold-bright) 48%,transparent); border-radius:1rem; background:linear-gradient(135deg,color-mix(in srgb,var(--pm-gold-bright) 13%,var(--pm-surface-hi)),color-mix(in srgb,var(--pm-mint) 7%,var(--pm-surface-hi))); color:var(--pm-ink) !important; box-shadow:0 7px 20px color-mix(in srgb,var(--pm-gold-bright) 12%,transparent), inset 0 1px 0 rgba(255,255,255,.08); text-align:center; cursor:pointer; transition:transform .18s cubic-bezier(.23,1,.32,1), box-shadow .18s ease, border-color .18s ease, background .18s ease; }
-        .quick-entry-manual-link::after { content:''; position:absolute; inset:0; border-radius:inherit; background:linear-gradient(110deg,transparent 20%,rgba(255,255,255,.12) 48%,transparent 76%); transform:translateX(-120%); transition:transform .55s ease; pointer-events:none; }
-        .quick-entry-manual-link:hover { transform:translateY(-1px); border-color:color-mix(in srgb,var(--pm-gold-bright) 76%,transparent); box-shadow:0 10px 28px color-mix(in srgb,var(--pm-gold-bright) 20%,transparent), inset 0 1px 0 rgba(255,255,255,.12); }
+        #quick-manual-success-fx { position:absolute; top:0;right:0;bottom:0;left:0;inset:0; width:100%; height:100%; pointer-events:none; z-index:40; display:flex; align-items:center; justify-content:center; overflow:visible; }
+        .quick-entry-manual-link { position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.1rem; width:100%; min-height:1.9rem; margin:.06rem 0 .04rem; padding:.26rem .7rem; border:1px solid rgba(8,122,89,0.48); border:1px solid color-mix(in srgb,var(--pm-gold-bright) 48%,transparent); border-radius:1rem; background:linear-gradient(135deg,rgb(223,238,233),rgb(238,247,244)); background:linear-gradient(135deg,color-mix(in srgb,var(--pm-gold-bright) 13%,var(--pm-surface-hi)),color-mix(in srgb,var(--pm-mint) 7%,var(--pm-surface-hi))); color:var(--pm-ink) !important; box-shadow:0 7px 20px rgba(8,122,89,0.12), inset 0 1px 0 rgba(255,255,255,.08); box-shadow:0 7px 20px color-mix(in srgb,var(--pm-gold-bright) 12%,transparent), inset 0 1px 0 rgba(255,255,255,.08); text-align:center; cursor:pointer; transition:transform .18s cubic-bezier(.23,1,.32,1), box-shadow .18s ease, border-color .18s ease, background .18s ease; }
+        .quick-entry-manual-link::after { content:''; position:absolute; top:0;right:0;bottom:0;left:0;inset:0; border-radius:inherit; background:linear-gradient(110deg,transparent 20%,rgba(255,255,255,.12) 48%,transparent 76%); transform:translateX(-120%); transition:transform .55s ease; pointer-events:none; }
+        .quick-entry-manual-link:hover { transform:translateY(-1px); border-color:rgba(8,122,89,0.76); border-color:color-mix(in srgb,var(--pm-gold-bright) 76%,transparent); box-shadow:0 10px 28px rgba(8,122,89,0.2), inset 0 1px 0 rgba(255,255,255,.12); box-shadow:0 10px 28px color-mix(in srgb,var(--pm-gold-bright) 20%,transparent), inset 0 1px 0 rgba(255,255,255,.12); }
         .quick-entry-manual-link:hover::after { transform:translateX(120%); }
         .quick-entry-manual-link:active { transform:scale(.98); }
         .quick-entry-manual-main { display:flex; align-items:center; justify-content:center; gap:.22rem; font-size:.6rem; font-weight:950; letter-spacing:-.01em; }
@@ -2334,11 +2364,11 @@
         .quick-secondary-row { margin:.3rem 0 .35rem; }
         .quick-secondary-btn { display:flex; align-items:center; justify-content:center; gap:.3rem; padding:.32rem .4rem; border:1px dashed var(--pm-hairline); border-radius:.75rem; background:transparent; color:var(--pm-muted); font-size:.62rem; font-weight:800; font-family:inherit; cursor:pointer; transition:border-color .15s ease, color .15s ease; }
         .quick-secondary-btn span:first-child { font-size:.75rem; }
-        .quick-secondary-btn:hover, .quick-secondary-btn:active { border-color: color-mix(in srgb, var(--pm-gold-bright) 45%, transparent); color: var(--pm-gold-bright); }
-        #quick-manual-success-fx.is-manual-success { background:radial-gradient(circle at 50% 48%,color-mix(in srgb,var(--pm-gold-bright) 19%,transparent),transparent 58%); animation:manualSuccessFlash .42s ease-out both; }
+        .quick-secondary-btn:hover, .quick-secondary-btn:active { border-color: rgba(8,122,89,0.45); border-color: color-mix(in srgb, var(--pm-gold-bright) 45%, transparent); color: var(--pm-gold-bright); }
+        #quick-manual-success-fx.is-manual-success { background:radial-gradient(circle at 50% 48%,rgba(8,122,89,0.19),transparent 58%); background:radial-gradient(circle at 50% 48%,color-mix(in srgb,var(--pm-gold-bright) 19%,transparent),transparent 58%); animation:manualSuccessFlash .42s ease-out both; }
         #quick-manual-success-fx.is-manual-success .dabbar-celebrate-ring { width:5.8rem !important; height:5.8rem !important; border-width:2px; }
-        #quick-manual-success-fx.is-manual-success .dabbar-celebrate-badge { width:5.25rem; height:5.25rem; box-shadow:0 0 0 7px color-mix(in srgb,var(--pm-gold-bright) 12%,transparent),0 14px 36px rgba(0,0,0,.32),inset 0 1px 2px rgba(255,255,255,.4); animation:manualSuccessBadgeIn .6s cubic-bezier(.2,.8,.3,1) both, dabbarCelebrateBadgeOut .45s ease 1.55s forwards; }
-        #quick-manual-success-fx .manual-success-copy { position:absolute; top:calc(50% + 3.7rem); display:flex; flex-direction:column; align-items:center; gap:.12rem; color:var(--pm-ink); text-shadow:0 1px 10px color-mix(in srgb,var(--pm-surface) 70%,transparent); animation:manualSuccessCopyIn .45s cubic-bezier(.2,.8,.3,1) .12s both; }
+        #quick-manual-success-fx.is-manual-success .dabbar-celebrate-badge { width:5.25rem; height:5.25rem; box-shadow:0 0 0 7px rgba(8,122,89,0.12),0 14px 36px rgba(0,0,0,.32),inset 0 1px 2px rgba(255,255,255,.4); box-shadow:0 0 0 7px color-mix(in srgb,var(--pm-gold-bright) 12%,transparent),0 14px 36px rgba(0,0,0,.32),inset 0 1px 2px rgba(255,255,255,.4); animation:manualSuccessBadgeIn .6s cubic-bezier(.2,.8,.3,1) both, dabbarCelebrateBadgeOut .45s ease 1.55s forwards; }
+        #quick-manual-success-fx .manual-success-copy { position:absolute; top:calc(50% + 3.7rem); display:flex; flex-direction:column; align-items:center; gap:.12rem; color:var(--pm-ink); text-shadow:0 1px 10px rgba(255,255,255,0.7); text-shadow:0 1px 10px color-mix(in srgb,var(--pm-surface) 70%,transparent); animation:manualSuccessCopyIn .45s cubic-bezier(.2,.8,.3,1) .12s both; }
         #quick-manual-success-fx .manual-success-kicker { color:var(--pm-gold-bright); font-size:.58rem; font-weight:950; letter-spacing:.08em; }
         #quick-manual-success-fx .manual-success-title { font-size:.82rem; font-weight:950; }
         @keyframes manualSuccessFlash { 0% { opacity:0; } 25% { opacity:1; } 100% { opacity:1; } }
@@ -2347,6 +2377,7 @@
         .dabbar-celebrate-ring { position:absolute; border-radius:999px; border:2px solid var(--pm-gold-bright, #10b981); animation: dabbarCelebrateRing 1s cubic-bezier(.2,.7,.3,1) both; }
         .dabbar-celebrate-badge {
             position:relative; width:4.2rem; height:4.2rem; border-radius:999px; display:flex; align-items:center; justify-content:center;
+            background: radial-gradient(circle at 35% 25%, rgb(45,142,114), var(--pm-gold, #0e655b));
             background: radial-gradient(circle at 35% 25%, color-mix(in srgb, var(--pm-gold-bright, #10b981) 85%, white 15%), var(--pm-gold, #0e655b));
             box-shadow: 0 10px 26px rgba(0,0,0,.28), inset 0 1px 2px rgba(255,255,255,.35);
             animation: dabbarCelebrateBadgeIn .5s cubic-bezier(.2,.8,.3,1) both, dabbarCelebrateBadgeOut .35s ease .95s forwards;
@@ -2374,9 +2405,9 @@
         .text-rose-300, .text-rose-300\/80, .text-rose-400, .text-rose-500,
         .text-rose-700, .text-red-700 { color: var(--pm-clay) !important; }
         .bg-rose-50, .bg-rose-500, .bg-rose-500\/10, .bg-rose-500\/15,
-        .bg-rose-500\/20, .bg-red-50 { background: color-mix(in srgb, var(--pm-clay) 12%, var(--pm-surface-hi)) !important; }
+        .bg-rose-500\/20, .bg-red-50 { background: rgb(245,234,231) !important; background: color-mix(in srgb, var(--pm-clay) 12%, var(--pm-surface-hi)) !important; }
         .border-rose-200, .border-rose-500\/20, .border-rose-500\/25,
-        .border-rose-500\/30, .border-red-300\/40 { border-color: color-mix(in srgb, var(--pm-clay) 38%, transparent) !important; }
+        .border-rose-500\/30, .border-red-300\/40 { border-color: rgba(169,76,58,0.38) !important; border-color: color-mix(in srgb, var(--pm-clay) 38%, transparent) !important; }
 
         /* Neutral text hierarchy */
         .text-slate-50, .text-slate-100, .text-slate-200, .text-slate-800,
@@ -2394,6 +2425,7 @@
 
         /* Supporting info surfaces keep a cool petrol-compatible tone */
         .bg-blue-50, .bg-sky-500\/10, html[data-theme="light"] .bg-blue-50 {
+            background: rgb(228,243,238) !important;
             background: color-mix(in srgb, var(--pm-mint) 11%, var(--pm-surface-hi)) !important;
         }
         .text-blue-300, .text-blue-600\/70, .text-blue-700 { color: var(--pm-mint) !important; }
@@ -2402,27 +2434,28 @@
 
         /* High-salience cards and streak elements */
         #quick-entry-card {
+            background: linear-gradient(135deg, rgb(233,245,241), var(--pm-surface-hi) 62%, rgb(241,248,246)) !important;
             background: linear-gradient(135deg, color-mix(in srgb, var(--pm-gold) 9%, var(--pm-surface-hi)), var(--pm-surface-hi) 62%, color-mix(in srgb, var(--pm-gold) 6%, var(--pm-surface-hi))) !important;
             border-color: var(--pm-hairline) !important;
         }
-        #planning-summary { background: color-mix(in srgb, var(--pm-gold) 13%, var(--pm-surface-hi)) !important; color: var(--pm-ink) !important; }
+        #planning-summary { background: rgb(224,240,235) !important; background: color-mix(in srgb, var(--pm-gold) 13%, var(--pm-surface-hi)) !important; color: var(--pm-ink) !important; }
         #planning-reset { background: var(--pm-surface-soft) !important; color: var(--pm-ink-dim) !important; border-color: var(--pm-hairline-soft) !important; }
-        #quick-entry-subscription-lock { background: color-mix(in srgb, var(--pm-gold) 11%, var(--pm-surface-hi)) !important; border-color: var(--pm-hairline) !important; color: var(--pm-ink) !important; }
-        .active-days-card { background: linear-gradient(135deg, color-mix(in srgb, var(--pm-gold) 10%, var(--pm-surface-hi)), var(--pm-surface-soft)) !important; border-color: var(--pm-hairline) !important; color: var(--pm-ink) !important; }
+        #quick-entry-subscription-lock { background: rgb(228,243,238) !important; background: color-mix(in srgb, var(--pm-gold) 11%, var(--pm-surface-hi)) !important; border-color: var(--pm-hairline) !important; color: var(--pm-ink) !important; }
+        .active-days-card { background: linear-gradient(135deg, rgb(231,244,240), var(--pm-surface-soft)) !important; background: linear-gradient(135deg, color-mix(in srgb, var(--pm-gold) 10%, var(--pm-surface-hi)), var(--pm-surface-soft)) !important; border-color: var(--pm-hairline) !important; color: var(--pm-ink) !important; }
         .active-days-title, .active-days-badge, .active-days-dot.is-active { color: var(--pm-gold-bright) !important; }
-        .active-days-badge { background: color-mix(in srgb, var(--pm-gold) 14%, var(--pm-surface-hi)) !important; border-color: var(--pm-hairline) !important; }
-        .active-days-dot-mark { background: color-mix(in srgb, var(--pm-ink) 11%, var(--pm-surface-hi)) !important; border-color: var(--pm-hairline-soft) !important; }
+        .active-days-badge { background: rgb(221,239,234) !important; background: color-mix(in srgb, var(--pm-gold) 14%, var(--pm-surface-hi)) !important; border-color: var(--pm-hairline) !important; }
+        .active-days-dot-mark { background: rgb(229,230,232) !important; background: color-mix(in srgb, var(--pm-ink) 11%, var(--pm-surface-hi)) !important; border-color: var(--pm-hairline-soft) !important; }
         .active-days-dot.is-active .active-days-dot-mark { background: linear-gradient(135deg, var(--pm-gold-bright), var(--pm-gold)) !important; border-color: var(--pm-gold) !important; }
-        .active-days-flame-wrap::before { background: radial-gradient(circle, color-mix(in srgb, var(--pm-gold) 30%, transparent), transparent 68%) !important; }
+        .active-days-flame-wrap::before { background: radial-gradient(circle, rgba(14,143,104,0.3), transparent 68%) !important; background: radial-gradient(circle, color-mix(in srgb, var(--pm-gold) 30%, transparent), transparent 68%) !important; }
         .active-days-number { background: linear-gradient(135deg, var(--pm-gold-dim), var(--pm-gold-bright) 55%, var(--pm-gold)) !important; -webkit-background-clip: text !important; background-clip: text !important; -webkit-text-fill-color: transparent !important; }
-        .weekday-bar.is-active { background-color: var(--pm-gold) !important; box-shadow: 0 0 14px 2px color-mix(in srgb, var(--pm-gold) 48%, transparent) !important; }
-        .daily-reminder-card { background: linear-gradient(90deg, color-mix(in srgb, var(--pm-gold) 12%, var(--pm-surface-hi)), color-mix(in srgb, var(--pm-gold) 4%, var(--pm-surface-hi))) !important; border-color: var(--pm-gold) !important; }
+        .weekday-bar.is-active { background-color: var(--pm-gold) !important; box-shadow: 0 0 14px 2px rgba(14,143,104,0.48) !important; box-shadow: 0 0 14px 2px color-mix(in srgb, var(--pm-gold) 48%, transparent) !important; }
+        .daily-reminder-card { background: linear-gradient(90deg, rgb(226,242,237), rgb(245,251,249)) !important; background: linear-gradient(90deg, color-mix(in srgb, var(--pm-gold) 12%, var(--pm-surface-hi)), color-mix(in srgb, var(--pm-gold) 4%, var(--pm-surface-hi))) !important; border-color: var(--pm-gold) !important; }
         .daily-reminder-icon { background: var(--pm-surface-hi) !important; }
         .daily-reminder-text { color: var(--pm-ink) !important; }
 
         /* Navigation, premium card, modal surfaces, and focused controls */
         .tab-btn.active-tab { color: var(--pm-gold-bright) !important; }
-        .tab-btn.active-tab .tab-icon-wrap { background: conic-gradient(from 220deg, var(--pm-gold-bright), var(--pm-gold), var(--pm-gold-dim), var(--pm-gold-bright)) !important; color: #17120a !important; border-color: transparent !important; box-shadow: 0 6px 14px color-mix(in srgb, var(--pm-gold) 35%, transparent) !important; }
+        .tab-btn.active-tab .tab-icon-wrap { background: conic-gradient(from 220deg, var(--pm-gold-bright), var(--pm-gold), var(--pm-gold-dim), var(--pm-gold-bright)) !important; color: #17120a !important; border-color: transparent !important; box-shadow: 0 6px 14px rgba(14,143,104,0.35) !important; box-shadow: 0 6px 14px color-mix(in srgb, var(--pm-gold) 35%, transparent) !important; }
         #premium-hero-card { border-color: var(--pm-hairline) !important; background: linear-gradient(180deg, var(--pm-surface-hi), var(--pm-canvas-2)) !important; }
         #wrapped-card { background: linear-gradient(155deg, var(--pm-surface-hi) 0%, var(--pm-canvas) 55%, var(--pm-canvas) 100%) !important; border-color: var(--pm-hairline) !important; }
         #brandbar-theme-btn, #brandbar-lang-btn, #refresh-btn, .seal-like { border-color: var(--pm-hairline-soft) !important; }
@@ -2442,8 +2475,9 @@
         .pnx-lbl b { color:var(--pm-ink); font-weight:900; font-size:10px; }
         .pnx-wheels { position:relative; direction:ltr; display:flex; justify-content:center; align-items:center; height:72px; overflow:hidden; border-radius:12px; }
         .pnx-wheels::before { content:""; position:absolute; left:2px; right:2px; top:24px; height:24px; border-radius:9px; pointer-events:none;
-            background:color-mix(in srgb,var(--pm-gold) 13%,transparent); border:1px solid color-mix(in srgb,var(--pm-gold) 38%,transparent); }
-        .pnx-wheels::after { content:""; position:absolute; inset:0; pointer-events:none;
+            background:rgba(14,143,104,0.13);
+            background:color-mix(in srgb,var(--pm-gold) 13%,transparent); border:1px solid rgba(14,143,104,0.38); border:1px solid color-mix(in srgb,var(--pm-gold) 38%,transparent); }
+        .pnx-wheels::after { content:""; position:absolute; top:0;right:0;bottom:0;left:0;inset:0; pointer-events:none;
             background:linear-gradient(var(--pm-surface-soft) 0%,transparent 34%,transparent 66%,var(--pm-surface-soft) 100%); }
         .pnx-wheel { box-sizing:border-box; position:relative; z-index:1; height:72px; width:40px; overflow-y:auto; scroll-snap-type:y mandatory; padding:24px 0; scrollbar-width:none; overscroll-behavior:contain; }
         .pnx-wheel.pnx-narrow { width:34px; }
@@ -2454,7 +2488,7 @@
         .pnx-pct { display:flex; align-items:center; justify-content:space-between; gap:4px; height:34px; }
         .pnx-step { width:30px; height:30px; flex:0 0 auto; border-radius:10px; border:1px solid var(--pm-hairline); background:var(--pm-surface-hi); color:var(--pm-ink);
             font:900 17px/1 'Cairo',sans-serif; display:grid; place-items:center; padding:0; touch-action:manipulation; }
-        .pnx-step:active { transform:scale(.92); background:color-mix(in srgb,var(--pm-gold) 14%,var(--pm-surface-hi)); }
+        .pnx-step:active { transform:scale(.92); background:rgb(221,239,234); background:color-mix(in srgb,var(--pm-gold) 14%,var(--pm-surface-hi)); }
         .pnx-num { font:900 24px/1 'Cairo',sans-serif; color:var(--pm-ink); font-variant-numeric:tabular-nums; }
         .pnx-num span { font-size:13px; color:var(--pm-gold); margin-inline-start:1px; }
         .pnx-range { -webkit-appearance:none; appearance:none; width:100%; height:24px !important; background:transparent !important; border:0 !important; box-shadow:none !important; border-radius:0 !important; margin:2px 0 0; padding:0 !important; direction:rtl; outline:none !important; }
@@ -2472,7 +2506,7 @@
         .pnx-save.is-error { border-color:#f43f5e !important; color:#fb7185 !important; animation:pnxShake .45s; }
         @keyframes pnxSpin { to { transform:rotate(360deg); } }
         @keyframes pnxCheck { to { stroke-dashoffset:0; } }
-        @keyframes pnxRing { 0% { box-shadow:0 0 0 0 color-mix(in srgb,var(--pm-gold) 55%,transparent); } 100% { box-shadow:0 0 0 14px transparent; } }
+        @keyframes pnxRing { 0% { box-shadow:0 0 0 0 rgba(14,143,104,0.55); box-shadow:0 0 0 0 color-mix(in srgb,var(--pm-gold) 55%,transparent); } 100% { box-shadow:0 0 0 14px transparent; } }
         @keyframes pnxShake { 20%,60% { transform:translateX(-5px); } 40%,80% { transform:translateX(5px); } }
         @media (prefers-reduced-motion: reduce) { .pnx-save-spin { animation-duration:1.6s; } .pnx-save.is-saved, .pnx-save.is-error, .pnx-save.is-saved .pnx-save-check { animation:none; } .pnx-save-check { stroke-dashoffset:0; } }
         .pnx-range::-webkit-slider-runnable-track { height:6px; border-radius:99px; background:var(--pnx-trk,var(--pm-hairline)); }
@@ -2490,7 +2524,7 @@
         html:not([data-theme="light"]) #quick-entry-card,
         html:not([data-theme="light"]) #tab-monthly.active > #quick-entry-card { background: linear-gradient(135deg, #17191a 0%, #101214 62%, #0d0f10 100%) !important; border-color: var(--pm-hairline) !important; }
         html[data-theme="light"] #planning-summary { background: #e8f0ec !important; color: #17322e !important; }
-        html:not([data-theme="light"]) #planning-summary { background: color-mix(in srgb, var(--pm-gold) 12%, var(--pm-surface-hi)) !important; color: var(--pm-ink) !important; }
+        html:not([data-theme="light"]) #planning-summary { background: rgb(226,242,237) !important; background: color-mix(in srgb, var(--pm-gold) 12%, var(--pm-surface-hi)) !important; color: var(--pm-ink) !important; }
         html[data-theme="light"] .active-days-card { background: linear-gradient(135deg, #fffdf8 0%, #f2ece0 100%) !important; border-color: var(--pm-hairline) !important; }
         html:not([data-theme="light"]) .active-days-card { background: linear-gradient(135deg, #151718 0%, #0d0f10 100%) !important; border-color: var(--pm-hairline) !important; }
         html[data-theme="light"] .daily-reminder-card { background: linear-gradient(90deg, #eef5f0, #fffdf8) !important; border-color: var(--pm-gold) !important; }
@@ -2855,7 +2889,7 @@
             background: conic-gradient(var(--pm-gold-bright) calc(var(--asst-goal-pct) * 1%), var(--pm-hairline) 0);
         }
         .asst-goal-ring-hole {
-            position: absolute; inset: .28rem; border-radius: 50%; background: var(--pm-surface-hi, var(--pm-surface));
+            position: absolute; top:.28rem;right:.28rem;bottom:.28rem;left:.28rem;inset:.28rem; border-radius: 50%; background: var(--pm-surface-hi, var(--pm-surface));
             display: flex; align-items: center; justify-content: center; font-size: 1rem;
         }
         .asst-goal-mid { flex: 1; min-width: 0; }
@@ -2872,7 +2906,7 @@
         .asst-goal-stat-k { display: block; font-size: .54rem; font-weight: 700; color: var(--pm-muted); }
         .asst-goal-stat-v { display: block; font-size: .7rem; font-weight: 900; color: var(--pm-ink); margin-top: .15rem; }
         .asst-goal-stat--accent .asst-goal-stat-v { color: var(--pm-gold-bright); }
-        .asst-goal-daily-line { font-size: .64rem; color: var(--pm-muted); background: color-mix(in srgb, var(--pm-gold) 8%, transparent); border: 1px dashed color-mix(in srgb, var(--pm-gold) 30%, transparent); border-radius: .8rem; padding: .5rem .65rem; margin: 0 0 .65rem; line-height: 1.55; }
+        .asst-goal-daily-line { font-size: .64rem; color: var(--pm-muted); background: rgba(14,143,104,0.08); background: color-mix(in srgb, var(--pm-gold) 8%, transparent); border: 1px dashed rgba(14,143,104,0.3); border: 1px dashed color-mix(in srgb, var(--pm-gold) 30%, transparent); border-radius: .8rem; padding: .5rem .65rem; margin: 0 0 .65rem; line-height: 1.55; }
         .asst-goal-daily-line:empty { display: none; }
         .asst-goal-date-chip { display: flex; align-items: center; justify-content: space-between; gap: .5rem; background: var(--pm-surface-hi, var(--pm-surface)); border: 1px solid var(--pm-hairline); border-radius: .85rem; padding: .5rem .65rem; margin-bottom: .65rem; cursor: pointer; }
         .asst-goal-date-chip span { font-size: .64rem; font-weight: 700; color: var(--pm-muted); }
@@ -2949,7 +2983,7 @@
         .quick-manual-sheet-shell .text-slate-400, .quick-manual-sheet-shell .text-slate-500 { opacity: 1 !important; }
         .dabbar-metric-label, .dabbar-savings-row2-hint { color: var(--pm-ink-dim, #29483c) !important; }
         #quick-manual-popup-backdrop { background: #0b1511 !important; backdrop-filter: none !important; }
-        #quick-manual-popup-backdrop .quick-manual-sheet-shell { max-height: min(88dvh, calc(var(--app-vh) - 16px)); overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+        #quick-manual-popup-backdrop .quick-manual-sheet-shell { max-height:min(88vh, calc(var(--app-vh) - 16px));max-height:min(88dvh, calc(var(--app-vh) - 16px)); overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
         #quick-entry-manual-form input, #quick-entry-manual-form textarea, #quick-entry-manual-form select { font-size: 16px !important; line-height: 1.35; }
         #asst-chat-input { font-size: 16px !important; line-height: 1.35; touch-action: manipulation; -webkit-appearance: none; }
         #asst-chat-send { touch-action: manipulation; }
@@ -2995,7 +3029,7 @@
         .qe2-dock .q-icon { width:1.9rem; height:1.9rem; font-size:.95rem; }
         .qe2-dock .q-title { font-size:.78rem !important; }
         .qe2-dock .q-sub { font-size:.6rem !important; margin-top:0 !important; }
-        .qe2-open-hint { flex-shrink:0; font-size:.62rem; font-weight:800; color:var(--pm-gold-bright); background:color-mix(in srgb,var(--pm-gold-bright) 14%,transparent); border:1px solid color-mix(in srgb,var(--pm-gold-bright) 40%,transparent); border-radius:999px; padding:.22rem .55rem; }
+        .qe2-open-hint { flex-shrink:0; font-size:.62rem; font-weight:800; color:var(--pm-gold-bright); background:rgba(8,122,89,0.14); background:color-mix(in srgb,var(--pm-gold-bright) 14%,transparent); border:1px solid rgba(8,122,89,0.4); border:1px solid color-mix(in srgb,var(--pm-gold-bright) 40%,transparent); border-radius:999px; padding:.22rem .55rem; }
         .qe2-dock[aria-expanded="true"] .qe2-open-hint { display:none; }
         .qe2-chevron { flex-shrink:0; font-size:1.2rem; font-weight:900; color:var(--pm-gold-bright); transform:rotate(-90deg); transition:transform .22s ease; margin-inline-start:.1rem; }
         .qe2-dock[aria-expanded="true"] .qe2-chevron { transform:rotate(90deg); }
@@ -3004,7 +3038,7 @@
         .qe2-linked-row { display:flex; gap:.55rem; margin-top:.65rem; }
         .qe2-linked-card { flex:1; display:flex; flex-direction:column; align-items:center; gap:.25rem; padding:.6rem .4rem; border-radius:1.1rem; background:var(--pm-surface-hi); border:1px solid var(--pm-hairline); cursor:pointer; text-align:center; transition:transform .15s ease, background .15s ease, border-color .15s ease; }
         .qe2-linked-card:hover { transform:translateY(-1px); background:var(--pm-surface-soft); }
-        .qe2-linked-card.active { border-color:color-mix(in srgb,var(--pm-gold-bright) 55%,transparent); background:color-mix(in srgb,var(--pm-gold-bright) 8%,var(--pm-surface-hi)); }
+        .qe2-linked-card.active { border-color:rgba(8,122,89,0.55); border-color:color-mix(in srgb,var(--pm-gold-bright) 55%,transparent); background:rgb(235,244,242); background:color-mix(in srgb,var(--pm-gold-bright) 8%,var(--pm-surface-hi)); }
         .qe2-linked-ico { font-size:1.05rem; }
         .qe2-linked-txt { font-size:.68rem; font-weight:800; color:var(--pm-ink); }
         .qe2-linked-sub { font-size:.55rem; color:var(--pm-muted); }
@@ -3117,7 +3151,9 @@
         .planning-card-collapsed .planning-body { display:none; }
         .planning-collapse-ic {
             width:1.7rem; height:1.7rem; flex:none; border-radius:.65rem;
+            background:rgba(244,198,72,0.16);
             background:color-mix(in srgb, #f4c648 16%, transparent);
+            border:1px solid rgba(244,198,72,0.3);
             border:1px solid color-mix(in srgb, #f4c648 30%, transparent);
             display:flex; align-items:center; justify-content:center; font-size:.8rem;
         }
@@ -3231,7 +3267,7 @@
             transition: filter .25s ease;
         }
         .dabbar-donut-center {
-            position:absolute; inset:15%; border-radius:50%; background:var(--db-surface);
+            position:absolute; top:15%;right:15%;bottom:15%;left:15%;inset:15%; border-radius:50%; background:var(--db-surface);
             display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.1rem;
             box-shadow: inset 0 0 0 1px rgba(148,163,184,.15);
         }
@@ -3325,6 +3361,7 @@
         /* رأس الصفحات: نفس الهوية، لكن بارتفاع أصغر حتى يصل المستخدم للمحتوى بسرعة */
         #brand-bar {
             flex-shrink:0; padding:.55rem 1rem .12rem !important;
+            background:rgba(255,255,255,0.72) !important;
             background:color-mix(in srgb, var(--pm-surface-hi) 72%, transparent) !important;
             backdrop-filter:blur(16px) saturate(135%);
             -webkit-backdrop-filter:blur(16px) saturate(135%);
@@ -3354,8 +3391,11 @@
         #bottom-tab-nav {
             position:relative; z-index:30; flex-shrink:0; gap:.18rem;
             padding:.38rem .55rem calc(.46rem + env(safe-area-inset-bottom)) !important;
+            background:rgba(255,255,255,0.7) !important;
             background:color-mix(in srgb, var(--pm-surface-hi) 70%, transparent) !important;
+            border-top:1px solid rgba(14,143,104,0.24) !important;
             border-top:1px solid color-mix(in srgb, var(--pm-mint) 24%, transparent) !important;
+            box-shadow:0 -10px 28px rgba(244,245,247,0.22) !important;
             box-shadow:0 -10px 28px color-mix(in srgb, var(--pm-canvas) 22%, transparent) !important;
             backdrop-filter:blur(18px) saturate(145%);
             -webkit-backdrop-filter:blur(18px) saturate(145%);
@@ -3371,6 +3411,7 @@
         #bottom-tab-nav .tab-btn[data-tab="reminders"] { display:none !important; }
         #bottom-tab-nav .tab-icon-wrap {
             width:2.12rem !important; height:2.12rem !important; border-radius:.78rem !important;
+            border:1px solid rgba(14,143,104,0.22) !important;
             border:1px solid color-mix(in srgb, var(--pm-mint) 22%, transparent) !important;
             background:transparent !important; opacity:.86; font-size:.92rem !important;
             box-shadow:none !important; transform:none !important;
@@ -3379,7 +3420,9 @@
         #bottom-tab-nav .tab-btn:hover .tab-icon-wrap,
         #bottom-tab-nav .tab-btn.active-tab .tab-icon-wrap {
             opacity:1; transform:translateY(-1px) !important;
+            background:rgba(14,143,104,0.13) !important;
             background:color-mix(in srgb, var(--pm-mint) 13%, transparent) !important;
+            border-color:rgba(14,143,104,0.45) !important;
             border-color:color-mix(in srgb, var(--pm-mint) 45%, transparent) !important;
         }
         #bottom-tab-nav .tab-btn.active-tab { color:var(--pm-mint) !important; font-weight:900 !important; }
@@ -3409,7 +3452,7 @@
          }
          #dabbar-magic-fx {
              position:absolute;
-             inset:0;
+             top:0;right:0;bottom:0;left:0;inset:0;
              z-index:0;
              pointer-events:none;
              overflow:hidden;
@@ -3423,6 +3466,7 @@
              width:11rem;
              height:11rem;
              border-radius:50%;
+             border:1px solid rgba(8,122,89,0.34);
              border:1px solid color-mix(in srgb, var(--pm-gold-bright) 34%, transparent);
              filter:blur(.2px);
              opacity:.55;
@@ -3448,9 +3492,10 @@
          #quick-entry-card.is-magic-recording::after {
              content:'';
              position:absolute;
-             inset:0;
+             top:0;right:0;bottom:0;left:0;inset:0;
              z-index:0;
              pointer-events:none;
+             background:linear-gradient(110deg, transparent 24%, rgba(8,122,89,0.1) 48%, transparent 72%);
              background:linear-gradient(110deg, transparent 24%, color-mix(in srgb, var(--pm-gold-bright) 10%, transparent) 48%, transparent 72%);
              transform:translateX(-110%);
              animation:dabbarMagicSweep 1.7s ease-in-out infinite;
@@ -3461,7 +3506,9 @@
              gap:.35rem;
              padding:.28rem .56rem;
              border-radius:999px;
+             border:1px solid rgba(8,122,89,0.32);
              border:1px solid color-mix(in srgb, var(--pm-gold-bright) 32%, transparent);
+             background:rgb(233,243,240);
              background:color-mix(in srgb, var(--pm-gold-bright) 9%, var(--pm-surface-hi));
              color:var(--pm-muted);
              font-size:.58rem;
@@ -3475,10 +3522,12 @@
              flex:0 0 .38rem;
              border-radius:50%;
              background:var(--pm-gold-bright);
+             box-shadow:0 0 0 0 rgba(8,122,89,0.35);
              box-shadow:0 0 0 0 color-mix(in srgb, var(--pm-gold-bright) 35%, transparent);
          }
          .dabbar-magic-chip.is-active {
              color:var(--pm-ink);
+             border-color:rgba(8,122,89,0.62);
              border-color:color-mix(in srgb, var(--pm-gold-bright) 62%, transparent);
              transform:translateY(-1px);
          }
@@ -3492,7 +3541,7 @@
          html:not([data-theme="light"]) .dabbar-magic-chip.is-active { color:#fff4c2; }
          @keyframes dabbarMagicSweep { 0% { transform:translateX(-110%); opacity:0; } 22% { opacity:1; } 72% { opacity:1; } 100% { transform:translateX(110%); opacity:0; } }
          @keyframes dabbarMagicOrbit { from { transform:rotate(0deg) scale(.94); } to { transform:rotate(360deg) scale(1.06); } }
-         @keyframes dabbarMagicDot { 0%,100% { box-shadow:0 0 0 0 color-mix(in srgb, var(--pm-gold-bright) 35%, transparent); } 50% { box-shadow:0 0 0 .32rem color-mix(in srgb, var(--pm-gold-bright) 18%, transparent); } }
+         @keyframes dabbarMagicDot { 0%,100% { box-shadow:0 0 0 0 rgba(8,122,89,0.35); box-shadow:0 0 0 0 color-mix(in srgb, var(--pm-gold-bright) 35%, transparent); } 50% { box-shadow:0 0 0 .32rem rgba(8,122,89,0.18); box-shadow:0 0 0 .32rem color-mix(in srgb, var(--pm-gold-bright) 18%, transparent); } }
 
          /* عائلة التوبات الأساسية: خمسة عناصر واضحة بدل شريط مزدحم */
          #bottom-tab-nav {
@@ -3503,6 +3552,7 @@
              min-height:3.45rem;
          }
          #bottom-tab-nav .tab-btn.active-tab {
+             background:rgba(14,143,104,0.06);
              background:color-mix(in srgb, var(--pm-mint) 6%, transparent);
          }
          html:not([data-theme="light"]) #bottom-tab-nav .tab-btn.active-tab {
@@ -3518,8 +3568,11 @@
              margin:0 .55rem calc(.55rem + env(safe-area-inset-bottom)) !important;
              padding:.42rem .5rem .42rem !important;
              border-radius:1.6rem !important;
+             border:1px solid rgba(8,122,89,0.24) !important;
              border:1px solid color-mix(in srgb, var(--pm-gold-bright) 24%, transparent) !important;
+             background:rgba(255,255,255,0.92) !important;
              background:color-mix(in srgb, var(--pm-surface-hi) 92%, transparent) !important;
+             box-shadow:0 10px 26px rgba(244,245,247,0.45), 0 0 0 1px rgba(8,122,89,0.08) inset !important;
              box-shadow:0 10px 26px color-mix(in srgb, var(--pm-canvas) 45%, transparent), 0 0 0 1px color-mix(in srgb, var(--pm-gold-bright) 8%, transparent) inset !important;
          }
          #bottom-tab-nav .tab-btn.active-tab::before { display:none !important; }
@@ -3528,12 +3581,15 @@
              border:1px solid transparent !important; background:transparent !important;
          }
          #bottom-tab-nav .tab-btn:hover .tab-icon-wrap {
+             background:rgba(8,122,89,0.1) !important;
              background:color-mix(in srgb, var(--pm-gold-bright) 10%, transparent) !important;
+             border-color:rgba(8,122,89,0.3) !important;
              border-color:color-mix(in srgb, var(--pm-gold-bright) 30%, transparent) !important;
          }
          #bottom-tab-nav .tab-btn.active-tab .tab-icon-wrap {
              background:linear-gradient(145deg, var(--pm-gold-bright), var(--pm-gold)) !important;
              border-color:transparent !important;
+             box-shadow:0 4px 12px rgba(8,122,89,0.45) !important;
              box-shadow:0 4px 12px color-mix(in srgb, var(--pm-gold-bright) 45%, transparent) !important;
              transform:translateY(-1px) !important;
          }
@@ -3606,7 +3662,7 @@
     .add-white-title { color:#0f172a; font-weight:900; font-size:1.02rem; text-align:right; margin:0 0 .9rem; }
     .add-seg { display:flex; gap:.5rem; background:#eef0f2; border-radius:1.1rem; padding:.3rem; margin-bottom:.75rem; }
     .add-seg-btn { flex:1; border:none; border-radius:.9rem; padding:.68rem .5rem; font-family:inherit; font-size:.76rem; font-weight:800; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:.35rem; background:transparent; color:#334155; transition:.15s; }
-    .add-seg-btn.active { background: var(--pm-gold-bright, #0e9f6e); color: var(--pm-gold-ink-on, #fff); box-shadow: 0 6px 14px color-mix(in srgb, var(--pm-gold-bright, #0e9f6e) 35%, transparent); }
+    .add-seg-btn.active { background: var(--pm-gold-bright, #0e9f6e); color: var(--pm-gold-ink-on, #fff); box-shadow: 0 6px 14px rgba(8,122,89,0.35); box-shadow: 0 6px 14px color-mix(in srgb, var(--pm-gold-bright, #0e9f6e) 35%, transparent); }
     .add-white-input { width:100%; background:#f1f2f4; border:none; border-radius:1.05rem; padding:.85rem 1rem; font-family:inherit; font-size:.85rem; color:#0f172a; text-align:right; outline:none; margin-bottom:.65rem; }
     .add-white-input::placeholder { color:#94a3b8; }
     .add-row { display:flex; gap:.6rem; margin-bottom:.65rem; }
@@ -3618,7 +3674,7 @@
     .add-white-status { min-height:1rem; text-align:center; font-size:.68rem; color:#e11d48; margin-top:.5rem; }
 </style>
 <style id="dabbar-interactive-onboarding-styles">
-  #dabbar-coach-backdrop { position: fixed; inset: 0; z-index: 1100; background: rgba(15,23,42,.48); backdrop-filter: blur(3px); display:flex; align-items:flex-start; justify-content:center; padding:clamp(18px,8vh,90px) 16px 24px; }
+  #dabbar-coach-backdrop { position: fixed; top:0;right:0;bottom:0;left:0;inset:0; z-index: 1100; background: rgba(15,23,42,.48); backdrop-filter: blur(3px); display:flex; align-items:flex-start; justify-content:center; padding:clamp(18px,8vh,90px) 16px 24px; }
   #dabbar-coach-backdrop.hidden { display:none; }
   .dabbar-coach-panel { width:min(100%, 430px); max-height:min(82vh,680px); overflow:auto; border:1px solid rgba(16,185,129,.28); border-radius:28px; background:var(--pm-surface-hi,#fff); color:var(--pm-ink,#0f172a); box-shadow:0 24px 70px rgba(2,6,23,.28); padding:22px; animation:coachIn .35s cubic-bezier(.16,.84,.44,1) both; }
   html:not([data-theme="light"]) .dabbar-coach-panel { background:#0f172a; color:#f8fafc; border-color:rgba(52,211,153,.28); }
@@ -3731,6 +3787,7 @@ html[data-theme="light"] {
 #quick-entry-card::before { display:none !important; }
 html #quick-entry-card, html[data-theme] #quick-entry-card,
 html #tab-monthly.active > #quick-entry-card, html[data-theme] #tab-monthly.active > #quick-entry-card {
+    background: linear-gradient(165deg, rgb(252,254,245) 0%, var(--cs-card) 58%) !important;
     background: linear-gradient(165deg, color-mix(in srgb, var(--db-accent) 5%, var(--cs-card)) 0%, var(--cs-card) 58%) !important;
     border: 1px solid var(--cs-line) !important;
     box-shadow: var(--cs-shadow) !important;
@@ -3744,7 +3801,9 @@ html #tab-monthly.active > #quick-entry-card, html[data-theme] #tab-monthly.acti
 #quick-entry-card .q-head > .qe2-chevron { margin-top:.2rem; }
 #quick-entry-card .q-icon {
     width:2.8rem; height:2.8rem; flex:none; display:grid; place-items:center; font-size:1.35rem; border-radius:.95rem;
+    background: rgba(189,242,63,0.14);
     background: color-mix(in srgb, var(--db-accent) 14%, transparent);
+    border: 1px solid rgba(189,242,63,0.3);
     border: 1px solid color-mix(in srgb, var(--db-accent) 30%, transparent);
 }
 #quick-entry-card .q-titles { flex:1; min-width:0; display:flex; align-items:baseline; flex-wrap:wrap; gap:.35rem; }
@@ -3759,7 +3818,9 @@ html[data-theme="light"] #quick-entry-card .quick-entry-eyebrow { color:var(--db
 html #quick-entry-card .dabbar-magic-chip, html[data-theme] #quick-entry-card .dabbar-magic-chip {
     flex:none; padding:.28rem .65rem; font-size:.62rem;
     color: var(--db-accent);
+    background: rgba(189,242,63,0.1);
     background: color-mix(in srgb, var(--db-accent) 10%, transparent);
+    border-color: rgba(189,242,63,0.3);
     border-color: color-mix(in srgb, var(--db-accent) 30%, transparent);
 }
 html[data-theme="light"] .quick-workspace-switcher, html:not([data-theme="light"]) .quick-workspace-switcher { background: var(--cs-panel2); }
@@ -3776,7 +3837,9 @@ html[data-theme="light"] .quick-workspace-switcher, html:not([data-theme="light"
 }
 #quick-expense-content .q-modes > .quick-entry-tab > span:last-child { font-size:.74rem !important; font-weight:800; }
 #quick-expense-content .q-modes > #quick-entry-text {
+    background: rgb(240,247,227) !important;
     background: color-mix(in srgb, var(--db-accent) 11%, var(--cs-panel)) !important;
+    border-color: rgba(189,242,63,0.42) !important;
     border-color: color-mix(in srgb, var(--db-accent) 42%, transparent) !important;
 }
 
@@ -3786,7 +3849,9 @@ html #quick-entry-card #quick-entry-form, html[data-theme] #quick-entry-card #qu
     border-radius:1.25rem !important; padding:.85rem !important;
 }
 html #quick-entry-card #quick-entry-form:focus-within, html[data-theme] #quick-entry-card #quick-entry-form:focus-within {
+    border-color: rgba(189,242,63,0.45) !important;
     border-color: color-mix(in srgb, var(--db-accent) 45%, transparent) !important;
+    box-shadow: 0 0 0 3px rgba(189,242,63,0.13) !important;
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--db-accent) 13%, transparent) !important;
 }
 html #quick-entry-card #quick-entry-form #quick-entry-input, html[data-theme] #quick-entry-card #quick-entry-form #quick-entry-input {
@@ -3795,11 +3860,12 @@ html #quick-entry-card #quick-entry-form #quick-entry-input, html[data-theme] #q
 }
 .q-ex-chips { display:flex; gap:.4rem; flex-wrap:wrap; }
 .q-ex-chip {
+    border:1px dashed rgba(189,242,63,0.45) !important;
     border:1px dashed color-mix(in srgb, var(--db-accent) 45%, transparent) !important; background:transparent !important;
     color:var(--db-muted) !important; border-radius:999px; padding:.22rem .65rem;
     font:700 .64rem 'Cairo',sans-serif; cursor:pointer;
 }
-.q-ex-chip:active { background: color-mix(in srgb, var(--db-accent) 12%, transparent) !important; }
+.q-ex-chip:active { background: rgba(189,242,63,0.12) !important; background: color-mix(in srgb, var(--db-accent) 12%, transparent) !important; }
 #quick-entry-analyze { height:2.9rem; border-radius:.95rem !important; font-size:.88rem !important; }
 #quick-entry-cancel { border:0 !important; background:transparent !important; }
 #quick-expense-content .q-foot {
@@ -3831,13 +3897,14 @@ html #portfolio-collapsible, html[data-theme="dark"] #portfolio-collapsible, htm
     box-shadow: none;
 }
 .portfolio-digest-badge.up, .portfolio-detail-badge.up, .portfolio-asset-change.up {
-    color: var(--cs-up) !important; background: color-mix(in srgb, var(--cs-up) 13%, transparent) !important;
+    color: var(--cs-up) !important; background: rgba(59,122,99,0.13) !important; background: color-mix(in srgb, var(--cs-up) 13%, transparent) !important;
 }
 .portfolio-digest-badge.down, .portfolio-detail-badge.down, .portfolio-asset-change.down {
-    color: var(--cs-down) !important; background: color-mix(in srgb, var(--cs-down) 13%, transparent) !important;
+    color: var(--cs-down) !important; background: rgba(180,87,74,0.13) !important; background: color-mix(in srgb, var(--cs-down) 13%, transparent) !important;
 }
 html .portfolio-asset-icon, html[data-theme] .portfolio-asset-icon {
-    color: var(--db-accent); background: color-mix(in srgb, var(--db-accent) 12%, transparent);
+    color: var(--db-accent); background: rgba(189,242,63,0.12); background: color-mix(in srgb, var(--db-accent) 12%, transparent);
+    border-color: rgba(189,242,63,0.24);
     border-color: color-mix(in srgb, var(--db-accent) 24%, transparent);
 }
 .portfolio-form-submit { color: #17120a !important; }
@@ -3850,20 +3917,22 @@ html #bank-movements-card, html[data-theme] #bank-movements-card {
     border-radius:1.25rem !important; box-shadow:none !important;
 }
 html #bank-movements-card:hover, html[data-theme] #bank-movements-card:hover { background: var(--cs-panel2) !important; }
-#bank-movements-card .bank-card-ico { background: color-mix(in srgb, var(--db-accent) 13%, transparent) !important; }
+#bank-movements-card .bank-card-ico { background: rgba(189,242,63,0.13) !important; background: color-mix(in srgb, var(--db-accent) 13%, transparent) !important; }
 #bank-movements-card .text-slate-100 { color: var(--db-ink) !important; }
 #bank-movements-card .text-slate-400 { color: var(--db-muted) !important; }
 .bm-filter-btn, .bm-source-filter-btn { background: var(--cs-panel) !important; color: var(--db-muted) !important; border:1px solid var(--cs-line) !important; }
 .bm-filter-btn.active, .bm-source-filter-btn.active {
+    background: rgba(189,242,63,0.14) !important;
     background: color-mix(in srgb, var(--db-accent) 14%, transparent) !important; color: var(--db-accent) !important;
+    border-color: rgba(189,242,63,0.4) !important;
     border-color: color-mix(in srgb, var(--db-accent) 40%, transparent) !important;
 }
 .bm-neutral-box { background: var(--cs-panel); border:1px solid var(--cs-line); }
 .bm-neutral-box > summary { color: var(--db-ink) !important; }
 .bm-pos { color: var(--cs-up) !important; }
 .bm-neg { color: var(--cs-down) !important; }
-.bm-pos-bg { background: color-mix(in srgb, var(--cs-up) 12%, transparent); }
-.bm-neg-bg { background: color-mix(in srgb, var(--cs-down) 12%, transparent); }
+.bm-pos-bg { background: rgba(59,122,99,0.12); background: color-mix(in srgb, var(--cs-up) 12%, transparent); }
+.bm-neg-bg { background: rgba(180,87,74,0.12); background: color-mix(in srgb, var(--cs-down) 12%, transparent); }
 #bank-movements-sheet > div { background: var(--cs-card) !important; border-top:1px solid var(--cs-line) !important; }
 #bank-movements-list { background: var(--cs-panel) !important; border-color: var(--cs-line) !important; }
 
@@ -3923,7 +3992,7 @@ html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgb
 #dabbar-magic-fx { display:none !important; }
 #quick-entry-card.is-magic-processing::after,
 #quick-entry-card.is-magic-recording::after {
-  inset: 0 0 auto 0 !important; height: 2px !important; width: 100% !important;
+  top:0 !important;right:0 !important;bottom:auto !important;left:0 !important;inset:0 0 auto 0 !important; height: 2px !important; width: 100% !important;
   background: linear-gradient(90deg, transparent 0, var(--pm-gold-bright, #10b981) 50%, transparent 100%) !important;
   transform: translateX(-100%); animation: moBar .85s cubic-bezier(.4,0,.2,1) infinite !important; z-index: 3 !important;
 }
@@ -3955,6 +4024,7 @@ button:active, .quick-entry-tab:active { transition-duration: .06s; }
 
 /* نفس معاملة "المعالجة اليدوي" بس بشكل عام لأي حاوية احتفال (الكتابة الذكية والصوت والفاتورة بيستخدموا #dabbar-celebrate-fx) */
 .dabbar-magic-fx-active {
+  background:radial-gradient(circle at 50% 48%, rgba(8,122,89,0.19), transparent 58%) !important;
   background:radial-gradient(circle at 50% 48%, color-mix(in srgb, var(--pm-gold-bright) 19%, transparent), transparent 58%) !important;
   animation: manualSuccessFlash .42s ease-out both !important;
 }
@@ -3964,7 +4034,7 @@ button:active, .quick-entry-tab:active { transition-duration: .06s; }
 /* نسخة عامة من نص "تم التسجيل" مش مربوطة بـ id معيّن، عشان تشتغل جوه أي حاوية احتفال */
 .manual-success-copy {
   position:absolute; top:calc(50% + 3.7rem); display:flex; flex-direction:column; align-items:center; gap:.12rem;
-  color:var(--pm-ink); text-shadow:0 1px 10px color-mix(in srgb,var(--pm-surface) 70%,transparent);
+  color:var(--pm-ink); text-shadow:0 1px 10px rgba(255,255,255,0.7); text-shadow:0 1px 10px color-mix(in srgb,var(--pm-surface) 70%,transparent);
   animation:manualSuccessCopyIn .45s cubic-bezier(.2,.8,.3,1) .12s both;
 }
 .manual-success-kicker { color:var(--pm-gold-bright); font-size:.58rem; font-weight:950; letter-spacing:.08em; }
@@ -3993,13 +4063,14 @@ button:active, .quick-entry-tab:active { transition-duration: .06s; }
 .dabbar-process-card.is-leaving { animation: dabbarProcessCardOut .18s ease both; }
 @keyframes dabbarProcessCardIn { from { opacity:0; transform:translateY(6px) scale(.96); } to { opacity:1; transform:none; } }
 @keyframes dabbarProcessCardOut { to { opacity:0; transform:scale(.94); } }
-.dabbar-process-spinner { width:1.15rem; height:1.15rem; border-radius:999px; border:2px solid color-mix(in srgb, var(--pm-gold-bright, #10b981) 25%, transparent); border-top-color:var(--pm-gold-bright, #10b981); animation: dabbarSpin .6s linear infinite; }
+.dabbar-process-spinner { width:1.15rem; height:1.15rem; border-radius:999px; border:2px solid rgba(8,122,89,0.25); border:2px solid color-mix(in srgb, var(--pm-gold-bright, #10b981) 25%, transparent); border-top-color:var(--pm-gold-bright, #10b981); animation: dabbarSpin .6s linear infinite; }
 @keyframes dabbarSpin { to { transform:rotate(360deg); } }
 .dabbar-process-text { font-size:.78rem; font-weight:800; color:var(--pm-ink); text-align:center; white-space:nowrap; }
 
 /* ============ توست نجاح بسيط واحترافي — تشيك صغير + نص واحد، بدل الكونفيتي/الحلقات/الصوت المركب القديم ============ */
 .dabbar-simple-toast{
   display:flex; align-items:center; gap:.5rem; background:var(--pm-surface-hi, #1e293b);
+  border:1px solid rgba(8,122,89,0.35);
   border:1px solid color-mix(in srgb, var(--pm-gold-bright, #10b981) 35%, transparent);
   border-radius:999px; padding:.5rem .9rem; box-shadow:0 10px 26px rgba(0,0,0,.3);
   opacity:0; transform:translateY(8px) scale(.97); transition:opacity .16s ease, transform .16s ease;
@@ -4040,12 +4111,14 @@ button:active, .quick-entry-tab:active { transition-duration: .06s; }
 .expense-ledger-cta{
   display:inline-flex; align-items:center; gap:.2rem; flex-shrink:0;
   font-size:.66rem; font-weight:900; color:var(--pm-gold-bright, #10b981);
+  background:rgba(8,122,89,0.13);
   background:color-mix(in srgb, var(--pm-gold-bright, #10b981) 13%, transparent);
+  border:1px solid rgba(8,122,89,0.35);
   border:1px solid color-mix(in srgb, var(--pm-gold-bright, #10b981) 35%, transparent);
   border-radius:999px; padding:.32rem .65rem; line-height:1; white-space:nowrap;
   transition:transform .12s ease, background .12s ease;
 }
-.expense-ledger-cta:active{ transform:scale(.94); background:color-mix(in srgb, var(--pm-gold-bright, #10b981) 22%, transparent); }
+.expense-ledger-cta:active{ transform:scale(.94); background:rgba(8,122,89,0.22); background:color-mix(in srgb, var(--pm-gold-bright, #10b981) 22%, transparent); }
 </style>
 <style id="bm-redesign">
 #bank-movements-sheet > div { padding-top:0 !important; }
@@ -4092,27 +4165,17 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
 .bm-acct-chip.bm-acct-unknown { color:#fbbf24; border-color:rgba(245,158,11,.45); background:rgba(245,158,11,.1); }
 .bm-review-btn { border:1px solid rgba(245,158,11,.45); background: rgba(245,158,11,.1); color:#fbbf24 !important; border-radius:999px; padding:.15rem .55rem; font-size:10px !important; margin-top:.25rem; }
 </style>
-<style id="legacy-mobile-color-fallbacks">
-    /* Fallback palette for older Safari/WebViews without CSS color-mix(). */
-    @supports not (background-color: color-mix(in srgb, #0e8f68 10%, transparent)) {
-        :root { --legacy-gold-tint: rgba(189,242,63,.16); --legacy-clay-tint: rgba(211,106,86,.16); }
-        html[data-theme="light"] { --legacy-gold-tint: rgba(14,143,104,.14); --legacy-clay-tint: rgba(169,76,58,.14); }
-        .dabbar-metric-card, .dabbar-savings-card, .dabbar-metric-empty,
-        .dabbar-scan-box, .dabbar-premium-modal, .portfolio-asset-detail,
-        .portfolio-add-form-panel {
-            background-color: var(--pm-surface-hi, #fff) !important;
-            background-image: none !important;
-        }
-        .dabbar-metric-icon, .dabbar-savings-row2-ic, .dabbar-hdr-ic,
-        .portfolio-title-icon, .quick-entry-manual-link {
-            background-color: var(--legacy-gold-tint) !important;
-        }
-        .dabbar-metric-icon--piggy, .dabbar-metric-empty--piggy,
-        .dabbar-savings-row2-ic--piggy { background-color: var(--legacy-clay-tint) !important; }
-        .dabbar-metric-track { background-color: var(--legacy-gold-tint) !important; }
-        #daily-expense-section .dabbar-hdr-ic { background-color: var(--legacy-clay-tint) !important; }
-        .dabbar-metric-cta-btn, .dabbar-reminder-banner-cta { background-color: var(--pm-gold, #0e8f68) !important; }
-    }
+<script src="./dabbar-compat.js"></script>
+<style id="dabbar-compat-css">
+/* دبّر: شبكة أمان للمتصفحات القديمة */
+body { height: 100vh; }
+@supports (height: 100dvh) { body { height: 100dvh; } }
+@supports not (height: 100dvh) { :root { --app-vh: 100vh; } }
+@supports not (inset: 0) {
+  .inset-0 { top: 0; right: 0; bottom: 0; left: 0; }
+  .inset-x-0 { left: 0; right: 0; }
+  .inset-y-0 { top: 0; bottom: 0; }
+}
 </style>
 </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col overflow-hidden">
@@ -4235,17 +4298,17 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                 <div id="dabbar-magic-fx" aria-hidden="true"></div>
                 <div class="q-head qe2-dock" id="qe2-dock" data-quick-workspace="expense" role="button" tabindex="0" aria-expanded="false" aria-controls="quick-expense-detail"><div class="q-icon" aria-hidden="true">✨</div><div class="q-titles"><h3 class="q-title" id="qe2-title">سجّل مصروفك بسرعة</h3><p class="q-sub" id="qe2-sub">كتابة، صوت، أو فاتورة — في ثواني</p></div><span id="dabbar-magic-chip" class="dabbar-magic-chip" hidden><span class="dabbar-magic-chip-dot"></span><span id="dabbar-magic-label">جاهز يفهمها</span></span><span class="qe2-chevron" id="qe2-chevron" aria-hidden="true">‹</span></div>
                 <div id="quick-expense-content"><div id="quick-expense-detail" class="qe2-detail">
-                <div id="quick-entry-subscription-lock" class="hidden items-center justify-between gap-3 rounded-2xl border px-3 py-2.5 text-[11px]" style="border-color:color-mix(in srgb,var(--pm-gold-bright) 40%,transparent);background:color-mix(in srgb,var(--pm-gold-bright) 10%,var(--pm-surface-hi));color:var(--pm-ink);"><div class="flex items-center gap-2"><span id="quick-entry-vip-badge" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-lg" style="background:linear-gradient(145deg,var(--pm-gold-bright),var(--pm-gold));color:var(--pm-ink);">💎</span><span><strong class="block" style="color:var(--pm-gold-bright);">التصنيف الذكي بقى ميزة VIP</strong><span style="color:var(--pm-muted);">الإدخال اليدوي شغال زي العادة — فعّل VIP للصوت والفواتير والـ AI.</span></span></div><button id="quick-entry-open-subscription" type="button" class="shrink-0 rounded-xl px-3 py-2 text-[10px] font-black" style="background:linear-gradient(145deg,var(--pm-gold-bright),var(--pm-gold));color:var(--pm-ink);">فعّل VIP</button></div>
+                <div id="quick-entry-subscription-lock" class="hidden items-center justify-between gap-3 rounded-2xl border px-3 py-2.5 text-[11px]" style="border-color:rgba(8,122,89,0.4);border-color:color-mix(in srgb,var(--pm-gold-bright) 40%,transparent);background:rgb(230,242,238);background:color-mix(in srgb,var(--pm-gold-bright) 10%,var(--pm-surface-hi));color:var(--pm-ink);"><div class="flex items-center gap-2"><span id="quick-entry-vip-badge" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-lg" style="background:linear-gradient(145deg,var(--pm-gold-bright),var(--pm-gold));color:var(--pm-ink);">💎</span><span><strong class="block" style="color:var(--pm-gold-bright);">التصنيف الذكي بقى ميزة VIP</strong><span style="color:var(--pm-muted);">الإدخال اليدوي شغال زي العادة — فعّل VIP للصوت والفواتير والـ AI.</span></span></div><button id="quick-entry-open-subscription" type="button" class="shrink-0 rounded-xl px-3 py-2 text-[10px] font-black" style="background:linear-gradient(145deg,var(--pm-gold-bright),var(--pm-gold));color:var(--pm-ink);">فعّل VIP</button></div>
                 
-                <div class="grid grid-cols-3 gap-2 q-modes"><button id="quick-entry-text" class="quick-entry-tab rounded-2xl border px-2 py-3 text-center shadow-sm transition" type="button" style="border-color:color-mix(in srgb,var(--pm-gold-bright) 50%,transparent);background:linear-gradient(145deg,color-mix(in srgb,var(--pm-gold-bright) 18%,var(--pm-surface-hi)),var(--pm-surface-hi));"><span class="mx-auto mb-1 flex h-9 w-9 items-center justify-center rounded-full text-xl" style="background:color-mix(in srgb,var(--pm-gold-bright) 18%,transparent);">✍️</span><span class="block text-[11px] font-bold" style="color:var(--pm-ink);">كتابة</span></button><button id="quick-entry-voice" class="quick-entry-tab rounded-2xl border px-2 py-3 text-center shadow-sm transition" type="button" style="border-color:var(--pm-hairline);background:var(--pm-surface-hi);"><span class="mx-auto mb-1 flex h-9 w-9 items-center justify-center rounded-full text-xl" style="background:color-mix(in srgb,var(--pm-gold-bright) 12%,transparent);">🎙️</span><span class="block text-[11px] font-bold" style="color:var(--pm-ink);">صوت</span></button><button id="quick-entry-invoice" class="quick-entry-tab rounded-2xl border px-2 py-3 text-center shadow-sm transition" type="button" style="border-color:var(--pm-hairline);background:var(--pm-surface-hi);"><span class="mx-auto mb-1 flex h-9 w-9 items-center justify-center rounded-full text-xl" style="background:color-mix(in srgb,var(--pm-gold-bright) 12%,transparent);">📸</span><span class="block text-[11px] font-bold" style="color:var(--pm-ink);">فاتورة</span></button></div><div class="grid grid-cols-2 gap-2 quick-secondary-row"><button id="quick-entry-manual" type="button" class="quick-secondary-btn"><span aria-hidden="true">✍️</span><span>يدوي من غير AI</span></button><button id="quick-entry-multi-btn" type="button" class="quick-secondary-btn"><span aria-hidden="true">🧾</span><span>فاتورة طويلة</span></button></div><p class="q-foot text-[10px]" style="color:var(--pm-muted);"><span class="gem" aria-hidden="true">💎</span><span>الصوت والفاتورة الذكية VIP — الكتابة والتسجيل اليدوي متاحين دايمًا.</span></p>
+                <div class="grid grid-cols-3 gap-2 q-modes"><button id="quick-entry-text" class="quick-entry-tab rounded-2xl border px-2 py-3 text-center shadow-sm transition" type="button" style="border-color:rgba(8,122,89,0.5);border-color:color-mix(in srgb,var(--pm-gold-bright) 50%,transparent);background:linear-gradient(145deg,rgb(211,231,225),var(--pm-surface-hi));background:linear-gradient(145deg,color-mix(in srgb,var(--pm-gold-bright) 18%,var(--pm-surface-hi)),var(--pm-surface-hi));"><span class="mx-auto mb-1 flex h-9 w-9 items-center justify-center rounded-full text-xl" style="background:rgba(8,122,89,0.18);background:color-mix(in srgb,var(--pm-gold-bright) 18%,transparent);">✍️</span><span class="block text-[11px] font-bold" style="color:var(--pm-ink);">كتابة</span></button><button id="quick-entry-voice" class="quick-entry-tab rounded-2xl border px-2 py-3 text-center shadow-sm transition" type="button" style="border-color:var(--pm-hairline);background:var(--pm-surface-hi);"><span class="mx-auto mb-1 flex h-9 w-9 items-center justify-center rounded-full text-xl" style="background:rgba(8,122,89,0.12);background:color-mix(in srgb,var(--pm-gold-bright) 12%,transparent);">🎙️</span><span class="block text-[11px] font-bold" style="color:var(--pm-ink);">صوت</span></button><button id="quick-entry-invoice" class="quick-entry-tab rounded-2xl border px-2 py-3 text-center shadow-sm transition" type="button" style="border-color:var(--pm-hairline);background:var(--pm-surface-hi);"><span class="mx-auto mb-1 flex h-9 w-9 items-center justify-center rounded-full text-xl" style="background:rgba(8,122,89,0.12);background:color-mix(in srgb,var(--pm-gold-bright) 12%,transparent);">📸</span><span class="block text-[11px] font-bold" style="color:var(--pm-ink);">فاتورة</span></button></div><div class="grid grid-cols-2 gap-2 quick-secondary-row"><button id="quick-entry-manual" type="button" class="quick-secondary-btn"><span aria-hidden="true">✍️</span><span>يدوي من غير AI</span></button><button id="quick-entry-multi-btn" type="button" class="quick-secondary-btn"><span aria-hidden="true">🧾</span><span>فاتورة طويلة</span></button></div><p class="q-foot text-[10px]" style="color:var(--pm-muted);"><span class="gem" aria-hidden="true">💎</span><span>الصوت والفاتورة الذكية VIP — الكتابة والتسجيل اليدوي متاحين دايمًا.</span></p>
                 <input type="file" id="quick-entry-multi-input" accept="image/*" multiple class="hidden">
                 <input type="file" id="quick-entry-invoice-input" accept="image/*" class="hidden">
                 <div id="quick-entry-scanning" class="hidden dabbar-scan-box rounded-2xl p-3 text-center"><div class="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl dabbar-scan-box-icon text-xl shadow-sm"><span style="display:inline-block;animation:dabbar-scan-spin 1s linear infinite">⟳</span></div><p class="text-xs font-bold dabbar-scan-box-title">بنقرأ الفاتورة...</p><p class="mt-1 text-[10px] dabbar-scan-box-sub">دبّر بيستخرج المبلغ والأصناف</p></div>
                 <div id="quick-entry-form" class="hidden space-y-3 rounded-2xl border p-3" style="border-color:var(--pm-hairline);background:var(--pm-surface-hi);"><div><div class="flex items-center gap-2 flex-wrap"><p class="text-xs font-black" style="color:var(--pm-ink);">اكتب عمليتك بطريقتك</p><span class="smart-write-badge"><svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor" aria-hidden="true"><path d="M12 2l1.9 5.6L19.5 9.5l-5.6 1.9L12 17l-1.9-5.6L4.5 9.5l5.6-1.9L12 2zm7 12l.9 2.6 2.6.9-2.6.9L19 21l-.9-2.6-2.6-.9 2.6-.9L19 14z"/></svg>كتابة ذكية</span></div><p class="mt-1 text-[10px]" style="color:var(--pm-muted);">مثال: «صرفت 50 جنيه على القهوة النهاردة»</p></div><textarea id="quick-entry-input" rows="1" maxlength="2500" placeholder="مثال: صرفت 50 جنيه على القهوة النهاردة" class="w-full resize-y rounded-2xl border px-3 py-3 text-sm leading-7 outline-none" style="border-color:var(--pm-hairline);background:var(--pm-surface-soft);color:var(--pm-ink);"></textarea><div class="q-ex-chips"><button type="button" class="q-ex-chip" data-ex="صرفت 50 جنيه على القهوة النهاردة">☕ قهوة ٥٠</button><button type="button" class="q-ex-chip" data-ex="دفعت 30 جنيه مواصلات">🚌 مواصلات ٣٠</button><button type="button" class="q-ex-chip" data-ex="قبضت 8000 جنيه مرتب">💰 مرتب</button></div><div class="flex gap-2"><button id="quick-entry-analyze" class="quick-entry-ai-save flex-1 rounded-xl py-2.5 text-xs font-black" type="button" style="background:linear-gradient(145deg,var(--pm-gold-bright),var(--pm-gold));color:var(--pm-ink);">حلّل وسجّل</button><button id="quick-entry-cancel" class="rounded-xl border px-3 py-2.5 text-xs" style="border-color:var(--pm-hairline);color:var(--pm-muted);" type="button">إلغاء</button></div></div>
-                <div id="quick-entry-manual-form" class="hidden relative space-y-3 rounded-2xl border p-3" style="border-color:color-mix(in srgb,var(--pm-gold-bright) 34%,transparent);background:var(--pm-surface-hi);"><div id="quick-manual-success-fx" aria-hidden="true"></div><div class="flex items-center justify-between gap-2"><div><p class="text-xs font-black" style="color:var(--pm-ink);">إدخال يدوي سريع</p><p class="mt-1 text-[10px]" style="color:var(--pm-muted);">اختار النوع والفئة واحفظ من غير AI.</p><p class="mt-1 text-[10px] font-bold" id="quick-manual-month-label" style="color:var(--pm-gold-bright);"></p></div><div class="flex items-center gap-1.5 shrink-0"><span class="rounded-full px-2 py-1 text-[10px] font-bold" style="background:color-mix(in srgb,var(--pm-gold-bright) 14%,transparent);color:var(--pm-gold-bright);">متاح للجميع</span><button type="button" id="quick-manual-close" aria-label="إغلاق" class="quick-manual-close-btn">✕</button></div></div><div class="grid grid-cols-3 gap-2"><button id="quick-manual-expense" type="button" data-type="expense" class="quick-manual-type active rounded-xl border px-2 py-2 text-[11px] font-black" style="border-color:var(--pm-gold-bright);background:color-mix(in srgb,var(--pm-gold-bright) 14%,transparent);color:var(--pm-ink);">🧾 مصروف</button><button id="quick-manual-income" type="button" data-type="income" class="quick-manual-type rounded-xl border px-2 py-2 text-[11px] font-black" style="border-color:var(--pm-hairline);color:var(--pm-muted);">💰 دخل</button><button id="quick-manual-debt" type="button" data-type="debt" class="quick-manual-type rounded-xl border px-2 py-2 text-[11px] font-black" style="border-color:var(--pm-hairline);color:var(--pm-muted);">🤝 دين</button></div><div class="relative"><input id="quick-manual-amount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="المبلغ" class="w-full rounded-xl border px-3 py-3 pl-14 text-sm outline-none" style="border-color:var(--pm-hairline);background:var(--pm-surface-soft);color:var(--pm-ink);"><span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs font-black" style="color:var(--pm-gold-bright);">ج.م</span></div><div class="quick-description-wrap"><input id="quick-manual-description" type="text" maxlength="500" placeholder="الوصف — مثال: غدا أو مرتب" class="w-full rounded-xl border px-3 py-3 text-xs outline-none" style="border-color:var(--pm-hairline);background:var(--pm-surface-soft);color:var(--pm-ink);"><button type="button" id="quick-manual-mic" class="speech-mic-btn" aria-label="إملاء صوتي" title="إملاء صوتي"><iconify-icon icon="ph:microphone-bold" width="20"></iconify-icon></button></div>
+                <div id="quick-entry-manual-form" class="hidden relative space-y-3 rounded-2xl border p-3" style="border-color:rgba(8,122,89,0.34);border-color:color-mix(in srgb,var(--pm-gold-bright) 34%,transparent);background:var(--pm-surface-hi);"><div id="quick-manual-success-fx" aria-hidden="true"></div><div class="flex items-center justify-between gap-2"><div><p class="text-xs font-black" style="color:var(--pm-ink);">إدخال يدوي سريع</p><p class="mt-1 text-[10px]" style="color:var(--pm-muted);">اختار النوع والفئة واحفظ من غير AI.</p><p class="mt-1 text-[10px] font-bold" id="quick-manual-month-label" style="color:var(--pm-gold-bright);"></p></div><div class="flex items-center gap-1.5 shrink-0"><span class="rounded-full px-2 py-1 text-[10px] font-bold" style="background:rgba(8,122,89,0.14);background:color-mix(in srgb,var(--pm-gold-bright) 14%,transparent);color:var(--pm-gold-bright);">متاح للجميع</span><button type="button" id="quick-manual-close" aria-label="إغلاق" class="quick-manual-close-btn">✕</button></div></div><div class="grid grid-cols-3 gap-2"><button id="quick-manual-expense" type="button" data-type="expense" class="quick-manual-type active rounded-xl border px-2 py-2 text-[11px] font-black" style="border-color:var(--pm-gold-bright);background:rgba(8,122,89,0.14);background:color-mix(in srgb,var(--pm-gold-bright) 14%,transparent);color:var(--pm-ink);">🧾 مصروف</button><button id="quick-manual-income" type="button" data-type="income" class="quick-manual-type rounded-xl border px-2 py-2 text-[11px] font-black" style="border-color:var(--pm-hairline);color:var(--pm-muted);">💰 دخل</button><button id="quick-manual-debt" type="button" data-type="debt" class="quick-manual-type rounded-xl border px-2 py-2 text-[11px] font-black" style="border-color:var(--pm-hairline);color:var(--pm-muted);">🤝 دين</button></div><div class="relative"><input id="quick-manual-amount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="المبلغ" class="w-full rounded-xl border px-3 py-3 pl-14 text-sm outline-none" style="border-color:var(--pm-hairline);background:var(--pm-surface-soft);color:var(--pm-ink);"><span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs font-black" style="color:var(--pm-gold-bright);">ج.م</span></div><div class="quick-description-wrap"><input id="quick-manual-description" type="text" maxlength="500" placeholder="الوصف — مثال: غدا أو مرتب" class="w-full rounded-xl border px-3 py-3 text-xs outline-none" style="border-color:var(--pm-hairline);background:var(--pm-surface-soft);color:var(--pm-ink);"><button type="button" id="quick-manual-mic" class="speech-mic-btn" aria-label="إملاء صوتي" title="إملاء صوتي"><iconify-icon icon="ph:microphone-bold" width="20"></iconify-icon></button></div>
                     <div id="quick-manual-category-block"><p class="mb-1 text-[10px] font-bold" style="color:var(--pm-muted);">الفئة</p>
                         <div id="quick-manual-chips-expense" class="flex flex-wrap gap-1.5">
-                            <button type="button" class="quick-manual-chip active" data-category="أكل" style="border-color:var(--pm-gold);background:linear-gradient(135deg,color-mix(in srgb,var(--pm-gold-bright) 30%,transparent),var(--pm-surface-hi));color:var(--pm-ink);">🍔 أكل</button>
+                            <button type="button" class="quick-manual-chip active" data-category="أكل" style="border-color:var(--pm-gold);background:linear-gradient(135deg,rgba(8,122,89,0.3),var(--pm-surface-hi));background:linear-gradient(135deg,color-mix(in srgb,var(--pm-gold-bright) 30%,transparent),var(--pm-surface-hi));color:var(--pm-ink);">🍔 أكل</button>
                             <button type="button" class="quick-manual-chip" data-category="مواصلات">🚗 مواصلات</button>
                             <button type="button" class="quick-manual-chip" data-category="فواتير">🧾 فواتير</button>
                             <button type="button" class="quick-manual-chip" data-category="تسوق">🛍️ تسوق</button>
@@ -4259,7 +4322,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                             <button type="button" class="quick-manual-chip" data-category="other">✨ أخرى</button>
                         </div>
                         <div id="quick-manual-chips-income" class="hidden flex flex-wrap gap-1.5">
-                            <button type="button" class="quick-manual-chip active" data-category="مرتب" style="border-color:var(--pm-gold);background:linear-gradient(135deg,color-mix(in srgb,var(--pm-gold-bright) 30%,transparent),var(--pm-surface-hi));color:var(--pm-ink);">💼 مرتب</button>
+                            <button type="button" class="quick-manual-chip active" data-category="مرتب" style="border-color:var(--pm-gold);background:linear-gradient(135deg,rgba(8,122,89,0.3),var(--pm-surface-hi));background:linear-gradient(135deg,color-mix(in srgb,var(--pm-gold-bright) 30%,transparent),var(--pm-surface-hi));color:var(--pm-ink);">💼 مرتب</button>
                             <button type="button" class="quick-manual-chip" data-category="بيع خدمة">🤝 بيع خدمة</button>
                             <button type="button" class="quick-manual-chip" data-category="هدايا وتبرعات">🎁 هدايا وتبرعات</button>
                             <button type="button" class="quick-manual-chip" data-category="أرباح استثمار">📈 أرباح استثمار</button>
@@ -4273,7 +4336,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                     <div id="quick-manual-debt-block" class="hidden space-y-2 rounded-xl border border-dashed p-2.5" style="border-color:var(--pm-hairline);background:var(--pm-surface-soft);">
                         <input id="quick-manual-person" type="text" maxlength="160" placeholder="اسم الشخص — مثال: أحمد" class="w-full rounded-xl border px-3 py-3 text-xs outline-none" style="border-color:var(--pm-hairline);background:var(--pm-surface-soft);color:var(--pm-ink);">
                         <div class="grid grid-cols-2 gap-2">
-                            <button type="button" id="quick-manual-dir-lent" data-dir="lent" class="quick-manual-dir active rounded-xl border px-2 py-2 text-[11px] font-black" style="border-color:var(--pm-gold-bright);background:color-mix(in srgb,var(--pm-gold-bright) 14%,transparent);color:var(--pm-ink);">📤 ليك عنده (سلّفته)</button>
+                            <button type="button" id="quick-manual-dir-lent" data-dir="lent" class="quick-manual-dir active rounded-xl border px-2 py-2 text-[11px] font-black" style="border-color:var(--pm-gold-bright);background:rgba(8,122,89,0.14);background:color-mix(in srgb,var(--pm-gold-bright) 14%,transparent);color:var(--pm-ink);">📤 ليك عنده (سلّفته)</button>
                             <button type="button" id="quick-manual-dir-borrowed" data-dir="borrowed" class="quick-manual-dir rounded-xl border px-2 py-2 text-[11px] font-black" style="border-color:var(--pm-hairline);color:var(--pm-muted);">📥 عليك له (استلفت منه)</button>
                         </div>
                     </div>
@@ -5421,7 +5484,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
 
             <button type="button" id="dbo-reopen-btn" class="w-full flex items-center justify-between gap-3 rounded-3xl border p-4" style="border-color:var(--pm-hairline);background:var(--pm-surface-hi);">
                 <span style="display:flex;align-items:center;gap:10px;">
-                    <span style="width:2.4rem;height:2.4rem;border-radius:.9rem;display:flex;align-items:center;justify-content:center;font-size:1.15rem;background:color-mix(in srgb,var(--pm-gold) 16%,transparent);">🧭</span>
+                    <span style="width:2.4rem;height:2.4rem;border-radius:.9rem;display:flex;align-items:center;justify-content:center;font-size:1.15rem;background:rgba(14,143,104,0.16);background:color-mix(in srgb,var(--pm-gold) 16%,transparent);">🧭</span>
                     <span style="text-align:right;">
                         <span style="display:block;font-size:.82rem;font-weight:900;color:var(--pm-ink);">تعرف على دبّر</span>
                         <span style="display:block;font-size:.66rem;color:var(--pm-muted);margin-top:2px;">تعريف سريع بكل مميزات دبّر</span>
@@ -6538,8 +6601,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
 
         function applyThemeToggleUI(theme) {
             const themeMeta = document.querySelector('meta[name="theme-color"]');
-            document.documentElement.style.colorScheme = theme === 'light' ? 'light' : 'dark';
-            if (themeMeta) themeMeta.setAttribute('content', theme === 'light' ? '#f4f5f7' : '#1f2022');
+            if (themeMeta) themeMeta.setAttribute('content', theme === 'light' ? '#f6f1e7' : '#08090a');
             const icon = document.getElementById('theme-toggle-icon');
             const label = document.getElementById('theme-toggle-label');
             const track = document.getElementById('theme-toggle-track');
@@ -8061,6 +8123,8 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             // لثواني قليلة (تبديل تطبيقات، فتح إشعار...). بنأجل أي تحديث فعلي لحد ما يعدي 15 ثانية بعيد.
             window.__lastDashboardLoadAt = window.__lastDashboardLoadAt || 0; // إصلاح: كانت let محلية هنا فمكنش loadDashboard (تحت في الملف) بيحدّثها فعليًا — النتيجة إن الـ 15 ثانية دي متنفعش أبدًا، وكل رجوع/فوكس للتاب كان بيعمل تحميل كامل فورًا
             async function ensureFreshSessionThenLoad() {
+                // لو المستخدم بيكتب في خانة، نأجل التحديث لحد ما يخلص عشان الكيبورد ما يتقفلش
+                if (window.DabbarTyping && window.DabbarTyping.isTyping()) { window.DabbarTyping.whenIdle(ensureFreshSessionThenLoad); return; }
                 if (Date.now() - window.__lastDashboardLoadAt < 15000) return; // رجوع سريع: البيانات المعروضة لسه طازة، متعملش حاجة
 
                 // Stale-While-Revalidate: أول ما ترجع للتطبيق، اعرض آخر بيانات محفوظة فورًا (من غير ما تستنى النت خالص)،
@@ -8083,7 +8147,8 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
 
             // تحديث هادي في الخلفية كل دقيقة بدل كل 20 ثانية، عشان يقلل الريفريش المستمر اللي بيحس التطبيق بطيء
             setInterval(() => {
-                if (document.visibilityState === 'visible') loadDashboard();
+                if (document.visibilityState !== 'visible') return;
+                if (window.DabbarTyping) window.DabbarTyping.whenIdle(() => loadDashboard()); else loadDashboard();
             }, 60000);
 
             document.getElementById('refresh-btn').addEventListener('click', async (e) => {
@@ -14305,7 +14370,17 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
         function renderSubscription(subscription, dashboardData) {
             const card = document.getElementById('account-subscription-card');
             const hero = document.getElementById('premium-hero-card');
-            if (!card || !subscription) return;
+            if (!card) return;
+            if (!subscription) {
+                card.classList.remove('hidden');
+                const h0 = document.getElementById('account-sub-headline');
+                const s0 = document.getElementById('account-sub-subline');
+                if (h0) h0.textContent = 'حالة الاشتراك';
+                if (s0) s0.textContent = 'مش قادرين نجيب حالة اشتراكك دلوقتي. جرّب تحدّث الصفحة بعد شوية.';
+                document.getElementById('account-sub-form')?.classList.add('hidden');
+                document.getElementById('account-sub-pending')?.classList.add('hidden');
+                return;
+            }
             setQuickEntrySubscription(subscription);
             updateTrialEndingBanner(subscription);
 
@@ -15072,10 +15147,18 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                 makeSection(
                     'account-security-section',
                     '🔐',
-                    'الخصوصية والاشتراك',
-                    'الحماية، البريميوم، والتحكم في البيانات',
-                    ['premium-hero-card', 'account-subscription-card', 'account-privacy-card']
+                    'الخصوصية والبيانات',
+                    'الحماية والتحكم في بياناتك',
+                    ['account-privacy-card']
                 );
+                // كارت الاشتراك بقى ظاهر دايمًا في أول "حسابي" تحت البروفايل، مش جوه قسم مقفول
+                (function placeSubscriptionCards() {
+                    let anchor = document.getElementById('account-profile-card');
+                    ['premium-hero-card', 'account-subscription-card'].forEach((id) => {
+                        const el = document.getElementById(id);
+                        if (el && anchor && anchor.parentNode) { anchor.parentNode.insertBefore(el, anchor.nextSibling); anchor = el; }
+                    });
+                })();
                 account.dataset.organizationReady = 'true';
             }
 
@@ -15102,9 +15185,9 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
      ممكن يفتحه تاني وقت ما يحب من "حسابي" (dbo-reopen-btn).
      ============================================================ -->
 <style id="dbo-styles">
-#dbo-root{position:fixed;inset:0;z-index:1200;display:none;font-family:'Cairo',sans-serif;}
+#dbo-root{position:fixed;top:0;right:0;bottom:0;left:0;inset:0;z-index:1200;display:none;font-family:'Cairo',sans-serif;}
 #dbo-root.dbo-show{display:block;}
-#dbo-backdrop{position:absolute;inset:0;background:var(--pm-canvas);overflow:hidden;}
+#dbo-backdrop{position:absolute;top:0;right:0;bottom:0;left:0;inset:0;background:var(--pm-canvas);overflow:hidden;}
 #dbo-backdrop::before,#dbo-backdrop::after{content:'';position:absolute;border-radius:999px;filter:blur(60px);pointer-events:none;opacity:.55;}
 #dbo-backdrop::before{width:280px;height:280px;top:-90px;right:-70px;background:radial-gradient(circle,var(--pm-gold-bright),transparent 70%);animation:dboDrift1 16s ease-in-out infinite;}
 #dbo-backdrop::after{width:240px;height:240px;bottom:-60px;left:-80px;background:radial-gradient(circle,var(--pm-gold),transparent 70%);animation:dboDrift2 19s ease-in-out infinite;}
@@ -15116,10 +15199,11 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
 .dbo-orb-d{width:130px;height:130px;top:30%;right:20%;background:radial-gradient(circle,var(--pm-gold),transparent 72%);opacity:.45;animation:dboOrbFloatA 20s ease-in-out infinite reverse;}
 html[data-theme="light"] .dbo-orb{opacity:.34;}
 /* ---- جسيمات خضراء صغيرة بتطلع لفوق ببطء في خلفية الجولة ---- */
-.dbo-particles{position:absolute;inset:0;overflow:hidden;pointer-events:none;}
+.dbo-particles{position:absolute;top:0;right:0;bottom:0;left:0;inset:0;overflow:hidden;pointer-events:none;}
 .dbo-p{position:absolute;bottom:-14px;border-radius:50%;background:var(--pm-gold-bright);opacity:0;will-change:transform,opacity;
+  box-shadow:0 0 10px 2px rgba(8,122,89,0.55);
   box-shadow:0 0 10px 2px color-mix(in srgb,var(--pm-gold-bright) 55%,transparent);animation:dboRise var(--d,12s) linear var(--dl,0s) infinite;}
-html[data-theme="light"] .dbo-p{background:var(--pm-gold);box-shadow:0 0 8px 1px color-mix(in srgb,var(--pm-gold) 45%,transparent);}
+html[data-theme="light"] .dbo-p{background:var(--pm-gold);box-shadow:0 0 8px 1px rgba(14,143,104,0.45);box-shadow:0 0 8px 1px color-mix(in srgb,var(--pm-gold) 45%,transparent);}
 @keyframes dboRise{
   0%{transform:translate3d(0,0,0) scale(.6);opacity:0;}
   12%{opacity:var(--o,.7);}
@@ -15145,8 +15229,8 @@ html[data-theme="light"] #dbo-backdrop::before,html[data-theme="light"] #dbo-bac
 #dbo-root .dbo-skip-top:active{opacity:.5;}
 #dbo-root .dbo-dots{flex:1;display:flex;align-items:center;justify-content:center;gap:5px;}
 #dbo-root .dbo-dot{width:6px;height:6px;border-radius:999px;background:var(--pm-surface-soft);transition:all .3s cubic-bezier(.34,1.56,.64,1);flex-shrink:0;}
-#dbo-root .dbo-dot.dbo-dot-active{width:18px;background:var(--pm-gold);box-shadow:0 0 0 3px color-mix(in srgb,var(--pm-gold) 25%,transparent);animation:dboDotPulse 1.8s ease-in-out infinite;}
-@keyframes dboDotPulse{0%,100%{box-shadow:0 0 0 3px color-mix(in srgb,var(--pm-gold) 25%,transparent);}50%{box-shadow:0 0 0 6px color-mix(in srgb,var(--pm-gold) 12%,transparent);}}
+#dbo-root .dbo-dot.dbo-dot-active{width:18px;background:var(--pm-gold);box-shadow:0 0 0 3px rgba(14,143,104,0.25);box-shadow:0 0 0 3px color-mix(in srgb,var(--pm-gold) 25%,transparent);animation:dboDotPulse 1.8s ease-in-out infinite;}
+@keyframes dboDotPulse{0%,100%{box-shadow:0 0 0 3px rgba(14,143,104,0.25);box-shadow:0 0 0 3px color-mix(in srgb,var(--pm-gold) 25%,transparent);}50%{box-shadow:0 0 0 6px rgba(14,143,104,0.12);box-shadow:0 0 0 6px color-mix(in srgb,var(--pm-gold) 12%,transparent);}}
 #dbo-root .dbo-steps{flex:1;display:flex;flex-direction:column;padding:8px 24px 12px;overflow-y:auto;}
 #dbo-root .dbo-step{display:none;flex-direction:column;align-items:center;text-align:center;flex:1;padding-top:6%;}
 #dbo-root .dbo-step.dbo-active{display:flex;}
@@ -15157,11 +15241,11 @@ html[data-theme="light"] #dbo-backdrop::before,html[data-theme="light"] #dbo-bac
 #dbo-root .dbo-step.dbo-active>*:nth-child(4){animation-delay:.23s;}
 #dbo-root .dbo-step.dbo-active>*:nth-child(5){animation-delay:.3s;}
 @keyframes dboFadeUp{from{opacity:0;transform:translateY(14px) scale(.96);}to{opacity:1;transform:translateY(0) scale(1);}}
-#dbo-root .dbo-icon{position:relative;width:5.2rem;height:5.2rem;border-radius:1.6rem;background:color-mix(in srgb,var(--pm-gold) 15%,transparent);border:1px solid color-mix(in srgb,var(--pm-gold) 35%,transparent);display:flex;align-items:center;justify-content:center;font-size:2.3rem;margin-bottom:22px;animation:dboFadeUp .5s cubic-bezier(.22,1,.36,1) both,dboFloat 3.2s ease-in-out .5s infinite;}
-#dbo-root .dbo-icon::before{content:'';position:absolute;inset:-8px;border-radius:2rem;border:1px solid color-mix(in srgb,var(--pm-gold) 30%,transparent);opacity:0;animation:dboRing 2.6s ease-out .4s infinite;}
+#dbo-root .dbo-icon{position:relative;width:5.2rem;height:5.2rem;border-radius:1.6rem;background:rgba(14,143,104,0.15);background:color-mix(in srgb,var(--pm-gold) 15%,transparent);border:1px solid rgba(14,143,104,0.35);border:1px solid color-mix(in srgb,var(--pm-gold) 35%,transparent);display:flex;align-items:center;justify-content:center;font-size:2.3rem;margin-bottom:22px;animation:dboFadeUp .5s cubic-bezier(.22,1,.36,1) both,dboFloat 3.2s ease-in-out .5s infinite;}
+#dbo-root .dbo-icon::before{content:'';position:absolute;top:-8px;right:-8px;bottom:-8px;left:-8px;inset:-8px;border-radius:2rem;border:1px solid rgba(14,143,104,0.3);border:1px solid color-mix(in srgb,var(--pm-gold) 30%,transparent);opacity:0;animation:dboRing 2.6s ease-out .4s infinite;}
 @keyframes dboFloat{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
 @keyframes dboRing{0%{opacity:.6;transform:scale(.9);}100%{opacity:0;transform:scale(1.25);}}
-#dbo-root .dbo-tag{font-size:.66rem;font-weight:900;color:var(--pm-gold);background:color-mix(in srgb,var(--pm-gold) 14%,transparent);border-radius:999px;padding:.3rem .85rem;margin-bottom:14px;}
+#dbo-root .dbo-tag{font-size:.66rem;font-weight:900;color:var(--pm-gold);background:rgba(14,143,104,0.14);background:color-mix(in srgb,var(--pm-gold) 14%,transparent);border-radius:999px;padding:.3rem .85rem;margin-bottom:14px;}
 #dbo-root h1.dbo-step-title{font-size:1.32rem;font-weight:900;margin:0 0 12px;line-height:1.45;color:var(--pm-ink);}
 #dbo-root p.dbo-step-sub{font-size:.85rem;color:var(--pm-muted);line-height:1.85;margin:0;max-width:320px;}
 #dbo-root .dbo-mini-row{display:flex;gap:8px;margin-top:20px;flex-wrap:wrap;justify-content:center;}

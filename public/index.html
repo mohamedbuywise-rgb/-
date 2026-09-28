@@ -19,7 +19,20 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;800;900&family=Tajawal:wght@400;500;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script>
+    /* دبّر: Tailwind 4 بيحتاج متصفح حديث (Chrome 111+/Safari 16.4+). المتصفحات القديمة بتاخد Tailwind 3 المتوافق معاها بدل ألوان باهتة/ناقصة. */
+    (function () {
+      var modern = false;
+      try {
+        modern = !!(window.CSS && CSS.supports && typeof CSS.registerProperty === 'function' &&
+          CSS.supports('color', 'oklch(50% .1 200)') && CSS.supports('color', 'color-mix(in srgb, red 50%, blue)'));
+      } catch (e) {}
+      document.documentElement.className += modern ? ' tw-modern' : ' tw-legacy';
+      document.write(modern
+        ? '<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"><\/script>'
+        : '<script src="https://cdn.tailwindcss.com/3.4.17"><\/script>');
+    })();
+  </script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
   /* ===== هوية دبّر الموحّدة: أبيض + أخضر (نفس القيم بالظبط في dabbar-onboarding.html و guide.html) ===== */
@@ -240,6 +253,7 @@
   footer{ background:var(--ink); color:var(--muted-onDark); text-align:center; padding:34px 0 100px; font-size:12px; }
   .fab{ position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:var(--money-bright); color:#0E1D16; font-family:'Cairo',sans-serif; font-weight:800; font-size:14px; padding:13px 28px; border-radius:100px; z-index:50; box-shadow:0 14px 34px -10px rgba(0,0,0,0.5); display:flex; align-items:center; gap:7px; }
 </style>
+<script src="./app/dabbar-compat.js"></script>
 </head>
 <body>
 

@@ -8,7 +8,20 @@
 <link rel="icon" type="image/png" sizes="32x32" href="./icons/icon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="./icons/icon-180.png">
 <link rel="apple-touch-icon-precomposed" sizes="180x180" href="./apple-touch-icon.png">
-<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script>
+    /* دبّر: Tailwind 4 بيحتاج متصفح حديث (Chrome 111+/Safari 16.4+). المتصفحات القديمة بتاخد Tailwind 3 المتوافق معاها بدل ألوان باهتة/ناقصة. */
+    (function () {
+      var modern = false;
+      try {
+        modern = !!(window.CSS && CSS.supports && typeof CSS.registerProperty === 'function' &&
+          CSS.supports('color', 'oklch(50% .1 200)') && CSS.supports('color', 'color-mix(in srgb, red 50%, blue)'));
+      } catch (e) {}
+      document.documentElement.className += modern ? ' tw-modern' : ' tw-legacy';
+      document.write(modern
+        ? '<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"><\/script>'
+        : '<script src="https://cdn.tailwindcss.com/3.4.17"><\/script>');
+    })();
+  </script>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
 <style>
   body { font-family: 'Cairo', sans-serif; background:#020617; color:#f1f5f9; }
@@ -17,6 +30,7 @@
   .skeleton { animation: pulse 1.4s ease-in-out infinite; }
   @keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:.9} }
 </style>
+<script src="./dabbar-compat.js"></script>
 </head>
 <body class="min-h-screen">
 

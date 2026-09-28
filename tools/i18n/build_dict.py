@@ -119,6 +119,67 @@ for ar,en in {
  'إجمالي المحفظة':'Portfolio total','عدد الأصول':'Number of assets','التفاصيل':'Details','💰 عمليات الدخل —':'💰 Income transactions —',
 }.items(): extra[ar]=en
 
+# ---- ترجمات إضافية (مراجعة الداش الجديد: زرار اللغة، الجمعيات، الأهداف، الفواتير الطويلة، دليل iPhone...) ----
+extra.update({
+ # أحرف أيام الأسبوع (بتظهر تحت كارت "أيامك النشطة")
+ 'ن':'M','ث':'T','ر':'W','خ':'T','ج':'F','س':'S','ح':'S',
+ # زرار/كارت اللغة
+ 'العربية شغّالة دلوقتي':'Arabic is on now','English is on now':'English is on now',
+ # نصوص ثابتة في الـHTML
+ 'يدوي من غير AI':'Manual, no AI','فاتورة طويلة':'Long receipt','فاتورة طويلة (كذا صورة)':'Long receipt (multiple photos)',
+ 'الصوت والفاتورة الذكية VIP — الكتابة والتسجيل اليدوي متاحين دايمًا.':'Voice and smart receipts are VIP — typing and manual logging are always available.',
+ 'وصف (120 جرام)':'Description (120 grams)','قيمة الشراء (اختياري)':'Purchase value (optional)',
+ 'الوحدة/الرمز — جرام، BTC، أو COMI.CA':'Unit/symbol — grams, BTC, or COMI.CA',
+ 'لو حطيت كمية ورمز مدعوم هنحدّث القيمة يوميًا تلقائيًا من سعر السوق.':"If you enter a quantity and a supported symbol, we'll update the value daily from the market price automatically.",
+ 'دخلك النهاردة':"Today's income",'مصاريفك النهاردة':"Today's expenses",'عرض الكل':'View all','إخفاء ‹':'Hide ‹',
+ 'اشتراكاتك الثابتة':'Your fixed subscriptions','مشتريات بتتكرر عندك':'Purchases that repeat for you',
+ 'جمعية جديدة':'New savings circle','تعديل الجمعية':'Edit savings circle','اتعدلت الجمعية!':'Savings circle updated!',
+ 'نقطة جديدة':'New entry','تعديل المناسبة':'Edit occasion','اتعدلت المناسبة!':'Occasion updated!',
+ 'إضافة جديد':'Add new','تذكير عادي':'Regular reminder','قسط ثابت':'Fixed installment',
+ 'اسم التذكير — مثال: قسط العربية':'Reminder name — e.g., car installment','المبلغ (اختياري)':'Amount (optional)',
+ 'إضافة هدف جديد':'Add a new goal','اسم الهدف، المبلغ، وتاريخ الوصول':'Goal name, amount, and target date',
+ 'وفرت':'Saved','الهدف':'Goal','متبقي':'Remaining','بيقرا الصور...':'Reading the photos...',
+ 'تأكيد التسجيل — عملية واحدة':'Confirm logging — one transaction',
+ # دليل أتمتة iPhone
+ 'من Shortcuts / الاختصارات ⬅️ Automation / الأتمتة ⬅️ (+) ⬅️ اختر مشغّل Message / الرسالة فقط':'From Shortcuts ⬅️ Automation ⬅️ (+) ⬅️ choose the Message trigger only',
+ 'اترك Sender / المرسل وMessage Contains / تحتوي على بدون فلتر ليشمل أي مُرسل، ثم اختر تشغيل اختصار «دبّر»؛ الاختصار يفلتر العملة داخليًا.':'Leave Sender and Message Contains without a filter so it covers any sender, then choose to run the "Dabbar" shortcut; the shortcut filters the currency internally.',
+ 'اختر Run Immediately / تشغيل فورًا، وفعّل Allow Running When Locked / السماح بالتشغيل عند القفل — لازم تظهر علامة الصح ✅؛ هذا الإذن مطلوب ليعمل والهاتف مقفل.':'Choose Run Immediately, and turn on Allow Running When Locked — the checkmark ✅ must be visible; this permission is required for it to work while the phone is locked.',
+ 'iPhone لا يقرأ كل الرسائل عبر تطبيق خارجي مثل Android؛ الأتمتة تمرّر الرسالة للاختصار ليفحصها أولًا، ثم يرسل العملية المطابقة فقط. وللتشغيل أثناء قفل الشاشة، اجعل Allow Running When Locked مفعّلًا ✅ (إلزامي)، مع Run Immediately.':'iPhone can\'t read all messages through a third-party app like Android does; the automation passes the message to the shortcut to check it first, then it sends only the matching transaction. To run while the screen is locked, keep Allow Running When Locked turned on ✅ (mandatory), together with Run Immediately.',
+ '📱 شاشة iPhone التفاعلية — Guided Review':'📱 Interactive iPhone screen — Guided Review','12 خطوة':'12 steps',
+ 'دليل إعداد أتمتة رسائل البنوك على iPhone':'Setup guide for bank-message automation on iPhone',
+ 'فعّل Allow Running When Locked داخل معلومات الاختصار / Privacy، وتأكد أن علامة الصح ظاهرة.':'Turn on Allow Running When Locked inside the shortcut info / Privacy, and make sure the checkmark is visible.',
+ # الديون
+ 'تسجيل تسديد':'Log repayment','تسجيل تسديد — استلمت الفلوس':'Log repayment — I received the money','تسجيل تسديد — إنت رجّعتله':'Log repayment — you paid them back',
+ 'تسديد':'Repayment','متصفي 🤝':'Settled 🤝','سعر الوحدة الآن':'Current unit price',
+ # حالات وسلاسل بتتركّب في الكود
+ 'عملية':'transaction','عمليات':'transactions','صنف':'Item','شهور':'months','شهرين':'months','يوم تاني':'more day','أيام تانية':'more days',
+ 'وريني الاشتراكات':'Show me the subscriptions','وريني الاشتراكات اللي غلت':'Show me what got pricier','وريني تفاصيل الفئة':'Show me the category details',
+ '📝 بنجهز العملية...':'📝 Preparing the transaction...','🏷️ بنصنّفها...':'🏷️ Classifying it...','💾 بنسجلها في سجلك...':'💾 Logging it in your record...',
+ '📸 بنستخرج الأصناف...':'📸 Extracting the items...','💾 بنسجل العملية...':'💾 Logging the transaction...',
+ 'مفيش أصناف اتقرت':'No items were read','معرفناش نقرا أي صنف من الصور دي. جرب صور أوضح.':"We couldn't read any items from these photos. Try clearer photos.",
+ 'بياناتك محفوظة أصلًا، تقدر ترجع تكمل من غير ما تفتح من الأول.':"Your data is already saved — you can come back and continue without starting over.",
+ 'هتخرج من دبّر؟':'Leave Dabbar?','أيوه، اخرج':'Yes, leave','لأ، كمّل':'No, keep going',
+})
+extra_patterns.extend([
+ ['+ عرض الكل ({}) ›','+ View all ({}) ›'],
+ ['عندك {} علّمت عليهم إنك مش بتستخدمهم، وبتفضل بتدفعهم شهريًا. حدّ نفسك سقف اشتراكات أقل عشان دبّر ينبهك أول ما تقرب منه.','You have {} you marked as unused, and you keep paying for them monthly. Set yourself a lower subscriptions cap so Dabbar can warn you as soon as you get close to it.'],
+ ['🎯 حدّ الاشتراكات بـ {}','🎯 Cap subscriptions at {}'],
+ ['{} سعرهم عن الشهر اللي فات — يستاهل تراجعهم أو تحديد سقف يوقّفهم عند حد معين.','{} got pricier than last month — worth reviewing them or setting a cap to stop them at a certain limit.'],
+ ['صرفت الشهر ده {} على "{}" — أكتر فئة في مصروفك. حدّ نفسك سقف أقل بـ {} عشان دبّر يفكّرك أول ما تقرب منه.','You spent {} on "{}" this month — your top spending category. Set yourself a cap {} lower so Dabbar can remind you as soon as you get close to it.'],
+ ['🎯 حدّ فئة {} بـ {}','🎯 Cap {} at {}'],
+ ['🔁 بيتكرر من {} {}','🔁 Repeating for {} {}'],
+ ['عرض كل الأيام ({} {})','View all days ({} {})'],
+ ['{} · دورك رقم {} من {}','{} · Your turn #{} of {}'],
+ ['راجع {} صنف قبل الحفظ','Review {} items before saving'],
+ ['بنقرا صورة {} من {}...','Reading photo {} of {}...'],
+ ['📸 بنقرا صورة {} من {}...','📸 Reading photo {} of {}...'],
+ ['⚠️ الملف {} مش صورة — اتجاهل.',"⚠️ The file {} isn't an image — ignored."],
+ ['⚠️ الصورة {} أكبر من 8 ميجابايت — اتجاهلت.','⚠️ Photo {} is larger than 8 MB — ignored.'],
+ ['⚠️ تعذرت قراءة صورة {}: {}',"⚠️ Couldn't read photo {}: {}"],
+ ['تقدر تضيف هدف تاني ({}/{})','You can add another goal ({}/{})'],
+ ['تم تحليل {} صورة — شيل أي صنف اتكرر بين صورتين ثم أكد التسجيل.','Analyzed {} photos — remove any item repeated across two photos, then confirm logging.'],
+])
+
 def add(ar,en):
     ar=re.sub(r'\s+',' ',ar).strip()
     if not en or not AR.search(ar): return

@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="dabbar-lang-switch" content="1">
     <script src="./dabbar-i18n.js"></script>
     <title>لوحة التحكم والتقارير - محاسبك الشخصي</title>
     <!-- Embedded brand logo sources (logos remain their owners' trademarks; source references):
@@ -691,7 +690,7 @@
             background: linear-gradient(180deg, var(--db-canvas) 0%, transparent 100%) !important;
         }
 
-        #brandbar-theme-btn,
+        #brandbar-theme-btn, #brandbar-lang-btn,
         #refresh-btn {
             border: 0 !important;
             background: var(--db-surface-soft) !important;
@@ -2147,7 +2146,7 @@
         html[data-theme="light"] .tab-btn.active-tab { color: var(--pm-gold-bright) !important; }
 
         /* أزرار وحدود عامة */
-        #brandbar-theme-btn, #refresh-btn, .seal-like { border-color: var(--pm-hairline-soft) !important; }
+        #brandbar-theme-btn, #brandbar-lang-btn, #refresh-btn, .seal-like { border-color: var(--pm-hairline-soft) !important; }
 
         /* ---- شوط التحسين التاني: عمق بالظل بدل الحدود، ميدالية حقيقية، أزرار موحّدة ---- */
 
@@ -2190,7 +2189,7 @@
         [class*="rounded-2xl"] { border-radius: 1.25rem !important; }
 
         /* 3) توحيد الأزرار الدائرية الصغيرة (الثيم، تحديث، إقفال المودالات) */
-        #brandbar-theme-btn, #refresh-btn,
+        #brandbar-theme-btn, #brandbar-lang-btn, #refresh-btn,
         #avatar-crop-close, #wrapped-close, #invoices-close, #invoice-detail-back, #invoice-detail-close,
         #quick-entry-recording-cancel, #quick-entry-voice-cancel, #quick-entry-draft-close {
             background: var(--pm-surface-hi) !important;
@@ -2199,7 +2198,7 @@
             box-shadow: 0 4px 12px rgba(0,0,0,.12) !important;
             transition: transform .2s ease, box-shadow .2s ease;
         }
-        #brandbar-theme-btn:hover, #refresh-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px color-mix(in srgb, var(--pm-gold) 20%, transparent) !important; }
+        #brandbar-theme-btn:hover, #brandbar-lang-btn:hover, #refresh-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 16px color-mix(in srgb, var(--pm-gold) 20%, transparent) !important; }
 
         /* 4) شارة الأيام النشطة — ميدالية دهبية بدل الخلفية العادية */
         .active-days-flame-wrap::before { background: radial-gradient(circle, color-mix(in srgb, var(--pm-gold) 30%, transparent), transparent 68%) !important; }
@@ -2411,7 +2410,7 @@
         .tab-btn.active-tab .tab-icon-wrap { background: conic-gradient(from 220deg, var(--pm-gold-bright), var(--pm-gold), var(--pm-gold-dim), var(--pm-gold-bright)) !important; color: #17120a !important; border-color: transparent !important; box-shadow: 0 6px 14px color-mix(in srgb, var(--pm-gold) 35%, transparent) !important; }
         #premium-hero-card { border-color: var(--pm-hairline) !important; background: linear-gradient(180deg, var(--pm-surface-hi), var(--pm-canvas-2)) !important; }
         #wrapped-card { background: linear-gradient(155deg, var(--pm-surface-hi) 0%, var(--pm-canvas) 55%, var(--pm-canvas) 100%) !important; border-color: var(--pm-hairline) !important; }
-        #brandbar-theme-btn, #refresh-btn, .seal-like { border-color: var(--pm-hairline-soft) !important; }
+        #brandbar-theme-btn, #brandbar-lang-btn, #refresh-btn, .seal-like { border-color: var(--pm-hairline-soft) !important; }
         .bg-slate-900.border-t, nav.bg-slate-900 { background: var(--pm-surface) !important; border-color: var(--pm-hairline-soft) !important; }
         input, textarea, select { accent-color: var(--pm-gold); }
         #theme-toggle-track.bg-amber-400 { background: var(--pm-gold) !important; }
@@ -4066,7 +4065,23 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                     <span>🔥</span><span id="streak-count">0</span>
                 </span>
             </div>
-            <button id="brandbar-theme-btn" title="تبديل المظهر" class="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-xs hover:bg-slate-700 transition">🌙</button>
+            <div class="flex items-center gap-2">
+                <button id="brandbar-lang-btn" type="button" class="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-[11px] font-black hover:bg-slate-700 transition" style="direction:ltr">EN</button>
+                <button id="brandbar-theme-btn" title="تبديل المظهر" class="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-slate-300 text-xs hover:bg-slate-700 transition">🌙</button>
+            </div>
+            <script>
+                (function () {
+                    var b = document.getElementById('brandbar-lang-btn');
+                    if (!b) return;
+                    var en = window.APP_LANG === 'en';
+                    b.textContent = en ? '\u0639' : 'EN';
+                    b.title = en ? '\u0627\u0644\u0639\u0631\u0628\u064a\u0629' : 'English';
+                    b.setAttribute('aria-label', en ? 'Switch to Arabic' : 'Switch to English');
+                    b.addEventListener('click', function () {
+                        if (window.DabbarI18n) window.DabbarI18n.setLang(en ? 'ar' : 'en');
+                    });
+                })();
+            </script>
         </div>
 
         <!-- Header Bar -->
@@ -5626,6 +5641,46 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                     <span class="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform" id="theme-toggle-knob"></span>
                 </span>
             </button>
+
+            <button id="account-lang-toggle" type="button" class="w-full bg-slate-950/60 border border-slate-800 rounded-3xl p-4 flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <span class="w-9 h-9 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-base" id="lang-toggle-icon">🌐</span>
+                    <div class="text-right">
+                        <p class="text-xs font-bold text-slate-200" id="lang-toggle-title">اللغة</p>
+                        <p class="text-[11px] text-slate-500" id="lang-toggle-label">العربية شغّالة دلوقتي</p>
+                    </div>
+                </div>
+                <span class="relative inline-flex w-11 h-6 rounded-full bg-slate-700 transition-colors" id="lang-toggle-track">
+                    <span class="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform" id="lang-toggle-knob"></span>
+                </span>
+            </button>
+            <script>
+                (function () {
+                    function setup() {
+                        var btn = document.getElementById('account-lang-toggle');
+                        if (!btn) return;
+                        var lang = window.APP_LANG === 'en' ? 'en' : 'ar';
+                        var title = document.getElementById('lang-toggle-title');
+                        var label = document.getElementById('lang-toggle-label');
+                        var knob = document.getElementById('lang-toggle-knob');
+                        var track = document.getElementById('lang-toggle-track');
+                        if (lang === 'en') {
+                            if (title) title.textContent = 'Language';
+                            if (label) label.textContent = 'English is on now';
+                            if (knob) { knob.style.right = 'auto'; knob.style.left = '2px'; }
+                            if (track) track.classList.add('bg-emerald-500');
+                        } else {
+                            if (title) title.textContent = 'اللغة';
+                            if (label) label.textContent = 'العربية شغّالة دلوقتي';
+                        }
+                        btn.addEventListener('click', function () {
+                            if (window.DabbarI18n) window.DabbarI18n.setLang(lang === 'en' ? 'ar' : 'en');
+                        });
+                    }
+                    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setup);
+                    else setup();
+                })();
+            </script>
 
             <section id="push-notifications-card" class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3">
                 <div class="flex items-start gap-3">

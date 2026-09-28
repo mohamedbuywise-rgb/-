@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>دبّر — صفحة تشخيص</title>
+<style>
+  body{margin:0;padding:14px;font:14px/1.5 system-ui,'Cairo',sans-serif;background:#111;color:#eee}
+  h2{font-size:15px;margin:18px 0 6px;color:#bdf23f}
+  input{width:100%;box-sizing:border-box;padding:12px;font-size:16px;border-radius:10px;border:1px solid #555;background:#222;color:#fff}
+  #B{-webkit-appearance:none;touch-action:manipulation}
+  pre{background:#000;padding:8px;border-radius:8px;max-height:200px;overflow:auto;font-size:11px;direction:ltr;text-align:left;white-space:pre-wrap}
+  .sw{display:flex;gap:8px}.sw div{flex:1;height:70px;border-radius:14px;display:grid;place-items:center;font:700 11px monospace;color:#000}
+  td{padding:2px 8px;border-bottom:1px solid #333}table{border-collapse:collapse;width:100%}
+</style>
+</head>
+<body>
+<h2>1) اختبار الكتابة</h2>
+<p>اكتب في الخانتين. لو الحروف ظهرت في A بس، المشكلة في خصائص الخانة/الـCSS. لو ماظهرتش في الاتنين، المشكلة في الكيبورد/المتصفح نفسه.</p>
+A (خانة عادية):<input id="A" type="text" placeholder="اكتب هنا">
+<br><br>B (نفس خصائص خانة المساعد):<input id="B" type="text" maxlength="500" placeholder="اكتب سؤالك...">
+<pre id="log">سجل الأحداث…</pre>
+
+<h2>2) اختبار الألوان</h2>
+<p>خد سكرين شوت عادي (مش صورة بكاميرا) للجزء ده وقارنه بالأكواد المكتوبة.</p>
+<div class="sw">
+  <div style="background:linear-gradient(155deg,#d0ff52,#bdf23f)">#d0ff52 → #bdf23f</div>
+  <div style="background:linear-gradient(155deg,#0e8f68,#0a6b4e);color:#fff">#0e8f68 → #0a6b4e</div>
+</div>
+
+<h2>3) قدرات المتصفح</h2>
+<table id="caps"></table>
+
+<script>
+(function(){
+  var log=document.getElementById('log'),n=0;
+  function w(s){ if(++n>60) log.textContent=''; log.textContent+=s+'\n'; log.scrollTop=log.scrollHeight; }
+  ['A','B'].forEach(function(id){
+    var el=document.getElementById(id);
+    ['keydown','beforeinput','input','compositionstart','compositionend'].forEach(function(t){
+      el.addEventListener(t,function(e){
+        w(id+' '+t+(e.key?' key='+e.key:'')+(e.inputType?' type='+e.inputType:'')+(e.data!=null?' data='+e.data:'')+(e.defaultPrevented?' PREVENTED':'')+' | value="'+el.value+'"');
+      },true);
+    });
+  });
+  function s(q){try{return CSS.supports.apply(CSS,q)}catch(e){return false}}
+  var rows=[
+    ['UA',navigator.userAgent.replace(/\).*/,')')],
+    ['color-mix()',s(['color','color-mix(in srgb, red 50%, blue)'])],
+    ['oklch()',s(['color','oklch(50% .1 200)'])],
+    ['CSS.registerProperty',!!(window.CSS&&CSS.registerProperty)],
+    ['100dvh',s(['height','100dvh'])],
+    ['Tailwind 4 مدعوم؟',!!(window.CSS&&CSS.registerProperty&&s(['color','oklch(50% .1 200)'])&&s(['color','color-mix(in srgb, red 50%, blue)']))],
+    ['شاشة P3',matchMedia('(color-gamut:p3)').matches],
+    ['وضع الجهاز غامق',matchMedia('(prefers-color-scheme:dark)').matches],
+    ['توفير بيانات/حركة أقل',matchMedia('(prefers-reduced-motion:reduce)').matches]
+  ];
+  document.getElementById('caps').innerHTML=rows.map(function(r){return '<tr><td>'+r[0]+'</td><td dir="ltr">'+String(r[1])+'</td></tr>'}).join('');
+})();
+</script>
+</body>
+</html>

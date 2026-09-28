@@ -20,10 +20,10 @@ async function requireAuthUser(req) {
 
 export default async function handler(req, res) {
   const user = await requireAuthUser(req);
-  if (!user) return res.status(401).json({ ok: false, error: 'محتاج تسجيل دخول.' });
+  if (!user) return res.status(401).json({ ok: false, code: 'SESSION_REFRESH' });
 
   const dashboardUser = await getDashboardUserFromRequest(req);
-  if (!dashboardUser) return res.status(401).json({ ok: false, error: 'محتاج تسجيل دخول.' });
+  if (!dashboardUser) return res.status(401).json({ ok: false, code: 'SESSION_REFRESH' });
   const access = await getFeatureAccess(dashboardUser.dataUserId, 'bank_linking', { startTrial: true });
   if (!access.allowed) return res.status(403).json({ ok: false, ...subscriptionRequiredResponse(access) });
 

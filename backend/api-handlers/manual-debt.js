@@ -4,7 +4,7 @@ import { currencyLabel } from '../../lib/textNormalize.js';
 
 async function requireUser(req, res) {
   const user = await getDashboardUserFromRequest(req);
-  if (!user) { res.status(401).json({ error: 'نورت من تاني! جلستك خلصت، سجّل دخولك تاني عشان نكمل سوا.' }); return null; }
+  if (!user) { res.status(401).json({ code: 'SESSION_REFRESH' }); return null; }
   return user.dataUserId;
 }
 

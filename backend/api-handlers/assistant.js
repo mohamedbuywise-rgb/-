@@ -28,7 +28,7 @@ import { getPortfolio, addPortfolioAsset, updatePortfolioAsset, deletePortfolioA
 async function requireLink(req, res) {
   const user = await getDashboardUserFromRequest(req);
   if (!user) {
-    res.status(401).json({ error: 'نورت من تاني! جلستك خلصت، سجّل دخولك تاني عشان نكمل سوا.' });
+    res.status(401).json({ code: 'SESSION_REFRESH' });
     return null;
   }
 
@@ -339,7 +339,7 @@ async function handleAsk(userId, body, res) {
     : '';
 
   const dataContext = `${expensesText}\n\n${debtsText}\n\n${goalText}${historyText ? `\n\n${historyText}` : ''}`;
-  const answer = isRoast ? await askDabbarRoast(dataContext) : await askDabbarChat(question, dataContext);
+  const answer = isRoast ? await askDabbarRoast(dataContext, body.lang === 'en' ? 'en' : 'ar') : await askDabbarChat(question, dataContext, body.lang === 'en' ? 'en' : 'ar');
 
   // كلا الدالتين بترجع نص بديل لطيف عند الفشل؛ لا نردّ العداد إذا وصل رد حقيقي.
   const failed = !answer || answer.startsWith('معلش');

@@ -18,7 +18,7 @@ import { getDashboardUserFromRequest } from '../../lib/dashboardAuth.js';
 async function requireLink(req, res) {
   const user = await getDashboardUserFromRequest(req);
   if (!user) {
-    res.status(401).json({ error: 'نورت من تاني! جلستك خلصت، سجّل دخولك تاني عشان نكمل سوا.' });
+    res.status(401).json({ code: 'SESSION_REFRESH' });
     return null;
   }
   return user;

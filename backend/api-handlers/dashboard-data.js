@@ -38,7 +38,7 @@ export default async function handler(req, res) {
   try {
     const dashboardUser = await getDashboardUserFromRequest(req);
     if (!dashboardUser) {
-      return res.status(401).json({ error: 'نورت من تاني! جلستك خلصت، سجّل دخولك تاني عشان نكمل سوا.' });
+      return res.status(401).json({ code: 'SESSION_REFRESH' });
     }
 
     const { dataUserId, telegramUserId, linked } = dashboardUser;
@@ -192,6 +192,10 @@ export default async function handler(req, res) {
         .eq('telegram_user_id', dataUserId)
         .eq('direction', 'borrowed')
         .eq('is_repayment', false)
+        // الجمعيات (gameya) والمناسبات (occasion) بتتسجل في نفس جدول debts بـ direction='borrowed' برضو،
+        // لكنها التزام شهري مش فلوس دخلت فعلًا، فلازم نستثنيها هنا (زي ما computeNetByPerson بيعمل بالظبط)
+        // وإلا كل ما حد يضيف جمعية جديدة، قسطها الشهري كان بيظهر كـ"دخل" غلط في نفس اللحظة.
+        .eq('commitment_type', 'debt')
         .gte('created_at', prevRange.start.toISOString())
         .lt('created_at', prevRange.end.toISOString()),
       Promise.all(historyOffsets.map(({ range }) => getExpensesBetween(dataUserId, range.start, range.end))),
@@ -216,6 +220,7 @@ export default async function handler(req, res) {
         .eq('telegram_user_id', dataUserId)
         .eq('direction', 'borrowed')
         .eq('is_repayment', false)
+        .eq('commitment_type', 'debt')
         .gte('created_at', start.toISOString())
         .lt('created_at', end.toISOString())
         .order('created_at', { ascending: false }),

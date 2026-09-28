@@ -6,6 +6,7 @@ import {
   getVapidPublicKey,
   isPushConfigured,
   normalizeTimeZone,
+  setNotificationLanguage,
   removePushSubscription,
   saveNotificationPreferences,
   savePushSubscription,
@@ -31,7 +32,7 @@ export default async function handler(req, res) {
 
   try {
     const user = await getDashboardUserFromToken(tokenFromRequest(req));
-    if (!user) return res.status(401).json({ error: 'لازم تسجل دخول الأول.' });
+    if (!user) return res.status(401).json({ code: 'SESSION_REFRESH' });
 
     if (req.method === 'GET') {
       const preferences = await getNotificationPreferences(user.dataUserId);
@@ -59,6 +60,12 @@ export default async function handler(req, res) {
         preferences: { ...current, timezone },
       });
       return res.status(200).json({ ok: true, changed: true, timezone: saved.timezone });
+    }
+
+    // لغة المستخدم (للإشعارات اللي بتتبعت من السيرفر)
+    if (req.method === 'POST' && req.body?.action === 'set_language') {
+      const result = await setNotificationLanguage({ authUserId: user.authUserId, telegramUserId: user.dataUserId, language: req.body?.language });
+      return res.status(200).json(result);
     }
 
     if (req.method === 'POST' && req.body?.action === 'test') {

@@ -22,7 +22,7 @@ function importKeyFor(userId, t) {
 
 export default async function handler(req, res) {
   const dashboardUser = await getDashboardUserFromRequest(req);
-  if (!dashboardUser) return res.status(401).json({ ok: false, error: 'محتاج تسجيل دخول.' });
+  if (!dashboardUser) return res.status(401).json({ ok: false, code: 'SESSION_REFRESH' });
   const { dataUserId } = dashboardUser;
 
   if (req.method === 'GET') {

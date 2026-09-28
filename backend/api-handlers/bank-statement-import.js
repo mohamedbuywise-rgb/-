@@ -54,7 +54,7 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ ok: false, error: 'Method not allowed' });
 
   const dashboardUser = await getDashboardUserFromRequest(req);
-  if (!dashboardUser) return res.status(401).json({ ok: false, error: 'محتاج تسجيل دخول.' });
+  if (!dashboardUser) return res.status(401).json({ ok: false, code: 'SESSION_REFRESH' });
   const { dataUserId } = dashboardUser;
 
   const access = await getFeatureAccess(dataUserId, 'bank_linking', { startTrial: true });

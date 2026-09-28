@@ -7190,6 +7190,45 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
 
         let accessToken = null;
         let currentUser = null;
+
+        // DABBAR_SILENT_AUTH: أي 401 من /api بيتجدد له التوكن ويتعاد الطلب مرة واحدة بصمت — من غير أي رسالة للمستخدم
+        (function () {
+            const nativeFetch = window.fetch.bind(window);
+            let renewing = null;
+            function isApiCall(input) {
+                try {
+                    const raw = typeof input === 'string' ? input : (input instanceof URL ? input.href : null);
+                    if (!raw) return false;
+                    const u = new URL(raw, location.href);
+                    return u.origin === location.origin && u.pathname.startsWith('/api');
+                } catch (e) { return false; }
+            }
+            function renewToken() {
+                if (!renewing) {
+                    renewing = (async () => {
+                        try {
+                            const { data } = await sb.auth.refreshSession();
+                            if (data && data.session) { accessToken = data.session.access_token; currentUser = data.session.user; return accessToken; }
+                        } catch (e) {}
+                        try {
+                            const s = await getSessionResilient();
+                            if (s && s.access_token) { accessToken = s.access_token; currentUser = s.user || currentUser; return accessToken; }
+                        } catch (e) {}
+                        return null;
+                    })().finally(() => { setTimeout(() => { renewing = null; }, 0); });
+                }
+                return renewing;
+            }
+            window.fetch = async function (input, init) {
+                const res = await nativeFetch(input, init);
+                if (res.status !== 401 || !isApiCall(input)) return res;
+                const token = await renewToken();
+                if (!token) return res;
+                const headers = new Headers((init && init.headers) || {});
+                headers.set('Authorization', 'Bearer ' + token);
+                return nativeFetch(input, Object.assign({}, init || {}, { headers }));
+            };
+        })();
         let pushPreferences = null;
         let pushPublicKey = '';
         let pushRegistrationPromise = null;
@@ -8170,7 +8209,11 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                     signal: controller.signal,
                 });
                 const data = await res.json().catch(() => ({}));
-                if (!res.ok) throw new Error(data.error || 'فشل تحميل البيانات');
+                if (!res.ok) {
+                    const err = new Error(data.error || 'فشل تحميل البيانات');
+                    err.status = res.status; err.code = data.code;
+                    throw err;
+                }
                 return data;
             } finally {
                 clearTimeout(timeoutId);
@@ -8243,6 +8286,25 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             } catch (e) {
                 console.error(`dashboard-data fetch failed (attempt ${attempt}/${MAX_ATTEMPTS}):`, e);
                 const isTimeoutOrNetwork = e.name === 'AbortError' || e.message === 'Failed to fetch' || !navigator.onLine;
+                // الجلسة/التوكن: تجديد صامت تمامًا — من غير أي بانر ولا رسالة (زي فيسبوك وإنستا).
+                // بنجدد التوكن ونعيد المحاولة، ولو لسه فشل بنفضل شايفين آخر بيانات ونعيد المحاولة في الخلفية.
+                const isAuthIssue = e.status === 401 || e.status === 403 || e.code === 'SESSION_REFRESH';
+                if (isAuthIssue) {
+                    try {
+                        const { data: renewed } = await sb.auth.refreshSession();
+                        if (renewed && renewed.session) { accessToken = renewed.session.access_token; currentUser = renewed.session.user; }
+                    } catch (renewErr) { /* صامت */ }
+                    if (attempt < MAX_ATTEMPTS) {
+                        __dashboardRetryTimer = setTimeout(() => loadDashboard(isInitialLoad, attempt + 1), attempt * 900);
+                        return;
+                    }
+                    let cachedAuth = null;
+                    try { cachedAuth = JSON.parse(localStorage.getItem(dashboardCacheKey) || 'null'); } catch (cacheErr) {}
+                    if (cachedAuth && !window.__dashboardData) renderDashboardData(cachedAuth, true);
+                    // أي بيانات معروضة تفضل زي ما هي؛ محاولة هادية تانية بعد نص دقيقة
+                    __dashboardRetryTimer = setTimeout(() => loadDashboard(false, 1), 30000);
+                    return;
+                }
                 // خطأ شبكة/تايم آوت عابر: نعيد المحاولة تلقائيًا بتأخير بسيط وبهدوء تام، من غير أي مؤشر على الشاشة
                 if (isTimeoutOrNetwork && navigator.onLine && attempt < MAX_ATTEMPTS) {
                     const delay = attempt * 900;
@@ -8262,7 +8324,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                 const errorEl = document.getElementById('dashboard-load-error');
                 const errorText = document.getElementById('dashboard-load-error-text');
                 const retryBtn = document.getElementById('dashboard-load-retry-btn');
-                if (errorEl && errorText) {
+                if (errorEl && errorText && !window.__dashboardData) {
                     errorText.textContent = message;
                     errorEl.classList.remove('hidden');
                     if (retryBtn) retryBtn.classList.remove('hidden');

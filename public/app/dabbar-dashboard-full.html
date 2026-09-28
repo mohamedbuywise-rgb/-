@@ -2313,6 +2313,31 @@
         #quick-manual-popup-backdrop #quick-entry-manual-form { border:0 !important; background:transparent !important; padding:0 !important; }
         .quick-manual-close-btn { width:1.7rem; height:1.7rem; flex:none; display:flex; align-items:center; justify-content:center; border-radius:50%; border:1px solid var(--pm-hairline); background:var(--pm-surface-soft); color:var(--pm-muted); font-size:.75rem; cursor:pointer; }
         .quick-manual-close-btn:active { transform:scale(.94); }
+
+        /* زر المايك في خانة الوصف (تسجيل صوتي بالمتصفح — مجاني) */
+        .quick-mic-btn { position:absolute; left:.4rem; top:50%; transform:translateY(-50%); width:2.15rem; height:2.15rem; border-radius:50%; padding:0; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--pm-gold-bright); border:1px solid color-mix(in srgb,var(--pm-gold-bright) 42%,transparent); background:linear-gradient(145deg,color-mix(in srgb,var(--pm-gold-bright) 28%,transparent),color-mix(in srgb,var(--pm-gold-bright) 10%,transparent)); transition:transform .15s,background .2s,color .2s,border-color .2s; -webkit-tap-highlight-color:transparent; }
+        .quick-mic-btn svg { width:1.1rem; height:1.1rem; }
+        .quick-mic-btn:active { transform:translateY(-50%) scale(.92); }
+        .quick-mic-btn.listening { color:#fff; background:#e5484d; border-color:#e5484d; animation:quickMicPulse 1.3s ease-out infinite; }
+        .quick-mic-btn.hidden { display:none; }
+        @keyframes quickMicPulse { 0% { box-shadow:0 0 0 0 rgba(229,72,77,.55); } 100% { box-shadow:0 0 0 .85rem rgba(229,72,77,0); } }
+
+        /* أرقام الالتزامات الشهرية */
+        .commit-amt-wrap { display:inline-flex; align-items:center; gap:.55rem; }
+        .commit-amt { display:inline-flex; align-items:baseline; gap:.28rem; color:var(--pm-gold-bright); font-variant-numeric:lining-nums tabular-nums; }
+        .commit-amt b { font-size:.98rem; font-weight:800; letter-spacing:.01em; unicode-bidi:isolate; }
+        .commit-amt small { font-size:.62rem; font-weight:700; opacity:.72; }
+        .commit-remove { width:1.4rem; height:1.4rem; border-radius:50%; border:none; padding:0; display:inline-flex; align-items:center; justify-content:center; font-size:.6rem; line-height:1; cursor:pointer; color:var(--pm-muted,#94a3b8); background:rgba(148,163,184,.16); transition:background .15s,color .15s; }
+        .commit-remove:hover, .commit-remove:active { color:#e5484d; background:rgba(229,72,77,.14); }
+
+        /* بار تقدم الجمعية — واضح في الوضعين */
+        .gameya-progress-track { width:100%; height:.6rem; border-radius:999px; overflow:hidden; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.16); box-shadow:inset 0 1px 2px rgba(0,0,0,.35); }
+        .gameya-progress-fill { height:100%; border-radius:999px; background:linear-gradient(90deg,var(--pm-gold-dim,#8ccf1f),var(--pm-gold-bright,#c6f94a)); box-shadow:0 0 8px color-mix(in srgb,var(--pm-gold-bright,#c6f94a) 55%,transparent); }
+        html[data-theme="light"] .gameya-progress-track { background:#c6dbd0; border-color:#a5c4b4; box-shadow:inset 0 1px 2px rgba(0,0,0,.14); }
+        html[data-theme="light"] .gameya-progress-fill { background:linear-gradient(90deg,#08684a,#12a874); box-shadow:none; }
+
+        /* مبالغ الأقساط في الوضع النهاري: أخضر بدل البرتقالي/البني */
+        html[data-theme="light"] .installment-card .inst-amount.text-amber-300 { color:var(--pm-gold-bright) !important; }
         #quick-manual-success-fx { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:40; display:flex; align-items:center; justify-content:center; overflow:visible; }
         .quick-entry-manual-link { position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:.1rem; width:100%; min-height:1.9rem; margin:.06rem 0 .04rem; padding:.26rem .7rem; border:1px solid color-mix(in srgb,var(--pm-gold-bright) 48%,transparent); border-radius:1rem; background:linear-gradient(135deg,color-mix(in srgb,var(--pm-gold-bright) 13%,var(--pm-surface-hi)),color-mix(in srgb,var(--pm-mint) 7%,var(--pm-surface-hi))); color:var(--pm-ink) !important; box-shadow:0 7px 20px color-mix(in srgb,var(--pm-gold-bright) 12%,transparent), inset 0 1px 0 rgba(255,255,255,.08); text-align:center; cursor:pointer; transition:transform .18s cubic-bezier(.23,1,.32,1), box-shadow .18s ease, border-color .18s ease, background .18s ease; }
         .quick-entry-manual-link::after { content:''; position:absolute; inset:0; border-radius:inherit; background:linear-gradient(110deg,transparent 20%,rgba(255,255,255,.12) 48%,transparent 76%); transform:translateX(-120%); transition:transform .55s ease; pointer-events:none; }
@@ -4182,7 +4207,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                 <input type="file" id="quick-entry-invoice-input" accept="image/*" class="hidden">
                 <div id="quick-entry-scanning" class="hidden dabbar-scan-box rounded-2xl p-3 text-center"><div class="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl dabbar-scan-box-icon text-xl shadow-sm"><span style="display:inline-block;animation:dabbar-scan-spin 1s linear infinite">⟳</span></div><p class="text-xs font-bold dabbar-scan-box-title">بنقرأ الفاتورة...</p><p class="mt-1 text-[10px] dabbar-scan-box-sub">دبّر بيستخرج المبلغ والأصناف</p></div>
                 <div id="quick-entry-form" class="hidden space-y-3 rounded-2xl border p-3" style="border-color:var(--pm-hairline);background:var(--pm-surface-hi);"><div><div class="flex items-center gap-2 flex-wrap"><p class="text-xs font-black" style="color:var(--pm-ink);">اكتب عمليتك بطريقتك</p><span class="smart-write-badge"><svg viewBox="0 0 24 24" width="11" height="11" fill="currentColor" aria-hidden="true"><path d="M12 2l1.9 5.6L19.5 9.5l-5.6 1.9L12 17l-1.9-5.6L4.5 9.5l5.6-1.9L12 2zm7 12l.9 2.6 2.6.9-2.6.9L19 21l-.9-2.6-2.6-.9 2.6-.9L19 14z"/></svg>كتابة ذكية</span></div><p class="mt-1 text-[10px]" style="color:var(--pm-muted);">مثال: «صرفت 50 جنيه على القهوة النهاردة»</p></div><textarea id="quick-entry-input" rows="1" maxlength="2500" placeholder="مثال: صرفت 50 جنيه على القهوة النهاردة" class="w-full resize-y rounded-2xl border px-3 py-3 text-sm leading-7 outline-none" style="border-color:var(--pm-hairline);background:var(--pm-surface-soft);color:var(--pm-ink);"></textarea><div class="q-ex-chips"><button type="button" class="q-ex-chip" data-ex="صرفت 50 جنيه على القهوة النهاردة">☕ قهوة ٥٠</button><button type="button" class="q-ex-chip" data-ex="دفعت 30 جنيه مواصلات">🚌 مواصلات ٣٠</button><button type="button" class="q-ex-chip" data-ex="قبضت 8000 جنيه مرتب">💰 مرتب</button></div><div class="flex gap-2"><button id="quick-entry-analyze" class="quick-entry-ai-save flex-1 rounded-xl py-2.5 text-xs font-black" type="button" style="background:linear-gradient(145deg,var(--pm-gold-bright),var(--pm-gold));color:var(--pm-ink);">حلّل وسجّل</button><button id="quick-entry-cancel" class="rounded-xl border px-3 py-2.5 text-xs" style="border-color:var(--pm-hairline);color:var(--pm-muted);" type="button">إلغاء</button></div></div>
-                <div id="quick-entry-manual-form" class="hidden relative space-y-3 rounded-2xl border p-3" style="border-color:color-mix(in srgb,var(--pm-gold-bright) 34%,transparent);background:var(--pm-surface-hi);"><div id="quick-manual-success-fx" aria-hidden="true"></div><div class="flex items-center justify-between gap-2"><div><p class="text-xs font-black" style="color:var(--pm-ink);">إدخال يدوي سريع</p><p class="mt-1 text-[10px]" style="color:var(--pm-muted);">اختار النوع والفئة واحفظ من غير AI.</p><p class="mt-1 text-[10px] font-bold" id="quick-manual-month-label" style="color:var(--pm-gold-bright);"></p></div><div class="flex items-center gap-1.5 shrink-0"><span class="rounded-full px-2 py-1 text-[10px] font-bold" style="background:color-mix(in srgb,var(--pm-gold-bright) 14%,transparent);color:var(--pm-gold-bright);">متاح للجميع</span><button type="button" id="quick-manual-close" aria-label="إغلاق" class="quick-manual-close-btn">✕</button></div></div><div class="grid grid-cols-3 gap-2"><button id="quick-manual-expense" type="button" data-type="expense" class="quick-manual-type active rounded-xl border px-2 py-2 text-[11px] font-black" style="border-color:var(--pm-gold-bright);background:color-mix(in srgb,var(--pm-gold-bright) 14%,transparent);color:var(--pm-ink);">🧾 مصروف</button><button id="quick-manual-income" type="button" data-type="income" class="quick-manual-type rounded-xl border px-2 py-2 text-[11px] font-black" style="border-color:var(--pm-hairline);color:var(--pm-muted);">💰 دخل</button><button id="quick-manual-debt" type="button" data-type="debt" class="quick-manual-type rounded-xl border px-2 py-2 text-[11px] font-black" style="border-color:var(--pm-hairline);color:var(--pm-muted);">🤝 دين</button></div><div class="relative"><input id="quick-manual-amount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="المبلغ" class="w-full rounded-xl border px-3 py-3 pl-14 text-sm outline-none" style="border-color:var(--pm-hairline);background:var(--pm-surface-soft);color:var(--pm-ink);"><span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs font-black" style="color:var(--pm-gold-bright);">ج.م</span></div><input id="quick-manual-description" type="text" maxlength="500" placeholder="الوصف — مثال: غدا أو مرتب" class="w-full rounded-xl border px-3 py-3 text-xs outline-none" style="border-color:var(--pm-hairline);background:var(--pm-surface-soft);color:var(--pm-ink);">
+                <div id="quick-entry-manual-form" class="hidden relative space-y-3 rounded-2xl border p-3" style="border-color:color-mix(in srgb,var(--pm-gold-bright) 34%,transparent);background:var(--pm-surface-hi);"><div id="quick-manual-success-fx" aria-hidden="true"></div><div class="flex items-center justify-between gap-2"><div><p class="text-xs font-black" style="color:var(--pm-ink);">إدخال يدوي سريع</p><p class="mt-1 text-[10px]" style="color:var(--pm-muted);">اختار النوع والفئة واحفظ من غير AI.</p><p class="mt-1 text-[10px] font-bold" id="quick-manual-month-label" style="color:var(--pm-gold-bright);"></p></div><div class="flex items-center gap-1.5 shrink-0"><span class="rounded-full px-2 py-1 text-[10px] font-bold" style="background:color-mix(in srgb,var(--pm-gold-bright) 14%,transparent);color:var(--pm-gold-bright);">متاح للجميع</span><button type="button" id="quick-manual-close" aria-label="إغلاق" class="quick-manual-close-btn">✕</button></div></div><div class="grid grid-cols-3 gap-2"><button id="quick-manual-expense" type="button" data-type="expense" class="quick-manual-type active rounded-xl border px-2 py-2 text-[11px] font-black" style="border-color:var(--pm-gold-bright);background:color-mix(in srgb,var(--pm-gold-bright) 14%,transparent);color:var(--pm-ink);">🧾 مصروف</button><button id="quick-manual-income" type="button" data-type="income" class="quick-manual-type rounded-xl border px-2 py-2 text-[11px] font-black" style="border-color:var(--pm-hairline);color:var(--pm-muted);">💰 دخل</button><button id="quick-manual-debt" type="button" data-type="debt" class="quick-manual-type rounded-xl border px-2 py-2 text-[11px] font-black" style="border-color:var(--pm-hairline);color:var(--pm-muted);">🤝 دين</button></div><div class="relative"><input id="quick-manual-amount" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="المبلغ" class="w-full rounded-xl border px-3 py-3 pl-14 text-sm outline-none" style="border-color:var(--pm-hairline);background:var(--pm-surface-soft);color:var(--pm-ink);"><span class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-xs font-black" style="color:var(--pm-gold-bright);">ج.م</span></div><div class="relative"><input id="quick-manual-description" type="text" maxlength="500" placeholder="الوصف — مثال: غدا أو مرتب" class="w-full rounded-xl border px-3 py-3 text-xs outline-none" style="border-color:var(--pm-hairline);background:var(--pm-surface-soft);color:var(--pm-ink);padding-left:3.1rem;"><button type="button" id="quick-manual-mic" class="quick-mic-btn" aria-label="اكتب بالصوت" aria-pressed="false" title="اكتب بالصوت"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="9" y="2.5" width="6" height="12" rx="3" fill="currentColor" fill-opacity=".18"/><path d="M5 11.5a7 7 0 0 0 14 0"/><path d="M12 18.5V22"/><path d="M8.5 22h7"/></svg></button></div>
                     <div id="quick-manual-category-block"><p class="mb-1 text-[10px] font-bold" style="color:var(--pm-muted);">الفئة</p>
                         <div id="quick-manual-chips-expense" class="flex flex-wrap gap-1.5">
                             <button type="button" class="quick-manual-chip active" data-category="أكل" style="border-color:var(--pm-gold);background:linear-gradient(135deg,color-mix(in srgb,var(--pm-gold-bright) 30%,transparent),var(--pm-surface-hi));color:var(--pm-ink);">🍔 أكل</button>
@@ -7190,45 +7215,6 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
 
         let accessToken = null;
         let currentUser = null;
-
-        // DABBAR_SILENT_AUTH: أي 401 من /api بيتجدد له التوكن ويتعاد الطلب مرة واحدة بصمت — من غير أي رسالة للمستخدم
-        (function () {
-            const nativeFetch = window.fetch.bind(window);
-            let renewing = null;
-            function isApiCall(input) {
-                try {
-                    const raw = typeof input === 'string' ? input : (input instanceof URL ? input.href : null);
-                    if (!raw) return false;
-                    const u = new URL(raw, location.href);
-                    return u.origin === location.origin && u.pathname.startsWith('/api');
-                } catch (e) { return false; }
-            }
-            function renewToken() {
-                if (!renewing) {
-                    renewing = (async () => {
-                        try {
-                            const { data } = await sb.auth.refreshSession();
-                            if (data && data.session) { accessToken = data.session.access_token; currentUser = data.session.user; return accessToken; }
-                        } catch (e) {}
-                        try {
-                            const s = await getSessionResilient();
-                            if (s && s.access_token) { accessToken = s.access_token; currentUser = s.user || currentUser; return accessToken; }
-                        } catch (e) {}
-                        return null;
-                    })().finally(() => { setTimeout(() => { renewing = null; }, 0); });
-                }
-                return renewing;
-            }
-            window.fetch = async function (input, init) {
-                const res = await nativeFetch(input, init);
-                if (res.status !== 401 || !isApiCall(input)) return res;
-                const token = await renewToken();
-                if (!token) return res;
-                const headers = new Headers((init && init.headers) || {});
-                headers.set('Authorization', 'Bearer ' + token);
-                return nativeFetch(input, Object.assign({}, init || {}, { headers }));
-            };
-        })();
         let pushPreferences = null;
         let pushPublicKey = '';
         let pushRegistrationPromise = null;
@@ -8209,11 +8195,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                     signal: controller.signal,
                 });
                 const data = await res.json().catch(() => ({}));
-                if (!res.ok) {
-                    const err = new Error(data.error || 'فشل تحميل البيانات');
-                    err.status = res.status; err.code = data.code;
-                    throw err;
-                }
+                if (!res.ok) throw new Error(data.error || 'فشل تحميل البيانات');
                 return data;
             } finally {
                 clearTimeout(timeoutId);
@@ -8286,25 +8268,6 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             } catch (e) {
                 console.error(`dashboard-data fetch failed (attempt ${attempt}/${MAX_ATTEMPTS}):`, e);
                 const isTimeoutOrNetwork = e.name === 'AbortError' || e.message === 'Failed to fetch' || !navigator.onLine;
-                // الجلسة/التوكن: تجديد صامت تمامًا — من غير أي بانر ولا رسالة (زي فيسبوك وإنستا).
-                // بنجدد التوكن ونعيد المحاولة، ولو لسه فشل بنفضل شايفين آخر بيانات ونعيد المحاولة في الخلفية.
-                const isAuthIssue = e.status === 401 || e.status === 403 || e.code === 'SESSION_REFRESH';
-                if (isAuthIssue) {
-                    try {
-                        const { data: renewed } = await sb.auth.refreshSession();
-                        if (renewed && renewed.session) { accessToken = renewed.session.access_token; currentUser = renewed.session.user; }
-                    } catch (renewErr) { /* صامت */ }
-                    if (attempt < MAX_ATTEMPTS) {
-                        __dashboardRetryTimer = setTimeout(() => loadDashboard(isInitialLoad, attempt + 1), attempt * 900);
-                        return;
-                    }
-                    let cachedAuth = null;
-                    try { cachedAuth = JSON.parse(localStorage.getItem(dashboardCacheKey) || 'null'); } catch (cacheErr) {}
-                    if (cachedAuth && !window.__dashboardData) renderDashboardData(cachedAuth, true);
-                    // أي بيانات معروضة تفضل زي ما هي؛ محاولة هادية تانية بعد نص دقيقة
-                    __dashboardRetryTimer = setTimeout(() => loadDashboard(false, 1), 30000);
-                    return;
-                }
                 // خطأ شبكة/تايم آوت عابر: نعيد المحاولة تلقائيًا بتأخير بسيط وبهدوء تام، من غير أي مؤشر على الشاشة
                 if (isTimeoutOrNetwork && navigator.onLine && attempt < MAX_ATTEMPTS) {
                     const delay = attempt * 900;
@@ -8324,7 +8287,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                 const errorEl = document.getElementById('dashboard-load-error');
                 const errorText = document.getElementById('dashboard-load-error-text');
                 const retryBtn = document.getElementById('dashboard-load-retry-btn');
-                if (errorEl && errorText && !window.__dashboardData) {
+                if (errorEl && errorText) {
                     errorText.textContent = message;
                     errorEl.classList.remove('hidden');
                     if (retryBtn) retryBtn.classList.remove('hidden');
@@ -8709,7 +8672,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             const recurringList = document.getElementById('recurring-list');
             if (recurringList) recurringList.innerHTML = (settings.recurringExpenses || []).length ? settings.recurringExpenses.map((item, i) => {
                 const cIcon = getCommitmentIcon(item.name);
-                return `<div class="flex items-center justify-between rounded-xl bg-slate-900/70 px-2.5 py-2 text-[10px]"><span class="flex items-center"><span class="commitment-icon" data-tone="${cIcon.tone}"><iconify-icon icon="${cIcon.icon}"></iconify-icon></span>${item.name}</span><span class="text-emerald-300">${fmt(item.amount)} <button type="button" data-recurring-remove="${i}" aria-label="حذف الالتزام" class="mr-1 text-slate-600 hover:text-rose-400 transition">✕</button></span></div>`;
+                return `<div class="flex items-center justify-between rounded-xl bg-slate-900/70 px-2.5 py-2 text-[11.5px] font-bold"><span class="flex items-center"><span class="commitment-icon" data-tone="${cIcon.tone}"><iconify-icon icon="${cIcon.icon}"></iconify-icon></span>${item.name}</span><span class="commit-amt-wrap"><span class="commit-amt"><b>${Number(item.amount || 0).toLocaleString('en-US', { maximumFractionDigits: 2 })}</b><small>${CURRENCY_LABELS[currencyCode('EGP')] || 'ج.م'}</small></span><button type="button" data-recurring-remove="${i}" aria-label="حذف الالتزام" class="commit-remove">✕</button></span></div>`;
             }).join('') : '<p class="text-[10px] text-slate-500">أضف الإيجار أو الاشتراكات عشان تشوف التزاماتك الشهرية قدامك.</p>';
             recurringList?.querySelectorAll('[data-recurring-remove]').forEach((btn) => btn.addEventListener('click', async () => {
                 const item = settings.recurringExpenses[Number(btn.dataset.recurringRemove)];
@@ -9920,7 +9883,6 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                             ${r.tags.length ? `<div class="dabbar-savings-tags2">${r.tags.map((t) => `<span class="dabbar-savings-tag2">${t}</span>`).join('')}</div>` : ''}
                             <div class="dabbar-savings-cta-row">
                                 ${r.actionCta ? `<button type="button" class="dabbar-savings-cta-primary" data-savings-limit-name="${escHtmlLocal(r.actionName)}" data-savings-limit-amount="${r.actionAmount}">${r.actionCta}</button>` : ''}
-                                <button type="button" class="dabbar-savings-cta2" data-savings-cta="${r.ctaTarget}" data-savings-cat="${escHtmlLocal(r.ctaCategory || '')}">${r.cta} ›</button>
                             </div>
                         </div>
                     </div>
@@ -9944,12 +9906,6 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                     const detailToReopen = document.getElementById(`savings-detail-${expandedIdxBefore}`);
                     if (rowToReopen && detailToReopen) { rowToReopen.classList.add('expanded'); detailToReopen.classList.add('open'); }
                 }
-                breakdownEl.querySelectorAll('[data-savings-cta]').forEach((btn) => {
-                    btn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        goToSavingsTarget(btn.dataset.savingsCta, btn.dataset.savingsCat);
-                    });
-                });
                 // ============ CTA حقيقي: مش بس "وريني" — بيفتح شيت حد الفئة جاهز بالاسم والمبلغ المقترح، فحفظه بيبقى ضغطة واحدة ============
                 breakdownEl.querySelectorAll('[data-savings-limit-name]').forEach((btn) => {
                     btn.addEventListener('click', (e) => {
@@ -10685,7 +10641,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                                     <div class="min-w-0 flex-1">
                                         <div class="flex items-center justify-between gap-2">
                                             <p class="text-[13px] font-black text-slate-100 truncate">${debtEscape(r.title)}</p>
-                                            <p class="text-[13px] font-black text-amber-300 shrink-0">${fmt(r.amount || 0)}</p>
+                                            <p class="inst-amount text-[13px] font-black text-amber-300 shrink-0">${fmt(r.amount || 0)}</p>
                                         </div>
                                         <p class="text-[10.5px] text-slate-500 mt-0.5">${reminderDaysLabel(r.due_date)}</p>
                                     </div>
@@ -10952,7 +10908,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                                 <span>دورك رقم ${g.myTurn} من ${g.groupSize}</span>
                                 <span>${g.hasReceivedTurn ? 'استلمت دورك ✅' : `باقي ${g.monthsRemaining} شهر`}</span>
                             </div>
-                            <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden"><div class="bg-emerald-500 h-full rounded-full" style="width:${progressPercent}%"></div></div>
+                            <div class="gameya-progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(progressPercent)}"><div class="gameya-progress-fill" style="width:${progressPercent}%"></div></div>
                         </div>
                         ${!g.hasReceivedTurn ? `<div class="bg-emerald-500/10 border border-emerald-500/20 rounded-xl px-3 py-2 flex items-center gap-2"><span class="text-[11px]">📅</span><span class="text-[11px] text-emerald-300 font-bold">دورك جاي في ${turnDateLabel}</span></div>` : ''}
                         ${membersHtml ? `<div class="pt-1"><p class="text-[10px] text-slate-500 mb-1">أعضاء الجمعية - الشهر ده</p>${membersHtml}</div>` : ''}
@@ -12511,6 +12467,56 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
         document.getElementById('quick-manual-close')?.addEventListener('click', closeQuickManualPopup);
         document.getElementById('quick-entry-cancel')?.addEventListener('click', () => { quickShow('quick-entry-form', false); quickShow('quick-entry-draft', false); quickStatus(''); document.getElementById('quick-entry-input').value = ''; });
         document.getElementById('quick-manual-cancel')?.addEventListener('click', () => { closeQuickManualPopup(); quickStatus(''); });
+
+        // ============ مايك الوصف: تحويل الصوت لنص عبر Web Speech API في المتصفح (مجاني، من غير سيرفر) ============
+        (function initQuickManualMic() {
+            const btn = document.getElementById('quick-manual-mic');
+            const input = document.getElementById('quick-manual-description');
+            if (!btn || !input) return;
+            const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SR) { btn.classList.add('hidden'); return; }
+            const isEn = () => window.APP_LANG === 'en';
+            let rec = null; let base = ''; let finalText = ''; let listeningHint = '';
+            const setUI = (on) => {
+                btn.classList.toggle('listening', on);
+                btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+                if (on) { listeningHint = isEn() ? 'Listening… speak now' : 'سامعك… اتكلم دلوقتي'; input.dataset.micPrev = input.placeholder; input.placeholder = listeningHint; }
+                else if (input.dataset.micPrev !== undefined) { if (input.placeholder === listeningHint) input.placeholder = input.dataset.micPrev; delete input.dataset.micPrev; }
+            };
+            const compose = (interim) => {
+                const spoken = (finalText + interim).replace(/\s+/g, ' ').trim();
+                input.value = ((base ? base + ' ' : '') + spoken).slice(0, 500);
+            };
+            const stop = () => { try { rec && rec.stop(); } catch (_) {} };
+            const start = () => {
+                try {
+                    rec = new SR();
+                    rec.lang = isEn() ? 'en-US' : 'ar-EG';
+                    rec.interimResults = true;
+                    rec.continuous = false;
+                    rec.maxAlternatives = 1;
+                    base = input.value.trim(); finalText = '';
+                    rec.onstart = () => setUI(true);
+                    rec.onresult = (e) => {
+                        let interim = '';
+                        for (let i = e.resultIndex; i < e.results.length; i += 1) {
+                            const r = e.results[i];
+                            if (r.isFinal) finalText += r[0].transcript + ' '; else interim += r[0].transcript;
+                        }
+                        compose(interim);
+                    };
+                    rec.onerror = (e) => {
+                        const msg = { 'not-allowed': 'اسمح للمتصفح يستخدم المايك وجرب تاني.', 'service-not-allowed': 'اسمح للمتصفح يستخدم المايك وجرب تاني.', 'no-speech': 'مسمعتش صوت، جرب تاني.', 'audio-capture': 'مفيش مايك متاح على الجهاز.', 'network': 'التعرف على الصوت محتاج إنترنت.' }[e.error];
+                        if (msg && typeof quickStatus === 'function') quickStatus(msg, 'error');
+                    };
+                    rec.onend = () => { setUI(false); rec = null; input.dispatchEvent(new Event('input', { bubbles: true })); };
+                    rec.start();
+                    if (navigator.vibrate) navigator.vibrate(12);
+                } catch (err) { setUI(false); rec = null; }
+            };
+            btn.addEventListener('click', () => { if (rec) stop(); else start(); });
+            ['quick-manual-close', 'quick-manual-cancel', 'quick-manual-save'].forEach((id) => document.getElementById(id)?.addEventListener('click', stop));
+        })();
         function quickManualSetActive(list, target, activeStyle) {
             list.forEach((item) => { item.classList.remove('active'); item.removeAttribute('style'); });
             target.classList.add('active');

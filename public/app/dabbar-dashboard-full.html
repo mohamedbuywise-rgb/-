@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <script src="./dabbar-i18n.js"></script>
     <title>لوحة التحكم والتقارير - محاسبك الشخصي</title>
     <!-- Embedded brand logo sources (logos remain their owners' trademarks; source references):
@@ -2980,6 +2980,7 @@
         #asst-chat-send { touch-action: manipulation; }
         #asst-chat-input:focus { scroll-margin-bottom: 5rem; }
         body.keyboard-open #bottom-tab-nav { display: none !important; }
+        body.keyboard-open .db-bank-track, body.keyboard-open .mascot-float, body.keyboard-open .active-days-flame, body.keyboard-open .ts-pulse, body.keyboard-open .dabbar-soon-pulse, body.keyboard-open .dabbar-tap-hint-icon { animation-play-state: paused !important; }
         body.keyboard-open .flex-1.overflow-y-auto { padding-bottom: max(1rem, env(safe-area-inset-bottom)) !important; }
         #quick-entry-manual-form input:focus, #quick-entry-manual-form textarea:focus, #quick-entry-manual-form select:focus { outline: 2px solid var(--pm-gold-bright, #087a59); outline-offset: 1px; }
         .quick-description-wrap { position: relative; }
@@ -15531,11 +15532,17 @@ html[data-theme="light"] #dbo-backdrop::before,html[data-theme="light"] #dbo-bac
     const ta = document.getElementById('quick-entry-input');
     const form = document.getElementById('quick-entry-form');
     if (!ta) return;
+    let fitRaf = 0;
     const fit = () => {
-        if (!ta.value) { ta.style.height = ''; return; }
-        if (!ta.offsetParent) return;
-        ta.style.height = 'auto';
-        ta.style.height = (ta.scrollHeight + 2) + 'px';
+        if (fitRaf) return;
+        fitRaf = requestAnimationFrame(() => {
+            fitRaf = 0;
+            if (!ta.value) { ta.style.height = ''; return; }
+            if (!ta.offsetParent) return;
+            if (!ta.style.height && ta.scrollHeight <= ta.clientHeight + 2) return; // لسه جوه الحجم الأدنى: مفيش داعي لأي reflow
+            ta.style.height = 'auto';
+            ta.style.height = (ta.scrollHeight + 2) + 'px';
+        });
     };
     ta.addEventListener('input', fit);
     ta.addEventListener('focus', fit);
@@ -15661,7 +15668,8 @@ function dabbarReward(){
     const height = Math.round(vv?.height || window.innerHeight);
     if (height && height !== lastHeight) {
       lastHeight = height;
-      root.style.setProperty('--app-vh', `${height}px`);
+      const popup = document.getElementById('quick-manual-popup-backdrop');
+      if (popup) popup.style.setProperty('--app-vh', `${height}px`);
     }
     const active = document.activeElement;
     const writing = !!active && /^(INPUT|TEXTAREA|SELECT)$/.test(active.tagName) && !active.readOnly && !active.disabled;

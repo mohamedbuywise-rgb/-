@@ -2259,6 +2259,14 @@
         html[data-theme="light"] .text-amber-600 {
             color: var(--pm-gold-bright) !important;
         }
+        /* شارات حالة الأقساط في الوضع النهاري: كانت أصفر فاتح على أصفر فاتح فبتختفي */
+        html[data-theme="light"] .installment-card .text-amber-200,
+        html[data-theme="light"] .installment-card .text-amber-300 { color: #7a4a00 !important; }
+        html[data-theme="light"] .installment-card .text-rose-300 { color: #b4232c !important; }
+        html[data-theme="light"] .installment-card .text-emerald-300 { color: #0e655b !important; }
+        html[data-theme="light"] .installment-card .bg-amber-500\/15,
+        html[data-theme="light"] .installment-card .bg-amber-500\/20 { background: rgba(217,142,4,.20) !important; }
+        html[data-theme="light"] .installment-card .bg-rose-500\/15 { background: rgba(225,29,72,.12) !important; }
         .bg-emerald-50, .bg-emerald-500, .bg-emerald-500\/10, .bg-emerald-500\/15,
         .bg-emerald-500\/20, .bg-amber-400, .bg-amber-500\/10, .bg-amber-500\/15,
         html[data-theme="light"] .bg-emerald-50, html[data-theme="light"] .bg-emerald-500\/10,
@@ -3222,6 +3230,10 @@
         /* في الوضع الليلي بس: نفس اللون الأخضر الليموني بتاع براند التطبيق بدل التيل */
         html:not([data-theme="light"]) .dabbar-goal-row-percent { color: var(--pm-gold-bright, #d0ff52); }
         html:not([data-theme="light"]) .dabbar-goal-row-bar { background: linear-gradient(90deg, var(--pm-gold, #bdf23f), var(--pm-gold-bright, #d0ff52)); }
+        /* توحيد لون شريط الهدف في الوضع النهاري: نفس أخضر بار "مساعد" (هدفك المالي) في "شهري" (أهدافك) */
+        html[data-theme="light"] .dabbar-goal-row-percent { color: var(--pm-gold-bright) !important; }
+        html[data-theme="light"] .dabbar-goal-row-track { background: var(--pm-hairline) !important; }
+        html[data-theme="light"] .dabbar-goal-row-bar { background: linear-gradient(90deg, var(--pm-gold-bright), var(--pm-gold)) !important; }
         .dabbar-goal-row-amounts { margin-top:.3rem; color:var(--db-muted); font:700 .6rem 'Cairo',sans-serif; }
 
         /* كارت ربط تليجرام — هوية تليجرام الحقيقية (أزرق فاتح) بدل الأيقونة الرمادية القديمة، واضح ليلي/نهاري */
@@ -5642,39 +5654,31 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                 </span>
             </button>
 
-            <button id="account-lang-toggle" type="button" class="w-full bg-slate-950/60 border border-slate-800 rounded-3xl p-4 flex items-center justify-between gap-3">
-                <div class="flex items-center gap-3">
-                    <span class="w-9 h-9 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-base" id="lang-toggle-icon">🌐</span>
-                    <div class="text-right">
-                        <p class="text-xs font-bold text-slate-200" id="lang-toggle-title">اللغة</p>
-                        <p class="text-[11px] text-slate-500" id="lang-toggle-label">العربية شغّالة دلوقتي</p>
-                    </div>
-                </div>
-                <span class="relative inline-flex w-11 h-6 rounded-full bg-slate-700 transition-colors" id="lang-toggle-track">
-                    <span class="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform" id="lang-toggle-knob"></span>
-                </span>
-            </button>
+            <div id="account-lang-card" class="space-y-2">
+                <button type="button" data-lang-opt="ar" class="w-full bg-slate-950/60 border border-slate-800 rounded-3xl p-4 flex items-center justify-between gap-3">
+                    <span class="text-xs font-bold text-slate-200">العربية</span>
+                    <span class="lang-opt-check text-emerald-400 text-sm font-black"></span>
+                </button>
+                <button type="button" data-lang-opt="en" class="w-full bg-slate-950/60 border border-slate-800 rounded-3xl p-4 flex items-center justify-between gap-3" style="direction:ltr">
+                    <span class="text-xs font-bold text-slate-200">English</span>
+                    <span class="lang-opt-check text-emerald-400 text-sm font-black"></span>
+                </button>
+            </div>
             <script>
                 (function () {
                     function setup() {
-                        var btn = document.getElementById('account-lang-toggle');
-                        if (!btn) return;
-                        var lang = window.APP_LANG === 'en' ? 'en' : 'ar';
-                        var title = document.getElementById('lang-toggle-title');
-                        var label = document.getElementById('lang-toggle-label');
-                        var knob = document.getElementById('lang-toggle-knob');
-                        var track = document.getElementById('lang-toggle-track');
-                        if (lang === 'en') {
-                            if (title) title.textContent = 'Language';
-                            if (label) label.textContent = 'English is on now';
-                            if (knob) { knob.style.right = 'auto'; knob.style.left = '2px'; }
-                            if (track) track.classList.add('bg-emerald-500');
-                        } else {
-                            if (title) title.textContent = 'اللغة';
-                            if (label) label.textContent = 'العربية شغّالة دلوقتي';
-                        }
-                        btn.addEventListener('click', function () {
-                            if (window.DabbarI18n) window.DabbarI18n.setLang(lang === 'en' ? 'ar' : 'en');
+                        var card = document.getElementById('account-lang-card');
+                        if (!card) return;
+                        var cur = window.APP_LANG === 'en' ? 'en' : 'ar';
+                        card.querySelectorAll('[data-lang-opt]').forEach(function (b) {
+                            var on = b.getAttribute('data-lang-opt') === cur;
+                            var chk = b.querySelector('.lang-opt-check');
+                            if (chk) chk.textContent = on ? '\u2713' : '';
+                            if (on) b.style.borderColor = 'rgba(16,185,129,.55)';
+                            b.addEventListener('click', function () {
+                                var next = b.getAttribute('data-lang-opt');
+                                if (next !== cur && window.DabbarI18n) window.DabbarI18n.setLang(next);
+                            });
                         });
                     }
                     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', setup);
@@ -14932,6 +14936,13 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                     ['in-app-notifications-card']
                 );
                 // ============ "تفعيل الإشعارات" بقى خانة مستقلة بذاتها في "حسابي" — عشان يبان واضح ويفهم اليوزر لازم يفعّلها عشان توصله إشعارات على جهازه ============
+                makeSection(
+                    'account-language-section',
+                    '🌐',
+                    'اللغة',
+                    'العربية / English',
+                    ['account-lang-card']
+                );
                 makeSection(
                     'account-push-permission-section',
                     '🔔',

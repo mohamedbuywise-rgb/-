@@ -6,6 +6,7 @@ import { getDailyPiggybank } from '../../lib/goals.js';
 import { getInvoicesList, getInvoiceDetail } from '../../lib/invoices.js';
 import { MONTH_NAMES, CATEGORY_EMOJI, SUBSCRIPTION_PRICE_EGP, INSTAPAY_LINK } from '../../lib/config.js';
 import { hasActiveSubscription, getSubscriptionExpiry, isInTrial, getTrialDaysLeft, getActiveSubscribersCount } from '../../lib/users.js';
+import { ensureTrialStarted } from '../../lib/subscriptionAccess.js';
 import { getActiveDays } from '../../lib/activeDays.js';
 import { getPortfolio, getPortfolioDigest } from '../../lib/investments.js';
 
@@ -21,8 +22,8 @@ function sumByCurrency(rows = []) {
 // بيرجّع بيانات حقيقية بس (صفر mock data): مصاريف النهاردة، مصاريف الشهر بالتصنيفات، والديون.
 // Header: Authorization: Bearer <supabase access token>
 //
-// ملحوظة: الدخل بيتحسب من جدول financial_events (event_type='income') + السلف المستلَفة
-// من جدول debts (direction='borrowed') — راجع month.incomeTotal و month.incomeItems تحت.
+// ملحوظة: الدخل بيتحسب من financial_events + السلف المستلَفة فقط.
+// الجمعية (commitment_type='gameya') التزام/حركة خاصة ولا تظهر كدخل.
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -38,10 +39,12 @@ export default async function handler(req, res) {
   try {
     const dashboardUser = await getDashboardUserFromRequest(req);
     if (!dashboardUser) {
-      return res.status(401).json({ code: 'SESSION_REFRESH' });
+      return res.status(401).json({ error: 'انتهت جلسة الدخول. سجّل دخولك مرة أخرى للمتابعة.' });
     }
 
     const { dataUserId, telegramUserId, linked } = dashboardUser;
+    // فتح لوحة الحساب/ربطها يهيّئ التجربة للحسابات القديمة التي لم تُسجّل تاريخ البداية بعد.
+    if (linked) await ensureTrialStarted(dataUserId);
     console.log(
       `dashboard-data: ${linked ? 'linked to telegram_user_id' : 'standalone auth user'}:`,
       linked ? telegramUserId : dashboardUser.authUserId
@@ -192,10 +195,7 @@ export default async function handler(req, res) {
         .eq('telegram_user_id', dataUserId)
         .eq('direction', 'borrowed')
         .eq('is_repayment', false)
-        // الجمعيات (gameya) والمناسبات (occasion) بتتسجل في نفس جدول debts بـ direction='borrowed' برضو،
-        // لكنها التزام شهري مش فلوس دخلت فعلًا، فلازم نستثنيها هنا (زي ما computeNetByPerson بيعمل بالظبط)
-        // وإلا كل ما حد يضيف جمعية جديدة، قسطها الشهري كان بيظهر كـ"دخل" غلط في نفس اللحظة.
-        .eq('commitment_type', 'debt')
+        .or('commitment_type.is.null,commitment_type.neq.gameya')
         .gte('created_at', prevRange.start.toISOString())
         .lt('created_at', prevRange.end.toISOString()),
       Promise.all(historyOffsets.map(({ range }) => getExpensesBetween(dataUserId, range.start, range.end))),
@@ -220,7 +220,7 @@ export default async function handler(req, res) {
         .eq('telegram_user_id', dataUserId)
         .eq('direction', 'borrowed')
         .eq('is_repayment', false)
-        .eq('commitment_type', 'debt')
+        .or('commitment_type.is.null,commitment_type.neq.gameya')
         .gte('created_at', start.toISOString())
         .lt('created_at', end.toISOString())
         .order('created_at', { ascending: false }),
@@ -228,6 +228,7 @@ export default async function handler(req, res) {
         .from('debts')
         .select('id, person_name, amount, currency_code, note, direction, created_at')
         .eq('telegram_user_id', dataUserId)
+        .or('commitment_type.is.null,commitment_type.neq.gameya')
         .gte('created_at', startOfDay.toISOString())
         .lt('created_at', endOfDay.toISOString()),
       getExpensesBetween(dataUserId, yearStart, yearEnd),
@@ -448,7 +449,7 @@ export default async function handler(req, res) {
     }));
     const borrowedThisMonthTotal = borrowedThisMonth.reduce((sum, d) => sum + d.amount, 0);
 
-    // ---- حركة السيولة اليومية (واصل من / واصل لـ) ----
+    // ---- حركة السيولة اليومية (واصل من / واصل لـ) — الجمعية مستبعدة من todayFlowData ----
     const flowIn = (todayFlowData || [])
       .filter(d => d.direction === 'borrowed')
       .reduce((sum, d) => sum + Number(d.amount), 0);

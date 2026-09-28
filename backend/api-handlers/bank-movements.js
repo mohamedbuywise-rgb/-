@@ -27,7 +27,7 @@ async function getTelegramLink(authUserId) {
 
 export default async function handler(req, res) {
   const user = await requireAuthUser(req);
-  if (!user) return res.status(401).json({ ok: false, code: 'SESSION_REFRESH' });
+  if (!user) return res.status(401).json({ ok: false, error: 'محتاج تسجيل دخول.' });
 
   const telegramUserId = await getTelegramLink(user.id);
   if (!telegramUserId) return res.status(409).json({ ok: false, error: 'الحساب ده لسه مش مربوط بحساب تليجرام دبّر.' });

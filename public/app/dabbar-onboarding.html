@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
 <title>دبّر — ابدأ دلوقتي</title>
 
 <!-- PWA -->
@@ -11,6 +11,7 @@
 <link rel="icon" href="./icons/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="./icons/icon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="./icons/icon-180.png">
+<link rel="apple-touch-icon-precomposed" sizes="180x180" href="./apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="دبّر">
@@ -283,6 +284,32 @@
     opacity:0;
     animation: bootFadeUp .6s ease-out .45s forwards;
   }
+
+  /* ===== Safari iOS install guide: animated, explicit, and honest about manual installation ===== */
+  .ios-install-modal{display:none;position:fixed;inset:0;z-index:200;background:rgba(7,24,16,.72);padding:18px;align-items:center;justify-content:center;backdrop-filter:blur(7px);}
+  .ios-install-modal.show{display:flex;animation:iosModalIn .24s ease-out both;}
+  .ios-install-card{width:min(100%,390px);max-height:min(88vh,680px);overflow:auto;background:#fff;border:1px solid #cfe8d9;border-radius:24px;padding:22px 18px 18px;box-shadow:0 24px 70px rgba(5,47,30,.30);text-align:center;}
+  .ios-install-icon{width:62px;height:62px;border-radius:20px;margin:0 auto 12px;display:grid;place-items:center;background:linear-gradient(145deg,#dff8eb,#bcebd3);border:1px solid #9ed8b8;font-size:30px;animation:iosIconPulse 1.9s ease-in-out infinite;}
+  .ios-install-title{font-family:'Cairo',sans-serif;font-size:17px;font-weight:900;color:var(--ink);}
+  .ios-install-copy{margin:7px auto 14px;color:var(--muted);font-size:12.5px;line-height:1.85;max-width:315px;}
+  .ios-install-progress{height:8px;background:#e9f5ee;border-radius:999px;overflow:hidden;margin:0 2px 8px;}
+  .ios-install-progress-bar{height:100%;width:18%;border-radius:inherit;background:linear-gradient(90deg,#1faa6e,#73e1ab);animation:iosInstallProgress 2.8s ease-in-out infinite;}
+  .ios-install-state{font-family:'Cairo',sans-serif;font-weight:800;font-size:10.5px;color:var(--green-deep);min-height:20px;margin-bottom:12px;}
+  .ios-install-steps{display:grid;gap:8px;text-align:right;margin:12px 0 14px;}
+  .ios-install-step{display:flex;align-items:flex-start;gap:9px;background:#f2fbf6;border:1px solid #d5eee0;border-radius:13px;padding:10px 11px;color:var(--text);font-size:12px;line-height:1.7;}
+  .ios-install-step-num{flex:0 0 24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--green);color:#fff;font-family:'Cairo',sans-serif;font-weight:900;font-size:11px;}
+  .ios-install-step b{font-family:'Cairo',sans-serif;color:var(--green-deep);}
+  .ios-install-share{display:inline-grid;place-items:center;width:23px;height:23px;margin:0 2px;border-radius:7px;background:#e5f3ff;color:#1271bb;font-size:16px;vertical-align:middle;}
+  .ios-install-actions{display:flex;gap:8px;}
+  .ios-install-actions button{font-family:'Cairo',sans-serif;font-weight:800;font-size:12px;border-radius:11px;padding:11px 10px;cursor:pointer;border:0;flex:1;}
+  #iosInstallDone{background:var(--green);color:#fff;box-shadow:0 10px 22px -12px rgba(31,170,110,.7);}
+  #iosInstallClose{background:#eef8f2;color:var(--green-deep);}
+  .install-btn.is-guiding{background:var(--green-deep);animation:installButtonPulse 1.8s ease-in-out infinite;}
+  @keyframes iosModalIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  @keyframes iosIconPulse{0%,100%{box-shadow:0 0 0 0 rgba(31,170,110,.10)}50%{box-shadow:0 0 0 10px rgba(31,170,110,.14)}}
+  @keyframes iosInstallProgress{0%{width:12%;transform:translateX(0)}55%{width:74%;transform:translateX(0)}100%{width:88%;transform:translateX(0)}}
+  @keyframes installButtonPulse{50%{box-shadow:0 0 0 6px rgba(31,170,110,.14),0 12px 24px -12px rgba(31,170,110,.7)}}
+  @media(prefers-reduced-motion:reduce){.ios-install-modal.show,.ios-install-icon,.ios-install-progress-bar,.install-btn.is-guiding{animation:none}.ios-install-progress-bar{width:62%}}
 </style>
 </head>
 <body>
@@ -458,6 +485,22 @@
   </div>
 </div>
 
+<!-- Safari iOS installation guide and waiting state -->
+<div class="ios-install-modal" id="iosInstallModal" role="dialog" aria-modal="true" aria-labelledby="iosInstallTitle" aria-hidden="true">
+  <div class="ios-install-card">
+    <div class="ios-install-icon" aria-hidden="true">📲</div>
+    <h3 class="ios-install-title" id="iosInstallTitle">نجهّز تثبيت دبّر</h3>
+    <p class="ios-install-copy" id="iosInstallCopy">Safari لا يثبت التطبيق تلقائياً من داخل الصفحة، لكن الخطوات سهلة وسريعة.</p>
+    <div class="ios-install-progress" aria-hidden="true"><div class="ios-install-progress-bar"></div></div>
+    <div class="ios-install-state" id="iosInstallState" aria-live="polite">جاري تجهيز تعليمات التثبيت...</div>
+    <div class="ios-install-steps" id="installGuideSteps">
+      <div class="ios-install-step"><span class="ios-install-step-num">1</span><span>اضغط زر <b>المشاركة</b> أسفل Safari <span class="ios-install-share">□↑</span></span></div>
+      <div class="ios-install-step"><span class="ios-install-step-num">2</span><span>مرّر القائمة ثم اختر <b>إضافة إلى الشاشة الرئيسية</b>.</span></div>
+      <div class="ios-install-step"><span class="ios-install-step-num">3</span><span>اضغط <b>إضافة</b>، ثم أغلق هذه الصفحة وافتح دبّر من الأيقونة الجديدة.</span></div>
+    </div>
+    <div class="ios-install-actions"><button type="button" id="iosInstallClose">لاحقاً</button><button type="button" id="iosInstallDone">تمت الإضافة — افتح التطبيق</button></div>
+  </div>
+</div>
 <script>
   /* ========================================================
      SUPABASE SETUP — استبدل القيمتين دول ببيانات مشروعك الحقيقي
@@ -1000,96 +1043,113 @@
   const successState = document.getElementById('successState');
   const linkFormState = document.getElementById('linkFormState');
 
-  // ---- PWA install ----
-  // خطوة إجبارية: لازم يثبّت التطبيق قبل ما يدخل الداشبورد.
+  // ---- PWA install: one animated flow for iPhone Safari, iPhone Chrome, Android, and desktop ----
   const ua = navigator.userAgent || '';
-  const isIOS = /iPhone|iPad|iPod/.test(ua);
-
+  const isIOS = /iPhone|iPad|iPod/i.test(ua);
+  const isIOSChrome = isIOS && /CriOS/i.test(ua);
+  const isIOSSafari = isIOS && /Safari/i.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS/i.test(ua);
+  const isAndroid = /Android/i.test(ua);
   let deferredPrompt = null;
+  let installPlatform = 'other';
   const installBtn = document.getElementById('installBtn');
-
+  const installGuideSteps = document.getElementById('installGuideSteps');
+  const iosInstallModal = document.getElementById('iosInstallModal');
+  const iosInstallState = document.getElementById('iosInstallState');
+  const iosInstallCopy = document.getElementById('iosInstallCopy');
+  const iosInstallDone = document.getElementById('iosInstallDone');
+  const iosInstallClose = document.getElementById('iosInstallClose');
   function isStandalone() {
     return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
   }
-
-  // ============ خلاص التثبيت — لا نكمل إلا بعد التأكد من وضع standalone ============
-  // (أو للداشبورد على طول لو عنده جلسة شغالة أصلاً، مثلاً لو ثبّت التطبيق تاني على جهاز جديد وهو مسجّل بالفعل)
+  function platformKey() {
+    if (isIOSChrome) return 'ios-chrome';
+    if (isIOSSafari) return 'ios-safari';
+    if (isAndroid) return 'android';
+    return 'other';
+  }
+  function closeInstallGuide() {
+    iosInstallModal?.classList.remove('show');
+    iosInstallModal?.setAttribute('aria-hidden','true');
+    installBtn?.classList.remove('is-guiding');
+    if (installBtn) { installBtn.disabled = false; installBtn.textContent = '➕ تثبّت "دبّر" دلوقتي'; }
+  }
+  function showInstallGuide(kind = platformKey(), state = 'ready') {
+    if (isStandalone()) { finishInstallStep(); return; }
+    installPlatform = kind;
+    const configs = {
+      'ios-safari': {
+        title: 'تثبيت دبّر من Safari',
+        copy: 'أنت تستخدم Safari على الآيفون. اتبع الخطوات الظاهرة، ثم افتح دبّر من الأيقونة الجديدة.',
+        state: state === 'waiting' ? 'افتح دبّر من الشاشة الرئيسية بعد الإضافة' : 'التطبيق جاهز للإضافة إلى الشاشة الرئيسية',
+        steps: '<div class="ios-install-step"><span class="ios-install-step-num">1</span><span>اضغط زر <b>المشاركة</b> أسفل Safari <span class="ios-install-share">□↑</span></span></div><div class="ios-install-step"><span class="ios-install-step-num">2</span><span>مرّر القائمة واختر <b>إضافة إلى الشاشة الرئيسية</b>.</span></div><div class="ios-install-step"><span class="ios-install-step-num">3</span><span>اضغط <b>إضافة</b>، ثم أغلق Safari وافتح دبّر من الأيقونة الجديدة.</span></div>'
+      },
+      'ios-chrome': {
+        title: 'تثبيت دبّر من Chrome على iPhone',
+        copy: 'أنت تستخدم Chrome على الآيفون. افتح قائمة Chrome ثم استخدم خيار المشاركة لإضافة دبّر إلى الشاشة الرئيسية.',
+        state: state === 'waiting' ? 'افتح دبّر من الشاشة الرئيسية بعد الإضافة' : 'التطبيق جاهز للإضافة إلى الشاشة الرئيسية',
+        steps: '<div class="ios-install-step"><span class="ios-install-step-num">1</span><span>اضغط زر <b>المشاركة</b> بجوار شريط العنوان أو من قائمة <b>⋯</b>.</span></div><div class="ios-install-step"><span class="ios-install-step-num">2</span><span>اختر <b>إضافة إلى الشاشة الرئيسية</b> من خيارات المشاركة.</span></div><div class="ios-install-step"><span class="ios-install-step-num">3</span><span>اضغط <b>إضافة</b>، ثم افتح دبّر من الأيقونة الجديدة على الشاشة الرئيسية.</span></div>'
+      },
+      'android': {
+        title: 'تثبيت دبّر على Android',
+        copy: 'اضغط تثبيت من نافذة المتصفح. إذا لم تظهر النافذة، اتبع خطوات القائمة اليدوية الموضحة.',
+        state: state === 'waiting' ? 'جاري انتظار اكتمال التثبيت...' : 'جاري تجهيز التثبيت...',
+        steps: '<div class="ios-install-step"><span class="ios-install-step-num">1</span><span>اضغط <b>تثبيت</b> في نافذة المتصفح، أو افتح قائمة <b>⋮</b>.</span></div><div class="ios-install-step"><span class="ios-install-step-num">2</span><span>اختر <b>تثبيت التطبيق</b> أو <b>إضافة إلى الشاشة الرئيسية</b>.</span></div><div class="ios-install-step"><span class="ios-install-step-num">3</span><span>اضغط <b>تثبيت/إضافة</b>، ثم افتح دبّر من الأيقونة الجديدة.</span></div>'
+      },
+      'other': {
+        title: 'تثبيت دبّر على جهازك',
+        copy: 'استخدم نافذة التثبيت أو قائمة المتصفح لإضافة دبّر إلى الشاشة الرئيسية.',
+        state: state === 'waiting' ? 'جاري انتظار اكتمال التثبيت...' : 'جاري تجهيز التثبيت...',
+        steps: '<div class="ios-install-step"><span class="ios-install-step-num">1</span><span>افتح قائمة المتصفح أو اضغط أيقونة <b>التثبيت ⊕</b>.</span></div><div class="ios-install-step"><span class="ios-install-step-num">2</span><span>اختر <b>تثبيت دبّر</b> أو <b>إضافة إلى الشاشة الرئيسية</b>.</span></div><div class="ios-install-step"><span class="ios-install-step-num">3</span><span>افتح دبّر من الأيقونة الجديدة لإكمال العملية.</span></div>'
+      }
+    };
+    const config = configs[kind] || configs.other;
+    iosInstallModal?.classList.add('show');
+    iosInstallModal?.setAttribute('aria-hidden','false');
+    installBtn?.classList.add('is-guiding');
+    if (installBtn) { installBtn.disabled = false; installBtn.textContent = state === 'waiting' ? '⏳ جاري التثبيت...' : '📲 عرض خطوات التثبيت'; }
+    const titleEl = document.getElementById('iosInstallTitle'); if (titleEl) titleEl.textContent = config.title;
+    if (iosInstallCopy) iosInstallCopy.textContent = config.copy;
+    if (iosInstallState) iosInstallState.textContent = config.state;
+    if (installGuideSteps) installGuideSteps.innerHTML = config.steps;
+    if (iosInstallDone) iosInstallDone.textContent = state === 'waiting' ? 'افتح التطبيق بعد التثبيت' : 'تمت الإضافة — افتح التطبيق';
+  }
+  // ============ لا نعرض نجاحاً إلا بعد اكتشاف Standalone فعلياً ============
   async function finishInstallStep() {
-    if (!isStandalone()) {
-      linkFormState.style.display = '';
-      successState.classList.remove('show');
-      const notice = document.getElementById('installPendingNotice');
-      if (notice) notice.classList.add('show');
-      return;
-    }
-    linkFormState.style.display = 'none';
-    successState.classList.add('show');
-    try {
-      const { data: { session } } = sb ? await sb.auth.getSession() : { data: { session: null } };
-      if (session) { window.location.href = dashboardUrlWithQuick(); return; }
-    } catch (e) {}
+    if (!isStandalone()) { showInstallGuide(installPlatform || platformKey(), 'waiting'); return; }
+    closeInstallGuide();
+    linkFormState.style.display = 'none'; successState.classList.add('show');
+    try { const { data: { session } } = sb ? await sb.auth.getSession() : { data: { session: null } }; if (session) { window.location.href = dashboardUrlWithQuick(); return; } } catch (e) {}
     setTimeout(() => { successState.classList.remove('show'); linkFormState.style.display = ''; showAuthScreen(); }, 700);
   }
-
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-  });
-
-  installBtn.addEventListener('click', async () => {
+  window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; });
+  installBtn?.addEventListener('click', async () => {
+    if (isStandalone()) { finishInstallStep(); return; }
+    const kind = platformKey();
+    if (isIOS) { showInstallGuide(kind, 'ready'); return; }
+    showInstallGuide(kind, deferredPrompt ? 'ready' : 'waiting');
     if (deferredPrompt) {
       deferredPrompt.prompt();
-      const choice = await deferredPrompt.userChoice;
-      deferredPrompt = null;
-      if (choice && choice.outcome === 'accepted') {
-        document.getElementById('installPendingNotice')?.classList.add('show');
-        return;
-      }
-    }
-    // لو المتصفح (زي Safari على iOS) مش بيدعم التثبيت الأوتوماتيك، نوريله خطوات يدوية واضحة
-    // حسب نوع جهازه. في الحالة دي، هيتأكد التثبيت لما يرجع يفتح الصفحة من الأيقونة (شوف الفحص فوق).
-    showManualInstallSteps();
+      const choice = await deferredPrompt.userChoice; deferredPrompt = null;
+      if (choice?.outcome === 'accepted') { showInstallGuide(kind, 'waiting'); return; }
+      closeInstallGuide();
+    } else { showManualInstallSteps(); }
   });
-
+  iosInstallClose?.addEventListener('click', closeInstallGuide);
+  iosInstallDone?.addEventListener('click', () => {
+    if (isStandalone()) finishInstallStep();
+    else showInstallGuide(installPlatform || platformKey(), 'waiting');
+  });
   function showManualInstallSteps() {
-    const isAndroid = /Android/.test(ua);
-    const steps = document.getElementById('manualInstallSteps');
-    const title = document.getElementById('manualInstallTitle');
-
-    if (isIOS) {
-      title.textContent = '📱 على آيفون (Safari):';
-      steps.innerHTML = `
-        <li>دوس على زرار <b>المشاركة (Share) 􀈂</b> تحت في المتصفح</li>
-        <li>اسكرول لحد ما تلاقي <b>"إضافة إلى الشاشة الرئيسية"</b> ودوس عليها</li>
-        <li>دوس <b>"إضافة"</b> فوق يمين</li>
-        <li><b>اقفل الصفحة دي وافتح دبّر من الأيقونة اللي على شاشتك</b> — مش هتقدر تكمل من هنا</li>`;
-    } else if (isAndroid) {
-      title.textContent = '📱 على أندرويد:';
-      steps.innerHTML = `
-        <li>دوس على <b>الثلاث نقط ⋮</b> فوق يمين المتصفح</li>
-        <li>اختار <b>"إضافة إلى الشاشة الرئيسية"</b> أو <b>"تثبيت التطبيق"</b></li>
-        <li>أكّد بالضغط على <b>"إضافة" / "تثبيت"</b></li>
-        <li><b>اقفل الصفحة دي وافتح دبّر من الأيقونة اللي على شاشتك</b> — مش هتقدر تكمل من هنا</li>`;
-    } else {
-      title.textContent = '💻 على الكمبيوتر:';
-      steps.innerHTML = `
-        <li>دوس على أيقونة <b>التثبيت ⊕</b> في شريط عنوان المتصفح</li>
-        <li>أو من قائمة المتصفح اختار <b>"تثبيت دبّر"</b></li>
-        <li><b>افتح دبّر بعد كده من الأيقونة اللي اتثبّتت</b> عشان تقدر تكمل</li>`;
-    }
+    const steps = document.getElementById('manualInstallSteps'); const title = document.getElementById('manualInstallTitle');
+    if (isIOSChrome) { title.textContent = '📱 على آيفون (Chrome):'; steps.innerHTML = `<li>دوس على <b>المشاركة</b> بجوار شريط العنوان أو من قائمة <b>⋯</b></li><li>اختار <b>"إضافة إلى الشاشة الرئيسية"</b></li><li>دوس <b>"إضافة"</b></li><li><b>افتح دبّر من الأيقونة الجديدة</b> عشان نكمل تلقائياً</li>`; }
+    else if (isIOSSafari) { title.textContent = '📱 على آيفون (Safari):'; steps.innerHTML = `<li>دوس على زرار <b>المشاركة (Share) 􀈂</b> تحت في المتصفح</li><li>اسكرول واختر <b>"إضافة إلى الشاشة الرئيسية"</b></li><li>دوس <b>"إضافة"</b></li><li><b>افتح دبّر من الأيقونة الجديدة</b> عشان نكمل تلقائياً</li>`; }
+    else if (isAndroid) { title.textContent = '📱 على أندرويد:'; steps.innerHTML = `<li>دوس على <b>الثلاث نقط ⋮</b> فوق يمين المتصفح</li><li>اختار <b>"إضافة إلى الشاشة الرئيسية"</b> أو <b>"تثبيت التطبيق"</b></li><li>أكّد بالضغط على <b>"إضافة" / "تثبيت"</b></li><li><b>افتح دبّر من الأيقونة</b> عشان تقدر تكمل</li>`; }
+    else { title.textContent = '💻 على الكمبيوتر:'; steps.innerHTML = `<li>دوس على أيقونة <b>التثبيت ⊕</b> في شريط عنوان المتصفح</li><li>أو من قائمة المتصفح اختار <b>"تثبيت دبّر"</b></li><li><b>افتح دبّر من الأيقونة</b> عشان تقدر تكمل</li>`; }
     document.getElementById('manualInstall').classList.add('show');
   }
-
-  window.addEventListener('appinstalled', () => {
-    if (!successState.classList.contains('show')) finishInstallStep();
-  });
-
-  // لو المستخدم رجع للتبويب/فتح الصفحة تاني وهو standalone خلاص (ثبّته يدوي مثلًا)، نكمّل تلقائي
-  document.addEventListener('visibilitychange', () => {
-    if (document.visibilityState === 'visible' && isStandalone() && !successState.classList.contains('show')) finishInstallStep();
-  });
+  window.addEventListener('appinstalled', () => { if (!successState.classList.contains('show')) finishInstallStep(); });
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && isStandalone() && !successState.classList.contains('show')) finishInstallStep(); });
   window.addEventListener('focus', () => { if (isStandalone() && !successState.classList.contains('show')) finishInstallStep(); });
-
   // ---- service worker ----
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('./sw.js').catch(() => {});

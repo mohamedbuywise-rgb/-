@@ -29,7 +29,7 @@ export default async function handler(req, res) {
   }
 
   const user = await requireAuthUser(req);
-  if (!user) return res.status(401).json({ ok: false, code: 'SESSION_REFRESH' });
+  if (!user) return res.status(401).json({ ok: false, error: 'محتاج تسجيل دخول.' });
 
   const { message, source } = req.body || {};
   const cleanMessage = String(message || '').trim().slice(0, 1000);

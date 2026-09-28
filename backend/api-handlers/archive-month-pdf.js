@@ -12,7 +12,7 @@ export default async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ ok: false, error: 'Method not allowed' });
 
   const dashboardUser = await getDashboardUserFromRequest(req);
-  if (!dashboardUser) return res.status(401).json({ ok: false, code: 'SESSION_REFRESH' });
+  if (!dashboardUser) return res.status(401).json({ ok: false, error: 'محتاج تسجيل دخول.' });
   const { dataUserId } = dashboardUser;
 
   const monthOffset = Number(req.query?.monthOffset ?? -1);

@@ -4,7 +4,7 @@ import { getDashboardUserFromRequest } from '../../lib/dashboardAuth.js';
 
 async function requireUser(req, res) {
   const user = await getDashboardUserFromRequest(req);
-  if (!user) { res.status(401).json({ code: 'SESSION_REFRESH' }); return null; }
+  if (!user) { res.status(401).json({ error: 'انتهت جلسة الدخول. سجّل دخولك مرة أخرى للمتابعة.' }); return null; }
   return user.dataUserId;
 }
 

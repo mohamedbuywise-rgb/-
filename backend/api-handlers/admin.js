@@ -97,7 +97,7 @@ const MAX_IMAGE_BYTES = 4 * 1024 * 1024; // 4MB - حد معقول لصورة س�
 async function handleSubscriptionProof(req, res) {
   const user = await getDashboardUserFromRequest(req);
   if (!user) {
-    return res.status(401).json({ code: 'SESSION_REFRESH' });
+    return res.status(401).json({ error: 'انتهت جلسة الدخول. سجّل دخولك مرة أخرى للمتابعة.' });
   }
   const authUserId = user.authUserId;
   const telegramUserId = user.dataUserId;

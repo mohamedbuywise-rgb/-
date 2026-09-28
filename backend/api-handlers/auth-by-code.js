@@ -11,12 +11,12 @@ export default async function handler(req, res) {
   try {
     const token = (req.headers.authorization || '').replace(/^Bearer\s+/i, '').trim();
     if (!token) {
-      return res.status(401).json({ ok: false, code: 'SESSION_REFRESH' });
+      return res.status(401).json({ ok: false, error: 'لازم تسجل دخول الأول.' });
     }
 
     const { data: userData, error: authError } = await supabase.auth.getUser(token);
     if (authError || !userData?.user) {
-      return res.status(401).json({ ok: false, code: 'SESSION_REFRESH' });
+      return res.status(401).json({ ok: false, error: 'انتهت جلسة الدخول. سجّل دخولك مرة أخرى للمتابعة.' });
     }
 
     const code = String(req.body?.code || '').trim();

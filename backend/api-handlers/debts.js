@@ -4,7 +4,7 @@ import { getDashboardUserFromRequest } from '../../lib/dashboardAuth.js';
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
   const user = await getDashboardUserFromRequest(req);
-  if (!user) return res.status(401).json({ code: 'SESSION_REFRESH' });
+  if (!user) return res.status(401).json({ error: 'انتهت جلسة الدخول. سجّل دخولك مرة أخرى للمتابعة.' });
   const body = req.body || {};
   const person = String(body.person || '').trim().slice(0, 120);
   const amount = Number(body.amount);

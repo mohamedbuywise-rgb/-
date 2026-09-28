@@ -7,7 +7,7 @@ export default async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'GET only' });
 
   const user = await getDashboardUserFromRequest(req);
-  if (!user) return res.status(401).json({ code: 'SESSION_REFRESH' });
+  if (!user) return res.status(401).json({ error: 'سجّل الدخول أولاً.' });
 
   // getDashboardUserFromRequest يرجع authUserId، وليس كائن auth.users نفسه.
   // استخدام user.id هنا كان يمرر undefined إلى استعلام profiles، لذلك كان

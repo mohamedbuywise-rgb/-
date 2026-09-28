@@ -18,6 +18,7 @@ import macrodroidMacroHandler from '../backend/api-handlers/macrodroid-macro.js'
 import manualDebtHandler from '../backend/api-handlers/manual-debt.js';
 import setupHandler from '../backend/api-handlers/setup.js';
 import smsWebhookHandler from '../backend/api-handlers/sms-webhook.js';
+import subscriptionSmsWebhookHandler from '../backend/api-handlers/subscription-sms-webhook.js';
 import supportMessageHandler from '../backend/api-handlers/support-message.js';
 import telegramWebhookHandler from '../backend/api-handlers/telegram-webhook.js';
 import trialSummaryProofHandler from '../backend/api-handlers/trial-summary-proof.js';
@@ -45,6 +46,7 @@ const handlers = {
   'manual-debt': manualDebtHandler,
   setup: setupHandler,
   'sms-webhook': smsWebhookHandler,
+  'subscription-sms-webhook': subscriptionSmsWebhookHandler,
   'support-message': supportMessageHandler,
   'telegram-webhook': telegramWebhookHandler,
   'trial-summary-proof': trialSummaryProofHandler,

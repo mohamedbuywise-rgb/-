@@ -3,6 +3,8 @@ import { sendTelegramMessage, sendTelegramPhoto } from '../../lib/telegram.js';
 import { getChatIdByUserId } from '../../lib/users.js';
 import { ADMIN_TELEGRAM_ID, ADMIN_PASSWORD, SUBSCRIPTION_PRICE_EGP } from '../../lib/config.js';
 import { getDashboardUserFromRequest } from '../../lib/dashboardAuth.js';
+import { extractSubscriptionPaymentProof } from '../../lib/groq.js';
+import { tryMatchPendingProof } from '../../lib/subscriptionPayments.js';
 
 // ============ GET /api/admin  (كان /api/admin-stats) ============
 // صفحة إحصائيات خاصة بالأدمن بس (مالك المشروع). مفيش حساب Supabase/تليجرام هنا خالص —
@@ -46,7 +48,7 @@ async function handleStats(req, res) {
     const { count: approvedCount } = await supabase
       .from('subscription_proofs')
       .select('*', { count: 'exact', head: true })
-      .eq('status', 'approved');
+      .eq('status', 'activated');
     const { count: pendingCount } = await supabase
       .from('subscription_proofs')
       .select('*', { count: 'exact', head: true })
@@ -133,19 +135,32 @@ async function handleSubscriptionProof(req, res) {
   const { data: publicUrlData } = supabase.storage.from('payment-proofs').getPublicUrl(fileName);
   const imageUrl = publicUrlData?.publicUrl;
 
-  await supabase.from('subscription_proofs').insert({
+  const { data: proof, error: proofError } = await supabase.from('subscription_proofs').insert({
     telegram_user_id: telegramUserId,
     auth_user_id: authUserId,
     image_url: imageUrl,
     sender_name: senderName || null,
-  });
+  }).select('id').single();
+  if (proofError || !proof) throw proofError || new Error('تعذر حفظ إثبات الاشتراك.');
+
+  // استخراج المرجع والمبلغ من الصورة للاستخدام في المطابقة فقط؛ لا يتم التفعيل من الصورة منفردة.
+  const extracted = await extractSubscriptionPaymentProof(rawBase64, mimeType);
+  await supabase.from('subscription_proofs').update({
+    extracted_reference: extracted.reference || null,
+    extracted_amount: extracted.amount || null,
+    status: extracted.readable ? 'pending' : 'review',
+    verification_reason: extracted.readable ? 'waiting_for_owner_sms' : 'reference_or_amount_unclear',
+  }).eq('id', proof.id);
+  const proofMatch = extracted.readable ? await tryMatchPendingProof(proof.id) : { matched: false, reason: 'proof_needs_review' };
 
   // ---- إبلاغ الأدمن على تليجرام، بنفس صيغة سكرين شوت البوت العادي (أمر "فعل" جاهز) ----
   if (ADMIN_TELEGRAM_ID && imageUrl) {
     const sourceLabel = isTelegramLinked ? 'الحساب مربوط بتيليجرام' : 'حساب مستقل — غير مربوط بتيليجرام';
-    const caption = senderName
-      ? `👆 إيصال تحويل من الداشبورد (مش تليجرام).\n🔗 ${sourceLabel}\n👤 الاسم اللي بعته: <b>${senderName}</b>\n\nقارن الاسم ده باللي ظهرلك في إنستا باي، ولو تمام ابعت:\n<code>فعل ${telegramUserId}</code>`
-      : `👆 إيصال تحويل من الداشبورد (مش تليجرام) — من غير اسم.\n🔗 ${sourceLabel}\nلو اتأكدت، فعّله بـ:\n<code>فعل ${telegramUserId}</code>`;
+    const caption = proofMatch.matched
+      ? `✅ تم تفعيل الاشتراك تلقائيًا بعد تطابق المرجع والمبلغ مع SMS حساب الاستقبال.\n🔗 ${sourceLabel}\n👤 ${senderName || 'من غير اسم'}\n🧾 المرجع: <code>${extracted.reference}</code>\n💰 المبلغ: <b>${extracted.amount} ج.م</b>`
+      : senderName
+        ? `👆 إيصال تحويل من الداشبورد (مش تليجرام).\n🔗 ${sourceLabel}\n👤 الاسم اللي بعته: <b>${senderName}</b>\n🧾 المرجع المقروء: <code>${extracted.reference || 'غير واضح'}</code>\n💰 المبلغ المقروء: <b>${extracted.amount || 'غير واضح'} ج.م</b>\n\n${extracted.readable ? 'مستنيين SMS حساب الاستقبال للمطابقة التلقائية.' : 'المرجع أو المبلغ غير واضح — راجعه يدويًا.'}`
+        : `👆 إيصال تحويل من الداشبورد (مش تليجرام) — من غير اسم.\n🔗 ${sourceLabel}\n🧾 المرجع المقروء: <code>${extracted.reference || 'غير واضح'}</code>\n💰 المبلغ المقروء: <b>${extracted.amount || 'غير واضح'} ج.م</b>\n\n${extracted.readable ? 'مستنيين SMS حساب الاستقبال للمطابقة التلقائية.' : 'المرجع أو المبلغ غير واضح — راجعه يدويًا.'}`;
 
     try {
       await sendTelegramPhoto(ADMIN_TELEGRAM_ID, imageUrl, caption, 'HTML');
@@ -160,12 +175,14 @@ async function handleSubscriptionProof(req, res) {
     if (chatId) {
       await sendTelegramMessage(
         chatId,
-        '✅ وصلنا إيصال تحويلك من الداشبورد، هنتأكد ونفعّل اشتراكك خلال دقايق قليلة.'
+        proofMatch.matched
+          ? '✅ تم تفعيل اشتراكك تلقائيًا بعد مطابقة رقم المرجع والمبلغ مع رسالة البنك.'
+          : '✅ وصلنا إيصال تحويلك من الداشبورد، وهنفعّله تلقائيًا عند تطابق المرجع مع رسالة البنك؛ ولو البيانات غير واضحة هيفضل للمراجعة.'
       );
     }
   }
 
-  return res.status(200).json({ ok: true });
+  return res.status(200).json({ ok: true, autoActivated: Boolean(proofMatch.matched), reviewRequired: !proofMatch.matched });
 }
 
 // ============ Router: /api/admin ============

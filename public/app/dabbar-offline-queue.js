@@ -69,6 +69,10 @@
       lastError: null,
     };
     await withStore('readwrite', (store) => store.add(record));
+    try {
+      const registration = await navigator.serviceWorker?.ready;
+      if (registration?.sync?.register) await registration.sync.register('dabbar-outbox-sync');
+    } catch (_) { /* المتصفح لا يدعم Background Sync — تبقى مزامنة online/visibility فعالة */ }
     return record;
   }
 

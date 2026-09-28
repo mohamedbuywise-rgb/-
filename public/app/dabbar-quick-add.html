@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl" data-theme="light">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
 <title>تسجيل سريع — دبّر</title>
 <link rel="manifest" href="./manifest.json">
 <meta name="theme-color" content="#0E655B">
@@ -15,10 +15,11 @@
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html {
     width: 100%; min-width: 100%; max-width: 100%; height: 100%;
+    --app-vh: 100dvh;
     overflow-x: hidden; background: #06231F;
   }
   body {
-    margin: 0; min-height: 100%; min-height: 100dvh;
+    margin: 0; min-height: 100%; min-height: var(--app-vh);
     width: 100vw; min-width: 100vw; max-width: 100vw;
     font-family: -apple-system, "Segoe UI", Tahoma, Arial, sans-serif;
     color: #fff; display: flex; align-items: center; justify-content: center; padding: 20px;
@@ -85,7 +86,7 @@
 
   textarea {
     width: 100%; min-height: 70px; border-radius: 12px; border: none; padding: 12px 14px;
-    font-family: inherit; font-size: 14px; resize: vertical; background: rgba(255,255,255,.12); color: #fff;
+    font-family: inherit; font-size: 16px; line-height: 1.35; touch-action: manipulation; -webkit-appearance: none; resize: vertical; background: rgba(255,255,255,.12); color: #fff;
     outline: none;
   }
   textarea::placeholder { color: rgba(255,255,255,.6); }
@@ -607,10 +608,7 @@
     audio.currentTime = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width)) * audio.duration;
     updateVoicePreviewProgress();
   });
-  window.addEventListener('resize', () => {
-    drawVoiceWave($('voice-live-waveform'), [], 0, true);
-    drawVoiceWave($('voice-preview-waveform'), previewWaveform, $('voice-audio')?.duration ? $('voice-audio').currentTime / $('voice-audio').duration : 0);
-  });
+  // لا نعيد رسم الـ canvas مع resize؛ فتح كيبورد الهاتف لا يجب أن يغيّر حالة الـ textarea أو الـ focus.
 
   function pickVoiceMimeType() {
     const candidates = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus', 'audio/ogg'];
@@ -863,6 +861,21 @@
       setMode('text');
       show('input-view', true);
     }
+  })();
+</script>
+<script>
+  // visualViewport is used only as a CSS measurement; DOM nodes are never recreated while typing.
+  (() => {
+    const root = document.documentElement;
+    const vv = window.visualViewport;
+    let frame = 0, lastHeight = 0;
+    const sync = () => {
+      frame = 0;
+      const height = Math.round(vv?.height || window.innerHeight);
+      if (height && height !== lastHeight) { lastHeight = height; root.style.setProperty('--app-vh', `${height}px`); }
+    };
+    const schedule = () => { if (!frame) frame = requestAnimationFrame(sync); };
+    sync(); window.addEventListener('resize', schedule, { passive: true }); vv?.addEventListener('resize', schedule, { passive: true });
   })();
 </script>
 </body>

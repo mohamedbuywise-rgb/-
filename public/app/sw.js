@@ -1,6 +1,6 @@
 // v2: لازم نغيّر الاسم عشان أي جهاز عنده الكاش القديم (اللي كان بيحفظ ردود الـ API غلط)
 // يمسحه فورًا ويبدأ من كاش جديد فاضي — خطوة activate تحت بتمسح أي CACHE_NAME قديم تلقائي.
-const CACHE_NAME = 'dabbar-cache-v9';
+const CACHE_NAME = 'dabbar-cache-v10';
 const PRECACHE_URLS = [
   './dabbar-onboarding.html',
   './dabbar-dashboard-full.html',
@@ -9,6 +9,7 @@ const PRECACHE_URLS = [
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/badge-mono-96.png',
+  './dabbar-offline-store.js',
   './dabbar-offline-queue.js',
   './dabbar-i18n.js',
   './i18n-en.js'
@@ -33,6 +34,13 @@ self.addEventListener('activate', (event) => {
     )
   );
   self.clients.claim();
+});
+
+self.addEventListener('sync', (event) => {
+  if (event.tag !== 'dabbar-outbox-sync') return;
+  event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+    clients.forEach((client) => client.postMessage({ type: 'DABBAR_BACKGROUND_SYNC' }));
+  }));
 });
 
 self.addEventListener('push', (event) => {

@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
     <script src="./dabbar-i18n.js"></script>
     <title>لوحة التحكم والتقارير - محاسبك الشخصي</title>
     <!-- Embedded brand logo sources (logos remain their owners' trademarks; source references):
@@ -2945,6 +2945,11 @@
         #quick-manual-popup-backdrop { background: #0b1511 !important; backdrop-filter: none !important; }
         #quick-manual-popup-backdrop .quick-manual-sheet-shell { max-height: min(88dvh, calc(var(--app-vh) - 16px)); overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
         #quick-entry-manual-form input, #quick-entry-manual-form textarea, #quick-entry-manual-form select { font-size: 16px !important; line-height: 1.35; }
+        #asst-chat-input { font-size: 16px !important; line-height: 1.35; touch-action: manipulation; -webkit-appearance: none; }
+        #asst-chat-send { touch-action: manipulation; }
+        #asst-chat-input:focus { scroll-margin-bottom: 5rem; }
+        body.keyboard-open #bottom-tab-nav { display: none !important; }
+        body.keyboard-open .flex-1.overflow-y-auto { padding-bottom: max(1rem, env(safe-area-inset-bottom)) !important; }
         #quick-entry-manual-form input:focus, #quick-entry-manual-form textarea:focus, #quick-entry-manual-form select:focus { outline: 2px solid var(--pm-gold-bright, #087a59); outline-offset: 1px; }
         .quick-description-wrap { position: relative; }
         .quick-description-wrap #quick-manual-description { padding-inline-end: 3.2rem !important; }
@@ -4083,6 +4088,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
 </style>
 </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col overflow-hidden">
+    <script src="./dabbar-offline-store.js"></script>
     <script src="./dabbar-offline-queue.js"></script>
 
 
@@ -4523,8 +4529,13 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
   function focusWriter() { const b = $('quick-entry-text'); if (!b) return; b.scrollIntoView({behavior:'smooth',block:'center'}); setTimeout(() => b.click(), 250); }
   $('dabbar-coach-primary').addEventListener('click', next);
   $('dabbar-coach-secondary').addEventListener('click', () => { if (state.step === 0) close(true); else if (state.step === 1) { state.step = 2; render(); focusWriter(); } else close(false); });
-  window.addEventListener('resize', positionArrow);
-  window.addEventListener('scroll', positionArrow, true);
+  function positionArrowOnViewportChange() {
+    const active = document.activeElement;
+    if (document.body.classList.contains('keyboard-open') || /^(INPUT|TEXTAREA|SELECT)$/.test(active?.tagName || '')) return;
+    positionArrow();
+  }
+  window.addEventListener('resize', positionArrowOnViewportChange, { passive: true });
+  window.addEventListener('scroll', positionArrowOnViewportChange, { passive: true, capture: true });
   window.dabbarCoachRecord = function (drafts, result) {
     const list = Array.isArray(drafts) ? drafts : [];
     const expenses = list.filter(x => x.type === 'expense');
@@ -7956,6 +7967,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             }
         }
         window.addEventListener('online', async () => {
+            document.documentElement.dataset.connection = 'online';
             // النت رجع: نجدد الجلسة أول حاجة، وبعدين نزامن العمليات المعلّقة ونحدّث الداش
             try { const { data } = await sb.auth.refreshSession(); if (data?.session) { accessToken = data.session.access_token; currentUser = data.session.user; } } catch (e) { /* هنحاول تاني في التحديث الجاي */ }
             try { if (typeof dabbarOfflineFlush === 'function') await dabbarOfflineFlush(false); } catch (e) {}
@@ -7963,6 +7975,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
         });
 
         (async () => {
+            document.documentElement.dataset.connection = navigator.onLine ? 'online' : 'offline';
             try {
                 const session = await getSessionResilient();
                 if (!session) {
@@ -8024,9 +8037,8 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                 // Stale-While-Revalidate: أول ما ترجع للتطبيق، اعرض آخر بيانات محفوظة فورًا (من غير ما تستنى النت خالص)،
                 // وبعدين حدّث البيانات في الخلفية بهدوء من غير أي مؤشر تحميل يوقف حاجة على الشاشة.
                 try {
-                    const cacheKey = `dabbar-dashboard-cache-${currentUser?.id || 'guest'}`;
-                    const cached = JSON.parse(localStorage.getItem(cacheKey) || 'null');
-                    if (cached) renderDashboardData(cached, false);
+                    const cached = (await window.DabbarOfflineStore?.readDashboard(currentUser?.id || 'guest'))?.data || null;
+                    if (cached) renderDashboardData(cached, true);
                 } catch (e) {}
 
                 try {
@@ -8254,9 +8266,13 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             // من غير أي إشارة لحالة الأوفلاين: لو البيانات من الكاش، بنسيب آخر وقت تحديث حقيقي زي ما هو
             // بدل ما نستبدله بكلمة "أوفلاين" بتلفت النظر لحاجة مش محتاج العميل يعرفها.
             const label = document.getElementById('last-updated-label');
-            if (label && !servedFromCache) {
-                const now = new Date();
-                label.textContent = `آخر تحديث ${now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}`;
+            if (label) {
+                if (servedFromCache) {
+                    label.textContent = navigator.onLine ? 'آخر نسخة محفوظة على الجهاز — جاري التحديث' : 'وضع عدم الاتصال — آخر نسخة محفوظة على الجهاز';
+                } else {
+                    const now = new Date();
+                    label.textContent = `آخر تحديث ${now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}`;
+                }
             }
         }
 
@@ -8270,7 +8286,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             try {
                 if (!navigator.onLine) throw new TypeError('Failed to fetch'); // من غير نت: من غير ما نستنى مهلة الطلب
                 data = await fetchDashboardOnce(TIMEOUT_MS);
-                try { const raw = JSON.stringify(data); if (raw.length < 4000000) localStorage.setItem(dashboardCacheKey, raw); } catch (cacheErr) { /* مساحة التخزين ممتلئة: نكمل من غير كاش */ }
+                try { await window.DabbarOfflineStore?.saveDashboard(currentUser?.id || 'guest', data); } catch (cacheErr) { console.warn('dashboard IDB cache save failed', cacheErr); }
             } catch (e) {
                 console.error(`dashboard-data fetch failed (attempt ${attempt}/${MAX_ATTEMPTS}):`, e);
                 const isTimeoutOrNetwork = e.name === 'AbortError' || e.message === 'Failed to fetch' || !navigator.onLine;
@@ -8282,7 +8298,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
                 }
                 // أوفلاين/نت ضعيف: نعرض آخر بيانات محفوظة على الجهاز بدل شاشة الخطأ
                 let cachedData = null;
-                if (isTimeoutOrNetwork) { try { cachedData = JSON.parse(localStorage.getItem(dashboardCacheKey) || 'null'); } catch (cacheErr) { cachedData = null; } }
+                if (isTimeoutOrNetwork) { try { cachedData = (await window.DabbarOfflineStore?.readDashboard(currentUser?.id || 'guest'))?.data || null; } catch (cacheErr) { cachedData = null; } }
                 if (cachedData) {
                     data = cachedData;
                     servedFromCache = true;
@@ -12179,11 +12195,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             audio.currentTime = Math.max(0, Math.min(1, (event.clientX - rect.left) / rect.width)) * audio.duration;
             updateQuickWaveProgress();
         });
-        window.addEventListener('resize', () => {
-            drawQuickWave(document.getElementById('quick-entry-live-waveform'), [], 0, true);
-            const audio = document.getElementById('quick-entry-voice-audio');
-            drawQuickWave(document.getElementById('quick-entry-voice-waveform'), quickWavePreview, audio?.duration ? audio.currentTime / audio.duration : 0);
-        });
+        // لا نعيد رسم موجات الصوت عند resize؛ فتح كيبورد الهاتف لا يجب أن يسبب أي تحديث واجهة.
         // ============ حماية إضافية ضد تسجيل الصمت: بنراقب مستوى الصوت الفعلي لحظة بلحظة (مش بس حجم الملف بعد ما يخلص) وبنوقف التسجيل فورًا لو المايك اتقطع أو المستخدم غادر التاب ============
         let quickEntryAudioCtx = null, quickEntryAnalyser = null, quickEntrySoundCheckId = null, quickEntryHadSound = false, quickEntryVisibilityHandler = null, quickEntryFinalizeTimer = null, quickEntryStopRequested = false, quickEntryStream = null;
         function stopQuickEntrySoundMonitor() {
@@ -12431,12 +12443,12 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             }
             quickStatus(quickEntryDrafts.length > 1 ? `فهمنا ${quickEntryDrafts.length} معاملة — راجعهم ثم أكد التسجيل.` : 'راجع المبلغ والفئة ثم أكد التسجيل.');
         }
-        async function analyzeQuickEntry(payload) { if (!requireQuickEntryAccess()) return; const cycleMsgs = payload.audioBase64 ? ['🎙️ بنسمع كلامك', '🧠 بنفهم العملية', '📝 بنجهز المراجعة'] : payload.imageBase64 ? ['📸 بنقرأ الفاتورة', '🔎 بنفصّل الأصناف', '🧮 بنجهز الإجمالي'] : ['🧠 بنفهم كلامك', '🏷️ بنحدد الفئة', '📝 بنجهز المراجعة']; quickStatusCycle(cycleMsgs); try { const result = await asstApi(payload.imageBase64 ? 'entry_invoice_draft' : 'entry_draft', payload); quickDraft(result.drafts, result.transcript); } catch (e) { if (await dabbarOfflineFallback(payload, e)) return; quickStatus(e.message || 'تعذر فهم العملية.', 'error'); } }
+        async function analyzeQuickEntry(payload) { if (!requireQuickEntryAccess()) return; if (!navigator.onLine) { quickStatus('الميزة الذكية تحتاج اتصالًا بالإنترنت. استخدم «الإدخال اليدوي» لحفظ العملية الآن.', 'error'); return; } const cycleMsgs = payload.audioBase64 ? ['🎙️ بنسمع كلامك', '🧠 بنفهم العملية', '📝 بنجهز المراجعة'] : payload.imageBase64 ? ['📸 بنقرأ الفاتورة', '🔎 بنفصّل الأصناف', '🧮 بنجهز الإجمالي'] : ['🧠 بنفهم كلامك', '🏷️ بنحدد الفئة', '📝 بنجهز المراجعة']; quickStatusCycle(cycleMsgs); try { const result = await asstApi(payload.imageBase64 ? 'entry_invoice_draft' : 'entry_draft', payload); quickDraft(result.drafts, result.transcript); } catch (e) { if (await dabbarOfflineFallback(payload, e)) return; quickStatus(e.message || 'تعذر فهم العملية.', 'error'); } }
         // ============ لو مفيش نت وأنت كاتب عملية: بنحفظها على الجهاز (المبلغ + وصفك) وتتسجل أوتوماتيك لما النت يرجع ============
         async function dabbarOfflineFallback(payload, error) {
             const offline = !navigator.onLine || error?.name === 'AbortError' || error?.message === 'Failed to fetch' || (window.DabbarOfflineQueue && window.DabbarOfflineQueue.isNetworkFailure(error));
             if (!offline) return false;
-            if (!payload.text) { quickStatus('مفيش نت دلوقتي — الصوت والفاتورة محتاجين إنترنت. اكتب العملية أو استخدم الإدخال اليدوي وهتتحفظ على جهازك.', 'error'); return true; }
+            quickStatus('الميزة الذكية تحتاج اتصالًا بالإنترنت. استخدم «الإدخال اليدوي» لحفظ العملية الآن.', 'error'); return true;
             if (!window.DabbarOfflineQueue) return false;
             const normalized = String(payload.text).replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[,،](?=\d{3})/g, '');
             const amount = Number((normalized.match(/\d+(?:\.\d+)?/) || [])[0]);
@@ -12558,6 +12570,7 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
             window.DabbarOfflineQueue.refreshUI();
             document.getElementById('quick-manual-offline-sync')?.addEventListener('click', () => dabbarOfflineFlush(true));
             window.addEventListener('online', () => dabbarOfflineFlush(false));
+            navigator.serviceWorker?.addEventListener('message', (event) => { if (event.data?.type === 'DABBAR_BACKGROUND_SYNC') dabbarOfflineFlush(false); });
             document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && navigator.onLine) dabbarOfflineFlush(false); });
             // حدث 'online' مش مضمون يحصل دايمًا صح (خصوصًا مع شبكات موبايل بطيئة أو نت ضعيف بيتردد)،
             // فبنحاول كمان كل 20 ثانية طول ما الصفحة مفتوحة — flushQueue نفسها بترجع فورًا من غير أي طلب لو الطابور فاضي.
@@ -15463,9 +15476,28 @@ function dabbarReward(){
 </script>
 <script>
 (function () {
-  const setViewportUnit = () => document.documentElement.style.setProperty('--app-vh', `${window.visualViewport?.height || window.innerHeight}px`);
-  setViewportUnit(); window.addEventListener('resize', setViewportUnit, { passive: true });
-  window.visualViewport?.addEventListener('resize', setViewportUnit, { passive: true });
+  // Keyboard-safe viewport: update one CSS variable only; never rebuild DOM or touch the focused field.
+  const root = document.documentElement;
+  const vv = window.visualViewport;
+  let frame = 0;
+  let lastHeight = 0;
+  const syncViewport = () => {
+    frame = 0;
+    const height = Math.round(vv?.height || window.innerHeight);
+    if (height && height !== lastHeight) {
+      lastHeight = height;
+      root.style.setProperty('--app-vh', `${height}px`);
+    }
+    const active = document.activeElement;
+    const writing = !!active && /^(INPUT|TEXTAREA|SELECT)$/.test(active.tagName) && !active.readOnly && !active.disabled;
+    document.body.classList.toggle('keyboard-open', writing && !!vv && vv.height < window.innerHeight - 80);
+  };
+  const scheduleViewportSync = () => { if (!frame) frame = requestAnimationFrame(syncViewport); };
+  syncViewport();
+  window.addEventListener('resize', scheduleViewportSync, { passive: true });
+  vv?.addEventListener('resize', scheduleViewportSync, { passive: true });
+  document.addEventListener('focusin', scheduleViewportSync, { passive: true });
+  document.addEventListener('focusout', () => setTimeout(scheduleViewportSync, 80), { passive: true });
 })();
 </script>
 </body>

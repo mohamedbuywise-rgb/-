@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
+    <meta name="color-scheme" content="light dark">
     <script src="./dabbar-i18n.js"></script>
     <title>لوحة التحكم والتقارير - محاسبك الشخصي</title>
     <!-- Embedded brand logo sources (logos remain their owners' trademarks; source references):
@@ -25,7 +26,7 @@
 
     <!-- PWA -->
     <link rel="manifest" href="./manifest.json">
-    <meta name="theme-color" content="#08090a">
+    <meta name="theme-color" content="#f4f5f7">
     <link rel="icon" href="./icons/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="./icons/icon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="./icons/icon-180.png">
@@ -34,7 +35,8 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="دبّر">
 
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+    <script>tailwind.config = { darkMode: ['selector', '[data-theme="dark"]'] };</script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://code.iconify.design/iconify-icon/2.1.0/iconify-icon.min.js"></script>
     <script src="../vendor/modern-screenshot.js"></script>
@@ -45,7 +47,11 @@
             try {
                 var saved = localStorage.getItem('dabbar-theme');
                 // لو مفيش حاجة محفوظة، أو المحفوظ "فاتح"، نطبق الفاتح. الغامق بيتطبّق صراحةً لو هو اللي اختاره.
-                document.documentElement.setAttribute('data-theme', saved === 'dark' ? 'dark' : 'light');
+                var theme = saved === 'dark' ? 'dark' : 'light';
+                document.documentElement.setAttribute('data-theme', theme);
+                document.documentElement.style.colorScheme = theme;
+                var themeMeta = document.querySelector('meta[name="theme-color"]');
+                if (themeMeta) themeMeta.setAttribute('content', theme === 'light' ? '#f4f5f7' : '#1f2022');
             } catch (e) {}
         })();
     </script>
@@ -4086,6 +4092,28 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
 .bm-acct-chip.bm-acct-unknown { color:#fbbf24; border-color:rgba(245,158,11,.45); background:rgba(245,158,11,.1); }
 .bm-review-btn { border:1px solid rgba(245,158,11,.45); background: rgba(245,158,11,.1); color:#fbbf24 !important; border-radius:999px; padding:.15rem .55rem; font-size:10px !important; margin-top:.25rem; }
 </style>
+<style id="legacy-mobile-color-fallbacks">
+    /* Fallback palette for older Safari/WebViews without CSS color-mix(). */
+    @supports not (background-color: color-mix(in srgb, #0e8f68 10%, transparent)) {
+        :root { --legacy-gold-tint: rgba(189,242,63,.16); --legacy-clay-tint: rgba(211,106,86,.16); }
+        html[data-theme="light"] { --legacy-gold-tint: rgba(14,143,104,.14); --legacy-clay-tint: rgba(169,76,58,.14); }
+        .dabbar-metric-card, .dabbar-savings-card, .dabbar-metric-empty,
+        .dabbar-scan-box, .dabbar-premium-modal, .portfolio-asset-detail,
+        .portfolio-add-form-panel {
+            background-color: var(--pm-surface-hi, #fff) !important;
+            background-image: none !important;
+        }
+        .dabbar-metric-icon, .dabbar-savings-row2-ic, .dabbar-hdr-ic,
+        .portfolio-title-icon, .quick-entry-manual-link {
+            background-color: var(--legacy-gold-tint) !important;
+        }
+        .dabbar-metric-icon--piggy, .dabbar-metric-empty--piggy,
+        .dabbar-savings-row2-ic--piggy { background-color: var(--legacy-clay-tint) !important; }
+        .dabbar-metric-track { background-color: var(--legacy-gold-tint) !important; }
+        #daily-expense-section .dabbar-hdr-ic { background-color: var(--legacy-clay-tint) !important; }
+        .dabbar-metric-cta-btn, .dabbar-reminder-banner-cta { background-color: var(--pm-gold, #0e8f68) !important; }
+    }
+</style>
 </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col overflow-hidden">
     <script src="./dabbar-offline-store.js"></script>
@@ -6510,7 +6538,8 @@ html[data-theme="light"] #bank-movements-sheet #bank-movements-source-filters .b
 
         function applyThemeToggleUI(theme) {
             const themeMeta = document.querySelector('meta[name="theme-color"]');
-            if (themeMeta) themeMeta.setAttribute('content', theme === 'light' ? '#f6f1e7' : '#08090a');
+            document.documentElement.style.colorScheme = theme === 'light' ? 'light' : 'dark';
+            if (themeMeta) themeMeta.setAttribute('content', theme === 'light' ? '#f4f5f7' : '#1f2022');
             const icon = document.getElementById('theme-toggle-icon');
             const label = document.getElementById('theme-toggle-label');
             const track = document.getElementById('theme-toggle-track');

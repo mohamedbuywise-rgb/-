@@ -12532,6 +12532,7 @@ body { height: 100vh; }
         function playDabbarMagicSound() {
             try {
                 var c = dabbarMagicCtx();
+                if (c.state === 'suspended') { try { c.resume(); } catch (e) {} }
                 var t0 = c.currentTime;
                 var osc = c.createOscillator(), gain = c.createGain();
                 osc.type = 'sine';
@@ -12541,6 +12542,7 @@ body { height: 100vh; }
                 gain.gain.linearRampToValueAtTime(0.18, t0 + .015);
                 gain.gain.exponentialRampToValueAtTime(0.001, t0 + .22);
                 osc.connect(gain).connect(c.destination);
+                osc.onended = function () { try { c.suspend(); } catch (e) {} }; // مانسيبوش شغال ومسيطر على الصوت
                 osc.start(t0); osc.stop(t0 + .25);
             } catch (e) {}
         }
@@ -13488,6 +13490,8 @@ body { height: 100vh; }
             voicePipelineMod = false;
             return false;
         }
+        // تحميل مسبق: عشان أول ضغطة ماتستناش import قبل ما Web Speech يبدأ
+        window.addEventListener('load', () => setTimeout(() => { loadVoicePipeline().catch(() => {}); }, 1500));
         const VOICE_ERROR_MESSAGES = {
             'mic-denied': 'الميكروفون مش مسموح. اسمح للتطبيق بالميكروفون من إعدادات المتصفح.',
             'silence': 'ما سمعتش حاجة. قرّب من الميكروفون وجرب تاني.',
@@ -13501,7 +13505,7 @@ body { height: 100vh; }
             if (!requireQuickEntryAccess()) return;
             if (quickVoiceSession) return;
             if (quickEntryRecorder?.state === 'recording') return;
-            const mod = await loadVoicePipeline();
+            const mod = voicePipelineMod || await loadVoicePipeline(); // لو اتحمّل مسبقًا: مفيش await، فالبداية بتحصل جوه الضغطة مباشرة
             if (!mod) return legacyQuickVoiceStart(); // الملف مش موجود جنب الداشبورد: نرجع للتسجيل القديم
             if (!navigator.mediaDevices?.getUserMedia) return quickStatus('المتصفح ده مش بيدعم التسجيل الصوتي.', 'error');
             let lastError = null;

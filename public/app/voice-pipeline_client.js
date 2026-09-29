@@ -1,23 +1,23 @@
-// voice-pipeline.client.js — الجزء اللي بيشتغل في المتصفح من استراتيجية الصوت في "دبّر"
+// voice-pipeline_client.js — الجزء اللي بيشتغل في المتصفح من استراتيجية الصوت في "دبّر"
 //
-// الفكرة:
-//   1) Web Speech API (مجاني) بلهجة مصرية ar-EG، ومعاه تسجيل صوت موازي بـ MediaRecorder كاحتياطي.
-//   2) لو النص الناتج سليم (isUsableTranscript) -> بيتبعت *كنص بس* للتصنيف (موديل رخيص). مفيش صوت بيتبعت خالص.
-//   3) لو Web Speech فشل / مش مدعوم / النص طلاسم -> التسجيل بيتبعت للسيرفر (Gemini ثم Whisper Large V3).
-//   4) لو الميكروفون سكوت تقريبًا -> مفيش نداء مدفوع خالص، بنقول للمستخدم "ما سمعتش حاجة".
+// الفكرة (مرحلتين، الميكروفون بيتفتح مرة واحدة في كل مرحلة):
+//   1) Web Speech API (مجاني) لوحده، بلهجة مصرية ar-EG، من غير أي تسجيل موازي.
+//      (على أندرويد فتح الميكروفون للتسجيل مع Web Speech في نفس الوقت كان بيخلّي Web Speech يسمع صمت.)
+//      لو النص سليم (isUsableTranscript) -> بيتبعت *كنص بس* للتصنيف (موديل رخيص). مفيش صوت بيتبعت خالص.
+//   2) لو Web Speech فشل / مش مدعوم / النص طلاسم -> بيبدأ تسجيل تاني (status = 'retry' ثم 'listening')
+//      والمستخدم يتكلم تاني ويدوس إيقاف -> الصوت بيتبعت للسيرفر (Gemini ثم Whisper Large V3).
+//   3) لو الميكروفون سكوت تقريبًا في مرحلة التسجيل -> مفيش نداء مدفوع، بنقول "ما سمعتش حاجة".
 //
 // الملف مستقل عن باقي الداشبورد: انت اللي بتديله دالتين (classifyText / classifyAudio) بيلفّوا الـ fetch بتاعك الموجود.
 //
-// مثال استخدام في الداشبورد:
-//   import { startVoiceCapture } from './voice-pipeline.client.js';
 //   const session = startVoiceCapture({
-//     onStatus: (s) => setMicState(s),          // 'starting' | 'listening' | 'processing' | 'uploading'
+//     onStatus: (s) => setMicState(s),   // 'starting' | 'listening' | 'processing' | 'retry' | 'uploading'
 //     onInterim: (t) => showLiveText(t),
-//     classifyText:  async (text) => (await fetch('/api/…', {…body: {text}})).json(),
-//     classifyAudio: async ({ audioBase64, mimeType }) => (await fetch('/api/…', {…})).json(),
+//     classifyText:  async (text) => ({ transactions }),
+//     classifyAudio: async ({ audioBase64, mimeType }) => ({ success, transcript, transactions, provider }),
 //   });
 //   stopBtn.onclick = () => session.stop();
-//   const result = await session.result;       // { ok, source, transcript, transactions, provider, error }
+//   const result = await session.result;  // { ok, source, transcript, transactions, provider, error, debug }
 
 export const VOICE_DEFAULTS = {
   langs: ['ar-EG', 'ar'],   // اللهجة المصرية أولًا، مش لغة الجهاز
@@ -71,6 +71,7 @@ function createPeakMeter(stream) {
   const Ctx = window.AudioContext || window.webkitAudioContext;
   if (!Ctx) return { getPeak: () => 1, close() {} }; // مفيش قياس متاح: منمنعش الفولباك
   let peak = 0;
+  const meterStart = Date.now();
   let timer = null;
   let ctx = null;
   try {
@@ -82,6 +83,7 @@ function createPeakMeter(stream) {
     const data = new Uint8Array(analyser.fftSize);
     timer = setInterval(() => {
       analyser.getByteTimeDomainData(data);
+      if (Date.now() - meterStart < 400) return; // تجاهل طقّة فتح الميكروفون
       for (let i = 0; i < data.length; i += 1) peak = Math.max(peak, Math.abs(data[i] - 128) / 128);
     }, 80);
   } catch {
@@ -102,19 +104,22 @@ export function startVoiceCapture(options = {}) {
   const { onStatus = () => {}, onInterim = () => {}, classifyText, classifyAudio } = opt;
 
   let cancelled = false;
-  let stopRequested = false;
   let finished = false;
+  let phase = 'speech'; // 'speech' | 'record'
+  let speechStopRequested = false;
+  let speechDecided = false;
+  let recordStopRequested = false;
   let recognition = null;
   let recorder = null;
   let stream = null;
   let meter = null;
   let maxTimer = null;
   let graceTimer = null;
-  let debug = null; // مؤقت: للتشخيص بس
+  const debug = {}; // مؤقت: للتشخيص بس
   const chunks = [];
 
   // حالة Web Speech
-  const speech = { segments: [], confidences: [], error: null, ended: false, langIndex: 0, retrying: false, events: [] };
+  const speech = { segments: [], confidences: [], error: null, ended: false, langIndex: 0, retrying: false, events: [], audioStartAt: 0, pendingStop: false, t0: Date.now() };
 
   let resolveResult;
   const result = new Promise((resolve) => { resolveResult = resolve; });
@@ -163,72 +168,28 @@ export function startVoiceCapture(options = {}) {
     return text;
   };
 
-  // ---- بدء Web Speech بلهجة مصرية، مع تجربة ar لو ar-EG مش مدعومة ----
-  const startRecognition = () => {
-    const Ctor = window.SpeechRecognition || window.webkitSpeechRecognition;
-    recognition = new Ctor();
-    recognition.lang = opt.langs[speech.langIndex] || 'ar-EG';
-    recognition.continuous = false;
-    recognition.interimResults = true;
-    recognition.maxAlternatives = 3;
-
-    ['start', 'audiostart', 'soundstart', 'speechstart', 'speechend', 'audioend', 'end'].forEach((n) => {
-      recognition.addEventListener(n, () => speech.events.push(n));
-    });
-    recognition.onresult = (event) => {
-      speech.events.push('result');
-      collectFromEvent(event);
-      let interim = '';
-      for (let i = 0; i < event.results.length; i += 1) interim += `${event.results[i][0].transcript} `;
-      onInterim(interim.trim());
-    };
-    recognition.onerror = (event) => {
-      speech.events.push(`error:${event.error}`); // بنسجّل حتى 'aborted' عشان التشخيص
-      // 'aborted' بيحصل لما احنا نلغي. 'no-speech' هيتعالج بفحص مستوى الصوت.
-      if (event.error === 'language-not-supported' && speech.langIndex + 1 < opt.langs.length) {
-        speech.langIndex += 1;
-        speech.retrying = true; // المتصفح هيطلّع onend بعد الخطأ، وهناك هنعيد المحاولة باللغة التالية
-        return;
-      }
-      if (event.error !== 'aborted') speech.error = event.error;
-    };
-    recognition.onend = () => {
-      if (speech.retrying) {
-        speech.retrying = false;
-        if (!finished && !stopRequested) startRecognition();
-        return;
-      }
-      speech.ended = true;
-      // Web Speech بيقفل لوحده بعد الصمت — نقفل التسجيل ونكمّل
-      if (!stopRequested) requestStop();
-    };
-    try {
-      recognition.start();
-    } catch (err) {
-      speech.error = 'start-failed';
-      speech.ended = true;
-    }
-  };
-
-  // ---- إنهاء التسجيل واتخاذ القرار ----
-  const decide = async () => {
+  // ================= المرحلة 1: Web Speech لوحده =================
+  const decideSpeech = async () => {
+    if (speechDecided || finished) return;
+    speechDecided = true;
+    clearTimeout(maxTimer);
+    clearTimeout(graceTimer);
     if (cancelled) return finish({ ok: false, source: null, error: 'cancelled' });
-    onStatus('processing');
-    debug = {
+
+    const text = webSpeechText();
+    debug.speech = {
       supported: isWebSpeechSupported(),
       lang: recognition?.lang,
       speechError: speech.error,
       events: speech.events.join(','),
       segments: speech.segments,
       confidences: speech.confidences,
-      usable: !!webSpeechText(),
-      peak: Number((meter?.getPeak() || 0).toFixed(2)),
-      audioBytes: chunks.reduce((n, c) => n + c.size, 0),
+      usable: !!text,
     };
 
-    // (1) محاولة Web Speech: نص سليم -> تصنيف نصي رخيص، وخلاص
-    const text = webSpeechText();
+    // نص سليم -> تصنيف نصي رخيص، وخلاص
     if (text && typeof classifyText === 'function') {
+      onStatus('processing');
       try {
         const out = await classifyText(text);
         return finish({
@@ -244,18 +205,147 @@ export function startVoiceCapture(options = {}) {
       }
     }
 
-    // (2) الفولباك السحابي — بس لو فعلًا فيه كلام اتسجّل
+    // الميكروفون نفسه مرفوض: التسجيل هيفشل بنفس السبب
+    if (speech.error === 'not-allowed') return finish({ ok: false, source: null, error: 'mic-denied' });
+
+    // Web Speech ما جابش نص: نبدأ مرحلة التسجيل ونطلب من المستخدم يتكلم تاني
+    return startRecordPhase(true);
+  };
+
+  const startRecognition = () => {
+    const Ctor = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const rec = new Ctor();
+    recognition = rec;
+    rec.lang = opt.langs[speech.langIndex] || 'ar-EG';
+    rec.continuous = false;
+    rec.interimResults = true;
+    rec.maxAlternatives = 3;
+
+    ['start', 'audiostart', 'soundstart', 'speechstart', 'speechend', 'audioend', 'end'].forEach((n) => {
+      rec.addEventListener(n, () => {
+        speech.events.push(`${n}@${Date.now() - speech.t0}`);
+        if (n === 'audiostart') {
+          speech.audioStartAt = Date.now();
+          onStatus('listening'); // المحرك بدأ يسمع فعلًا، مش قبل كده
+          if (speech.pendingStop) doSpeechStop();
+        }
+      });
+    });
+    rec.onresult = (event) => {
+      speech.events.push('result');
+      collectFromEvent(event);
+      let interim = '';
+      for (let i = 0; i < event.results.length; i += 1) interim += `${event.results[i][0].transcript} `;
+      onInterim(interim.trim());
+    };
+    rec.onerror = (event) => {
+      speech.events.push(`error:${event.error}`); // بنسجّل حتى 'aborted' عشان التشخيص
+      if (event.error === 'language-not-supported' && speech.langIndex + 1 < opt.langs.length) {
+        speech.langIndex += 1;
+        speech.retrying = true; // المتصفح هيطلّع onend بعد الخطأ، وهناك هنعيد المحاولة باللغة التالية
+        return;
+      }
+      if (event.error !== 'aborted') speech.error = event.error;
+    };
+    rec.onend = () => {
+      if (rec !== recognition) return;
+      if (speech.retrying) {
+        speech.retrying = false;
+        if (!finished && !speechStopRequested) startRecognition();
+        return;
+      }
+      speech.ended = true;
+      // Web Speech بيقفل لوحده بعد الصمت أو بعد ما المستخدم يوقف: نقرر
+      decideSpeech();
+    };
+    try {
+      rec.start();
+    } catch (err) {
+      speech.error = 'start-failed';
+      speech.ended = true;
+      setTimeout(decideSpeech, 0);
+    }
+  };
+
+  const MIN_LISTEN_MS = 1200;
+
+  const doSpeechStop = () => {
+    if (speechStopRequested) return;
+    const wait = speech.audioStartAt ? speech.audioStartAt + MIN_LISTEN_MS - Date.now() : 0;
+    if (wait > 0) { setTimeout(doSpeechStop, wait); return; }
+    speechStopRequested = true;
+    clearTimeout(maxTimer);
+    if (recognition && !speech.ended) {
+      try { recognition.stop(); } catch { /* ignore */ }
+      graceTimer = setTimeout(() => {
+        try { recognition.abort(); } catch { /* ignore */ }
+        speech.ended = true;
+        decideSpeech();
+      }, opt.stopGraceMs);
+    } else {
+      decideSpeech();
+    }
+  };
+
+  const stopSpeech = () => {
+    if (speechStopRequested) return;
+    // لو المحرك لسه ما بدأش يسمع، نستنى audiostart وبعدها نوقف
+    if (!speech.audioStartAt && recognition && !speech.ended) { speech.pendingStop = true; return; }
+    doSpeechStop();
+  };
+
+  // ================= المرحلة 2: تسجيل للسيرفر =================
+  const startRecordPhase = async (afterSpeechFailure) => {
+    phase = 'record';
+    if (typeof classifyAudio !== 'function') {
+      return finish({ ok: false, source: null, error: afterSpeechFailure ? 'silence' : 'no-fallback' });
+    }
+    if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
+      return finish({ ok: false, source: null, error: 'unsupported' });
+    }
+    if (afterSpeechFailure) onStatus('retry');
+    try {
+      // نفس إعدادات الداشبورد القديمة (echoCancellation/autoGainControl مقفولين) لأنها اتجرّبت على أندرويد
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          audio: { channelCount: 1, noiseSuppression: true, echoCancellation: false, autoGainControl: false },
+        });
+      } catch (innerErr) {
+        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      }
+    } catch (err) {
+      return finish({ ok: false, source: null, error: 'mic-denied' });
+    }
+    if (cancelled || finished) { cleanup(); return undefined; }
+
+    meter = createPeakMeter(stream);
+    try {
+      const mime = pickRecorderMime();
+      recorder = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
+      recorder.ondataavailable = (e) => { if (e.data && e.data.size) chunks.push(e.data); };
+      recorder.start(250);
+    } catch (err) {
+      return finish({ ok: false, source: null, error: 'unsupported' });
+    }
+    onStatus('listening');
+    maxTimer = setTimeout(stopRecord, opt.maxSeconds * 1000);
+    return undefined;
+  };
+
+  const decideRecord = async () => {
+    if (cancelled) return finish({ ok: false, source: null, error: 'cancelled' });
+    onStatus('processing');
+    debug.record = {
+      peak: Number((meter?.getPeak() || 0).toFixed(2)),
+      audioBytes: chunks.reduce((n, c) => n + c.size, 0),
+    };
     const blob = chunks.length ? new Blob(chunks, { type: chunks[0].type || recorder?.mimeType || 'audio/webm' }) : null;
     if (!blob || blob.size < opt.minAudioBytes) {
-      return finish({ ok: false, source: null, error: speech.error === 'not-allowed' ? 'mic-denied' : 'silence' });
+      return finish({ ok: false, source: null, error: 'silence' });
     }
     if (meter && meter.getPeak() < opt.minPeakLevel) {
       return finish({ ok: false, source: null, error: 'silence' }); // منصرفش على صمت
     }
-    if (typeof classifyAudio !== 'function') {
-      return finish({ ok: false, source: null, error: 'no-fallback' });
-    }
-
     try {
       onStatus('uploading');
       const mimeType = (blob.type || 'audio/webm').split(';')[0];
@@ -276,71 +366,30 @@ export function startVoiceCapture(options = {}) {
     }
   };
 
-  function requestStop() {
-    if (stopRequested) return;
-    stopRequested = true;
+  function stopRecord() {
+    if (recordStopRequested) return;
+    recordStopRequested = true;
     clearTimeout(maxTimer);
-    try { if (recognition && !speech.ended) recognition.stop(); } catch { /* ignore */ }
-
-    const stopRecorder = () => {
-      if (recorder && recorder.state !== 'inactive') {
-        recorder.onstop = () => { decide(); };
-        try { recorder.stop(); } catch { decide(); }
-      } else {
-        decide();
-      }
-    };
-
-    if (recognition && !speech.ended) {
-      // نستنى Web Speech يسلّم النتيجة النهائية (أو ينتهي وقت السماح) قبل ما نقفل التسجيل
-      recognition.onend = () => { speech.ended = true; clearTimeout(graceTimer); stopRecorder(); };
-      graceTimer = setTimeout(() => {
-        try { recognition.abort(); } catch { /* ignore */ }
-        speech.ended = true;
-        stopRecorder();
-      }, opt.stopGraceMs);
+    if (recorder && recorder.state !== 'inactive') {
+      recorder.onstop = () => { decideRecord(); };
+      try { recorder.stop(); } catch { decideRecord(); }
     } else {
-      stopRecorder();
+      decideRecord();
     }
   }
 
   // ---- التشغيل ----
-  (async () => {
-    onStatus('starting');
-    try {
-      stream = await navigator.mediaDevices.getUserMedia({
-        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-      });
-    } catch (err) {
-      return finish({ ok: false, source: null, error: 'mic-denied' });
-    }
-    if (cancelled) return finish({ ok: false, source: null, error: 'cancelled' });
-
-    meter = createPeakMeter(stream);
-
-    // تسجيل موازي كاحتياطي. لو فشل (بعض المتصفحات/iOS) بنكمّل بـ Web Speech لوحده.
-    try {
-      const mime = pickRecorderMime();
-      recorder = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
-      recorder.ondataavailable = (e) => { if (e.data && e.data.size) chunks.push(e.data); };
-      recorder.start(250);
-    } catch (err) {
-      recorder = null;
-    }
-
-    if (isWebSpeechSupported()) {
-      startRecognition();
-    } else if (!recorder) {
-      return finish({ ok: false, source: null, error: 'unsupported' });
-    }
-
-    onStatus('listening');
-    maxTimer = setTimeout(requestStop, opt.maxSeconds * 1000);
-  })();
+  onStatus('starting');
+  if (isWebSpeechSupported()) {
+    startRecognition();
+    maxTimer = setTimeout(stopSpeech, opt.maxSeconds * 1000);
+  } else {
+    startRecordPhase(false);
+  }
 
   return {
     result,
-    stop: () => requestStop(),
+    stop: () => { if (phase === 'speech') stopSpeech(); else stopRecord(); },
     cancel: () => {
       cancelled = true;
       try { if (recognition) recognition.abort(); } catch { /* ignore */ }

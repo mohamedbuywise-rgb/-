@@ -63,6 +63,7 @@ export default async function handler(req, res) {
     topCategoryName: breakdown[0]?.name || '—',
     comparisonLine,
     categories: breakdown,
+    expenses, // للتفاصيل اليومية (القالب بيرتبها من ١ لآخر الشهر)
     flow: { byCurrency: flowByCurrency },
   });
 

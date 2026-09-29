@@ -7612,10 +7612,17 @@ body { height: 100vh; }
         }
 
         async function getPushRegistration() {
-            if (pushRegistrationPromise) return pushRegistrationPromise;
             if (!('serviceWorker' in navigator)) return null;
-            pushRegistrationPromise = navigator.serviceWorker.ready;
-            return pushRegistrationPromise;
+            let reg = null;
+            try { reg = pushRegistrationPromise ? await pushRegistrationPromise : null; } catch (e) { reg = null; }
+            if (reg) return reg;
+            // التسجيل الأول فشل (نت بطيء مثلًا): ما نخزنش null — نحاول نجيب التسجيل الموجود أو نسجّل تاني
+            pushRegistrationPromise = null;
+            try { reg = await navigator.serviceWorker.getRegistration('/app/'); } catch (e) { reg = null; }
+            if (!reg) { try { reg = await navigator.serviceWorker.register('/app/sw.js', { scope: '/app/' }); } catch (e) { reg = null; } }
+            if (reg && !reg.active) { try { reg = await Promise.race([navigator.serviceWorker.ready, new Promise((r) => setTimeout(() => r(reg), 8000))]); } catch (e) { /* ignore */ } }
+            if (reg) pushRegistrationPromise = Promise.resolve(reg);
+            return reg || null;
         }
 
         // ============ الوصول السريع (صوت/كتابة) — إشعار ثابت بزرارين، أقرب بديل ممكن لبلاطة Quick Settings على الويب ============
@@ -7757,7 +7764,20 @@ body { height: 100vh; }
                     return;
                 }
                 const registration = await getPushRegistration();
+                if (!registration) {
+                    // مش قادرين نقرا حالة الجهاز دلوقتي (نت/Service Worker): ما نغيّرش الشاشة ونحاول تاني بعد شوية
+                    pushStatus('بنتحقق من حالة الإشعارات... لو النت ضعيف هنعيد المحاولة.');
+                    setTimeout(() => { refreshPushUI().catch(() => {}); }, 8000);
+                    return;
+                }
                 let subscription = await registration?.pushManager.getSubscription();
+                // اشتراك الجهاز ضاع (كروم مسحه) والمستخدم كان مفعّلها والصلاحية لسه موجودة: نرجّعه بصمت
+                try {
+                    if (!subscription && localStorage.getItem(pushIntentKey()) === 'on' && Notification.permission === 'granted' && pushPublicKey) {
+                        subscription = await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(pushPublicKey) });
+                        await pushApi('POST', { subscription: subscription.toJSON() });
+                    }
+                } catch (healErr) { console.warn('push auto-resubscribe failed:', healErr); }
                 let syncNote = '';
                 if (subscription) {
                     // إصلاح تلقائي: لو الجهاز مشترك في المتصفح بس الخادم مش شايف الاشتراك (أو شايفه معطّل، أو اتعمل بمفاتيح VAPID قديمة)
@@ -7881,6 +7901,7 @@ body { height: 100vh; }
             }
         }
         setTimeout(dabbarSilentPushHeal, 6000);
+        document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') setTimeout(dabbarSilentPushHeal, 1500); });
 
         let pushSaveResetTimer = null;
         function setPushSaveState(state, text) {
@@ -8042,6 +8063,7 @@ body { height: 100vh; }
 
             document.getElementById('push-notifications-toggle')?.addEventListener('click', async () => {
                 const registration = await getPushRegistration();
+                if (!registration) { pushStatus('مش قادر أوصل لخدمة الإشعارات دلوقتي. تأكد من النت وجرب تاني.', 'error'); return; }
                 const subscription = await registration?.pushManager.getSubscription();
                 if (subscription) {
                     await disablePushNotifications();
@@ -13481,7 +13503,27 @@ body { height: 100vh; }
         };
         // ============ مسار الصوت الجديد: Web Speech (مجاني) ثم فولباك للسيرفر — voice-pipeline.client.js ============
         let quickVoiceSession = null, voicePipelineMod = null;
-        const VOICE_DEBUG_ALERT = true; // TEMP للتشخيص: بيطلّع alert بحالة Web Speech بعد كل تسجيل. اقفله (false) بعد ما نعرف السبب.
+        // ============ موجة صوت متحركة أثناء Web Speech (الميكروفون مشغول بالتعرّف فمنفتحوش تاني عليه) ============
+        let speechWaveRaf = null, speechWaveActiveUntil = 0;
+        function startSpeechWave() {
+            stopSpeechWave();
+            let level = 0.08;
+            const N = 56;
+            const frame = (t) => {
+                const active = performance.now() < speechWaveActiveUntil;
+                level += ((active ? 0.62 + Math.random() * 0.33 : 0.07) - level) * (active ? 0.35 : 0.12);
+                const vals = new Array(N);
+                for (let i = 0; i < N; i++) {
+                    const env = 0.35 + 0.65 * Math.sin((i / (N - 1)) * Math.PI); // أعلى في النص
+                    const w = 0.5 + 0.5 * Math.sin(t / 130 + i * 0.75);
+                    vals[i] = level * env * (0.4 + 0.6 * w) * (active ? 0.7 + Math.random() * 0.3 : 1);
+                }
+                drawQuickWave(document.getElementById('quick-entry-live-waveform'), vals, 0, true);
+                speechWaveRaf = requestAnimationFrame(frame);
+            };
+            speechWaveRaf = requestAnimationFrame(frame);
+        }
+        function stopSpeechWave() { if (speechWaveRaf) cancelAnimationFrame(speechWaveRaf); speechWaveRaf = null; speechWaveActiveUntil = 0; }
         async function loadVoicePipeline() {
             if (voicePipelineMod !== null) return voicePipelineMod;
             for (const path of ['./voice-pipeline.client.js', './voice-pipeline_client.js']) {
@@ -13514,8 +13556,10 @@ body { height: 100vh; }
             quickShow('quick-entry-voice-preview', false);
             const stopTimer = () => { clearInterval(quickEntryTimer); quickEntryTimer = null; };
             const session = mod.startVoiceCapture({
+                onActivity: (on) => { speechWaveActiveUntil = on ? performance.now() + 900 : 0; },
                 onStatus: (s) => {
                     if (s === 'listening') {
+                        startSpeechWave();
                         quickShow('quick-entry-recording', true);
                         quickStatus('بسمعك.. اتكلم.');
                         setQuickMagic('recording');
@@ -13526,7 +13570,7 @@ body { height: 100vh; }
                             if (el) el.textContent = `00:${String(quickEntrySeconds).padStart(2, '0')}`;
                         }, 1000);
                     } else if (s === 'processing' || s === 'uploading') {
-                        stopTimer();
+                        stopTimer(); stopSpeechWave();
                         quickShow('quick-entry-recording', false);
                         quickStatusCycle(['بفهم كلامك', 'بطلّع العمليات', 'ثواني كده'], 450);
                     }
@@ -13547,7 +13591,7 @@ body { height: 100vh; }
             quickVoiceSession = null;
             stopTimer();
             quickShow('quick-entry-recording', false);
-            if (VOICE_DEBUG_ALERT && result.error !== 'cancelled') { try { alert(JSON.stringify(result.debug)); } catch (e) { /* ignore */ } }
+            stopSpeechWave();
             if (result.error === 'cancelled') { quickStatus(''); return; }
             if (result.ok) { quickDraft(result.transactions, result.transcript); return; }
             quickStatus((result.error === 'classify-failed' || result.error === 'network') && lastError?.message ? lastError.message : (VOICE_ERROR_MESSAGES[result.error] || 'حصل خطأ في التسجيل. جرب تاني.'), 'error');

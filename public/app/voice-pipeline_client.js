@@ -101,7 +101,7 @@ function createPeakMeter(stream) {
 // بتبدأ جلسة تسجيل. بترجّع { stop, cancel, result } — result Promise بيتحل دايمًا (مش بيرمي).
 export function startVoiceCapture(options = {}) {
   const opt = { ...VOICE_DEFAULTS, ...options };
-  const { onStatus = () => {}, onInterim = () => {}, classifyText, classifyAudio } = opt;
+  const { onStatus = () => {}, onInterim = () => {}, onActivity = () => {}, classifyText, classifyAudio } = opt;
 
   let cancelled = false;
   let finished = false;
@@ -119,7 +119,7 @@ export function startVoiceCapture(options = {}) {
   const chunks = [];
 
   // حالة Web Speech
-  const speech = { segments: [], confidences: [], error: null, ended: false, langIndex: 0, retrying: false, events: [], audioStartAt: 0, pendingStop: false, t0: Date.now() };
+  const speech = { segments: [], confidences: [], prevSegments: [], prevConfs: [], restarts: 0, startedAt: 0, error: null, ended: false, langIndex: 0, retrying: false, events: [], audioStartAt: 0, pendingStop: false, t0: Date.now() };
 
   let resolveResult;
   const result = new Promise((resolve) => { resolveResult = resolve; });
@@ -154,8 +154,9 @@ export function startVoiceCapture(options = {}) {
       finals.push(String(chosen.transcript || '').trim());
       if (chosen.confidence > 0) confs.push(chosen.confidence);
     }
-    speech.segments = finals;
-    speech.confidences = confs;
+    // بنضيف على اللي اتجمع في الجلسات السابقة (لو المحرك اتقفل واتفتح تاني وسط الكلام)
+    speech.segments = [...speech.prevSegments, ...finals];
+    speech.confidences = [...speech.prevConfs, ...confs];
   };
 
   const webSpeechText = () => {
@@ -217,11 +218,12 @@ export function startVoiceCapture(options = {}) {
     const rec = new Ctor();
     recognition = rec;
     rec.lang = opt.langs[speech.langIndex] || 'ar-EG';
-    rec.continuous = false;
+    rec.continuous = true; // مايقفلش لوحده عند أول وقفة كلام — بيكمّل لحد ما المستخدم يدوس "إيقاف وتحليل"
+    speech.startedAt = Date.now();
     rec.interimResults = true;
     rec.maxAlternatives = 3;
 
-    ['start', 'audiostart', 'soundstart', 'speechstart', 'speechend', 'audioend', 'end'].forEach((n) => {
+    ['start', 'audiostart', 'soundstart', 'soundend', 'speechstart', 'speechend', 'audioend', 'end'].forEach((n) => {
       rec.addEventListener(n, () => {
         speech.events.push(`${n}@${Date.now() - speech.t0}`);
         if (n === 'audiostart') {
@@ -229,11 +231,14 @@ export function startVoiceCapture(options = {}) {
           onStatus('listening'); // المحرك بدأ يسمع فعلًا، مش قبل كده
           if (speech.pendingStop) doSpeechStop();
         }
+        if (n === 'soundstart' || n === 'speechstart') onActivity(true);
+        if (n === 'speechend' || n === 'soundend') onActivity(false);
       });
     });
     rec.onresult = (event) => {
       speech.events.push('result');
       collectFromEvent(event);
+      onActivity(true);
       let interim = '';
       for (let i = 0; i < event.results.length; i += 1) interim += `${event.results[i][0].transcript} `;
       onInterim(interim.trim());
@@ -254,8 +259,20 @@ export function startVoiceCapture(options = {}) {
         if (!finished && !speechStopRequested) startRecognition();
         return;
       }
+      // المتصفح قفل المحرك لوحده (صمت/حد زمني) والمستخدم لسه ما ضغطش إيقاف: نفتحه تاني ونكمّل
+      const fatal = ['not-allowed', 'service-not-allowed', 'audio-capture', 'network'].includes(speech.error);
+      if (!speechStopRequested && !cancelled && !finished && !fatal && speech.restarts < 60) {
+        const quick = Date.now() - speech.startedAt < 400; // قفل فوري = مشكلة، مانعملش loop سريع
+        speech.restarts += 1;
+        speech.prevSegments = speech.segments.slice();
+        speech.prevConfs = speech.confidences.slice();
+        speech.events.push('restart');
+        onActivity(false);
+        setTimeout(() => { if (!finished && !speechStopRequested && !cancelled) startRecognition(); }, quick ? 400 : 60);
+        return;
+      }
       speech.ended = true;
-      // Web Speech بيقفل لوحده بعد الصمت أو بعد ما المستخدم يوقف: نقرر
+      // اتقفل بعد ما المستخدم ضغط إيقاف (أو خطأ نهائي): نقرر
       decideSpeech();
     };
     try {

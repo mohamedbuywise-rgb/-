@@ -279,6 +279,15 @@ async function saveChatMessage(userId, sessionId, role, message) {
   if (error) console.error('saveChatMessage error:', JSON.stringify(error));
 }
 
+async function saveChatPair(userId, sessionId, question, answer) {
+  const now = Date.now();
+  const { error } = await supabase.from('chat_messages').insert([
+    { user_id: userId, session_id: sessionId, role: 'user', message: String(question || '').slice(0, 4000), created_at: new Date(now).toISOString() },
+    { user_id: userId, session_id: sessionId, role: 'assistant', message: String(answer || '').slice(0, 4000), created_at: new Date(now + 1).toISOString() },
+  ]);
+  if (error) console.error('saveChatPair error:', JSON.stringify(error));
+}
+
 // action = "chat_history"  { sessionId? } — بيتنادى عند فتح شاشة "اسأل دبّر" عشان يعرض المحادثة القديمة
 async function handleChatHistory(userId, body, res) {
   const sessionId = String(body.sessionId || DEFAULT_SESSION_ID).slice(0, 80);
@@ -346,9 +355,9 @@ async function handleAsk(userId, body, res) {
   if (failed) {
     await refundUsage(userId, 'chat');
   } else {
-    // بنحفظ السؤال والرد في الخلفية بصمت — من غير ما ننتظرهم قبل ما نرجّع الرد للمستخدم (أسرع للواجهة)
-    saveChatMessage(userId, sessionId, 'user', question).catch(() => {});
-    saveChatMessage(userId, sessionId, 'assistant', answer).catch(() => {});
+    // لازم نستنى الحفظ قبل الرد: على Vercel الدالة بتتجمّد بعد res فبيتلغي أي insert في الخلفية (ده كان سبب اختفاء التاريخ).
+    // insert واحد للرسالتين بترتيب created_at مضمون.
+    await saveChatPair(userId, sessionId, question, answer).catch(() => {});
   }
   return res.status(200).json({
     answer,

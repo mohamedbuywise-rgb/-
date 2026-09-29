@@ -26,11 +26,99 @@ export const VOICE_DEFAULTS = {
   minPeakLevel: 0.04,       // أقل مستوى صوت (0..1) يعتبر إن فيه كلام فعلًا
   minAudioBytes: 1500,      // نفس VOICE_MIN_AUDIO_BYTES في config.js
   stopGraceMs: 4000,        // أقصى انتظار بعد stop() لحد ما Web Speech يقفل
+  maxChars: 600,            // أقصى طول نص يتبعت للتصنيف (30 ثانية كلام ≈ 450 حرف)
 };
 
 const ARABIC_LETTERS = /[\u0600-\u06FF]/;
 const MEANINGFUL_CHARS = /[\u0600-\u06FFa-zA-Z0-9\u0660-\u0669]/g;
 const REFUSAL_HINTS = /(لا أستطيع|لا استطيع|مقدرش|عذرًا|عذرا|آسف|i can't|i cannot|unable to|sorry)/i;
+
+// ============ عدّة تنضيف نص Web Speech (مشكلة التكرار على أندرويد) ============
+// كروم أندرويد مع continuous=true بيرجّع كل نتيجة *تراكمية*: "بقول" -> "بقول لك" -> "بقول لك النهارده"...
+// وأحيانًا الكلمات نفسها بتتعدّل بين نتيجة والتانية. الحماية على 4 طبقات:
+//   1) collapseChains: نتائج بتكمّل بعض = نسخة واحدة (الأحدث/الأطول)
+//   2) dedupeRuns: أي عبارة اتكررت ورا بعض تتشال
+//   3) transcriptHealth: لو النص لسه مشبوه (تكرار عالي/طويل جدًا) مانبعتوش للتصنيف -> نروح للتسجيل التاني
+//   4) maxChars: سقف على طول النص اللي بيتبعت للسيرفر
+export const VOICE_PIPELINE_VERSION = '2026-09-30.3';
+
+const IS_ANDROID = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent || '');
+const normSeg = (t) => String(t || '').replace(/[\u064B-\u0652\u0640]/g, '').replace(/\s+/g, ' ').trim();
+const toWords = (t) => normSeg(t).split(' ').filter(Boolean);
+const HAS_DIGIT = /[0-9\u0660-\u0669]/;
+
+// هل النتيجة next مكمّلة/تعديل لـ prev؟
+function relation(prev, next) {
+  const a = toWords(prev);
+  const b = toWords(next);
+  if (!a.length || !b.length) return null;
+  const [s, l] = a.length <= b.length ? [a, b] : [b, a];
+  let prefix = true;
+  for (let i = 0; i < s.length; i += 1) {
+    const ok = i < s.length - 1 ? s[i] === l[i] : l[i].startsWith(s[i]); // آخر كلمة ممكن تكون لسه ناقصة
+    if (!ok) { prefix = false; break; }
+  }
+  if (prefix) return a.length === b.length && normSeg(prev) === normSeg(next) ? 'same' : 'prefix';
+  // تعديل جوه نفس الجملة: أول كلمة واحدة و75% من الكلمات مشتركة
+  if (a.length >= 4 && b.length >= 3 && a[0] === b[0]) {
+    const setB = new Set(b);
+    if (a.filter((w) => setB.has(w)).length / a.length >= 0.75) return 'revision';
+  }
+  return null;
+}
+
+// items: [{ text, conf }] بترتيبها. بترجّع النتايج من غير التراكم.
+export function collapseChains(items) {
+  const out = [];
+  for (const it of items) {
+    if (!it.text) continue;
+    const last = out[out.length - 1];
+    const rel = last ? relation(last.text, it.text) : null;
+    if (!rel) { out.push(it); continue; }
+    const lw = toWords(last.text).length;
+    const nw = toWords(it.text).length;
+    if (rel === 'revision' || nw >= lw) out[out.length - 1] = it; // الأحدث يكسب
+    // لو الجديد أقصر (بادئة بس): نسيب الأطول
+  }
+  return out;
+}
+
+// فيه نمط تراكمي واضح (كل نتيجة أطول من اللي قبلها وبتبدأ بيها)؟
+function hasGrowth(items) {
+  for (let i = 1; i < items.length; i += 1) {
+    if (relation(items[i - 1].text, items[i].text) === 'prefix' && toWords(items[i].text).length !== toWords(items[i - 1].text).length) return true;
+  }
+  return false;
+}
+
+// عبارة (1..6 كلمات) اتكررت ورا بعض -> نسخة واحدة. الأرقام محتاجة 3 تكرارات (احتمال تكون فعلًا مصروفين).
+export function dedupeRuns(text) {
+  let tokens = toWords(text);
+  let changed = true;
+  while (changed) {
+    changed = false;
+    for (let n = 6; n >= 1 && !changed; n -= 1) {
+      for (let i = 0; i + 2 * n <= tokens.length && !changed; i += 1) {
+        const gram = tokens.slice(i, i + n);
+        let reps = 1;
+        while (i + (reps + 1) * n <= tokens.length && tokens.slice(i + reps * n, i + (reps + 1) * n).every((w, k) => w === gram[k])) reps += 1;
+        const need = gram.some((w) => HAS_DIGIT.test(w)) ? 3 : 2;
+        if (reps >= need) { tokens = [...tokens.slice(0, i + n), ...tokens.slice(i + reps * n)]; changed = true; }
+      }
+    }
+  }
+  return tokens.join(' ');
+}
+
+// فحص أخير: هل النص معقول يتبعت للتصنيف؟
+export function transcriptHealth(text, maxChars = VOICE_DEFAULTS.maxChars) {
+  const t = String(text || '').trim();
+  if (!isUsableTranscript(t)) return { ok: false, reason: 'unusable' };
+  if (t.length > maxChars) return { ok: false, reason: 'too-long' };
+  const w = toWords(t);
+  if (w.length >= 6 && new Set(w).size / w.length < 0.55) return { ok: false, reason: 'repetitive' };
+  return { ok: true, reason: null };
+}
 
 // ============ فحص جودة النص (نفس منطق isUsableTranscript في groq.js) ============
 export function isUsableTranscript(text) {
@@ -119,7 +207,7 @@ export function startVoiceCapture(options = {}) {
   const chunks = [];
 
   // حالة Web Speech
-  const speech = { segments: [], confidences: [], prevSegments: [], prevConfs: [], restarts: 0, startedAt: 0, error: null, ended: false, langIndex: 0, retrying: false, events: [], audioStartAt: 0, pendingStop: false, t0: Date.now() };
+  const speech = { cumulative: false, segments: [], confidences: [], prevSegments: [], prevConfs: [], restarts: 0, startedAt: 0, error: null, ended: false, langIndex: 0, retrying: false, events: [], audioStartAt: 0, pendingStop: false, t0: Date.now() };
 
   let resolveResult;
   const result = new Promise((resolve) => { resolveResult = resolve; });
@@ -140,28 +228,35 @@ export function startVoiceCapture(options = {}) {
 
   // ---- اختيار أفضل نص من نتيجة Web Speech ----
   const collectFromEvent = (event) => {
-    const finals = [];
-    const confs = [];
+    const items = [];
     for (let i = 0; i < event.results.length; i += 1) {
       const res = event.results[i];
-      if (!res.isFinal) continue;
-      // أول بديل (من maxAlternatives) يعدّي فحص الجودة، وإلا نرجع لأول بديل
+      // أول بديل يعدّي فحص الجودة، وإلا أول بديل
       let chosen = null;
       for (let a = 0; a < res.length; a += 1) {
         if (isUsableTranscript(res[a].transcript)) { chosen = res[a]; break; }
       }
       chosen = chosen || res[0];
-      finals.push(String(chosen.transcript || '').trim());
-      if (chosen.confidence > 0) confs.push(chosen.confidence);
+      if (!chosen) continue;
+      const text = String(chosen.transcript || '').trim();
+      // النتيجة اللي لسه بتتكوّن (مش نهائية) بناخدها برضه: لو المستخدم وقّف قبل ما تتثبّت منخسرش كلامه
+      if (text) items.push({ text, conf: res.isFinal && chosen.confidence > 0 ? chosen.confidence : 0 });
     }
-    // بنضيف على اللي اتجمع في الجلسات السابقة (لو المحرك اتقفل واتفتح تاني وسط الكلام)
-    speech.segments = [...speech.prevSegments, ...finals];
-    speech.confidences = [...speech.prevConfs, ...confs];
+    if (IS_ANDROID || speech.cumulative || hasGrowth(items)) speech.cumulative = true;
+    const kept = speech.cumulative ? collapseChains(items) : items;
+    speech.segments = [...speech.prevSegments, ...kept.map((k) => k.text)];
+    speech.confidences = [...speech.prevConfs, ...kept.filter((k) => k.conf > 0).map((k) => k.conf)];
+    return dedupeRuns(speech.segments.join(' '));
   };
 
   const webSpeechText = () => {
-    const text = speech.segments.join(' ').trim();
-    if (!isUsableTranscript(text)) return '';
+    // تنضيف نهائي عبر كل الجلسات (لو المحرك اتقفل واتفتح وسط الكلام)
+    const merged = speech.cumulative ? collapseChains(speech.segments.map((text) => ({ text }))).map((k) => k.text) : speech.segments;
+    const text = dedupeRuns(merged.join(' ')).trim();
+    const health = transcriptHealth(text, opt.maxChars);
+    debug.health = health.reason;
+    debug.cleaned = text;
+    if (!health.ok) return '';
     const conf = speech.confidences.length
       ? speech.confidences.reduce((a, b) => a + b, 0) / speech.confidences.length
       : 0;
@@ -178,6 +273,7 @@ export function startVoiceCapture(options = {}) {
     if (cancelled) return finish({ ok: false, source: null, error: 'cancelled' });
 
     const text = webSpeechText();
+    debug.version = VOICE_PIPELINE_VERSION;
     debug.speech = {
       supported: isWebSpeechSupported(),
       lang: recognition?.lang,
@@ -186,6 +282,8 @@ export function startVoiceCapture(options = {}) {
       segments: speech.segments,
       confidences: speech.confidences,
       usable: !!text,
+      rawSegments: speech.segments.length,
+      cumulative: speech.cumulative,
     };
 
     // نص سليم -> تصنيف نصي رخيص، وخلاص
@@ -237,11 +335,9 @@ export function startVoiceCapture(options = {}) {
     });
     rec.onresult = (event) => {
       speech.events.push('result');
-      collectFromEvent(event);
+      const preview = collectFromEvent(event);
       onActivity(true);
-      let interim = '';
-      for (let i = 0; i < event.results.length; i += 1) interim += `${event.results[i][0].transcript} `;
-      onInterim(interim.trim());
+      onInterim(preview);
     };
     rec.onerror = (event) => {
       speech.events.push(`error:${event.error}`); // بنسجّل حتى 'aborted' عشان التشخيص

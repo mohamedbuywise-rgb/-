@@ -300,14 +300,46 @@
   .ios-install-modal{display:none;position:fixed;inset:0;z-index:200;background:rgba(7,24,16,.72);padding:18px;align-items:center;justify-content:center;backdrop-filter:blur(7px);}
   .ios-install-modal.show{display:flex;animation:iosModalIn .24s ease-out both;}
   .ios-install-card{width:min(100%,390px);max-height:min(88vh,680px);overflow:auto;background:#fff;border:1px solid #cfe8d9;border-radius:24px;padding:22px 18px 18px;box-shadow:0 24px 70px rgba(5,47,30,.30);text-align:center;}
-  .ios-install-icon{width:62px;height:62px;border-radius:20px;margin:0 auto 12px;display:grid;place-items:center;background:linear-gradient(145deg,#dff8eb,#bcebd3);border:1px solid #9ed8b8;font-size:30px;animation:iosIconPulse 1.9s ease-in-out infinite;}
+  .ios-install-badge{position:relative;width:96px;height:96px;margin:0 auto 12px;}
+  .ib-ring{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg);}
+  .ib-ring circle{fill:none;stroke-width:5;stroke-linecap:round;}
+  .ib-t{stroke:#e9f5ee;}
+  .ib-f{stroke:url(#ibg);stroke-dasharray:289;stroke-dashoffset:289;transition:stroke-dashoffset .3s linear;}
+  .ib-core{position:absolute;inset:11px;border-radius:50%;background:var(--green-tint);display:grid;place-items:center;overflow:hidden;}
+  .ib-phone{position:relative;width:24px;height:40px;border:3px solid var(--green-deep);border-radius:7px;}
+  .ib-phone::after{content:"";position:absolute;left:50%;bottom:3px;width:8px;height:3px;border-radius:2px;background:var(--green-deep);transform:translateX(-50%);}
+  .ib-drop{position:absolute;left:50%;top:-20px;width:11px;height:11px;margin-left:-5.5px;border-radius:50%;background:var(--green);animation:ibDrop 1.5s cubic-bezier(.5,0,.6,1) infinite;}
+  .ib-check{position:absolute;inset:0;display:grid;place-items:center;opacity:0;transform:scale(.4);}
+  .ib-check svg{width:40px;height:40px;}
+  .ib-check path{fill:none;stroke:#fff;stroke-width:5;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:40;stroke-dashoffset:40;}
+  .ib-pulse{position:absolute;inset:0;border-radius:50%;border:2px solid var(--green);opacity:0;}
+  .ios-install-card.is-done .ib-core{background:linear-gradient(135deg,var(--green),#73e1ab);animation:ibPop .5s cubic-bezier(.3,1.6,.5,1);}
+  .ios-install-card.is-done .ib-phone,.ios-install-card.is-done .ib-drop{display:none;}
+  .ios-install-card.is-done .ib-check{opacity:1;transform:scale(1);transition:.3s;}
+  .ios-install-card.is-done .ib-check path{stroke-dashoffset:0;transition:stroke-dashoffset .45s .2s ease-out;}
+  .ios-install-card.is-done .ib-f{stroke:var(--green);}
+  .ios-install-card.is-done .ib-pulse{animation:ibPulse .9s .1s ease-out;}
+  @keyframes ibDrop{0%{transform:translateY(0) scale(.6);opacity:0}25%{opacity:1}75%{transform:translateY(42px) scale(1);opacity:1}100%{transform:translateY(48px) scale(.4);opacity:0}}
+  @keyframes ibPop{0%{transform:scale(.8)}100%{transform:scale(1)}}
+  @keyframes ibPulse{0%{transform:scale(1);opacity:.55}100%{transform:scale(1.55);opacity:0}}
   .ios-install-title{font-family:'Cairo',sans-serif;font-size:17px;font-weight:900;color:var(--ink);}
   .ios-install-copy{margin:7px auto 14px;color:var(--muted);font-size:12.5px;line-height:1.85;max-width:315px;}
-  .ios-install-progress{height:8px;background:#e9f5ee;border-radius:999px;overflow:hidden;margin:0 2px 8px;}
-  .ios-install-progress-bar{height:100%;width:18%;border-radius:inherit;background:linear-gradient(90deg,#1faa6e,#73e1ab);animation:iosInstallProgress 2.8s ease-in-out infinite;}
-  .ios-install-state{font-family:'Cairo',sans-serif;font-weight:800;font-size:10.5px;color:var(--green-deep);min-height:20px;margin-bottom:12px;}
+  .ios-install-progress{height:10px;background:#e9f5ee;border-radius:999px;overflow:hidden;margin:0 2px;}
+  .ios-install-progress-bar{position:relative;overflow:hidden;height:100%;width:6%;border-radius:inherit;background:linear-gradient(90deg,#1faa6e,#73e1ab);transition:width .3s linear;}
+  .ios-install-progress-bar::after{content:"";position:absolute;inset:0;width:45%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent);animation:ibShine 1.3s ease-in-out infinite;}
+  .ios-install-progress-bar.is-done::after{animation:none;opacity:0;}
+  @keyframes ibShine{0%{transform:translateX(-120%)}100%{transform:translateX(320%)}}
+  .ios-install-progress-bar.is-done{background:#1faa6e;}
+  .ios-install-row{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin:9px 2px 12px;}
+  .ios-install-state{font-family:'Cairo',sans-serif;font-weight:800;font-size:11px;color:var(--green-deep);min-height:20px;text-align:right;}
+  .ios-install-pct{font-family:'Cairo',sans-serif;font-weight:900;font-size:19px;color:var(--ink);direction:ltr;font-variant-numeric:tabular-nums;}
   .ios-install-steps{display:grid;gap:8px;text-align:right;margin:12px 0 14px;}
   .ios-install-step{display:flex;align-items:flex-start;gap:9px;background:#f2fbf6;border:1px solid #d5eee0;border-radius:13px;padding:10px 11px;color:var(--text);font-size:12px;line-height:1.7;}
+  .ios-install-step{transition:background .3s,border-color .3s;}
+  .ios-install-step:not(.on) .ios-install-step-num{background:#e9f5ee;color:var(--muted);}
+  .ios-install-step.on{background:var(--green-tint);border-color:var(--green);}
+  .ios-install-step.on .ios-install-step-num{font-size:0;}
+  .ios-install-step.on .ios-install-step-num::before{content:"✓";font-size:12px;}
   .ios-install-step-num{flex:0 0 24px;height:24px;border-radius:50%;display:grid;place-items:center;background:var(--green);color:#fff;font-family:'Cairo',sans-serif;font-weight:900;font-size:11px;}
   .ios-install-step b{font-family:'Cairo',sans-serif;color:var(--green-deep);}
   .ios-install-share{display:inline-grid;place-items:center;width:23px;height:23px;margin:0 2px;border-radius:7px;background:#e5f3ff;color:#1271bb;font-size:16px;vertical-align:middle;}
@@ -317,10 +349,8 @@
   #iosInstallClose{background:#eef8f2;color:var(--green-deep);}
   .install-btn.is-guiding{background:var(--green-deep);animation:installButtonPulse 1.8s ease-in-out infinite;}
   @keyframes iosModalIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-  @keyframes iosIconPulse{0%,100%{box-shadow:0 0 0 0 rgba(31,170,110,.10)}50%{box-shadow:0 0 0 10px rgba(31,170,110,.14)}}
-  @keyframes iosInstallProgress{0%{width:12%;transform:translateX(0)}55%{width:74%;transform:translateX(0)}100%{width:88%;transform:translateX(0)}}
   @keyframes installButtonPulse{50%{box-shadow:0 0 0 6px rgba(31,170,110,.14),0 12px 24px -12px rgba(31,170,110,.7)}}
-  @media(prefers-reduced-motion:reduce){.ios-install-modal.show,.ios-install-icon,.ios-install-progress-bar,.install-btn.is-guiding{animation:none}.ios-install-progress-bar{width:62%}}
+  @media(prefers-reduced-motion:reduce){.ios-install-modal.show,.ib-drop,.ib-pulse,.ios-install-progress-bar::after,.install-btn.is-guiding{animation:none!important}}
 </style>
 <script src="./dabbar-compat.js"></script>
 </head>
@@ -504,11 +534,15 @@
 <!-- Safari iOS installation guide and waiting state -->
 <div class="ios-install-modal" id="iosInstallModal" role="dialog" aria-modal="true" aria-labelledby="iosInstallTitle" aria-hidden="true">
   <div class="ios-install-card">
-    <div class="ios-install-icon" aria-hidden="true">📲</div>
+    <div class="ios-install-badge" aria-hidden="true">
+      <svg class="ib-ring" viewBox="0 0 104 104"><defs><linearGradient id="ibg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1faa6e"/><stop offset="1" stop-color="#73e1ab"/></linearGradient></defs><circle class="ib-t" cx="52" cy="52" r="46"/><circle class="ib-f" id="iosRing" cx="52" cy="52" r="46"/></svg>
+      <div class="ib-pulse"></div>
+      <div class="ib-core"><div class="ib-phone"><i class="ib-drop"></i></div><div class="ib-check"><svg viewBox="0 0 44 44"><path d="M11 23l8 8 15-17"/></svg></div></div>
+    </div>
     <h3 class="ios-install-title" id="iosInstallTitle">نجهّز تثبيت دبّر</h3>
     <p class="ios-install-copy" id="iosInstallCopy">Safari لا يثبت التطبيق تلقائياً من داخل الصفحة، لكن الخطوات سهلة وسريعة.</p>
-    <div class="ios-install-progress" aria-hidden="true"><div class="ios-install-progress-bar"></div></div>
-    <div class="ios-install-state" id="iosInstallState" aria-live="polite">جاري تجهيز تعليمات التثبيت...</div>
+    <div class="ios-install-progress" id="iosProgress" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="6"><div class="ios-install-progress-bar"></div></div>
+    <div class="ios-install-row"><div class="ios-install-state" id="iosInstallState" aria-live="polite">جاري تجهيز تعليمات التثبيت...</div><span class="ios-install-pct" id="iosPct">6%</span></div>
     <div class="ios-install-steps" id="installGuideSteps">
       <div class="ios-install-step"><span class="ios-install-step-num">1</span><span>اضغط زر <b>المشاركة</b> أسفل Safari <span class="ios-install-share">□↑</span></span></div>
       <div class="ios-install-step"><span class="ios-install-step-num">2</span><span>مرّر القائمة ثم اختر <b>إضافة إلى الشاشة الرئيسية</b>.</span></div>
@@ -1085,7 +1119,21 @@
   }
   // ============ شريط تقدّم التثبيت — بيظهر لحد ما التثبيت يتأكد فعليًا (standalone)، ومش بيوصل 100% قبل كده ============
   const ipBox = document.getElementById('installProgress'), ipFill = document.getElementById('ipFill'), ipPct = document.getElementById('ipPct'), ipStage = document.getElementById('ipStage'), ipTrack = document.getElementById('ipTrack');
-  let ipRaf = 0, ipStart = 0, ipDone = false;
+  let ipRaf = 0, ipStart = 0, ipDone = false, installedFlag = false;
+  const iosBar = document.querySelector('.ios-install-progress-bar');
+  const iosRing = document.getElementById('iosRing'), iosPct = document.getElementById('iosPct'), iosProg = document.getElementById('iosProgress');
+  const iosCard = document.querySelector('#iosInstallModal .ios-install-card');
+  function iosBarSet(v, done) {
+    const r = Math.round(v);
+    if (iosBar) { iosBar.style.width = v + '%'; iosBar.classList.toggle('is-done', !!done); }
+    if (iosRing) iosRing.style.strokeDashoffset = String(289 * (1 - v / 100));
+    if (iosPct) iosPct.textContent = r + '%';
+    if (iosProg) iosProg.setAttribute('aria-valuenow', String(r));
+    // الخطوات بتتعلّم ✓ بس لما التثبيت يتأكد فعليًا (هي إجراءات بيعملها المستخدم، مش هنمثّل إنها خلصت)
+    document.querySelectorAll('#installGuideSteps .ios-install-step').forEach((el) => el.classList.toggle('on', !!done));
+    if (iosCard) iosCard.classList.toggle('is-done', !!done);
+  }
+  iosBarSet(6, false);
   function ipSet(v, text) {
     const r = Math.round(v);
     if (ipFill) ipFill.style.width = v + '%';
@@ -1094,11 +1142,13 @@
     if (text && ipStage) ipStage.textContent = text;
   }
   function startInstallProgress() {
-    if (!ipBox || ipRaf || ipDone) return;
-    ipBox.hidden = false; ipBox.classList.remove('is-done'); ipStart = performance.now();
+    if (ipRaf || ipDone) return;
+    if (ipBox) { ipBox.hidden = false; ipBox.classList.remove('is-done'); }
+    ipStart = performance.now();
     const tick = (now) => {
       const t = (now - ipStart) / 1000;
       const v = 90 * (1 - Math.exp(-t / 6)) + 6 * (1 - Math.exp(-t / 60)); // يقرب من 96% ويستنى التأكيد الحقيقي
+      iosBarSet(v, false);
       ipSet(v, v < 30 ? 'بنجهّز التثبيت…' : v < 70 ? 'بنضيف دبّر لشاشتك الرئيسية…' : 'قربنا — دوّر على أيقونة دبّر وافتحه منها');
       ipRaf = requestAnimationFrame(tick);
     };
@@ -1106,13 +1156,28 @@
   }
   function stopInstallProgress() {
     cancelAnimationFrame(ipRaf); ipRaf = 0;
-    if (ipBox && !ipDone) { ipBox.hidden = true; ipSet(0, 'بنجهّز التثبيت…'); }
+    if (!ipDone) { iosBarSet(6, false); if (ipBox) { ipBox.hidden = true; ipSet(0, 'بنجهّز التثبيت…'); } }
   }
   function completeInstallProgress() {
-    if (!ipBox || ipBox.hidden || ipDone) return Promise.resolve();
+    if (ipDone) return Promise.resolve();
     ipDone = true; cancelAnimationFrame(ipRaf); ipRaf = 0;
-    ipBox.classList.add('is-done'); ipSet(100, 'تم التثبيت ✓');
+    iosBarSet(100, true);
+    if (ipBox && !ipBox.hidden) { ipBox.classList.add('is-done'); ipSet(100, 'تم التثبيت ✓'); }
     return new Promise((r) => setTimeout(r, 750));
+  }
+  function applyInstalledUi() {
+    iosBarSet(100, true);
+    const ttl = document.getElementById('iosInstallTitle'); if (ttl) ttl.textContent = 'دبّر اتثبّت';
+    if (iosInstallCopy) iosInstallCopy.textContent = 'افتحه من أيقونته على الشاشة الرئيسية وكمّل من هناك.';
+    if (iosInstallState) iosInstallState.textContent = 'تم التثبيت ✓ — افتح دبّر من أيقونته على الشاشة الرئيسية';
+    if (iosInstallDone) iosInstallDone.textContent = 'تمام';
+    if (installBtn) installBtn.textContent = '✅ اتثبّت — افتح دبّر من الأيقونة';
+  }
+  function markInstalledInBrowser() {
+    if (installedFlag) return;
+    installedFlag = true; ipDone = true; cancelAnimationFrame(ipRaf); ipRaf = 0;
+    if (ipBox && !ipBox.hidden) { ipBox.classList.add('is-done'); ipSet(100, 'تم التثبيت ✓'); }
+    applyInstalledUi();
   }
   function closeInstallGuide() {
     iosInstallModal?.classList.remove('show');
@@ -1160,6 +1225,7 @@
     if (iosInstallState) iosInstallState.textContent = config.state;
     if (installGuideSteps) installGuideSteps.innerHTML = config.steps;
     if (iosInstallDone) iosInstallDone.textContent = state === 'waiting' ? 'افتح التطبيق بعد التثبيت' : 'تمت الإضافة — افتح التطبيق';
+    if (installedFlag) applyInstalledUi();
   }
   // ============ لا نعرض نجاحاً إلا بعد اكتشاف Standalone فعلياً ============
   async function finishInstallStep() {
@@ -1186,6 +1252,7 @@
   iosInstallClose?.addEventListener('click', closeInstallGuide);
   iosInstallDone?.addEventListener('click', () => {
     if (isStandalone()) finishInstallStep();
+    else if (installedFlag) closeInstallGuide();
     else showInstallGuide(installPlatform || platformKey(), 'waiting');
   });
   function showManualInstallSteps() {
@@ -1196,7 +1263,10 @@
     else { title.textContent = '💻 على الكمبيوتر:'; steps.innerHTML = `<li>دوس على أيقونة <b>التثبيت ⊕</b> في شريط عنوان المتصفح</li><li>أو من قائمة المتصفح اختار <b>"تثبيت دبّر"</b></li><li><b>افتح دبّر من الأيقونة</b> عشان تقدر تكمل</li>`; }
     document.getElementById('manualInstall').classList.add('show');
   }
-  window.addEventListener('appinstalled', () => { if (!successState.classList.contains('show')) finishInstallStep(); });
+  window.addEventListener('appinstalled', () => {
+    if (successState.classList.contains('show')) return;
+    if (isStandalone()) finishInstallStep(); else markInstalledInBrowser();
+  });
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && isStandalone() && !successState.classList.contains('show')) finishInstallStep(); });
   window.addEventListener('focus', () => { if (isStandalone() && !successState.classList.contains('show')) finishInstallStep(); });
   // ---- service worker ----

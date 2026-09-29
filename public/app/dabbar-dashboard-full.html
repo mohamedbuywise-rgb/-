@@ -5205,7 +5205,7 @@ body { height: 100vh; }
                         <input type="checkbox" id="reminder-installment-toggle" class="hidden">
                         <input type="text" id="reminder-title-input" maxlength="200" placeholder="اسم التذكير — مثال: قسط العربية" class="add-white-input">
                         <div class="add-row">
-                            <input type="date" id="reminder-date-input" class="add-white-input" aria-label="التاريخ">
+                            <label class="add-date-field is-empty" id="reminder-date-field"><span class="add-date-label">📅 تاريخ التذكير</span><span class="add-date-ph">اختار التاريخ</span><input type="date" id="reminder-date-input" class="add-white-input" aria-label="التاريخ"></label>
                             <input type="number" id="reminder-amount-input" min="0" step="0.01" inputmode="decimal" placeholder="المبلغ (اختياري)" class="add-white-input" aria-label="المبلغ">
                         </div>
                         <div id="reminder-installment-fields" class="add-installments-field">
@@ -7815,6 +7815,7 @@ body { height: 100vh; }
                 const registration = await getPushRegistration();
                 const subscription = await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(pushPublicKey) });
                 await pushApi('POST', { subscription: subscription.toJSON() });
+                try { localStorage.setItem(pushIntentKey(), 'on'); } catch (e) {}
                 await refreshPushUI();
                 pushStatus('تم تفعيل الإشعارات بنجاح.', 'success');
             } catch (error) {
@@ -7830,6 +7831,7 @@ body { height: 100vh; }
                 toggle.disabled = true;
                 const registration = await getPushRegistration();
                 const subscription = await registration?.pushManager.getSubscription();
+                try { localStorage.setItem(pushIntentKey(), 'off'); } catch (e) {}
                 if (subscription) {
                     await pushApi('DELETE', { endpoint: subscription.endpoint });
                     await subscription.unsubscribe();
@@ -7842,6 +7844,43 @@ body { height: 100vh; }
                 if (toggle) toggle.disabled = false;
             }
         }
+
+        // ============ ترميم صامت للإشعارات: لو المستخدم كان مفعّلها واشتراك المتصفح/الخادم اتمسح لوحده (انتهاء صلاحية، تنظيف بيانات، إلخ)
+        // بنجدّده تلقائيًا طالما إذن المتصفح لسه "مسموح" — ومش بنعمل كده أبدًا لو المستخدم هو اللي قفلها بنفسه ============
+        function pushIntentKey() { return `dabbar_push_intent_${currentUser?.id || 'anon'}`; }
+        async function dabbarSilentPushHeal() {
+            try {
+                if (!accessToken || !('Notification' in window) || !('PushManager' in window) || !('serviceWorker' in navigator)) return;
+                if (window.__pushHealBusy || Date.now() - (window.__pushHealAt || 0) < 30 * 60 * 1000) return;
+                window.__pushHealBusy = true; window.__pushHealAt = Date.now();
+                const intent = localStorage.getItem(pushIntentKey());
+                if (intent === 'off') return;
+                const registration = await getPushRegistration();
+                let subscription = await registration?.pushManager.getSubscription();
+                if (subscription && intent !== 'on') { localStorage.setItem(pushIntentKey(), 'on'); }
+                if (!subscription && intent !== 'on') return;
+                if (Notification.permission !== 'granted') {
+                    // الإذن اتسحب من المتصفح (Chrome بيسحب إذن المواقع اللي مش بتتفتح فترة) — مقدرش أرجّعه من غير ضغطة المستخدم
+                    if (typeof updatePushNudgeBanner === 'function') updatePushNudgeBanner(false);
+                    return;
+                }
+                const data = await pushApi('GET');
+                if (!data.configured || !data.publicKey) return;
+                pushPublicKey = data.publicKey;
+                if (!subscription) {
+                    subscription = await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(pushPublicKey) });
+                    await pushApi('POST', { subscription: subscription.toJSON() });
+                    return;
+                }
+                const state = await pushApi('GET', undefined, `?endpoint=${encodeURIComponent(subscription.endpoint)}`);
+                if (!state?.server?.thisDevice?.active) await pushApi('POST', { subscription: subscription.toJSON() });
+            } catch (error) {
+                console.warn('silent push heal failed:', error);
+            } finally {
+                window.__pushHealBusy = false;
+            }
+        }
+        setTimeout(dabbarSilentPushHeal, 6000);
 
         let pushSaveResetTimer = null;
         function setPushSaveState(state, text) {
@@ -8161,7 +8200,7 @@ body { height: 100vh; }
                 loadDashboard(); // تحديث حقيقي في الخلفية؛ هيستبدل العرض المؤقت لما البيانات الجديدة توصل
             }
             document.addEventListener('visibilitychange', () => {
-                if (document.visibilityState === 'visible') ensureFreshSessionThenLoad();
+                if (document.visibilityState === 'visible') { ensureFreshSessionThenLoad(); setTimeout(dabbarSilentPushHeal, 2500); }
             });
             window.addEventListener('focus', () => ensureFreshSessionThenLoad());
 
@@ -8505,10 +8544,10 @@ body { height: 100vh; }
                 <details class="group"><summary class="flex cursor-pointer list-none items-center gap-2.5 rounded-xl bg-slate-900/60 px-3 py-2.5 text-[10px] font-bold text-slate-400"><span class="planning-collapse-ic"><iconify-icon icon="ph:chart-bar-duotone" width="15"></iconify-icon></span><span class="flex-1">حدود مصروف لكل فئة (اختياري)</span><span class="text-slate-600 transition group-open:rotate-180">⌄</span></summary>
                 <div class="mt-2 space-y-2"><p class="text-[9.5px] leading-relaxed text-slate-500">حد تخطيطي بس، مش مصروف بيتسجل — دبّر ينبهك لما توصل لـ <b class="text-amber-300">80%</b> منه.</p><div id="category-budgets-list" class="space-y-1.5"></div><button type="button" id="category-budgets-toggle" class="dabbar-list-toggle hidden">عرض الكل</button><button id="category-budget-add" type="button" class="dabbar-fab-add">+ إضافة حد لفئة</button></div></details>
                 <details class="group border-t border-slate-800 pt-3"><summary class="flex cursor-pointer list-none items-center gap-2.5 rounded-xl bg-slate-900/60 px-3 py-2.5 text-[10px] font-bold text-slate-400"><span class="planning-collapse-ic"><iconify-icon icon="ph:push-pin-duotone" width="15"></iconify-icon></span><span class="flex-1">التزامات شهرية متوقعة (إيجار / اشتراكات)</span><span class="text-slate-600 transition group-open:rotate-180">⌄</span></summary>
-                <div class="mt-2 space-y-2"><p class="text-[9px] text-slate-500">للتخطيط فقط — لا تُضاف للصرف الفعلي إلا عند تسجيلها.</p><div id="recurring-list" class="space-y-1.5"></div><button type="button" id="recurring-list-toggle" class="dabbar-list-toggle hidden">عرض الكل</button><button id="recurring-add" type="button" class="dabbar-fab-add">+ إضافة التزام جديد</button></div></details>
+                <div class="mt-2 space-y-2"><p class="text-[9px] text-slate-500">للتخطيط فقط — لا تُضاف للصرف الفعلي إلا عند تسجيلها.</p><div id="recurring-total" class="dabbar-commit-total"></div><div id="recurring-list" class="space-y-1.5"></div><button type="button" id="recurring-list-toggle" class="dabbar-list-toggle hidden">عرض الكل</button><button id="recurring-add" type="button" class="dabbar-fab-add">+ إضافة التزام جديد</button></div></details>
                 <div class="flex gap-2 border-t border-slate-800 pt-3"><button id="planning-save" type="button" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950">حفظ خطتي</button><button id="planning-reset" type="button" title="إدارة ومسح خطة الدخل والميزانية" class="rounded-xl border border-slate-700/60 px-3 py-2.5 text-xs text-slate-500">إدارة</button></div>
                 <div class="dabbar-sheet-backdrop" id="limit-sheet"><div class="dabbar-sheet"><h3 class="text-xs font-black text-slate-100 mb-2">إضافة حد لفئة</h3><label class="dabbar-sheet-label">اسم الفئة</label><input id="limit-sheet-name" type="text" maxlength="40" placeholder="اكتب اسم الفئة أو اختار من تحت" class="dabbar-sheet-input"><div id="limit-sheet-chips" class="dabbar-chip-row"></div><label class="dabbar-sheet-label">الحد الشهري</label><input id="limit-sheet-amount" type="number" min="0" placeholder="مثال: 1500" class="dabbar-sheet-input"><div class="dabbar-sheet-btns"><button type="button" id="limit-sheet-cancel" class="dabbar-sheet-cancel">إلغاء</button><button type="button" id="limit-sheet-save" class="dabbar-sheet-save">حفظ الحد</button></div></div></div>
-                <div class="dabbar-sheet-backdrop" id="commit-sheet"><div class="dabbar-sheet"><h3 class="text-xs font-black text-slate-100 mb-2">إضافة التزام جديد</h3><label class="dabbar-sheet-label">اسم الالتزام</label><input id="commit-sheet-name" type="text" placeholder="مثال: اشتراك نتفليكس، إيجار الشقة..." class="dabbar-sheet-input"><div class="dabbar-live-preview"><span class="commitment-icon" data-tone="default" id="commit-sheet-icon-wrap"><iconify-icon id="commit-sheet-icon" icon="ph:push-pin-duotone" width="18"></iconify-icon></span><span class="dabbar-live-preview-tag" id="commit-sheet-tag">اكتب اسم عشان الأيقونة تتحدد تلقائي</span></div><label class="dabbar-sheet-label">المبلغ الشهري</label><input id="commit-sheet-amount" type="number" min="0" placeholder="مثال: 250" class="dabbar-sheet-input"><div class="dabbar-sheet-btns"><button type="button" id="commit-sheet-cancel" class="dabbar-sheet-cancel">إلغاء</button><button type="button" id="commit-sheet-save" class="dabbar-sheet-save">حفظ الالتزام</button></div></div></div>`;
+                <div class="dabbar-sheet-backdrop" id="commit-sheet"><div class="dabbar-sheet"><h3 id="commit-sheet-title" class="text-xs font-black text-slate-100 mb-2">إضافة التزام جديد</h3><label class="dabbar-sheet-label">اسم الالتزام</label><input id="commit-sheet-name" type="text" placeholder="مثال: اشتراك نتفليكس، إيجار الشقة..." class="dabbar-sheet-input"><div class="dabbar-live-preview"><span class="commitment-icon" data-tone="default" id="commit-sheet-icon-wrap"><iconify-icon id="commit-sheet-icon" icon="ph:push-pin-duotone" width="18"></iconify-icon></span><span class="dabbar-live-preview-tag" id="commit-sheet-tag">اكتب اسم عشان الأيقونة تتحدد تلقائي</span></div><label class="dabbar-sheet-label">المبلغ الشهري</label><input id="commit-sheet-amount" type="number" min="0" placeholder="مثال: 250" class="dabbar-sheet-input"><div class="dabbar-sheet-btns"><button type="button" id="commit-sheet-cancel" class="dabbar-sheet-cancel">إلغاء</button><button type="button" id="commit-sheet-save" class="dabbar-sheet-save">حفظ الالتزام</button></div></div></div>`;
             monthly.insertBefore(wrap, quick.parentNode === monthly ? quick.nextSibling : null);
             const ledger = document.createElement('section');
             ledger.id = 'expense-ledger-card';
@@ -8535,7 +8574,7 @@ body { height: 100vh; }
                 });
             });
             // ============ الإضافة بقت خطوة واحدة عن طريق شيت (اسم + مبلغ سوا) بدل صف إدخال ثابت + زرار منفصل ============
-            document.getElementById('recurring-add').addEventListener('click', openCommitSheet);
+            document.getElementById('recurring-add').addEventListener('click', () => openCommitSheet());
             document.getElementById('category-budget-add').addEventListener('click', openLimitSheet);
             bindDabbarListToggle(document.getElementById('category-budgets-list'), document.getElementById('category-budgets-toggle'), 4);
             bindDabbarListToggle(document.getElementById('recurring-list'), document.getElementById('recurring-list-toggle'), 4);
@@ -8554,10 +8593,15 @@ body { height: 100vh; }
                 if (details) details.open = !details.open;
             });
             document.getElementById('available-empty-cta')?.addEventListener('click', () => {
-                const details = document.getElementById('available-collapsible');
-                if (details && !details.open) details.open = true;
-                wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                setTimeout(() => document.getElementById('planning-income')?.focus(), 350);
+                // كارت "وضعك المالي" بيبدأ مطوي — لازم نفتحه فعليًا (مش نسكرول له بس)
+                if (wrap.classList.contains('planning-card-collapsed')) {
+                    const planningHeader = wrap.children[0];
+                    if (planningHeader && wrap.querySelector('[data-planning-action="collapse"]')) planningHeader.click();
+                    else wrap.classList.remove('planning-card-collapsed');
+                    try { localStorage.setItem('dabbar-planning-card-state', 'expanded'); } catch (e) {}
+                }
+                setTimeout(() => wrap.scrollIntoView({ behavior: 'smooth', block: 'start' }), 60);
+                setTimeout(() => document.getElementById('planning-income')?.focus({ preventScroll: true }), 500);
             });
 
             // ============ حفظ تلقائي — أي رقم يدخّله في الدخل/الميزانية/حد الفئة يتحفظ لوحده أول ما يسيب الخانة، من غير أي زرار ============
@@ -8628,11 +8672,19 @@ body { height: 100vh; }
         }
 
         // ============ شيت إضافة التزام — خطوة واحدة (اسم + مبلغ) مع معاينة الأيقونة التلقائية حية وهو بيكتب ============
-        function openCommitSheet() {
+        let __commitEditIndex = null;
+        function openCommitSheet(index) {
             const nameEl = document.getElementById('commit-sheet-name');
             const amtEl = document.getElementById('commit-sheet-amount');
-            if (nameEl) nameEl.value = '';
-            if (amtEl) amtEl.value = '';
+            const list = planningSettings().recurringExpenses || [];
+            const item = Number.isInteger(index) ? list[index] : null;
+            __commitEditIndex = item ? index : null;
+            if (nameEl) nameEl.value = item ? item.name : '';
+            if (amtEl) amtEl.value = item ? item.amount : '';
+            const titleEl = document.getElementById('commit-sheet-title');
+            if (titleEl) titleEl.textContent = item ? 'تعديل الالتزام' : 'إضافة التزام جديد';
+            const saveBtn = document.getElementById('commit-sheet-save');
+            if (saveBtn) saveBtn.textContent = item ? 'حفظ التعديل' : 'حفظ الالتزام';
             updateCommitSheetPreview();
             document.getElementById('commit-sheet')?.classList.add('open');
             setTimeout(() => nameEl?.focus(), 150);
@@ -8653,7 +8705,11 @@ body { height: 100vh; }
             const amount = Number(document.getElementById('commit-sheet-amount')?.value || 0);
             if (!name || amount <= 0) return quickStatus('اكتب اسم ومبلغ الالتزام.', 'error');
             const settings = planningSettings();
-            settings.recurringExpenses = [...(settings.recurringExpenses || []), { id: crypto.randomUUID(), name, amount, day: 1, category: 'أخرى', active: true }];
+            const commitItems = [...(settings.recurringExpenses || [])];
+            if (__commitEditIndex !== null && commitItems[__commitEditIndex]) commitItems[__commitEditIndex] = { ...commitItems[__commitEditIndex], name, amount };
+            else commitItems.push({ id: crypto.randomUUID(), name, amount, day: 1, category: 'أخرى', active: true });
+            __commitEditIndex = null;
+            settings.recurringExpenses = commitItems;
             window.__financialSettings = settings;
             closeCommitSheet();
             savePlanningSettings();
@@ -8814,7 +8870,7 @@ body { height: 100vh; }
             if (recurringList) recurringList.innerHTML = (settings.recurringExpenses || []).length ? settings.recurringExpenses.map((item, i) => {
                 const cIcon = getCommitmentIcon(item.name);
                 return `<div class="recurring-row flex items-center justify-between rounded-xl bg-slate-900/70 px-2.5 py-2 text-[10px]"><span class="recurring-name flex items-center">
-<span class="commitment-icon" data-tone="${cIcon.tone}"><iconify-icon icon="${cIcon.icon}"></iconify-icon></span>${item.name}</span><span class="recurring-amt text-emerald-300">${fmt(item.amount)} <button type="button" data-recurring-remove="${i}" aria-label="حذف الالتزام" class="mr-1 text-slate-600 hover:text-rose-400 transition">✕</button></span></div>`;
+<span class="commitment-icon" data-tone="${cIcon.tone}"><iconify-icon icon="${cIcon.icon}"></iconify-icon></span>${item.name}</span><span class="recurring-amt text-emerald-300">${fmt(item.amount)} <button type="button" data-recurring-edit="${i}" aria-label="تعديل الالتزام" class="recurring-edit-btn"><iconify-icon icon="ph:pencil-simple-duotone"></iconify-icon></button><button type="button" data-recurring-remove="${i}" aria-label="حذف الالتزام" class="mr-1 text-slate-600 hover:text-rose-400 transition">✕</button></span></div>`;
             }).join('') : '<p class="text-[10px] text-slate-500">أضف الإيجار أو الاشتراكات عشان تشوف التزاماتك الشهرية قدامك.</p>';
             recurringList?.querySelectorAll('[data-recurring-remove]').forEach((btn) => btn.addEventListener('click', async () => {
                 const item = settings.recurringExpenses[Number(btn.dataset.recurringRemove)];
@@ -8822,6 +8878,13 @@ body { height: 100vh; }
                 settings.recurringExpenses.splice(Number(btn.dataset.recurringRemove), 1);
                 savePlanningSettings();
             }));
+            recurringList?.querySelectorAll('[data-recurring-edit]').forEach((btn) => btn.addEventListener('click', () => openCommitSheet(Number(btn.dataset.recurringEdit))));
+            const recurringTotalEl = document.getElementById('recurring-total');
+            if (recurringTotalEl) {
+                const commitList = settings.recurringExpenses || [];
+                const commitSum = commitList.reduce((t, x) => t + Number(x.amount || 0), 0);
+                recurringTotalEl.innerHTML = commitList.length ? `<span>إجمالي الالتزامات الشهرية (${commitList.length})</span><b>${fmt(commitSum)}</b>` : '';
+            }
             applyDabbarListPreview(recurringList, document.getElementById('recurring-list-toggle'), 4);
             const list = document.getElementById('expense-ledger-list');
             // ============ لازم ترتيب صريح بالأحدث أولًا هنا: مفيش ضمان إن الـ API راجع العمليات بترتيب زمني تنازلي،
@@ -10719,18 +10782,13 @@ body { height: 100vh; }
             if (soonItems.length) {
                 soonSection.classList.remove('hidden');
                 soonList.innerHTML = soonItems.map(({ r, days }) => {
-                    const amountText = r.amount ? `<div class="text-[11px] font-black text-amber-400 mt-0.5">${fmt(r.amount)}</div>` : '';
-                    const dateText = new Date(r.due_date + 'T00:00:00').toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'short' });
+                    const amountText = r.amount ? `<span class="dsc-amt">${fmt(r.amount)}</span>` : '';
+                    const dateText = new Date(r.due_date + 'T00:00:00').toLocaleDateString('ar-EG', { weekday: 'short', day: 'numeric', month: 'short' });
                     const pillText = days < 0 ? 'متأخر' : days === 0 ? 'النهاردة' : days === 1 ? 'بكرة' : 'بعد يومين';
                     return `<div class="dabbar-soon-card ${days <= 1 ? 'urgent' : ''}">
-                        <div class="flex items-center gap-2.5 min-w-0">
-                            <span class="w-9 h-9 shrink-0 rounded-xl flex items-center justify-center text-base" style="background: rgba(0,0,0,.12)">${iconOf(days)}</span>
-                            <div class="min-w-0"><p class="text-xs font-bold truncate" style="color: var(--pm-ink, #f6f1e5)">${debtEscape(r.title)}</p><p class="text-[10px]" style="color: var(--pm-muted, #aaa39b)">${dateText}</p></div>
-                        </div>
-                        <div class="text-left shrink-0">
-                            <span class="text-[10px] font-black rounded-full px-2 py-1" style="background: rgba(0,0,0,.12); color: var(--pm-ink-dim, #d7d0c3)">${pillText}</span>
-                            ${amountText}
-                        </div>
+                        <span class="dsc-ic">${iconOf(days)}</span>
+                        <div class="dsc-mid"><p class="dsc-title">${debtEscape(r.title)}</p><p class="dsc-sub">${dateText} · <span class="dsc-pill">${pillText}</span></p></div>
+                        ${amountText}
                     </div>`;
                 }).join('');
             } else {
@@ -15912,5 +15970,95 @@ html[data-theme="light"] #installments-summary-card p.text-lg{ color:#0b7a58 !im
 html.qm-open :not(#quick-manual-popup-backdrop):not(#quick-manual-popup-backdrop *){ animation-play-state:paused !important; }
 #quick-manual-popup-backdrop .quick-manual-sheet-shell{ transition:transform .18s cubic-bezier(.2,.8,.2,1), opacity .14s ease !important; }
 #quick-manual-popup-backdrop input{ -webkit-user-select:text; user-select:text; }
+</style>
+<style id="dabbar-ui-polish-2026-09b">
+/* ===== إضافة تذكير: وضع ليلي متناسق ===== */
+html:not([data-theme="light"]) .add-white-card{ background:#26272b !important; border:1px solid rgba(255,255,255,.14); box-shadow:0 14px 34px rgba(0,0,0,.45); color-scheme:dark; }
+html:not([data-theme="light"]) .add-white-title{ color:var(--pm-ink,#f5f5f4) !important; }
+html:not([data-theme="light"]) .add-seg{ background:#1b1c1f !important; border:1px solid rgba(255,255,255,.1); }
+html:not([data-theme="light"]) .add-seg-btn{ color:#c9cbcd !important; }
+html:not([data-theme="light"]) .add-seg-btn.active{ background:var(--pm-gold,#bdf23f) !important; color:#14210a !important; box-shadow:0 6px 16px rgba(189,242,63,.22) !important; }
+html:not([data-theme="light"]) .add-white-input{ background:#34353a !important; border:1px solid rgba(255,255,255,.2) !important; color:#f5f5f4 !important; }
+html:not([data-theme="light"]) .add-white-input::placeholder{ color:#9a9da1; }
+html:not([data-theme="light"]) .add-white-input:focus{ border-color:var(--pm-gold,#bdf23f) !important; box-shadow:0 0 0 3px rgba(189,242,63,.14); }
+html:not([data-theme="light"]) .add-white-save{ background:var(--pm-gold,#bdf23f) !important; color:#14210a !important; }
+html:not([data-theme="light"]) .add-white-cancel{ color:#c9cbcd !important; border-color:rgba(255,255,255,.22) !important; }
+html:not([data-theme="light"]) .add-white-status{ color:#ff8e8e; }
+html[data-theme="light"] .add-white-input{ border:1px solid #e2e5e9; }
+
+/* خانة التاريخ: عنوان واضح + نص بديل لما تكون فاضية */
+.add-date-field{ position:relative; display:block; flex:1; min-width:0; }
+.add-date-field .add-white-input{ margin-bottom:0; min-height:3.2rem; padding-top:1.25rem; padding-bottom:.35rem; }
+.add-row .add-white-input{ min-height:3.2rem; }
+.add-date-label{ position:absolute; top:.38rem; right:1rem; z-index:1; pointer-events:none; font-size:.6rem; font-weight:800; color:#64748b; }
+.add-date-ph{ position:absolute; right:1rem; bottom:.62rem; z-index:1; pointer-events:none; display:none; font-size:.82rem; font-weight:700; color:#94a3b8; }
+.add-date-field.is-empty .add-date-ph{ display:block; }
+.add-date-field.is-empty input[type="date"]{ color:transparent !important; }
+.add-date-field.is-empty input[type="date"]::-webkit-datetime-edit{ color:transparent; }
+html:not([data-theme="light"]) .add-date-label{ color:#a8aaab; }
+html:not([data-theme="light"]) .add-date-ph{ color:#d6d9dc; }
+html:not([data-theme="light"]) .add-date-field input[type="date"]::-webkit-calendar-picker-indicator{ filter:invert(1); opacity:.75; }
+
+/* ===== تذكيرات قريبة: مضغوطة ===== */
+#reminders-soon-list.space-y-2 > :not([hidden]) ~ :not([hidden]){ margin-top:.3rem !important; }
+#reminders-urgent-banners.space-y-2 > :not([hidden]) ~ :not([hidden]){ margin-top:.3rem !important; }
+.dabbar-soon-card{ padding:.4rem .65rem !important; border-radius:.85rem !important; gap:.55rem !important; }
+.dabbar-soon-card .dsc-ic{ width:1.75rem; height:1.75rem; flex-shrink:0; display:flex; align-items:center; justify-content:center; border-radius:.6rem; font-size:.95rem; background:rgba(127,127,127,.16); }
+.dabbar-soon-card .dsc-mid{ flex:1; min-width:0; }
+.dabbar-soon-card .dsc-title{ margin:0; font-size:.76rem; font-weight:800; line-height:1.3; color:var(--pm-ink,#17202b); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.dabbar-soon-card .dsc-sub{ margin:.05rem 0 0; font-size:.6rem; line-height:1.3; color:var(--pm-muted,#7b8490); }
+.dabbar-soon-card .dsc-pill{ display:inline-block; padding:0 .4rem; border-radius:99px; font-size:.58rem; font-weight:900; background:rgba(127,127,127,.2); color:var(--pm-ink,#17202b); }
+.dabbar-soon-card .dsc-amt{ flex-shrink:0; font-size:.76rem; font-weight:900; font-variant-numeric:tabular-nums; color:var(--pm-gold-bright,#087a59); }
+.dabbar-reminder-banner{ align-items:center; gap:.5rem; padding:.4rem .6rem; border-radius:.85rem; }
+.dabbar-reminder-banner-icon{ width:1.6rem; height:1.6rem; font-size:.85rem; border-radius:.55rem; }
+.dabbar-reminder-banner-title{ font-size:.72rem; }
+.dabbar-reminder-banner-sub{ font-size:.6rem; margin-top:0; }
+.dabbar-reminder-banner-close{ width:1.35rem; height:1.35rem; font-size:.75rem; }
+
+/* ===== هدفك المالي: حدود واضحة في الوضع الليلي ===== */
+html:not([data-theme="light"]) .asst-goal-item{ border:1px solid rgba(255,255,255,.22) !important; }
+html:not([data-theme="light"]) .asst-goal-body{ border-top:1px solid rgba(255,255,255,.18) !important; }
+html:not([data-theme="light"]) .asst-goal-stat{ background:rgba(255,255,255,.05) !important; border:1px solid rgba(255,255,255,.26) !important; }
+html:not([data-theme="light"]) .asst-goal-stat--accent{ background:rgba(189,242,63,.08) !important; border-color:rgba(189,242,63,.55) !important; }
+html:not([data-theme="light"]) .asst-goal-stat-k{ color:#b9bcc0 !important; }
+html:not([data-theme="light"]) .asst-goal-contribute-amount{ background:#2b2c30 !important; border:1.5px solid rgba(255,255,255,.3) !important; color:var(--pm-ink,#f5f5f4) !important; }
+html:not([data-theme="light"]) .asst-goal-contribute-amount::placeholder{ color:#9a9da1; }
+html:not([data-theme="light"]) .asst-goal-contribute-amount:focus{ border-color:var(--pm-gold,#bdf23f) !important; box-shadow:0 0 0 3px rgba(189,242,63,.14); }
+html:not([data-theme="light"]) .asst-goal-date-chip{ background:rgba(255,255,255,.04) !important; border:1px solid rgba(255,255,255,.26) !important; }
+
+/* ===== الالتزامات الشهرية: أصغر + تعديل + إجمالي ===== */
+#recurring-list{ gap:.3rem !important; }
+#recurring-list > .recurring-row{ font-size:.74rem !important; padding:.38rem .6rem !important; border-radius:.8rem !important; gap:.45rem; min-height:38px !important; }
+#recurring-list .recurring-name{ font-size:.76rem !important; font-weight:800; }
+#recurring-list .commitment-icon{ flex:0 0 1.55rem; width:1.55rem; height:1.55rem; font-size:.85rem; border-radius:.55rem; margin-inline-end:.45rem; }
+#recurring-list .recurring-amt{ font-size:.8rem !important; gap:.25rem !important; }
+#recurring-list .recurring-amt button{ width:1.6rem; height:1.6rem; font-size:.8rem; }
+#recurring-list .recurring-edit-btn{ color:var(--pm-muted,#7b8490); background:transparent; border:0; cursor:pointer; }
+#recurring-list .recurring-edit-btn:hover, #recurring-list .recurring-edit-btn:active{ color:var(--pm-gold-bright,#087a59); }
+.dabbar-commit-total{ display:flex; align-items:center; justify-content:space-between; gap:.5rem; padding:.42rem .7rem; border-radius:.85rem; font-size:.7rem; font-weight:800; color:var(--pm-ink,#17202b); background:rgba(16,185,129,.10); background:color-mix(in srgb, var(--pm-gold,#10b981) 11%, transparent); border:1px solid rgba(16,185,129,.35); border:1px solid color-mix(in srgb, var(--pm-gold,#10b981) 34%, transparent); }
+.dabbar-commit-total b{ font-size:.82rem; font-weight:900; font-variant-numeric:tabular-nums; color:var(--pm-gold-bright,#087a59); }
+.dabbar-commit-total:empty{ display:none; }
+
+</style>
+<script id="dabbar-ui-polish-2026-09b-js">
+(function () {
+  var inp = document.getElementById('reminder-date-input');
+  var field = document.getElementById('reminder-date-field');
+  if (!inp || !field) return;
+  function sync() { field.classList.toggle('is-empty', !inp.value); }
+  inp.addEventListener('input', sync);
+  inp.addEventListener('change', sync);
+  try {
+    var d = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
+    Object.defineProperty(inp, 'value', {
+      configurable: true,
+      get: function () { return d.get.call(this); },
+      set: function (v) { d.set.call(this, v); sync(); }
+    });
+  } catch (e) {}
+  sync();
+})();
+
+</script>
 </body>
 </html>

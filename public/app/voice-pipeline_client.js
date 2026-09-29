@@ -110,10 +110,11 @@ export function startVoiceCapture(options = {}) {
   let meter = null;
   let maxTimer = null;
   let graceTimer = null;
+  let debug = null; // مؤقت: للتشخيص بس
   const chunks = [];
 
   // حالة Web Speech
-  const speech = { segments: [], confidences: [], error: null, ended: false, langIndex: 0, retrying: false };
+  const speech = { segments: [], confidences: [], error: null, ended: false, langIndex: 0, retrying: false, events: [] };
 
   let resolveResult;
   const result = new Promise((resolve) => { resolveResult = resolve; });
@@ -129,7 +130,7 @@ export function startVoiceCapture(options = {}) {
     if (finished) return;
     finished = true;
     cleanup();
-    resolveResult(value);
+    resolveResult({ ...value, debug });
   };
 
   // ---- اختيار أفضل نص من نتيجة Web Speech ----
@@ -171,13 +172,18 @@ export function startVoiceCapture(options = {}) {
     recognition.interimResults = true;
     recognition.maxAlternatives = 3;
 
+    ['start', 'audiostart', 'soundstart', 'speechstart', 'speechend', 'audioend', 'end'].forEach((n) => {
+      recognition.addEventListener(n, () => speech.events.push(n));
+    });
     recognition.onresult = (event) => {
+      speech.events.push('result');
       collectFromEvent(event);
       let interim = '';
       for (let i = 0; i < event.results.length; i += 1) interim += `${event.results[i][0].transcript} `;
       onInterim(interim.trim());
     };
     recognition.onerror = (event) => {
+      speech.events.push(`error:${event.error}`); // بنسجّل حتى 'aborted' عشان التشخيص
       // 'aborted' بيحصل لما احنا نلغي. 'no-speech' هيتعالج بفحص مستوى الصوت.
       if (event.error === 'language-not-supported' && speech.langIndex + 1 < opt.langs.length) {
         speech.langIndex += 1;
@@ -208,6 +214,17 @@ export function startVoiceCapture(options = {}) {
   const decide = async () => {
     if (cancelled) return finish({ ok: false, source: null, error: 'cancelled' });
     onStatus('processing');
+    debug = {
+      supported: isWebSpeechSupported(),
+      lang: recognition?.lang,
+      speechError: speech.error,
+      events: speech.events.join(','),
+      segments: speech.segments,
+      confidences: speech.confidences,
+      usable: !!webSpeechText(),
+      peak: Number((meter?.getPeak() || 0).toFixed(2)),
+      audioBytes: chunks.reduce((n, c) => n + c.size, 0),
+    };
 
     // (1) محاولة Web Speech: نص سليم -> تصنيف نصي رخيص، وخلاص
     const text = webSpeechText();

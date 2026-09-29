@@ -12508,6 +12508,7 @@ body { height: 100vh; }
         }
         function cancelQuickVoice() {
             quickEntryVoiceCancelled = true;
+            if (typeof quickVoiceSession !== 'undefined' && quickVoiceSession) { quickVoiceSession.cancel(); return; }
             quickEntryVoiceBlob = null;
             clearQuickVoicePreview();
             if (quickEntryRecorder?.state === 'recording') {
@@ -13331,6 +13332,7 @@ body { height: 100vh; }
         // ============ نطلب آخر chunk قبل stop؛ على بعض أجهزة Android حدث stop يصل قبل اكتمال تسليم
         // آخر dataavailable، فتطلع المعاينة بملف صغير جدًا (رأس WebM فقط) رغم أن مدتها ظاهرة وصوتها مسموع. ============
         function stopQuickEntryRecording(reason = 'user') {
+            if (typeof quickVoiceSession !== 'undefined' && quickVoiceSession) { quickVoiceSession.stop(); return; }
             const activeRecorder = quickEntryRecorder;
             if (!activeRecorder || activeRecorder.state !== 'recording' || quickEntryStopRequested) return;
             quickEntryStopRequested = true;
@@ -13352,7 +13354,7 @@ body { height: 100vh; }
             for (const type of candidates) { if (window.MediaRecorder?.isTypeSupported?.(type)) return type; }
             return '';
         }
-        document.getElementById('quick-entry-voice')?.addEventListener('click', async () => {
+        const legacyQuickVoiceStart = async () => {
             if (!requireQuickEntryAccess()) return;
             if (!navigator.mediaDevices?.getUserMedia || !window.MediaRecorder) return quickStatus('المتصفح لا يدعم التسجيل الصوتي.', 'error');
             if (quickEntryRecorder?.state === 'recording') return;
@@ -13474,6 +13476,77 @@ body { height: 100vh; }
                         : error?.message || 'مش قادرين نفتح الميكروفون دلوقتي. تأكد من الإذن وحاول تاني.';
                 quickStatus(message, 'error');
             }
+        };
+        // ============ مسار الصوت الجديد: Web Speech (مجاني) ثم فولباك للسيرفر — voice-pipeline.client.js ============
+        let quickVoiceSession = null, voicePipelineMod = null;
+        const VOICE_DEBUG_ALERT = true; // TEMP للتشخيص: بيطلّع alert بحالة Web Speech بعد كل تسجيل. اقفله (false) بعد ما نعرف السبب.
+        async function loadVoicePipeline() {
+            if (voicePipelineMod !== null) return voicePipelineMod;
+            for (const path of ['./voice-pipeline.client.js', './voice-pipeline_client.js']) {
+                try { voicePipelineMod = await import(path); return voicePipelineMod; } catch (e) { console.warn('DABBAR_VOICE_PIPELINE_LOAD_FAILED', path, e); }
+            }
+            voicePipelineMod = false;
+            return false;
+        }
+        const VOICE_ERROR_MESSAGES = {
+            'mic-denied': 'الميكروفون مش مسموح. اسمح للتطبيق بالميكروفون من إعدادات المتصفح.',
+            'silence': 'ما سمعتش حاجة. قرّب من الميكروفون وجرب تاني.',
+            'unsupported': 'المتصفح ده مش بيدعم التسجيل الصوتي.',
+            'no-fallback': 'ما قدرتش أفهم الصوت. جرب تاني أو اكتب المصروف.',
+            'classify-failed': 'فهمت كلامك بس حصل خطأ أثناء التحليل. جرب تاني.',
+            'transcription-failed': 'ما قدرتش أفهم الصوت. جرب تاني أو اكتب المصروف.',
+            'network': 'مشكلة في الاتصال. تأكد من الإنترنت وجرب تاني.',
+        };
+        document.getElementById('quick-entry-voice')?.addEventListener('click', async () => {
+            if (!requireQuickEntryAccess()) return;
+            if (quickVoiceSession) return;
+            if (quickEntryRecorder?.state === 'recording') return;
+            const mod = await loadVoicePipeline();
+            if (!mod) return legacyQuickVoiceStart(); // الملف مش موجود جنب الداشبورد: نرجع للتسجيل القديم
+            if (!navigator.mediaDevices?.getUserMedia) return quickStatus('المتصفح ده مش بيدعم التسجيل الصوتي.', 'error');
+            let lastError = null;
+            quickEntrySeconds = 0;
+            quickEntryVoiceCancelled = false;
+            quickShow('quick-entry-voice-preview', false);
+            const stopTimer = () => { clearInterval(quickEntryTimer); quickEntryTimer = null; };
+            const session = mod.startVoiceCapture({
+                onStatus: (s) => {
+                    if (s === 'listening') {
+                        quickShow('quick-entry-recording', true);
+                        quickStatus('بسمعك.. اتكلم.');
+                        setQuickMagic('recording');
+                        stopTimer();
+                        quickEntryTimer = setInterval(() => {
+                            quickEntrySeconds++;
+                            const el = document.getElementById('quick-entry-recording-time');
+                            if (el) el.textContent = `00:${String(quickEntrySeconds).padStart(2, '0')}`;
+                        }, 1000);
+                    } else if (s === 'processing' || s === 'uploading') {
+                        stopTimer();
+                        quickShow('quick-entry-recording', false);
+                        quickStatusCycle(['بفهم كلامك', 'بطلّع العمليات', 'ثواني كده'], 450);
+                    }
+                },
+                classifyText: async (text) => {
+                    try { const r = await asstApi('entry_draft', { text }); return { transactions: r.drafts || [], transcript: r.transcript }; }
+                    catch (e) { lastError = e; throw e; }
+                },
+                classifyAudio: async ({ audioBase64, mimeType }) => {
+                    try {
+                        const r = await asstApi('entry_draft', { audioBase64: `data:${mimeType};base64,${audioBase64}`, mimeType, audioDurationSeconds: quickEntrySeconds });
+                        return { success: true, transcript: r.transcript, transactions: r.drafts || [], provider: r.provider || null };
+                    } catch (e) { lastError = e; throw e; }
+                },
+            });
+            quickVoiceSession = session;
+            const result = await session.result;
+            quickVoiceSession = null;
+            stopTimer();
+            quickShow('quick-entry-recording', false);
+            if (VOICE_DEBUG_ALERT && result.error !== 'cancelled') { try { alert(JSON.stringify(result.debug)); } catch (e) { /* ignore */ } }
+            if (result.error === 'cancelled') { quickStatus(''); return; }
+            if (result.ok) { quickDraft(result.transactions, result.transcript); return; }
+            quickStatus((result.error === 'classify-failed' || result.error === 'network') && lastError?.message ? lastError.message : (VOICE_ERROR_MESSAGES[result.error] || 'حصل خطأ في التسجيل. جرب تاني.'), 'error');
         });
         document.getElementById('quick-entry-stop')?.addEventListener('click', stopQuickEntryRecording);
         document.getElementById('quick-entry-recording-cancel')?.addEventListener('click', cancelQuickVoice);

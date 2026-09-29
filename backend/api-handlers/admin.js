@@ -159,8 +159,8 @@ async function handleSubscriptionProof(req, res) {
     const caption = proofMatch.matched
       ? `✅ تم تفعيل الاشتراك تلقائيًا بعد تطابق المرجع والمبلغ مع SMS حساب الاستقبال.\n🔗 ${sourceLabel}\n👤 ${senderName || 'من غير اسم'}\n🧾 المرجع: <code>${extracted.reference}</code>\n💰 المبلغ: <b>${extracted.amount} ج.م</b>`
       : senderName
-        ? `👆 إيصال تحويل من الداشبورد (مش تليجرام).\n🔗 ${sourceLabel}\n👤 الاسم اللي بعته: <b>${senderName}</b>\n🧾 المرجع المقروء: <code>${extracted.reference || 'غير واضح'}</code>\n💰 المبلغ المقروء: <b>${extracted.amount || 'غير واضح'} ج.م</b>\n\n${extracted.readable ? 'مستنيين SMS حساب الاستقبال للمطابقة التلقائية.' : 'المرجع أو المبلغ غير واضح — راجعه يدويًا.'}`
-        : `👆 إيصال تحويل من الداشبورد (مش تليجرام) — من غير اسم.\n🔗 ${sourceLabel}\n🧾 المرجع المقروء: <code>${extracted.reference || 'غير واضح'}</code>\n💰 المبلغ المقروء: <b>${extracted.amount || 'غير واضح'} ج.م</b>\n\n${extracted.readable ? 'مستنيين SMS حساب الاستقبال للمطابقة التلقائية.' : 'المرجع أو المبلغ غير واضح — راجعه يدويًا.'}`;
+        ? `👆 إيصال تحويل من الداشبورد (مش تليجرام).\n🔗 ${sourceLabel}\n👤 الاسم اللي بعته: <b>${senderName}</b>\n🧾 المرجع المقروء: <code>${extracted.reference || 'غير واضح'}</code>\n💰 المبلغ المقروء: <b>${extracted.amount || 'غير واضح'} ج.م</b>\n\n${extracted.readable ? 'مستنيين SMS حساب الاستقبال للمطابقة التلقائية.' : 'المرجع أو المبلغ غير واضح — راجعه يدويًا.'}\n\nلو اتأكدت من الإيصال، فعّله بـ:\n<code>فعل ${telegramUserId}</code>`
+        : `👆 إيصال تحويل من الداشبورد (مش تليجرام) — من غير اسم.\n🔗 ${sourceLabel}\n🧾 المرجع المقروء: <code>${extracted.reference || 'غير واضح'}</code>\n💰 المبلغ المقروء: <b>${extracted.amount || 'غير واضح'} ج.م</b>\n\n${extracted.readable ? 'مستنيين SMS حساب الاستقبال للمطابقة التلقائية.' : 'المرجع أو المبلغ غير واضح — راجعه يدويًا.'}\n\nلو اتأكدت من الإيصال، فعّله بـ:\n<code>فعل ${telegramUserId}</code>`;
 
     try {
       await sendTelegramPhoto(ADMIN_TELEGRAM_ID, imageUrl, caption, 'HTML');

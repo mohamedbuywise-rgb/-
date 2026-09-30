@@ -14,6 +14,7 @@
 
 import { supabase } from '../../lib/supabaseClient.js';
 import { classifyMessage, transcribeAudioBase64, extractItemizedReceiptFromImageBase64 } from '../../lib/groq.js';
+import { dedupeEquivalentTransactions, normalizeFinancialTransaction } from '../../lib/textNormalize.js';
 import { recordExpense } from '../../lib/expenses.js';
 import { recordDebt } from '../../lib/debts.js';
 import { recordFinancialEvent } from '../../lib/financialEvents.js';
@@ -61,7 +62,7 @@ async function bumpDailyCounter(profile) {
 
 // ============ نفس منطق تصنيف/تسجيل المعاملة اللي في sms-webhook.js — مستخرجة هنا كدالة مشتركة ============
 async function classifyAndRecordText(text, userId, note) {
-  const transactions = await classifyMessage(text);
+  const transactions = dedupeEquivalentTransactions((await classifyMessage(text)).map((item) => normalizeFinancialTransaction(item, text)));
   let recorded = 0;
   for (const item of transactions) {
     if (item.type === 'expense' || item.type === 'purchase' || item.type === 'asset' || item.type === 'refund') {

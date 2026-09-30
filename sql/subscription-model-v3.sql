@@ -27,7 +27,7 @@ create table if not exists subscription_plans (
   created_at timestamptz not null default now()
 );
 insert into subscription_plans (plan_key, name, price_egp, billing_interval, limits)
-values ('monthly', 'دبّر الشهري', 199, 'month', '{"voice":250,"ocr":50,"chat":180,"text":300,"statement":10}'::jsonb)
+values ('monthly', 'دبّر الشهري', 199, 'month', '{"voice":250,"ocr":50,"chat":180,"text":300,"web_text":600,"statement":10}'::jsonb)
 on conflict (plan_key) do update set price_egp = excluded.price_egp, limits = excluded.limits;
 
 create or replace function start_trial_if_missing(p_user_id bigint)

@@ -11,7 +11,7 @@ import { isFinancialEventType, recordFinancialEvent } from '../../lib/financialE
 import { buyIntoPortfolio, sellFromPortfolio } from '../../lib/investments.js';
 import { CATEGORY_EMOJI, CATEGORIES } from '../../lib/config.js';
 import { currencyLabel } from '../../lib/textNormalize.js';
-import { normalizeDigits, extractDeterministicExpense, correctDebtDirections, normalizeFinancialTransaction, reconcileSingleTransaction } from '../../lib/textNormalize.js';
+import { normalizeDigits, extractDeterministicTransactions, dedupeEquivalentTransactions, correctDebtDirections, normalizeFinancialTransaction, reconcileSingleTransaction } from '../../lib/textNormalize.js';
 import { checkVoiceUsage, checkOcrUsage, checkChatUsage, checkTextUsage, refundOcrUsage } from '../../lib/rateLimits.js';
 import { GUIDE_URL, TRIAL_SUMMARY_BASE_URL, ADMIN_TELEGRAM_ID, SUBSCRIPTION_DAYS, SUBSCRIPTION_PRICE_EGP, INSTAPAY_LINK, ADMIN_CONTACT_USERNAME, VOICE_MAX_DURATION_SECONDS, TELEGRAM_WEBHOOK_SECRET } from '../../lib/config.js';
 import { createTrialSummaryToken } from '../../lib/trialToken.js';
@@ -789,11 +789,11 @@ async function handleIncomingText(text, userId, chatId, { fromVoice = false } = 
     ? preClassifiedTransactions
     : await classifyMessage(text);
   const parsedTransactions = rawTransactions.map((item) => normalizeFinancialTransaction(item, text));
-  let transactions = reconcileSingleTransaction(correctDebtDirections(text, parsedTransactions), text);
+  let transactions = dedupeEquivalentTransactions(reconcileSingleTransaction(correctDebtDirections(text, parsedTransactions), text));
   // fallback آمن للجمل الصوتية القصيرة مثل "غدا مية جنيه" إذا أعاد المصنّف unknown.
   if (!transactions.some((t) => (t?.type === 'expense' || t?.type === 'purchase' || t?.type === 'asset' || t?.type === 'debt') && Number(t.amount) > 0)) {
-    const deterministicExpense = extractDeterministicExpense(text);
-    if (deterministicExpense) transactions = [deterministicExpense];
+    const deterministicTransactions = extractDeterministicTransactions(text);
+    if (deterministicTransactions.length) transactions = dedupeEquivalentTransactions(deterministicTransactions);
   }
   let successCount = 0;
   let hadPortfolioAttempt = false;

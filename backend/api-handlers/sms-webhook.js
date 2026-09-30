@@ -270,7 +270,7 @@ export default async function handler(req, res) {
   }
   const abandon = () => releaseSmsFingerprint(telegramUserId, fingerprint);
 
-  const bankAccess = await getFeatureAccess(telegramUserId, 'bank_linking', { startTrial: true });
+  const bankAccess = await getFeatureAccess(telegramUserId, 'sms_ingestion', { startTrial: true });
   if (!bankAccess.allowed) {
     await abandon();
     return res.status(403).json({ ok: false, ...subscriptionRequiredResponse(bankAccess) });
@@ -315,7 +315,8 @@ export default async function handler(req, res) {
 
     for (const item of items) {
       const type = ['purchase', 'asset'].includes(item.type) ? 'expense' : item.type;
-      const category = CATEGORIES.includes(item.category) ? item.category : 'تسوق';
+      const isGameyaInstallment = /(?:قسط|أقساط|اقساط).{0,24}(?:جمعي)|(?:جمعي).{0,24}(?:قسط|أقساط|اقساط)/iu.test(rawText);
+      const category = isGameyaInstallment ? 'جمعية وأقساط' : (CATEGORIES.includes(item.category) ? item.category : 'تسوق');
 
       if (type === 'expense') {
         await recordExpense({ ...item, type, category }, rawText, telegramUserId, chatId, `\n\n🏦 اتسجلت أوتوماتيك من رسالة ${bankMatch.label}${item.account_last4 ? ` (حساب ••${item.account_last4})` : ''}`, { ...sourceMeta, account_last4: item.account_last4 || '' });

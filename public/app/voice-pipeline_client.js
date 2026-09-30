@@ -297,6 +297,8 @@ export function startVoiceCapture(options = {}) {
           transcript: text,
           transactions: out?.transactions || [],
           provider: 'webspeech',
+          classificationSource: out?.classificationSource || null,
+          localClassification: out?.localClassification || null,
         });
       } catch (err) {
         // فشل التصنيف النصي = مشكلة شبكة/سيرفر، مش مشكلة تفريغ؛ إرسال الصوت مش هيحلها

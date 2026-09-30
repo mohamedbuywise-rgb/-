@@ -4183,10 +4183,10 @@ body { height: 100vh; }
   .inset-y-0 { top: 0; bottom: 0; }
 }
 /* ===== اعرف صرفك في أي مدة (شهري، تحت أهدافك) ===== */
-.ps-card{--ps-soft:rgba(30,41,59,.55);--ps-line:rgba(148,163,184,.2);--ps-muted:#94a3b8;--ps-text:#e2e8f0;--ps-neg:#fda4af;--ps-green:#10b981;--ps-on-green:#022c22;--ps-row:rgba(15,23,42,.7);--ps-tile:rgba(16,185,129,.14);border-radius:1.75rem;padding:1rem;border:1px solid #1e293b;background:rgba(2,6,23,.6);color:var(--ps-text)}
-html[data-theme="light"] .ps-card{--ps-soft:#f4f6f9;--ps-line:#e3e8ef;--ps-muted:#64748b;--ps-text:#0f172a;--ps-neg:#b4452f;--ps-green:#0b8f66;--ps-on-green:#fff;--ps-row:#fff;--ps-tile:#e6f6ef;background:#fff;border-color:#e2e8f0;box-shadow:0 10px 30px rgba(15,23,42,.06)}
+.ps-card{--ps-soft:var(--pm-surface-soft);--ps-line:var(--pm-hairline);--ps-muted:var(--pm-muted);--ps-text:var(--pm-ink);--ps-neg:var(--pm-clay);--ps-green:var(--pm-gold);--ps-on-green:var(--pm-gold-ink-on);--ps-row:var(--pm-surface);--ps-tile:rgba(14,143,104,.16);--ps-tile:color-mix(in srgb,var(--pm-gold) 16%,transparent);border-radius:1.75rem;padding:1rem;border:1px solid var(--pm-hairline);background:linear-gradient(160deg,rgb(236,246,243) 0%,var(--pm-surface-hi) 65%);background:linear-gradient(160deg,color-mix(in srgb,var(--pm-gold) 8%,var(--pm-surface-hi)) 0%,var(--pm-surface-hi) 65%);color:var(--pm-ink)}
+html[data-theme="light"] .ps-card{box-shadow:0 10px 30px rgba(15,23,42,.06)}
 .ps-card[hidden],.ps-reopen[hidden],.ps-body[hidden]{display:none!important}
-.ps-head{display:flex;align-items:center;gap:.6rem}
+.ps-head{display:flex;align-items:center;gap:.6rem;cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none}.ps-head:focus-visible{outline:2px solid var(--pm-gold);outline-offset:4px;border-radius:1rem}
 .ps-icon{width:2.6rem;height:2.6rem;border-radius:.9rem;background:var(--ps-tile);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex:none}
 .ps-head-copy{flex:1;min-width:0}.ps-head-copy h3{font-size:.95rem;font-weight:900;margin:0}.ps-head-copy p{font-size:.68rem;color:var(--ps-muted);margin:.2rem 0 0}
 .ps-round-btn{width:2rem;height:2rem;border-radius:50%;border:1px solid var(--ps-line);background:transparent;color:var(--ps-muted);font-size:.8rem;display:flex;align-items:center;justify-content:center;flex:none;cursor:pointer}
@@ -4208,26 +4208,27 @@ html[data-theme="light"] .ps-card{--ps-soft:#f4f6f9;--ps-line:#e3e8ef;--ps-muted
 .ps-flow{display:flex;justify-content:center;gap:.5rem;flex-wrap:wrap}
 .ps-chip{border-radius:999px;padding:.3rem .75rem;font-size:.7rem;font-weight:800;border:1px solid}
 .ps-chip b{font-weight:900;margin-inline-start:.3rem}
-.ps-chip-income{background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.35);color:#6ee7b7}
+.ps-chip-income{background:rgba(14,143,104,.12);background:color-mix(in srgb,var(--pm-gold) 14%,transparent);border-color:rgba(14,143,104,.4);border-color:color-mix(in srgb,var(--pm-gold) 40%,transparent);color:var(--pm-gold-bright)}
 .ps-chip-debt{background:rgba(245,158,11,.14);border-color:rgba(245,158,11,.4);color:#fcd34d}
-html[data-theme="light"] .ps-chip-income{color:#047857}html[data-theme="light"] .ps-chip-debt{color:#b45309}
+html[data-theme="light"] .ps-chip-debt{color:#b45309}
 .ps-sec{display:flex;justify-content:space-between;align-items:baseline;margin:1rem 0 .5rem}.ps-sec h4{font-size:.8rem;font-weight:900;margin:0}.ps-sec small{font-size:.62rem;color:var(--ps-muted)}
-.ps-cat{padding:.55rem .75rem .65rem;border-radius:1rem;background:var(--ps-soft);margin-bottom:.4rem}
-.ps-cat-top{display:flex;align-items:center;gap:.5rem}
-.ps-dot{width:.6rem;height:.6rem;border-radius:50%;flex:none}.ps-cat-name{flex:1;min-width:0;font-size:.78rem;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ps-pct{font-size:.62rem;color:var(--ps-muted)}.ps-amt{font-size:.78rem;font-weight:900}
-.ps-track{height:4px;border-radius:4px;background:rgba(148,163,184,.25);margin-top:.5rem;overflow:hidden}.ps-fill{height:100%;border-radius:4px}
+.ps-cat{padding:.32rem .6rem .4rem;border-radius:.75rem;background:var(--ps-soft);margin-bottom:.25rem}
+.ps-cat-top{display:flex;align-items:center;gap:.4rem}
+.ps-dot{width:.5rem;height:.5rem;border-radius:50%;flex:none}.ps-cat-name{flex:1;min-width:0;font-size:.72rem;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ps-pct{font-size:.58rem;color:var(--ps-muted)}.ps-amt{font-size:.72rem;font-weight:900}
+.ps-track{height:3px;border-radius:3px;background:rgba(148,163,184,.25);margin-top:.3rem;overflow:hidden}.ps-fill{height:100%;border-radius:4px}
 .ps-details{margin-top:.9rem;border:1px solid var(--ps-line);border-radius:1.1rem;padding:.7rem}
 .ps-details summary{display:flex;justify-content:space-between;align-items:center;cursor:pointer;list-style:none;font-size:.8rem;font-weight:900}
 .ps-details summary::-webkit-details-marker{display:none}.ps-details summary small{font-size:.65rem;font-weight:700;color:var(--ps-muted)}
 .ps-details summary small::after{content:" ▾"}.ps-details[open] summary small::after{content:" ▴"}
 .ps-items{margin-top:.6rem;max-height:18rem;overflow-y:auto}
-.ps-day{display:flex;justify-content:space-between;font-size:.62rem;color:var(--ps-muted);margin:.6rem .2rem .3rem}
+.ps-day{display:flex;justify-content:space-between;align-items:center;gap:.5rem;font-size:.72rem;font-weight:800;color:var(--ps-text);margin:.7rem 0 .35rem;padding:.4rem .7rem;border-radius:.8rem;background:rgba(14,143,104,.16);background:color-mix(in srgb,var(--pm-gold) 16%,transparent);border:1px solid rgba(14,143,104,.4);border:1px solid color-mix(in srgb,var(--pm-gold) 40%,transparent);border-inline-start:3px solid var(--pm-gold)}
+.ps-day-total{font-size:.78rem;font-weight:900;color:var(--pm-gold-bright);white-space:nowrap}.ps-day-total small{font-size:.6rem;font-weight:700;color:var(--ps-muted);margin-inline-end:.3rem}
 .ps-item{display:flex;align-items:center;gap:.6rem;padding:.5rem .65rem;border-radius:.95rem;background:var(--ps-row);border:1px solid var(--ps-line);margin-bottom:.35rem}
 .ps-item-ico{width:2rem;height:2rem;border-radius:.7rem;background:var(--ps-tile);display:flex;align-items:center;justify-content:center;font-size:1rem;flex:none}
 .ps-item-name{flex:1;min-width:0;font-size:.78rem;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ps-item-amt{font-size:.78rem;font-weight:900;color:var(--ps-neg);direction:ltr}
 .ps-empty{text-align:center;font-size:.68rem;color:var(--ps-muted);padding:.5rem}
-.ps-reopen{display:flex;align-items:center;justify-content:space-between;width:100%;padding:.75rem 1rem;border-radius:1.25rem;border:1px dashed var(--ps-line,#334155);background:transparent;color:#94a3b8;font-size:.75rem;font-weight:800;cursor:pointer}
+.ps-reopen{display:flex;align-items:center;justify-content:space-between;width:100%;padding:.75rem 1rem;border-radius:1.25rem;border:1px dashed var(--pm-hairline);background:transparent;color:var(--pm-muted);font-size:.75rem;font-weight:800;cursor:pointer}
 </style>
 </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col overflow-hidden">
@@ -4732,14 +4733,14 @@ html[data-theme="light"] .ps-chip-income{color:#047857}html[data-theme="light"] 
             </div>
 
             <!-- اعرف صرفك في أي مدة: تحت أهدافك في شهري، قابل للطي والإغلاق -->
-            <section id="period-summary-card" class="ps-card" style="order:9" aria-label="اعرف صرفك في أي مدة">
-                <div class="ps-head">
+            <section id="period-summary-card" class="ps-card ps-collapsed" style="order:9" aria-label="اعرف صرفك في أي مدة">
+                <div class="ps-head" id="period-summary-head" role="button" tabindex="0" aria-expanded="false" aria-controls="period-summary-body">
                     <span class="ps-icon" aria-hidden="true">📅</span>
                     <div class="ps-head-copy"><h3>اعرف صرفك في أي مدة</h3><p>اختار مدة أو حدد تاريخين بنفسك.</p></div>
-                    <button type="button" id="period-summary-toggle" class="ps-round-btn" aria-expanded="true" aria-controls="period-summary-body" aria-label="طي أو فتح الكارت"><span class="ps-chev">▾</span></button>
+                    <span id="period-summary-toggle" class="ps-round-btn" aria-hidden="true"><span class="ps-chev">▾</span></span>
                     <button type="button" id="period-summary-close" class="ps-round-btn" aria-label="إغلاق الكارت">✕</button>
                 </div>
-                <div id="period-summary-body" class="ps-body">
+                <div id="period-summary-body" class="ps-body" hidden>
                     <div class="ps-tabs" role="group" aria-label="اختيار مدة سريعة">
                         <button type="button" class="period-preset ps-active" data-days="4">آخر 4 أيام</button>
                         <button type="button" class="period-preset" data-days="7">أسبوع</button>
@@ -9419,6 +9420,7 @@ html[data-theme="light"] .ps-chip-income{color:#047857}html[data-theme="light"] 
             return String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
         }
         const PERIOD_UI_KEYS = { collapsed: 'dabbar_period_collapsed', closed: 'dabbar_period_closed' };
+        let periodIsOpen = false; // الكارت دايمًا يبدأ مقفول ويفتح بالضغط فقط
         function periodUiGet(key) { try { return localStorage.getItem(key) === '1'; } catch (e) { return false; } }
         function periodUiSet(key, on) { try { if (on) localStorage.setItem(key, '1'); else localStorage.removeItem(key); } catch (e) {} }
         function periodNum(n) { return Number(n || 0).toLocaleString('ar-EG'); }
@@ -9436,7 +9438,9 @@ html[data-theme="light"] .ps-chip-income{color:#047857}html[data-theme="light"] 
             const toggle = document.getElementById('period-summary-toggle');
             if (!card || !reopen || !body || !toggle) return;
             const closed = periodUiGet(PERIOD_UI_KEYS.closed);
-            const collapsed = periodUiGet(PERIOD_UI_KEYS.collapsed);
+            const collapsed = !periodIsOpen;
+            const head = document.getElementById('period-summary-head');
+            if (head) head.setAttribute('aria-expanded', String(!collapsed));
             card.hidden = closed;
             reopen.hidden = !closed;
             body.hidden = collapsed;
@@ -9495,7 +9499,7 @@ html[data-theme="light"] .ps-chip-income{color:#047857}html[data-theme="light"] 
                     g.rows.push(item);
                 });
                 document.getElementById('period-items-list').innerHTML = groups.length
-                    ? groups.map((g) => `<div class="ps-day"><span>${escapePeriodText(g.label)}</span><span>${fmt(g.total)}</span></div>` + g.rows.map((item) => `<div class="ps-item"><span class="ps-item-ico" aria-hidden="true">${getCategoryEmoji(item.category || item.description)}</span><span class="ps-item-name">${escapePeriodText(item.description || item.category || 'مصروف')}</span><strong class="ps-item-amt">-${fmt(item.amount)}</strong></div>`).join('')).join('')
+                    ? groups.map((g) => `<div class="ps-day"><span>${escapePeriodText(g.label)}</span><span class="ps-day-total"><small>إجمالي اليوم</small>${fmt(g.total)}</span></div>` + g.rows.map((item) => `<div class="ps-item"><span class="ps-item-ico" aria-hidden="true">${getCategoryEmoji(item.category || item.description)}</span><span class="ps-item-name">${escapePeriodText(item.description || item.category || 'مصروف')}</span><strong class="ps-item-amt">-${fmt(item.amount)}</strong></div>`).join('')).join('')
                     : '<p class="ps-empty">لا توجد عمليات.</p>';
                 resultEl.classList.remove('hidden');
                 const card = document.getElementById('period-summary-card');
@@ -9525,12 +9529,12 @@ html[data-theme="light"] .ps-chip-income{color:#047857}html[data-theme="light"] 
                 setPeriodActivePreset(days);
                 loadPeriodSummary();
             }));
-            document.getElementById('period-summary-toggle')?.addEventListener('click', () => {
-                periodUiSet(PERIOD_UI_KEYS.collapsed, !periodUiGet(PERIOD_UI_KEYS.collapsed));
-                applyPeriodUiState();
-            });
-            document.getElementById('period-summary-close')?.addEventListener('click', () => { periodUiSet(PERIOD_UI_KEYS.closed, true); applyPeriodUiState(); });
-            document.getElementById('period-summary-reopen')?.addEventListener('click', () => { periodUiSet(PERIOD_UI_KEYS.closed, false); applyPeriodUiState(); });
+            const psHead = document.getElementById('period-summary-head');
+            const psToggle = () => { periodIsOpen = !periodIsOpen; applyPeriodUiState(); };
+            psHead?.addEventListener('click', psToggle);
+            psHead?.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); psToggle(); } });
+            document.getElementById('period-summary-close')?.addEventListener('click', (e) => { e.stopPropagation(); periodUiSet(PERIOD_UI_KEYS.closed, true); applyPeriodUiState(); });
+            document.getElementById('period-summary-reopen')?.addEventListener('click', () => { periodUiSet(PERIOD_UI_KEYS.closed, false); periodIsOpen = false; applyPeriodUiState(); });
             applyPeriodUiState();
         }
         function renderMonthly(month) {

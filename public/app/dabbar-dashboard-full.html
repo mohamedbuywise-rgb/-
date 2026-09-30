@@ -4182,6 +4182,52 @@ body { height: 100vh; }
   .inset-x-0 { left: 0; right: 0; }
   .inset-y-0 { top: 0; bottom: 0; }
 }
+/* ===== اعرف صرفك في أي مدة (شهري، تحت أهدافك) ===== */
+.ps-card{--ps-soft:rgba(30,41,59,.55);--ps-line:rgba(148,163,184,.2);--ps-muted:#94a3b8;--ps-text:#e2e8f0;--ps-neg:#fda4af;--ps-green:#10b981;--ps-on-green:#022c22;--ps-row:rgba(15,23,42,.7);--ps-tile:rgba(16,185,129,.14);border-radius:1.75rem;padding:1rem;border:1px solid #1e293b;background:rgba(2,6,23,.6);color:var(--ps-text)}
+html[data-theme="light"] .ps-card{--ps-soft:#f4f6f9;--ps-line:#e3e8ef;--ps-muted:#64748b;--ps-text:#0f172a;--ps-neg:#b4452f;--ps-green:#0b8f66;--ps-on-green:#fff;--ps-row:#fff;--ps-tile:#e6f6ef;background:#fff;border-color:#e2e8f0;box-shadow:0 10px 30px rgba(15,23,42,.06)}
+.ps-card[hidden],.ps-reopen[hidden],.ps-body[hidden]{display:none!important}
+.ps-head{display:flex;align-items:center;gap:.6rem}
+.ps-icon{width:2.6rem;height:2.6rem;border-radius:.9rem;background:var(--ps-tile);display:flex;align-items:center;justify-content:center;font-size:1.4rem;flex:none}
+.ps-head-copy{flex:1;min-width:0}.ps-head-copy h3{font-size:.95rem;font-weight:900;margin:0}.ps-head-copy p{font-size:.68rem;color:var(--ps-muted);margin:.2rem 0 0}
+.ps-round-btn{width:2rem;height:2rem;border-radius:50%;border:1px solid var(--ps-line);background:transparent;color:var(--ps-muted);font-size:.8rem;display:flex;align-items:center;justify-content:center;flex:none;cursor:pointer}
+.ps-chev{display:inline-block;transition:transform .2s}.ps-collapsed .ps-chev{transform:rotate(90deg)}
+.ps-body{margin-top:.9rem}
+.ps-tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:.25rem;padding:.3rem;border-radius:1.1rem;background:var(--ps-soft)}
+.period-preset{border:0;background:transparent;color:var(--ps-muted);padding:.65rem .3rem;border-radius:.85rem;font-size:.75rem;font-weight:800;cursor:pointer}
+.period-preset.ps-active{background:var(--ps-green);color:var(--ps-on-green)}
+.ps-dates{display:flex;align-items:flex-end;gap:.5rem;margin-top:.9rem}
+.ps-date{flex:1;min-width:0;display:block}.ps-date span{display:block;font-size:.68rem;font-weight:700;color:var(--ps-muted);margin-bottom:.3rem}
+.ps-date input{width:100%;height:2.6rem;border-radius:.9rem;border:1px solid var(--ps-line);background:var(--ps-soft);color:var(--ps-text);font-size:.75rem;font-weight:800;padding:0 .5rem}
+.ps-go{height:2.6rem;padding:0 1.1rem;border:0;border-radius:.9rem;background:var(--ps-green);color:var(--ps-on-green);font-size:.78rem;font-weight:900;flex:none;cursor:pointer}
+.ps-go:disabled{opacity:.6}
+.ps-err{margin-top:.5rem;text-align:center;font-size:.68rem;font-weight:700;color:#f43f5e}
+.ps-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:.45rem;margin-top:.8rem}
+.ps-stat{text-align:center;padding:.7rem .2rem;border-radius:1.1rem;border:1px solid var(--ps-line);background:var(--ps-soft)}
+.ps-stat span{display:block;font-size:.66rem;color:var(--ps-muted)}.ps-stat strong{display:block;margin-top:.3rem;font-size:.95rem;font-weight:900}.ps-neg{color:var(--ps-neg)}
+.ps-meta{text-align:center;font-size:.66rem;color:var(--ps-muted);margin:.7rem 0 .4rem}
+.ps-flow{display:flex;justify-content:center;gap:.5rem;flex-wrap:wrap}
+.ps-chip{border-radius:999px;padding:.3rem .75rem;font-size:.7rem;font-weight:800;border:1px solid}
+.ps-chip b{font-weight:900;margin-inline-start:.3rem}
+.ps-chip-income{background:rgba(16,185,129,.12);border-color:rgba(16,185,129,.35);color:#6ee7b7}
+.ps-chip-debt{background:rgba(245,158,11,.14);border-color:rgba(245,158,11,.4);color:#fcd34d}
+html[data-theme="light"] .ps-chip-income{color:#047857}html[data-theme="light"] .ps-chip-debt{color:#b45309}
+.ps-sec{display:flex;justify-content:space-between;align-items:baseline;margin:1rem 0 .5rem}.ps-sec h4{font-size:.8rem;font-weight:900;margin:0}.ps-sec small{font-size:.62rem;color:var(--ps-muted)}
+.ps-cat{padding:.55rem .75rem .65rem;border-radius:1rem;background:var(--ps-soft);margin-bottom:.4rem}
+.ps-cat-top{display:flex;align-items:center;gap:.5rem}
+.ps-dot{width:.6rem;height:.6rem;border-radius:50%;flex:none}.ps-cat-name{flex:1;min-width:0;font-size:.78rem;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ps-pct{font-size:.62rem;color:var(--ps-muted)}.ps-amt{font-size:.78rem;font-weight:900}
+.ps-track{height:4px;border-radius:4px;background:rgba(148,163,184,.25);margin-top:.5rem;overflow:hidden}.ps-fill{height:100%;border-radius:4px}
+.ps-details{margin-top:.9rem;border:1px solid var(--ps-line);border-radius:1.1rem;padding:.7rem}
+.ps-details summary{display:flex;justify-content:space-between;align-items:center;cursor:pointer;list-style:none;font-size:.8rem;font-weight:900}
+.ps-details summary::-webkit-details-marker{display:none}.ps-details summary small{font-size:.65rem;font-weight:700;color:var(--ps-muted)}
+.ps-details summary small::after{content:" ▾"}.ps-details[open] summary small::after{content:" ▴"}
+.ps-items{margin-top:.6rem;max-height:18rem;overflow-y:auto}
+.ps-day{display:flex;justify-content:space-between;font-size:.62rem;color:var(--ps-muted);margin:.6rem .2rem .3rem}
+.ps-item{display:flex;align-items:center;gap:.6rem;padding:.5rem .65rem;border-radius:.95rem;background:var(--ps-row);border:1px solid var(--ps-line);margin-bottom:.35rem}
+.ps-item-ico{width:2rem;height:2rem;border-radius:.7rem;background:var(--ps-tile);display:flex;align-items:center;justify-content:center;font-size:1rem;flex:none}
+.ps-item-name{flex:1;min-width:0;font-size:.78rem;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ps-item-amt{font-size:.78rem;font-weight:900;color:var(--ps-neg);direction:ltr}
+.ps-empty{text-align:center;font-size:.68rem;color:var(--ps-muted);padding:.5rem}
+.ps-reopen{display:flex;align-items:center;justify-content:space-between;width:100%;padding:.75rem 1rem;border-radius:1.25rem;border:1px dashed var(--ps-line,#334155);background:transparent;color:#94a3b8;font-size:.75rem;font-weight:800;cursor:pointer}
 </style>
 </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col overflow-hidden">
@@ -4432,35 +4478,6 @@ body { height: 100vh; }
             <div id="monthly-income-details" class="hidden border border-emerald-300 dark:border-emerald-500/20 rounded-3xl p-4 space-y-1 mt-2"></div>
                 </div>
             </details>
-
-            <section id="period-summary-card" class="rounded-3xl border border-emerald-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-950/60">
-                <div class="flex items-center justify-between gap-3">
-                    <div><h3 class="text-sm font-black text-slate-800 dark:text-slate-100">اعرف صرفك في أي مدة</h3><p class="mt-1 text-[10px] text-slate-500 dark:text-slate-400">اختار 4 أيام، أسبوع، أو حدد تاريخين بنفسك.</p></div>
-                    <span class="text-xl" aria-hidden="true">📅</span>
-                </div>
-                <div class="mt-3 grid grid-cols-3 gap-2" role="group" aria-label="اختيار مدة سريعة">
-                    <button type="button" class="period-preset rounded-xl border border-emerald-300 bg-emerald-50 px-2 py-2 text-[10px] font-black text-emerald-800 dark:bg-emerald-500/10 dark:text-emerald-300" data-days="4">آخر 4 أيام</button>
-                    <button type="button" class="period-preset rounded-xl border border-slate-200 px-2 py-2 text-[10px] font-black text-slate-600 dark:border-slate-700 dark:text-slate-300" data-days="7">أسبوع</button>
-                    <button type="button" class="period-preset rounded-xl border border-slate-200 px-2 py-2 text-[10px] font-black text-slate-600 dark:border-slate-700 dark:text-slate-300" data-days="30">30 يوم</button>
-                </div>
-                <div class="mt-3 grid grid-cols-2 gap-2">
-                    <label class="text-[10px] font-bold text-slate-500">من<input id="period-start" type="date" class="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-2 py-2 text-xs dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"></label>
-                    <label class="text-[10px] font-bold text-slate-500">إلى<input id="period-end" type="date" class="mt-1 w-full rounded-xl border border-slate-200 bg-slate-50 px-2 py-2 text-xs dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100"></label>
-                </div>
-                <button id="period-summary-load" type="button" class="mt-3 w-full rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950">اعرض الفترة</button>
-                <p id="period-summary-error" class="mt-2 hidden text-center text-[10px] font-bold text-rose-500"></p>
-                <div id="period-summary-result" class="mt-3 hidden space-y-3" aria-live="polite">
-                    <div class="grid grid-cols-2 gap-2 sm:grid-cols-4">
-                        <div class="rounded-2xl bg-rose-50 p-3 text-center dark:bg-rose-500/10"><span class="block text-[10px] text-rose-600">إجمالي الصرف</span><strong id="period-total" class="mt-1 block text-sm font-black text-rose-800 dark:text-rose-300">—</strong></div>
-                        <div class="rounded-2xl bg-emerald-50 p-3 text-center dark:bg-emerald-500/10"><span class="block text-[10px] text-emerald-600">متوسط اليوم</span><strong id="period-average" class="mt-1 block text-sm font-black text-emerald-800 dark:text-emerald-300">—</strong></div>
-                        <div class="rounded-2xl bg-sky-50 p-3 text-center dark:bg-sky-500/10"><span class="block text-[10px] text-sky-600">عدد العمليات</span><strong id="period-count" class="mt-1 block text-sm font-black text-sky-800 dark:text-sky-300">—</strong></div>
-                        <div class="rounded-2xl bg-amber-50 p-3 text-center dark:bg-amber-500/10"><span class="block text-[10px] text-amber-600">أيام الصرف</span><strong id="period-active-days" class="mt-1 block text-sm font-black text-amber-800 dark:text-amber-300">—</strong></div>
-                    </div>
-                    <p id="period-summary-meta" class="text-center text-[10px] text-slate-500"></p>
-                    <div id="period-category-list" class="space-y-1.5"></div>
-                    <details class="rounded-2xl border border-slate-200 p-3 dark:border-slate-800"><summary class="cursor-pointer text-[11px] font-black text-slate-600 dark:text-slate-300">عرض كل عمليات الفترة</summary><div id="period-items-list" class="mt-2 max-h-64 space-y-1 overflow-y-auto"></div></details>
-                </div>
-            </section>
 
             <!-- المحفظة الاستثمارية: بيانات حقيقية بيدخلها العميل بنفسه (ذهب/صناديق/عملات رقمية/أي أصل) -->
             <details id="portfolio-collapsible">
@@ -4713,6 +4730,46 @@ body { height: 100vh; }
                     </div>
                 </div>
             </div>
+
+            <!-- اعرف صرفك في أي مدة: تحت أهدافك في شهري، قابل للطي والإغلاق -->
+            <section id="period-summary-card" class="ps-card" style="order:9" aria-label="اعرف صرفك في أي مدة">
+                <div class="ps-head">
+                    <span class="ps-icon" aria-hidden="true">📅</span>
+                    <div class="ps-head-copy"><h3>اعرف صرفك في أي مدة</h3><p>اختار مدة أو حدد تاريخين بنفسك.</p></div>
+                    <button type="button" id="period-summary-toggle" class="ps-round-btn" aria-expanded="true" aria-controls="period-summary-body" aria-label="طي أو فتح الكارت"><span class="ps-chev">▾</span></button>
+                    <button type="button" id="period-summary-close" class="ps-round-btn" aria-label="إغلاق الكارت">✕</button>
+                </div>
+                <div id="period-summary-body" class="ps-body">
+                    <div class="ps-tabs" role="group" aria-label="اختيار مدة سريعة">
+                        <button type="button" class="period-preset ps-active" data-days="4">آخر 4 أيام</button>
+                        <button type="button" class="period-preset" data-days="7">أسبوع</button>
+                        <button type="button" class="period-preset" data-days="30">30 يوم</button>
+                    </div>
+                    <div class="ps-dates">
+                        <label class="ps-date"><span>من</span><input id="period-start" type="date"></label>
+                        <label class="ps-date"><span>إلى</span><input id="period-end" type="date"></label>
+                        <button id="period-summary-load" type="button" class="ps-go">اعرض</button>
+                    </div>
+                    <p id="period-summary-error" class="ps-err hidden"></p>
+                    <div id="period-summary-result" class="hidden" aria-live="polite">
+                        <div class="ps-stats">
+                            <div class="ps-stat"><span>الإجمالي</span><strong id="period-total" class="ps-neg">—</strong></div>
+                            <div class="ps-stat"><span>متوسط اليوم</span><strong id="period-average">—</strong></div>
+                            <div class="ps-stat"><span>أيام الصرف</span><strong id="period-active-days">—</strong></div>
+                            <div class="ps-stat"><span>العمليات</span><strong id="period-count">—</strong></div>
+                        </div>
+                        <p id="period-summary-meta" class="ps-meta"></p>
+                        <div class="ps-flow">
+                            <span class="ps-chip ps-chip-income">الدخل<b id="period-income">—</b></span>
+                            <span class="ps-chip ps-chip-debt">الديون<b id="period-debt">—</b></span>
+                        </div>
+                        <div class="ps-sec"><h4>التصنيفات</h4><small>حسب الأكثر صرفًا</small></div>
+                        <div id="period-category-list"></div>
+                        <details class="ps-details"><summary><span>كل عمليات الفترة</span><small id="period-items-count"></small></summary><div id="period-items-list" class="ps-items"></div></details>
+                    </div>
+                </div>
+            </section>
+            <button type="button" id="period-summary-reopen" class="ps-reopen" style="order:9" hidden><span>📅 اعرف صرفك في أي مدة</span><span aria-hidden="true">＋</span></button>
 
             <div id="balance-category-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 p-4 backdrop-blur-sm">
                 <div class="w-full max-w-sm rounded-3xl border border-slate-700 bg-slate-900 p-4 shadow-2xl">
@@ -9361,6 +9418,32 @@ body { height: 100vh; }
         function escapePeriodText(value) {
             return String(value ?? '').replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
         }
+        const PERIOD_UI_KEYS = { collapsed: 'dabbar_period_collapsed', closed: 'dabbar_period_closed' };
+        function periodUiGet(key) { try { return localStorage.getItem(key) === '1'; } catch (e) { return false; } }
+        function periodUiSet(key, on) { try { if (on) localStorage.setItem(key, '1'); else localStorage.removeItem(key); } catch (e) {} }
+        function periodNum(n) { return Number(n || 0).toLocaleString('ar-EG'); }
+        function setPeriodActivePreset(days) {
+            document.querySelectorAll('.period-preset').forEach((b) => {
+                const on = days != null && Number(b.dataset.days) === days;
+                b.classList.toggle('ps-active', on);
+                b.setAttribute('aria-pressed', on ? 'true' : 'false');
+            });
+        }
+        function applyPeriodUiState() {
+            const card = document.getElementById('period-summary-card');
+            const reopen = document.getElementById('period-summary-reopen');
+            const body = document.getElementById('period-summary-body');
+            const toggle = document.getElementById('period-summary-toggle');
+            if (!card || !reopen || !body || !toggle) return;
+            const closed = periodUiGet(PERIOD_UI_KEYS.closed);
+            const collapsed = periodUiGet(PERIOD_UI_KEYS.collapsed);
+            card.hidden = closed;
+            reopen.hidden = !closed;
+            body.hidden = collapsed;
+            card.classList.toggle('ps-collapsed', collapsed);
+            toggle.setAttribute('aria-expanded', String(!collapsed));
+            if (!closed && !collapsed && !card.dataset.loaded) loadPeriodSummary();
+        }
         async function loadPeriodSummary() {
             const startEl = document.getElementById('period-start');
             const endEl = document.getElementById('period-end');
@@ -9377,32 +9460,52 @@ body { height: 100vh; }
                 return;
             }
             button.disabled = true;
-            button.textContent = 'بنحسب الفترة...';
+            button.textContent = 'بنحسب...';
             try {
                 const res = await fetch(`/api/dashboard-data?periodStart=${encodeURIComponent(start)}&periodEnd=${encodeURIComponent(end)}`, { headers: { Authorization: `Bearer ${accessToken}` }, cache: 'no-store' });
                 const data = await res.json().catch(() => ({}));
                 if (!res.ok) throw new Error(data.error || 'تعذر تحميل الفترة');
                 const period = data.period || {};
-                document.getElementById('period-total').textContent = fmt(period.total || 0);
-                document.getElementById('period-average').textContent = fmt(period.avgPerDay || 0);
-                document.getElementById('period-count').textContent = `${Number(period.count || 0)} عملية`;
-                document.getElementById('period-active-days').textContent = `${Number(period.activeSpendingDays || 0)} يوم`;
-                document.getElementById('period-summary-meta').textContent = `من ${start} إلى ${end} · الدخل ${fmt(period.incomeTotal || 0)} · الديون ${fmt(period.debtTotal || 0)}`;
+                const setText = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+                setText('period-total', periodNum(period.total));
+                setText('period-average', periodNum(period.avgPerDay));
+                setText('period-count', periodNum(period.count));
+                setText('period-active-days', periodNum(period.activeSpendingDays));
+                setText('period-summary-meta', `من ${start} إلى ${end}`);
+                setText('period-income', fmt(period.incomeTotal || 0));
+                setText('period-debt', fmt(period.debtTotal || 0));
                 const categories = Array.isArray(period.byCategory) ? period.byCategory : [];
+                const maxAmt = Math.max(1, ...categories.map((c) => Number(c.amount) || 0));
                 document.getElementById('period-category-list').innerHTML = categories.length
-                    ? categories.slice(0, 8).map((category) => `<div class="flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-2 dark:bg-slate-900"><span class="min-w-0 flex-1 truncate text-[11px] font-bold text-slate-700 dark:text-slate-200">${escapePeriodText(category.name)}</span><span class="text-[10px] text-slate-500">${Number(category.percent || 0)}%</span><strong class="text-[11px] font-black text-rose-700 dark:text-rose-300">${fmt(category.amount)}</strong></div>`).join('')
-                    : '<p class="text-center text-[10px] text-slate-500">مفيش مصاريف في الفترة دي.</p>';
+                    ? categories.map((c) => {
+                        const color = (typeof CATEGORY_HEX !== 'undefined' && CATEGORY_HEX[c.name]) || '#94a3b8';
+                        const w = Math.max(3, Math.round(((Number(c.amount) || 0) / maxAmt) * 100));
+                        return `<div class="ps-cat"><div class="ps-cat-top"><span class="ps-dot" style="background:${color}"></span><span class="ps-cat-name">${escapePeriodText(c.name)}</span><span class="ps-pct">${periodNum(c.percent)}٪</span><strong class="ps-amt">${fmt(c.amount)}</strong></div><div class="ps-track"><div class="ps-fill" style="width:${w}%;background:${color}"></div></div></div>`;
+                    }).join('')
+                    : '<p class="ps-empty">مفيش مصاريف في الفترة دي.</p>';
                 const items = Array.isArray(period.items) ? period.items : [];
-                document.getElementById('period-items-list').innerHTML = items.length
-                    ? items.map((item) => `<div class="flex items-center gap-2 border-b border-slate-100 py-2 text-[10px] last:border-0 dark:border-slate-800"><span class="min-w-0 flex-1 truncate text-slate-600 dark:text-slate-300">${escapePeriodText(item.description || item.category || 'مصروف')}</span><span class="text-slate-400">${new Date(item.created_at).toLocaleDateString('ar-EG')}</span><strong class="font-black text-rose-700 dark:text-rose-300">${fmt(item.amount)}</strong></div>`).join('')
-                    : '<p class="text-center text-[10px] text-slate-500">لا توجد عمليات.</p>';
+                setText('period-items-count', `${periodNum(period.count || items.length)} عملية`);
+                const groups = [];
+                items.forEach((item) => {
+                    const d = new Date(item.created_at);
+                    const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+                    let g = groups[groups.length - 1];
+                    if (!g || g.key !== key) { g = { key, label: d.toLocaleDateString('ar-EG', { year: 'numeric', month: 'numeric', day: 'numeric' }), total: 0, rows: [] }; groups.push(g); }
+                    g.total += Number(item.amount) || 0;
+                    g.rows.push(item);
+                });
+                document.getElementById('period-items-list').innerHTML = groups.length
+                    ? groups.map((g) => `<div class="ps-day"><span>${escapePeriodText(g.label)}</span><span>${fmt(g.total)}</span></div>` + g.rows.map((item) => `<div class="ps-item"><span class="ps-item-ico" aria-hidden="true">${getCategoryEmoji(item.category || item.description)}</span><span class="ps-item-name">${escapePeriodText(item.description || item.category || 'مصروف')}</span><strong class="ps-item-amt">-${fmt(item.amount)}</strong></div>`).join('')).join('')
+                    : '<p class="ps-empty">لا توجد عمليات.</p>';
                 resultEl.classList.remove('hidden');
+                const card = document.getElementById('period-summary-card');
+                if (card) card.dataset.loaded = '1';
             } catch (error) {
                 errorEl.textContent = error.message || 'تعذر تحميل الفترة.';
                 errorEl.classList.remove('hidden');
             } finally {
                 button.disabled = false;
-                button.textContent = 'اعرض الفترة';
+                button.textContent = 'اعرض';
             }
         }
         function setupPeriodSummaryControls() {
@@ -9414,12 +9517,21 @@ body { height: 100vh; }
             startEl.value = periodDateInput(3);
             endEl.value = periodDateInput(0);
             loadButton.addEventListener('click', loadPeriodSummary);
+            [startEl, endEl].forEach((el) => el.addEventListener('change', () => setPeriodActivePreset(null)));
             document.querySelectorAll('.period-preset').forEach((preset) => preset.addEventListener('click', () => {
                 const days = Math.max(1, Number(preset.dataset.days) || 4);
                 startEl.value = periodDateInput(days - 1);
                 endEl.value = periodDateInput(0);
+                setPeriodActivePreset(days);
                 loadPeriodSummary();
             }));
+            document.getElementById('period-summary-toggle')?.addEventListener('click', () => {
+                periodUiSet(PERIOD_UI_KEYS.collapsed, !periodUiGet(PERIOD_UI_KEYS.collapsed));
+                applyPeriodUiState();
+            });
+            document.getElementById('period-summary-close')?.addEventListener('click', () => { periodUiSet(PERIOD_UI_KEYS.closed, true); applyPeriodUiState(); });
+            document.getElementById('period-summary-reopen')?.addEventListener('click', () => { periodUiSet(PERIOD_UI_KEYS.closed, false); applyPeriodUiState(); });
+            applyPeriodUiState();
         }
         function renderMonthly(month) {
             renderBalanceCard(month);

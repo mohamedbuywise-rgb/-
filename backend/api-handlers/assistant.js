@@ -6,6 +6,7 @@ import { extractItemizedReceiptFromImageBase64, askDabbarChat, askDabbarRoast, c
 import { saveInvoiceRecord, deleteInvoiceById } from '../../lib/invoices.js';
 import { getFeatureAccess, subscriptionRequiredResponse } from '../../lib/subscriptionAccess.js';
 import { checkOcrUsage, checkChatUsage, checkVoiceUsage, checkTextUsage, checkWebSpeechTextUsage, refundOcrUsage, refundUsage } from '../../lib/rateLimits.js';
+import { classifyByRules } from '../../lib/localClassifierAdapter.js';
 import { normalizeDigits, classifyLocally, extractDeterministicTransactions, dedupeEquivalentTransactions, correctDebtDirections, detectCurrency, currencyLabel, normalizeFinancialTransaction, reconcileSingleTransaction } from '../../lib/textNormalize.js';
 import { maybeSendBudgetAlert } from '../../lib/webPush.js';
 import { getDashboardUserFromRequest } from '../../lib/dashboardAuth.js';
@@ -433,7 +434,7 @@ async function handleEntryDraft(userId, body, res) {
   // Web Speech والنص المكتوب يمران من نفس بوابة الخادم. لو القواعد المحلية
   // واثقة جدًا نرجع المسودات فورًا ونوفّر استدعاء Groq/Gemini، وإلا نكمل السلسلة الحالية.
   if (!voiceTransactions) {
-    localClassification = classifyLocally(text, { threshold: 0.95, maxTransactions: 20 });
+    localClassification = classifyByRules(text);
     console.info('CLASSIFICATION_ROUTE', JSON.stringify({
       source: webSpeechInput ? 'webspeech' : 'text',
       route: localClassification?.handled ? 'local' : 'ai',

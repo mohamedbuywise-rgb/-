@@ -35,8 +35,24 @@ export default async function handler(req, res) {
       const recurringExpenses = Array.isArray(body.recurringExpenses) ? body.recurringExpenses.slice(0, 50).map((item) => ({
         id: String(item.id || crypto.randomUUID()), name: String(item.name || '').trim().slice(0, 80), amount: Math.max(0, Number(item.amount || 0)), day: Math.min(31, Math.max(1, Number(item.day || 1))), category: String(item.category || 'أخرى').slice(0, 40), active: item.active !== false,
       })).filter((item) => item.name && item.amount > 0) : [];
-      const { data, error } = await supabase.from('financial_settings').upsert({ telegram_user_id: userId, monthly_income: monthlyIncome, monthly_budget: monthlyBudget, category_budgets: categoryBudgets, recurring_expenses: recurringExpenses, balance_categories: balanceCategories, updated_at: new Date().toISOString() }, { onConflict: 'telegram_user_id' }).select('*').single();
-      if (error) throw error;
+      const fullRow = { telegram_user_id: userId, monthly_income: monthlyIncome, monthly_budget: monthlyBudget, category_budgets: categoryBudgets, recurring_expenses: recurringExpenses, balance_categories: balanceCategories, updated_at: new Date().toISOString() };
+      let { data, error } = await supabase.from('financial_settings').upsert(fullRow, { onConflict: 'telegram_user_id' }).select('*').single();
+      // لو قاعدة البيانات لسه ماخدتش migration الأعمدة الجديدة (balance_categories / recurring_expenses) الحفظ كله كان بيفشل
+      // والدخل والميزانية بيضيعوا. هنا بنحاول تاني بالأعمدة الأساسية بس، فالدخل والميزانية وحدود الفئات يتحفظوا على الأقل.
+      if (error && /balance_categories|recurring_expenses|column|schema cache/i.test(String(error.message || ''))) {
+        console.error('financial-actions PUT: extended columns missing, retrying with core columns:', JSON.stringify(error));
+        const { balance_categories: _bc, recurring_expenses: _re, ...coreRow } = fullRow;
+        const retry = await supabase.from('financial_settings').upsert(coreRow, { onConflict: 'telegram_user_id' }).select('*').single();
+        if (!retry.error) {
+          return res.status(200).json({ settings: { ...cleanSettings(retry.data), recurringExpenses, balanceCategories }, warning: 'columns_missing', hint: 'اتحفظ الدخل والميزانية، بس لازم تشغّل sql/financial-planning.sql في Supabase عشان باقي الإعدادات تتحفظ.' });
+        }
+        error = retry.error;
+        data = null;
+      }
+      if (error) {
+        console.error('financial-actions PUT failed:', JSON.stringify(error));
+        return res.status(500).json({ error: 'تعذر حفظ الخطة على السيرفر.', hint: `سبب السيرفر: ${String(error.message || error.code || 'غير معروف').slice(0, 160)}` });
+      }
       return res.status(200).json({ settings: cleanSettings(data) });
     }
 

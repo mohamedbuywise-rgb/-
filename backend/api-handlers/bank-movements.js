@@ -4,6 +4,7 @@
 // GET  ?route=bank-movements&period=month|week|all   -> يرجع الحركات + هل فيه بنوك مربوطة أصلاً
 // POST ?route=bank-movements action=resolve { eventId, resolution } -> يقفل حالة "تحتاج مراجعة"
 
+import { autoSettleIfBalanced } from '../../lib/debts.js';
 import { supabase } from '../../lib/supabaseClient.js';
 import { listBankMovements, resolveBankMovementReview, financialEventLabel } from '../../lib/financialEvents.js';
 
@@ -138,6 +139,7 @@ export default async function handler(req, res) {
         is_repayment: false,
         note: String(note || event.description || '').slice(0, 500),
       });
+      await autoSettleIfBalanced(telegramUserId, String(person || event.counterparty || 'غير محدد').slice(0, 160));
     } else if (resolution === 'expense') {
       await supabase.from('expenses').insert({
         telegram_user_id: telegramUserId,

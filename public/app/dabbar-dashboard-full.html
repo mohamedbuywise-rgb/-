@@ -4388,7 +4388,7 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
                     </div>
                     <div id="quick-manual-debt-block" class="hidden space-y-2 rounded-xl border border-dashed p-2.5" style="border-color:var(--pm-hairline);background:var(--pm-surface-soft);">
                         <input id="quick-manual-person" enterkeyhint="next" autocomplete="off" spellcheck="false" type="text" maxlength="160" placeholder="اسم الشخص — مثال: أحمد" class="w-full rounded-xl border px-3 py-3 text-xs outline-none" style="border-color:var(--pm-hairline);background:var(--pm-surface-soft);color:var(--pm-ink);">
-                        <div class="grid grid-cols-2 gap-2">
+                        <div id="quick-manual-dir-row" class="grid grid-cols-2 gap-2">
                             <button type="button" id="quick-manual-dir-lent" data-dir="lent" class="quick-manual-dir active rounded-xl border px-2 py-2 text-[11px] font-black" style="border-color:var(--pm-gold-bright);background:rgba(8,122,89,0.14);background:color-mix(in srgb,var(--pm-gold-bright) 14%,transparent);color:var(--pm-ink);">📤 ليك عنده (سلّفته)</button>
                             <button type="button" id="quick-manual-dir-borrowed" data-dir="borrowed" class="quick-manual-dir rounded-xl border px-2 py-2 text-[11px] font-black" style="border-color:var(--pm-hairline);color:var(--pm-muted);">📥 عليك له (استلفت منه)</button>
                         </div>
@@ -5957,15 +5957,6 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
                         <input id="push-large-expense" type="checkbox" class="accent-amber-400 w-4 h-4">
                     </label>
                     <div class="pnx-row">
-                        <div class="pnx-box">
-                            <div class="pnx-lbl"><span>⏰ وقت التذكير</span><b id="pnx-time-txt">8:00 ص</b></div>
-                            <div class="pnx-wheels" aria-label="وقت التذكير">
-                                <div class="pnx-wheel" id="pnx-wh"></div>
-                                <div class="pnx-colon">:</div>
-                                <div class="pnx-wheel" id="pnx-wm"></div>
-                                <div class="pnx-wheel pnx-narrow" id="pnx-wp"></div>
-                            </div>
-                        </div>
                         <div class="pnx-box">
                             <div class="pnx-lbl"><span>🎯 نسبة التنبيه</span><b>من الميزانية</b></div>
                             <div class="pnx-pct">
@@ -7575,7 +7566,8 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
             function boot() {
                 const $ = (id) => document.getElementById(id);
                 const wrapH = $('pnx-wh'), wrapM = $('pnx-wm'), wrapP = $('pnx-wp'), range = $('pnx-range');
-                if (!wrapH || !wrapM || !wrapP || !range) return;
+                if (!range) return;
+                const hasWheels = Boolean(wrapH && wrapM && wrapP); // خانة وقت التذكير اتشالت، فالعجلات اختيارية والوقت المحفوظ بيفضل زي ما هو
                 const RH = 24;
                 const pad = (n) => (n < 10 ? '0' + n : '' + n);
                 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -7613,15 +7605,15 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
 
                 function writeHidden() {
                     const h = $('push-daily-hour'), m = $('push-daily-minute'), t = $('push-budget-threshold');
-                    if (h) h.value = String(to24());
-                    if (m) m.value = String(S.m);
+                    if (hasWheels && h) h.value = String(to24());
+                    if (hasWheels && m) m.value = String(S.m);
                     if (t) t.value = (S.pct / 100).toFixed(2);
                     const lbl = $('pnx-time-txt');
                     if (lbl) lbl.textContent = S.h12 + ':' + pad(S.m) + ' ' + (S.p ? 'م' : 'ص');
                 }
-                const wH = makeWheel(wrapH, hours, (i) => { S.h12 = i + 1; writeHidden(); });
-                const wM = makeWheel(wrapM, mins, (i) => { S.m = i; writeHidden(); });
-                const wP = makeWheel(wrapP, ['ص', 'م'], (i) => { S.p = i; writeHidden(); });
+                const wH = hasWheels ? makeWheel(wrapH, hours, (i) => { S.h12 = i + 1; writeHidden(); }) : null;
+                const wM = hasWheels ? makeWheel(wrapM, mins, (i) => { S.m = i; writeHidden(); }) : null;
+                const wP = hasWheels ? makeWheel(wrapP, ['ص', 'م'], (i) => { S.p = i; writeHidden(); }) : null;
 
                 function paintPct() {
                     $('pnx-num').textContent = S.pct;
@@ -7647,15 +7639,16 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
                     m = clamp(Math.round(m), 0, 59);
                     let th = Number($('push-budget-threshold')?.value); if (!Number.isFinite(th) || th <= 0) th = 0.8;
                     S.p = h >= 12 ? 1 : 0; S.h12 = h % 12 === 0 ? 12 : h % 12; S.m = m; S.pct = clamp(Math.round(th * 100), 50, 100);
-                    wH.set(S.h12 - 1, false, true); wM.set(S.m, false, true); wP.set(S.p, false, true);
+                    if (hasWheels) { wH.set(S.h12 - 1, false, true); wM.set(S.m, false, true); wP.set(S.p, false, true); }
                     paintPct(); writeHidden();
                 }
                 window.pnxSync = sync;
                 sync();
                 // الكارت بيكون مخفي (display:none) لحد ما المستخدم يفتحه، فنعيد ضبط مواضع العجلات أول ما تظهر
                 if (window.ResizeObserver) {
-                    const ro = new ResizeObserver(() => { if (wrapH.offsetHeight > 0) sync(); });
-                    ro.observe(wrapH);
+                    const watchEl = hasWheels ? wrapH : range;
+                    const ro = new ResizeObserver(() => { if (watchEl.offsetHeight > 0) sync(); });
+                    ro.observe(watchEl);
                 }
             }
             if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
@@ -7865,7 +7858,7 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
                 let subscription = await registration?.pushManager.getSubscription();
                 // اشتراك الجهاز ضاع (كروم مسحه) والمستخدم كان مفعّلها والصلاحية لسه موجودة: نرجّعه بصمت
                 try {
-                    if (!subscription && localStorage.getItem(pushIntentKey()) === 'on' && Notification.permission === 'granted' && pushPublicKey) {
+                    if (!subscription && pushIntentGet() === 'on' && Notification.permission === 'granted' && pushPublicKey) {
                         subscription = await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(pushPublicKey) });
                         await pushApi('POST', { subscription: subscription.toJSON() });
                     }
@@ -7893,6 +7886,7 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
                     }
                 }
                 if (subscription) {
+                    if (pushIntentGet() !== 'off') pushIntentSet('on');
                     if (toggle) { toggle.disabled = false; toggle.textContent = 'إيقاف'; toggle.classList.remove('bg-amber-400', 'text-slate-950'); toggle.classList.add('bg-slate-800', 'text-slate-200', 'border', 'border-slate-700'); }
                     if (settings) settings.classList.remove('hidden');
                     pushStatus(`الإشعارات مفعّلة على الجهاز ده.${syncNote}`, 'success');
@@ -7927,7 +7921,7 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
                 const registration = await getPushRegistration();
                 const subscription = await registration.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlBase64ToUint8Array(pushPublicKey) });
                 await pushApi('POST', { subscription: subscription.toJSON() });
-                try { localStorage.setItem(pushIntentKey(), 'on'); } catch (e) {}
+                pushIntentSet('on');
                 await refreshPushUI();
                 pushStatus('تم تفعيل الإشعارات بنجاح.', 'success');
             } catch (error) {
@@ -7943,7 +7937,7 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
                 toggle.disabled = true;
                 const registration = await getPushRegistration();
                 const subscription = await registration?.pushManager.getSubscription();
-                try { localStorage.setItem(pushIntentKey(), 'off'); } catch (e) {}
+                pushIntentSet('off');
                 if (subscription) {
                     await pushApi('DELETE', { endpoint: subscription.endpoint });
                     await subscription.unsubscribe();
@@ -7960,16 +7954,20 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
         // ============ ترميم صامت للإشعارات: لو المستخدم كان مفعّلها واشتراك المتصفح/الخادم اتمسح لوحده (انتهاء صلاحية، تنظيف بيانات، إلخ)
         // بنجدّده تلقائيًا طالما إذن المتصفح لسه "مسموح" — ومش بنعمل كده أبدًا لو المستخدم هو اللي قفلها بنفسه ============
         function pushIntentKey() { return `dabbar_push_intent_${currentUser?.id || 'anon'}`; }
+        // نية التفعيل بتتخزن في مفتاحين (باسم المستخدم + مفتاح عام) — عشان لو المفتاح الخاص ضاع أو اتقرا قبل ما currentUser يتحدد،
+        // الترميم الصامت ما يضيعش ويرجّع "مفعّلة" بدل ما المستخدم يلاقيها اتقفلت لوحدها.
+        function pushIntentGet() { try { const own = localStorage.getItem(pushIntentKey()); if (own) return own; return localStorage.getItem('dabbar_push_intent_last'); } catch (e) { return null; } }
+        function pushIntentSet(value) { try { localStorage.setItem(pushIntentKey(), value); localStorage.setItem('dabbar_push_intent_last', value); } catch (e) {} }
         async function dabbarSilentPushHeal() {
             try {
                 if (!accessToken || !('Notification' in window) || !('PushManager' in window) || !('serviceWorker' in navigator)) return;
                 if (window.__pushHealBusy || Date.now() - (window.__pushHealAt || 0) < 30 * 60 * 1000) return;
                 window.__pushHealBusy = true; window.__pushHealAt = Date.now();
-                const intent = localStorage.getItem(pushIntentKey());
+                const intent = pushIntentGet();
                 if (intent === 'off') return;
                 const registration = await getPushRegistration();
                 let subscription = await registration?.pushManager.getSubscription();
-                if (subscription && intent !== 'on') { localStorage.setItem(pushIntentKey(), 'on'); }
+                if (subscription && intent !== 'on') { pushIntentSet('on'); }
                 if (!subscription && intent !== 'on') return;
                 if (Notification.permission !== 'granted') {
                     // الإذن اتسحب من المتصفح (Chrome بيسحب إذن المواقع اللي مش بتتفتح فترة) — مقدرش أرجّعه من غير ضغطة المستخدم
@@ -9178,6 +9176,30 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
                 }
             }
 
+            // Self-heal للدخل والميزانية: لو آخر حفظ فشل على السيرفر (علامة dirty) أو السيرفر رجّع أصفار والنسخة المحلية فيها أرقام،
+            // نفضّل النسخة المحلية ونبعتها تاني — قبل كده الأرقام كانت بتختفي لأن النسخة المحلية كانت بتتهمل لما السيرفر يرد بأي حاجة.
+            try {
+                const dirtyKey = `${planningSettingsKey()}:dirty`;
+                const dirty = localStorage.getItem(dirtyKey) === '1';
+                const srv = settings || defaultPlanningSettings();
+                if (serverReachable && local) {
+                    const serverEmpty = !Number(srv.monthlyIncome) && !Number(srv.monthlyBudget);
+                    const localHas = Number(local.monthlyIncome) > 0 || Number(local.monthlyBudget) > 0;
+                    if (dirty || (serverEmpty && localHas)) {
+                        settings = {
+                            ...srv,
+                            monthlyIncome: Number(local.monthlyIncome) || 0,
+                            monthlyBudget: Number(local.monthlyBudget) || 0,
+                            categoryBudgets: { ...(srv.categoryBudgets || {}), ...(local.categoryBudgets || {}) },
+                            recurringExpenses: (srv.recurringExpenses || []).length ? srv.recurringExpenses : (local.recurringExpenses || []),
+                            balanceCategories: Object.keys(srv.balanceCategories || {}).length ? srv.balanceCategories : (local.balanceCategories || {}),
+                        };
+                        fetch('/api/financial-actions', { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` }, body: JSON.stringify(settings) })
+                            .then((r) => { if (r.ok) localStorage.removeItem(dirtyKey); }).catch(() => {});
+                    }
+                }
+            } catch (e) { console.warn('planning self-heal failed:', e); }
+
             window.__financialSettings = settings || defaultPlanningSettings();
             localStorage.setItem(planningSettingsKey(), JSON.stringify(window.__financialSettings));
             renderPlanning(window.__dashboardData || {});
@@ -9194,14 +9216,21 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
             const settings = { ...current, monthlyIncome: parseMoneyInput('planning-income'), monthlyBudget: parseMoneyInput('planning-budget'), categoryBudgets };
             window.__financialSettings = settings;
             localStorage.setItem(planningSettingsKey(), JSON.stringify(settings));
+            localStorage.setItem(`${planningSettingsKey()}:dirty`, '1'); // لحد ما السيرفر يأكد الحفظ، النسخة المحلية هي الأحدث
             let saveSucceeded = false;
+            let saveErrorText = '';
             try {
                 const res = await fetch('/api/financial-actions', { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` }, body: JSON.stringify(settings) });
                 if (res.ok) {
                     window.__financialSettings = (await res.json()).settings;
                     saveSucceeded = true;
+                    localStorage.removeItem(`${planningSettingsKey()}:dirty`);
+                } else {
+                    const errBody = await res.json().catch(() => ({}));
+                    saveErrorText = errBody.hint || errBody.error || `HTTP ${res.status}`;
+                    console.error('planning save failed:', res.status, errBody);
                 }
-            } catch {}
+            } catch (e) { saveErrorText = 'مفيش اتصال بالسيرفر'; console.error('planning save network error:', e); }
             renderPlanning(window.__dashboardData || {}); renderBalanceCard(window.__dashboardData?.month || {}); renderInAppNotifications(window.__dashboardData || {});
             if (window.__dashboardData?.month) renderCategories(window.__dashboardData.month);
             renderSalaryCountdown();
@@ -9210,7 +9239,7 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
             } else {
                 // الحفظ فشل فعليًا — منقولش "اتحفظت" وهي متحفظتش. النسخة المحلية (localStorage) هتفضل موجودة
                 // وهنحاول نبعتها تاني لما لودّبلانينج سيتينجز يفتح، بدل ما نمسحها ونضلل المستخدم.
-                quickStatus('حصلت مشكلة في حفظ الخطة على السيرفر. اتحفظت مؤقتًا على جهازك بس وهنحاول تاني.', 'error');
+                quickStatus(`حصلت مشكلة في حفظ الخطة على السيرفر (${saveErrorText || 'سبب غير معروف'}). اتحفظت على جهازك وهنعيد المحاولة تلقائيًا.`, 'error');
             }
         }
         // ============ مكتبة أيقونات الالتزامات الشهرية — بتديله أيقونة مناسبة أوتوماتيك حسب اسم الالتزام ============
@@ -11587,7 +11616,11 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
                 const res = await fetch('/api/reports?type=debt-history', { headers: { Authorization: `Bearer ${accessToken}` } });
                 const data = await res.json(); if (!res.ok) throw new Error(data.error || 'فشل تحميل كشف الحساب');
                 __debtHistory = data; renderSettlementMessages(); renderDebtStatementList();
-            } catch (e) { console.error('debt history fetch failed:', e); }
+            } catch (e) {
+                console.error('debt history fetch failed:', e);
+                const root = document.getElementById('debts-settlement-list');
+                if (root && !(__debtHistory.settlements || []).length) root.innerHTML = `<p class="text-xs text-rose-400 text-center p-4">معرفناش نحمّل رسايل التصفية دلوقتي (${debtEscape(e.message || 'خطأ')}). اسحب لتحديث الصفحة وجرّب تاني.</p>`;
+            }
         }
         function renderSettlementMessages() {
             const root = document.getElementById('debts-settlement-list');
@@ -11678,6 +11711,8 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
             debtTypeBtn?.click();
             const dir = current.net > 0 ? 'borrowed' : 'lent'; // net>0 (ليك عنده) يبقى استلمت فلوس، فبنسجلها borrowed عشان تقفل الرصيد؛ والعكس لو عليك له
             document.getElementById(`quick-manual-dir-${dir}`)?.click();
+            // في وضع التسوية الاتجاه محدد تلقائي (عكس الرصيد) فنخفي أزرار "ليك عنده / عليك له" عشان متلخبطش المستخدم — بتتخفي بس ومش بتتشال
+            document.getElementById('quick-manual-dir-row')?.classList.add('hidden');
             const personInput = document.getElementById('quick-manual-person'); if (personInput) personInput.value = current.name;
             const descInput = document.getElementById('quick-manual-description'); if (descInput) descInput.value = 'تسديد';
             document.getElementById('quick-manual-amount')?.focus();
@@ -12930,6 +12965,7 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
             if (descInput) descInput.value = `دفع قسط ${String(title || '').trim()}`.trim();
         }
         function openQuickManualPopup() {
+            document.getElementById('quick-manual-dir-row')?.classList.remove('hidden');
             const backdrop = quickManualPopupEl();
             quickShow('quick-entry-form', false); quickShow('quick-entry-draft', false);
             quickShow('quick-entry-manual-form', true);
@@ -12947,6 +12983,7 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
             if (monthLbl) monthLbl.textContent = `📅 هتتسجّل في: ${new Date().toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' })}`;
         }
         function closeQuickManualPopup() {
+            document.getElementById('quick-manual-dir-row')?.classList.remove('hidden'); // نرجّع أزرار الاتجاه للإدخال العادي
             document.getElementById('quick-manual-popup-backdrop')?.classList.remove('show');
             document.documentElement.classList.remove('qm-open');
             quickShow('quick-entry-manual-form', false);

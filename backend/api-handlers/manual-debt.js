@@ -1,6 +1,7 @@
 import { supabase } from '../../lib/supabaseClient.js';
 import { getDashboardUserFromRequest } from '../../lib/dashboardAuth.js';
 import { currencyLabel } from '../../lib/textNormalize.js';
+import { autoSettleIfBalanced } from '../../lib/debts.js';
 
 async function requireUser(req, res) {
   const user = await getDashboardUserFromRequest(req);
@@ -41,11 +42,13 @@ export default async function handler(req, res) {
 
     if (error) { console.error('manual-debt insert error:', JSON.stringify(error)); return res.status(500).json({ error: 'تعذر حفظ الدين، جرّب تاني.' }); }
 
+    // لو العملية دي قفلت الرصيد مع الشخص على صفر، نسجّل تصفية فتظهر في تبويب رسالة التصفية
+    const autoSettled = await autoSettleIfBalanced(userId, data.person_name);
     const isLent = data.direction !== 'borrowed';
     const money = `${data.amount} ${currencyLabel(data.currency_code)}`;
     const message = isLent ? `تم تسجيل: بقى ليك عند ${data.person_name} ${money}.` : `تم تسجيل: بقى عليك لـ ${data.person_name} ${money}.`;
 
-    return res.status(200).json({ ok: true, type: 'debt', record: data, message });
+    return res.status(200).json({ ok: true, type: 'debt', record: data, message: autoSettled ? `${message} واتصفى الحساب بينكم.` : message, settled: autoSettled });
   } catch (error) {
     console.error('manual-debt handler error:', error);
     return res.status(500).json({ error: 'حصل خطأ غير متوقع، جرّب تاني.' });

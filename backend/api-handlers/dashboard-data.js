@@ -24,6 +24,33 @@ function sumByCurrency(rows = []) {
 //
 // ملحوظة: الدخل بيتحسب من financial_events + السلف المستلَفة فقط.
 // الجمعية (commitment_type='gameya') التزام/حركة خاصة ولا تظهر كدخل.
+// ============ مصدر واحد لحساب المصاريف حسب الأيام (بيستخدمه شارت أيام الأسبوع وكارت "اعرف صرفك في أي مدة") ============
+// قبل كده كان فيه حسابين مختلفين: الشارت بيجمع كل العملات وبيقسّم الأيام بالـ 24 ساعة (بيغلط مع تغيير التوقيت الصيفي)،
+// والكارت بيحسب الجنيه المصري بس وبأيام تقويمية، فالأرقام كانت بتختلف لنفس الفترة.
+// هنا: جنيه مصري بس (زي إجمالي الشهر)، وكل يوم = تاريخ تقويمي بتوقيت القاهرة، ومفتاح اليوم واحد في الاتنين.
+const isEgpRow = (row) => String(row?.currency_code || 'EGP').toUpperCase() === 'EGP';
+const dayKeyOf = (value) => {
+  const d = value instanceof Date ? value : new Date(value);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+function summarizeExpensesByDay(expenses) {
+  const rows = (expenses || []).filter(isEgpRow);
+  const byDay = new Map();
+  let total = 0;
+  for (const e of rows) {
+    const amount = Number(e.amount) || 0;
+    total += amount;
+    const key = dayKeyOf(e.created_at);
+    const day = byDay.get(key) || { total: 0, count: 0, categories: {} };
+    day.total += amount;
+    day.count += 1;
+    const cat = e.category || 'مصروف عام';
+    day.categories[cat] = (day.categories[cat] || 0) + amount;
+    byDay.set(key, day);
+  }
+  return { rows, total, byDay, activeDays: byDay.size };
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -98,10 +125,11 @@ export default async function handler(req, res) {
           .gte('created_at', periodStartDay.toISOString()).lt('created_at', periodEndExclusive.toISOString()),
       ]);
 
-      const egp = (row) => String(row.currency_code || 'EGP').toUpperCase() === 'EGP';
-      const egpExpenses = (periodExpenses || []).filter(egp);
-      const periodTotal = egpExpenses.reduce((sum, e) => sum + Number(e.amount || 0), 0);
-      const activeDaySet = new Set(egpExpenses.map((e) => { const d = new Date(e.created_at); return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`; }));
+      const egp = isEgpRow;
+      const periodSummary = summarizeExpensesByDay(periodExpenses);
+      const egpExpenses = periodSummary.rows;
+      const periodTotal = periodSummary.total;
+      const activeDaySet = { size: periodSummary.activeDays };
       // الدخل = أحداث الدخل + السلف المستلَفة (نفس منطق الشهر في الداشبورد). الديون = السلف اللي إنت أديتها (lent) في الفترة، مش مصروف.
       const borrowedTotal = (periodDebts || []).filter((d) => egp(d) && d.direction === 'borrowed' && !d.is_repayment).reduce((sum, d) => sum + Number(d.amount || 0), 0);
       const lentTotal = (periodDebts || []).filter((d) => egp(d) && d.direction !== 'borrowed' && !d.is_repayment).reduce((sum, d) => sum + Number(d.amount || 0), 0);
@@ -382,16 +410,18 @@ export default async function handler(req, res) {
     const weekByCategory = buildCategoryBreakdown(weekExpenses).map(({ name, amount, percent }) => ({ name, amount: Number(amount), percent: Number(percent) }));
     const previousWeekByCategory = buildCategoryBreakdown(previousWeekExpenses).map(({ name, amount, percent }) => ({ name, amount: Number(amount), percent: Number(percent) }));
 
+    const weekSummary = summarizeExpensesByDay(weekExpenses);
     const weekdayTotals = [0, 0, 0, 0, 0, 0, 0];
     const weekdayCounts = [0, 0, 0, 0, 0, 0, 0];
     const weekdayCategoryTotals = [{}, {}, {}, {}, {}, {}, {}];
-    for (const e of weekExpenses) {
-      const dayIdx = Math.floor((new Date(e.created_at) - weekStart) / (24 * 60 * 60 * 1000));
-      if (dayIdx < 0 || dayIdx > 6) continue;
-      weekdayTotals[dayIdx] += Number(e.amount);
-      weekdayCounts[dayIdx] += 1;
-      const cat = e.category || 'مصروف عام';
-      weekdayCategoryTotals[dayIdx][cat] = (weekdayCategoryTotals[dayIdx][cat] || 0) + Number(e.amount);
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(weekStart);
+      d.setDate(d.getDate() + i);
+      const day = weekSummary.byDay.get(dayKeyOf(d));
+      if (!day) continue;
+      weekdayTotals[i] = day.total;
+      weekdayCounts[i] = day.count;
+      weekdayCategoryTotals[i] = day.categories;
     }
 
     const weekDates = [];

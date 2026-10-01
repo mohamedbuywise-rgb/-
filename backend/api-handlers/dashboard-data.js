@@ -67,6 +67,65 @@ export default async function handler(req, res) {
     }
 
 
+    // ---- اعرف صرفك في أي مدة (GET /api/dashboard-data?periodStart=YYYY-MM-DD&periodEnd=YYYY-MM-DD) ----
+    // بيرجّع { period } بس: إجمالي المصروفات في الفترة، متوسط اليوم، أيام الصرف، التصنيفات، كل العمليات، ومعاهم الدخل والديون.
+    // مجمّع هنا (مش ملف API جديد) عشان نفضل تحت حد دوال Vercel Hobby.
+    if (req.query.periodStart || req.query.periodEnd) {
+      const parseDay = (value) => {
+        const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(value || '').trim());
+        if (!m) return null;
+        const d = new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 0, 0, 0, 0); // توقيت السيرفر = القاهرة (config.js)
+        return Number.isNaN(d.getTime()) || d.getMonth() !== Number(m[2]) - 1 ? null : d;
+      };
+      const periodStartDay = parseDay(req.query.periodStart);
+      const periodEndDay = parseDay(req.query.periodEnd || req.query.periodStart);
+      if (!periodStartDay || !periodEndDay || periodStartDay > periodEndDay) {
+        return res.status(400).json({ error: 'اختار بداية ونهاية صحيحتين.' });
+      }
+      const periodEndExclusive = new Date(periodEndDay);
+      periodEndExclusive.setDate(periodEndExclusive.getDate() + 1);
+      const dayCount = Math.round((periodEndExclusive - periodStartDay) / 86400000);
+      if (dayCount > 366) return res.status(400).json({ error: 'أقصى مدة 366 يوم.' });
+
+      const [periodExpenses, { data: periodIncomeEvents }, { data: periodDebts }] = await Promise.all([
+        getExpensesBetween(dataUserId, periodStartDay, periodEndExclusive),
+        supabase.from('financial_events').select('amount, currency_code')
+          .eq('telegram_user_id', dataUserId).eq('event_type', 'income')
+          .gte('created_at', periodStartDay.toISOString()).lt('created_at', periodEndExclusive.toISOString()),
+        supabase.from('debts').select('amount, currency_code, direction, is_repayment')
+          .eq('telegram_user_id', dataUserId)
+          .or('commitment_type.is.null,commitment_type.neq.gameya')
+          .gte('created_at', periodStartDay.toISOString()).lt('created_at', periodEndExclusive.toISOString()),
+      ]);
+
+      const egp = (row) => String(row.currency_code || 'EGP').toUpperCase() === 'EGP';
+      const egpExpenses = (periodExpenses || []).filter(egp);
+      const periodTotal = egpExpenses.reduce((sum, e) => sum + Number(e.amount || 0), 0);
+      const activeDaySet = new Set(egpExpenses.map((e) => { const d = new Date(e.created_at); return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`; }));
+      // الدخل = أحداث الدخل + السلف المستلَفة (نفس منطق الشهر في الداشبورد). الديون = السلف اللي إنت أديتها (lent) في الفترة، مش مصروف.
+      const borrowedTotal = (periodDebts || []).filter((d) => egp(d) && d.direction === 'borrowed' && !d.is_repayment).reduce((sum, d) => sum + Number(d.amount || 0), 0);
+      const lentTotal = (periodDebts || []).filter((d) => egp(d) && d.direction !== 'borrowed' && !d.is_repayment).reduce((sum, d) => sum + Number(d.amount || 0), 0);
+      const incomeTotal = (periodIncomeEvents || []).filter(egp).reduce((sum, e) => sum + Number(e.amount || 0), 0) + borrowedTotal;
+
+      return res.status(200).json({
+        linked,
+        telegramUserId: linked ? telegramUserId : null,
+        period: {
+          start: req.query.periodStart,
+          end: req.query.periodEnd || req.query.periodStart,
+          days: dayCount,
+          total: Math.round(periodTotal),
+          avgPerDay: Math.round(periodTotal / Math.max(1, dayCount)),
+          count: egpExpenses.length,
+          activeSpendingDays: activeDaySet.size,
+          incomeTotal: Math.round(incomeTotal),
+          debtTotal: Math.round(lentTotal),
+          byCategory: buildCategoryBreakdown(egpExpenses).map((c) => ({ name: c.name, amount: Number(c.amount), percent: Number(c.percent) })),
+          items: egpExpenses.slice(0, 500).map((e) => ({ id: e.id, amount: Number(e.amount), currency_code: 'EGP', category: e.category, description: e.description || '', created_at: e.created_at })),
+        },
+      });
+    }
+
     // ---- حساب كل نطاقات التاريخ الأول (عمليات JS بحتة، بدون أي استعلام) ----
     const startOfDay = new Date();
     startOfDay.setHours(0, 0, 0, 0);

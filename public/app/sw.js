@@ -52,8 +52,9 @@ self.addEventListener('push', (event) => {
     const title = payload.title || (en ? 'Dabbar' : 'دبّر');
     const options = {
       body: payload.body || (en ? 'You have a new update in Dabbar.' : 'عندك تحديث جديد في دبّر.'),
-      icon: payload.icon || './icons/icon-192.png',
-      badge: payload.badge || './icons/badge-mono-96.png',
+      // هوية موحّدة لكل الإشعارات: نفس اللوجو ونفس الأيقونة الصغيرة الأحادية بغض النظر عن اللي جاي في الـ payload
+      icon: './icons/icon-192.png',
+      badge: './icons/badge-mono-96.png',
       tag: payload.tag || 'dabbar-notification',
       renotify: Boolean(payload.renotify),
       dir: en ? 'ltr' : 'rtl',

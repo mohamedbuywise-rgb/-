@@ -23,6 +23,7 @@ import { recordExpense } from '../../lib/expenses.js';
 import { recordFinancialEvent } from '../../lib/financialEvents.js';
 import { GENERIC_BANK, detectBankFromText, looksLikePersonalNumber, matchBankSender } from '../../lib/bank-senders.js';
 import { numbersInText, parseBankSms, stripNoiseForAi } from '../../lib/smsParser.js';
+import { LOCAL_CLASSIFICATION_ENABLED } from '../../lib/config.js';
 import { claimSmsFingerprint, releaseSmsFingerprint, smsFingerprint } from '../../lib/smsDedupe.js';
 import { checkTextUsage } from '../../lib/rateLimits.js';
 import { getFeatureAccess, subscriptionRequiredResponse } from '../../lib/subscriptionAccess.js';
@@ -226,6 +227,19 @@ export default async function handler(req, res) {
 
   // ============ 1) المحلل القاعدي (من غير AI) ============
   const parsed = parseBankSms(rawText, { sender: senderName });
+  // التصنيف المحلي معطّل: القواعد مبتقررش نوع/فئة العملية، كله بيروح للـ AI (LOCAL_CLASSIFICATION=on يرجّعه).
+  // ثقة القواعد الأصلية بنحتفظ بيها لقرار قبول المرسل غير المعروف بس.
+  const ruleConfidence = parsed.confidence;
+  if (!LOCAL_CLASSIFICATION_ENABLED) {
+    // رسالة فيها مبلغ بس من غير فعل واضح (مثلاً "عملية شراء بمبلغ ... لدى SPOTIFY") كانت بتتجاهل قبل ما توصل للـ AI؛
+    // دلوقتي الـ AI هو اللي يقرر لو هي عملية فعلًا ولا لا.
+    if (parsed.skip === 'no_transaction_verb' || parsed.skip === 'no_main_amount') {
+      parsed.skip = null;
+      parsed.items = parsed.items || [];
+      parsed.hints = parsed.hints || {};
+    }
+    if (!parsed.skip) parsed.confidence = 'low';
+  }
   if (parsed.skip) {
     return res.status(200).json({ ok: true, skipped: true, code: parsed.skip, reason: SKIP_REASONS[parsed.skip] || 'اتجاهلت.' });
   }
@@ -234,7 +248,7 @@ export default async function handler(req, res) {
   let bankMatch = matchBankSender(senderName) || detectBankFromText(rawText);
   if (!bankMatch) {
     // مرسل مش معروف: لو مش رقم شخصي والرسالة واضحة جدًا كعملية بنكية، بنقبلها كـ "بنك/محفظة" عامة بدل ما نضيّعها.
-    if (!looksLikePersonalNumber(senderName) && parsed.confidence === 'high') {
+    if (!looksLikePersonalNumber(senderName) && ruleConfidence === 'high') {
       bankMatch = { ...GENERIC_BANK, label: senderName ? senderName.slice(0, 40) : GENERIC_BANK.label };
     } else {
       return res.status(200).json({ ok: true, skipped: true, code: 'unknown_sender', reason: 'مرسل غير معروف كبنك/محفظة، اتجاهلت.' });
@@ -247,7 +261,7 @@ export default async function handler(req, res) {
       dry_run: true,
       bank: bankMatch.label,
       confidence: parsed.confidence,
-      parsed_by: parsed.confidence === 'high' ? 'rules' : 'needs_ai',
+      parsed_by: parsed.confidence === 'high' ? 'rules' : 'ai',
       items: parsed.items,
       meta: parsed.meta,
     });
@@ -270,7 +284,7 @@ export default async function handler(req, res) {
   }
   const abandon = () => releaseSmsFingerprint(telegramUserId, fingerprint);
 
-  const bankAccess = await getFeatureAccess(telegramUserId, 'sms_ingestion', { startTrial: true });
+  const bankAccess = await getFeatureAccess(telegramUserId, 'bank_linking', { startTrial: true });
   if (!bankAccess.allowed) {
     await abandon();
     return res.status(403).json({ ok: false, ...subscriptionRequiredResponse(bankAccess) });
@@ -315,8 +329,7 @@ export default async function handler(req, res) {
 
     for (const item of items) {
       const type = ['purchase', 'asset'].includes(item.type) ? 'expense' : item.type;
-      const isGameyaInstallment = /(?:قسط|أقساط|اقساط).{0,24}(?:جمعي)|(?:جمعي).{0,24}(?:قسط|أقساط|اقساط)/iu.test(rawText);
-      const category = isGameyaInstallment ? 'جمعية وأقساط' : (CATEGORIES.includes(item.category) ? item.category : 'تسوق');
+      const category = CATEGORIES.includes(item.category) ? item.category : 'تسوق';
 
       if (type === 'expense') {
         await recordExpense({ ...item, type, category }, rawText, telegramUserId, chatId, `\n\n🏦 اتسجلت أوتوماتيك من رسالة ${bankMatch.label}${item.account_last4 ? ` (حساب ••${item.account_last4})` : ''}`, { ...sourceMeta, account_last4: item.account_last4 || '' });

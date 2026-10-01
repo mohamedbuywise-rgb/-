@@ -1,13 +1,12 @@
 import { supabase } from '../../lib/supabaseClient.js';
 import { getRecentExpensesSummaryText, flagSubscriptionUnused, unflagSubscriptionUnused, getSavingsOpportunities } from '../../lib/expenses.js';
-import { getDebtsSummaryText, createGameya, getGameyaList, toggleGameyaMemberPaid, deleteGameya, createOccasion, getOccasionsSummary, deleteOccasion, updateDebtById } from '../../lib/debts.js';
+import { getDebtsSummaryText, createGameya, getGameyaList, toggleGameyaMemberPaid, deleteGameya, createOccasion, getOccasionsSummary, deleteOccasion, updateDebtById, autoSettleIfBalanced } from '../../lib/debts.js';
 import { createDailyPiggybank, getDailyPiggybank, contributeDailyPiggybank, deleteDailyPiggybank } from '../../lib/goals.js';
 import { extractItemizedReceiptFromImageBase64, askDabbarChat, askDabbarRoast, classifyMessage, transcribeAndClassifyVoiceBase64 } from '../../lib/groq.js';
 import { saveInvoiceRecord, deleteInvoiceById } from '../../lib/invoices.js';
 import { getFeatureAccess, subscriptionRequiredResponse } from '../../lib/subscriptionAccess.js';
-import { checkOcrUsage, checkChatUsage, checkVoiceUsage, checkTextUsage, checkWebSpeechTextUsage, refundOcrUsage, refundUsage } from '../../lib/rateLimits.js';
-import { classifyByRules } from '../../lib/localClassifierAdapter.js';
-import { normalizeDigits, classifyLocally, extractDeterministicTransactions, dedupeEquivalentTransactions, correctDebtDirections, detectCurrency, currencyLabel, normalizeFinancialTransaction, reconcileSingleTransaction } from '../../lib/textNormalize.js';
+import { checkOcrUsage, checkChatUsage, checkVoiceUsage, checkTextUsage, refundOcrUsage, refundUsage } from '../../lib/rateLimits.js';
+import { normalizeDigits, extractDeterministicExpense, correctDebtDirections, detectCurrency, currencyLabel, normalizeFinancialTransaction, reconcileSingleTransaction } from '../../lib/textNormalize.js';
 import { maybeSendBudgetAlert } from '../../lib/webPush.js';
 import { getDashboardUserFromRequest } from '../../lib/dashboardAuth.js';
 import { isFinancialEventType, recordFinancialEvent } from '../../lib/financialEvents.js';
@@ -33,16 +32,15 @@ async function requireLink(req, res) {
     return null;
   }
 
-  // الربط بتيليجرام ليس شرطًا. الحساب المستقل يستخدم dataUserId السالب.
-  // نفحص الاشتراك لكل ميزة على حدة كي تظل الجمعية والأهداف والديون والميزانية متاحة.
-  return user.dataUserId;
-}
+  // الربط بتيليجرام ليس شرطًا. الحساب المستقل يستخدم dataUserId السالب
+  // بنفس جداول المصروفات/الديون، بينما تظل بوابة الاشتراك والتجربة فعّالة.
+  const access = await getFeatureAccess(user.dataUserId, 'ai_assistant', { startTrial: true });
+  if (!access.allowed) {
+    res.status(403).json(subscriptionRequiredResponse(access));
+    return null;
+  }
 
-async function requireFeature(userId, feature, res) {
-  const access = await getFeatureAccess(userId, feature, { startTrial: true });
-  if (access.allowed) return true;
-  res.status(403).json(subscriptionRequiredResponse(access));
-  return false;
+  return user.dataUserId;
 }
 
 function formatGoal(row) {
@@ -214,7 +212,6 @@ async function handleGoalCancel(userId, body, res) {
 }
 
 async function handleReceiptScan(userId, body, res) {
-  if (!(await requireFeature(userId, 'invoice_ocr', res))) return;
   const { imageBase64, mimeType } = body;
   if (!imageBase64) return res.status(400).json({ error: 'مفيش صورة اتبعتت.' });
 
@@ -293,7 +290,6 @@ async function saveChatPair(userId, sessionId, question, answer) {
 
 // action = "chat_history"  { sessionId? } — بيتنادى عند فتح شاشة "اسأل دبّر" عشان يعرض المحادثة القديمة
 async function handleChatHistory(userId, body, res) {
-  if (!(await requireFeature(userId, 'ai_assistant', res))) return;
   const sessionId = String(body.sessionId || DEFAULT_SESSION_ID).slice(0, 80);
   const messages = await fetchRecentChatMessages(userId, sessionId, CHAT_HISTORY_FETCH_LIMIT);
   return res.status(200).json({
@@ -303,7 +299,6 @@ async function handleChatHistory(userId, body, res) {
 }
 
 async function handleAsk(userId, body, res) {
-  if (!(await requireFeature(userId, 'ai_assistant', res))) return;
   // mode: "roast" -> زرار "هزقني بدم خفيف" — مفيش سؤال مكتوب من المستخدم، بيتسجل كأنه طلب ثابت في الشات.
   const isRoast = body.mode === 'roast';
   const question = isRoast ? 'هزقني بدم خفيف 😂' : (body.question || '').trim();
@@ -373,22 +368,19 @@ async function handleAsk(userId, body, res) {
 async function handleEntryDraft(userId, body, res) {
   let text = String(body.text || '').trim();
   let voiceUsageCharged = false;
-  let textUsageCharged = false;
   let voiceTransactions = null; // ناتج التفريغ+التصنيف المدمج (نداء واحد) عشان منكررش التصنيف
-  const webSpeechInput = !body.audioBase64 && ['webspeech', 'web_speech'].includes(String(body.inputSource || body.source || '').toLowerCase());
-  if (!(await requireFeature(userId, body.audioBase64 ? 'voice_input' : 'ai_classification', res))) return;
 
-  // النص التقليدي وSMS لهما حد 300؛ Web Speech المجاني له عداد مستقل 600، والصوت السحابي حدّه 250.
+  // الإدخال اليدوي النصي له عداد شهري موحد مع رسائل Telegram وSMS.
+  // الصوت لا يستهلك هذا العداد؛ هو محسوب في عداد voice مستقل.
   if (!body.audioBase64) {
     if (!text) return res.status(400).json({ error: 'اكتب وصف العملية الأول.' });
-    const textUsage = webSpeechInput ? await checkWebSpeechTextUsage(userId) : await checkTextUsage(userId);
+    const textUsage = await checkTextUsage(userId);
     if (!textUsage.allowed) {
       if (textUsage.isTrial) {
         return res.status(403).json({ error: 'خلصت حدود الإدخال النصي في التجربة المجانية. اشترك عشان تكمل.', trialEnded: true });
       }
-      return res.status(429).json({ error: webSpeechInput ? 'وصلت للحد الأقصى للتصنيف النصي الناتج من Web Speech الشهر ده.' : 'وصلت للحد الأقصى من الإدخالات النصية الشهر ده. هيرجع تاني بداية الشهر الجاي.', limitReached: true });
+      return res.status(429).json({ error: 'وصلت للحد الأقصى من الإدخالات النصية الشهر ده. هيرجع تاني بداية الشهر الجاي.', limitReached: true });
     }
-    textUsageCharged = true;
   }
   if (body.audioBase64) {
     const audioDurationSeconds = Number(body.audioDurationSeconds);
@@ -419,44 +411,26 @@ async function handleEntryDraft(userId, body, res) {
     voiceTransactions = Array.isArray(transcript.transactions) && transcript.transactions.length ? transcript.transactions : null;
   }
   text = normalizeDigits(text);
-  if (!text || text.length > 2500) {
-    if (voiceUsageCharged) await refundUsage(userId, 'voice');
-    else if (textUsageCharged) await refundUsage(userId, webSpeechInput ? 'web_text' : 'text');
-    return res.status(400).json({ error: 'اكتب أو سجّل وصفًا واضحًا للمصروف.' });
-  }
+  if (!text || text.length > 2500) return res.status(400).json({ error: 'اكتب أو سجّل وصفًا واضحًا للمصروف.' });
 
   // ============ نفس منطق تليجرام بالظبط: الرسالة الواحدة ممكن يكون فيها أكتر من معاملة مع بعض ============
   // (مثلاً "صرفت 50 جنيه أكل و100 مواصلات") — بنرجّعهم كلهم كمسودات عشان المستخدم يراجعهم ويأكدهم مرة واحدة،
   // بدل ما نلقط أول معاملة بس ونسيب الباقي بلا تسجيل زي ما كان الموقع بيعمل قبل كده.
   // الفويس: التصنيف جه جاهز من نداء Gemini الواحد — مفيش نداء تاني. لو فاضي نرجع للتصنيف النصي.
-  let classificationSource = body.audioBase64 ? 'voice-ai' : 'ai';
-  let localClassification = null;
-  // Web Speech والنص المكتوب يمران من نفس بوابة الخادم. لو القواعد المحلية
-  // واثقة جدًا نرجع المسودات فورًا ونوفّر استدعاء Groq/Gemini، وإلا نكمل السلسلة الحالية.
-  if (!voiceTransactions) {
-    localClassification = classifyByRules(text);
-    console.info('CLASSIFICATION_ROUTE', JSON.stringify({
-      source: webSpeechInput ? 'webspeech' : 'text',
-      route: localClassification?.handled ? 'local' : 'ai',
-      reason: localClassification?.reason || 'voice-ai',
-      transactionCount: localClassification?.handled ? localClassification.transactions.length : 0,
-    }));
-  }
-  const parsed = voiceTransactions || (localClassification?.handled ? localClassification.transactions : await classifyMessage(text));
-  if (!voiceTransactions && localClassification?.handled) classificationSource = 'local';
+  const parsed = voiceTransactions || await classifyMessage(text);
   const normalizedTransactions = (Array.isArray(parsed) ? parsed : []).map((item) => normalizeFinancialTransaction(item, text));
-  const reconciledTransactions = dedupeEquivalentTransactions(reconcileSingleTransaction(correctDebtDirections(text, normalizedTransactions), text));
+  const reconciledTransactions = reconcileSingleTransaction(correctDebtDirections(text, normalizedTransactions), text);
   // العميل مبيختارش دخل/مصروف يدويًا في الإدخال السريع — دبّر يصنّف كل عملية من كلامه مباشرة (classifyMessage)
   const transactions = reconciledTransactions;
   let validTx = transactions.filter((item) => ((isFinancialEventType(item?.type) || item?.type === 'expense' || item?.type === 'purchase' || item?.type === 'asset') || item?.type === 'debt' || item?.type === 'portfolio_buy' || item?.type === 'portfolio_sell') && Number.isFinite(Number(item.amount)) && Number(item.amount) > 0 && (item.type !== 'debt' || item.person));
   // لو التصنيف الذكي لم يلتقط جملة قصيرة مثل "غدا 100 جنيه"، نستخدم استخراجًا حتميًا
   // مقيدًا بعلامات المصروف، فلا نخلط جمل الديون أو الأسئلة مع مصروفات وهمية.
   if (!validTx.length) {
-    validTx = dedupeEquivalentTransactions(extractDeterministicTransactions(text));
+    const deterministicExpense = extractDeterministicExpense(text);
+    if (deterministicExpense) validTx = [{ ...deterministicExpense, type: 'expense' }];
   }
   if (!validTx.length) {
     if (voiceUsageCharged) await refundUsage(userId, 'voice');
-    else if (textUsageCharged) await refundUsage(userId, webSpeechInput ? 'web_text' : 'text');
     return res.status(422).json({ error: 'محتاج مبلغ واضح عشان أفهم العملية.' });
   }
 
@@ -473,18 +447,10 @@ async function handleEntryDraft(userId, body, res) {
     needsConfirmation: true,
     confidence: 0.85,
   }));
-  return res.status(200).json({
-    transcript: text,
-    drafts,
-    classificationSource,
-    localClassification: localClassification?.handled
-      ? { handled: true, confidence: localClassification.confidence, reason: localClassification.reason }
-      : null,
-  });
+  return res.status(200).json({ transcript: text, drafts });
 }
 
 async function handleEntryInvoiceDraft(userId, body, res) {
-  if (!(await requireFeature(userId, 'invoice_ocr', res))) return;
   const imageBase64 = String(body.imageBase64 || '').replace(/^data:[^,]+,/, '');
   if (!imageBase64) return res.status(400).json({ error: 'الصورة فاضية.' });
 
@@ -569,12 +535,13 @@ async function saveOneDraft(userId, draft) {
       note: String(draft.note || '').slice(0, 500),
     }).select('id, person_name, amount, currency_code, direction, is_repayment').single();
     if (error) { console.error('entry_confirm debt error:', JSON.stringify(error)); return { ok: false, error: 'تعذر حفظ الدين.' }; }
+    const autoSettled = await autoSettleIfBalanced(userId, data.person_name);
     const isLent = data.direction !== 'borrowed';
     const money = `${data.amount} ${currencyLabel(data.currency_code)}`;
     const message = isRepayment
       ? (isLent ? `تم تسجيل: رجّعت لـ ${data.person_name} ${money}.` : `تم تسجيل: ${data.person_name} رجّعلك ${money}.`)
       : (isLent ? `تم تسجيل: بقى ليك عند ${data.person_name} ${money}.` : `تم تسجيل: بقى عليك لـ ${data.person_name} ${money}.`);
-    return { ok: true, type: 'debt', record: data, message };
+    return { ok: true, type: 'debt', record: data, message: autoSettled ? `${message} واتصفى الحساب بينكم.` : message, settled: autoSettled };
   }
 
   if (draft.type === 'invoice') {

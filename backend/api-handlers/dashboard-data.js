@@ -66,77 +66,6 @@ export default async function handler(req, res) {
       return res.status(200).json({ linked, telegramUserId: linked ? telegramUserId : null, invoices });
     }
 
-    // ---- ملخص فترة يحددها المستخدم (4 أيام/أسبوع/أي تاريخين) ----
-    // المسار يظل تحت نفس المصادقة، ويعيد بيانات حقيقية من قاعدة البيانات فقط.
-    if (req.query.periodStart || req.query.periodEnd) {
-      const datePattern = /^\d{4}-\d{2}-\d{2}$/;
-      const startText = String(req.query.periodStart || '');
-      const endText = String(req.query.periodEnd || startText);
-      if (!datePattern.test(startText) || !datePattern.test(endText)) {
-        return res.status(400).json({ error: 'اختار تاريخ بداية ونهاية صحيحين.' });
-      }
-      const periodStart = new Date(`${startText}T00:00:00`);
-      const periodEnd = new Date(`${endText}T00:00:00`);
-      periodEnd.setDate(periodEnd.getDate() + 1);
-      const days = Math.round((periodEnd.getTime() - periodStart.getTime()) / 86400000);
-      if (!Number.isFinite(periodStart.getTime()) || !Number.isFinite(periodEnd.getTime()) || days < 1 || days > 366 || periodStart > periodEnd) {
-        return res.status(400).json({ error: 'الفترة لازم تكون من يوم إلى سنة بحد أقصى.' });
-      }
-      const [periodExpenses, { data: periodEvents, error: periodEventsError }, { data: periodDebts, error: periodDebtsError }] = await Promise.all([
-        getExpensesBetween(dataUserId, periodStart, periodEnd),
-        supabase.from('financial_events')
-          .select('id, event_type, amount, currency_code, category, description, created_at')
-          .eq('telegram_user_id', dataUserId)
-          .gte('created_at', periodStart.toISOString())
-          .lt('created_at', periodEnd.toISOString())
-          .order('created_at', { ascending: false }),
-        supabase.from('debts')
-          .select('id, person_name, amount, currency_code, note, direction, is_repayment, created_at')
-          .eq('telegram_user_id', dataUserId)
-          .gte('created_at', periodStart.toISOString())
-          .lt('created_at', periodEnd.toISOString())
-          .order('created_at', { ascending: false }),
-      ]);
-      if (periodEventsError) console.error('dashboard-data period events error:', JSON.stringify(periodEventsError));
-      if (periodDebtsError) console.error('dashboard-data period debts error:', JSON.stringify(periodDebtsError));
-      const expenses = periodExpenses || [];
-      const events = periodEvents || [];
-      const debts = periodDebts || [];
-      const byCurrency = sumByCurrency(expenses);
-      const total = byCurrency.EGP || 0;
-      const byCategory = buildCategoryBreakdown(expenses).map((item) => ({
-        name: item.name,
-        amount: Number(item.amount),
-        currency_code: item.currency_code || 'EGP',
-        percent: Number(item.percent),
-        items: item.items || [],
-      }));
-      const spendingDays = new Set(expenses.map((item) => new Date(item.created_at).toDateString())).size;
-      const incomeItems = events.filter((event) => event.event_type === 'income');
-      const incomeTotal = incomeItems.reduce((sum, item) => sum + ((item.currency_code || 'EGP') === 'EGP' ? Number(item.amount) : 0), 0);
-      const debtTotal = debts.filter((debt) => !debt.is_repayment).reduce((sum, debt) => sum + ((debt.currency_code || 'EGP') === 'EGP' ? Number(debt.amount) : 0), 0);
-      return res.status(200).json({
-        linked,
-        period: {
-          start: startText,
-          end: endText,
-          days,
-          total,
-          count: expenses.length,
-          avgPerDay: Math.round(total / days),
-          activeSpendingDays: spendingDays,
-          byCurrency,
-          topCategory: byCategory[0] || null,
-          byCategory,
-          items: expenses.map((item) => ({ id: item.id, amount: Number(item.amount), currency_code: item.currency_code || 'EGP', category: item.category, description: item.description, created_at: item.created_at })),
-          incomeTotal,
-          incomeCount: incomeItems.length,
-          debtTotal,
-          debtCount: debts.filter((debt) => !debt.is_repayment).length,
-        },
-      });
-    }
-
 
     // ---- حساب كل نطاقات التاريخ الأول (عمليات JS بحتة، بدون أي استعلام) ----
     const startOfDay = new Date();
@@ -159,7 +88,7 @@ export default async function handler(req, res) {
     const prevRange = getMonthRange(-1);
     const historyOffsets = [-1, -2, -3, -4].map((offset) => ({ offset, range: getMonthRange(offset) }));
 
-    const DISCRETIONARY_CATEGORIES = ['تسوق', 'ملابس', 'أحذية وإكسسوارات', 'إلكترونيات وأجهزة', 'ترفيه', 'رياضة وجيم', 'سفر وإقامة', 'اشتراكات', 'هدايا', 'تبرعات وصدقات', 'هدايا وتبرعات', 'عناية شخصية', 'حلاقة وتجميل', 'شخصي وعناية'];
+    const DISCRETIONARY_CATEGORIES = ['تسوق', 'ترفيه', 'اشتراكات', 'هدايا وتبرعات', 'شخصي وعناية'];
     const AR_DAY_NAMES = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
 
     // بتاخد المصاريف جاهزة (expenses) بدل ما تجيبها بنفسها من قاعدة البيانات، عشان "الأسبوعي"

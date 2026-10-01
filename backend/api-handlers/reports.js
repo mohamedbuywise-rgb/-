@@ -163,7 +163,7 @@ async function handleMonthlyPdf(req, res, telegramUserId) {
   return res.status(200).send(pdfBuffer);
 }
 
-// ---- type=daily: PDF تقرير اليوم: كل مصروفات اليوم والحركات البنكية والديون ----
+// ---- type=daily: PDF تقرير اليوم (كل عمليات اليوم بس) ----
 async function handleDailyPdf(req, res, telegramUserId) {
   const offset = Number(req.query?.offset ?? 0) || 0;
   const start = new Date();
@@ -173,46 +173,14 @@ async function handleDailyPdf(req, res, telegramUserId) {
   end.setDate(end.getDate() + 1);
 
   const expenses = await getExpensesBetween(telegramUserId, start, end);
-  const [eventsResult, debtsResult] = await Promise.all([
-    supabase.from('financial_events')
-      .select('id,event_type,amount,currency_code,category,description,direction,counterparty,created_at')
-      .eq('telegram_user_id', telegramUserId).gte('created_at', start.toISOString()).lt('created_at', end.toISOString()),
-    supabase.from('debts')
-      .select('id,person_name,amount,currency_code,direction,note,created_at,is_repayment')
-      .eq('telegram_user_id', telegramUserId).gte('created_at', start.toISOString()).lt('created_at', end.toISOString()),
-  ]);
-  if (eventsResult.error) console.error('daily PDF financial_events error:', JSON.stringify(eventsResult.error));
-  if (debtsResult.error) console.error('daily PDF debts error:', JSON.stringify(debtsResult.error));
 
-  const eventLabels = { income: 'دخل', deposit: 'إيداع', withdrawal: 'سحب', transfer: 'تحويل', refund: 'استرداد', subscription: 'اشتراك', purchase: 'شراء', asset: 'أصل', other: 'حركة مالية' };
-  const dailyEntries = [
-    ...expenses.map((e) => ({ ...e, type_label: 'مصروف', signed_amount: -Math.abs(Number(e.amount || 0)) })),
-    ...(eventsResult.data || []).map((e) => ({
-      ...e,
-      type_label: eventLabels[e.event_type] || 'حركة مالية',
-      description: [e.description, e.counterparty].filter(Boolean).join(' — '),
-      signed_amount: e.direction === 'outflow' ? -Math.abs(Number(e.amount || 0)) : Math.abs(Number(e.amount || 0)),
-    })),
-    ...(debtsResult.data || []).map((d) => ({
-      ...d,
-      type_label: d.is_repayment
-        ? (d.direction === 'borrowed' ? 'سداد دين' : 'استرداد دين')
-        : (d.direction === 'borrowed' ? 'دين مستلم' : 'دين مدفوع'),
-      category: d.person_name ? `دين — ${d.person_name}` : 'دين',
-      description: d.note || (d.person_name ? `مع ${d.person_name}` : ''),
-      signed_amount: ((d.direction === 'borrowed') !== Boolean(d.is_repayment))
-        ? Math.abs(Number(d.amount || 0))
-        : -Math.abs(Number(d.amount || 0)),
-    })),
-  ];
-
-  if (dailyEntries.length === 0) {
-    return res.status(404).json({ error: 'لسه مفيش معاملات مالية مسجلة في اليوم ده.' });
+  if (expenses.length === 0) {
+    return res.status(404).json({ error: 'لسه معندكش مصاريف مسجلة النهاردة.' });
   }
 
   const total = expenses.reduce((sum, e) => sum + Number(e.amount), 0);
   const breakdown = buildCategoryBreakdown(expenses);
-  const topCategory = breakdown[0] || { name: '—' };
+  const topCategory = breakdown[0];
   const dayLabel = start.toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' });
 
   const html = buildReportHtml({
@@ -220,19 +188,22 @@ async function handleDailyPdf(req, res, telegramUserId) {
     periodLabel: `يوم ${dayLabel}`,
     generatedAt: dayLabel,
     total,
-    count: dailyEntries.length,
-    expenseCount: expenses.length,
+    count: expenses.length,
     topCategoryName: topCategory.name,
     comparisonLine: '',
     categories: breakdown,
-    expenses: dailyEntries,
   });
 
   const pdfBuffer = await renderPdfFromHtml(html);
+
   const rawFileName = `تقرير-يومي-${dayLabel}.pdf`;
   const encodedFileName = encodeURIComponent(rawFileName);
+
   res.setHeader('Content-Type', 'application/pdf');
-  res.setHeader('Content-Disposition', `attachment; filename="daily-report.pdf"; filename*=UTF-8''${encodedFileName}`);
+  res.setHeader(
+    'Content-Disposition',
+    `attachment; filename="daily-report.pdf"; filename*=UTF-8''${encodedFileName}`
+  );
   return res.status(200).send(pdfBuffer);
 }
 

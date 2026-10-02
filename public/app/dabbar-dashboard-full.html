@@ -4248,6 +4248,47 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
 .ps-empty{text-align:center;font-size:.68rem;color:var(--ps-muted);padding:.5rem}
 .ps-reopen{display:flex;align-items:center;justify-content:space-between;width:100%;padding:.75rem 1rem;border-radius:1.25rem;border:1px dashed var(--pm-hairline);background:transparent;color:var(--pm-muted);font-size:.75rem;font-weight:800;cursor:pointer}
 </style>
+<style id="dabbar-ui-polish">
+/* عملة التطبيق */
+.cur-field{position:relative;display:flex;align-items:center;flex:1}
+#account-currency-search{padding-inline-start:2.8rem!important;font-size:.82rem!important;font-weight:700;border-radius:.9rem!important;padding-top:.7rem!important;padding-bottom:.7rem!important}
+.cur-flag{position:absolute;inset-inline-start:.8rem;font-size:1.35rem;line-height:1;pointer-events:none}
+.cur-panel{display:none;margin-top:.55rem;border:1px solid var(--cs-line,rgba(148,163,184,.3));border-radius:1rem;background:var(--cs-card,#fff);max-height:17rem;overflow:auto;overscroll-behavior:contain}
+.cur-panel.open{display:block}
+.cur-lbl{font-size:.65rem;font-weight:800;color:var(--db-muted,#687381);padding:.6rem .9rem .2rem}
+.cur-row{display:flex;align-items:center;gap:.7rem;padding:.55rem .9rem;cursor:pointer}
+.cur-row:hover,.cur-row:active{background:var(--cs-panel2,rgba(120,120,120,.1))}
+.cur-row.sel{background:var(--db-accent-soft,rgba(22,168,120,.12))}
+.cur-row .f{font-size:1.45rem;line-height:1}
+.cur-row .n{flex:1;font-size:.8rem;font-weight:700;color:var(--db-ink,inherit)}
+.cur-row .c{font-size:.66rem;font-weight:900;padding:.15rem .5rem;border-radius:.5rem;background:var(--cs-panel2,rgba(120,120,120,.12));color:var(--db-muted,#687381)}
+/* فورم الأصل */
+.pf-lbl{font-size:.68rem;font-weight:800;color:var(--portfolio-muted);margin-top:.35rem}
+.pf-cats{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+.pf-cat{display:flex;align-items:center;gap:.55rem;padding:.65rem .7rem;border:1.5px solid var(--portfolio-line);border-radius:1rem;background:var(--portfolio-card);color:var(--portfolio-ink);cursor:pointer;text-align:start;font:inherit}
+.pf-cat iconify-icon{font-size:1.55rem;color:var(--portfolio-accent);flex:none}
+.pf-cat b{display:block;font-size:.72rem;font-weight:900}
+.pf-cat small{display:block;font-size:.6rem;color:var(--portfolio-muted);margin-top:1px}
+.pf-cat.on{border-color:var(--portfolio-accent);background:color-mix(in srgb,var(--portfolio-accent) 13%,transparent)}
+#portfolio-add-form .portfolio-form-input{padding:.8rem .9rem;font-size:.8rem;border-radius:.9rem;border-width:1.5px}
+#portfolio-add-form .portfolio-form-input:focus{border-color:var(--portfolio-accent)}
+#portfolio-add-amount{font-size:1.2rem!important;font-weight:900;text-align:center}
+#portfolio-icon-picker{gap:.5rem}
+#portfolio-icon-picker .icon-library-btn{width:2.6rem;height:2.6rem;font-size:1.3rem;border-radius:.85rem}
+.pf-more{border:1px dashed var(--portfolio-line);border-radius:.9rem}
+.pf-more>summary{list-style:none;cursor:pointer;padding:.7rem .85rem;font-size:.72rem;font-weight:800;color:var(--portfolio-accent-strong)}
+.pf-more>summary::-webkit-details-marker{display:none}
+.pf-more-in{display:flex;flex-direction:column;gap:.55rem;padding:0 .85rem .85rem}
+#portfolio-add-form .portfolio-form-submit{padding:.85rem .8rem;font-size:.82rem;border-radius:.9rem}
+#portfolio-add-form .portfolio-form-cancel{padding:.85rem 1rem;border-radius:.9rem}
+/* تفاصيل الأصل */
+.portfolio-detail-value{font-size:1.9rem;letter-spacing:-.02em}
+.portfolio-detail-badge{font-size:.74rem;padding:.25rem .7rem;border-radius:999px}
+.portfolio-detail-stat{border-radius:14px;padding:.7rem .8rem}
+.portfolio-detail-stat strong{font-size:.92rem}
+.portfolio-detail-stat.up strong{color:#0a7a52}
+.portfolio-detail-stat.down strong{color:#c0362c}
+</style>
 </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col overflow-hidden">
     <script src="./dabbar-offline-store.js"></script>
@@ -4585,11 +4626,19 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
                     <div id="portfolio-add-form" class="hidden portfolio-add-form-panel" style="margin-top:.8rem;flex-direction:column;gap:.55rem;">
                         <span id="portfolio-form-title" class="portfolio-form-title">إضافة أصل جديد</span>
 
+<div class="pf-lbl">إيه نوع الأصل؟</div>
+<div class="pf-cats" id="portfolio-cat-tiles">
+<button type="button" class="pf-cat" data-cat="static_cash"><iconify-icon icon="ph:wallet-duotone"></iconify-icon><span><b>كاش وعقار</b><small>فلوس، عقار، سيارة</small></span></button>
+<button type="button" class="pf-cat" data-cat="fixed_yield"><iconify-icon icon="ph:bank-duotone"></iconify-icon><span><b>شهادة / وديعة</b><small>بعائد ثابت</small></span></button>
+<button type="button" class="pf-cat" data-cat="market_asset"><iconify-icon icon="ph:chart-line-up-duotone"></iconify-icon><span><b>سهم / ذهب / عملة</b><small>سعره بيتغير</small></span></button>
+<button type="button" class="pf-cat" data-cat="loan_debt"><iconify-icon icon="ph:handshake-duotone"></iconify-icon><span><b>فلوس ليا / عليا</b><small>سلف وديون</small></span></button>
+</div>
+<div class="pf-lbl">اسم الأصل</div>
                         <div style="display:flex;gap:.5rem;">
                             <input id="portfolio-add-name" type="text" placeholder="اسم الأصل (مثلاً: ذهب، صناديق بنك مصر)" class="portfolio-form-input" style="flex:1.6;">
                             <input id="portfolio-add-sub" type="text" placeholder="وصف (120 جرام)" class="portfolio-form-input" style="flex:1;">
                         </div>
-                        <select id="portfolio-add-category" class="portfolio-form-input" aria-label="فئة الأصل">
+                        <select id="portfolio-add-category" class="portfolio-form-input" aria-label="فئة الأصل" hidden>
                             <option value="static_cash">كاش / عقار / سيارة</option><option value="fixed_yield">شهادة / وديعة / عائد ثابت</option><option value="market_asset">سهم / ذهب / عملة</option><option value="loan_debt">فلوس ليا / فلوس عليا</option>
                         </select>
                         <div id="portfolio-yield-fields" class="hidden" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem;">
@@ -4600,21 +4649,19 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
                             <input id="portfolio-add-maturity" type="date" class="portfolio-form-input" aria-label="تاريخ الاستحقاق">
                         </div>
                         <div id="portfolio-yield-preview" class="hidden" style="padding:.6rem .7rem;border-radius:.75rem;background:color-mix(in srgb,var(--portfolio-accent) 10%,transparent);font-size:.67rem;font-weight:800;color:var(--portfolio-accent-strong);">العائد المتوقع: —</div>
-
+<div class="pf-lbl">اختار أيقونة (اختياري)</div>
                         <div class="icon-library-row" id="portfolio-icon-picker" aria-label="اختار أيقونة الأصل"></div>
-
-                        <div style="display:flex;gap:.5rem;">
+<div class="pf-lbl">القيمة الحالية</div>
                             <input id="portfolio-add-amount" type="number" inputmode="numeric" placeholder="القيمة الحالية بالجنيه" class="portfolio-form-input">
+<details class="pf-more"><summary>＋ تفاصيل إضافية (اختياري)</summary><div class="pf-more-in">
                             <input id="portfolio-add-cost" type="number" inputmode="numeric" min="0" placeholder="قيمة الشراء (اختياري)" class="portfolio-form-input">
-                        </div>
-
-                        <div style="display:flex;gap:.5rem;">
+<div style="display:flex;gap:.5rem;">
                             <input id="portfolio-add-quantity" type="number" inputmode="decimal" min="0" step="any" placeholder="الكمية (اختياري)" class="portfolio-form-input" style="flex:1;">
                             <input id="portfolio-add-unit" type="text" placeholder="الوحدة/الرمز — جرام، BTC، أو COMI.CA" class="portfolio-form-input" style="flex:1.4;">
-                        </div>
+</div>
                         <p class="text-[10px] text-slate-500 -mt-1">لو حطيت كمية ورمز مدعوم هنحدّث القيمة يوميًا تلقائيًا من سعر السوق.</p>
-
                         <input id="portfolio-add-alert" type="number" inputmode="numeric" min="0" placeholder="نبهني لو تحرك أكثر من % في اليوم (اختياري)" class="portfolio-form-input">
+</div></details>
 
                         <div style="display:flex;gap:.5rem;">
                             <button type="button" id="portfolio-add-confirm" class="portfolio-form-submit">حفظ الأصل</button>
@@ -12016,6 +12063,8 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
                 <div class="portfolio-detail-stat-grid">
                     <div class="portfolio-detail-stat"><span>سعر الوحدة الآن</span><strong>${unitPriceEgp ? `${fmt(unitPriceEgp)}` : fmt(currentAmount)}</strong></div>
                     <div class="portfolio-detail-stat"><span>قيمة الشراء</span><strong>${hasCostBasis ? fmt(costBasis) : '—'}</strong></div>
+                    ${hasCostBasis ? `<div class="portfolio-detail-stat ${isUp ? 'up' : 'down'}"><span>الربح / الخسارة</span><strong>${isUp ? '+' : '-'}${fmt(Math.abs(gainAmount))}</strong></div>` : ''}
+                    ${Number(asset.quantity) > 0 ? `<div class="portfolio-detail-stat"><span>الكمية</span><strong>${Number(asset.quantity).toLocaleString('ar-EG')}${asset.unit ? ' ' + String(asset.unit).replace(/[<>&"]/g, '') : ''}</strong></div>` : ''}
                 </div>
                 ${weightPct != null ? `<div class="portfolio-detail-weight">
                     <div class="portfolio-detail-weight-top"><span>${weightPct}%</span><span>بيمثل كام % من محفظتك</span></div>
@@ -12318,8 +12367,10 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
                     if (isEditing) payload.assetId = portfolioEditingId;
                     await asstApi(isEditing ? 'portfolio_asset_update' : 'portfolio_asset_add', payload);
                     if (selectedIcon) localStorage.setItem(`dabbar-portfolio-icon:${name.toLowerCase()}`, selectedIcon);
+                    const __prevIds = new Set((window.__portfolioState?.assets || []).map((x) => x.id));
                     resetPortfolioForm();
                     await loadDashboard();
+                    if (!isEditing) { try { const added = (window.__portfolioState?.assets || []).find((x) => !__prevIds.has(x.id)); if (added) { __expandedPortfolioAssetId = added.id; renderPortfolio(window.__portfolioState, window.__portfolioDigest); setTimeout(() => document.querySelector('.portfolio-asset-wrap.open')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 200); } } catch (_) {} }
                 } catch (e) {
                     errEl.textContent = e.message;
                     errEl.classList.remove('hidden');
@@ -13233,11 +13284,8 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
                     quickStatus('تعذر التقاط الصوت. تأكد من إذن الميكروفون وجرب تاني.', 'error');
                 };
                 // مفيش input.focus() هنا: الخانة أصلاً في إيدك، وإجبار الفوكس بعد الإملاء كان بيلخبط الكيبورد.
-                r.onend = () => {
-                    if (userStopped) { finish(); return; }
-                    baseText = input.value.trim(); // اللي اتكتب لحد دلوقتي يبقى الأساس للجلسة الجديدة
-                    try { recognition = build(); recognition.start(); } catch (e) { finish(); }
-                };
+                // جلسة واحدة بس: من غير إعادة تشغيل تلقائية، عشان يطلع بيب فتح وبيب قفل بس (القفل لما المستخدم يدوس إيقاف).
+                r.onend = () => { finish(); };
                 return r;
             }
             mic.addEventListener('click', () => {
@@ -16618,6 +16666,56 @@ html:not([data-theme="light"]) .asst-goal-date-chip{ background:rgba(255,255,255
   sync();
 })();
 
+</script>
+<script id="dabbar-ui-polish-js">
+(function(){
+ const $=(s)=>document.querySelector(s);
+ // ===== اختيار العملة بأعلام =====
+ try{
+  const inp=$('#account-currency-search'),dl=$('#world-currencies'),card=$('#account-currency-card');
+  if(inp&&dl&&card){
+   const OV={EUR:'EU',ANG:'CW',XCD:'AG',XOF:'SN',XAF:'CM',XPF:'PF'};
+   const flag=(c)=>{if(!c||c.length!==3)return '🌐';if(c[0]==='X'&&!OV[c])return '🌐';const cc=OV[c]||c.slice(0,2);return String.fromCodePoint(...[...cc].map((ch)=>0x1F1E6+ch.charCodeAt(0)-65));};
+   const list=[...dl.options].map((o)=>({code:o.value,name:(o.textContent.split('—')[1]||'').trim()}));
+   const byCode=Object.fromEntries(list.map((c)=>[c.code,c]));
+   const POP=['EGP','USD','EUR','SAR','AED','GBP','KWD','QAR'];
+   inp.removeAttribute('list');inp.setAttribute('autocomplete','off');
+   const row0=inp.parentNode,wrap=document.createElement('div');wrap.className='cur-field';
+   row0.insertBefore(wrap,inp);wrap.appendChild(inp);
+   const fl=document.createElement('span');fl.className='cur-flag';wrap.appendChild(fl);
+   const panel=document.createElement('div');panel.className='cur-panel';row0.after(panel);
+   let typed=false;
+   const cur=()=>{const v=(inp.value||'').trim().toUpperCase();return byCode[v]?v:null;};
+   const sync=()=>{const c=cur();fl.textContent=c?flag(c):'🌐';};
+   const row=(c)=>`<div class="cur-row${c.code===cur()?' sel':''}" data-c="${c.code}"><span class="f">${flag(c.code)}</span><span class="n">${c.name}</span><span class="c">${c.code}</span></div>`;
+   const render=()=>{
+    const q=typed?inp.value.trim().toLowerCase():'';
+    if(!q){panel.innerHTML='<div class="cur-lbl">الأكثر استخدامًا</div>'+POP.filter((p)=>byCode[p]).map((p)=>row(byCode[p])).join('')+'<div class="cur-lbl">كل العملات</div>'+list.filter((c)=>!POP.includes(c.code)).map(row).join('');}
+    else{const m=list.filter((c)=>c.code.toLowerCase().includes(q)||c.name.includes(q));panel.innerHTML=m.length?m.map(row).join(''):'<div class="cur-lbl">مفيش نتيجة</div>';}
+   };
+   const open=()=>{render();panel.classList.add('open');setTimeout(()=>panel.scrollIntoView({block:'nearest',behavior:'smooth'}),250);};
+   inp.addEventListener('focus',()=>{typed=false;open();setTimeout(()=>inp.select(),0);});
+   inp.addEventListener('input',(e)=>{if(e.isTrusted){typed=true;open();}sync();});
+   panel.addEventListener('mousedown',(e)=>e.preventDefault());
+   panel.addEventListener('click',(e)=>{const r=e.target.closest('.cur-row');if(!r)return;const code=r.dataset.c;inp.value=code;typed=false;panel.classList.remove('open');inp.blur();const st=$('#account-currency-status');if(st)st.textContent=`${byCode[code].name} (${code}) — اضغط «حفظ العملة» للتأكيد`;});
+   document.addEventListener('click',(e)=>{if(!card.contains(e.target))panel.classList.remove('open');});
+   const d=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value');
+   Object.defineProperty(inp,'value',{configurable:true,get(){return d.get.call(this);},set(v){d.set.call(this,v);sync();}});
+   sync();
+  }
+ }catch(err){console.warn('currency picker',err);}
+ // ===== بطاقات نوع الأصل =====
+ try{
+  const sel=$('#portfolio-add-category'),tiles=$('#portfolio-cat-tiles');
+  if(sel&&tiles){
+   const paint=()=>tiles.querySelectorAll('.pf-cat').forEach((b)=>b.classList.toggle('on',b.dataset.cat===sel.value));
+   tiles.addEventListener('click',(e)=>{const b=e.target.closest('.pf-cat');if(b)sel.value=b.dataset.cat;});
+   const d=Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value');
+   Object.defineProperty(sel,'value',{configurable:true,get(){return d.get.call(this);},set(v){d.set.call(this,v);paint();sel.dispatchEvent(new Event('change',{bubbles:true}));}});
+   paint();
+  }
+ }catch(err){console.warn('category tiles',err);}
+})();
 </script>
 </body>
 </html>

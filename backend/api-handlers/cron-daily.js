@@ -7,6 +7,7 @@ import { generateFriendlyReminderIntro } from '../../lib/groq.js';
 import { getAllUsers } from '../../lib/users.js';
 import { claimCronSlot } from '../../lib/cronRuns.js';
 import { refreshPortfolioMarketPrices, savePortfolioSnapshot, getPortfolioDigest, buildPortfolioDigestMessage, checkPortfolioPriceAlerts, buildPortfolioAlertTelegramMessage, buildPortfolioAlertPushPayload } from '../../lib/investments.js';
+import { processPortfolioDaily } from '../../lib/portfolioLedger.js';
 import { CATEGORY_EMOJI, CRON_SECRET, ADMIN_TELEGRAM_ID, isModelsCheckOverdue } from '../../lib/config.js';
 import { hasActivePushSubscription, sendPushToUser } from '../../lib/webPush.js';
 import { plainText, runPushSchedule, sendSubscriptionAlertPush } from '../../lib/pushSchedule.js';
@@ -164,6 +165,8 @@ async function processUser(user, { isFriday, isLastDayOfMonth, monthKey, reminde
     if (claimedPriceSync) {
       await refreshPortfolioMarketPrices(userId).catch((error) => console.error(`Portfolio price sync failed for user ${userId}:`, error));
     }
+    // معالجة العوائد والاستحقاقات داخل PostgreSQL transaction؛ RPC idempotent وآمن عند retry.
+    await processPortfolioDaily(userId).catch((error) => console.error(`Portfolio ledger failed for user ${userId}:`, error));
     // تسجيل صورة يومية من المحفظة — بيانات فقط، لكل المستخدمين، مش مربوط بالاشتراك
     // ملحوظة: بنجيب تنبيهات حركة الأسعار الأول (بيقارن بأمس) قبل ما نكتب صورة النهاردة فوقها
     const telegramLinkedEarly = Number(userId) > 0 && Number(chatId) > 0;

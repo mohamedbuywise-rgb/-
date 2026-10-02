@@ -9,6 +9,8 @@ import { hasActiveSubscription, getSubscriptionExpiry, isInTrial, getTrialDaysLe
 import { ensureTrialStarted } from '../../lib/subscriptionAccess.js';
 import { getActiveDays } from '../../lib/activeDays.js';
 import { getPortfolio, getPortfolioDigest } from '../../lib/investments.js';
+import { getPortfolioMetrics } from '../../lib/portfolioLedger.js';
+import { getEgpPerUnit } from '../../lib/fx.js';
 
 function sumByCurrency(rows = []) {
   return rows.reduce((acc, row) => {
@@ -70,6 +72,13 @@ export default async function handler(req, res) {
     }
 
     const { dataUserId, telegramUserId, linked } = dashboardUser;
+    const { data: currencyPreference } = await supabase
+      .from('user_currency_preferences')
+      .select('currency_code')
+      .eq('telegram_user_id', dataUserId)
+      .maybeSingle();
+    const displayCurrency = String(currencyPreference?.currency_code || 'EGP').toUpperCase();
+    const displayCurrencyEgpRate = await getEgpPerUnit(displayCurrency).catch(() => 1);
     // فتح لوحة الحساب يهيّئ التجربة (7 أيام) لأي حساب لم يُسجّل تاريخ البداية بعد — مربوط بتليجرام أو حساب إيميل مستقل.
     await ensureTrialStarted(dataUserId);
     console.log(
@@ -79,6 +88,10 @@ export default async function handler(req, res) {
 
     // ---- الأيام النشطة: طلب واحد من RPC، والـ fallback لا يعطل الداشبورد ----
     const activeDays = await getActiveDays(dataUserId);
+    const portfolioMetrics = await getPortfolioMetrics(dataUserId).catch((error) => {
+      console.error('portfolio metrics lookup failed:', error);
+      return { netWorth: 0, expectedMonthlyIncome: 0, unrealizedPnl: 0, realizedYield: 0 };
+    });
 
     // ---- كل الفواتير / تفاصيل فاتورة واحدة (GET /api/dashboard-data?invoices=1 أو ?invoiceId=123) ----
     // اتحطوا هنا بدل ملف API منفصل عشان نفضل تحت حد Vercel Hobby (12 function كحد أقصى)،
@@ -407,10 +420,13 @@ export default async function handler(req, res) {
     const todayTotal = todayByCurrency.EGP || 0;
 
     // ---- توزيع صرف "الأسبوع الحالي" حسب الأيام (سبت -> جمعة)، مش الشهر كله ----
-    const weekByCategory = buildCategoryBreakdown(weekExpenses).map(({ name, amount, percent }) => ({ name, amount: Number(amount), percent: Number(percent) }));
-    const previousWeekByCategory = buildCategoryBreakdown(previousWeekExpenses).map(({ name, amount, percent }) => ({ name, amount: Number(amount), percent: Number(percent) }));
+    // نفس مصدر البيانات المستخدم في «اعرف صرفك»: EGP فقط + أيام تقويمية.
+    const weekExpensesEgp = weekExpenses.filter(isEgpRow);
+    const previousWeekExpensesEgp = previousWeekExpenses.filter(isEgpRow);
+    const weekByCategory = buildCategoryBreakdown(weekExpensesEgp).map(({ name, amount, percent }) => ({ name, amount: Number(amount), percent: Number(percent) }));
+    const previousWeekByCategory = buildCategoryBreakdown(previousWeekExpensesEgp).map(({ name, amount, percent }) => ({ name, amount: Number(amount), percent: Number(percent) }));
 
-    const weekSummary = summarizeExpensesByDay(weekExpenses);
+    const weekSummary = summarizeExpensesByDay(weekExpensesEgp);
     const weekdayTotals = [0, 0, 0, 0, 0, 0, 0];
     const weekdayCounts = [0, 0, 0, 0, 0, 0, 0];
     const weekdayCategoryTotals = [{}, {}, {}, {}, {}, {}, {}];
@@ -459,7 +475,7 @@ export default async function handler(req, res) {
     );
     const avgPerDayThisMonth = Math.round(monthTotal / daysPassedThisMonth);
     const activeSpendingDaysThisMonth = new Set(
-      monthExpenses.map((e) => new Date(e.created_at).toDateString())
+      monthExpenses.filter(isEgpRow).map((e) => dayKeyOf(e.created_at))
     ).size;
     const avgPerActiveDay = Math.round(
       monthTotal / Math.max(1, activeSpendingDaysThisMonth)
@@ -559,6 +575,8 @@ export default async function handler(req, res) {
       linked,
       telegramUserId: linked ? telegramUserId : null,
       generatedAt: new Date().toISOString(),
+      displayCurrency,
+      displayCurrencyEgpRate,
       subscription: {
         active: subActive,
         expiresAt: subExpiresAt ? subExpiresAt.toISOString() : null,
@@ -625,11 +643,13 @@ export default async function handler(req, res) {
         youOwe: youOwe.map((v) => ({ name: v.displayName, amount: Math.abs(v.net), dueDate: v.nearestDueDate || null })),
       },
       netWorth: {
-        total: netWorth,
+        total: netWorth + portfolioMetrics.netWorth,
         cash: lifetimeCash.cash,
         owedToYouTotal,
         youOweTotal,
+        portfolio: portfolioMetrics,
       },
+      portfolioMetrics,
       recurringSubscriptions,
       flow: {
         in: flowIn,

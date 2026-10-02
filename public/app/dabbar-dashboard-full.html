@@ -4589,6 +4589,17 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
                             <input id="portfolio-add-name" type="text" placeholder="اسم الأصل (مثلاً: ذهب، صناديق بنك مصر)" class="portfolio-form-input" style="flex:1.6;">
                             <input id="portfolio-add-sub" type="text" placeholder="وصف (120 جرام)" class="portfolio-form-input" style="flex:1;">
                         </div>
+                        <select id="portfolio-add-category" class="portfolio-form-input" aria-label="فئة الأصل">
+                            <option value="static_cash">كاش / عقار / سيارة</option><option value="fixed_yield">شهادة / وديعة / عائد ثابت</option><option value="market_asset">سهم / ذهب / عملة</option><option value="loan_debt">فلوس ليا / فلوس عليا</option>
+                        </select>
+                        <div id="portfolio-yield-fields" class="hidden" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem;">
+                            <input id="portfolio-add-yield" type="number" min="0" step="any" placeholder="العائد السنوي %" class="portfolio-form-input">
+                            <select id="portfolio-add-frequency" class="portfolio-form-input"><option value="monthly">شهري</option><option value="quarterly">كل 3 شهور</option><option value="annually">سنوي</option></select>
+                            <select id="portfolio-add-payout-type" class="portfolio-form-input"><option value="cash_payout">عائد كاش</option><option value="compound">عائد متراكم</option></select>
+                            <input id="portfolio-add-next-payout" type="date" class="portfolio-form-input" aria-label="تاريخ أول دفعة">
+                            <input id="portfolio-add-maturity" type="date" class="portfolio-form-input" aria-label="تاريخ الاستحقاق">
+                        </div>
+                        <div id="portfolio-yield-preview" class="hidden" style="padding:.6rem .7rem;border-radius:.75rem;background:color-mix(in srgb,var(--portfolio-accent) 10%,transparent);font-size:.67rem;font-weight:800;color:var(--portfolio-accent-strong);">العائد المتوقع: —</div>
 
                         <div class="icon-library-row" id="portfolio-icon-picker" aria-label="اختار أيقونة الأصل"></div>
 
@@ -5574,6 +5585,19 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
                         <p class="text-xs mt-0.5 account-profile-email" id="account-email">—</p>
                     </div>
                 </div>
+            </div>
+
+            <div id="account-currency-card" class="rounded-3xl border border-slate-800 bg-slate-950/60 shadow-lg p-4 sm:p-5">
+                <div class="flex items-center justify-between gap-3 mb-3">
+                    <div><h3 class="text-sm font-black text-slate-100">عملة التطبيق الأساسية</h3><p class="text-[10px] text-slate-400 mt-1">كل الإجماليات والتقارير والمحفظة ستُعرض بالعملة التي تختارها.</p></div>
+                    <span class="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-300 flex items-center justify-center text-lg">¤</span>
+                </div>
+                <div class="flex flex-col sm:flex-row gap-2">
+                    <input id="account-currency-search" list="world-currencies" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-100 outline-none focus:border-emerald-500/60" placeholder="ابحث بالكود أو اسم العملة…">
+                    <datalist id="world-currencies"><option value="AED">AED — درهم إماراتي</option><option value="AFN">AFN — أفغاني</option><option value="ALL">ALL — ليك ألباني</option><option value="AMD">AMD — درام أرميني</option><option value="ANG">ANG — جلدر هولندي</option><option value="AOA">AOA — كوانزا أنغولي</option><option value="ARS">ARS — بيزو أرجنتيني</option><option value="AUD">AUD — دولار أسترالي</option><option value="AWG">AWG — فلورين أروبي</option><option value="AZN">AZN — مانات أذربيجاني</option><option value="BAM">BAM — مارك بوسني</option><option value="BBD">BBD — دولار بربادوسي</option><option value="BDT">BDT — تاكا بنغلاديشي</option><option value="BGN">BGN — ليف بلغاري</option><option value="BHD">BHD — دينار بحريني</option><option value="BIF">BIF — فرنك بوروندي</option><option value="BMD">BMD — دولار برمودي</option><option value="BND">BND — دولار بروناي</option><option value="BOB">BOB — بوليفيانو بوليفي</option><option value="BRL">BRL — ريال برازيلي</option><option value="BSD">BSD — دولار باهامي</option><option value="BTN">BTN — نغولتروم بوتاني</option><option value="BWP">BWP — بولا بوتسواني</option><option value="BYN">BYN — روبل بيلاروسي</option><option value="BZD">BZD — دولار بليزي</option><option value="CAD">CAD — دولار كندي</option><option value="CDF">CDF — فرنك كونغولي</option><option value="CHF">CHF — فرنك سويسري</option><option value="CLP">CLP — بيزو تشيلي</option><option value="CNY">CNY — يوان صيني</option><option value="COP">COP — بيزو كولومبي</option><option value="CRC">CRC — كولون كوستاريكي</option><option value="CUP">CUP — بيزو كوبي</option><option value="CVE">CVE — إسكودو الرأس الأخضر</option><option value="CZK">CZK — كرونة تشيكية</option><option value="DJF">DJF — فرنك جيبوتي</option><option value="DKK">DKK — كرونة دنماركية</option><option value="DOP">DOP — بيزو دومينيكاني</option><option value="DZD">DZD — دينار جزائري</option><option value="EGP">EGP — جنيه مصري</option><option value="ERN">ERN — ناكفا إريتري</option><option value="ETB">ETB — بير إثيوبي</option><option value="EUR">EUR — يورو</option><option value="FJD">FJD — دولار فيجي</option><option value="FKP">FKP — جنيه جزر فوكلاند</option><option value="GBP">GBP — جنيه إسترليني</option><option value="GEL">GEL — لاري جورجي</option><option value="GHS">GHS — سيدي غاني</option><option value="GIP">GIP — جنيه جبل طارق</option><option value="GMD">GMD — دالاسي غامبي</option><option value="GNF">GNF — فرنك غيني</option><option value="GTQ">GTQ — كيتزال غواتيمالي</option><option value="GYD">GYD — دولار غياني</option><option value="HKD">HKD — دولار هونغ كونغ</option><option value="HNL">HNL — لمبيرا هندوراسي</option><option value="HRK">HRK — كونا كرواتية</option><option value="HTG">HTG — غورد هايتي</option><option value="HUF">HUF — فورنت مجري</option><option value="IDR">IDR — روبية إندونيسية</option><option value="ILS">ILS — شيكل إسرائيلي</option><option value="INR">INR — روبية هندية</option><option value="IQD">IQD — دينار عراقي</option><option value="IRR">IRR — ريال إيراني</option><option value="ISK">ISK — كرونة آيسلندية</option><option value="JMD">JMD — دولار جامايكي</option><option value="JOD">JOD — دينار أردني</option><option value="JPY">JPY — ين ياباني</option><option value="KES">KES — شلن كيني</option><option value="KGS">KGS — سوم قيرغيزي</option><option value="KHR">KHR — ريال كمبودي</option><option value="KMF">KMF — فرنك قمري</option><option value="KPW">KPW — وون كوري شمالي</option><option value="KRW">KRW — وون كوري جنوبي</option><option value="KWD">KWD — دينار كويتي</option><option value="KYD">KYD — دولار جزر كايمان</option><option value="KZT">KZT — تنغي كازاخستاني</option><option value="LAK">LAK — كيب لاوسي</option><option value="LBP">LBP — ليرة لبنانية</option><option value="LKR">LKR — روبية سريلانكية</option><option value="LRD">LRD — دولار ليبيري</option><option value="LSL">LSL — لوتي ليسوتو</option><option value="LYD">LYD — دينار ليبي</option><option value="MAD">MAD — درهم مغربي</option><option value="MDL">MDL — ليو مولدوفي</option><option value="MGA">MGA — أرياري مدغشقري</option><option value="MKD">MKD — دينار مقدوني</option><option value="MMK">MMK — كيات ميانماري</option><option value="MNT">MNT — توغروغ منغولي</option><option value="MOP">MOP — باتاكا ماكاوي</option><option value="MRU">MRU — أوقية موريتانية</option><option value="MUR">MUR — روبية موريشيوسية</option><option value="MVR">MVR — روفيه مالديفي</option><option value="MWK">MWK — كواشا ملاوي</option><option value="MXN">MXN — بيزو مكسيكي</option><option value="MYR">MYR — رينغيت ماليزي</option><option value="MZN">MZN — متكال موزمبيقي</option><option value="NAD">NAD — دولار ناميبي</option><option value="NGN">NGN — نايرا نيجيري</option><option value="NIO">NIO — كوردوبا نيكاراغوي</option><option value="NOK">NOK — كرونة نرويجية</option><option value="NPR">NPR — روبية نيبالية</option><option value="NZD">NZD — دولار نيوزيلندي</option><option value="OMR">OMR — ريال عماني</option><option value="PAB">PAB — بالبوا بنمي</option><option value="PEN">PEN — سول بيروفي</option><option value="PGK">PGK — كينا بابوا</option><option value="PHP">PHP — بيزو فلبيني</option><option value="PKR">PKR — روبية باكستانية</option><option value="PLN">PLN — زلوتي بولندي</option><option value="PYG">PYG — غواراني باراغواي</option><option value="QAR">QAR — ريال قطري</option><option value="RON">RON — ليو روماني</option><option value="RSD">RSD — دينار صربي</option><option value="RUB">RUB — روبل روسي</option><option value="RWF">RWF — فرنك رواندي</option><option value="SAR">SAR — ريال سعودي</option><option value="SBD">SBD — دولار جزر سليمان</option><option value="SCR">SCR — روبية سيشيلية</option><option value="SDG">SDG — جنيه سوداني</option><option value="SEK">SEK — كرونة سويدية</option><option value="SGD">SGD — دولار سنغافوري</option><option value="SHP">SHP — جنيه سانت هيلينا</option><option value="SLE">SLE — ليون سيراليوني</option><option value="SOS">SOS — شلن صومالي</option><option value="SRD">SRD — دولار سورينامي</option><option value="SSP">SSP — جنيه جنوب سوداني</option><option value="STN">STN — دوبرا ساو تومي</option><option value="SYP">SYP — ليرة سورية</option><option value="SZL">SZL — ليلانجيني إسواتيني</option><option value="THB">THB — بات تايلاندي</option><option value="TJS">TJS — سوموني طاجيكستاني</option><option value="TMT">TMT — مانات تركماني</option><option value="TND">TND — دينار تونسي</option><option value="TOP">TOP — بانغا تونغي</option><option value="TRY">TRY — ليرة تركية</option><option value="TTD">TTD — دولار ترينيداد</option><option value="TWD">TWD — دولار تايواني</option><option value="TZS">TZS — شلن تنزاني</option><option value="UAH">UAH — هريفنيا أوكرانية</option><option value="UGX">UGX — شلن أوغندي</option><option value="USD">USD — دولار أمريكي</option><option value="UYU">UYU — بيزو أوروغواي</option><option value="UZS">UZS — سوم أوزبكي</option><option value="VES">VES — بوليفار فنزويلي</option><option value="VND">VND — دونغ فيتنامي</option><option value="VUV">VUV — فاتو فانواتو</option><option value="WST">WST — تالا ساموا</option><option value="XAF">XAF — فرنك وسط أفريقيا</option><option value="XCD">XCD — دولار شرق الكاريبي</option><option value="XOF">XOF — فرنك غرب أفريقيا</option><option value="XPF">XPF — فرنك المحيط الهادئ</option><option value="YER">YER — ريال يمني</option><option value="ZAR">ZAR — راند جنوب أفريقي</option><option value="ZMW">ZMW — كواشا زامبي</option><option value="ZWL">ZWL — دولار زيمبابوي</option></datalist>
+                    <button id="account-currency-save" type="button" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs rounded-xl px-4 py-2.5">حفظ العملة</button>
+                </div>
+                <p id="account-currency-status" class="text-[10px] text-slate-500 mt-2">العملة الحالية: جنيه مصري (EGP)</p>
             </div>
 
             <details id="honor-board-card" class="hidden honor-loyalty-section">
@@ -6720,7 +6744,7 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
         }
         const CURRENCY_LABELS = { EGP: 'ج.م', USD: 'دولار', EUR: 'يورو', GBP: 'جنيه إسترليني', SAR: 'ريال سعودي', AED: 'درهم', KWD: 'دينار كويتي', QAR: 'ريال قطري' };
         const currencyCode = (code) => String(code || 'EGP').toUpperCase();
-        const fmt = (n, code = 'EGP') => `${Number(n).toLocaleString('ar-EG')} ${CURRENCY_LABELS[currencyCode(code)] || currencyCode(code)}`;
+        const fmt = (n, code = 'EGP') => { const source = currencyCode(code); const target = window.__displayCurrency || 'EGP'; const rate = Number(window.__displayCurrencyEgpRate || 1); const value = source === 'EGP' && target !== 'EGP' && rate > 0 ? Number(n) / rate : Number(n); const label = source === 'EGP' ? (CURRENCY_LABELS[target] || target) : (CURRENCY_LABELS[source] || source); return `${value.toLocaleString('ar-EG', { maximumFractionDigits: 2 })} ${label}`; };
         const typeLabel = (type) => ({ expense: 'مصروف', income: 'دخل', purchase: 'شراء', asset: 'أصل', transfer: 'تحويل', refund: 'استرداد', debt: 'دين', invoice: 'فاتورة' }[type] || 'عملية مالية');
 
         // ============ الوضع الفاتح/الغامق — بيتخزن في localStorage على جهاز المستخدم ============
@@ -8623,6 +8647,8 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
             const dashboardError = document.getElementById('dashboard-load-error');
             if (dashboardError) dashboardError.classList.add('hidden');
 
+            window.__displayCurrency = data.displayCurrency || window.__displayCurrency || 'EGP';
+            window.__displayCurrencyEgpRate = Number(data.displayCurrencyEgpRate || 1);
             renderDashboardData(data, servedFromCache);
             if (typeof __lastDashboardLoadAt !== 'undefined') __lastDashboardLoadAt = Date.now();
 
@@ -12163,6 +12189,12 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
             const amountInput = document.getElementById('portfolio-add-amount');
             const errEl = document.getElementById('portfolio-add-error');
             if (!form || !addBtn) return;
+            const categoryInput = document.getElementById('portfolio-add-category');
+            const yieldInput = document.getElementById('portfolio-add-yield');
+            const frequencyInput = document.getElementById('portfolio-add-frequency');
+            const payoutTypeInput = document.getElementById('portfolio-add-payout-type');
+            const nextPayoutInput = document.getElementById('portfolio-add-next-payout');
+            const maturityInput = document.getElementById('portfolio-add-maturity');
 
             portfolioEditingId = asset?.id || null;
             titleEl.textContent = asset ? 'تعديل قيمة الأصل' : 'إضافة أصل جديد';
@@ -12170,6 +12202,12 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
             nameInput.value = asset?.name || '';
             subInput.value = asset?.sub_label || '';
             amountInput.value = asset?.amount ?? '';
+            if (categoryInput) categoryInput.value = asset?.category || 'static_cash';
+            if (yieldInput) yieldInput.value = asset?.yield_rate ?? '';
+            if (frequencyInput) frequencyInput.value = asset?.payout_frequency || 'monthly';
+            if (payoutTypeInput) payoutTypeInput.value = asset?.payout_type || 'cash_payout';
+            if (nextPayoutInput) nextPayoutInput.value = asset?.next_payout_date || '';
+            if (maturityInput) maturityInput.value = asset?.maturity_date || '';
             const quantityInput = document.getElementById('portfolio-add-quantity');
             const unitInput = document.getElementById('portfolio-add-unit');
             if (quantityInput) quantityInput.value = asset?.quantity ?? '';
@@ -12210,6 +12248,10 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
             if (nameInput) nameInput.value = '';
             if (subInput) subInput.value = '';
             if (amountInput) amountInput.value = '';
+            if (document.getElementById('portfolio-add-category')) document.getElementById('portfolio-add-category').value = 'static_cash';
+            if (document.getElementById('portfolio-add-yield')) document.getElementById('portfolio-add-yield').value = '';
+            if (document.getElementById('portfolio-add-next-payout')) document.getElementById('portfolio-add-next-payout').value = '';
+            if (document.getElementById('portfolio-add-maturity')) document.getElementById('portfolio-add-maturity').value = '';
             if (quantityInput) quantityInput.value = '';
             if (unitInput) unitInput.value = '';
             if (alertInput) alertInput.value = '';
@@ -12229,6 +12271,20 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
 
             addBtn.addEventListener('click', () => openPortfolioForm());
             cancelBtn.addEventListener('click', resetPortfolioForm);
+            const categoryInput = document.getElementById('portfolio-add-category');
+            const yieldFields = document.getElementById('portfolio-yield-fields');
+            const yieldPreview = document.getElementById('portfolio-yield-preview');
+            const syncYieldFields = () => {
+                const fixed = categoryInput?.value === 'fixed_yield';
+                yieldFields?.classList.toggle('hidden', !fixed);
+                yieldPreview?.classList.toggle('hidden', !fixed);
+                const amount = Number(document.getElementById('portfolio-add-amount')?.value || 0);
+                const rate = Number(document.getElementById('portfolio-add-yield')?.value || 0);
+                const months = { monthly: 1, quarterly: 3, annually: 12 }[document.getElementById('portfolio-add-frequency')?.value] || 1;
+                if (yieldPreview) yieldPreview.textContent = fixed && amount > 0 && rate > 0 ? `العائد المتوقع: ${(amount * rate / 100 * months / 12).toLocaleString('ar-EG')} ج.م` : 'العائد المتوقع: —';
+            };
+            [categoryInput, document.getElementById('portfolio-add-yield'), document.getElementById('portfolio-add-frequency'), document.getElementById('portfolio-add-amount')].forEach((el) => el?.addEventListener('input', syncYieldFields));
+            categoryInput?.addEventListener('change', syncYieldFields);
             confirmBtn.addEventListener('click', async () => {
                 errEl.classList.add('hidden');
                 const name = nameInput.value.trim();
@@ -12243,6 +12299,12 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
                 const costInput = document.getElementById('portfolio-add-cost');
                 const costBasis = costInput && !costInput.classList.contains('hidden') && costInput.value !== '' ? Number(costInput.value) : null;
                 const selectedIcon = document.getElementById('portfolio-icon-picker')?.dataset.selected;
+                const category = document.getElementById('portfolio-add-category')?.value || 'static_cash';
+                const yieldRate = Number(document.getElementById('portfolio-add-yield')?.value || 0) || null;
+                const payoutFrequency = document.getElementById('portfolio-add-frequency')?.value || null;
+                const payoutType = document.getElementById('portfolio-add-payout-type')?.value || null;
+                const nextPayoutDate = document.getElementById('portfolio-add-next-payout')?.value || null;
+                const maturityDate = document.getElementById('portfolio-add-maturity')?.value || null;
                 if (!name || !amount || amount <= 0) {
                     errEl.textContent = 'محتاج اسم الأصل وقيمة صحيحة أكبر من صفر.';
                     errEl.classList.remove('hidden');
@@ -12251,7 +12313,7 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
                 confirmBtn.disabled = true;
                 try {
                     const isEditing = Boolean(portfolioEditingId);
-                    const payload = { name, subLabel, amount, alertThresholdPct, quantity, unit };
+                    const payload = { name, subLabel, amount, alertThresholdPct, quantity, unit, category, yieldRate, payoutFrequency, payoutType, nextPayoutDate, maturityDate };
                     if (!isEditing && costBasis) payload.costBasis = costBasis; // قيمة الشراء بتتبعت مرة واحدة بس وقت الإضافة الأولى
                     if (isEditing) payload.assetId = portfolioEditingId;
                     await asstApi(isEditing ? 'portfolio_asset_update' : 'portfolio_asset_add', payload);
@@ -14904,6 +14966,20 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
                 label.textContent = originalLabel;
             }
         });
+
+        // ============ عملة الحساب الأساسية — محفوظة على مستوى المستخدم وتنعكس على كل الواجهات ============
+        const ACCOUNT_CURRENCY_NAMES = { EGP: 'جنيه مصري', USD: 'دولار أمريكي', EUR: 'يورو', GBP: 'جنيه إسترليني', SAR: 'ريال سعودي', AED: 'درهم إماراتي', KWD: 'دينار كويتي', QAR: 'ريال قطري' };
+        async function loadAccountCurrencyPreference() {
+            const input = document.getElementById('account-currency-search');
+            const status = document.getElementById('account-currency-status');
+            try { const res = await fetch('/api?route=currency-preference', { headers: { Authorization: `Bearer ${accessToken}` }, cache: 'no-store' }); const body = await res.json(); if (!res.ok) throw new Error(body.error); const code = currencyCode(body.currencyCode); if (input) input.value = code; if (status) status.textContent = `العملة الحالية: ${ACCOUNT_CURRENCY_NAMES[code] || code} (${code})`; window.__displayCurrency = code; } catch (e) { console.warn('currency preference load failed', e); }
+        }
+        function bindAccountCurrencyPreference() {
+            const input = document.getElementById('account-currency-search'); const save = document.getElementById('account-currency-save'); const status = document.getElementById('account-currency-status'); if (!input || !save || save.dataset.bound) return; save.dataset.bound = '1';
+            save.addEventListener('click', async () => { const code = currencyCode(input.value); if (!/^[A-Z]{3}$/.test(code)) { if (status) status.textContent = 'اختار عملة صحيحة من القائمة.'; return; } save.disabled = true; try { const res = await fetch('/api?route=currency-preference', { method: 'PUT', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({ currencyCode: code }) }); const body = await res.json(); if (!res.ok) throw new Error(body.error); if (status) status.textContent = `تم الحفظ — كل النظام سيظهر بـ ${ACCOUNT_CURRENCY_NAMES[code] || code} (${code})`; window.__displayCurrency = code; await loadDashboard(); } catch (e) { if (status) status.textContent = e.message || 'تعذر حفظ العملة.'; } finally { save.disabled = false; } });
+            loadAccountCurrencyPreference();
+        }
+        bindAccountCurrencyPreference();
 
         // ============ تاب "حسابي": بيانات البروفايل + حالة ربط تليجرام ============
         function openSubscriptionCollapse() { const d = document.getElementById('account-sub-collapse'); if (d) { d.classList.remove('hidden'); d.open = true; } }

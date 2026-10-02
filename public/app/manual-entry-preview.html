@@ -45,7 +45,7 @@
       <label class="label" for="description">الوصف</label>
       <input id="description" type="text" placeholder="مثال: غدا، مواصلات، مرتب">
       <div class="row">
-        <div><label class="label" for="category">الفئة</label><select id="category"><option>أكل</option><option>مواصلات</option><option>فواتير</option><option>تسوق</option><option>ترفيه</option><option>صحة</option><option>تعليم</option><option>منزل وأثاث</option><option>ملابس</option><option>اشتراكات</option><option>هدايا وتبرعات</option><option>شخصي وعناية</option><option value="other">أخرى</option></select><input id="customCategory" class="hidden" type="text" placeholder="اكتب اسم الفئة اختياريًا" style="margin-top:8px"></div>
+        <div><label class="label" for="category">الفئة</label><select id="category"><option>أكل</option><option>مشروبات</option><option>بقالة وسوبر ماركت</option><option>مواصلات</option><option>بنزين وسيارة</option><option>فواتير</option><option>اتصالات وإنترنت</option><option>تسوق</option><option>ترفيه</option><option>صحة</option><option>تعليم</option><option>منزل وأثاث</option><option>ملابس</option><option>اشتراكات</option><option>هدايا وتبرعات</option><option>شخصي وعناية</option><option value="other">أخرى</option></select><input id="customCategory" class="hidden" type="text" placeholder="اكتب اسم الفئة اختياريًا" style="margin-top:8px"></div>
         <div><label class="label" for="date">التاريخ</label><input id="date" type="date"></div>
       </div>
       <button class="button" id="save">حفظ العملية</button>
@@ -61,7 +61,7 @@
   <script>
     const $ = (id) => document.getElementById(id);
     let type = 'expense';
-    const icons = { 'أكل':'🍔','مواصلات':'🚕','فواتير':'🧾','تسوق':'🛍️','ترفيه':'🎬','صحة':'💊','تعليم':'📚','منزل وأثاث':'🏠','ملابس':'👕','اشتراكات':'🔁','هدايا وتبرعات':'🎁','شخصي وعناية':'🧴','أخرى':'📌' };
+    const icons = { 'أكل':'🍔','مواصلات':'🚕','فواتير':'🧾','تسوق':'🛍️','ترفيه':'🎬','صحة':'💊','تعليم':'📚','منزل وأثاث':'🏠','ملابس':'👕','اشتراكات':'🔁','هدايا وتبرعات':'🎁','شخصي وعناية':'🧴','مشروبات':'☕','بقالة وسوبر ماركت':'🛒','بنزين وسيارة':'⛽','اتصالات وإنترنت':'📱','أخرى':'📌' };
     $('date').value = new Date().toISOString().slice(0,10);
     $('category').addEventListener('change', () => { $('customCategory').classList.toggle('hidden', $('category').value !== 'other'); if ($('category').value === 'other') $('customCategory').focus(); });
     document.querySelectorAll('.type').forEach((button) => button.addEventListener('click', () => { document.querySelectorAll('.type').forEach((b) => b.classList.remove('active')); button.classList.add('active'); type = button.dataset.type; }));

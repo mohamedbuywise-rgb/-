@@ -42,7 +42,7 @@ if (!token) error = "اكتب توكن الربط في Parameter";
 else { try { data = await load(); if (!data.ok) { error = data.error || "تعذر التحميل"; data = null; } } catch (e) { error = "مفيش اتصال"; } }
 
 const head = w.addStack(); head.centerAlignContent();
-const logo = head.addStack(); logo.size = new Size(24, 24); logo.cornerRadius = 8; logo.backgroundColor = new Color("#0553E8"); logo.centerAlignContent();
+const logo = head.addStack(); logo.size = new Size(24, 24); logo.cornerRadius = 8; logo.backgroundColor = new Color("#18C379"); logo.centerAlignContent();
 label(logo, "D", Color.white(), 14, true);
 head.addSpacer(8); label(head, "دبّر", C.text, 15, true); head.addSpacer(8);
 label(head, data ? data.month.label : "", C.muted, 11, false); head.addSpacer();

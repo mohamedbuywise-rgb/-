@@ -18,6 +18,7 @@
 
 import { supabase } from '../../lib/supabaseClient.js';
 import { CATEGORIES } from '../../lib/config.js';
+import { resolveCategory } from '../../lib/categoryHints.js';
 import { classifyBankSms } from '../../lib/groq.js';
 import { recordExpense } from '../../lib/expenses.js';
 import { recordFinancialEvent } from '../../lib/financialEvents.js';
@@ -167,7 +168,10 @@ function validateAiItems(aiItems, rawText, parsed) {
 
     let currency = String(raw.currency_code || raw.currency || parsed.hints?.currency || 'EGP').trim().toUpperCase();
     if (!/^[A-Z]{3}$/.test(currency)) currency = parsed.hints?.currency || 'EGP';
-    const category = CATEGORIES.includes(raw.category) ? raw.category : 'تسوق';
+    const isSpend = ['expense', 'purchase'].includes(candidate.type);
+    const category = isSpend
+      ? resolveCategory(raw.category, `${raw.item || ''} ${raw.note || ''} ${raw.counterparty || ''}`, { fallback: 'تسوق' })
+      : (CATEGORIES.includes(raw.category) ? raw.category : 'تسوق');
     const normalized = {
       type: candidate.type,
       amount,
@@ -329,7 +333,9 @@ export default async function handler(req, res) {
 
     for (const item of items) {
       const type = ['purchase', 'asset'].includes(item.type) ? 'expense' : item.type;
-      const category = CATEGORIES.includes(item.category) ? item.category : 'تسوق';
+      const category = type === 'expense'
+        ? resolveCategory(item.category, `${item.item || ''} ${item.note || ''}`, { fallback: 'تسوق' })
+        : (CATEGORIES.includes(item.category) ? item.category : 'تسوق');
 
       if (type === 'expense') {
         await recordExpense({ ...item, type, category }, rawText, telegramUserId, chatId, `\n\n🏦 اتسجلت أوتوماتيك من رسالة ${bankMatch.label}${item.account_last4 ? ` (حساب ••${item.account_last4})` : ''}`, { ...sourceMeta, account_last4: item.account_last4 || '' });

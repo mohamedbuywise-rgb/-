@@ -175,7 +175,7 @@ export default async function handler(req, res) {
     const prevRange = getMonthRange(-1);
     const historyOffsets = [-1, -2, -3, -4].map((offset) => ({ offset, range: getMonthRange(offset) }));
 
-    const DISCRETIONARY_CATEGORIES = ['تسوق', 'ترفيه', 'اشتراكات', 'هدايا وتبرعات', 'شخصي وعناية'];
+    const DISCRETIONARY_CATEGORIES = ['تسوق', 'ترفيه', 'اشتراكات', 'هدايا وتبرعات', 'شخصي وعناية', 'مشروبات'];
     const AR_DAY_NAMES = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
 
     // بتاخد المصاريف جاهزة (expenses) بدل ما تجيبها بنفسها من قاعدة البيانات، عشان "الأسبوعي"

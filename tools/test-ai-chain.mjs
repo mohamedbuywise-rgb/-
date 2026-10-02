@@ -79,13 +79,13 @@ check('كله فشل → unknown بأمان', out[0]?.type === 'unknown', JSON.s
 // (الـ cooldown مشترك بين النص والرؤية لأن الليمت على مستوى الموديل — فبنفضّيه قبل اختبار الرؤية)
 clearCooldowns();
 // 6) رؤية: الموديل الأول 404 → التاني يقرأ إثبات التحويل
-const ok = JSON.stringify({ readable: true, reference: 'ABC123', amount: 199, currency: 'EGP', confidence: 0.9 });
+const ok = JSON.stringify({ readable: true, reference: 'ABC123', amount: 129, currency: 'EGP', confidence: 0.9 });
 script = [
   { match: groqFor(GROQ_VISION_MODELS[0]), status: 404, json: { error: { code: 'model_not_found' } } },
   { match: groqFor(GROQ_VISION_MODELS[1]), json: chat(ok) },
 ];
 const proof = await extractSubscriptionPaymentProof('aGVsbG8=');
-check('رؤية: الأول 404 → التاني يقرأ', proof.readable && proof.reference === 'ABC123' && proof.amount === 199, JSON.stringify(proof));
+check('رؤية: الأول 404 → التاني يقرأ', proof.readable && proof.reference === 'ABC123' && proof.amount === 129, JSON.stringify(proof));
 
 clearCooldowns();
 // 7) صوت: Whisper v3 خلص الليمت → Turbo (مع إيقاف Gemini عشان نختبر Groq بس)

@@ -20,6 +20,7 @@ import { getDashboardUserFromRequest } from '../../lib/dashboardAuth.js';
 import { extractTransactionsFromRows } from '../../lib/groq.js';
 import { checkStatementUsage, refundStatementUsage } from '../../lib/rateLimits.js';
 import { BANK_STATEMENT_MAX_PDF_PAGES, BANK_STATEMENT_MAX_LINES, BANK_STATEMENT_LINES_PER_AI_CALL } from '../../lib/config.js';
+import { resolveCategory } from '../../lib/categoryHints.js';
 import { getFeatureAccess, subscriptionRequiredResponse } from '../../lib/subscriptionAccess.js';
 import crypto from 'crypto';
 
@@ -148,7 +149,7 @@ export default async function handler(req, res) {
       if (await isLikelyDuplicate(dataUserId, t)) { duplicateCount += 1; continue; }
 
       const currency_code = String(t.currency_code || 'EGP').trim().toUpperCase().slice(0, 3) || 'EGP';
-      const category = t.category || 'مصروف عام';
+      const category = t.type === 'income' ? (t.category || 'مصروف عام') : resolveCategory(t.category, `${t.note || ''} ${t.item || ''}`, { fallback: 'مصروف عام' });
       const import_key = importKeyFor(dataUserId, t);
       const created_at = t.date ? new Date(t.date) : new Date();
       const row = {

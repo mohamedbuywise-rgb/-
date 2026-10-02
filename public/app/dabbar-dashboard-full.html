@@ -2661,8 +2661,26 @@
         html[data-theme="light"] .debts-tab-btn { color: #64748b !important; }
         html[data-theme="light"] .debts-tab-btn.active { background: #10b981 !important; color: #0f172a !important; }
         html[data-theme="light"] #debts-active-search, html[data-theme="light"] #debts-statement-search { background: #f8fafc !important; color: #1e293b !important; border-color: #cbd5e1 !important; }
-        .debt-settlement-card { background: linear-gradient(90deg, rgba(16,185,129,.14), rgba(16,185,129,.04)); }
-        html[data-theme="light"] .debt-settlement-card { background: linear-gradient(90deg, #ecfdf5, #f8fafc) !important; }
+        /* ===== كارت رسالة التصفية (احترافي — ليلي ونهاري) ===== */
+        #debts-settlement-list { --st-bg1: rgba(16,185,129,.16); --st-bg2: rgba(15,23,42,.55); --st-line: rgba(52,211,153,.32); --st-ink: #ecfdf5; --st-mut: #94a3b8; --st-chip-bg: rgba(16,185,129,.16); --st-chip-ink: #6ee7b7; --st-btn-bg: rgba(16,185,129,.14); --st-btn-ink: #6ee7b7; --st-ring: rgba(16,185,129,.18); --st-shadow: 0 14px 30px -18px rgba(0,0,0,.65); }
+        html[data-theme="light"] #debts-settlement-list { --st-bg1: #ecfdf5; --st-bg2: #ffffff; --st-line: #a7f3d0; --st-ink: #0f3d2e; --st-mut: #5b6b64; --st-chip-bg: #d1fae5; --st-chip-ink: #047857; --st-btn-bg: #ecfdf5; --st-btn-ink: #047857; --st-ring: #d1fae5; --st-shadow: 0 12px 26px -18px rgba(5,150,105,.45); }
+        .debt-settlement-card { position: relative; display: flex; gap: 12px; align-items: flex-start; padding: 14px 14px 12px; border: 1px solid var(--st-line); border-radius: 20px; background: linear-gradient(135deg, var(--st-bg1), var(--st-bg2)); box-shadow: var(--st-shadow); overflow: hidden; }
+        .debt-settlement-card::before { content: ""; position: absolute; inset-block: 0; inset-inline-start: 0; width: 4px; background: linear-gradient(180deg, #34d399, #059669); }
+        .st-ico { flex: 0 0 38px; width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; background: linear-gradient(145deg, #10b981, #059669); color: #fff; box-shadow: 0 0 0 5px var(--st-ring); }
+        .st-ico svg { width: 20px; height: 20px; }
+        .st-body { flex: 1; min-width: 0; }
+        .st-top { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .st-title { font-family: 'Cairo', sans-serif; font-weight: 900; font-size: 13px; color: var(--st-ink); }
+        .st-chip { font-size: 9.5px; font-weight: 800; padding: 2px 8px; border-radius: 999px; background: var(--st-chip-bg); color: var(--st-chip-ink); }
+        .st-text { margin-top: 5px; font-size: 11.5px; line-height: 1.8; color: var(--st-mut); }
+        .st-text strong { color: var(--st-ink); font-weight: 800; }
+        .st-meta { margin-top: 6px; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+        .st-date { font-size: 10px; font-weight: 700; color: var(--st-mut); }
+        .st-open { font-family: 'Cairo', sans-serif; font-size: 10.5px; font-weight: 800; padding: 6px 12px; border-radius: 10px; border: 1px solid var(--st-line); background: var(--st-btn-bg); color: var(--st-btn-ink); cursor: pointer; }
+        .st-open:active { transform: scale(.97); }
+        .st-x { position: absolute; top: 8px; inset-inline-end: 10px; width: 24px; height: 24px; border-radius: 8px; border: 0; background: transparent; color: var(--st-mut); font-size: 17px; line-height: 1; cursor: pointer; }
+        .st-empty { text-align: center; padding: 26px 12px; border: 1px dashed var(--st-line); border-radius: 20px; color: var(--st-mut); font-size: 12px; font-weight: 700; }
+        .st-empty b { display: block; font-size: 22px; margin-bottom: 6px; }
         .debt-history-badge.active { background: rgba(16,185,129,.15); color: #34d399; }
         .debt-history-badge.settled { background: rgba(51,65,85,.4); color: #94a3b8; }
         html[data-theme="light"] .debt-history-badge.active { background: #d1fae5 !important; color: #047857 !important; }
@@ -4362,8 +4380,12 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
                     <div id="quick-manual-category-block"><p class="mb-1 text-[10px] font-bold" style="color:var(--pm-muted);">الفئة</p>
                         <div id="quick-manual-chips-expense" class="flex flex-wrap gap-1.5">
                             <button type="button" class="quick-manual-chip active" data-category="أكل" style="border-color:var(--pm-gold);background:linear-gradient(135deg,rgba(8,122,89,0.3),var(--pm-surface-hi));background:linear-gradient(135deg,color-mix(in srgb,var(--pm-gold-bright) 30%,transparent),var(--pm-surface-hi));color:var(--pm-ink);">🍔 أكل</button>
+                            <button type="button" class="quick-manual-chip" data-category="مشروبات">☕ مشروبات</button>
+                            <button type="button" class="quick-manual-chip" data-category="بقالة وسوبر ماركت">🛒 بقالة</button>
                             <button type="button" class="quick-manual-chip" data-category="مواصلات">🚗 مواصلات</button>
+                            <button type="button" class="quick-manual-chip" data-category="بنزين وسيارة">⛽ بنزين</button>
                             <button type="button" class="quick-manual-chip" data-category="فواتير">🧾 فواتير</button>
+                            <button type="button" class="quick-manual-chip" data-category="اتصالات وإنترنت">📱 اتصالات</button>
                             <button type="button" class="quick-manual-chip" data-category="تسوق">🛍️ تسوق</button>
                             <button type="button" class="quick-manual-chip" data-category="ترفيه">🎬 ترفيه</button>
                             <button type="button" class="quick-manual-chip" data-category="صحة">💊 صحة</button>
@@ -4392,6 +4414,7 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
                             <button type="button" id="quick-manual-dir-lent" data-dir="lent" class="quick-manual-dir active rounded-xl border px-2 py-2 text-[11px] font-black" style="border-color:var(--pm-gold-bright);background:rgba(8,122,89,0.14);background:color-mix(in srgb,var(--pm-gold-bright) 14%,transparent);color:var(--pm-ink);">📤 ليك عنده (سلّفته)</button>
                             <button type="button" id="quick-manual-dir-borrowed" data-dir="borrowed" class="quick-manual-dir rounded-xl border px-2 py-2 text-[11px] font-black" style="border-color:var(--pm-hairline);color:var(--pm-muted);">📥 عليك له (استلفت منه)</button>
                         </div>
+                        <div id="quick-manual-settle-note" class="hidden rounded-xl border px-3 py-2 text-[11px] font-black" style="border-color:var(--pm-hairline);background:var(--pm-surface-soft);color:var(--pm-ink);"></div>
                     </div>
                     <style>
                         .quick-manual-chip { border-radius:10px; border:1px solid var(--pm-hairline); padding:7px 10px; font-size:11px; font-weight:800; color:var(--pm-ink-dim); background:var(--pm-surface-soft); }
@@ -4756,7 +4779,8 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
                 <div id="period-summary-body" class="ps-body" hidden>
                     <div class="ps-tabs" role="group" aria-label="اختيار مدة سريعة">
                         <button type="button" class="period-preset ps-active" data-days="4">آخر 4 أيام</button>
-                        <button type="button" class="period-preset" data-days="7">أسبوع</button>
+                        <button type="button" class="period-preset" data-days="week">هذا الأسبوع</button>
+                        <button type="button" class="period-preset" data-days="7">آخر 7 أيام</button>
                         <button type="button" class="period-preset" data-days="30">30 يوم</button>
                     </div>
                     <div class="ps-dates">
@@ -5074,7 +5098,7 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
                         <span class="text-xs text-emerald-400 font-black" id="weekday-chart-total">—</span>
                     </div>
                 </div>
-                <p class="text-[9px] text-slate-600 font-semibold mb-1.5">🔄 بيتحدث كل أسبوع</p>
+                <p class="text-[9px] text-slate-600 font-semibold mb-1.5">🔄 الأسبوع من السبت للجمعة، جنيه مصري بس — نفس أرقام "اعرف صرفك" لما تختار "هذا الأسبوع"</p>
                 <p class="text-[10px] text-slate-500 font-semibold mb-3">👆 اضغط على أي عمود تشوف عدد العمليات</p>
                 <div class="flex items-end justify-between gap-2 h-32 px-2 pt-4 border-b border-slate-800" id="weekday-chart-container"></div>
                 <div class="flex justify-between text-[10px] text-slate-400 mt-2 px-1" id="weekday-labels-row">
@@ -6066,7 +6090,7 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
                     <div class="flex items-start gap-2">
                         <span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 flex items-center justify-center font-black text-[10px] shrink-0 mt-0.5">1</span>
                         <div class="flex-1">
-                            <p class="text-slate-300 mb-1.5">حوّل <b id="account-sub-price" class="text-emerald-400">100 ج.م</b> عن طريق إنستا باي على الرقم:</p>
+                            <p class="text-slate-300 mb-1.5">حوّل <b id="account-sub-price" class="text-emerald-400">129 ج.م</b> عن طريق إنستا باي على الرقم:</p>
                             <button type="button" id="account-sub-copy-btn" class="w-full flex items-center justify-between gap-2 bg-slate-900 border border-slate-800 rounded-lg px-3 py-2.5">
                                 <span id="account-sub-instapay" class="font-mono text-sm text-slate-100 select-all" dir="ltr">—</span>
                                 <span id="account-sub-copy-label" class="text-[10px] font-bold text-emerald-400 shrink-0">نسخ 📋</span>
@@ -6636,7 +6660,7 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
             setTimeout(() => document.getElementById(btnId)?.click(), 150);
         }
 
-        const CATEGORY_EMOJI = { 'أكل':'🍔', 'مواصلات':'🚕', 'فواتير':'🧾', 'تسوق':'🛍️', 'ترفيه':'🎬', 'صحة':'💊', 'تعليم':'📚', 'منزل وأثاث':'🏠', 'ملابس':'👕', 'اشتراكات':'🔁', 'هدايا وتبرعات':'🎁', 'شخصي وعناية':'🧴' };
+        const CATEGORY_EMOJI = { 'أكل':'🍔', 'مواصلات':'🚕', 'فواتير':'🧾', 'تسوق':'🛍️', 'ترفيه':'🎬', 'صحة':'💊', 'تعليم':'📚', 'منزل وأثاث':'🏠', 'ملابس':'👕', 'اشتراكات':'🔁', 'هدايا وتبرعات':'🎁', 'شخصي وعناية':'🧴', 'مشروبات':'☕', 'بقالة وسوبر ماركت':'🛒', 'بنزين وسيارة':'⛽', 'اتصالات وإنترنت':'📱' };
         const CATEGORY_EMOJI_RULES = [
             [/سفر|طيران|طيارة|رحلة|سياحة|مطار/, '✈️'],
             [/قهوة|كافيه|مشروب|عصير/, '☕'],
@@ -6662,9 +6686,9 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
             return match ? match[1] : '🧩';
         }
         const MONTH_NAMES = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
-        const CATEGORY_BAR_COLOR = { 'أكل':'bg-rose-400', 'مواصلات':'bg-teal-400', 'فواتير':'bg-amber-400', 'تسوق':'bg-violet-400', 'ترفيه':'bg-pink-400', 'صحة':'bg-emerald-400', 'تعليم':'bg-blue-400', 'منزل وأثاث':'bg-orange-400', 'ملابس':'bg-fuchsia-400', 'اشتراكات':'bg-indigo-400', 'هدايا وتبرعات':'bg-amber-500', 'شخصي وعناية':'bg-cyan-400' };
+        const CATEGORY_BAR_COLOR = { 'أكل':'bg-rose-400', 'مواصلات':'bg-teal-400', 'فواتير':'bg-amber-400', 'تسوق':'bg-violet-400', 'ترفيه':'bg-pink-400', 'صحة':'bg-emerald-400', 'تعليم':'bg-blue-400', 'منزل وأثاث':'bg-orange-400', 'ملابس':'bg-fuchsia-400', 'اشتراكات':'bg-indigo-400', 'هدايا وتبرعات':'bg-amber-500', 'شخصي وعناية':'bg-cyan-400', 'مشروبات':'bg-yellow-600', 'بقالة وسوبر ماركت':'bg-lime-400', 'بنزين وسيارة':'bg-red-400', 'اتصالات وإنترنت':'bg-sky-400' };
         // نفس الألوان بالظبط بس Hex عشان نرسم بيها دائرة الفئات (conic-gradient بيحتاج قيم حقيقية مش أسماء كلاسات Tailwind)
-        const CATEGORY_HEX = { 'أكل':'#fb7185', 'مواصلات':'#2dd4bf', 'فواتير':'#fbbf24', 'تسوق':'#a78bfa', 'ترفيه':'#f472b6', 'صحة':'#34d399', 'تعليم':'#60a5fa', 'منزل وأثاث':'#fb923c', 'ملابس':'#e879f9', 'اشتراكات':'#818cf8', 'هدايا وتبرعات':'#f59e0b', 'شخصي وعناية':'#22d3ee' };
+        const CATEGORY_HEX = { 'أكل':'#fb7185', 'مواصلات':'#2dd4bf', 'فواتير':'#fbbf24', 'تسوق':'#a78bfa', 'ترفيه':'#f472b6', 'صحة':'#34d399', 'تعليم':'#60a5fa', 'منزل وأثاث':'#fb923c', 'ملابس':'#e879f9', 'اشتراكات':'#818cf8', 'هدايا وتبرعات':'#f59e0b', 'شخصي وعناية':'#22d3ee', 'مشروبات':'#ca8a04', 'بقالة وسوبر ماركت':'#a3e635', 'بنزين وسيارة':'#f87171', 'اتصالات وإنترنت':'#38bdf8' };
         const CATEGORY_HEX_FALLBACK = '#94a3b8';
 
         const CATEGORY_QUICK_TIPS = {
@@ -6680,6 +6704,10 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
             'اشتراكات': ['راجع اشتراكاتك كل شهر وخلي المفيد بس', 'جرّب توقف أي خدمة مش بتستخدمها', 'اختار الباقة اللي تناسب استخدامك فعلًا'],
             'هدايا وتبرعات': ['حط بند ثابت للعطاء على قد استطاعتك', 'خطط لهداياك بدري واختار اللي يفرّحهم', 'اللفتة الحلوة مش لازم تكون غالية'],
             'شخصي وعناية': ['خصص للعناية مبلغًا مريحًا ضمن ميزانيتك', 'قارن البدائل وخد اللي يناسب احتياجك', 'اهتم بنفسك من غير ما تضغط على خطتك'],
+            'مشروبات': ['القهوة والعصاير الصغيرة بتتجمع — حط لها حد أسبوعي', 'جرّب تعمل قهوتك في البيت كام يوم في الأسبوع', 'اختار المشروب اللي بتستمتع بيه فعلًا وسيب الباقي'],
+            'بقالة وسوبر ماركت': ['اكتب قايمة مقاضي قبل ما تنزل', 'قارن الأسعار بين السوبر ماركتات للحاجات اللي بتتكرر', 'شراء الكميات الأكبر للحاجات الأساسية ممكن يوفّر'],
+            'بنزين وسيارة': ['اتابع استهلاك العربية، والصيانة في ميعادها بتوفر', 'جمّع مشاويرك عشان تقلل البنزين', 'حط بند ثابت للعربية في ميزانيتك كل شهر'],
+            'اتصالات وإنترنت': ['قارن الباقات كل فترة واختار اللي يناسب استخدامك', 'راجع لو فيه باقة أو خط مش بتستخدمه', 'الباقة السنوية أحيانًا أوفر من الشهرية'],
             fallback: ['قسّم الفئة لحدود صغيرة وخلي خطتك مرنة', 'كل خطوة صغيرة بتفرق في آخر الشهر', 'خليك متابع، وهتلاقي اختياراتك أوضح']
         };
         function getMonthlyCategoryTip(category) {
@@ -7468,7 +7496,7 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
             // إنجازات التوازن: نفس تصنيف الكارت، برسالة واحدة لكل مستوى خلال الشهر.
             const balanceIncome = Number(settings.monthlyIncome || 0);
             if (balanceIncome > 0 && total > 0) {
-                const needsSet = new Set(['أكل', 'مواصلات', 'فواتير', 'صحة', 'تعليم', 'منزل وأثاث']);
+                const needsSet = new Set(['أكل', 'بقالة وسوبر ماركت', 'مواصلات', 'بنزين وسيارة', 'فواتير', 'اتصالات وإنترنت', 'صحة', 'تعليم', 'منزل وأثاث']);
                 const overrides = settings.balanceCategories || {};
                 const isNeeds = (item) => (overrides[item.name] || (needsSet.has(item.name) ? 'needs' : 'wants')) === 'needs';
                 const needsTotal = categories.filter(isNeeds).reduce((sum, item) => sum + Number(item.amount || 0), 0);
@@ -9072,7 +9100,7 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
         // ============ بدل ما نستخدم اتنين prompt() منفصلين (مبلغ لوحده، وصف لوحده) بشكل مبعثر — بنفتح فورم واحد مرتب فيه الحقلين مع بعض ============
         let __expenseEditId = null;
         // قائمة فئات المصروف المتاحة في التعديل (نفس فئات الإدخال اليدوي + شخصي وعناية). لو فئة العملية الحالية مش فيها بتتضاف تلقائي.
-        const EXPENSE_EDIT_CATEGORIES = ['أكل', 'مواصلات', 'فواتير', 'تسوق', 'ترفيه', 'صحة', 'تعليم', 'منزل وأثاث', 'ملابس', 'اشتراكات', 'هدايا وتبرعات', 'شخصي وعناية', 'أخرى'];
+        const EXPENSE_EDIT_CATEGORIES = ['أكل', 'مشروبات', 'بقالة وسوبر ماركت', 'مواصلات', 'بنزين وسيارة', 'فواتير', 'اتصالات وإنترنت', 'تسوق', 'ترفيه', 'صحة', 'تعليم', 'منزل وأثاث', 'ملابس', 'اشتراكات', 'هدايا وتبرعات', 'شخصي وعناية', 'أخرى'];
         function fillExpenseEditCategories(current) {
             const select = document.getElementById('expense-edit-category');
             if (!select) return;
@@ -9266,8 +9294,8 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
         function addRecurringExpense() { const name = document.getElementById('recurring-name')?.value.trim(); const amount = Number(document.getElementById('recurring-amount')?.value || 0); if (!name || amount <= 0) return quickStatus('اكتب اسم ومبلغ المصروف المتكرر.', 'error'); const settings = planningSettings(); settings.recurringExpenses = [...(settings.recurringExpenses || []), { id: crypto.randomUUID(), name, amount, day: 1, category: 'أخرى', active: true }]; document.getElementById('recurring-name').value = ''; document.getElementById('recurring-amount').value = ''; savePlanningSettings(); }
         async function deleteExpense(id, isEvent = false) { if (!id) return; if (!(await dabbarConfirm('بعد الحذف هتتخصم من إجمالي اليوم والشهر، ومش هتقدر ترجعها.', { title: 'تحذف العملية دي؟' }))) return; try { const typeQuery = isEvent ? '&type=event' : ''; const res = await fetch(`/api/financial-actions?id=${encodeURIComponent(id)}${typeQuery}`, { method: 'DELETE', headers: { Authorization: `Bearer ${accessToken}` } }); const body = await res.json().catch(() => ({})); if (!res.ok) throw new Error(body.error || 'معرفناش نحذف العملية دلوقتي.'); await loadDashboard(); quickStatus('اتحذفت العملية واتخصمت من إجمالياتك.', 'success'); } catch (error) { quickStatus(error.message || 'معرفناش نحذف العملية دلوقتي.', 'error'); } }
         const BALANCE_BUCKETS = [
-            { key: 'needs', label: 'احتياجات', target: 0.50, color: '#34d399', categories: new Set(['أكل', 'مواصلات', 'فواتير', 'صحة', 'تعليم', 'منزل وأثاث']) },
-            { key: 'wants', label: 'رغبات', target: 0.30, color: '#a78bfa', categories: new Set(['تسوق', 'ترفيه', 'ملابس', 'اشتراكات', 'هدايا وتبرعات', 'شخصي وعناية']) },
+            { key: 'needs', label: 'احتياجات', target: 0.50, color: '#34d399', categories: new Set(['أكل', 'بقالة وسوبر ماركت', 'مواصلات', 'بنزين وسيارة', 'فواتير', 'اتصالات وإنترنت', 'صحة', 'تعليم', 'منزل وأثاث']) },
+            { key: 'wants', label: 'رغبات', target: 0.30, color: '#a78bfa', categories: new Set(['تسوق', 'ترفيه', 'ملابس', 'اشتراكات', 'هدايا وتبرعات', 'شخصي وعناية', 'مشروبات']) },
             { key: 'savings', label: 'ادخار', target: 0.20, color: '#fbbf24', categories: new Set() },
         ];
         function balanceBucketFor(category, settings = planningSettings()) {
@@ -9408,6 +9436,10 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
             'ملابس': { title: 'خزانتك اتزودت النهاردة 👕', body: 'الملابس أخدت أكبر حصة من صرفك النهاردة — إطلالة جديدة تستاهل.' },
             'اشتراكات': { title: 'يوم الاشتراكات الشهرية 🔁', body: 'اشتراكاتك أخدت أكبر نصيب من صرف النهاردة — يستاهل تراجعها وتشوف إيه اللي بتستخدمه فعلًا.' },
             'هدايا وتبرعات': { title: 'يوم كرم رسمي 🎁', body: 'الهدايا والتبرعات أخدوا أكبر حصة من صرف النهاردة — إيد على قلبك، ده حلو.' },
+            'مشروبات': { title: 'يوم القهوة والعصاير ☕', body: 'المشروبات أخدت أكبر نصيب من صرف النهاردة — حاجة صغيرة بتتجمع، خلي بالك.' },
+            'بقالة وسوبر ماركت': { title: 'مقاضي البيت اتعمرت 🛒', body: 'البقالة والسوبر ماركت أخدوا أكبر حصة من صرف النهاردة — الثلاجة مبسوطة.' },
+            'بنزين وسيارة': { title: 'العربية خدت نصيبها ⛽', body: 'البنزين والعربية كانوا أكبر بند صرفته فيه النهاردة — شغلها بالتوفير.' },
+            'اتصالات وإنترنت': { title: 'يوم الشحن والباقات 📱', body: 'الاتصالات والإنترنت أخدوا أكبر حصة من صرف النهاردة — راجع باقتك تناسبك ولا لأ.' },
             'شخصي وعناية': { title: 'يوم دلع النفس 🧴', body: 'العناية الشخصية أخدت أكبر نصيب من صرف النهاردة — تستاهل تدلّع نفسك أحيانًا.' },
         };
         function getDailyCategoryInsight(today) {
@@ -9471,7 +9503,7 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
         function periodNum(n) { return Number(n || 0).toLocaleString('ar-EG'); }
         function setPeriodActivePreset(days) {
             document.querySelectorAll('.period-preset').forEach((b) => {
-                const on = days != null && Number(b.dataset.days) === days;
+                const on = days != null && (b.dataset.days === String(days));
                 b.classList.toggle('ps-active', on);
                 b.setAttribute('aria-pressed', on ? 'true' : 'false');
             });
@@ -9568,10 +9600,12 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
             loadButton.addEventListener('click', loadPeriodSummary);
             [startEl, endEl].forEach((el) => el.addEventListener('change', () => setPeriodActivePreset(null)));
             document.querySelectorAll('.period-preset').forEach((preset) => preset.addEventListener('click', () => {
-                const days = Math.max(1, Number(preset.dataset.days) || 4);
+                // "هذا الأسبوع" = نفس نافذة شارت أيام الأسبوع بالظبط (من السبت لحد النهاردة) عشان الأرقام تتطابق
+                const isWeek = preset.dataset.days === 'week';
+                const days = isWeek ? ((new Date().getDay() - 6 + 7) % 7) + 1 : Math.max(1, Number(preset.dataset.days) || 4);
                 startEl.value = periodDateInput(days - 1);
                 endEl.value = periodDateInput(0);
-                setPeriodActivePreset(days);
+                setPeriodActivePreset(isWeek ? 'week' : days);
                 loadPeriodSummary();
             }));
             const psHead = document.getElementById('period-summary-head');
@@ -10856,7 +10890,7 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
             const detailCatIcon = document.getElementById('weekday-detail-cat-icon');
             const dateEls = document.querySelectorAll('#weekday-labels-row .weekday-date');
 
-            totalEl.textContent = fmt(weekTotal || 0);
+            totalEl.textContent = fmt(Math.round(weekTotal || 0));
             container.innerHTML = '';
             detailWrap.classList.remove('is-open');
             dateEls.forEach((el, i) => { el.textContent = (weekDates && weekDates[i]) || '—'; });
@@ -11624,10 +11658,15 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
         }
         function renderSettlementMessages() {
             const root = document.getElementById('debts-settlement-list');
+            if (!root) return;
+            const emptyHtml = '<div class="st-empty"><b>🧾</b>مفيش رسائل تصفية دلوقتي</div>';
             const dismissed = JSON.parse(localStorage.getItem('dabbar-dismissed-settlements') || '{}');
             const items = (__debtHistory.settlements || []).filter((s) => !dismissed[`${s.settled_at}:${s.person_name}`]);
-            root.innerHTML = items.length ? items.map((s) => `<div class="debt-settlement-card border border-emerald-500/30 rounded-3xl p-4 relative"><button type="button" class="absolute top-2 end-3 text-slate-400 text-lg" data-dismiss-settlement="${debtEscape(`${s.settled_at}:${s.person_name}`)}" aria-label="إغلاق">×</button><p class="text-xs text-emerald-200 leading-relaxed pe-5">اتصفى الحساب بينك وبين <strong>${debtEscape(s.person_name)}</strong>، وكل التعاملات المالية هتلاقيها في كشف الحساب</p></div>`).join('') : '<div class="text-xs text-slate-500 text-center p-5">مفيش رسائل تصفية دلوقتي</div>';
-            root.querySelectorAll('[data-dismiss-settlement]').forEach((btn) => btn.addEventListener('click', () => { const state = JSON.parse(localStorage.getItem('dabbar-dismissed-settlements') || '{}'); state[btn.dataset.dismissSettlement] = true; localStorage.setItem('dabbar-dismissed-settlements', JSON.stringify(state)); btn.closest('.debt-settlement-card').remove(); if (!root.children.length) root.innerHTML = '<div class="text-xs text-slate-500 text-center p-5">مفيش رسائل تصفية دلوقتي</div>'; }));
+            const fmtDate = (v) => { const d = new Date(v); return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' }); };
+            const check = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg>';
+            root.innerHTML = items.length ? items.map((s) => `<div class="debt-settlement-card"><span class="st-ico">${check}</span><div class="st-body"><div class="st-top"><span class="st-title">تمت التصفية</span><span class="st-chip">الحساب صفر</span></div><p class="st-text">اتصفى الحساب بينك وبين <strong>${debtEscape(s.person_name)}</strong>، وكل التعاملات المالية هتلاقيها في كشف الحساب.</p><div class="st-meta"><span class="st-date">${debtEscape(fmtDate(s.settled_at))}</span><button type="button" class="st-open" data-open-statement="${debtEscape(s.person_name)}">كشف الحساب</button></div></div><button type="button" class="st-x" data-dismiss-settlement="${debtEscape(`${s.settled_at}:${s.person_name}`)}" aria-label="إغلاق">×</button></div>`).join('') : emptyHtml;
+            root.querySelectorAll('[data-open-statement]').forEach((btn) => btn.addEventListener('click', () => openPersonDebtDetail(btn.dataset.openStatement, true)));
+            root.querySelectorAll('[data-dismiss-settlement]').forEach((btn) => btn.addEventListener('click', () => { const state = JSON.parse(localStorage.getItem('dabbar-dismissed-settlements') || '{}'); state[btn.dataset.dismissSettlement] = true; localStorage.setItem('dabbar-dismissed-settlements', JSON.stringify(state)); btn.closest('.debt-settlement-card').remove(); if (!root.children.length) root.innerHTML = emptyHtml; }));
         }
         const statementExpanded = { active: false, settled: false };
         const statementLastCounts = { active: 0, settled: 0 };
@@ -11712,7 +11751,7 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
             const dir = current.net > 0 ? 'borrowed' : 'lent'; // net>0 (ليك عنده) يبقى استلمت فلوس، فبنسجلها borrowed عشان تقفل الرصيد؛ والعكس لو عليك له
             document.getElementById(`quick-manual-dir-${dir}`)?.click();
             // في وضع التسوية الاتجاه محدد تلقائي (عكس الرصيد) فنخفي أزرار "ليك عنده / عليك له" عشان متلخبطش المستخدم — بتتخفي بس ومش بتتشال
-            document.getElementById('quick-manual-dir-row')?.classList.add('hidden');
+            setQuickManualSettleMode(true, current.name, dir);
             const personInput = document.getElementById('quick-manual-person'); if (personInput) personInput.value = current.name;
             const descInput = document.getElementById('quick-manual-description'); if (descInput) descInput.value = 'تسديد';
             document.getElementById('quick-manual-amount')?.focus();
@@ -12964,8 +13003,20 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
             const descInput = document.getElementById('quick-manual-description');
             if (descInput) descInput.value = `دفع قسط ${String(title || '').trim()}`.trim();
         }
+        // وضع التسوية: بيخفي "ليك عنده / عليك له" في حالة التسوية بس (الاتجاه معروف تلقائي)، وأي فتح عادي بيرجّعهم
+        function setQuickManualSettleMode(on, personName, direction) {
+            const form = document.getElementById('quick-entry-manual-form');
+            const backdrop = document.getElementById('quick-manual-popup-backdrop');
+            [form, backdrop].forEach((el) => { if (!el) return; if (on) el.dataset.settle = '1'; else delete el.dataset.settle; });
+            document.getElementById('quick-manual-dir-row')?.classList.toggle('hidden', !!on);
+            const note = document.getElementById('quick-manual-settle-note');
+            if (note) {
+                note.classList.toggle('hidden', !on);
+                note.textContent = on ? (direction === 'borrowed' ? `🤝 تسوية حساب مع ${personName} — هتتسجل كمبلغ استلمته منه` : `🤝 تسوية حساب مع ${personName} — هتتسجل كمبلغ سددته له`) : '';
+            }
+        }
         function openQuickManualPopup() {
-            document.getElementById('quick-manual-dir-row')?.classList.remove('hidden');
+            setQuickManualSettleMode(false);
             const backdrop = quickManualPopupEl();
             quickShow('quick-entry-form', false); quickShow('quick-entry-draft', false);
             quickShow('quick-entry-manual-form', true);
@@ -12983,7 +13034,7 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
             if (monthLbl) monthLbl.textContent = `📅 هتتسجّل في: ${new Date().toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' })}`;
         }
         function closeQuickManualPopup() {
-            document.getElementById('quick-manual-dir-row')?.classList.remove('hidden'); // نرجّع أزرار الاتجاه للإدخال العادي
+            setQuickManualSettleMode(false); // نرجّع أزرار الاتجاه للإدخال العادي
             document.getElementById('quick-manual-popup-backdrop')?.classList.remove('show');
             document.documentElement.classList.remove('qm-open');
             quickShow('quick-entry-manual-form', false);
@@ -13098,30 +13149,44 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
             mic.addEventListener('mousedown', (e) => e.preventDefault());
             let recognition = null; // بنبنيه عند أول ضغطة بس (جوه لمسة المستخدم)، مش وقت تحميل الصفحة
             let baseText = '';
+            let userStopped = true, maxTimer = null;
+            // بيوقف في حالتين بس: عدّت 30 ثانية، أو المستخدم داس الميك تاني. غير كده لو المحرك قفل لوحده (وقفة كلام) بنفتحه تاني ونكمّل.
+            function finish() {
+                clearTimeout(maxTimer); maxTimer = null; userStopped = true;
+                mic.classList.remove('is-listening'); mic.setAttribute('aria-label', 'إملاء صوتي');
+            }
             function build() {
                 const r = new Recognition();
-                r.lang = 'ar-EG'; r.continuous = false; r.interimResults = true; r.maxAlternatives = 1;
-                r.onstart = () => { baseText = input.value.trim(); mic.classList.add('is-listening'); mic.setAttribute('aria-label', 'إيقاف الإملاء'); };
+                r.lang = 'ar-EG'; r.continuous = true; r.interimResults = true; r.maxAlternatives = 1;
+                r.onstart = () => { mic.classList.add('is-listening'); mic.setAttribute('aria-label', 'إيقاف الإملاء'); };
                 r.onresult = (event) => {
                     let transcript = '';
-                    for (let i = event.resultIndex; i < event.results.length; i++) transcript += event.results[i][0].transcript;
+                    for (let i = 0; i < event.results.length; i++) transcript += ' ' + event.results[i][0].transcript;
                     input.value = [baseText, transcript.trim()].filter(Boolean).join(' ');
                     input.dispatchEvent(new Event('input', { bubbles: true }));
                 };
                 r.onerror = (event) => {
-                    mic.classList.remove('is-listening');
-                    if (event.error !== 'aborted' && event.error !== 'no-speech') quickStatus('تعذر التقاط الصوت. تأكد من إذن الميكروفون وجرب تاني.', 'error');
+                    if (event.error === 'aborted' || event.error === 'no-speech') return;
+                    finish();
+                    quickStatus('تعذر التقاط الصوت. تأكد من إذن الميكروفون وجرب تاني.', 'error');
                 };
                 // مفيش input.focus() هنا: الخانة أصلاً في إيدك، وإجبار الفوكس بعد الإملاء كان بيلخبط الكيبورد.
-                r.onend = () => { mic.classList.remove('is-listening'); mic.setAttribute('aria-label', 'إملاء صوتي'); };
+                r.onend = () => {
+                    if (userStopped) { finish(); return; }
+                    baseText = input.value.trim(); // اللي اتكتب لحد دلوقتي يبقى الأساس للجلسة الجديدة
+                    try { recognition = build(); recognition.start(); } catch (e) { finish(); }
+                };
                 return r;
             }
             mic.addEventListener('click', () => {
                 try {
-                    if (mic.classList.contains('is-listening') && recognition) { recognition.stop(); return; }
+                    if (!userStopped && recognition) { userStopped = true; recognition.stop(); return; }
+                    baseText = input.value.trim(); userStopped = false;
                     recognition = build();
                     recognition.start();
-                } catch (e) { mic.classList.remove('is-listening'); }
+                    clearTimeout(maxTimer);
+                    maxTimer = setTimeout(() => { userStopped = true; try { recognition.stop(); } catch (e) {} }, 30000);
+                } catch (e) { finish(); }
             });
         })();
         document.getElementById('quick-manual-save')?.addEventListener('click', async () => {
@@ -16306,6 +16371,9 @@ body.keyboard-open .qm-head p:first-child{ font-size:.95rem !important; }
 #quick-manual-cat-error{ font-size:.75rem !important; }
 
 /* الدين */
+#quick-entry-manual-form[data-settle="1"] #quick-manual-dir-row,
+#quick-manual-popup-backdrop[data-settle="1"] #quick-manual-dir-row{ display:none !important; }
+#quick-manual-settle-note.hidden{ display:none !important; }
 #quick-manual-debt-block{ padding:.75rem !important; gap:.6rem; }
 #quick-manual-debt-block .quick-manual-dir{
   min-height:46px; border-radius:.9rem !important; font-size:.82rem !important; touch-action:manipulation;

@@ -10,6 +10,7 @@ import { createLinkCode } from '../../lib/linking.js';
 import { isFinancialEventType, recordFinancialEvent } from '../../lib/financialEvents.js';
 import { buyIntoPortfolio, sellFromPortfolio } from '../../lib/investments.js';
 import { CATEGORY_EMOJI, CATEGORIES } from '../../lib/config.js';
+import { guessCategory } from '../../lib/categoryHints.js';
 import { currencyLabel } from '../../lib/textNormalize.js';
 import { normalizeDigits, extractDeterministicExpense, correctDebtDirections, normalizeFinancialTransaction, reconcileSingleTransaction } from '../../lib/textNormalize.js';
 import { checkVoiceUsage, checkOcrUsage, checkChatUsage, checkTextUsage, refundOcrUsage } from '../../lib/rateLimits.js';
@@ -736,7 +737,7 @@ function parseFreeManualEntry(text) {
   const isExpense = /^(مصروف|مصروفات|صرفت|صرفنا|دفعت|دفعنا|اشتريت|اشتريت|شراء|تكلفة|كلفني|فاتورة|حولت|تبرعت)\b/i.test(normalized);
   if (!isIncome && !isExpense) return null;
   const customMatch = normalized.match(/(?:فئة|الفئة|تصنيف)\s*[:：-]?\s*([^،,]+)/i);
-  const category = CATEGORIES.find((item) => normalized.includes(item)) || customMatch?.[1]?.trim() || null;
+  const category = CATEGORIES.find((item) => normalized.includes(item)) || customMatch?.[1]?.trim() || (isIncome ? null : guessCategory(normalized)) || null;
   const description = normalized.replace(/^(دخل|استلمت|قبضت|وصلني|جالي|جاءني|تحويل داخل|تحويل ليا|ايداع|إيداع|مرتب|راتب|عمولة|ربحت|مصروف|مصروفات|صرفت|صرفنا|دفعت|دفعنا|اشتريت|شراء|تكلفة|كلفني|فاتورة|حولت|تبرعت)\s*/i, '').replace(amountMatch[1], '').replace(/^(جنيه|ج\.م|ج)\s*/i, '').replace(/(?:فئة|الفئة|تصنيف)\s*[:：-]?\s*([^،,]+)/i, '').trim();
   return { amount, category: category || 'أخرى', description: description || null, isIncome };
 }

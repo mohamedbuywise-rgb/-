@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>دبّر — فلوسك، من غير صداع</title>
 <link rel="manifest" href="app/manifest.json">
-<meta name="theme-color" content="#1E4FBE">
+<meta name="theme-color" content="#0B5CF0">
 <link rel="icon" href="/favicon.ico" sizes="any">
 <link rel="icon" type="image/png" sizes="32x32" href="app/icons/icon-32.png">
 <link rel="apple-touch-icon" sizes="180x180" href="app/icons/icon-180.png">
@@ -13,7 +13,7 @@
 <meta name="apple-mobile-web-app-title" content="دبّر">
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@600;700;800&family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
-:root{--b:#1E4FBE;--b2:#2E6BE6;--soft:#EEF3FC;--ink:#0B1B3A;--mut:#5B6B86;--line:#DCE4F2;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root{--b:#0B5CF0;--b2:#308FF2;--soft:#EEF4FE;--ink:#0A1A33;--mut:#5B6B86;--line:#DCE4F2;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:'Tajawal',sans-serif;background:#fff;color:var(--ink)}
 .v{display:none;min-height:100vh;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:32px 24px}
@@ -23,8 +23,8 @@ h1{font:800 26px/1.45 'Cairo';margin-top:18px}
 .sub{color:var(--mut);font-size:16px;line-height:1.8;max-width:300px;margin-top:6px}
 /* install button */
 .btn{position:relative;display:flex;align-items:center;justify-content:center;gap:10px;width:100%;max-width:340px;height:54px;margin-top:26px;border:0;border-radius:10px;background:var(--b);color:#fff;font:700 17px 'Cairo';overflow:hidden;cursor:pointer}
-.btn:active{background:#1a44a3}
-.btn .fill{position:absolute;inset:0;background:#163d94;transform-origin:right;transform:scaleX(0)}
+.btn:active{background:#0848C0}
+.btn .fill{position:absolute;inset:0;background:#0848C0;transform-origin:right;transform:scaleX(0)}
 .btn>*{position:relative}
 .ic{width:26px;height:26px;flex:none}
 .ic .ring{fill:none;stroke:rgba(255,255,255,.28);stroke-width:2}
@@ -33,7 +33,7 @@ h1{font:800 26px/1.45 'Cairo';margin-top:18px}
 .ic .chk{fill:none;stroke:#fff;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:20;stroke-dashoffset:20;opacity:0}
 .btn.run .ring,.btn.run .prog{opacity:1}
 .btn.run .arr{animation:drop 1s ease-in-out infinite}
-.btn.done{background:#0B1B3A}
+.btn.done{background:#0A1A33}
 .btn.done .ring{opacity:1;stroke:#fff}
 .btn.done .prog,.btn.done .arr{opacity:0;animation:none}
 .btn.done .chk{opacity:1;animation:draw .4s ease forwards}
@@ -70,7 +70,6 @@ ol svg{width:18px;height:18px;vertical-align:-4px;stroke:var(--b);fill:none;stro
 <svg width="0" height="0" style="position:absolute"><defs>
 <symbol id="i-and" viewBox="0 0 24 24"><path d="M5.5 9a6.5 6.5 0 0113 0z"/><rect x="5.5" y="10" width="13" height="8" rx="1.5"/><rect x="8" y="17" width="2.5" height="4.5" rx="1.25"/><rect x="13.5" y="17" width="2.5" height="4.5" rx="1.25"/><rect x="2" y="10" width="2.5" height="6.5" rx="1.25"/><rect x="19.5" y="10" width="2.5" height="6.5" rx="1.25"/><path d="M8.5 3.2L7.3 1.5M15.5 3.2l1.2-1.7" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" fill="none"/><circle cx="9.3" cy="6" r=".8" fill="#fff"/><circle cx="14.7" cy="6" r=".8" fill="#fff"/></symbol>
 <symbol id="i-ios" viewBox="0 0 24 24"><path d="M12.152 6.896c-.948 0-2.415-1.078-3.96-1.04-2.04.027-3.91 1.183-4.961 3.014-2.117 3.675-.546 9.103 1.519 12.09 1.013 1.454 2.208 3.09 3.792 3.039 1.52-.065 2.09-.987 3.935-.987 1.831 0 2.35.987 3.96.948 1.637-.026 2.676-1.48 3.676-2.948 1.156-1.688 1.636-3.325 1.662-3.415-.039-.013-3.182-1.221-3.22-4.857-.026-3.04 2.48-4.494 2.597-4.559-1.429-2.09-3.623-2.324-4.39-2.376-2-.156-3.675 1.09-4.61 1.09zM15.53 3.83c.843-1.012 1.4-2.427 1.245-3.83-1.207.052-2.662.805-3.532 1.818-.78.896-1.454 2.338-1.273 3.714 1.338.104 2.715-.688 3.559-1.701"/></symbol>
-<symbol id="i-btn" viewBox="0 0 24 24"><circle class="ring" cx="12" cy="12" r="10"/><circle class="prog" cx="12" cy="12" r="10"/><path class="arr" d="M12 6.5v8m0 0l-3-3m3 3l3-3M8 18h8"/><path class="chk" d="M7.8 12.4l3 3 5.4-5.8"/></symbol>
 </defs></svg>
 
 <main class="v on" id="c">
@@ -78,7 +77,7 @@ ol svg{width:18px;height:18px;vertical-align:-4px;stroke:var(--b);fill:none;stro
   <h1>ثبّت دبّر</h1>
   <div class="seg"><button data-p="and"><svg><use href="#i-and"/></svg>Android</button><button data-p="ios"><svg><use href="#i-ios"/></svg>iPhone</button></div>
   <ol class="js-steps"></ol>
-  <button class="btn js-install"><span class="fill"></span><svg class="ic"><use href="#i-btn"/></svg><span class="lb">تثبيت التطبيق</span></button>
+  <button class="btn js-install"><span class="fill"></span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle class="ring" cx="12" cy="12" r="10"/><circle class="prog" cx="12" cy="12" r="10"/><path class="arr" d="M12 6.5v8m0 0l-3-3m3 3l3-3M8 18h8"/><path class="chk" d="M7.8 12.4l3 3 5.4-5.8"/></svg><span class="lb">تثبيت التطبيق</span></button>
 </main>
 
 <div class="mask" id="mask"><div class="sheet"><h2>إزاي تثبّت دبّر</h2><ol class="js-steps"></ol><button class="close" id="close">تمام</button></div></div>
@@ -104,14 +103,16 @@ ol svg{width:18px;height:18px;vertical-align:-4px;stroke:var(--b);fill:none;stro
     clearInterval(timer);
     document.querySelectorAll('.js-install').forEach(function(b){b.className='btn js-install';b.querySelector('.lb').textContent='تثبيت التطبيق';b.querySelector('.prog').style.strokeDashoffset=62.83;b.querySelector('.fill').style.transform='scaleX(0)';b.disabled=false});
   }
+  var installed=false;
+  function finish(b){clearInterval(timer);var lb=b.querySelector('.lb');b.querySelector('.prog').style.strokeDashoffset=0;b.querySelector('.fill').style.transform='scaleX(1)';b.classList.remove('run');b.classList.add('done');lb.textContent='تم التثبيت، افتح دبّر من شاشتك'}
   function run(b){
-    var t0=Date.now(),D=3200,lb=b.querySelector('.lb'),pg=b.querySelector('.prog'),fl=b.querySelector('.fill');
+    var t0=Date.now(),lb=b.querySelector('.lb'),pg=b.querySelector('.prog'),fl=b.querySelector('.fill');
     b.disabled=true;b.classList.add('run');
     timer=setInterval(function(){
-      var x=Math.min((Date.now()-t0)/D,1), p=1-Math.pow(1-x,2.2);
+      var el=Date.now()-t0,x=Math.min(el/3500,1),p=0.92*(1-Math.pow(1-x,2.2));
       pg.style.strokeDashoffset=62.83*(1-p);fl.style.transform='scaleX('+p+')';
-      lb.textContent='جاري التثبيت '+Math.round(p*100)+'%';
-      if(x>=1){clearInterval(timer);b.classList.remove('run');b.classList.add('done');lb.textContent='تم التثبيت، افتح دبّر من شاشتك'}
+      lb.textContent=x<1?'جاري التثبيت '+Math.round(p*100)+'%':'بنخلّص التثبيت...';
+      if((installed&&x>=0.5)||el>=12000)finish(b);
     },40);
   }
   function sheet(on){
@@ -119,7 +120,7 @@ ol svg{width:18px;height:18px;vertical-align:-4px;stroke:var(--b);fill:none;stro
     if(on){var li=m.querySelectorAll('li'),i=0;cyc=setInterval(function(){li.forEach(function(e,k){e.classList.toggle('act',k===i)});i=(i+1)%li.length},1500)}
   }
   window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();dp=e});
-  window.addEventListener('appinstalled',function(){var b=document.querySelector('.v.on .js-install');if(b)run(b)});
+  window.addEventListener('appinstalled',function(){installed=true;var b=document.querySelector('.js-install');if(b&&!b.classList.contains('run')&&!b.classList.contains('done'))run(b)});
   if((window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone){location.replace('app/dabbar-onboarding.html')}
   document.querySelectorAll('.js-install').forEach(function(b){b.addEventListener('click',function(){
     if(dp){dp.prompt();dp.userChoice.then(function(r){dp=null;if(r.outcome==='accepted')run(b)});return}

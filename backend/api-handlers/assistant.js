@@ -11,7 +11,7 @@ import { normalizeDigits, extractDeterministicExpense, correctDebtDirections, de
 import { maybeSendBudgetAlert } from '../../lib/webPush.js';
 import { getDashboardUserFromRequest } from '../../lib/dashboardAuth.js';
 import { isFinancialEventType, recordFinancialEvent } from '../../lib/financialEvents.js';
-import { getPortfolio, addPortfolioAsset, updatePortfolioAsset, deletePortfolioAsset, buyIntoPortfolio, sellFromPortfolio, refreshPortfolioMarketPrices, getPortfolioAssetDetail } from '../../lib/investments.js';
+import { getPortfolio, addPortfolioAsset, updatePortfolioAsset, deletePortfolioAsset, buyIntoPortfolio, sellFromPortfolio, sellPortfolioAsset, refreshPortfolioMarketPrices, getPortfolioAssetDetail } from '../../lib/investments.js';
 
 // ============ Router: POST /api/assistant  { action: ... } ============
 // كل ميزات "دبّر الذكي" الجديدة (الأهداف، امسح فاتورة، اسأل دبّر) اتلمّت هنا في endpoint واحد،
@@ -583,6 +583,19 @@ async function handlePortfolioDelete(userId, body, res) {
   return res.status(200).json({ ok: true, portfolio });
 }
 
+async function handlePortfolioSell(userId, body, res) {
+  const assetId = body.assetId;
+  if (!assetId) return res.status(400).json({ error: 'مفيش رقم أصل اتبعت.' });
+  const result = await sellPortfolioAsset(userId, assetId, { proceeds: body.proceeds, quantity: body.quantity });
+  if (result.error === 'notfound') return res.status(400).json({ error: 'الأصل ده مش موجود.' });
+  if (result.error) return res.status(400).json({ error: result.error });
+  // نفس منطق البيع من الشات: العائد بيدخل كإيراد عشان رصيدك الكاش يتحدث
+  const savedEvent = await recordFinancialEvent({ type: 'income', amount: Number(body.proceeds), currency_code: 'EGP', category: 'بيع أصل استثماري', note: `بيع ${result.asset?.name || 'أصل'}`, raw_text: `بيع ${result.asset?.name || 'أصل'}` }, userId).catch((e) => ({ ok: false, error: e?.message }));
+  if (!savedEvent?.ok) console.error('portfolio_asset_sell financial event failed:', savedEvent?.error);
+  const portfolio = await getPortfolio(userId);
+  return res.status(200).json({ ok: true, deleted: Boolean(result.deleted), realizedGain: result.realizedGain, cashRecorded: Boolean(savedEvent?.ok), portfolio });
+}
+
 async function handlePortfolioRefreshPrices(userId, body, res) {
   const result = await refreshPortfolioMarketPrices(userId);
   const portfolio = await getPortfolio(userId);
@@ -765,6 +778,8 @@ export default async function handler(req, res) {
         return await handlePortfolioUpdate(userId, body, res);
       case 'portfolio_asset_delete':
         return await handlePortfolioDelete(userId, body, res);
+      case 'portfolio_asset_sell':
+        return await handlePortfolioSell(userId, body, res);
       case 'portfolio_refresh_prices':
         return await handlePortfolioRefreshPrices(userId, body, res);
       case 'portfolio_asset_detail':

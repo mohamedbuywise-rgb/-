@@ -4288,6 +4288,50 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
 .portfolio-detail-stat strong{font-size:.92rem}
 .portfolio-detail-stat.up strong{color:#0a7a52}
 .portfolio-detail-stat.down strong{color:#c0362c}
+
+/* ---------- فورم إضافة أصل (v2) + خانات الوثائق في حسابي ---------- */
+.pf2-part{display:flex;flex-direction:column;gap:.9rem}
+.pf2-part.hidden{display:none}
+.pf2-types{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.5rem}
+.pf2-type{display:flex;flex-direction:column;align-items:center;gap:.4rem;padding:.65rem .25rem .55rem;border-radius:1rem;border:1px solid var(--portfolio-line);background:transparent;color:var(--portfolio-ink);font:inherit;font-size:.66rem;font-weight:800;cursor:pointer;transition:background .15s,border-color .15s;-webkit-tap-highlight-color:transparent}
+.pf2-type-ic{width:2.4rem;height:2.4rem;border-radius:.85rem;display:flex;align-items:center;justify-content:center;font-size:1.4rem;background:color-mix(in srgb,var(--c) 16%,transparent);color:var(--c)}
+.pf2-type.on{border-color:var(--portfolio-accent);background:color-mix(in srgb,var(--portfolio-accent) 9%,transparent);box-shadow:inset 0 0 0 1px var(--portfolio-accent)}
+.pf2-fields{display:flex;flex-direction:column;gap:.85rem}
+.pf2-l{display:block;font-size:.64rem;font-weight:800;color:var(--portfolio-muted);margin-bottom:.35rem}
+.pf2-pills{display:flex;flex-wrap:wrap;gap:.4rem}
+.pf2-pill{border:1px solid var(--portfolio-line);background:transparent;color:var(--portfolio-ink);font:inherit;font-size:.7rem;font-weight:800;padding:.5rem .85rem;border-radius:999px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.pf2-pill.on{background:var(--portfolio-accent);border-color:var(--portfolio-accent);color:#04281e}
+.pf2-iw{position:relative}
+.pf2-iw .portfolio-form-input{width:100%}
+.pf2-u{position:absolute;inset-inline-end:.85rem;top:50%;transform:translateY(-50%);font-size:.62rem;font-weight:800;color:var(--portfolio-muted);pointer-events:none}
+.pf2-summary{padding:.65rem .8rem;border-radius:.9rem;font-size:.7rem;font-weight:800;line-height:1.7;color:var(--portfolio-accent-strong);background:color-mix(in srgb,var(--portfolio-accent) 12%,transparent)}
+.pf2-summary.hidden{display:none}
+.pf2-hint{font-size:.6rem;font-weight:700;color:var(--portfolio-muted);margin:.35rem 0 0;line-height:1.6}
+.pf2-edit-name{font-size:.82rem;font-weight:900;color:var(--portfolio-ink)}
+.acct-doc-ic{font-size:1.2rem;color:#10b981}
+.acct-doc-body{padding:0 1rem 1rem;font-size:.72rem;line-height:2;color:var(--pm-ink-dim,#cbd5e1);font-weight:600}
+.acct-doc-body h4{margin:.9rem 0 .25rem;font-size:.76rem;font-weight:900;color:var(--pm-ink,#f1f5f9)}
+.acct-doc-body p{margin:0 0 .3rem}
+.acct-doc-body ul{margin:.2rem 0 .3rem;padding-inline-start:1.1rem;list-style:disc}
+.acct-doc-body li{margin-bottom:.15rem}
+.acct-doc-callout{margin:.2rem 0 .4rem;padding:.7rem .8rem;border-radius:.9rem;background:rgba(16,185,129,.12);color:var(--pm-ink,#f1f5f9);font-weight:800}
+.acct-doc-meta{margin-top:.8rem;font-size:.62rem;color:var(--pm-muted,#94a3b8);font-weight:700}
+</style>
+<style>
+.pf-chips{display:flex;gap:.4rem;flex-wrap:wrap;margin:0 0 .7rem}
+.pf-chips.hidden{display:none}
+.pf-chip{border:1px solid var(--portfolio-line);background:transparent;color:var(--portfolio-muted);font:inherit;font-size:.64rem;font-weight:800;border-radius:999px;padding:.28rem .7rem;cursor:pointer}
+.pf-chip.on{background:var(--portfolio-accent);color:#062a21;border-color:var(--portfolio-accent)}
+.pf-note-box{font-size:.66rem;line-height:1.8;border-radius:.8rem;padding:.55rem .7rem;margin:0 0 .7rem;border:1px solid var(--portfolio-line);background:var(--portfolio-card);color:var(--portfolio-ink);white-space:pre-line}
+.pf-note-box.hidden{display:none}
+.portfolio-detail-sell-btn{flex:1;padding:.55rem;border-radius:10px;border:1px solid var(--portfolio-line);background:transparent;color:var(--portfolio-ink);font-family:inherit;font-size:.72rem;font-weight:800;cursor:pointer}
+.pf-sell-panel{margin-top:.6rem;border:1px dashed var(--portfolio-line);border-radius:12px;padding:.7rem;display:flex;flex-direction:column;gap:.55rem}
+.pf-sell-panel[hidden]{display:none}
+.pf-sell-preview{font-size:.68rem;font-weight:800;min-height:1.1rem}
+.pf-sell-preview.up{color:#0a7a52}.pf-sell-preview.down{color:#c0362c}
+html[data-theme="dark"] .pf-sell-preview.up{color:#6fe3b4}html[data-theme="dark"] .pf-sell-preview.down{color:#ff8f85}
+.pf-toast{position:fixed;left:50%;bottom:6rem;transform:translateX(-50%);z-index:999;background:#0f172a;border:1px solid #334155;color:#f1f5f9;font-size:.75rem;border-radius:1rem;padding:.7rem 1rem;max-width:90vw;text-align:center}
+.pf-empty-presets{display:flex;gap:.4rem;justify-content:center;flex-wrap:wrap;margin-top:.6rem}
 </style>
 </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col overflow-hidden">
@@ -4571,6 +4615,7 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
                             <span class="portfolio-total-quick" id="portfolio-total-quick">—</span>
                             <span class="portfolio-digest-badge hidden" id="portfolio-digest-badge"></span>
                         </div>
+                        <button type="button" id="portfolio-eye-btn" class="portfolio-refresh-prices-btn" title="إخفاء/إظهار الأرصدة" aria-label="إخفاء أو إظهار الأرصدة">👁️</button>
                         <button type="button" id="portfolio-refresh-prices-btn" class="portfolio-refresh-prices-btn" title="تحديث أسعار السوق (ذهب/عملات رقمية)" aria-label="تحديث أسعار السوق">🔄</button>
                         <span class="portfolio-chev" aria-hidden="true">⌄</span>
                     </div>
@@ -4597,7 +4642,13 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
                             <span class="portfolio-summary-header-value" id="portfolio-summary-header-count">—</span>
                         </div>
                     </div>
-                    <div id="portfolio-empty" class="hidden portfolio-note" style="text-align:center;padding:.5rem 0;">مفيش أصول مسجلة لسه. ضيف أول أصل (ذهب، صناديق استثمار، عملات رقمية... إلخ) وهنجمّعلك إجمالي محفظتك تلقائيًا.</div>
+                    <div id="portfolio-filters" class="pf-chips hidden"></div>
+                    <div id="portfolio-realized" class="pf-note-box hidden"></div>
+                    <div id="portfolio-concentration" class="pf-note-box hidden"></div>
+                    <div id="portfolio-reminders" class="pf-note-box hidden"></div>
+                    <div id="portfolio-empty" class="hidden portfolio-note" style="text-align:center;padding:.5rem 0;">مفيش أصول مسجلة لسه. ابدأ بأول أصل وهنجمّعلك إجمالي محفظتك تلقائيًا.
+                        <div class="pf-empty-presets"><button type="button" class="pf-chip" data-preset="gold">🪙 ذهب</button><button type="button" class="pf-chip" data-preset="cert">🏦 شهادة بنك</button><button type="button" class="pf-chip" data-preset="fx">💵 عملات</button></div>
+                    </div>
                     <div id="portfolio-asset-list" class="portfolio-asset-list"></div>
                     <template id="portfolio-asset-template">
                         <div class="portfolio-asset-wrap">
@@ -4613,7 +4664,7 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
                                     </div>
                                     <button type="button" class="portfolio-asset-menu" aria-label="إجراءات الأصل" aria-expanded="false"><iconify-icon icon="ph:dots-three-vertical-bold"></iconify-icon></button>
                                     <div class="portfolio-asset-menu-popover" role="menu">
-                                        <button type="button" class="portfolio-asset-menu-action edit" role="menuitem"><iconify-icon icon="ph:pencil-simple-duotone"></iconify-icon><span>تعديل القيمة</span></button>
+                                        <button type="button" class="portfolio-asset-menu-action edit" role="menuitem"><iconify-icon icon="ph:pencil-simple-duotone"></iconify-icon><span>تعديل الأصل</span></button>
                                         <button type="button" class="portfolio-asset-menu-action delete" role="menuitem"><iconify-icon icon="ph:trash-duotone"></iconify-icon><span>حذف الأصل</span></button>
                                     </div>
                                     <span class="portfolio-asset-expand-chev" aria-hidden="true">⌄</span>
@@ -4623,45 +4674,20 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
                         </div>
                     </template>
 
-                    <div id="portfolio-add-form" class="hidden portfolio-add-form-panel" style="margin-top:.8rem;flex-direction:column;gap:.55rem;">
-                        <span id="portfolio-form-title" class="portfolio-form-title">إضافة أصل جديد</span>
+                    <div id="portfolio-add-form" class="hidden portfolio-add-form-panel" style="margin-top:.8rem;flex-direction:column;gap:.9rem;">
+                        <span id="portfolio-form-title" class="portfolio-form-title">إضافة أصل</span>
 
-<div class="pf-lbl">إيه نوع الأصل؟</div>
-<div class="pf-cats" id="portfolio-cat-tiles">
-<button type="button" class="pf-cat" data-cat="static_cash"><iconify-icon icon="ph:wallet-duotone"></iconify-icon><span><b>كاش وعقار</b><small>فلوس، عقار، سيارة</small></span></button>
-<button type="button" class="pf-cat" data-cat="fixed_yield"><iconify-icon icon="ph:bank-duotone"></iconify-icon><span><b>شهادة / وديعة</b><small>بعائد ثابت</small></span></button>
-<button type="button" class="pf-cat" data-cat="market_asset"><iconify-icon icon="ph:chart-line-up-duotone"></iconify-icon><span><b>سهم / ذهب / عملة</b><small>سعره بيتغير</small></span></button>
-<button type="button" class="pf-cat" data-cat="loan_debt"><iconify-icon icon="ph:handshake-duotone"></iconify-icon><span><b>فلوس ليا / عليا</b><small>سلف وديون</small></span></button>
-</div>
-<div class="pf-lbl">اسم الأصل</div>
-                        <div style="display:flex;gap:.5rem;">
-                            <input id="portfolio-add-name" type="text" placeholder="اسم الأصل (مثلاً: ذهب، صناديق بنك مصر)" class="portfolio-form-input" style="flex:1.6;">
-                            <input id="portfolio-add-sub" type="text" placeholder="وصف (120 جرام)" class="portfolio-form-input" style="flex:1;">
+                        <div id="pf2-add-part" class="pf2-part">
+                            <div id="pf2-types" class="pf2-types" role="group" aria-label="نوع الأصل"></div>
+                            <div id="pf2-fields" class="pf2-fields"></div>
+                            <div id="pf2-summary" class="pf2-summary hidden" aria-live="polite"></div>
                         </div>
-                        <select id="portfolio-add-category" class="portfolio-form-input" aria-label="فئة الأصل" hidden>
-                            <option value="static_cash">كاش / عقار / سيارة</option><option value="fixed_yield">شهادة / وديعة / عائد ثابت</option><option value="market_asset">سهم / ذهب / عملة</option><option value="loan_debt">فلوس ليا / فلوس عليا</option>
-                        </select>
-                        <div id="portfolio-yield-fields" class="hidden" style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem;">
-                            <input id="portfolio-add-yield" type="number" min="0" step="any" placeholder="العائد السنوي %" class="portfolio-form-input">
-                            <select id="portfolio-add-frequency" class="portfolio-form-input"><option value="monthly">شهري</option><option value="quarterly">كل 3 شهور</option><option value="annually">سنوي</option></select>
-                            <select id="portfolio-add-payout-type" class="portfolio-form-input"><option value="cash_payout">عائد كاش</option><option value="compound">عائد متراكم</option></select>
-                            <input id="portfolio-add-next-payout" type="date" class="portfolio-form-input" aria-label="تاريخ أول دفعة">
-                            <input id="portfolio-add-maturity" type="date" class="portfolio-form-input" aria-label="تاريخ الاستحقاق">
+
+                        <div id="pf2-edit" class="pf2-part hidden">
+                            <div id="pf2-edit-name" class="pf2-edit-name"></div>
+                            <label class="pf-field"><span id="pf2-edit-label">القيمة الحالية</span>
+                                <input id="portfolio-add-amount" type="text" inputmode="decimal" placeholder="0" class="portfolio-form-input"></label>
                         </div>
-                        <div id="portfolio-yield-preview" class="hidden" style="padding:.6rem .7rem;border-radius:.75rem;background:color-mix(in srgb,var(--portfolio-accent) 10%,transparent);font-size:.67rem;font-weight:800;color:var(--portfolio-accent-strong);">العائد المتوقع: —</div>
-<div class="pf-lbl">اختار أيقونة (اختياري)</div>
-                        <div class="icon-library-row" id="portfolio-icon-picker" aria-label="اختار أيقونة الأصل"></div>
-<div class="pf-lbl">القيمة الحالية</div>
-                            <input id="portfolio-add-amount" type="number" inputmode="numeric" placeholder="القيمة الحالية بالجنيه" class="portfolio-form-input">
-<details class="pf-more"><summary>＋ تفاصيل إضافية (اختياري)</summary><div class="pf-more-in">
-                            <input id="portfolio-add-cost" type="number" inputmode="numeric" min="0" placeholder="قيمة الشراء (اختياري)" class="portfolio-form-input">
-<div style="display:flex;gap:.5rem;">
-                            <input id="portfolio-add-quantity" type="number" inputmode="decimal" min="0" step="any" placeholder="الكمية (اختياري)" class="portfolio-form-input" style="flex:1;">
-                            <input id="portfolio-add-unit" type="text" placeholder="الوحدة/الرمز — جرام، BTC، أو COMI.CA" class="portfolio-form-input" style="flex:1.4;">
-</div>
-                        <p class="text-[10px] text-slate-500 -mt-1">لو حطيت كمية ورمز مدعوم هنحدّث القيمة يوميًا تلقائيًا من سعر السوق.</p>
-                        <input id="portfolio-add-alert" type="number" inputmode="numeric" min="0" placeholder="نبهني لو تحرك أكثر من % في اليوم (اختياري)" class="portfolio-form-input">
-</div></details>
 
                         <div style="display:flex;gap:.5rem;">
                             <button type="button" id="portfolio-add-confirm" class="portfolio-form-submit">حفظ الأصل</button>
@@ -5634,18 +5660,25 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
                 </div>
             </div>
 
-            <div id="account-currency-card" class="rounded-3xl border border-slate-800 bg-slate-950/60 shadow-lg p-4 sm:p-5">
-                <div class="flex items-center justify-between gap-3 mb-3">
-                    <div><h3 class="text-sm font-black text-slate-100">عملة التطبيق الأساسية</h3><p class="text-[10px] text-slate-400 mt-1">كل الإجماليات والتقارير والمحفظة ستُعرض بالعملة التي تختارها.</p></div>
-                    <span class="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-300 flex items-center justify-center text-lg">¤</span>
-                </div>
+            <details id="account-currency-card" class="acct-sub-collapse">
+                <summary class="acct-sub-summary">
+                    <span class="acct-sub-summary-ic" aria-hidden="true"><iconify-icon class="acct-doc-ic" icon="ph:coins-duotone"></iconify-icon></span>
+                    <span class="acct-sub-summary-txt">
+                        <b>عملة التطبيق الأساسية</b>
+                        <small id="account-currency-summary-status">جنيه مصري (EGP)</small>
+                    </span>
+                    <span class="acct-sub-chev" aria-hidden="true">⌄</span>
+                </summary>
+                <div class="acct-sub-body">
+                <p class="text-[10px] text-slate-400 mb-3">كل الإجماليات والتقارير والمحفظة ستُعرض بالعملة التي تختارها.</p>
                 <div class="flex flex-col sm:flex-row gap-2">
                     <input id="account-currency-search" list="world-currencies" class="flex-1 bg-slate-900 border border-slate-700 rounded-xl px-3 py-2.5 text-xs text-slate-100 outline-none focus:border-emerald-500/60" placeholder="ابحث بالكود أو اسم العملة…">
                     <datalist id="world-currencies"><option value="AED">AED — درهم إماراتي</option><option value="AFN">AFN — أفغاني</option><option value="ALL">ALL — ليك ألباني</option><option value="AMD">AMD — درام أرميني</option><option value="ANG">ANG — جلدر هولندي</option><option value="AOA">AOA — كوانزا أنغولي</option><option value="ARS">ARS — بيزو أرجنتيني</option><option value="AUD">AUD — دولار أسترالي</option><option value="AWG">AWG — فلورين أروبي</option><option value="AZN">AZN — مانات أذربيجاني</option><option value="BAM">BAM — مارك بوسني</option><option value="BBD">BBD — دولار بربادوسي</option><option value="BDT">BDT — تاكا بنغلاديشي</option><option value="BGN">BGN — ليف بلغاري</option><option value="BHD">BHD — دينار بحريني</option><option value="BIF">BIF — فرنك بوروندي</option><option value="BMD">BMD — دولار برمودي</option><option value="BND">BND — دولار بروناي</option><option value="BOB">BOB — بوليفيانو بوليفي</option><option value="BRL">BRL — ريال برازيلي</option><option value="BSD">BSD — دولار باهامي</option><option value="BTN">BTN — نغولتروم بوتاني</option><option value="BWP">BWP — بولا بوتسواني</option><option value="BYN">BYN — روبل بيلاروسي</option><option value="BZD">BZD — دولار بليزي</option><option value="CAD">CAD — دولار كندي</option><option value="CDF">CDF — فرنك كونغولي</option><option value="CHF">CHF — فرنك سويسري</option><option value="CLP">CLP — بيزو تشيلي</option><option value="CNY">CNY — يوان صيني</option><option value="COP">COP — بيزو كولومبي</option><option value="CRC">CRC — كولون كوستاريكي</option><option value="CUP">CUP — بيزو كوبي</option><option value="CVE">CVE — إسكودو الرأس الأخضر</option><option value="CZK">CZK — كرونة تشيكية</option><option value="DJF">DJF — فرنك جيبوتي</option><option value="DKK">DKK — كرونة دنماركية</option><option value="DOP">DOP — بيزو دومينيكاني</option><option value="DZD">DZD — دينار جزائري</option><option value="EGP">EGP — جنيه مصري</option><option value="ERN">ERN — ناكفا إريتري</option><option value="ETB">ETB — بير إثيوبي</option><option value="EUR">EUR — يورو</option><option value="FJD">FJD — دولار فيجي</option><option value="FKP">FKP — جنيه جزر فوكلاند</option><option value="GBP">GBP — جنيه إسترليني</option><option value="GEL">GEL — لاري جورجي</option><option value="GHS">GHS — سيدي غاني</option><option value="GIP">GIP — جنيه جبل طارق</option><option value="GMD">GMD — دالاسي غامبي</option><option value="GNF">GNF — فرنك غيني</option><option value="GTQ">GTQ — كيتزال غواتيمالي</option><option value="GYD">GYD — دولار غياني</option><option value="HKD">HKD — دولار هونغ كونغ</option><option value="HNL">HNL — لمبيرا هندوراسي</option><option value="HRK">HRK — كونا كرواتية</option><option value="HTG">HTG — غورد هايتي</option><option value="HUF">HUF — فورنت مجري</option><option value="IDR">IDR — روبية إندونيسية</option><option value="ILS">ILS — شيكل إسرائيلي</option><option value="INR">INR — روبية هندية</option><option value="IQD">IQD — دينار عراقي</option><option value="IRR">IRR — ريال إيراني</option><option value="ISK">ISK — كرونة آيسلندية</option><option value="JMD">JMD — دولار جامايكي</option><option value="JOD">JOD — دينار أردني</option><option value="JPY">JPY — ين ياباني</option><option value="KES">KES — شلن كيني</option><option value="KGS">KGS — سوم قيرغيزي</option><option value="KHR">KHR — ريال كمبودي</option><option value="KMF">KMF — فرنك قمري</option><option value="KPW">KPW — وون كوري شمالي</option><option value="KRW">KRW — وون كوري جنوبي</option><option value="KWD">KWD — دينار كويتي</option><option value="KYD">KYD — دولار جزر كايمان</option><option value="KZT">KZT — تنغي كازاخستاني</option><option value="LAK">LAK — كيب لاوسي</option><option value="LBP">LBP — ليرة لبنانية</option><option value="LKR">LKR — روبية سريلانكية</option><option value="LRD">LRD — دولار ليبيري</option><option value="LSL">LSL — لوتي ليسوتو</option><option value="LYD">LYD — دينار ليبي</option><option value="MAD">MAD — درهم مغربي</option><option value="MDL">MDL — ليو مولدوفي</option><option value="MGA">MGA — أرياري مدغشقري</option><option value="MKD">MKD — دينار مقدوني</option><option value="MMK">MMK — كيات ميانماري</option><option value="MNT">MNT — توغروغ منغولي</option><option value="MOP">MOP — باتاكا ماكاوي</option><option value="MRU">MRU — أوقية موريتانية</option><option value="MUR">MUR — روبية موريشيوسية</option><option value="MVR">MVR — روفيه مالديفي</option><option value="MWK">MWK — كواشا ملاوي</option><option value="MXN">MXN — بيزو مكسيكي</option><option value="MYR">MYR — رينغيت ماليزي</option><option value="MZN">MZN — متكال موزمبيقي</option><option value="NAD">NAD — دولار ناميبي</option><option value="NGN">NGN — نايرا نيجيري</option><option value="NIO">NIO — كوردوبا نيكاراغوي</option><option value="NOK">NOK — كرونة نرويجية</option><option value="NPR">NPR — روبية نيبالية</option><option value="NZD">NZD — دولار نيوزيلندي</option><option value="OMR">OMR — ريال عماني</option><option value="PAB">PAB — بالبوا بنمي</option><option value="PEN">PEN — سول بيروفي</option><option value="PGK">PGK — كينا بابوا</option><option value="PHP">PHP — بيزو فلبيني</option><option value="PKR">PKR — روبية باكستانية</option><option value="PLN">PLN — زلوتي بولندي</option><option value="PYG">PYG — غواراني باراغواي</option><option value="QAR">QAR — ريال قطري</option><option value="RON">RON — ليو روماني</option><option value="RSD">RSD — دينار صربي</option><option value="RUB">RUB — روبل روسي</option><option value="RWF">RWF — فرنك رواندي</option><option value="SAR">SAR — ريال سعودي</option><option value="SBD">SBD — دولار جزر سليمان</option><option value="SCR">SCR — روبية سيشيلية</option><option value="SDG">SDG — جنيه سوداني</option><option value="SEK">SEK — كرونة سويدية</option><option value="SGD">SGD — دولار سنغافوري</option><option value="SHP">SHP — جنيه سانت هيلينا</option><option value="SLE">SLE — ليون سيراليوني</option><option value="SOS">SOS — شلن صومالي</option><option value="SRD">SRD — دولار سورينامي</option><option value="SSP">SSP — جنيه جنوب سوداني</option><option value="STN">STN — دوبرا ساو تومي</option><option value="SYP">SYP — ليرة سورية</option><option value="SZL">SZL — ليلانجيني إسواتيني</option><option value="THB">THB — بات تايلاندي</option><option value="TJS">TJS — سوموني طاجيكستاني</option><option value="TMT">TMT — مانات تركماني</option><option value="TND">TND — دينار تونسي</option><option value="TOP">TOP — بانغا تونغي</option><option value="TRY">TRY — ليرة تركية</option><option value="TTD">TTD — دولار ترينيداد</option><option value="TWD">TWD — دولار تايواني</option><option value="TZS">TZS — شلن تنزاني</option><option value="UAH">UAH — هريفنيا أوكرانية</option><option value="UGX">UGX — شلن أوغندي</option><option value="USD">USD — دولار أمريكي</option><option value="UYU">UYU — بيزو أوروغواي</option><option value="UZS">UZS — سوم أوزبكي</option><option value="VES">VES — بوليفار فنزويلي</option><option value="VND">VND — دونغ فيتنامي</option><option value="VUV">VUV — فاتو فانواتو</option><option value="WST">WST — تالا ساموا</option><option value="XAF">XAF — فرنك وسط أفريقيا</option><option value="XCD">XCD — دولار شرق الكاريبي</option><option value="XOF">XOF — فرنك غرب أفريقيا</option><option value="XPF">XPF — فرنك المحيط الهادئ</option><option value="YER">YER — ريال يمني</option><option value="ZAR">ZAR — راند جنوب أفريقي</option><option value="ZMW">ZMW — كواشا زامبي</option><option value="ZWL">ZWL — دولار زيمبابوي</option></datalist>
                     <button id="account-currency-save" type="button" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs rounded-xl px-4 py-2.5">حفظ العملة</button>
                 </div>
                 <p id="account-currency-status" class="text-[10px] text-slate-500 mt-2">العملة الحالية: جنيه مصري (EGP)</p>
-            </div>
+                </div>
+            </details>
 
             <details id="honor-board-card" class="hidden honor-loyalty-section">
                 <summary>
@@ -6225,6 +6258,106 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
                 <div class="grid grid-cols-2 gap-2"><button id="account-export-data" type="button" class="rounded-xl bg-slate-800 py-2.5 text-[11px] font-bold text-slate-200">تصدير بياناتي</button><button id="account-clear-local" type="button" class="rounded-xl border border-slate-700 py-2.5 text-[11px] font-bold text-slate-400">مسح إعدادات الجهاز</button></div>
 
             </div>
+
+            <details id="account-privacy-policy" class="acct-sub-collapse">
+                <summary class="acct-sub-summary">
+                    <span class="acct-sub-summary-ic" aria-hidden="true"><iconify-icon class="acct-doc-ic" icon="ph:shield-check-duotone"></iconify-icon></span>
+                    <span class="acct-sub-summary-txt">
+                        <b>سياسة الخصوصية</b>
+                        <small>إزاي بنحمي بياناتك وبنستخدمها</small>
+                    </span>
+                    <span class="acct-sub-chev" aria-hidden="true">⌄</span>
+                </summary>
+                <div class="acct-doc-body">
+                    <p class="acct-doc-callout">دبّر موجود عشان يساعدك تفهم فلوسك، مش عشان يجمع بياناتك. بنتعامل بأقل قدر لازم لتشغيل التطبيق، ولا نبيع بياناتك لأي جهة.</p>
+
+                    <h4>البيانات التي نتعامل معها</h4>
+                    <ul>
+                        <li>بيانات الحساب: الاسم والبريد الإلكتروني وصورة الملف الشخصي إن أضفتها.</li>
+                        <li>البيانات المالية اللي بتسجّلها بنفسك: المصروفات والدخل والديون والأهداف وأصول المحفظة الاستثمارية.</li>
+                        <li>محتوى الإدخال الذكي: نص أو تسجيل صوتي أو صورة فاتورة أو رسالة بنكية لو فعّلت قراءتها. بنستخدمه لاستخراج العملية (المبلغ والجهة والتصنيف) فقط.</li>
+                        <li>بيانات تقنية بسيطة لتشغيل التطبيق وإصلاح الأخطاء، مثل نوع الجهاز والمتصفح.</li>
+                    </ul>
+
+                    <h4>ما لا يحتاجه دبّر أبدًا</h4>
+                    <p>أرقام البطاقات البنكية، الرقم السري، كلمات مرور البنوك، أو رموز التحقق (OTP). لا تحتاجها أي ميزة في دبّر، وننصحك ألا تُدخلها في التطبيق.</p>
+
+                    <h4>كيف نستخدم بياناتك</h4>
+                    <ul>
+                        <li>تشغيل التطبيق وعرض تقاريرك وإجمالياتك.</li>
+                        <li>تصنيف عملياتك واقتراح طرق للتوفير.</li>
+                        <li>إرسال التنبيهات والتذكيرات اللي اخترت تفعيلها.</li>
+                        <li>تحسين الأداء والأمان. لا نستخدم بياناتك في الإعلانات.</li>
+                    </ul>
+
+                    <h4>الذكاء الاصطناعي ومزودو الخدمة</h4>
+                    <p>لتحويل الصوت إلى نص وقراءة الفواتير وتصنيف العمليات، قد نستعين بخدمات تقنية موثوقة (استضافة وقواعد بيانات وذكاء اصطناعي). بنشارك معهم الحد الأدنى اللازم لتنفيذ طلبك فقط، وقد تتم المعالجة على خوادم خارج بلدك.</p>
+
+                    <h4>حماية بياناتك</h4>
+                    <ul>
+                        <li>الاتصال بين جهازك وخوادمنا مشفّر.</li>
+                        <li>الوصول لبيانات الحسابات مقيّد ومحمي بتسجيل الدخول.</li>
+                        <li>قفل البصمة أو النمط (من «الخصوصية والتحكم») محفوظ على جهازك فقط ولا يُرسل لأي سيرفر.</li>
+                    </ul>
+
+                    <h4>حقوقك</h4>
+                    <ul>
+                        <li>تعديل أو حذف أي عملية أو أصل سجّلته في أي وقت.</li>
+                        <li>تصدير بياناتك من خانة «الخصوصية والتحكم».</li>
+                        <li>طلب حذف حسابك وبياناتك نهائيًا بالتواصل مع الدعم.</li>
+                    </ul>
+
+                    <h4>مدة الاحتفاظ بالبيانات</h4>
+                    <p>نحتفظ ببياناتك طالما حسابك نشط. عند طلب حذف الحساب نحذف بياناتك أو نجعلها مجهولة الهوية خلال مدة معقولة، إلا ما يلزم الاحتفاظ به قانونيًا.</p>
+
+                    <h4>الأطفال</h4>
+                    <p>دبّر غير موجّه لمن هم دون 13 عامًا، ولا نجمع بياناتهم عن قصد.</p>
+
+                    <h4>تحديث السياسة</h4>
+                    <p>لو أجرينا تغييرًا جوهريًا على هذه السياسة، هننبّهك داخل التطبيق قبل ما يسري.</p>
+
+                    <p class="acct-doc-meta">آخر تحديث: أكتوبر 2026</p>
+                </div>
+            </details>
+
+            <details id="account-about" class="acct-sub-collapse">
+                <summary class="acct-sub-summary">
+                    <span class="acct-sub-summary-ic" aria-hidden="true"><iconify-icon class="acct-doc-ic" icon="ph:info-duotone"></iconify-icon></span>
+                    <span class="acct-sub-summary-txt">
+                        <b>من نحن</b>
+                        <small>حكاية دبّر ورؤيتنا</small>
+                    </span>
+                    <span class="acct-sub-chev" aria-hidden="true">⌄</span>
+                </summary>
+                <div class="acct-doc-body">
+                    <p class="acct-doc-callout">دبّر مساعدك الشخصي لفهم فلوسك: تسجّل بسهولة، وتشوف الصورة كاملة، وتاخد قرارات أهدى.</p>
+
+                    <h4>إحنا مين</h4>
+                    <p>دبّر تطبيق عربي اتبنى عشان يحل مشكلة بسيطة: معظمنا مش عارف فلوسه بتروح فين. جمعنا تسجيل المصروفات ومتابعة الديون والأصول والأهداف في مكان واحد، بلغة قريبة منك وبدون تعقيد.</p>
+
+                    <h4>اللي بيقدّمه دبّر</h4>
+                    <ul>
+                        <li>تسجيل العمليات بالكتابة أو الصوت أو تصوير الفاتورة.</li>
+                        <li>تقارير يومية وشهرية توضّح صرفك وميزانيتك.</li>
+                        <li>متابعة الديون والالتزامات الشهرية والتذكير بيها.</li>
+                        <li>محفظة استثمارية للذهب والفضة والشهادات والودائع والأسهم والعقارات وغيرها.</li>
+                        <li>مساعد ذكي وأهداف توفير تساعدك توصل لللي بتخطط له.</li>
+                    </ul>
+
+                    <h4>قيمنا</h4>
+                    <ul>
+                        <li>البساطة: أي حد يقدر يستخدمه من أول مرة.</li>
+                        <li>الخصوصية: بياناتك ملكك، وبنطلب أقل قدر لازم.</li>
+                        <li>الشفافية: بنقولك إزاي بنحسب وإزاي بنستخدم بياناتك.</li>
+                    </ul>
+
+                    <h4>تنبيه مهم</h4>
+                    <p>دبّر أداة لتنظيم ومتابعة أموالك، وليس بنكًا ولا جهة تمويل ولا مستشارًا ماليًا. القيم والتقديرات المعروضة للمتابعة والاسترشاد فقط، وليست نصيحة استثمارية. القرار المالي دايمًا قرارك.</p>
+
+                    <h4>رأيك يهمنا</h4>
+                    <p>اقتراحاتك وملاحظاتك هي اللي بتطوّر دبّر. شاركنا رأيك من خلال الدعم داخل التطبيق.</p>
+                </div>
+            </details>
 
             <button id="account-logout-btn" class="w-full bg-slate-950/60 border border-rose-500/20 text-rose-400 font-bold py-3.5 rounded-2xl text-sm transition flex items-center justify-center gap-2 hover:bg-rose-500/10">
                 🚪 تسجيل خروج
@@ -11879,17 +12012,20 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
         // ============ المحفظة الاستثمارية — بيانات حقيقية من portfolio_assets ==========
         // ============================================================
         const PORTFOLIO_ASSET_ICONS = {
-            gold: 'ph:coins-duotone', silver: 'ph:coins-duotone',
+            gold: 'ph:coins-duotone', silver: 'ph:medal-duotone',
             bitcoin: 'simple-icons:bitcoin', ethereum: 'simple-icons:ethereum',
             crypto: 'ph:currency-circle-dollar-duotone', cash: 'ph:money-duotone',
             realestate: 'ph:buildings-duotone', funds: 'ph:chart-line-up-duotone',
             stocks: 'ph:chart-line-up-duotone', silverbar: 'ph:coins-duotone',
+            cert: 'ph:certificate-duotone', deposit: 'ph:piggy-bank-duotone', fx: 'ph:currency-dollar-duotone',
             default: 'ph:briefcase-duotone',
         };
 
         function getPortfolioAssetPresentation(asset) {
             const searchable = `${asset?.name || ''} ${asset?.sub_label || ''}`.trim().toLowerCase();
             const savedIcon = localStorage.getItem(`dabbar-portfolio-icon:${String(asset?.name || '').trim().toLowerCase()}`);
+            if (/شهادة|شهادات/.test(searchable)) return { tone: 'cert', icon: PORTFOLIO_ASSET_ICONS.cert };
+            if (/وديعة|ودائع/.test(searchable)) return { tone: 'deposit', icon: PORTFOLIO_ASSET_ICONS.deposit };
             if (/بيتكوين|bitcoin|btc/.test(searchable)) return { tone: 'crypto-btc', icon: savedIcon || PORTFOLIO_ASSET_ICONS.bitcoin };
             if (/ايثيريوم|إيثيريوم|ethereum|eth/.test(searchable)) return { tone: 'crypto-eth', icon: savedIcon || PORTFOLIO_ASSET_ICONS.ethereum };
             if (/صندوق|صناديق|fund|etf/.test(searchable)) return { tone: 'funds', icon: PORTFOLIO_ASSET_ICONS.funds };
@@ -11902,6 +12038,7 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
             if (/ذهب|دهب|gold/.test(searchable)) return { tone: 'gold', icon: savedIcon || PORTFOLIO_ASSET_ICONS.gold };
             if (/فضة|silver/.test(searchable)) return { tone: 'silver', icon: PORTFOLIO_ASSET_ICONS.silver };
             if (/عقار|عقارات|شقة|شقق|أرض|ارض|real estate|property/.test(searchable)) return { tone: 'realestate', icon: savedIcon || PORTFOLIO_ASSET_ICONS.realestate };
+            if (/دولار|يورو|ريال|إسترليني|استرليني/.test(searchable)) return { tone: 'fx', icon: PORTFOLIO_ASSET_ICONS.fx };
             if (/كاش|نقد|سيولة|فلوس|cash|money/.test(searchable)) return { tone: 'cash', icon: savedIcon || PORTFOLIO_ASSET_ICONS.cash };
             return { tone: 'default', icon: savedIcon || PORTFOLIO_ASSET_ICONS.default };
         }
@@ -11919,7 +12056,7 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
         const PORTFOLIO_TONE_COLOR = {
             gold: '#eab308', silver: '#94a3b8', 'crypto-btc': '#f59e0b', 'crypto-eth': '#6366f1',
             crypto: '#8b5cf6', stocks: '#10b981', funds: '#0ea5e9', realestate: '#0d9488',
-            cash: '#64748b', default: '#94a3b8',
+            cash: '#64748b', cert: '#3b82f6', deposit: '#16a34a', fx: '#84cc16', default: '#94a3b8',
         };
 
         // ============ شريط توزيع الأصول + صف الأيقونات المتراكبة اللي بيبان وقت ما المحفظة مقفولة (بريفيو بريميوم) ============
@@ -11953,6 +12090,107 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
             countEl.textContent = `${assets.length} ${assets.length === 1 ? 'أصل' : 'أصول'} · اضغط للتفاصيل`;
         }
 
+function pfToast(msg) {
+            document.getElementById('pf-toast')?.remove();
+            const el = document.createElement('div'); el.id = 'pf-toast'; el.className = 'pf-toast'; el.textContent = msg;
+            document.body.appendChild(el); setTimeout(() => el.remove(), 4500);
+        }
+        function pfBindSell(detailEl, asset) {
+            const btn = detailEl.querySelector('.portfolio-detail-sell-btn');
+            const panel = detailEl.querySelector('.pf-sell-panel');
+            if (!btn || !panel) return;
+            btn.addEventListener('click', (event) => {
+                event.stopPropagation();
+                if (!panel.hidden) { panel.hidden = true; panel.innerHTML = ''; return; }
+                const qty = Number(asset.quantity) > 0 ? Number(asset.quantity) : 0;
+                const unit = String(asset.unit || '').replace(/[<>&"]/g, '');
+                panel.innerHTML = `
+                    <label class="pf-field"><span>بعته بكام؟ (إجمالي المبلغ بـ ${pf2CurLabel()})</span><input class="portfolio-form-input" data-s="proceeds" type="text" inputmode="decimal" placeholder="0" autocomplete="off"></label>
+                    ${qty ? `<label class="pf-field"><span>الكمية اللي بعتها${unit ? ' (' + unit + ')' : ''}</span><input class="portfolio-form-input" data-s="qty" type="text" inputmode="decimal" value="${qty}" autocomplete="off"></label>` : ''}
+                    <div class="pf-sell-preview" aria-live="polite"></div>
+                    <p class="hidden text-[11px] text-rose-400" data-s="err"></p>
+                    <div style="display:flex;gap:.5rem"><button type="button" class="portfolio-form-submit" data-s="ok">تأكيد البيع</button><button type="button" class="portfolio-form-cancel" data-s="cancel">إلغاء</button></div>`;
+                panel.hidden = false;
+                const q = (s) => panel.querySelector(`[data-s="${s}"]`);
+                const cost = Number(asset.cost_basis) > 0 ? Number(asset.cost_basis) : Number(asset.amount) || 0;
+                const calc = () => {
+                    const proceeds = pf2Num(q('proceeds').value);
+                    const sellQty = qty ? Math.min(pf2Num(q('qty').value) || 0, qty) : 0;
+                    const fraction = qty ? (sellQty / qty) : 1;
+                    const prev = panel.querySelector('.pf-sell-preview');
+                    if (!(proceeds > 0) || (qty && !(sellQty > 0))) { prev.textContent = ''; prev.className = 'pf-sell-preview'; return null; }
+                    const gainDisp = proceeds - (cost * fraction) / pf2Rate();
+                    prev.className = `pf-sell-preview ${gainDisp >= 0 ? 'up' : 'down'}`;
+                    prev.textContent = `${gainDisp >= 0 ? 'مكسب' : 'خسارة'} تقريبي: ${Math.abs(Math.round(gainDisp)).toLocaleString('ar-EG')} ${pf2CurLabel()}`;
+                    return { proceeds, sellQty };
+                };
+                panel.addEventListener('input', calc);
+                q('cancel').addEventListener('click', () => { panel.hidden = true; panel.innerHTML = ''; });
+                q('ok').addEventListener('click', async () => {
+                    const v = calc(); const errEl = q('err');
+                    errEl.classList.add('hidden');
+                    if (!v) { errEl.textContent = 'أدخل مبلغ البيع' + (qty ? ' والكمية' : '') + '.'; errEl.classList.remove('hidden'); return; }
+                    const okBtn = q('ok'); okBtn.disabled = true;
+                    try {
+                        const res = await asstApi('portfolio_asset_sell', { assetId: asset.id, proceeds: pf2R(v.proceeds * pf2Rate()), quantity: qty ? v.sellQty : null });
+                        if (res.deleted) __expandedPortfolioAssetId = null;
+                        window.__portfolioDetailCache = {};
+                        await loadDashboard();
+                        const g = Number(res.realizedGain);
+                        pfToast(Number.isFinite(g) ? `اتسجل البيع — ${g >= 0 ? 'مكسب' : 'خسارة'} فعلي ${pfFmt(Math.abs(g))}` : 'اتسجل البيع.');
+                    } catch (e) { errEl.textContent = e.message || 'حصل خطأ، جرب تاني.'; errEl.classList.remove('hidden'); okBtn.disabled = false; }
+                });
+            });
+        }
+        function pfMasked() { try { return localStorage.getItem('dabbar-hide-balances') === '1'; } catch (_) { return false; } }
+        function pfFmt(n, c) { return pfMasked() ? '••••' : fmt(n, c); }
+        const PF_TONE_LABEL = { gold: 'ذهب', silver: 'فضة', 'crypto-btc': 'عملات رقمية', 'crypto-eth': 'عملات رقمية', crypto: 'عملات رقمية', stocks: 'أسهم', funds: 'صناديق', realestate: 'عقارات', cash: 'كاش', cert: 'شهادات', deposit: 'ودائع', fx: 'عملات', default: 'أخرى' };
+        window.__pfFilter = null;
+        function pfVisibleAssets(assets) {
+            if (!window.__pfFilter) return assets;
+            return assets.filter((a) => (PF_TONE_LABEL[getPortfolioAssetPresentation(a).tone] || 'أخرى') === window.__pfFilter);
+        }
+        function pfRenderExtras(data) {
+            const assets = data.assets || [];
+            const chipsEl = document.getElementById('portfolio-filters');
+            const conEl = document.getElementById('portfolio-concentration');
+            const realEl = document.getElementById('portfolio-realized');
+            if (realEl) {
+                const rz = data.realized;
+                if (rz && rz.count > 0) { const g = Number(rz.total) || 0; realEl.textContent = `${g >= 0 ? '💰 مكسب محقق من البيع' : '📉 خسارة محققة من البيع'}: ${pfFmt(Math.abs(g))} (${rz.count} ${rz.count === 1 ? 'عملية' : 'عمليات'})`; realEl.classList.remove('hidden'); }
+                else { realEl.textContent = ''; realEl.classList.add('hidden'); }
+            }
+            const remEl = document.getElementById('portfolio-reminders');
+            const labels = [...new Set(assets.map((a) => PF_TONE_LABEL[getPortfolioAssetPresentation(a).tone] || 'أخرى'))];
+            if (window.__pfFilter && !labels.includes(window.__pfFilter)) window.__pfFilter = null;
+            if (chipsEl) {
+                if (labels.length < 2) { chipsEl.classList.add('hidden'); chipsEl.innerHTML = ''; window.__pfFilter = null; }
+                else {
+                    chipsEl.classList.remove('hidden');
+                    chipsEl.innerHTML = ['الكل', ...labels].map((l) => `<button type="button" class="pf-chip${((l === 'الكل' && !window.__pfFilter) || l === window.__pfFilter) ? ' on' : ''}" data-f="${l}">${l}</button>`).join('');
+                }
+            }
+            const total = assets.reduce((s, a) => s + Math.max(Number(a.amount) || 0, 0), 0);
+            const top = [...assets].sort((a, b) => (Number(b.amount) || 0) - (Number(a.amount) || 0))[0];
+            const pct = top && total > 0 ? Math.round((Number(top.amount) / total) * 100) : 0;
+            if (conEl) {
+                if (assets.length >= 2 && pct > 60) { conEl.textContent = `"${top.name}" بقى ${pct}% من محفظتك. مفيش مشكلة، بس توزيع أوسع بيقلل المخاطرة.`; conEl.classList.remove('hidden'); }
+                else { conEl.textContent = ''; conEl.classList.add('hidden'); }
+            }
+            if (remEl) {
+                const today = new Date(); today.setHours(0, 0, 0, 0);
+                const days = (d) => { if (!d) return null; const x = new Date(String(d).slice(0, 10) + 'T00:00:00'); return isNaN(x) ? null : Math.round((x - today) / 86400000); };
+                const when = (n) => (n === 0 ? 'النهاردة' : n === 1 ? 'بكرة' : 'بعد يومين');
+                const items = [];
+                assets.forEach((a) => {
+                    const p = days(a.next_payout_date), m = days(a.maturity_date);
+                    if (p != null && p >= 0 && p <= 2) items.push(`🔔 ${a.name}: صرف العائد ${when(p)}`);
+                    if (m != null && m >= 0 && m <= 2) items.push(`🔔 ${a.name}: بتستحق ${when(m)}`);
+                });
+                if (items.length) { remEl.textContent = items.join('\n'); remEl.classList.remove('hidden'); }
+                else { remEl.textContent = ''; remEl.classList.add('hidden'); }
+            }
+        }
         window.__portfolioState = { assets: [], total: 0 };
         window.__portfolioDigest = null;
         // ============ التحديث التلقائي بيعمل renderPortfolio() تاني كل 20 ثانية، وده بيمسح الكارت ويبنيه من جديد فيقفل أي أصل مفتوح لوحده — بنحفظ آي دي الأصل المفتوح هنا عشان نرجّعه مفتوح تلقائيًا بعد كل تحديث، والقفل يفضل بإيد المستخدم بس ============
@@ -12033,7 +12271,7 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
             window.__portfolioDetailCache = window.__portfolioDetailCache || {};
             const cachedDetailHtml = window.__portfolioDetailCache[asset.id];
             detailEl.innerHTML = cachedDetailHtml || `<div class="portfolio-detail-loading">بنجيب سعر السوق دلوقتي...</div>`;
-            if (cachedDetailHtml) detailEl.querySelector('.portfolio-detail-edit-btn')?.addEventListener('click', () => openPortfolioForm(asset));
+            if (cachedDetailHtml) { detailEl.querySelector('.portfolio-detail-edit-btn')?.addEventListener('click', () => openPortfolioForm(asset)); pfBindSell(detailEl, asset); detailEl.querySelector('.portfolio-detail-delete-btn')?.addEventListener('click', (event) => deletePortfolioAssetWithConfirm(asset, event)); }
 
             const costBasis = Number(asset.cost_basis);
             const currentAmount = Number(asset.amount);
@@ -12057,13 +12295,13 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
             const weightPct = portfolioTotal > 0 ? Math.min(100, Math.round((currentAmount / portfolioTotal) * 1000) / 10) : null;
 
             detailEl.innerHTML = `
-                <div class="portfolio-detail-value">${fmt(currentAmount)}</div>
-                ${hasCostBasis ? `<span class="portfolio-detail-badge ${isUp ? 'up' : 'down'}">${trendArrowSvg(isUp)} ${Math.abs(gainPct)}% (${isUp ? '+' : '-'}${fmt(Math.abs(gainAmount))} منذ الشراء)</span>` : ''}
+                <div class="portfolio-detail-value">${pfFmt(currentAmount)}</div>
+                ${hasCostBasis ? `<span class="portfolio-detail-badge ${isUp ? 'up' : 'down'}">${trendArrowSvg(isUp)} ${Math.abs(gainPct)}% (${isUp ? '+' : '-'}${pfFmt(Math.abs(gainAmount))} منذ الشراء)</span>` : ''}
                 <div class="portfolio-detail-chart">${buildPortfolioSparkline(history, isUp)}</div>
                 <div class="portfolio-detail-stat-grid">
-                    <div class="portfolio-detail-stat"><span>سعر الوحدة الآن</span><strong>${unitPriceEgp ? `${fmt(unitPriceEgp)}` : fmt(currentAmount)}</strong></div>
-                    <div class="portfolio-detail-stat"><span>قيمة الشراء</span><strong>${hasCostBasis ? fmt(costBasis) : '—'}</strong></div>
-                    ${hasCostBasis ? `<div class="portfolio-detail-stat ${isUp ? 'up' : 'down'}"><span>الربح / الخسارة</span><strong>${isUp ? '+' : '-'}${fmt(Math.abs(gainAmount))}</strong></div>` : ''}
+                    <div class="portfolio-detail-stat"><span>سعر الوحدة الآن</span><strong>${unitPriceEgp ? `${pfFmt(unitPriceEgp)}` : pfFmt(currentAmount)}</strong></div>
+                    <div class="portfolio-detail-stat"><span>قيمة الشراء</span><strong>${hasCostBasis ? pfFmt(costBasis) : '—'}</strong></div>
+                    ${hasCostBasis ? `<div class="portfolio-detail-stat ${isUp ? 'up' : 'down'}"><span>الربح / الخسارة</span><strong>${isUp ? '+' : '-'}${pfFmt(Math.abs(gainAmount))}</strong></div>` : ''}
                     ${Number(asset.quantity) > 0 ? `<div class="portfolio-detail-stat"><span>الكمية</span><strong>${Number(asset.quantity).toLocaleString('ar-EG')}${asset.unit ? ' ' + String(asset.unit).replace(/[<>&"]/g, '') : ''}</strong></div>` : ''}
                 </div>
                 ${weightPct != null ? `<div class="portfolio-detail-weight">
@@ -12072,14 +12310,17 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
                 </div>` : ''}
                 <div class="portfolio-detail-meta-row"><span>تاريخ آخر تحديث</span><strong>${new Date(asset.updated_at || asset.created_at).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}</strong></div>
                 <div class="portfolio-detail-actions">
-                    <button type="button" class="portfolio-detail-edit-btn">تعديل القيمة</button>
+                    <button type="button" class="portfolio-detail-edit-btn">تعديل الأصل</button>
+                    <button type="button" class="portfolio-detail-sell-btn">بعت الأصل</button>
                     <button type="button" class="portfolio-detail-delete-btn" aria-label="حذف الأصل"><iconify-icon icon="ph:trash-duotone"></iconify-icon></button>
-                </div>`;
+                </div>
+                <div class="pf-sell-panel" hidden></div>`;
 
             window.__portfolioDetailCache[asset.id] = detailEl.innerHTML; // نخزّن آخر نسخة عشان الفتحة الجاية (أو التحديث التلقائي) يبدأ بيها فورًا من غير فلاش
 
             detailEl.querySelector('.portfolio-detail-edit-btn')?.addEventListener('click', () => openPortfolioForm(asset));
             detailEl.querySelector('.portfolio-detail-delete-btn')?.addEventListener('click', (event) => deletePortfolioAssetWithConfirm(asset, event));
+            pfBindSell(detailEl, asset);
         }
 
         // ============ سهم اتجاه احترافي (SVG) بدل الرمز النصي ▲/▼ — بيتلون تلقائي حسب كلاس up/down اللي حاطينه على الأب ============
@@ -12100,20 +12341,21 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
             const template = document.getElementById('portfolio-asset-template');
             if (!listEl || !template) return;
 
-            if (totalEl) totalEl.textContent = fmt(data.total || 0);
+            if (totalEl) totalEl.textContent = pfFmt(data.total || 0);
             const sheetTotalEl = document.getElementById('portfolio-summary-header-total');
             const sheetCountEl = document.getElementById('portfolio-summary-header-count');
-            if (sheetTotalEl) sheetTotalEl.textContent = fmt(data.total || 0);
+            if (sheetTotalEl) sheetTotalEl.textContent = pfFmt(data.total || 0);
             if (sheetCountEl) { const n = (data.assets || []).length; sheetCountEl.textContent = `${n} ${n === 1 ? 'أصل' : 'أصول'}`; }
             listEl.innerHTML = '';
             renderPortfolioPreviewStrip(data);
+            pfRenderExtras(data);
             if (!data.assets || data.assets.length === 0) {
                 emptyEl?.classList.remove('hidden');
                 return;
             }
 
             emptyEl?.classList.add('hidden');
-            data.assets.forEach((asset) => {
+            pfVisibleAssets(data.assets).forEach((asset) => {
                 const wrap = template.content.firstElementChild.cloneNode(true);
                 const node = wrap.querySelector('.portfolio-asset');
                 const presentation = getPortfolioAssetPresentation(asset);
@@ -12121,7 +12363,7 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
                 node.querySelector('.portfolio-asset-icon').innerHTML = `<iconify-icon icon=\"${presentation.icon}\"></iconify-icon>`;
                 node.querySelector('.portfolio-asset-name').textContent = asset.name || 'أصل استثماري';
                 node.querySelector('.portfolio-asset-sub').textContent = asset.sub_label || 'قيمة حالية';
-                node.querySelector('strong').textContent = fmt(asset.amount);
+                node.querySelector('strong').textContent = pfFmt(asset.amount);
 
                 const changeEl = node.querySelector('.portfolio-asset-change');
                 const costBasis = Number(asset.cost_basis);
@@ -12225,94 +12467,336 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
             }
         });
 
+(function bindPortfolioExtras() {
+            const eye = document.getElementById('portfolio-eye-btn');
+            const syncEye = () => { if (eye) eye.textContent = pfMasked() ? '🙈' : '👁️'; };
+            syncEye();
+            eye?.addEventListener('click', (event) => {
+                event.preventDefault(); event.stopPropagation();
+                try { localStorage.setItem('dabbar-hide-balances', pfMasked() ? '0' : '1'); } catch (_) {}
+                syncEye();
+                window.__portfolioDetailCache = {};
+                renderPortfolio(window.__portfolioState, undefined);
+            });
+            document.getElementById('portfolio-filters')?.addEventListener('click', (e) => {
+                const b = e.target.closest('.pf-chip'); if (!b) return;
+                window.__pfFilter = b.dataset.f === 'الكل' ? null : b.dataset.f;
+                renderPortfolio(window.__portfolioState, undefined);
+            });
+            document.getElementById('portfolio-empty')?.addEventListener('click', (e) => {
+                const b = e.target.closest('[data-preset]'); if (!b) return;
+                openPortfolioForm(null, b.dataset.preset);
+            });
+        })();
+        let pf2EditType = null;
+        let pf2EditInitial = null;
         let portfolioEditingId = null;
+        let pf2EditingAsset = null;
+        let pf2Type = 'gold';
+        const pf2Sel = {};
+        const PF2_BANKS = ['البنك الأهلي', 'بنك مصر', 'CIB', 'QNB', 'بنك القاهرة', 'بنك فيصل', 'HSBC', 'بنك آخر'];
+        const PF2_TYPES = {
+            gold: { n: 'ذهب', ic: 'ph:coins-duotone', c: '#eab308', f: [
+                { k: 'form', l: 'النوع', t: 'pills', o: ['مشغولات', 'سبائك', 'جنيه ذهب'], d: 0 },
+                { k: 'karat', l: 'العيار', t: 'pills', o: ['عيار 24', 'عيار 21', 'عيار 18', 'عيار 14'], d: 1 },
+                { k: 'wt', l: 'الوزن', t: 'num', u: 'جرام', ph: '120' },
+                { k: 'cost', l: 'إجمالي سعر الشراء', t: 'num', u: 'ج.م', ph: '80000' }] },
+            silver: { n: 'فضة', ic: 'ph:medal-duotone', c: '#94a3b8', f: [
+                { k: 'form', l: 'النوع', t: 'pills', o: ['سبائك', 'مشغولات', 'عملات'], d: 0 },
+                { k: 'pur', l: 'النقاء', t: 'pills', o: ['عيار 999', 'عيار 925', 'عيار 800'], d: 1 },
+                { k: 'wt', l: 'الوزن', t: 'num', u: 'جرام', ph: '500' },
+                { k: 'cost', l: 'إجمالي سعر الشراء', t: 'num', u: 'ج.م', ph: '30000' }] },
+            cert: { n: 'شهادات بنك', ic: 'ph:certificate-duotone', c: '#3b82f6', f: [
+                { k: 'bank', l: 'البنك', t: 'select', o: PF2_BANKS },
+                { k: 'amt', l: 'مبلغ الشهادة', t: 'num', u: 'ج.م', ph: '100000' },
+                { k: 'rate', l: 'العائد السنوي', t: 'num', u: '%', ph: '22' },
+                { k: 'freq', l: 'العائد بيتصرف', t: 'pills', o: ['كل شهر', 'كل 3 شهور', 'كل سنة', 'آخر المدة'], d: 1 },
+                { k: 'term', l: 'مدة الشهادة', t: 'pills', o: ['سنة', '3 سنين', '5 سنين'], d: 1 }] },
+            deposit: { n: 'وديعة', ic: 'ph:piggy-bank-duotone', c: '#16a34a', f: [
+                { k: 'bank', l: 'البنك', t: 'select', o: PF2_BANKS },
+                { k: 'amt', l: 'مبلغ الوديعة', t: 'num', u: 'ج.م', ph: '50000' },
+                { k: 'rate', l: 'العائد السنوي', t: 'num', u: '%', ph: '18' },
+                { k: 'freq', l: 'العائد بيتصرف', t: 'pills', o: ['كل شهر', 'كل 3 شهور', 'كل سنة', 'آخر المدة'], d: 3 },
+                { k: 'term', l: 'مدة الوديعة', t: 'pills', o: ['3 شهور', '6 شهور', 'سنة', 'سنتين'], d: 2 }] },
+            stock: { n: 'أسهم', ic: 'ph:chart-line-up-duotone', c: '#10b981', f: [
+                { k: 'mkt', l: 'البورصة', t: 'pills', o: ['مصر', 'السعودية', 'أمريكا'], d: 0 },
+                { k: 'sym', l: 'اسم السهم أو رمزه', t: 'text', ph: 'COMI.CA' },
+                { k: 'qty', l: 'عدد الأسهم', t: 'num', u: 'سهم', ph: '500' },
+                { k: 'price', l: 'متوسط سعر الشراء', t: 'num', u: 'للسهم', ph: '75' }],
+                hint: 'لو كتبت الرمز زي COMI.CA، هنحدّث القيمة تلقائيًا من سعر السوق.' },
+            real: { n: 'عقارات', ic: 'ph:buildings-duotone', c: '#0d9488', f: [
+                { k: 'kind', l: 'النوع', t: 'pills', o: ['شقة', 'أرض', 'محل', 'فيلا'], d: 0 },
+                { k: 'name', l: 'الاسم أو الموقع', t: 'text', ph: 'شقة التجمع', opt: 1 },
+                { k: 'now', l: 'القيمة الحالية التقريبية', t: 'num', u: 'ج.م', ph: '3200000' },
+                { k: 'cost', l: 'سعر الشراء', t: 'num', u: 'ج.م', ph: '2500000', opt: 1 },
+                { k: 'rent', l: 'إيجار شهري', t: 'num', u: 'ج.م', ph: '0', opt: 1 }] },
+            fx: { n: 'عملات', ic: 'ph:currency-dollar-duotone', c: '#84cc16', f: [
+                { k: 'cur', l: 'العملة', t: 'pills', o: ['دولار', 'يورو', 'ريال سعودي', 'جنيه إسترليني'], d: 0 },
+                { k: 'qty', l: 'المبلغ', t: 'num', ph: '2000' },
+                { k: 'price', l: 'سعر الشراء', t: 'num', u: 'ج.م', ph: '48.5' }] },
+            fund: { n: 'صناديق', ic: 'ph:chart-pie-slice-duotone', c: '#0ea5e9', f: [
+                { k: 'name', l: 'اسم الصندوق', t: 'text', ph: 'صندوق مصر الذهبي' },
+                { k: 'qty', l: 'عدد الوثائق', t: 'num', u: 'وثيقة', ph: '300' },
+                { k: 'price', l: 'سعر شراء الوثيقة', t: 'num', u: 'ج.م', ph: '42' }] },
+            crypto: { n: 'عملات رقمية', ic: 'ph:currency-btc-duotone', c: '#8b5cf6', f: [
+                { k: 'coin', l: 'العملة', t: 'pills', o: ['Bitcoin', 'Ethereum', 'USDT'], d: 0 },
+                { k: 'qty', l: 'الكمية', t: 'num', ph: '0.05' },
+                { k: 'cost', l: 'إجمالي الشراء', t: 'num', u: 'ج.م', ph: '150000' }] },
+        };
 
-        function openPortfolioForm(asset = null) {
-            bindIconPicker('portfolio-icon-picker', 'portfolio');
+function pf2Rate() { const r = Number(window.__displayCurrencyEgpRate || 1); const c = window.__displayCurrency || 'EGP'; return (c !== 'EGP' && r > 0) ? r : 1; }
+        function pf2CurLabel() { const c = window.__displayCurrency || 'EGP'; return CURRENCY_LABELS[c] || c; }
+        const PF2_MONEY = new Set(['cost', 'amt', 'price', 'now', 'rent']);
+        function pf2Num(v) {
+            const t = String(v || '').replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/٫/g, '.').replace(/[,٬\s]/g, '');
+            const n = parseFloat(t);
+            return Number.isFinite(n) ? n : 0;
+        }
+        const pf2R = (n) => Math.round(n * 100) / 100;
+        function pf2Val(k) { const e = document.querySelector(`#pf2-fields [data-k="${k}"]`); return e ? e.value.trim() : ''; }
+        function pf2N(k) { return pf2Num(pf2Val(k)); }
+        function pf2Pick(k) { const f = PF2_TYPES[pf2Type].f.find((x) => x.k === k); return f && f.o ? f.o[pf2Sel[k] ?? f.d ?? 0] : ''; }
+
+        function pf2DrawTypes() {
+            const el = document.getElementById('pf2-types'); if (!el) return;
+            el.innerHTML = Object.entries(PF2_TYPES).map(([k, t]) => `<button type="button" class="pf2-type${k === pf2Type ? ' on' : ''}" data-k="${k}" style="--c:${t.c}"><span class="pf2-type-ic"><iconify-icon icon="${t.ic}"></iconify-icon></span><span>${t.n}</span></button>`).join('');
+        }
+        function pf2DrawFields() {
+            const el = document.getElementById('pf2-fields'); if (!el) return;
+            const t = PF2_TYPES[pf2Type];
+            Object.keys(pf2Sel).forEach((k) => delete pf2Sel[k]);
+            el.innerHTML = t.f.map((f) => {
+                const u = f.u === 'ج.م' ? pf2CurLabel() : f.u;
+                let h = `<div><span class="pf2-l">${f.l}${f.opt ? ' (اختياري)' : ''}</span>`;
+                if (f.t === 'pills') {
+                    pf2Sel[f.k] = f.d || 0;
+                    h += `<div class="pf2-pills" data-k="${f.k}">${f.o.map((o, i) => `<button type="button" class="pf2-pill${i === (f.d || 0) ? ' on' : ''}" data-i="${i}">${o}</button>`).join('')}</div>`;
+                } else if (f.t === 'select') {
+                    h += `<div class="pf2-iw"><select class="portfolio-form-input" data-k="${f.k}">${f.o.map((o) => `<option>${o}</option>`).join('')}</select></div>`;
+                } else {
+                    h += `<div class="pf2-iw"><input class="portfolio-form-input" data-k="${f.k}" type="text" ${f.t === 'num' ? 'inputmode="decimal"' : ''} placeholder="${f.ph || ''}" ${u ? `style="padding-inline-end:${u.length * 9 + 24}px"` : ''} autocomplete="off">${u ? `<span class="pf2-u">${u}</span>` : ''}</div>`;
+                }
+                return h + '</div>';
+            }).join('') + (t.hint ? `<p class="pf2-hint">${t.hint}</p>` : '');
+            pf2UpdateSummary();
+        }
+        function pf2UpdateSummary() {
+            const box = document.getElementById('pf2-summary'); if (!box) return;
+            let t = '';
+            const r = (n) => `${Math.round(n).toLocaleString('ar-EG')} ${pf2CurLabel()}`;
+            if (pf2Type === 'gold' || pf2Type === 'silver') {
+                const w = pf2N('wt'), c = pf2N('cost');
+                if (w && c) t = `متوسط سعر الجرام اللي اشتريت بيه: ${r(c / w)}`;
+            } else if (pf2Type === 'cert' || pf2Type === 'deposit') {
+                const a = pf2N('amt'), rt = pf2N('rate');
+                if (a && rt) {
+                    const yearly = a * rt / 100;
+                    const per = { 'كل شهر': [12, 'كل شهر'], 'كل 3 شهور': [4, 'كل 3 شهور'], 'كل سنة': [1, 'كل سنة'] }[pf2Pick('freq')];
+                    t = per ? `عائدك المتوقع: ${r(yearly / per[0])} ${per[1]}` : `عائدك المتوقع في آخر المدة: ${r(yearly * pf2Months() / 12)}`;
+                }
+            } else if (pf2Type === 'real') {
+                const n = pf2N('now'), c = pf2N('cost'), rent = pf2N('rent');
+                if (n && c) t = `الفرق عن سعر الشراء: ${n >= c ? '+' : '-'}${r(Math.abs(n - c))}`;
+                if (n && rent) t += `${t ? ' · ' : ''}عائد الإيجار ${(rent * 12 / n * 100).toFixed(1)}% في السنة`;
+            } else if (pf2Type === 'stock' || pf2Type === 'fund' || pf2Type === 'fx') {
+                const q = pf2N('qty'), p = pf2N('price');
+                if (q && p) t = `إجمالي الشراء: ${r(q * p)}`;
+            }
+            box.textContent = t;
+            box.classList.toggle('hidden', !t);
+        }
+
+        const PF2_CATEGORY = { gold: 'market_asset', silver: 'market_asset', stock: 'market_asset', fx: 'market_asset', fund: 'market_asset', crypto: 'market_asset', cert: 'fixed_yield', deposit: 'fixed_yield', real: 'static_cash' };
+        function pf2Months() {
+            return { 'سنة': 12, '3 سنين': 36, '5 سنين': 60, '3 شهور': 3, '6 شهور': 6, 'سنتين': 24 }[pf2Pick('term')] || 12;
+        }
+        function pf2AddMonths(m) {
+            const d = new Date(); d.setMonth(d.getMonth() + m);
+            const z = (x) => String(x).padStart(2, '0');
+            return `${d.getFullYear()}-${z(d.getMonth() + 1)}-${z(d.getDate())}`;
+        }
+function pf2YieldFields() {
+            const out = pf2YieldFieldsRaw();
+            if (pf2EditingAsset && pf2EditInitial && pf2Pick('freq') === pf2EditInitial.freq && pf2Pick('term') === pf2EditInitial.term) {
+                out.nextPayoutDate = pf2EditingAsset.next_payout_date || out.nextPayoutDate;
+                out.maturityDate = pf2EditingAsset.maturity_date || out.maturityDate;
+            }
+            return out;
+        }
+        function pf2YieldFieldsRaw() {
+            const f = pf2Pick('freq');
+            const step = { 'كل شهر': 1, 'كل 3 شهور': 3, 'كل سنة': 12 }[f];
+            const months = pf2Months();
+            return {
+                category: 'fixed_yield', yieldRate: pf2N('rate') || null,
+                payoutFrequency: { 'كل شهر': 'monthly', 'كل 3 شهور': 'quarterly' }[f] || 'annually',
+                payoutType: step ? 'cash_payout' : 'compound',
+                nextPayoutDate: pf2AddMonths(Math.min(step || months, months)), maturityDate: pf2AddMonths(months),
+            };
+        }
+        function pf2Build() {
+            const g = pf2Pick, v = pf2Val, cr = pf2Rate();
+            const n = (k) => (PF2_MONEY.has(k) ? pf2R(pf2N(k) * cr) : pf2N(k));
+            const need = (k, l) => { if (!n(k)) throw new Error(`أدخل ${l}`); };
+            const bank = () => v('bank');
+            switch (pf2Type) {
+                case 'gold':
+                case 'silver': {
+                    need('wt', 'الوزن'); need('cost', 'إجمالي سعر الشراء');
+                    const wt = n('wt'), cost = n('cost');
+                    return { name: pf2Type === 'gold' ? `ذهب ${g('karat')}` : `فضة ${g('pur')}`, subLabel: `${wt} جرام · ${g('form')}`, amount: cost, quantity: wt, unit: 'جرام', costBasis: cost };
+                }
+                case 'cert': {
+                    need('amt', 'مبلغ الشهادة'); need('rate', 'نسبة العائد');
+                    return Object.assign({ name: bank() === 'بنك آخر' ? 'شهادة بنكية' : `شهادة ${bank()}`, subLabel: `${n('rate')}% · عائد ${g('freq')} · ${g('term')}`, amount: n('amt') }, pf2YieldFields());
+                }
+                case 'deposit': {
+                    need('amt', 'مبلغ الوديعة'); need('rate', 'نسبة العائد');
+                    return Object.assign({ name: bank() === 'بنك آخر' ? 'وديعة بنكية' : `وديعة ${bank()}`, subLabel: `${n('rate')}% · عائد ${g('freq')} · ${g('term')}`, amount: n('amt') }, pf2YieldFields());
+                }
+                case 'stock': {
+                    const sym = v('sym'); if (!sym) throw new Error('أدخل اسم السهم أو رمزه');
+                    need('qty', 'عدد الأسهم'); need('price', 'متوسط سعر الشراء');
+                    const qty = n('qty'), amount = pf2R(qty * n('price'));
+                    return { name: `أسهم ${sym}`, subLabel: `${qty} سهم · ${g('mkt')}`, amount, quantity: qty, unit: /^[A-Za-z0-9.\-]+$/.test(sym) ? sym.toUpperCase() : 'سهم', costBasis: amount };
+                }
+                case 'real': {
+                    need('now', 'القيمة الحالية التقريبية');
+                    const nm = v('name'), rent = n('rent'), cost = n('cost');
+                    const out = { name: `عقار ${g('kind')}${nm ? ' ' + nm : ''}`, subLabel: rent ? `إيجار ${fmt(rent)} شهريًا` : g('kind'), amount: n('now') };
+                    if (cost) out.costBasis = cost;
+                    return out;
+                }
+                case 'fx': {
+                    need('qty', 'المبلغ'); need('price', 'سعر الشراء');
+                    const map = { 'دولار': ['دولار أمريكي', 'USD'], 'يورو': ['يورو', 'EUR'], 'ريال سعودي': ['ريال سعودي', 'SAR'], 'جنيه إسترليني': ['جنيه إسترليني', 'GBP'] }[g('cur')];
+                    const qty = n('qty'), amount = pf2R(qty * n('price'));
+                    return { name: map[0], subLabel: `${qty} ${g('cur')}`, amount, quantity: qty, unit: map[1], costBasis: amount };
+                }
+                case 'fund': {
+                    const nm = v('name'); if (!nm) throw new Error('أدخل اسم الصندوق');
+                    need('qty', 'عدد الوثائق'); need('price', 'سعر شراء الوثيقة');
+                    const qty = n('qty'), amount = pf2R(qty * n('price'));
+                    return { name: `صندوق ${nm}`, subLabel: `${qty} وثيقة`, amount, quantity: qty, unit: 'وثيقة', costBasis: amount };
+                }
+                case 'crypto': {
+                    need('qty', 'الكمية'); need('cost', 'إجمالي الشراء');
+                    const map = { Bitcoin: ['بيتكوين', 'BTC'], Ethereum: ['إيثيريوم', 'ETH'], USDT: ['USDT', 'USDT'] }[g('coin')];
+                    const qty = n('qty'), cost = n('cost');
+                    return { name: map[0], subLabel: `${qty} ${map[1]}`, amount: cost, quantity: qty, unit: map[1], costBasis: cost };
+                }
+            }
+            throw new Error('اختار نوع الأصل');
+        }
+
+        function pf2TypeOf(a) {
+            const nm = String(a?.name || ''), unit = String(a?.unit || '').toUpperCase();
+            if (/^ذهب/.test(nm)) return 'gold';
+            if (/^فضة/.test(nm)) return 'silver';
+            if (/^شهادة/.test(nm)) return 'cert';
+            if (/^وديعة/.test(nm)) return 'deposit';
+            if (/^أسهم/.test(nm)) return 'stock';
+            if (/^عقار/.test(nm)) return 'real';
+            if (/^صندوق/.test(nm)) return 'fund';
+            if (['USD', 'EUR', 'SAR', 'GBP'].includes(unit)) return 'fx';
+            if (['BTC', 'ETH', 'USDT'].includes(unit)) return 'crypto';
+            return null;
+        }
+        function pf2SetInput(k, v) { const e = document.querySelector(`#pf2-fields [data-k="${k}"]`); if (e && v !== '' && v != null) e.value = v; }
+        function pf2SetPill(k, label) {
+            const f = PF2_TYPES[pf2Type].f.find((x) => x.k === k); if (!f || !f.o) return;
+            const i = f.o.indexOf(String(label || '').trim()); if (i < 0) return;
+            pf2Sel[k] = i;
+            document.querySelectorAll(`#pf2-fields .pf2-pills[data-k="${k}"] .pf2-pill`).forEach((b, j) => b.classList.toggle('on', j === i));
+        }
+        function pf2Prefill(a, type) {
+            const nm = String(a.name || ''), parts = String(a.sub_label || '').split(' · ').map((s) => s.trim());
+            const qty = Number(a.quantity) || 0, cost = Number(a.cost_basis) || 0, rate = pf2Rate();
+            const disp = (egp) => (Number.isFinite(Number(egp)) && Number(egp) > 0 ? String(pf2R(Number(egp) / rate)) : '');
+            const unitPrice = () => (qty > 0 && cost > 0 ? String(pf2R(cost / qty / rate)) : '');
+            switch (type) {
+                case 'gold': pf2SetPill('karat', nm.replace(/^ذهب\s*/, '')); pf2SetPill('form', parts[1]); pf2SetInput('wt', qty || ''); pf2SetInput('cost', disp(cost)); break;
+                case 'silver': pf2SetPill('pur', nm.replace(/^فضة\s*/, '')); pf2SetPill('form', parts[1]); pf2SetInput('wt', qty || ''); pf2SetInput('cost', disp(cost)); break;
+                case 'cert':
+                case 'deposit': {
+                    const bank = nm.replace(/^(شهادة|وديعة)\s*/, '');
+                    const sel = document.querySelector('#pf2-fields select[data-k="bank"]');
+                    if (sel) sel.value = [...sel.options].some((o) => o.value === bank) ? bank : 'بنك آخر';
+                    pf2SetInput('amt', disp(a.amount)); pf2SetInput('rate', a.yield_rate ?? '');
+                    pf2SetPill('freq', a.payout_type === 'compound' ? 'آخر المدة' : ({ monthly: 'كل شهر', quarterly: 'كل 3 شهور' }[a.payout_frequency] || 'كل سنة'));
+                    pf2SetPill('term', parts[2]);
+                    break;
+                }
+                case 'stock': pf2SetPill('mkt', parts[1]); pf2SetInput('sym', nm.replace(/^أسهم\s*/, '')); pf2SetInput('qty', qty || ''); pf2SetInput('price', unitPrice()); break;
+                case 'real': {
+                    const rest = nm.replace(/^عقار\s*/, '');
+                    const kind = PF2_TYPES.real.f[0].o.find((k) => rest.startsWith(k));
+                    if (kind) { pf2SetPill('kind', kind); pf2SetInput('name', rest.slice(kind.length).trim()); }
+                    pf2SetInput('now', disp(a.amount)); pf2SetInput('cost', disp(cost));
+                    break;
+                }
+                case 'fx': pf2SetPill('cur', { USD: 'دولار', EUR: 'يورو', SAR: 'ريال سعودي', GBP: 'جنيه إسترليني' }[String(a.unit || '').toUpperCase()]); pf2SetInput('qty', qty || ''); pf2SetInput('price', unitPrice()); break;
+                case 'fund': pf2SetInput('name', nm.replace(/^صندوق\s*/, '')); pf2SetInput('qty', qty || ''); pf2SetInput('price', unitPrice()); break;
+                case 'crypto': pf2SetPill('coin', { BTC: 'Bitcoin', ETH: 'Ethereum', USDT: 'USDT' }[String(a.unit || '').toUpperCase()]); pf2SetInput('qty', qty || ''); pf2SetInput('cost', disp(cost)); break;
+            }
+            pf2UpdateSummary();
+        }
+
+        function openPortfolioForm(asset = null, presetType = null) {
             const form = document.getElementById('portfolio-add-form');
             const addBtn = document.getElementById('portfolio-add-btn');
-            const titleEl = document.getElementById('portfolio-form-title');
-            const confirmBtn = document.getElementById('portfolio-add-confirm');
-            const nameInput = document.getElementById('portfolio-add-name');
-            const subInput = document.getElementById('portfolio-add-sub');
-            const amountInput = document.getElementById('portfolio-add-amount');
-            const errEl = document.getElementById('portfolio-add-error');
             if (!form || !addBtn) return;
-            const categoryInput = document.getElementById('portfolio-add-category');
-            const yieldInput = document.getElementById('portfolio-add-yield');
-            const frequencyInput = document.getElementById('portfolio-add-frequency');
-            const payoutTypeInput = document.getElementById('portfolio-add-payout-type');
-            const nextPayoutInput = document.getElementById('portfolio-add-next-payout');
-            const maturityInput = document.getElementById('portfolio-add-maturity');
-
             portfolioEditingId = asset?.id || null;
-            titleEl.textContent = asset ? 'تعديل قيمة الأصل' : 'إضافة أصل جديد';
-            confirmBtn.textContent = asset ? 'حفظ التعديل' : 'حفظ الأصل';
-            nameInput.value = asset?.name || '';
-            subInput.value = asset?.sub_label || '';
-            amountInput.value = asset?.amount ?? '';
-            if (categoryInput) categoryInput.value = asset?.category || 'static_cash';
-            if (yieldInput) yieldInput.value = asset?.yield_rate ?? '';
-            if (frequencyInput) frequencyInput.value = asset?.payout_frequency || 'monthly';
-            if (payoutTypeInput) payoutTypeInput.value = asset?.payout_type || 'cash_payout';
-            if (nextPayoutInput) nextPayoutInput.value = asset?.next_payout_date || '';
-            if (maturityInput) maturityInput.value = asset?.maturity_date || '';
-            const quantityInput = document.getElementById('portfolio-add-quantity');
-            const unitInput = document.getElementById('portfolio-add-unit');
-            if (quantityInput) quantityInput.value = asset?.quantity ?? '';
-            if (unitInput) unitInput.value = asset?.unit ?? '';
-            const alertInput = document.getElementById('portfolio-add-alert');
-            if (alertInput) alertInput.value = asset?.alert_threshold_pct ?? '';
-            // قيمة الشراء بتتدخل مرة واحدة بس وقت الإضافة الأولى للأصل، مش وقت تعديل القيمة الحالية بعد كده
-            const costInput = document.getElementById('portfolio-add-cost');
-            if (costInput) {
-                costInput.classList.toggle('hidden', Boolean(asset));
-                costInput.value = '';
+            pf2EditingAsset = asset;
+            pf2EditType = asset ? pf2TypeOf(asset) : null;
+            pf2EditInitial = null;
+            const typed = Boolean(asset && pf2EditType);
+            document.getElementById('portfolio-form-title').textContent = asset ? 'تعديل الأصل' : 'إضافة أصل';
+            document.getElementById('portfolio-add-confirm').textContent = asset ? 'حفظ التعديل' : 'حفظ الأصل';
+            document.getElementById('pf2-add-part').classList.toggle('hidden', Boolean(asset) && !typed);
+            document.getElementById('pf2-edit').classList.toggle('hidden', !(asset && !typed));
+            document.getElementById('pf2-types')?.classList.toggle('hidden', typed);
+            if (typed) {
+                pf2Type = pf2EditType;
+                pf2DrawFields();
+                pf2Prefill(asset, pf2Type);
+                pf2EditInitial = { freq: pf2Pick('freq'), term: pf2Pick('term') };
+            } else if (asset) {
+                document.getElementById('pf2-edit-name').textContent = asset.name || 'أصل استثماري';
+                document.getElementById('pf2-edit-label').textContent = `القيمة الحالية (${pf2CurLabel()})`;
+                const v = Number(asset.amount);
+                document.getElementById('portfolio-add-amount').value = Number.isFinite(v) ? String(pf2R(v / pf2Rate())) : '';
+            } else {
+                pf2Type = PF2_TYPES[presetType] ? presetType : 'gold';
+                pf2DrawTypes();
+                pf2DrawFields();
             }
-            const picker = document.getElementById('portfolio-icon-picker');
-            if (picker) { const saved = asset?.name ? localStorage.getItem(`dabbar-portfolio-icon:${asset.name.trim().toLowerCase()}`) : null; picker.dataset.selected = saved || ''; picker.querySelectorAll('.selected').forEach((x) => x.classList.toggle('selected', x.dataset.iconValue === saved)); }
-            errEl.classList.add('hidden');
+            document.getElementById('portfolio-add-error').classList.add('hidden');
             form.classList.remove('hidden');
             addBtn.classList.add('hidden');
-            nameInput.focus();
+            try { form.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } catch (_) {}
         }
 
         function resetPortfolioForm() {
             portfolioEditingId = null;
+            pf2EditingAsset = null;
+            pf2EditType = null;
+            pf2EditInitial = null;
+            document.getElementById('pf2-types')?.classList.remove('hidden');
             document.getElementById('portfolio-add-form')?.classList.add('hidden');
             document.getElementById('portfolio-add-btn')?.classList.remove('hidden');
-            const titleEl = document.getElementById('portfolio-form-title');
-            const confirmBtn = document.getElementById('portfolio-add-confirm');
-            if (titleEl) titleEl.textContent = 'إضافة أصل جديد';
-            if (confirmBtn) confirmBtn.textContent = 'حفظ الأصل';
-            const errEl = document.getElementById('portfolio-add-error');
-            errEl?.classList.add('hidden');
-            const nameInput = document.getElementById('portfolio-add-name');
-            const subInput = document.getElementById('portfolio-add-sub');
+            document.getElementById('portfolio-form-title').textContent = 'إضافة أصل';
+            document.getElementById('portfolio-add-confirm').textContent = 'حفظ الأصل';
+            document.getElementById('portfolio-add-error')?.classList.add('hidden');
             const amountInput = document.getElementById('portfolio-add-amount');
-            const quantityInput = document.getElementById('portfolio-add-quantity');
-            const unitInput = document.getElementById('portfolio-add-unit');
-            const alertInput = document.getElementById('portfolio-add-alert');
-            const costInput = document.getElementById('portfolio-add-cost');
-            if (nameInput) nameInput.value = '';
-            if (subInput) subInput.value = '';
             if (amountInput) amountInput.value = '';
-            if (document.getElementById('portfolio-add-category')) document.getElementById('portfolio-add-category').value = 'static_cash';
-            if (document.getElementById('portfolio-add-yield')) document.getElementById('portfolio-add-yield').value = '';
-            if (document.getElementById('portfolio-add-next-payout')) document.getElementById('portfolio-add-next-payout').value = '';
-            if (document.getElementById('portfolio-add-maturity')) document.getElementById('portfolio-add-maturity').value = '';
-            if (quantityInput) quantityInput.value = '';
-            if (unitInput) unitInput.value = '';
-            if (alertInput) alertInput.value = '';
-            if (costInput) { costInput.value = ''; costInput.classList.remove('hidden'); }
+            const fields = document.getElementById('pf2-fields');
+            if (fields) fields.innerHTML = '';
         }
 
         (function bindPortfolioAddForm() {
             const addBtn = document.getElementById('portfolio-add-btn');
             const form = document.getElementById('portfolio-add-form');
-            const nameInput = document.getElementById('portfolio-add-name');
-            const subInput = document.getElementById('portfolio-add-sub');
-            const amountInput = document.getElementById('portfolio-add-amount');
             const confirmBtn = document.getElementById('portfolio-add-confirm');
             const cancelBtn = document.getElementById('portfolio-add-cancel');
             const errEl = document.getElementById('portfolio-add-error');
@@ -12320,53 +12804,60 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
 
             addBtn.addEventListener('click', () => openPortfolioForm());
             cancelBtn.addEventListener('click', resetPortfolioForm);
-            const categoryInput = document.getElementById('portfolio-add-category');
-            const yieldFields = document.getElementById('portfolio-yield-fields');
-            const yieldPreview = document.getElementById('portfolio-yield-preview');
-            const syncYieldFields = () => {
-                const fixed = categoryInput?.value === 'fixed_yield';
-                yieldFields?.classList.toggle('hidden', !fixed);
-                yieldPreview?.classList.toggle('hidden', !fixed);
-                const amount = Number(document.getElementById('portfolio-add-amount')?.value || 0);
-                const rate = Number(document.getElementById('portfolio-add-yield')?.value || 0);
-                const months = { monthly: 1, quarterly: 3, annually: 12 }[document.getElementById('portfolio-add-frequency')?.value] || 1;
-                if (yieldPreview) yieldPreview.textContent = fixed && amount > 0 && rate > 0 ? `العائد المتوقع: ${(amount * rate / 100 * months / 12).toLocaleString('ar-EG')} ج.م` : 'العائد المتوقع: —';
-            };
-            [categoryInput, document.getElementById('portfolio-add-yield'), document.getElementById('portfolio-add-frequency'), document.getElementById('portfolio-add-amount')].forEach((el) => el?.addEventListener('input', syncYieldFields));
-            categoryInput?.addEventListener('change', syncYieldFields);
+            document.getElementById('pf2-types')?.addEventListener('click', (e) => {
+                const b = e.target.closest('.pf2-type'); if (!b) return;
+                pf2Type = b.dataset.k; pf2DrawTypes(); pf2DrawFields();
+            });
+            const fieldsEl = document.getElementById('pf2-fields');
+            fieldsEl?.addEventListener('click', (e) => {
+                const b = e.target.closest('.pf2-pill'); if (!b) return;
+                const grp = b.parentNode;
+                grp.querySelectorAll('.pf2-pill').forEach((x) => x.classList.remove('on'));
+                b.classList.add('on');
+                pf2Sel[grp.dataset.k] = Number(b.dataset.i);
+                pf2UpdateSummary();
+            });
+            fieldsEl?.addEventListener('input', () => { errEl.classList.add('hidden'); pf2UpdateSummary(); });
+
             confirmBtn.addEventListener('click', async () => {
                 errEl.classList.add('hidden');
-                const name = nameInput.value.trim();
-                const subLabel = subInput.value.trim();
-                const amount = Number(amountInput.value);
-                const quantityInput = document.getElementById('portfolio-add-quantity');
-                const unitInput = document.getElementById('portfolio-add-unit');
-                const quantity = quantityInput && quantityInput.value !== '' ? Number(quantityInput.value) : null;
-                const unit = unitInput ? unitInput.value.trim() : '';
-                const alertInput = document.getElementById('portfolio-add-alert');
-                const alertThresholdPct = alertInput && alertInput.value !== '' ? Number(alertInput.value) : null;
-                const costInput = document.getElementById('portfolio-add-cost');
-                const costBasis = costInput && !costInput.classList.contains('hidden') && costInput.value !== '' ? Number(costInput.value) : null;
-                const selectedIcon = document.getElementById('portfolio-icon-picker')?.dataset.selected;
-                const category = document.getElementById('portfolio-add-category')?.value || 'static_cash';
-                const yieldRate = Number(document.getElementById('portfolio-add-yield')?.value || 0) || null;
-                const payoutFrequency = document.getElementById('portfolio-add-frequency')?.value || null;
-                const payoutType = document.getElementById('portfolio-add-payout-type')?.value || null;
-                const nextPayoutDate = document.getElementById('portfolio-add-next-payout')?.value || null;
-                const maturityDate = document.getElementById('portfolio-add-maturity')?.value || null;
-                if (!name || !amount || amount <= 0) {
-                    errEl.textContent = 'محتاج اسم الأصل وقيمة صحيحة أكبر من صفر.';
+                const isEditing = Boolean(portfolioEditingId);
+                let payload;
+                try {
+                    if (isEditing) {
+                        const a = pf2EditingAsset || {};
+                        const base = {
+                            alertThresholdPct: a.alert_threshold_pct != null ? Number(a.alert_threshold_pct) : null, assetId: portfolioEditingId,
+                            category: a.category || 'static_cash', yieldRate: a.yield_rate ?? null, payoutFrequency: a.payout_frequency || null,
+                            payoutType: a.payout_type || null, nextPayoutDate: a.next_payout_date || null, maturityDate: a.maturity_date || null,
+                        };
+                        if (pf2EditType) {
+                            pf2Type = pf2EditType;
+                            const built = pf2Build();
+                            if (PF2_CATEGORY[pf2Type] === 'market_asset' && Number(a.amount) > 0 && Number(a.quantity) > 0 && built.quantity > 0) {
+                                built.amount = pf2R(Number(a.amount) * built.quantity / Number(a.quantity)); // نحافظ على القيمة السوقية الحالية ونعدّلها بنسبة الكمية الجديدة
+                            }
+                            if (pf2Type === 'real' && !pf2N('rent') && /^إيجار/.test(a.sub_label || '')) built.subLabel = a.sub_label;
+                            payload = Object.assign({ quantity: null, unit: '' }, base, { category: PF2_CATEGORY[pf2Type] || base.category }, built, { assetId: portfolioEditingId });
+                        } else {
+                            const val = pf2Num(document.getElementById('portfolio-add-amount').value);
+                            if (!(val > 0)) throw new Error('أدخل قيمة صحيحة أكبر من صفر.');
+                            payload = Object.assign(base, {
+                                name: a.name, subLabel: a.sub_label || '', amount: pf2R(val * pf2Rate()),
+                                quantity: a.quantity != null && a.quantity !== '' ? Number(a.quantity) : null, unit: a.unit || '',
+                            });
+                        }
+                    } else {
+                        payload = Object.assign({ alertThresholdPct: null, quantity: null, unit: '', category: PF2_CATEGORY[pf2Type] || 'static_cash' }, pf2Build());
+                    }
+                } catch (e) {
+                    errEl.textContent = e.message;
                     errEl.classList.remove('hidden');
                     return;
                 }
                 confirmBtn.disabled = true;
                 try {
-                    const isEditing = Boolean(portfolioEditingId);
-                    const payload = { name, subLabel, amount, alertThresholdPct, quantity, unit, category, yieldRate, payoutFrequency, payoutType, nextPayoutDate, maturityDate };
-                    if (!isEditing && costBasis) payload.costBasis = costBasis; // قيمة الشراء بتتبعت مرة واحدة بس وقت الإضافة الأولى
-                    if (isEditing) payload.assetId = portfolioEditingId;
                     await asstApi(isEditing ? 'portfolio_asset_update' : 'portfolio_asset_add', payload);
-                    if (selectedIcon) localStorage.setItem(`dabbar-portfolio-icon:${name.toLowerCase()}`, selectedIcon);
                     const __prevIds = new Set((window.__portfolioState?.assets || []).map((x) => x.id));
                     resetPortfolioForm();
                     await loadDashboard();
@@ -16716,6 +17207,9 @@ html:not([data-theme="light"]) .asst-goal-date-chip{ background:rgba(255,255,255
   }
  }catch(err){console.warn('category tiles',err);}
 })();
+</script>
+<script>
+(function(){try{var st=document.getElementById('account-currency-status'),sm=document.getElementById('account-currency-summary-status');if(!st||!sm)return;var up=function(){var m=/العملة الحالية:\s*(.+)$/.exec(st.textContent||'');if(m)sm.textContent=m[1];};up();new MutationObserver(up).observe(st,{childList:true,characterData:true,subtree:true});}catch(e){}})();
 </script>
 </body>
 </html>

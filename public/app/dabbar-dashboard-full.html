@@ -4331,6 +4331,9 @@ html[data-theme="light"] .ps-chip-debt{color:#b45309}
 .pf-sell-preview.up{color:#0a7a52}.pf-sell-preview.down{color:#c0362c}
 html[data-theme="dark"] .pf-sell-preview.up{color:#6fe3b4}html[data-theme="dark"] .pf-sell-preview.down{color:#ff8f85}
 .pf-toast{position:fixed;left:50%;bottom:6rem;transform:translateX(-50%);z-index:999;background:#0f172a;border:1px solid #334155;color:#f1f5f9;font-size:.75rem;border-radius:1rem;padding:.7rem 1rem;max-width:90vw;text-align:center}
+.portfolio-summary-header-cell--primary{flex:2 1 0!important;min-width:0}
+.portfolio-summary-header-cell--primary .portfolio-summary-header-value{white-space:nowrap;letter-spacing:0;font-variant-numeric:tabular-nums}
+.portfolio-body.pf-focus #portfolio-asset-list,.portfolio-body.pf-focus #portfolio-filters,.portfolio-body.pf-focus #portfolio-realized,.portfolio-body.pf-focus #portfolio-concentration,.portfolio-body.pf-focus #portfolio-reminders,.portfolio-body.pf-focus #portfolio-empty,.portfolio-body.pf-focus .portfolio-note{display:none!important}
 .pf-empty-presets{display:flex;gap:.4rem;justify-content:center;flex-wrap:wrap;margin-top:.6rem}
 </style>
 </head>
@@ -12142,6 +12145,17 @@ function pfToast(msg) {
                 });
             });
         }
+function pfFmtWhole(n) {
+            if (pfMasked()) return '••••';
+            const v = Math.round(Number(n || 0) / pf2Rate());
+            return `${v.toLocaleString('ar-EG')} ${pf2CurLabel()}`;
+        }
+        function pfFitText(el, text, sizes) {
+            if (!el) return;
+            el.textContent = text;
+            const len = text.length;
+            el.style.fontSize = len > sizes[2][0] ? sizes[2][1] : len > sizes[1][0] ? sizes[1][1] : len > sizes[0][0] ? sizes[0][1] : '';
+        }
         function pfMasked() { try { return localStorage.getItem('dabbar-hide-balances') === '1'; } catch (_) { return false; } }
         function pfFmt(n, c) { return pfMasked() ? '••••' : fmt(n, c); }
         const PF_TONE_LABEL = { gold: 'ذهب', silver: 'فضة', 'crypto-btc': 'عملات رقمية', 'crypto-eth': 'عملات رقمية', crypto: 'عملات رقمية', stocks: 'أسهم', funds: 'صناديق', realestate: 'عقارات', cash: 'كاش', cert: 'شهادات', deposit: 'ودائع', fx: 'عملات', default: 'أخرى' };
@@ -12341,10 +12355,10 @@ function pfToast(msg) {
             const template = document.getElementById('portfolio-asset-template');
             if (!listEl || !template) return;
 
-            if (totalEl) totalEl.textContent = pfFmt(data.total || 0);
+            pfFitText(totalEl, pfFmtWhole(data.total || 0), [[11, '.98rem'], [14, '.88rem'], [17, '.8rem']]);
             const sheetTotalEl = document.getElementById('portfolio-summary-header-total');
             const sheetCountEl = document.getElementById('portfolio-summary-header-count');
-            if (sheetTotalEl) sheetTotalEl.textContent = pfFmt(data.total || 0);
+            pfFitText(sheetTotalEl, pfFmtWhole(data.total || 0), [[10, '1.4rem'], [13, '1.2rem'], [16, '1.02rem']]);
             if (sheetCountEl) { const n = (data.assets || []).length; sheetCountEl.textContent = `${n} ${n === 1 ? 'أصل' : 'أصول'}`; }
             listEl.innerHTML = '';
             renderPortfolioPreviewStrip(data);
@@ -12751,7 +12765,7 @@ function pf2YieldFields() {
             pf2EditType = asset ? pf2TypeOf(asset) : null;
             pf2EditInitial = null;
             const typed = Boolean(asset && pf2EditType);
-            document.getElementById('portfolio-form-title').textContent = asset ? 'تعديل الأصل' : 'إضافة أصل';
+            document.getElementById('portfolio-form-title').textContent = asset ? `تعديل: ${asset.name || 'الأصل'}` : 'إضافة أصل';
             document.getElementById('portfolio-add-confirm').textContent = asset ? 'حفظ التعديل' : 'حفظ الأصل';
             document.getElementById('pf2-add-part').classList.toggle('hidden', Boolean(asset) && !typed);
             document.getElementById('pf2-edit').classList.toggle('hidden', !(asset && !typed));
@@ -12774,6 +12788,7 @@ function pf2YieldFields() {
             document.getElementById('portfolio-add-error').classList.add('hidden');
             form.classList.remove('hidden');
             addBtn.classList.add('hidden');
+            form.closest('.portfolio-body')?.classList.add('pf-focus');
             try { form.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } catch (_) {}
         }
 
@@ -12783,6 +12798,7 @@ function pf2YieldFields() {
             pf2EditType = null;
             pf2EditInitial = null;
             document.getElementById('pf2-types')?.classList.remove('hidden');
+            document.getElementById('portfolio-add-form')?.closest('.portfolio-body')?.classList.remove('pf-focus');
             document.getElementById('portfolio-add-form')?.classList.add('hidden');
             document.getElementById('portfolio-add-btn')?.classList.remove('hidden');
             document.getElementById('portfolio-form-title').textContent = 'إضافة أصل';

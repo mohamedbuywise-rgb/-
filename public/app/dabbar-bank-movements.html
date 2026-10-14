@@ -77,6 +77,14 @@
   :root[data-theme="light"] .filter-btn:not(.active) { border-color: #d9e8de; background: #f8fbf9; }
   :root[data-theme="dark"] .filter-btn:not(.active) { border-color: rgba(154,172,159,.22); background: rgba(18,28,24,.7); }
   .filter-btn.active { background: var(--db-surface); border-color: var(--db-accent); color: var(--db-accent); font-weight: 700; }
+  .month-bar { display: flex; align-items: center; justify-content: space-between; gap: 8px; background: var(--db-surface); border: 1px solid var(--db-surface-soft); border-radius: 14px; padding: 6px; margin-bottom: 12px; }
+  .month-nav { width: 38px; height: 38px; flex: 0 0 38px; border-radius: 50%; border: none; cursor: pointer; background: var(--db-surface-soft); color: var(--db-ink); font-size: 18px; display: flex; align-items: center; justify-content: center; }
+  .month-nav:disabled { opacity: .35; cursor: default; }
+  .month-select { flex: 1; min-width: 0; height: 38px; border-radius: 10px; border: 1px solid var(--db-surface-soft); background: var(--db-surface); color: var(--db-ink); font-size: 14px; font-weight: 700; text-align: center; text-align-last: center; font-family: inherit; padding: 0 8px; }
+  .summary-bar { display: flex; align-items: center; justify-content: space-between; gap: 10px; background: var(--db-accent-soft); border-radius: 12px; padding: 11px 14px; margin-bottom: 12px; }
+  .summary-bar .s-lbl { font-size: 12px; color: var(--db-muted); margin-bottom: 2px; }
+  .summary-bar .s-count { font-size: 13px; font-weight: 700; }
+  .summary-bar .s-total { font-size: 17px; font-weight: 800; color: var(--db-accent); white-space: nowrap; }
   .list-card { background: var(--db-surface); border-radius: 14px; padding: 4px 12px; }
   .row { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-top: 1px solid var(--db-surface-soft); }
   .row:first-child { border-top: none; }
@@ -135,10 +143,20 @@
 
   <div class="note-accordion"><button type="button" class="note-accordion-toggle" id="note-toggle" aria-expanded="false"><span>دليل تصنيف الحركات البنكية</span><span class="note-accordion-caret" id="note-caret">▾</span></button><div class="note-accordion-body" id="note-body" style="max-height:0; overflow:hidden;"><ul style="margin:0; padding:12px 14px; padding-inline-start:28px; display:flex; flex-direction:column; gap:6px; color:var(--db-ink);"><li>السحب والإيداع والتحويل بين حساباتك بتتسجل هنا للمتابعة بس، من غير ما تدخل في إجمالي مصروفاتك.</li><li>الاشتراكات والمشتريات بتتحسب مصروف حقيقي ومباشر زي أي حاجة تانية.</li><li><span style="color:#f2b90c;">⚠️</span> أي حركة مبهمة هتتحط تحت "تحتاج مراجعة" لحد ما تحددها بنفسك.</li></ul></div></div>
 
+  <div class="month-bar" id="month-bar">
+    <button type="button" class="month-nav" id="month-prev" aria-label="الشهر السابق">›</button>
+    <select class="month-select" id="month-select" aria-label="اختر الشهر"></select>
+    <button type="button" class="month-nav" id="month-next" aria-label="الشهر التالي">‹</button>
+  </div>
+
   <div id="status" class="status">بنجيب حركاتك...</div>
 
   <div class="filters" id="bank-filters"><button class="filter-btn active" data-filter="all">الكل</button><button class="filter-btn" data-filter="withdrawal">سحب / مشتريات</button><button class="filter-btn" data-filter="deposit">إيداع / وارد</button><button class="filter-btn" data-filter="review">تحتاج مراجعة ⚠️</button></div>
   <div id="content" class="hidden">
+    <div class="summary-bar" id="summary-bar">
+      <div><div class="s-lbl" id="summary-label">كل حركات الشهر</div><div class="s-count" id="summary-count">0 حركة</div></div>
+      <div class="s-total" id="summary-total">0 ج.م</div>
+    </div>
     <div class="stats-row">
       <div class="stat-card stat-danger"><div class="lbl">سحب</div><div class="val" id="stat-withdrawal">0 ج.م</div></div>
       <div class="stat-card stat-success"><div class="lbl">إيداع</div><div class="val" id="stat-deposit">0 ج.م</div></div>
@@ -190,10 +208,46 @@
   let allMovements = [];
   let currentFilter = 'all';
   let accessToken = null;
+  let loadSeq = 0; // لو المستخدم بدّل الشهر بسرعة، نتجاهل ردود الشهور القديمة
+
+  // ============ اختيار الشهر ============
+  const MONTHS_BACK = 24;
+  const MONTH_NAMES = ['يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو', 'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'];
+  const pad2 = (n) => String(n).padStart(2, '0');
+  const monthKey = (d) => `${d.getFullYear()}-${pad2(d.getMonth() + 1)}`;
+  const monthLabel = (key) => { const [y, m] = key.split('-').map(Number); return `${MONTH_NAMES[m - 1]} ${y}`.replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[d]); };
+  const monthOptions = (() => {
+    const now = new Date();
+    const list = [];
+    for (let i = 0; i < MONTHS_BACK; i += 1) list.push(monthKey(new Date(now.getFullYear(), now.getMonth() - i, 1)));
+    return list; // الأحدث أولًا
+  })();
+  let selectedMonth = monthOptions[0];
+
+  function syncMonthUI() {
+    const sel = $('month-select');
+    sel.value = selectedMonth;
+    const idx = monthOptions.indexOf(selectedMonth);
+    $('month-next').disabled = idx <= 0;                          // مفيش شهور في المستقبل
+    $('month-prev').disabled = idx >= monthOptions.length - 1;
+    $('summary-label').textContent = `كل حركات ${monthLabel(selectedMonth)}`;
+  }
+  function setMonth(key) {
+    if (!monthOptions.includes(key) || key === selectedMonth) return;
+    selectedMonth = key;
+    syncMonthUI();
+    loadMovements();
+  }
+  $('month-select').innerHTML = monthOptions.map((k) => `<option value="${k}">${monthLabel(k)}</option>`).join('');
+  $('month-select').addEventListener('change', (e) => setMonth(e.target.value));
+  $('month-prev').addEventListener('click', () => { const i = monthOptions.indexOf(selectedMonth); if (i < monthOptions.length - 1) setMonth(monthOptions[i + 1]); });
+  $('month-next').addEventListener('click', () => { const i = monthOptions.indexOf(selectedMonth); if (i > 0) setMonth(monthOptions[i - 1]); });
+  syncMonthUI();
 
   async function boot() {
     const { data: { session } } = await sb.auth.getSession();
     if (!session) {
+      $('month-bar').classList.add('hidden');
       showNoAccountsState();
       return;
     }
@@ -202,27 +256,31 @@
   }
 
   async function loadMovements() {
+    const seq = ++loadSeq;
+    $('status').textContent = 'بنجيب حركاتك...';
+    $('status').classList.remove('hidden');
+    $('content').classList.add('hidden');
+    $('empty-state').classList.add('hidden');
     try {
-      const res = await fetch('/api?route=bank-movements&period=month', {
+      const res = await fetch(`/api?route=bank-movements&month=${encodeURIComponent(selectedMonth)}`, {
         headers: { Authorization: `Bearer ${accessToken}` },
       });
       const data = await res.json();
+      if (seq !== loadSeq) return; // وصل رد متأخر لشهر مش المختار دلوقتي
       if (!res.ok || !data.ok) {
         showNoAccountsState();
         return;
       }
       allMovements = data.movements || [];
       $('status').classList.add('hidden');
-      if (!allMovements.length) {
-        showNoAccountsState();
-        return;
-      }
+      // الشهر الفاضي يفضل ظاهر مع اختيار الشهر (مش شاشة "مفيش عمليات" كاملة) عشان المستخدم يقدر يتنقل بين الشهور
       $('content').classList.remove('hidden');
       $('stat-withdrawal').textContent = `${fmt(data.totals.withdrawal)} ج.م`;
       $('stat-deposit').textContent = `${fmt(data.totals.deposit)} ج.م`;
       $('stat-transfer').textContent = `${fmt(data.totals.transfer)} ج.م`;
       renderList();
     } catch (e) {
+      if (seq !== loadSeq) return;
       showNoAccountsState();
     }
   }
@@ -244,8 +302,13 @@
       if (currentFilter === 'withdrawal') return ['withdrawal', 'expense', 'purchase', 'asset', 'refund', 'subscription'].includes(String(m.event_type || '').toLowerCase()) || ['expense', 'purchase', 'subscription'].includes(String(m.category || m.event_category || m.type || '').toLowerCase());
       return m.event_type === currentFilter;
     });
+    // ملخص الحركات المعروضة (حسب الفلتر المختار): العدد + إجمالي المبالغ
+    const shownTotal = filtered.reduce((sum, m) => sum + Number(m.amount || 0), 0);
+    $('summary-count').textContent = `${fmt(filtered.length)} ${filtered.length === 1 ? 'حركة' : 'حركات'}`;
+    $('summary-total').textContent = `${fmt(shownTotal)} ج.م`;
+    $('summary-label').textContent = currentFilter === 'all' ? `كل حركات ${monthLabel(selectedMonth)}` : `حركات ${monthLabel(selectedMonth)} (حسب التصنيف)`;
     if (!filtered.length) {
-      list.innerHTML = '<div style="padding:24px 0; text-align:center; color:var(--db-muted); font-size:13px;">مفيش حركات في التصنيف ده.</div>';
+      list.innerHTML = `<div style="padding:24px 0; text-align:center; color:var(--db-muted); font-size:13px;">${allMovements.length ? 'مفيش حركات في التصنيف ده.' : `مفيش حركات في ${monthLabel(selectedMonth)}.`}</div>`;
       return;
     }
     filtered.forEach((m) => {
@@ -260,7 +323,7 @@
       const today = new Date(); today.setHours(0, 0, 0, 0);
       const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
       const dateOnly = new Date(movementDate); dateOnly.setHours(0, 0, 0, 0);
-      const date = dateOnly.getTime() === today.getTime() ? 'اليوم' : (dateOnly.getTime() === yesterday.getTime() ? 'أمس' : movementDate.toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' }));
+      const date = dateOnly.getTime() === today.getTime() ? 'اليوم' : (dateOnly.getTime() === yesterday.getTime() ? 'أمس' : movementDate.toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', ...(movementDate.getFullYear() !== today.getFullYear() ? { year: 'numeric' } : {}) }));
       row.innerHTML = `
         <div class="movement-main">
           <span class="bank-logo${brand.wallet ? ' wallet' : ''}" aria-label="${brand.label || 'حركة بنكية'}">${brand.mark}</span>

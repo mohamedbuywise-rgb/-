@@ -13,14 +13,23 @@
 //   const session = startVoiceCapture({
 //     onStatus: (s) => setMicState(s),   // 'starting' | 'listening' | 'processing' | 'retry' | 'uploading'
 //     onInterim: (t) => showLiveText(t),
-//     classifyText:  async (text) => ({ transactions }),
-//     classifyAudio: async ({ audioBase64, mimeType }) => ({ success, transcript, transactions, provider }),
+//     lang: 'ar' | 'en',                 // لغة الكلام (Web Speech مبيكتشفهاش لوحده)
+//     classifyText:  async (text, { lang }) => ({ transactions }),
+//     classifyAudio: async ({ audioBase64, mimeType, lang }) => ({ success, transcript, transactions, provider }),
 //   });
 //   stopBtn.onclick = () => session.stop();
 //   const result = await session.result;  // { ok, source, transcript, transactions, provider, error, debug }
 
+// لغات Web Speech حسب اختيار المستخدم: عربي مصري أو إنجليزي. المتصفح مبيعرفش يكتشف اللغة لوحده،
+// فالاختيار (زر عربي / English جنب الميكروفون) هو اللي بيحدد اللغة، والسيرفر بياخد نفس الاختيار لو الصوت اتبعت له.
+export const VOICE_LANGS = {
+  ar: ['ar-EG', 'ar'],
+  en: ['en-US', 'en-GB', 'en'],
+};
+
 export const VOICE_DEFAULTS = {
-  langs: ['ar-EG', 'ar'],   // اللهجة المصرية أولًا، مش لغة الجهاز
+  lang: 'ar',               // 'ar' | 'en'
+  langs: null,              // لو اتبعتت، بتتقدم على lang (للتوافق مع الاستدعاء القديم)
   maxSeconds: 30,           // نفس VOICE_MAX_DURATION_SECONDS في config.js
   minConfidence: 0.35,      // بيتطبق بس لو المتصفح رجّع confidence > 0 (بعض المتصفحات بترجّع 0 دايمًا)
   minPeakLevel: 0.04,       // أقل مستوى صوت (0..1) يعتبر إن فيه كلام فعلًا
@@ -31,7 +40,9 @@ export const VOICE_DEFAULTS = {
 
 const ARABIC_LETTERS = /[\u0600-\u06FF]/;
 const MEANINGFUL_CHARS = /[\u0600-\u06FFa-zA-Z0-9\u0660-\u0669]/g;
-const REFUSAL_HINTS = /(لا أستطيع|لا استطيع|مقدرش|عذرًا|عذرا|آسف|i can't|i cannot|unable to|sorry)/i;
+const REFUSAL_HINTS = /(لا أستطيع|لا استطيع|مقدرش|عذرًا|عذرا|آسف)/i;
+// ردود الرفض الإنجليزية بس لما مفيش أي رقم في الكلام: "sorry I paid 50 for lunch" كلام حقيقي مش رفض
+const REFUSAL_HINTS_EN = /(i can't|i cannot|unable to|sorry)/i;
 
 // ============ عدّة تنضيف نص Web Speech (مشكلة التكرار على أندرويد) ============
 // كروم أندرويد مع continuous=true بيرجّع كل نتيجة *تراكمية*: "بقول" -> "بقول لك" -> "بقول لك النهارده"...
@@ -40,7 +51,7 @@ const REFUSAL_HINTS = /(لا أستطيع|لا استطيع|مقدرش|عذرً�
 //   2) dedupeRuns: أي عبارة اتكررت ورا بعض تتشال
 //   3) transcriptHealth: لو النص لسه مشبوه (تكرار عالي/طويل جدًا) مانبعتوش للتصنيف -> نروح للتسجيل التاني
 //   4) maxChars: سقف على طول النص اللي بيتبعت للسيرفر
-export const VOICE_PIPELINE_VERSION = '2026-09-30.3';
+export const VOICE_PIPELINE_VERSION = '2026-10-14.1';
 
 const IS_ANDROID = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent || '');
 const normSeg = (t) => String(t || '').replace(/[\u064B-\u0652\u0640]/g, '').replace(/\s+/g, ' ').trim();
@@ -129,10 +140,13 @@ export function isUsableTranscript(text) {
   if (!meaningful || meaningful / compact.length < 0.6) return false; // رموز/طلاسم
   if (/(.)\1{5,}/u.test(compact)) return false;                       // تكرار غريب
   if (REFUSAL_HINTS.test(t) && t.length < 120) return false;
+  if (REFUSAL_HINTS_EN.test(t) && t.length < 120 && !/[0-9\u0660-\u0669]/.test(t)) return false;
   const hasArabic = ARABIC_LETTERS.test(t);
   const hasDigit = /[0-9\u0660-\u0669]/.test(t);
   const hasLatin = /[a-zA-Z]/.test(t);
-  return hasArabic || (hasLatin && hasDigit);
+  // الإنجليزي مقبول حتى من غير أرقام ("coffee fifty") لأن الأرقام في التفريغ الإنجليزي كتير بتتكتب حروف
+  const latinLetters = (t.match(/[a-zA-Z]/g) || []).length;
+  return hasArabic || (hasLatin && (hasDigit || latinLetters >= 3));
 }
 
 export function isWebSpeechSupported() {
@@ -189,6 +203,8 @@ function createPeakMeter(stream) {
 // بتبدأ جلسة تسجيل. بترجّع { stop, cancel, result } — result Promise بيتحل دايمًا (مش بيرمي).
 export function startVoiceCapture(options = {}) {
   const opt = { ...VOICE_DEFAULTS, ...options };
+  const voiceLang = opt.lang === 'en' ? 'en' : 'ar';
+  opt.langs = Array.isArray(opt.langs) && opt.langs.length ? opt.langs : VOICE_LANGS[voiceLang];
   const { onStatus = () => {}, onInterim = () => {}, onActivity = () => {}, classifyText, classifyAudio } = opt;
 
   let cancelled = false;
@@ -290,7 +306,7 @@ export function startVoiceCapture(options = {}) {
     if (text && typeof classifyText === 'function') {
       onStatus('processing');
       try {
-        const out = await classifyText(text);
+        const out = await classifyText(text, { lang: voiceLang });
         return finish({
           ok: true,
           source: 'webspeech',
@@ -315,7 +331,7 @@ export function startVoiceCapture(options = {}) {
     const Ctor = window.SpeechRecognition || window.webkitSpeechRecognition;
     const rec = new Ctor();
     recognition = rec;
-    rec.lang = opt.langs[speech.langIndex] || 'ar-EG';
+    rec.lang = opt.langs[speech.langIndex] || (voiceLang === 'en' ? 'en-US' : 'ar-EG');
     rec.continuous = true; // مايقفلش لوحده عند أول وقفة كلام — بيكمّل لحد ما المستخدم يدوس "إيقاف وتحليل"
     speech.startedAt = Date.now();
     rec.interimResults = true;
@@ -357,6 +373,16 @@ export function startVoiceCapture(options = {}) {
       }
       // المتصفح قفل المحرك لوحده (صمت/حد زمني) والمستخدم لسه ما ضغطش إيقاف: نفتحه تاني ونكمّل
       const fatal = ['not-allowed', 'service-not-allowed', 'audio-capture', 'network'].includes(speech.error);
+      // أندرويد: كل إعادة تشغيل = بيب قفل + بيب فتح. لو معانا نص بالفعل والمحرك قفل لوحده، نعتبرها إيقاف وتحليل
+      // (البيب في البداية والنهاية بس). لو لسه مفيش نص، نعيد التشغيل زي الأول.
+      if (IS_ANDROID && !speechStopRequested && !cancelled && !finished && !fatal
+          && speech.segments.some((s) => String(s).trim())) {
+        speechStopRequested = true;
+        speech.ended = true;
+        speech.events.push('android-natural-end');
+        decideSpeech();
+        return;
+      }
       if (!speechStopRequested && !cancelled && !finished && !fatal && speech.restarts < 60) {
         const quick = Date.now() - speech.startedAt < 400; // قفل فوري = مشكلة، مانعملش loop سريع
         speech.restarts += 1;
@@ -463,7 +489,7 @@ export function startVoiceCapture(options = {}) {
       onStatus('uploading');
       const mimeType = (blob.type || 'audio/webm').split(';')[0];
       const audioBase64 = await blobToBase64(blob);
-      const out = await classifyAudio({ audioBase64, mimeType });
+      const out = await classifyAudio({ audioBase64, mimeType, lang: voiceLang });
       if (out && out.success !== false) {
         return finish({
           ok: true,

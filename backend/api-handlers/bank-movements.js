@@ -1,7 +1,7 @@
 // backend/api-handlers/bank-movements.js
 // شاشة "الحركات البنكية": سحب/إيداع/تحويل محايدة، بالإضافة لحالات "تحتاج مراجعة" الغامضة.
 //
-// GET  ?route=bank-movements&period=month|week|all   -> يرجع الحركات + هل فيه بنوك مربوطة أصلاً
+// GET  ?route=bank-movements&period=month|week|all|month:YYYY-MM   -> يرجع الحركات + هل فيه بنوك مربوطة أصلاً
 // POST ?route=bank-movements action=resolve { eventId, resolution } -> يقفل حالة "تحتاج مراجعة"
 
 import { autoSettleIfBalanced } from '../../lib/debts.js';
@@ -35,10 +35,8 @@ export default async function handler(req, res) {
 
   if (req.method === 'GET') {
     const period = String(req.query?.period || 'month');
-    // month=YYYY-MM: كل حركات شهر معيّن (اختيار الشهر من الشاشة)
-    const month = req.query?.month ? String(req.query.month) : null;
-    const result = await listBankMovements(telegramUserId, { period, month });
-    if (!result.ok) return res.status(result.badRequest ? 400 : 500).json(result);
+    const result = await listBankMovements(telegramUserId, { period });
+    if (!result.ok) return res.status(500).json(result);
 
     const { data: profile } = await supabase
       .from('profiles')
@@ -62,9 +60,6 @@ export default async function handler(req, res) {
       else if (m.event_type === 'transfer') acc.transfer += Number(m.amount);
       return acc;
     }, { withdrawal: 0, deposit: 0, transfer: 0 });
-    // إجمالي مبالغ كل حركات الفترة (أي نوع) + عددها
-    totals.all = movements.reduce((sum, m) => sum + Number(m.amount || 0), 0);
-    totals.count = movements.length;
 
     // أسماء الحسابات (لو عندك أكتر من حساب في نفس البنك) — لو الجدول لسه مش موجود نكمل من غيره
     let aliases = [];
@@ -81,7 +76,6 @@ export default async function handler(req, res) {
       movements,
       aliases,
       totals,
-      month,
       bankLinkingEnabled: Boolean(profile?.sms_webhook_enabled),
     });
   }

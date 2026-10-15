@@ -109,8 +109,7 @@
   .field input:focus{ outline:none; border-color:var(--green); }
   .field-hint{ color:var(--muted); font-size:11px; line-height:1.7; margin-top:6px; text-align:right; }
   .field-hint::before{ content:'ⓘ'; color:var(--green-deep); margin-left:5px; }
-  /* Google OAuth محفوظ للتفعيل لاحقًا: امسح السطر ده بس عشان يظهر الزرار */
-  #google-auth-divider, #googleSignInBtn, #google-auth-hint{ display:none !important; }
+  /* Google OAuth متاح مباشرة داخل onboarding */
   .btn-google{ display:flex; align-items:center; justify-content:center; gap:10px; width:100%; background:#fff; color:var(--ink); border:1.5px solid var(--line); font-family:'Cairo',sans-serif; font-weight:700; }
   .btn-google:active{ background:#F6F8F7; }
   .btn-google svg{ width:20px; height:20px; flex:none; }
@@ -992,10 +991,10 @@
     googleSignInBtn.disabled = true;
     googleSignInBtn.innerHTML = '<span class="spinner"></span> بنحوّلك لـ Google...';
     try {
-      const { error } = await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: `${window.location.origin}/app/dabbar-onboarding.html` } });
-      if (error) showAuthError(error.message || 'تعذر تسجيل الدخول بحساب Google.');
+      const { error } = await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: `${window.location.origin}/app/dabbar-onboarding.html`, queryParams: { prompt: 'select_account' } } });
+      if (error) showAuthError(/provider is not enabled|Unsupported provider|not enabled/i.test(error.message || '') ? 'تسجيل Google غير مفعّل في إعدادات المصادقة حاليًا.' : (error.message || 'تعذر تسجيل الدخول بحساب Google.'));
     } catch (error) {
-      showAuthError(error.message || 'تعذر تسجيل الدخول بحساب Google.');
+      showAuthError(/provider is not enabled|Unsupported provider|not enabled/i.test(error.message || '') ? 'تسجيل Google غير مفعّل في إعدادات المصادقة حاليًا.' : (error.message || 'تعذر تسجيل الدخول بحساب Google.'));
     } finally {
       authSubmitting = false;
       googleSignInBtn.disabled = false;

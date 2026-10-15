@@ -402,9 +402,7 @@ async function handleEntryDraft(userId, body, res) {
     }
     voiceUsageCharged = true;
 
-    // لغة الكلام اللي المستخدم اختارها (ar | en | auto) — الإنجليزي بيتفرّغ بالإنجليزي مش بيتحوّل لعربي
-    const voiceLang = ['ar', 'en', 'auto'].includes(String(body.voiceLang || '').toLowerCase()) ? String(body.voiceLang).toLowerCase() : 'ar';
-    const transcript = await transcribeAndClassifyVoiceBase64(body.audioBase64, body.mimeType || 'audio/webm', { lang: voiceLang });
+    const transcript = await transcribeAndClassifyVoiceBase64(body.audioBase64, body.mimeType || 'audio/webm');
     if (!transcript.success) {
       // الفشل مش غلطة المستخدم (مشكلة تفريغ صوت) — نرجّعله المحاولة اللي اتخصمت من عداده
       await refundUsage(userId, 'voice');

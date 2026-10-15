@@ -1154,8 +1154,6 @@
         html[data-theme="light"] .available-count-badge.gold { background: rgba(14,143,104,.1); border: 1px solid rgba(14,143,104,.25); color: #0e8f68; }
 
         /* ===== المحفظة الاستثمارية — واجهة بريميوم متوافقة مع الوضعين ===== */
-        .quick-voice-lang-btn { padding: .22rem .75rem; border-radius: 999px; font-size: 11px; font-weight: 800; font-family: inherit; cursor: pointer; border: 1px solid var(--pm-hairline, rgba(148,163,184,.4)); background: transparent; color: var(--pm-muted, #64748b); transition: background .15s, color .15s, border-color .15s; }
-        .quick-voice-lang-btn.on { background: var(--pm-gold-bright, #16a879); border-color: var(--pm-gold-bright, #16a879); color: #fff; }
         #portfolio-collapsible {
             --portfolio-accent: #16a879;
             --portfolio-accent-strong: #085041;
@@ -3029,7 +3027,12 @@
         .dabbar-savings-cta-row { display:none !important; }
         .dabbar-savings-detail2-inner { color: var(--pm-ink-dim, #29483c) !important; }
         @media (max-width: 640px) { .quick-manual-sheet-shell { padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px)); } }
-    </style>
+    
+        /* توحيد ألوان كل خانات تبويب حسابي — نفس سطح البطاقة والنصوص في الوضعين */
+        #tab-account .acct-sub-collapse, #tab-account .dabbar-telegram-card, #tab-account #data-import-card, #tab-account #bank-statement-import-card, #tab-account #account-referral-card, #tab-account #quick-add-feature-card, #tab-account #dbo-reopen-btn { background: var(--pm-surface-hi, var(--cs-panel)) !important; border-color: var(--pm-hairline, var(--cs-line)) !important; color: var(--pm-ink, var(--db-ink)) !important; }
+        #tab-account .acct-sub-summary, #tab-account .acct-sub-body, #tab-account .dabbar-telegram-title, #tab-account .text-slate-200, #tab-account .text-slate-300 { color: var(--pm-ink, var(--db-ink)) !important; }
+        #tab-account .text-slate-400, #tab-account .text-slate-500, #tab-account .dabbar-telegram-status, #tab-account .dabbar-telegram-note { color: var(--pm-muted, var(--db-muted)) !important; }
+</style>
     <style>
         #bank-movements-sheet.flex { display: flex; }
         .bm-filter-btn { background: rgba(30,41,59,.6); color: #94a3b8; border: 1px solid rgba(148,163,184,.18); }
@@ -4338,100 +4341,6 @@ html[data-theme="dark"] .pf-sell-preview.up{color:#6fe3b4}html[data-theme="dark"
 .portfolio-body.pf-focus #portfolio-asset-list,.portfolio-body.pf-focus #portfolio-filters,.portfolio-body.pf-focus #portfolio-realized,.portfolio-body.pf-focus #portfolio-concentration,.portfolio-body.pf-focus #portfolio-reminders,.portfolio-body.pf-focus #portfolio-empty,.portfolio-body.pf-focus .portfolio-note{display:none!important}
 .pf-empty-presets{display:flex;gap:.4rem;justify-content:center;flex-wrap:wrap;margin-top:.6rem}
 </style>
-    <style id="dabbar-monthly-order-preview-2026">
-    /* ترتيب تاب "شهري" زي بريفيو Monthly_preview1: الكروت بتترتب بالـ order بدل ما الـ HTML يتحرك.
-       الكروت اللي مش في القايمة (الأقسام الإضافية) بتفضل في آخر الصفحة بنفس ترتيبها الأصلي. */
-    #tab-monthly.active { display: flex !important; flex-direction: column; gap: 1rem; margin-top: 0; }
-    #tab-monthly > * { margin-top: 0 !important; min-width: 0; }
-    #tab-monthly > * { order: 50; }
-    #tab-monthly > #daily-reminder-card { order: 1 !important; }
-    #tab-monthly > #active-days-card { order: 2 !important; }
-    #tab-monthly > #push-nudge-banner { order: 3 !important; }
-    #tab-monthly > #quick-entry-card { order: 4 !important; }
-    #tab-monthly > #available-collapsible { order: 5 !important; }
-    #tab-monthly > #monthly-categories-card { order: 6 !important; }
-    #tab-monthly > #monthly-goals-card { order: 7 !important; }
-    #tab-monthly > #portfolio-collapsible { order: 8 !important; }
-    #tab-monthly > #bank-movements-card { order: 9 !important; }
-    #tab-monthly > #savings-opportunities-card { order: 10 !important; }
-    #tab-monthly > #period-summary-card { order: 11 !important; }
-    #tab-monthly > #personalized-insight-card { order: 12 !important; }
-    #tab-monthly > #monthly-tip-card { order: 13 !important; }
-    #tab-monthly > #footer-cta { order: 14 !important; }
-    </style>
-    <style id="dabbar-daily-order-preview-2026">
-    /* ترتيب تاب "يومي" زي بريفيو Daily_2.html.
-       الداشبورد كان بيجمّع الكروت جوه أكورديونات ("المتبقي من الشهر"، "حصالة اليوم"، "تفاصيل يومك")
-       وده مش موجود في البريفيو، فبنخلّي الأكورديونات دي شفافة (display: contents) والكروت تبان كلها
-       مباشرة بالترتيب الجديد. الـ HTML والـ JS مالمسوش، بس الشكل بقى زي البريفيو. */
-    #tab-daily.active { display: flex !important; flex-direction: column; gap: 1rem; margin-top: 0; }
-    #tab-daily > * { margin-top: 0 !important; min-width: 0; order: 50; }
-    #tab-daily #daily-focus-carousel,
-    #tab-daily #daily-focus-carousel .daily-focus-details,
-    #tab-daily #daily-focus-carousel .daily-focus-details-body,
-    #tab-daily #daily-details,
-    #tab-daily #daily-details .daily-details-body { display: contents !important; }
-    #tab-daily #daily-focus-carousel .daily-focus-details > summary,
-    #tab-daily #daily-details > summary { display: none !important; }
-    #tab-daily #daily-focus-carousel,
-    #tab-daily #daily-details { order: 0 !important; }
-    #tab-daily #daily-spend-card { order: 1 !important; }
-    #tab-daily #daily-items-card { order: 2 !important; }
-    #tab-daily #daily-flow-card { order: 3 !important; }
-    #tab-daily #salary-countdown-card { order: 4 !important; }
-    #tab-daily #salary-countdown-empty { order: 4 !important; }
-    #tab-daily #piggybank-card { order: 5 !important; }
-    #tab-daily #piggybank-empty { order: 5 !important; }
-    #tab-daily #daily-wrapped-open { order: 6 !important; }
-    #tab-daily #personalized-insight-card-daily { order: 7 !important; }
-    #tab-daily #daily-explainer-card { order: 8 !important; }
-    #tab-daily #download-daily-pdf { order: 9 !important; }
-    #tab-daily #daily-pdf-note { order: 9 !important; }
-    </style>
-    <style id="dabbar-assistant-order-preview-2026">
-    /* ترتيب تاب "مساعد" زي بريفيو مساعد_بريفيو_.html: الهيرو، الاقتراح، الهدف، اسأل دبّر، ثم الباقي.
-       الكروت مش متقسمة لتابات زي البريفيو، فبنحافظ على الكروت كلها في نفس التاب. */
-    #tab-assistant.active { display: flex !important; flex-direction: column; gap: 1rem; margin-top: 0; }
-    #tab-assistant > * { margin-top: 0 !important; min-width: 0; order: 50; }
-    #tab-assistant #assistant-hero-card { order: 1 !important; }
-    #tab-assistant #asst-suggestion-card { order: 2 !important; }
-    #tab-assistant #assistant-goals-card { order: 3 !important; }
-    #tab-assistant #assistant-chat-card { order: 4 !important; }
-    #tab-assistant #assistant-forecast-card { order: 5 !important; }
-    #tab-assistant #assistant-receipt-card { order: 6 !important; }
-    #tab-assistant #asst-wrapped-open { order: 7 !important; }
-    </style>
-    <style id="dabbar-account-order-preview-2026">
-    /* ترتيب تاب "حسابي" زي بريفيو حسابي.html.
-       الداشبورد بيجمّع الكروت جوه أقسام قابلة للطي (البنوك، المشاركة، التفضيلات...) وده مش موجود في البريفيو،
-       فبنخلّي الأقسام دي شفافة (display: contents) والكروت تبان مباشرة بالترتيب الجديد.
-       تسجيل الخروج في الآخر خالص. الـ HTML والـ JS مالمسوش. */
-    #tab-account.active { display: flex !important; flex-direction: column; gap: 1rem; margin-top: 0; }
-    #tab-account > * { margin-top: 0 !important; min-width: 0; order: 50; }
-    #tab-account .account-organization-section,
-    #tab-account .account-organization-section .account-section-body { display: contents !important; }
-    #tab-account .account-organization-section > summary { display: none !important; }
-    #tab-account .account-organization-section { order: 0 !important; }
-    #tab-account #account-profile-card { order: 1 !important; }
-    #tab-account #account-sub-collapse { order: 2 !important; }
-    #tab-account #account-currency-card { order: 3 !important; }
-    #tab-account #honor-board-card { order: 4 !important; }
-    #tab-account #bank-accounts-card { order: 5 !important; }
-    #tab-account #quick-add-feature-card { order: 5 !important; }
-    #tab-account #account-telegram-card { order: 5 !important; }
-    #tab-account #data-import-card { order: 5 !important; }
-    #tab-account #bank-statement-import-card { order: 5 !important; }
-    #tab-account #account-referral-card { order: 6 !important; }
-    #tab-account #account-theme-toggle { order: 7 !important; }
-    #tab-account #install-notice { order: 7 !important; }
-    #tab-account #account-lang-card { order: 8 !important; }
-    #tab-account #push-notifications-card { order: 9 !important; }
-    #tab-account #in-app-notifications-card { order: 10 !important; }
-    #tab-account #account-privacy-card { order: 11 !important; }
-    #tab-account #account-privacy-policy { order: 12 !important; }
-    #tab-account #account-about { order: 13 !important; }
-    #tab-account #account-logout-btn { order: 99 !important; }
-    </style>
 </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col overflow-hidden">
     <script src="./dabbar-offline-store.js"></script>
@@ -4555,7 +4464,7 @@ html[data-theme="dark"] .pf-sell-preview.up{color:#6fe3b4}html[data-theme="dark"
                 <div id="quick-expense-content"><div id="quick-expense-detail" class="qe2-detail">
                 <div id="quick-entry-subscription-lock" class="hidden items-center justify-between gap-3 rounded-2xl border px-3 py-2.5 text-[11px]" style="border-color:rgba(8,122,89,0.4);border-color:color-mix(in srgb,var(--pm-gold-bright) 40%,transparent);background:rgb(230,242,238);background:color-mix(in srgb,var(--pm-gold-bright) 10%,var(--pm-surface-hi));color:var(--pm-ink);"><div class="flex items-center gap-2"><span id="quick-entry-vip-badge" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-lg" style="background:linear-gradient(145deg,var(--pm-gold-bright),var(--pm-gold));color:var(--pm-ink);">💎</span><span><strong class="block" style="color:var(--pm-gold-bright);">التصنيف الذكي بقى ميزة VIP</strong><span style="color:var(--pm-muted);">الإدخال اليدوي شغال زي العادة — فعّل VIP للصوت والفواتير والـ AI.</span></span></div><button id="quick-entry-open-subscription" type="button" class="shrink-0 rounded-xl px-3 py-2 text-[10px] font-black" style="background:linear-gradient(145deg,var(--pm-gold-bright),var(--pm-gold));color:var(--pm-ink);">فعّل VIP</button></div>
                 
-                <div class="grid grid-cols-3 gap-2 q-modes"><button id="quick-entry-text" class="quick-entry-tab rounded-2xl border px-2 py-3 text-center shadow-sm transition" type="button" style="border-color:rgba(8,122,89,0.5);border-color:color-mix(in srgb,var(--pm-gold-bright) 50%,transparent);background:linear-gradient(145deg,rgb(211,231,225),var(--pm-surface-hi));background:linear-gradient(145deg,color-mix(in srgb,var(--pm-gold-bright) 18%,var(--pm-surface-hi)),var(--pm-surface-hi));"><span class="mx-auto mb-1 flex h-9 w-9 items-center justify-center rounded-full text-xl" style="background:rgba(8,122,89,0.18);background:color-mix(in srgb,var(--pm-gold-bright) 18%,transparent);">✍️</span><span class="block text-[11px] font-bold" style="color:var(--pm-ink);">كتابة</span></button><button id="quick-entry-voice" class="quick-entry-tab rounded-2xl border px-2 py-3 text-center shadow-sm transition" type="button" style="border-color:var(--pm-hairline);background:var(--pm-surface-hi);"><span class="mx-auto mb-1 flex h-9 w-9 items-center justify-center rounded-full text-xl" style="background:rgba(8,122,89,0.12);background:color-mix(in srgb,var(--pm-gold-bright) 12%,transparent);">🎙️</span><span class="block text-[11px] font-bold" style="color:var(--pm-ink);">صوت</span></button><button id="quick-entry-invoice" class="quick-entry-tab rounded-2xl border px-2 py-3 text-center shadow-sm transition" type="button" style="border-color:var(--pm-hairline);background:var(--pm-surface-hi);"><span class="mx-auto mb-1 flex h-9 w-9 items-center justify-center rounded-full text-xl" style="background:rgba(8,122,89,0.12);background:color-mix(in srgb,var(--pm-gold-bright) 12%,transparent);">📸</span><span class="block text-[11px] font-bold" style="color:var(--pm-ink);">فاتورة</span></button></div><div id="quick-voice-lang" class="flex items-center justify-center gap-2" role="group" aria-label="لغة الصوت" style="margin:-.1rem 0 .1rem;"><span class="text-[10px]" style="color:var(--pm-muted);">🎙️ لغة الصوت:</span><button type="button" class="quick-voice-lang-btn" data-vlang="ar">عربي</button><button type="button" class="quick-voice-lang-btn" data-vlang="en">English</button></div><div class="grid grid-cols-2 gap-2 quick-secondary-row"><button id="quick-entry-manual" type="button" class="quick-secondary-btn"><span aria-hidden="true">✍️</span><span>يدوي من غير AI</span></button><button id="quick-entry-multi-btn" type="button" class="quick-secondary-btn"><span aria-hidden="true">🧾</span><span>فاتورة طويلة</span></button></div><p class="q-foot text-[10px]" style="color:var(--pm-muted);"><span class="gem" aria-hidden="true">💎</span><span>الصوت والفاتورة الذكية VIP — الكتابة والتسجيل اليدوي متاحين دايمًا.</span></p>
+                <div class="grid grid-cols-3 gap-2 q-modes"><button id="quick-entry-text" class="quick-entry-tab rounded-2xl border px-2 py-3 text-center shadow-sm transition" type="button" style="border-color:rgba(8,122,89,0.5);border-color:color-mix(in srgb,var(--pm-gold-bright) 50%,transparent);background:linear-gradient(145deg,rgb(211,231,225),var(--pm-surface-hi));background:linear-gradient(145deg,color-mix(in srgb,var(--pm-gold-bright) 18%,var(--pm-surface-hi)),var(--pm-surface-hi));"><span class="mx-auto mb-1 flex h-9 w-9 items-center justify-center rounded-full text-xl" style="background:rgba(8,122,89,0.18);background:color-mix(in srgb,var(--pm-gold-bright) 18%,transparent);">✍️</span><span class="block text-[11px] font-bold" style="color:var(--pm-ink);">كتابة</span></button><button id="quick-entry-voice" class="quick-entry-tab rounded-2xl border px-2 py-3 text-center shadow-sm transition" type="button" style="border-color:var(--pm-hairline);background:var(--pm-surface-hi);"><span class="mx-auto mb-1 flex h-9 w-9 items-center justify-center rounded-full text-xl" style="background:rgba(8,122,89,0.12);background:color-mix(in srgb,var(--pm-gold-bright) 12%,transparent);">🎙️</span><span class="block text-[11px] font-bold" style="color:var(--pm-ink);">صوت</span></button><button id="quick-entry-invoice" class="quick-entry-tab rounded-2xl border px-2 py-3 text-center shadow-sm transition" type="button" style="border-color:var(--pm-hairline);background:var(--pm-surface-hi);"><span class="mx-auto mb-1 flex h-9 w-9 items-center justify-center rounded-full text-xl" style="background:rgba(8,122,89,0.12);background:color-mix(in srgb,var(--pm-gold-bright) 12%,transparent);">📸</span><span class="block text-[11px] font-bold" style="color:var(--pm-ink);">فاتورة</span></button></div><div class="grid grid-cols-2 gap-2 quick-secondary-row"><button id="quick-entry-manual" type="button" class="quick-secondary-btn"><span aria-hidden="true">✍️</span><span>يدوي من غير AI</span></button><button id="quick-entry-multi-btn" type="button" class="quick-secondary-btn"><span aria-hidden="true">🧾</span><span>فاتورة طويلة</span></button></div><p class="q-foot text-[10px]" style="color:var(--pm-muted);"><span class="gem" aria-hidden="true">💎</span><span>الصوت والفاتورة الذكية VIP — الكتابة والتسجيل اليدوي متاحين دايمًا.</span></p>
                 <input type="file" id="quick-entry-multi-input" accept="image/*" multiple class="hidden">
                 <input type="file" id="quick-entry-invoice-input" accept="image/*" class="hidden">
                 <div id="quick-entry-scanning" class="hidden dabbar-scan-box rounded-2xl p-3 text-center"><div class="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl dabbar-scan-box-icon text-xl shadow-sm"><span style="display:inline-block;animation:dabbar-scan-spin 1s linear infinite">⟳</span></div><p class="text-xs font-bold dabbar-scan-box-title">بنقرأ الفاتورة...</p><p class="mt-1 text-[10px] dabbar-scan-box-sub">دبّر بيستخرج المبلغ والأصناف</p></div>
@@ -5515,7 +5424,7 @@ html[data-theme="dark"] .pf-sell-preview.up{color:#6fe3b4}html[data-theme="dark"
         <!-- ===================== TAB: ASSISTANT (دبّر الذكي) ===================== -->
         <div class="tab-content p-5 space-y-4" id="tab-assistant">
 
-            <div id="assistant-hero-card" class="bg-gradient-to-br from-emerald-950/60 to-slate-900 border border-emerald-500/30 rounded-3xl p-4 text-center space-y-1.5 shadow-lg">
+            <div class="bg-gradient-to-br from-emerald-950/60 to-slate-900 border border-emerald-500/30 rounded-3xl p-4 text-center space-y-1.5 shadow-lg">
                 <span class="text-xs text-emerald-400 font-semibold block">مساعدك المالي الشخصي</span>
                 <h3 class="text-xl font-black text-slate-100">دبّر بيفكر معاك 🧠</h3>
                 <p class="text-[11px] text-slate-400">اقتراحات وتوقعات وشات مبني على بياناتك الحقيقية بس</p>
@@ -5539,7 +5448,7 @@ html[data-theme="dark"] .pf-sell-preview.up{color:#6fe3b4}html[data-theme="dark"
             </div>
 
             <!-- توقّع نهاية الشهر -->
-            <div id="assistant-forecast-card" class="bg-slate-950/60 border border-slate-800 rounded-2xl p-4 flex items-center gap-3">
+            <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-4 flex items-center gap-3">
                 <div class="w-9 h-9 rounded-full bg-slate-800 text-slate-300 flex items-center justify-center text-sm shrink-0 border border-slate-700">📈</div>
                 <p class="text-xs text-slate-300 leading-relaxed" id="asst-projection-text">جاري حساب التوقع...</p>
             </div>
@@ -5618,7 +5527,7 @@ html[data-theme="dark"] .pf-sell-preview.up{color:#6fe3b4}html[data-theme="dark"
 
 
             <!-- Smart Receipt Scanner -->
-            <div id="assistant-receipt-card" class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-2.5">
+            <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-2.5">
                 <h4 class="text-xs font-bold text-slate-300 flex items-center gap-1.5 justify-between">
                     <span class="flex items-center gap-1.5">📸 امسح فاتورة</span>
                     <span id="asst-receipt-usage" class="hidden text-[9.5px] font-semibold text-slate-500 bg-slate-900 border border-slate-800 rounded-full px-2 py-0.5"></span>
@@ -6870,7 +6779,7 @@ html[data-theme="dark"] .pf-sell-preview.up{color:#6fe3b4}html[data-theme="dark"
                 <p id="bank-movements-empty-msg" class="text-[12.5px] text-slate-400 leading-relaxed">مفيش حركات في الفترة دي.</p>
             </div>
             <div id="bank-movements-content" class="hidden">
-                <div class="bm-period flex gap-1 rounded-xl p-1 mb-3" id="bank-movements-periods">
+                <div class="bm-period-toolbar flex items-center gap-2 mb-3"><div class="bm-period flex gap-1 rounded-xl p-1 flex-1" id="bank-movements-periods">
                     <button type="button" class="bm-period-btn active flex-1 rounded-lg py-1.5 text-[11px] font-bold" data-period="month">الشهر ده</button>
                     <button type="button" class="bm-period-btn flex-1 rounded-lg py-1.5 text-[11px] font-bold" data-period="week">آخر ٧ أيام</button>
                     <button type="button" class="bm-period-btn flex-1 rounded-lg py-1.5 text-[11px] font-bold" data-period="all">الكل</button>
@@ -6878,7 +6787,7 @@ html[data-theme="dark"] .pf-sell-preview.up{color:#6fe3b4}html[data-theme="dark"
                 <div class="bm-summary rounded-2xl p-3.5 mb-3">
                     <div class="flex items-end justify-between gap-2 mb-3">
                         <div><div class="text-[10px] text-slate-400 mb-0.5">صافي الحركة</div><div id="bm-stat-net" class="text-lg font-black text-slate-100">0 ج.م</div></div>
-                        <div class="text-[10px] text-slate-500 text-left" id="bm-stat-count"></div>
+                        <div class="text-[10px] text-slate-500 text-left"><div id="bm-stat-count"></div><div id="bm-stat-total" class="font-bold text-slate-300 mt-0.5"></div></div>
                     </div>
                     <div class="grid grid-cols-3 gap-2">
                         <div class="rounded-xl bm-neg-bg px-2 py-2 text-center"><div class="text-[10px] bm-neg mb-0.5">خارج</div><div id="bm-stat-withdrawal" class="text-[12px] font-bold bm-neg">0</div></div>
@@ -12122,7 +12031,7 @@ html[data-theme="dark"] .pf-sell-preview.up{color:#6fe3b4}html[data-theme="dark"
 
         function getPortfolioAssetPresentation(asset) {
             const searchable = `${asset?.name || ''} ${asset?.sub_label || ''}`.trim().toLowerCase();
-            let savedIcon = null; try { savedIcon = localStorage.getItem(`dabbar-portfolio-icon:${String(asset?.name || '').trim().toLowerCase()}`); } catch (_) {}
+            const savedIcon = localStorage.getItem(`dabbar-portfolio-icon:${String(asset?.name || '').trim().toLowerCase()}`);
             if (/شهادة|شهادات/.test(searchable)) return { tone: 'cert', icon: PORTFOLIO_ASSET_ICONS.cert };
             if (/وديعة|ودائع/.test(searchable)) return { tone: 'deposit', icon: PORTFOLIO_ASSET_ICONS.deposit };
             if (/بيتكوين|bitcoin|btc/.test(searchable)) return { tone: 'crypto-btc', icon: savedIcon || PORTFOLIO_ASSET_ICONS.bitcoin };
@@ -12457,13 +12366,8 @@ function pfFmtWhole(n) {
             pfFitText(sheetTotalEl, pfFmtWhole(data.total || 0), [[10, '1.4rem'], [13, '1.2rem'], [16, '1.02rem']]);
             if (sheetCountEl) { const n = (data.assets || []).length; sheetCountEl.textContent = `${n} ${n === 1 ? 'أصل' : 'أصول'}`; }
             listEl.innerHTML = '';
-            // أي خطأ في الشريط أو الإضافات (فلاتر/ملاحظات) ما يمنعش القايمة نفسها من الظهور
-            try { renderPortfolioPreviewStrip(data); } catch (err) { console.error('portfolio preview strip failed', err); }
-            try { pfRenderExtras(data); } catch (err) { console.error('portfolio extras failed', err); }
-            if (data.loadError && (!data.assets || data.assets.length === 0)) {
-                if (emptyEl) { emptyEl.classList.remove('hidden'); }
-                console.error('portfolio: السيرفر مقدرش يقرا الأصول (راجع لوج getPortfolio وملف sql/portfolio-ledger-v4.sql)');
-            }
+            renderPortfolioPreviewStrip(data);
+            pfRenderExtras(data);
             if (!data.assets || data.assets.length === 0) {
                 emptyEl?.classList.remove('hidden');
                 return;
@@ -12471,7 +12375,6 @@ function pfFmtWhole(n) {
 
             emptyEl?.classList.add('hidden');
             pfVisibleAssets(data.assets).forEach((asset) => {
-              try {
                 const wrap = template.content.firstElementChild.cloneNode(true);
                 const node = wrap.querySelector('.portfolio-asset');
                 const presentation = getPortfolioAssetPresentation(asset);
@@ -12526,7 +12429,6 @@ function pfFmtWhole(n) {
                     deletePortfolioAssetWithConfirm(asset, event);
                 });
                 listEl.appendChild(wrap);
-              } catch (err) { console.error('portfolio asset render failed', asset, err); }
             });
         }
 
@@ -14144,6 +14046,8 @@ function pf2YieldFields() {
         let bmMovements = [];
         let bmFilter = 'all';
         let bmPeriod = 'month';
+        const bmMonthPicker = document.getElementById('bm-month-picker');
+        if (bmMonthPicker) { const now = new Date(); bmMonthPicker.value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`; }
         let bmAliases = [];
         let bmSearch = '';
         let bmLoadedOnce = false;
@@ -14177,7 +14081,9 @@ function pf2YieldFields() {
             bmNetEl.textContent = `${bmNet > 0 ? '+' : bmNet < 0 ? '-' : ''}${bmFmt(Math.abs(bmNet))} ج.م`;
             bmNetEl.className = `text-lg font-black ${bmNet > 0 ? 'text-emerald-400' : bmNet < 0 ? 'text-rose-400' : 'text-slate-100'}`;
             document.getElementById('bm-stat-count').textContent = `${bmMovements.length} حركة`;
-            document.getElementById('bm-subtitle').textContent = `${bmMovements.length} حركة · ${bmPeriod === 'week' ? 'آخر ٧ أيام' : bmPeriod === 'all' ? 'كل الفترات' : 'الشهر ده'}`;
+            const bmTotal = Number(data.totals.withdrawal || 0) + Number(data.totals.deposit || 0) + Number(data.totals.transfer || 0);
+            document.getElementById('bm-stat-total').textContent = `إجمالي الحركات: ${bmFmt(bmTotal)} ج.م`;
+            document.getElementById('bm-subtitle').textContent = `${bmMovements.length} حركة · ${bmPeriod === 'week' ? 'آخر ٧ أيام' : bmPeriod === 'all' ? 'كل الفترات' : (bmPeriod.startsWith('month:') ? `شهر ${bmPeriod.slice(6)}` : 'الشهر ده')}`;
             document.getElementById('bm-stat-withdrawal').textContent = `${bmFmt(data.totals.withdrawal)} ج.م`;
             document.getElementById('bm-stat-deposit').textContent = `${bmFmt(data.totals.deposit)} ج.م`;
             document.getElementById('bm-stat-transfer').textContent = `${bmFmt(data.totals.transfer)} ج.م`;
@@ -14391,6 +14297,7 @@ function pf2YieldFields() {
                 bmRenderList();
             });
         });
+        document.getElementById('bm-month-picker')?.addEventListener('change', (e) => { if (e.target.value) { document.querySelectorAll('#bank-movements-periods .bm-period-btn').forEach((b) => b.classList.remove('active')); bmPeriod = `month:${e.target.value}`; bmSourceFilter = 'all'; loadBankMovements(); } });
         document.getElementById('bank-movements-periods')?.querySelectorAll('.bm-period-btn').forEach((btn) => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('#bank-movements-periods .bm-period-btn').forEach((b) => b.classList.toggle('active', b === btn));
@@ -14582,28 +14489,6 @@ function pf2YieldFields() {
         };
         // ============ مسار الصوت الجديد: Web Speech (مجاني) ثم فولباك للسيرفر — voice-pipeline.client.js ============
         let quickVoiceSession = null, voicePipelineMod = null;
-        // ============ لغة الصوت: عربي أو إنجليزي. Web Speech مبيكتشفش اللغة لوحده، فالمستخدم هو اللي بيختار (والاختيار بيتحفظ). الافتراضي = لغة التطبيق ============
-        function getQuickVoiceLang() {
-            try { const v = localStorage.getItem('dabbar-voice-lang'); if (v === 'en' || v === 'ar') return v; } catch (_) {}
-            return window.APP_LANG === 'en' ? 'en' : 'ar';
-        }
-        function setQuickVoiceLang(lang) {
-            try { localStorage.setItem('dabbar-voice-lang', lang === 'en' ? 'en' : 'ar'); } catch (_) {}
-            syncQuickVoiceLangUI();
-        }
-        function syncQuickVoiceLangUI() {
-            const cur = getQuickVoiceLang();
-            document.querySelectorAll('.quick-voice-lang-btn').forEach((b) => {
-                const on = b.dataset.vlang === cur;
-                b.classList.toggle('on', on);
-                b.setAttribute('aria-pressed', String(on));
-            });
-        }
-        document.querySelectorAll('.quick-voice-lang-btn').forEach((b) => b.addEventListener('click', () => {
-            if (quickVoiceSession) return; // مفيش تغيير لغة وسط تسجيل شغال
-            setQuickVoiceLang(b.dataset.vlang);
-        }));
-        syncQuickVoiceLangUI();
         // ============ موجة صوت متحركة أثناء Web Speech (الميكروفون مشغول بالتعرّف فمنفتحوش تاني عليه) ============
         let speechWaveRaf = null, speechWaveActiveUntil = 0;
         function startSpeechWave() {
@@ -14656,9 +14541,7 @@ function pf2YieldFields() {
             quickEntryVoiceCancelled = false;
             quickShow('quick-entry-voice-preview', false);
             const stopTimer = () => { clearInterval(quickEntryTimer); quickEntryTimer = null; };
-            const voiceLang = getQuickVoiceLang();
             const session = mod.startVoiceCapture({
-                lang: voiceLang,
                 onActivity: (on) => { speechWaveActiveUntil = on ? performance.now() + 900 : 0; },
                 onStatus: (s) => {
                     if (s === 'listening') {
@@ -14679,12 +14562,12 @@ function pf2YieldFields() {
                     }
                 },
                 classifyText: async (text) => {
-                    try { const r = await asstApi('entry_draft', { text, voiceLang }); return { transactions: r.drafts || [], transcript: r.transcript }; }
+                    try { const r = await asstApi('entry_draft', { text }); return { transactions: r.drafts || [], transcript: r.transcript }; }
                     catch (e) { lastError = e; throw e; }
                 },
                 classifyAudio: async ({ audioBase64, mimeType }) => {
                     try {
-                        const r = await asstApi('entry_draft', { audioBase64: `data:${mimeType};base64,${audioBase64}`, mimeType, audioDurationSeconds: quickEntrySeconds, voiceLang });
+                        const r = await asstApi('entry_draft', { audioBase64: `data:${mimeType};base64,${audioBase64}`, mimeType, audioDurationSeconds: quickEntrySeconds });
                         return { success: true, transcript: r.transcript, transactions: r.drafts || [], provider: r.provider || null };
                     } catch (e) { lastError = e; throw e; }
                 },
@@ -14710,7 +14593,7 @@ function pf2YieldFields() {
             if (!blob) return;
             quickStatusCycle(['🎙️ بنسمع كلامك', '🧠 بنفهم العملية', '📝 بنجهز المراجعة'], 450);
             const reader = new FileReader();
-            reader.onloadend = () => analyzeQuickEntry({ audioBase64: reader.result, mimeType: blob.type, audioDurationSeconds: quickEntrySeconds, voiceLang: getQuickVoiceLang() });
+            reader.onloadend = () => analyzeQuickEntry({ audioBase64: reader.result, mimeType: blob.type, audioDurationSeconds: quickEntrySeconds });
             reader.readAsDataURL(blob);
         }
         document.getElementById('quick-entry-voice-send')?.addEventListener('click', () => {

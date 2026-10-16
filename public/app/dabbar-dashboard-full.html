@@ -3983,14 +3983,14 @@ html #bank-movements-card:hover, html[data-theme] #bank-movements-card:hover { b
 /* ---------- حسابي: "الوصول السريع" و"تعرف على دبّر" بنفس لون باقي الخانات ---------- */
 html[data-theme="light"] .tab-content > section#quick-access-card[class][class],
 html:not([data-theme="light"]) .tab-content > section#quick-access-card[class][class],
-html[data-theme] #dbo-reopen-btn[class][class] {
+html[data-theme] #dbo-reopen-btn-legacy[class][class] {
     background: var(--db-surface-soft) !important;
     border: 1px solid rgba(148,163,184,.2) !important;
     border-radius: 1.35rem !important;
     box-shadow: none !important;
 }
 html:not([data-theme="light"]) .tab-content > section#quick-access-card[class][class],
-html:not([data-theme="light"]) #dbo-reopen-btn[class][class] { border-color: rgba(244,198,72,.22) !important; }
+html:not([data-theme="light"]) #dbo-reopen-btn-legacy[class][class] { border-color: rgba(244,198,72,.22) !important; }
 /* الوصول السريع: مخفي من الداش */
 #quick-access-card { display: none !important; }
 /* الصفحات الفرعية (fixed) كانت بتتحسب من الصفحة الطويلة بدل الشاشة بسبب transform باقي بعد animation التبويب */
@@ -4452,20 +4452,38 @@ html[data-theme="dark"] .pf-sell-preview.up{color:#6fe3b4}html[data-theme="dark"
 #piggybank-card .dabbar-wallet-chip input { font-size: .66rem !important; }
 #piggybank-card .dabbar-metric-cta-btn, #piggybank-card .dabbar-wallet-reset-btn { padding: .42rem .6rem !important; font-size: .68rem !important; border-radius: .7rem !important; }
 
-/* حسابي: "الولاء" و"تعرف على دبّر" بنفس شكل باقي الخانات */
-#honor-board-card.honor-loyalty-section { border: 1px solid rgba(148,163,184,.2) !important; border-radius: 1.35rem !important; background: var(--db-surface-soft) !important; overflow: hidden; }
-html:not([data-theme="light"]) #honor-board-card.honor-loyalty-section { border-color: rgba(244,198,72,.22) !important; }
-#honor-board-card > summary { display: flex !important; align-items: center; justify-content: flex-start; gap: .75rem; padding: 1rem; list-style: none; cursor: pointer; background: transparent !important; }
+/* حسابي: "الولاء" و"تعرف على دبّر" صفوف عادية زي باقي الخانات (من غير كارت/إطار) */
+html .acct-list > #honor-board-card.honor-loyalty-section,
+html .acct-list > #dbo-reopen-btn { border: 0 !important; border-bottom: 1px solid rgba(148,163,184,.16) !important; border-radius: 0 !important; background: transparent !important; box-shadow: none !important; margin: 0 !important; }
+html[data-theme="light"] .acct-list > #honor-board-card.honor-loyalty-section,
+html[data-theme="light"] .acct-list > #dbo-reopen-btn { border-bottom-color: #e8eeeb !important; }
+html:not([data-theme="light"]) .acct-list > #honor-board-card.honor-loyalty-section,
+html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-color: rgba(148,163,184,.16) !important; }
+.acct-list > #honor-board-card > summary { display: flex !important; align-items: center; gap: .75rem; padding: .72rem .9rem !important; list-style: none; cursor: pointer; background: transparent !important; }
 #honor-board-card > summary::-webkit-details-marker { display: none; }
 #honor-board-card > summary::after { content: '⌄'; margin-right: auto; color: var(--db-muted); font-size: 1rem; transition: transform .2s ease; }
 #honor-board-card[open] > summary::after { transform: rotate(180deg); }
-#honor-board-card[open] > summary { border-bottom: 1px solid rgba(148,163,184,.14); }
-#honor-board-card .honor-loyalty-body { padding: 1rem; }
-#honor-board-subscribers-line { display: block; }
-#dbo-reopen-btn { padding: 1rem !important; gap: .75rem !important; border-radius: 1.35rem !important; background: var(--db-surface-soft) !important; border: 1px solid rgba(148,163,184,.2) !important; box-shadow: none !important; }
-html:not([data-theme="light"]) #dbo-reopen-btn { border-color: rgba(244,198,72,.22) !important; }
-#dbo-reopen-btn .account-section-title, #dbo-reopen-btn .account-section-subtitle { display: block; }
-#dbo-reopen-btn .dbo-arrow { color: var(--db-muted); font-size: .9rem; }
+#honor-board-card[open] > summary { border-bottom: 1px solid rgba(148,163,184,.14) !important; }
+#honor-board-card .honor-loyalty-body { padding: .9rem; }
+.acct-list > #dbo-reopen-btn { padding: .72rem .9rem !important; gap: .75rem !important; }
+#dbo-reopen-btn .dbo-arrow { color: var(--db-muted); font-size: 1rem; }
+
+/* الحصالة: أصغر وأكثر تكثيفًا */
+#piggybank-card { padding: .5rem .65rem !important; border-radius: 1rem !important; }
+#piggybank-card > * + * { margin-top: .25rem !important; }
+#piggybank-card .mt-3, #piggybank-card .mt-0\.5 { margin-top: .25rem !important; }
+#piggybank-card .dabbar-metric-glow { display: none !important; }
+#piggybank-card .dabbar-metric-icon { width: 1.25rem !important; height: 1.25rem !important; font-size: .7rem !important; border-radius: .5rem !important; }
+#piggybank-card .dabbar-metric-title { font-size: .66rem !important; }
+#piggybank-card .dabbar-metric-pill { font-size: .5rem !important; padding: .1rem .35rem !important; }
+#piggybank-card h3 { font-size: .85rem !important; line-height: 1.15 !important; }
+#piggybank-card .dabbar-metric-label { font-size: .52rem !important; margin-bottom: .15rem !important; }
+#piggybank-status { font-size: .5rem !important; line-height: 1.3 !important; }
+#piggybank-card .dabbar-wallet-chip { padding: .15rem 0 !important; font-size: .6rem !important; border-radius: .5rem !important; min-height: 0 !important; line-height: 1.3 !important; }
+#piggybank-card .dabbar-wallet-chip input { font-size: .58rem !important; padding: .15rem .1rem !important; }
+#piggybank-card .grid { gap: .25rem !important; }
+#piggybank-card .dabbar-metric-cta-btn, #piggybank-card .dabbar-wallet-reset-btn { padding: .28rem .5rem !important; font-size: .6rem !important; border-radius: .6rem !important; }
+#piggybank-card .flex.gap-2 { gap: .35rem !important; }
 </style>
 </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col overflow-hidden">

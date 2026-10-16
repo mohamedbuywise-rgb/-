@@ -428,7 +428,8 @@
         .dabbar-savings-row2.expanded .dabbar-savings-row2-chev { transform: rotate(90deg); color: var(--pm-gold-bright, #10b981); }
         .dabbar-savings-detail2 { max-height:0; overflow:hidden; transition:max-height .22s ease; }
         .dabbar-savings-detail2.open { max-height:280px; }
-        .dabbar-savings-detail2-inner { padding:.1rem .1rem .6rem 2.55rem; font-size:.64rem; color: var(--pm-muted, #7b8490); line-height:1.6; }
+        .dabbar-savings-detail2-inner { padding:.2rem .35rem .8rem 0; padding-inline-start:2.55rem; font-size:.72rem; font-weight:600; color: var(--pm-muted, #7b8490); line-height:1.9; }
+        .dabbar-savings-detail2-inner strong { font-weight:900; color: var(--pm-ink, #17202b); }
         .dabbar-savings-tags2 { display:flex; flex-wrap:wrap; gap:.3rem; margin-top:.35rem; }
         .dabbar-savings-tag2 { font-size:.58rem; font-weight:700; color: var(--pm-gold-bright, #10b981); background: rgba(8,122,89,0.12); background: color-mix(in srgb, var(--pm-gold-bright, #10b981) 12%, transparent); border: 1px solid rgba(8,122,89,0.28); border: 1px solid color-mix(in srgb, var(--pm-gold-bright, #10b981) 28%, transparent); border-radius:999px; padding:.15rem .5rem; }
         .dabbar-savings-cta-row { display:flex; align-items:center; gap:.6rem; flex-wrap:wrap; margin-top:.5rem; }
@@ -3303,7 +3304,8 @@
             box-shadow: inset 0 0 0 1px rgba(148,163,184,.15);
         }
         .dabbar-donut-center-label { color:var(--db-muted); font:700 .55rem 'Cairo',sans-serif; }
-        .dabbar-donut-center-value { color:var(--db-ink); font:900 .78rem 'Cairo',sans-serif; }
+        .dabbar-donut-center-value { color:var(--db-ink); font:900 .68rem/1.1 'Cairo',sans-serif; white-space:nowrap; font-variant-numeric:tabular-nums; }
+        .dabbar-donut-center-value small { display:block; font:800 .5rem 'Cairo',sans-serif; color:var(--db-muted); margin-top:.1rem; }
         .dabbar-donut-legend-row {
             display:flex; align-items:center; justify-content:space-between; gap:.5rem; font-size:.68rem;
             cursor:pointer; padding:.3rem .4rem; border-radius:.6rem; margin:0 -.4rem;
@@ -10036,18 +10038,25 @@ html[data-theme="dark"] .pf-sell-preview.up{color:#6fe3b4}html[data-theme="dark"
             if (index === null) {
                 donutEl.style.filter = 'none';
                 if (totalLbl) totalLbl.textContent = 'إجمالي';
-                totalEl.textContent = monthlyDonutTotalLabel;
+                setDonutValue(totalEl, monthlyDonutTotalLabel);
             } else {
                 const c = monthlyDonutCats[index];
                 const color = CATEGORY_HEX[c.name] || CATEGORY_HEX_FALLBACK;
                 donutEl.style.filter = `drop-shadow(0 0 8px ${color}99)`;
                 if (totalLbl) totalLbl.textContent = `${getCategoryEmoji(c.name)} ${c.name}`;
-                totalEl.textContent = fmt(c.amount);
+                setDonutValue(totalEl, fmt(c.amount));
             }
 
             document.querySelectorAll('#monthly-categories-legend .dabbar-donut-legend-row').forEach((row) => {
                 row.classList.toggle('is-active', Number(row.dataset.catIndex) === index);
             });
+        }
+
+        function setDonutValue(el, text) {
+            const s = String(text || '');
+            const i = s.lastIndexOf(' ');
+            if (i > 0) el.innerHTML = `${s.slice(0, i)}<small>${s.slice(i + 1)}</small>`;
+            else el.textContent = s;
         }
 
         function renderMonthlyCategoriesDonut(month) {
@@ -10071,7 +10080,7 @@ html[data-theme="dark"] .pf-sell-preview.up{color:#6fe3b4}html[data-theme="dark"
             }
 
             tapHintEl?.classList.remove('hidden');
-            totalEl.textContent = monthlyDonutTotalLabel;
+            setDonutValue(totalEl, monthlyDonutTotalLabel);
             donutEl.style.background = buildDonutGradient(monthlyDonutCats, null);
 
             legendEl.innerHTML = monthlyDonutCats.map((c, i) => `
@@ -10587,7 +10596,7 @@ html[data-theme="dark"] .pf-sell-preview.up{color:#6fe3b4}html[data-theme="dark"
                     data.breakdown.unusedSubscriptions > 0 ? {
                         icon: '🚫', label: 'اشتراكات علّمتها كمش مستخدمة', amount: data.breakdown.unusedSubscriptions,
                         hint: flaggedSubs.length ? flaggedSubs.slice(0, 2).map((s) => escHtmlLocal(s.label)).join('، ') : 'اشتراكات ثابتة',
-                        detail: flaggedSubs.length ? `عندك ${flaggedSubs.length === 1 ? 'اشتراك واحد' : flaggedSubs.length + ' اشتراكات'} علّمت عليهم إنك مش بتستخدمهم، وبتفضل بتدفعهم شهريًا. حدّ نفسك سقف اشتراكات أقل عشان دبّر ينبهك أول ما تقرب منه.` : 'اشتراكات علّمت عليها إنك مش بتستخدمها، وبتفضل بتتخصم شهريًا.',
+                        detail: flaggedSubs.length ? `${flaggedSubs.length === 1 ? 'اشتراك واحد علّمته إنك مش بتستخدمه' : flaggedSubs.length + ' اشتراكات علّمتهم إنك مش بتستخدمهم'}، وبيتخصم منك كل شهر من غير ما تستفيد منه. لو قلّلتهم هتوفّر <strong>${fmt(data.breakdown.unusedSubscriptions)}</strong> في الشهر، ودبّر هينبّهك أول ما تقرب من الحد اللي تحطه.` : 'اشتراكات علّمت عليها إنك مش بتستخدمها، وبتتخصم منك كل شهر.',
                         tags: flaggedSubs.slice(0, 4).map((s) => `${escHtmlLocal(s.label)} — ${fmt(s.amount)}`),
                         actionCta: `🎯 حدّ الاشتراكات بـ ${fmt(Math.max(0, subsTotal - data.breakdown.unusedSubscriptions))}`,
                         actionName: 'اشتراكات', actionAmount: Math.max(0, subsTotal - data.breakdown.unusedSubscriptions),
@@ -10596,7 +10605,7 @@ html[data-theme="dark"] .pf-sell-preview.up{color:#6fe3b4}html[data-theme="dark"
                     data.breakdown.priceIncreases > 0 ? {
                         icon: '📈', label: 'اشتراكات غلت من غير ما تاخد بالك', amount: data.breakdown.priceIncreases,
                         hint: raisedSubs.length ? raisedSubs.slice(0, 2).map((s) => escHtmlLocal(s.label)).join('، ') : 'زيادة أسعار',
-                        detail: raisedSubs.length ? `${raisedSubs.length === 1 ? 'اشتراك واحد زاد' : raisedSubs.length + ' اشتراكات زادوا'} سعرهم عن الشهر اللي فات — يستاهل تراجعهم أو تحديد سقف يوقّفهم عند حد معين.` : 'في اشتراكات زادت في السعر عن الشهر اللي فات.',
+                        detail: raisedSubs.length ? `${raisedSubs.length === 1 ? 'اشتراك واحد زاد سعره' : raisedSubs.length + ' اشتراكات زادت أسعارها'} عن الشهر اللي فات، والزيادة دي بتكلفك <strong>${fmt(data.breakdown.priceIncreases)}</strong> زيادة في الشهر. راجعهم، أو حط لهم سقف يوقّف الزيادة عند حد معيّن.` : 'في اشتراكات زادت أسعارها عن الشهر اللي فات، وبتدفع منها أكتر من الأول.',
                         tags: raisedSubs.slice(0, 4).map((s) => `${escHtmlLocal(s.label)} +${s.priceChangePercent}%`),
                         actionCta: `🎯 حدّ الاشتراكات بـ ${fmt(Math.max(0, subsTotal - data.breakdown.priceIncreases))}`,
                         actionName: 'اشتراكات', actionAmount: Math.max(0, subsTotal - data.breakdown.priceIncreases),
@@ -10605,7 +10614,7 @@ html[data-theme="dark"] .pf-sell-preview.up{color:#6fe3b4}html[data-theme="dark"
                     data.breakdown.discretionaryEstimate > 0 ? {
                         icon: '🛍️', label: 'تقليل بسيط في الفئات الكمالية', amount: data.breakdown.discretionaryEstimate,
                         hint: topCat ? `${escHtmlLocal(topCat.name)} — أكبر فئة صرف` : 'فئات كمالية',
-                        detail: topCat ? `صرفت الشهر ده ${fmt(topCat.amount)} على "${escHtmlLocal(topCat.name)}" — أكتر فئة في مصروفك. حدّ نفسك سقف أقل بـ ${fmt(data.breakdown.discretionaryEstimate)} عشان دبّر يفكّرك أول ما تقرب منه.` : 'تقليل بسيط في الفئات الكمالية زي التسوق والترفيه ممكن يوفر لك المبلغ ده.',
+                        detail: topCat ? `صرفت الشهر ده <strong>${fmt(topCat.amount)}</strong> على ${escHtmlLocal(topCat.name)}، وده أكبر بند في مصروفك. لو قلّلت منه بـ <strong>${fmt(data.breakdown.discretionaryEstimate)}</strong> بس، هتوفّر المبلغ ده. دبّر هيفكّرك أول ما تقرب من السقف اللي تحطه.` : 'تقليل بسيط في الفئات الكمالية زي التسوق والترفيه ممكن يوفّر لك المبلغ ده.',
                         tags: topCat ? [`${escHtmlLocal(topCat.name)}${topCatPercent !== null ? `: ${topCatPercent}% من مصروفك` : ''}`] : [],
                         actionCta: topCat ? `🎯 حدّ فئة ${escHtmlLocal(topCat.name)} بـ ${fmt(Math.max(0, Math.round(topCat.amount - data.breakdown.discretionaryEstimate)))}` : null,
                         actionName: topCat?.name || '', actionAmount: topCat ? Math.max(0, Math.round(topCat.amount - data.breakdown.discretionaryEstimate)) : 0,
@@ -17237,5 +17246,64 @@ html:not([data-theme="light"]) .asst-goal-date-chip{ background:rgba(255,255,255
 <script>
 (function(){try{var st=document.getElementById('account-currency-status'),sm=document.getElementById('account-currency-summary-status');if(!st||!sm)return;var up=function(){var m=/العملة الحالية:\s*(.+)$/.exec(st.textContent||'');if(m)sm.textContent=m[1];};up();new MutationObserver(up).observe(st,{childList:true,characterData:true,subtree:true});}catch(e){}})();
 </script>
+<style id="dabbar-account-rows-unify">
+/* توحيد كل خانات تبويب حسابي: نفس السطح والحدود والأيقونات والخطوط */
+html[data-theme] #tab-account .acct-sub-collapse,
+html[data-theme] #tab-account .account-organization-section,
+html[data-theme] #tab-account #honor-board-card,
+html[data-theme] #tab-account #dbo-reopen-btn {
+  background: var(--db-surface-soft) !important;
+  border: 1px solid rgba(148,163,184,.2) !important;
+  border-radius: 1.35rem !important;
+  box-shadow: none !important;
+}
+html:not([data-theme="light"]) #tab-account .acct-sub-collapse,
+html:not([data-theme="light"]) #tab-account .account-organization-section,
+html:not([data-theme="light"]) #tab-account #honor-board-card,
+html:not([data-theme="light"]) #tab-account #dbo-reopen-btn {
+  border-color: rgba(244,198,72,.22) !important;
+}
+#tab-account .acct-sub-summary { padding: 1rem; }
+#tab-account .acct-sub-summary-ic,
+#tab-account .account-section-icon {
+  width: 2.2rem; height: 2.2rem; border-radius: .8rem;
+  background: rgba(244,198,72,.1) !important;
+  border: 1px solid rgba(244,198,72,.2);
+}
+#tab-account .acct-sub-summary-txt b,
+#tab-account .account-section-title { color: var(--db-ink) !important; font: 900 .78rem 'Cairo', sans-serif; }
+#tab-account .acct-sub-summary-txt small,
+#tab-account .account-section-subtitle { color: var(--db-muted) !important; font: 600 .64rem/1.4 'Cairo', sans-serif; }
+#tab-account .acct-sub-chev,
+#tab-account .account-organization-section > summary::after { color: var(--db-muted) !important; }
+</style>
+<style id="dabbar-bank-movements-layout-fix">
+/* ===== الحركات البنكية: تنسيق الشيت عشان ما يتكسرش ===== */
+#bank-movements-sheet > div { width:100% !important; max-width:32rem !important; box-sizing:border-box !important; }
+#bank-movements-sheet #bank-movements-content { display:block !important; width:100%; }
+/* الفترة: الأزرار تاخد الصف كله ومايتقسموش على سطرين */
+#bank-movements-sheet .bm-period-toolbar { display:block !important; width:100%; margin-bottom:.75rem; }
+#bank-movements-sheet .bm-period { display:flex !important; width:100%; box-sizing:border-box; gap:.25rem; padding:.25rem; }
+#bank-movements-sheet .bm-period-btn { flex:1 1 0; min-width:0; white-space:nowrap; font-size:.72rem; padding:.5rem .3rem; line-height:1.2; }
+/* ملخص الحركة: الرقم الكبير بقى أصغر ومرتب، والصفوف الثلاثة في شبكة واحدة */
+#bank-movements-sheet .bm-summary { display:block !important; width:100%; box-sizing:border-box; padding:.85rem !important; }
+#bank-movements-sheet .bm-summary > div:first-child { display:flex !important; align-items:flex-end; justify-content:space-between; gap:.6rem; margin-bottom:.7rem !important; }
+#bank-movements-sheet #bm-stat-net { font-size:1.05rem !important; line-height:1.25; white-space:nowrap; direction:ltr; text-align:right; }
+#bank-movements-sheet #bm-stat-count { font-size:.66rem; white-space:nowrap; }
+#bank-movements-sheet #bm-stat-total { font-size:.66rem; white-space:nowrap; }
+#bank-movements-sheet .bm-summary .grid { display:grid !important; grid-template-columns:repeat(3, minmax(0,1fr)); gap:.4rem !important; }
+#bank-movements-sheet .bm-summary .grid > div { min-width:0; padding-inline:.3rem !important; }
+#bank-movements-sheet .bm-summary .grid > div > div:first-child { font-size:.66rem !important; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+#bank-movements-sheet .bm-summary #bm-stat-withdrawal,
+#bank-movements-sheet .bm-summary #bm-stat-deposit,
+#bank-movements-sheet .bm-summary #bm-stat-transfer { font-size:.7rem !important; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; direction:ltr; }
+/* البحث */
+#bank-movements-sheet .bm-search { display:flex !important; width:100%; box-sizing:border-box; }
+/* فلاتر النوع: صف واحد بيتمرر أفقيًا عشان "مراجعة" تفضل ظاهرة */
+#bank-movements-sheet #bank-movements-filters { display:flex !important; overflow-x:auto; scrollbar-width:none; width:100%; box-sizing:border-box; gap:.3rem; }
+#bank-movements-sheet #bank-movements-filters::-webkit-scrollbar { display:none; }
+#bank-movements-sheet #bank-movements-filters .bm-filter-btn { flex:1 0 auto; white-space:nowrap; font-size:.7rem; padding:.45rem .6rem; }
+#bank-movements-sheet #bank-movements-filters .bm-review-count { margin-inline-start:.2rem; }
+</style>
 </body>
 </html>

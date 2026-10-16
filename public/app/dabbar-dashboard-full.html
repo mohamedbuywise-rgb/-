@@ -1328,8 +1328,6 @@
         html[data-theme="light"] .subscription-row .subscription-amount { color: #1e293b !important; }
         html[data-theme="light"] .subscription-row.price-up .subscription-amount,
         html[data-theme="light"] .subscription-row.price-up .subscription-meta { color: #b4232f !important; }
-        html[data-theme="dark"] #subscriptions-card { background: #0d1117 !important; border: 1px solid #1e293b !important; }
-        html[data-theme="dark"] #subscriptions-title { color: #94a3b8 !important; }
         #subscriptions-card > summary::-webkit-details-marker { display: none; }
         #subscriptions-card[open] .subscriptions-chevron { transform: rotate(180deg); }
         #subscriptions-count { background: rgba(16,185,129,.15); color: #10b981; }
@@ -4437,6 +4435,38 @@ html[data-theme="dark"] .pf-sell-preview.up{color:#6fe3b4}html[data-theme="dark"
         html:not([data-theme="light"]) .daily-focus-title::after { content: ''; }
         html[data-theme="light"] .daily-focus-title { color: #0f172a; }
     </style>
+<style id="dabbar-tune-jun-2026">
+/* كارت "المتبقي من الشهر" و"حصالة اليوم": أصغر وأهدى */
+#salary-countdown-card, #piggybank-card { padding: .7rem .8rem !important; border-radius: 1.1rem !important; }
+#salary-countdown-empty, #piggybank-empty { padding: .6rem .7rem !important; border-radius: 1.1rem !important; }
+#salary-countdown-card > * + *, #piggybank-card > * + * { margin-top: .4rem !important; }
+#salary-countdown-card .mt-1, #piggybank-card .mt-3 { margin-top: .35rem !important; }
+#salary-countdown-card .dabbar-metric-icon, #piggybank-card .dabbar-metric-icon { width: 1.5rem !important; height: 1.5rem !important; font-size: .8rem !important; border-radius: .6rem !important; }
+#salary-countdown-card .dabbar-metric-title, #piggybank-card .dabbar-metric-title { font-size: .72rem !important; }
+#salary-countdown-card .dabbar-metric-pill, #piggybank-card .dabbar-metric-pill { font-size: .56rem !important; padding: .15rem .45rem !important; }
+#salary-countdown-card .dabbar-metric-label, #piggybank-card .dabbar-metric-label { font-size: .58rem !important; }
+#salary-countdown-card h3, #piggybank-card h3 { font-size: 1rem !important; line-height: 1.2 !important; }
+#salary-countdown-card .dabbar-metric-track { height: 4px !important; }
+#piggybank-status { font-size: .58rem !important; }
+#piggybank-card .dabbar-wallet-chip { padding: .28rem 0 !important; font-size: .68rem !important; border-radius: .6rem !important; }
+#piggybank-card .dabbar-wallet-chip input { font-size: .66rem !important; }
+#piggybank-card .dabbar-metric-cta-btn, #piggybank-card .dabbar-wallet-reset-btn { padding: .42rem .6rem !important; font-size: .68rem !important; border-radius: .7rem !important; }
+
+/* حسابي: "الولاء" و"تعرف على دبّر" بنفس شكل باقي الخانات */
+#honor-board-card.honor-loyalty-section { border: 1px solid rgba(148,163,184,.2) !important; border-radius: 1.35rem !important; background: var(--db-surface-soft) !important; overflow: hidden; }
+html:not([data-theme="light"]) #honor-board-card.honor-loyalty-section { border-color: rgba(244,198,72,.22) !important; }
+#honor-board-card > summary { display: flex !important; align-items: center; justify-content: flex-start; gap: .75rem; padding: 1rem; list-style: none; cursor: pointer; background: transparent !important; }
+#honor-board-card > summary::-webkit-details-marker { display: none; }
+#honor-board-card > summary::after { content: '⌄'; margin-right: auto; color: var(--db-muted); font-size: 1rem; transition: transform .2s ease; }
+#honor-board-card[open] > summary::after { transform: rotate(180deg); }
+#honor-board-card[open] > summary { border-bottom: 1px solid rgba(148,163,184,.14); }
+#honor-board-card .honor-loyalty-body { padding: 1rem; }
+#honor-board-subscribers-line { display: block; }
+#dbo-reopen-btn { padding: 1rem !important; gap: .75rem !important; border-radius: 1.35rem !important; background: var(--db-surface-soft) !important; border: 1px solid rgba(148,163,184,.2) !important; box-shadow: none !important; }
+html:not([data-theme="light"]) #dbo-reopen-btn { border-color: rgba(244,198,72,.22) !important; }
+#dbo-reopen-btn .account-section-title, #dbo-reopen-btn .account-section-subtitle { display: block; }
+#dbo-reopen-btn .dbo-arrow { color: var(--db-muted); font-size: .9rem; }
+</style>
 </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col overflow-hidden">
     <script src="./dabbar-offline-store.js"></script>
@@ -5741,9 +5771,10 @@ html[data-theme="dark"] .pf-sell-preview.up{color:#6fe3b4}html[data-theme="dark"
 
             <details id="honor-board-card" class="hidden honor-loyalty-section">
                 <summary>
+                    <span class="account-section-icon" aria-hidden="true">🏅</span>
                     <span>
-                        <span class="honor-loyalty-summary-title">🏅 الولاء</span>
-                        <span class="honor-loyalty-summary-meta" id="honor-board-subscribers-line">—</span>
+                        <span class="account-section-title">الولاء</span>
+                        <span class="account-section-subtitle" id="honor-board-subscribers-line">—</span>
                     </span>
                 </summary>
                 <div class="honor-loyalty-body">
@@ -5761,15 +5792,15 @@ html[data-theme="dark"] .pf-sell-preview.up{color:#6fe3b4}html[data-theme="dark"
                 </div>
             </details>
 
-            <button type="button" id="dbo-reopen-btn" class="w-full flex items-center justify-between gap-3 rounded-3xl border p-4" style="border-color:var(--pm-hairline);background:var(--pm-surface-hi);">
-                <span style="display:flex;align-items:center;gap:10px;">
-                    <span style="width:2.4rem;height:2.4rem;border-radius:.9rem;display:flex;align-items:center;justify-content:center;font-size:1.15rem;background:rgba(14,143,104,0.16);background:color-mix(in srgb,var(--pm-gold) 16%,transparent);">🧭</span>
-                    <span style="text-align:right;">
-                        <span style="display:block;font-size:.82rem;font-weight:900;color:var(--pm-ink);">تعرف على دبّر</span>
-                        <span style="display:block;font-size:.66rem;color:var(--pm-muted);margin-top:2px;">تعريف سريع بكل مميزات دبّر</span>
+            <button type="button" id="dbo-reopen-btn" class="w-full flex items-center justify-between gap-3">
+                <span class="flex items-center gap-3 min-w-0">
+                    <span class="account-section-icon" aria-hidden="true">🧭</span>
+                    <span class="text-right min-w-0">
+                        <span class="account-section-title">تعرف على دبّر</span>
+                        <span class="account-section-subtitle">تعريف سريع بكل مميزات دبّر</span>
                     </span>
                 </span>
-                <span style="color:var(--pm-muted);">←</span>
+                <span class="dbo-arrow" aria-hidden="true">←</span>
             </button>
 
             <div class="dabbar-telegram-card border rounded-3xl p-4 cursor-pointer active:opacity-70 transition" id="account-telegram-card">

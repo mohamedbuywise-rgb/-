@@ -17305,5 +17305,18 @@ html:not([data-theme="light"]) #tab-account #dbo-reopen-btn {
 #bank-movements-sheet #bank-movements-filters .bm-filter-btn { flex:1 0 auto; white-space:nowrap; font-size:.7rem; padding:.45rem .6rem; }
 #bank-movements-sheet #bank-movements-filters .bm-review-count { margin-inline-start:.2rem; }
 </style>
+<style id="dabbar-bank-movements-fullscreen">
+/* الحركات البنكية: الشيت ياخد الشاشة كاملة بدل نص الشاشة */
+#bank-movements-sheet { align-items:stretch !important; }
+#bank-movements-sheet > div {
+  height:100vh !important; height:100dvh !important;
+  max-height:100vh !important; max-height:100dvh !important;
+  max-width:none !important; width:100% !important;
+  border-radius:0 !important; border-top:0 !important;
+  overflow-y:auto; -webkit-overflow-scrolling:touch;
+  padding-bottom:calc(1.5rem + env(safe-area-inset-bottom, 0px)) !important;
+  overscroll-behavior:contain;
+}
+</style>
 </body>
 </html>

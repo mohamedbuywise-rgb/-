@@ -4448,8 +4448,8 @@ html[data-theme="dark"] .pf-sell-preview.up{color:#6fe3b4}html[data-theme="dark"
                 <div class="active-days-dots" id="active-days-dots" aria-label="نشاط آخر 7 أيام"></div>
             </section>
 
-            <!-- كارت فرص التوفير — قابل للطي ومقفول افتراضيًا؛ بيفتح بس لما المستخدم يضغط عليه (والإجمالي ظاهر في العنوان) -->
-            <details id="savings-opportunities-card" class="hidden relative overflow-hidden rounded-3xl p-4 shadow-lg dabbar-savings-card savings-opportunities-details">
+            <!-- كارت فرص التوفير — مفتوح افتراضيًا زي البريفيو، والمستخدم يقدر يقفله بالدوس على العنوان -->
+            <details id="savings-opportunities-card" open class="hidden relative overflow-hidden rounded-3xl p-4 shadow-lg dabbar-savings-card savings-opportunities-details">
                 <div class="dabbar-metric-glow" aria-hidden="true"></div>
                 <summary class="relative text-[11px] font-bold dabbar-metric-label"><span class="dabbar-hdr-ic"><iconify-icon icon="ph:lightbulb-filament-duotone" width="16"></iconify-icon></span><span>فرص التوفير الشهر ده</span><span id="savings-total-chip" class="dabbar-metric-value-accent text-[11px] font-black"></span></summary>
                 <div class="relative savings-opportunities-body">
@@ -10572,8 +10572,9 @@ html[data-theme="dark"] .pf-sell-preview.up{color:#6fe3b4}html[data-theme="dark"
                         cta: 'وريني الاشتراكات اللي غلت', ctaTarget: 'subscriptions',
                     } : null,
                     data.breakdown.discretionaryEstimate > 0 ? {
-                        icon: '🛍️', label: 'تقليل بسيط في الفئات الكمالية', amount: data.breakdown.discretionaryEstimate,
-                        hint: topCat ? `${escHtmlLocal(topCat.name)} — أكبر فئة صرف` : 'فئات كمالية',
+                        icon: '🛍️', amount: data.breakdown.discretionaryEstimate,
+                        label: (topCat && topCat.amount > 0) ? `قلل ${escHtmlLocal(topCat.name)} بـ ${Math.min(100, Math.round((data.breakdown.discretionaryEstimate / topCat.amount) * 100))}%` : 'قلل الصرف على الكماليات',
+                        hint: (topCat && topCat.amount > 0) ? `صرفت ${fmt(topCat.amount)} على ${escHtmlLocal(topCat.name)} — جرّب توصّل ${fmt(Math.max(0, topCat.amount - data.breakdown.discretionaryEstimate))}` : 'فئات كمالية',
                         detail: topCat ? `صرفت الشهر ده <strong>${fmt(topCat.amount)}</strong> على ${escHtmlLocal(topCat.name)}، وده أكبر بند في مصروفك. لو قلّلت منه بـ <strong>${fmt(data.breakdown.discretionaryEstimate)}</strong> بس، هتوفّر المبلغ ده. دبّر هيفكّرك أول ما تقرب من السقف اللي تحطه.` : 'تقليل بسيط في الفئات الكمالية زي التسوق والترفيه ممكن يوفّر لك المبلغ ده.',
                         tags: topCat ? [`${escHtmlLocal(topCat.name)}${topCatPercent !== null ? `: ${topCatPercent}% من مصروفك` : ''}`] : [],
                         actionCta: topCat ? `🎯 حدّ فئة ${escHtmlLocal(topCat.name)} بـ ${fmt(Math.max(0, Math.round(topCat.amount - data.breakdown.discretionaryEstimate)))}` : null,
@@ -13032,7 +13033,7 @@ function pf2YieldFields() {
                 if (daysLeft > 0) {
                     const remaining = Math.max(0, goal.targetAmount - goal.savedAmount);
                     const perDay = Math.ceil(remaining / daysLeft);
-                    dailyLineEl.textContent = `📅 محتاج توفر ${fmt(perDay)} يوميًا عشان توصل الهدف (${daysLeft} يوم متبقي)`;
+                    dailyLineEl.innerHTML = `📅 محتاج توفر <strong class="asst-goal-daily-amt">${fmt(perDay)}</strong> يوميًا عشان توصل الهدف (<strong class="asst-goal-daily-days">${daysLeft} يوم</strong> متبقي)`;
                 } else {
                     dailyLineEl.textContent = '⚠️ ميعاد الهدف فات — ممكن تحدّث التاريخ.';
                 }
@@ -17236,6 +17237,13 @@ html:not([data-theme="light"]) #tab-account #dbo-reopen-btn {
 #tab-account .account-section-subtitle { color: var(--db-muted) !important; font: 600 .64rem/1.4 'Cairo', sans-serif; }
 #tab-account .acct-sub-chev,
 #tab-account .account-organization-section > summary::after { color: var(--db-muted) !important; }
+
+/* تقريب الخانات من بعض في "حسابي": مسافة أصغر بين كل خانة والتانية، وحشوة داخلية أقل */
+#tab-account > * + * { margin-top: .5rem !important; }
+#tab-account .account-organization-section > summary { padding: .7rem .9rem !important; gap: .6rem; }
+#tab-account .acct-sub-summary { padding: .7rem .9rem !important; }
+#tab-account .account-section-body { gap: .5rem; padding: 0 .9rem .8rem; }
+#tab-account .account-section-icon { width: 2rem !important; height: 2rem !important; }
 </style>
 <style id="dabbar-bank-movements-layout-fix">
 /* ===== الحركات البنكية: تنسيق الشيت عشان ما يتكسرش ===== */
@@ -17276,6 +17284,39 @@ html:not([data-theme="light"]) #tab-account #dbo-reopen-btn {
   overflow-y:auto; -webkit-overflow-scrolling:touch;
   padding-bottom:calc(1.5rem + env(safe-area-inset-bottom, 0px)) !important;
   overscroll-behavior:contain;
+}
+</style>
+<style id="dabbar-goal-numbers-and-account-stack">
+/* ===== الأهداف: الأرقام واضحة وكبيرة ===== */
+.asst-goal-stats-row { gap: .35rem !important; }
+.asst-goal-stat { padding: .6rem .3rem !important; min-width: 0; }
+.asst-goal-stat-k { font-size: .68rem !important; font-weight: 800 !important; }
+.asst-goal-stat-v { font-size: .92rem !important; font-weight: 900 !important; white-space: nowrap !important; overflow: visible !important; margin-top: .25rem !important; }
+.asst-goal-daily-line { font-size: .72rem !important; }
+.asst-goal-title-label { font-size: .9rem !important; }
+.asst-goal-percent { font-size: .76rem !important; }
+
+/* ===== حسابي: كل الخانات بنفس الشكل ومتراصة تحت بعض زي البريفيو ===== */
+#tab-account > * + * { margin-top: .6rem !important; }
+#tab-account .acct-sub-summary { min-height: 4.1rem; padding: .8rem 1rem !important; gap: .75rem; }
+#tab-account .acct-sub-summary-ic,
+#tab-account .account-section-icon {
+  width: 2.3rem !important; height: 2.3rem !important; border-radius: .9rem !important;
+  display: flex; align-items: center; justify-content: center; font-size: 1.05rem;
+  background: rgba(244,198,72,.12) !important; border: 1px solid rgba(244,198,72,.22) !important;
+}
+#tab-account .acct-sub-chev { font-size: 1.05rem; }
+/* ===== الأهداف: الرقم اليومي المطلوب بهايلايت واضح في الليلي والنهاري ===== */
+.asst-goal-daily-line { font-size: .78rem !important; font-weight: 700 !important; color: var(--pm-ink, #1f2937) !important; }
+.asst-goal-daily-amt, .asst-goal-daily-days {
+  font-weight: 900 !important; padding: .08rem .45rem; margin: 0 .1rem; border-radius: .5rem; white-space: nowrap;
+  color: #065f46 !important; background: #d1fae5 !important; border: 1px solid #6ee7b7 !important;
+}
+.asst-goal-daily-amt { font-size: .92rem !important; }
+html:not([data-theme="light"]) .asst-goal-daily-line { color: #e5e7eb !important; }
+html:not([data-theme="light"]) .asst-goal-daily-amt,
+html:not([data-theme="light"]) .asst-goal-daily-days {
+  color: #d0ff52 !important; background: rgba(208,255,82,.16) !important; border: 1px solid rgba(208,255,82,.55) !important;
 }
 </style>
 </body>

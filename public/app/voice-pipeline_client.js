@@ -20,8 +20,7 @@
 //   const result = await session.result;  // { ok, source, transcript, transactions, provider, error, debug }
 
 export const VOICE_DEFAULTS = {
-  // نبدأ بلغة التطبيق، ثم نجرب اللغة الأخرى تلقائيًا؛ ده يخلّي التسجيل يفهم العربي والإنجليزي بدل تثبيت العربية فقط.
-  langs: (typeof document !== 'undefined' && (document.documentElement.lang || '').toLowerCase().startsWith('en')) ? ['en-US', 'en-GB', 'ar-SA', 'ar-EG', 'ar'] : ['ar-EG', 'ar-SA', 'ar-AE', 'en-US', 'en-GB'],
+  langs: ['ar-EG', 'ar'],   // اللهجة المصرية أولًا، مش لغة الجهاز
   maxSeconds: 30,           // نفس VOICE_MAX_DURATION_SECONDS في config.js
   minConfidence: 0.35,      // بيتطبق بس لو المتصفح رجّع confidence > 0 (بعض المتصفحات بترجّع 0 دايمًا)
   minPeakLevel: 0.04,       // أقل مستوى صوت (0..1) يعتبر إن فيه كلام فعلًا
@@ -41,7 +40,7 @@ const REFUSAL_HINTS = /(لا أستطيع|لا استطيع|مقدرش|عذرً�
 //   2) dedupeRuns: أي عبارة اتكررت ورا بعض تتشال
 //   3) transcriptHealth: لو النص لسه مشبوه (تكرار عالي/طويل جدًا) مانبعتوش للتصنيف -> نروح للتسجيل التاني
 //   4) maxChars: سقف على طول النص اللي بيتبعت للسيرفر
-export const VOICE_PIPELINE_VERSION = '2026-10-15.2';
+export const VOICE_PIPELINE_VERSION = '2026-10-17.1';
 
 const IS_ANDROID = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent || '');
 const normSeg = (t) => String(t || '').replace(/[\u064B-\u0652\u0640]/g, '').replace(/\s+/g, ' ').trim();
@@ -356,15 +355,20 @@ export function startVoiceCapture(options = {}) {
         if (!finished && !speechStopRequested) startRecognition();
         return;
       }
-      // لا نعيد تشغيل Web Speech تلقائيًا بعد الصمت: Chrome/Android يصدر beep كل مرة
-      // يبدأ فيها SpeechRecognition من جديد. ننتظر زر الإيقاف أو حد الـ30 ثانية بدل beep في المنتصف.
-      if (!speechStopRequested && !cancelled && !finished) {
-        speech.ended = true;
+      // المتصفح قفل المحرك لوحده (صمت/حد زمني) والمستخدم لسه ما ضغطش إيقاف: نفتحه تاني ونكمّل
+      const fatal = ['not-allowed', 'service-not-allowed', 'audio-capture', 'network'].includes(speech.error);
+      if (!speechStopRequested && !cancelled && !finished && !fatal && speech.restarts < 60) {
+        const quick = Date.now() - speech.startedAt < 400; // قفل فوري = مشكلة، مانعملش loop سريع
+        speech.restarts += 1;
+        speech.prevSegments = speech.segments.slice();
+        speech.prevConfs = speech.confidences.slice();
+        speech.events.push('restart');
         onActivity(false);
+        setTimeout(() => { if (!finished && !speechStopRequested && !cancelled) startRecognition(); }, quick ? 400 : 60);
         return;
       }
       speech.ended = true;
-      // اتقفل بعد ما المستخدم ضغط إيقاف (أو وصلنا لحد الوقت): نقرر
+      // اتقفل بعد ما المستخدم ضغط إيقاف (أو خطأ نهائي): نقرر
       decideSpeech();
     };
     try {

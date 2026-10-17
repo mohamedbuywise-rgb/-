@@ -3028,7 +3028,25 @@
         .dabbar-savings-cta-row { display:none !important; }
         .dabbar-savings-detail2-inner { color: var(--pm-ink-dim, #29483c) !important; }
         @media (max-width: 640px) { .quick-manual-sheet-shell { padding-bottom: calc(1rem + env(safe-area-inset-bottom, 0px)); } }
-    </style>
+    
+        /* ===== وضعك المالي: تصميم الكارت (معاينة الصورة) ===== */
+        html #planning-summary.pv-summary, html[data-theme="light"] #planning-summary.pv-summary { background: transparent !important; box-shadow: none !important; border-radius: 0 !important; padding: 0 !important; color: inherit !important; display: flex; flex-direction: column; gap: .9rem; direction: rtl; }
+        .pv-hero { display: flex; flex-direction: column; align-items: flex-end; gap: .3rem; }
+        .pv-hero-label { font-size: 11px; color: #94a3b8; }
+        .pv-hero-value { font-size: 2rem; font-weight: 900; color: #f8fafc; line-height: 1.1; direction: rtl; }
+        .pv-progress { display: flex; flex-direction: column; gap: .45rem; }
+        .pv-track { height: 8px; border-radius: 999px; background: #10261a; overflow: hidden; }
+        .pv-fill { height: 100%; border-radius: 999px; background: #22c55e; transition: width .4s ease; }
+        .pv-row { display: flex; justify-content: space-between; font-size: 11px; color: #94a3b8; }
+        .pv-forecast { display: flex; align-items: center; gap: .55rem; padding: .7rem .9rem; border-radius: 14px; background: rgba(245,158,11,.14); box-shadow: inset 0 0 0 1px rgba(245,158,11,.28); color: #fbbf24; font-size: 12px; }
+        .pv-forecast-ic { display: inline-flex; }
+        .pv-forecast-text { flex: 1; }
+        .pv-forecast strong { font-weight: 900; font-size: 14px; }
+        html[data-theme="light"] .pv-hero-label, html[data-theme="light"] .pv-row { color: #475569; }
+        html[data-theme="light"] .pv-hero-value { color: #0f172a; }
+        html[data-theme="light"] .pv-track { background: #d6eedf; }
+        html[data-theme="light"] .pv-forecast { background: #fef3c7; color: #92400e; box-shadow: inset 0 0 0 1px #fcd34d; }
+</style>
     <style>
         #bank-movements-sheet.flex { display: flex; }
         .bm-filter-btn { background: rgba(30,41,59,.6); color: #94a3b8; border: 1px solid rgba(148,163,184,.18); }
@@ -9003,11 +9021,11 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
             wrap.className = 'bg-slate-950/50 border border-emerald-500/15 rounded-3xl p-4 space-y-3';
             wrap.innerHTML = `<div class="flex items-center justify-between gap-2"><div><span class="text-[10px] text-emerald-400 font-bold">وضعك المالي</span><h3 class="text-sm font-black text-slate-100">الدخل والميزانية</h3></div><span class="text-lg">🎯</span></div>
                 <p class="text-[10px] text-slate-500 leading-relaxed">اكتب دخلك و/أو سقف صرفك الشهري، ودبّر يحسبلك المتاح تلقائيًا في الكارت اللي تحت.</p>
-                <div class="grid grid-cols-2 gap-2"><label class="text-[10px] text-slate-400">💰 دخلك الشهري<input id="planning-income" type="text" inputmode="numeric" placeholder="مثال: 12,000" class="mt-1 w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-100 outline-none focus:border-emerald-400 text-center"></label><label class="text-[10px] text-slate-400">🎯 ميزانيتك الشهرية<input id="planning-budget" type="text" inputmode="numeric" placeholder="مثال: 9,000" class="mt-1 w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-100 outline-none focus:border-emerald-400 text-center"></label></div>
+                <div class="grid grid-cols-2 gap-2"><label class="text-[10px] text-slate-400"><iconify-icon icon="ph:wallet-duotone" width="14"></iconify-icon> دخلك الشهري<input id="planning-income" type="text" inputmode="numeric" placeholder="مثال: 12,000" class="mt-1 w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2.5 text-base font-bold text-slate-100 outline-none focus:border-emerald-400 text-center"></label><label class="text-[10px] text-slate-400"><iconify-icon icon="ph:target-duotone" width="14"></iconify-icon> ميزانيتك<input id="planning-budget" type="text" inputmode="numeric" placeholder="مثال: 9,000" class="mt-1 w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2.5 text-base font-bold text-slate-100 outline-none focus:border-emerald-400 text-center"></label></div>
                 <div id="planning-summary" class="rounded-2xl bg-emerald-500/10 px-3 py-3 text-[11px] text-emerald-200"></div>
                 <details class="group"><summary class="flex cursor-pointer list-none items-center gap-2.5 rounded-xl bg-slate-900/60 px-3 py-2.5 text-[10px] font-bold text-slate-400"><span class="planning-collapse-ic"><iconify-icon icon="ph:chart-bar-duotone" width="15"></iconify-icon></span><span class="flex-1">حدود مصروف لكل فئة (اختياري)</span><span class="text-slate-600 transition group-open:rotate-180">⌄</span></summary>
                 <div class="mt-2 space-y-2"><p class="text-[9.5px] leading-relaxed text-slate-500">حد تخطيطي بس، مش مصروف بيتسجل — دبّر ينبهك لما توصل لـ <b class="text-amber-300">80%</b> منه.</p><div id="category-budgets-list" class="space-y-1.5"></div><button type="button" id="category-budgets-toggle" class="dabbar-list-toggle hidden">عرض الكل</button><button id="category-budget-add" type="button" class="dabbar-fab-add">+ إضافة حد لفئة</button></div></details>
-                <details class="group border-t border-slate-800 pt-3"><summary class="flex cursor-pointer list-none items-center gap-2.5 rounded-xl bg-slate-900/60 px-3 py-2.5 text-[10px] font-bold text-slate-400"><span class="planning-collapse-ic"><iconify-icon icon="ph:push-pin-duotone" width="15"></iconify-icon></span><span class="flex-1">التزامات شهرية متوقعة (إيجار / اشتراكات)</span><span class="text-slate-600 transition group-open:rotate-180">⌄</span></summary>
+                <details class="group border-t border-slate-800 pt-3"><summary class="flex cursor-pointer list-none items-center gap-2.5 rounded-xl bg-slate-900/60 px-3 py-2.5 text-[10px] font-bold text-slate-400"><span class="planning-collapse-ic"><iconify-icon icon="ph:repeat-duotone" width="15"></iconify-icon></span><span class="flex-1">التزامات شهرية متوقعة (إيجار / اشتراكات)</span><span class="text-slate-600 transition group-open:rotate-180">⌄</span></summary>
                 <div class="mt-2 space-y-2"><p class="text-[9px] text-slate-500">للتخطيط فقط — لا تُضاف للصرف الفعلي إلا عند تسجيلها.</p><div id="recurring-total" class="dabbar-commit-total"></div><div id="recurring-list" class="space-y-1.5"></div><button type="button" id="recurring-list-toggle" class="dabbar-list-toggle hidden">عرض الكل</button><button id="recurring-add" type="button" class="dabbar-fab-add">+ إضافة التزام جديد</button></div></details>
                 <div class="flex gap-2 border-t border-slate-800 pt-3"><button id="planning-save" type="button" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950">حفظ خطتي</button><button id="planning-reset" type="button" title="إدارة ومسح خطة الدخل والميزانية" class="rounded-xl border border-slate-700/60 px-3 py-2.5 text-xs text-slate-500">إدارة</button></div>
                 <div class="dabbar-sheet-backdrop" id="limit-sheet"><div class="dabbar-sheet"><h3 class="text-xs font-black text-slate-100 mb-2">إضافة حد لفئة</h3><label class="dabbar-sheet-label">اسم الفئة</label><input id="limit-sheet-name" type="text" maxlength="40" placeholder="اكتب اسم الفئة أو اختار من تحت" class="dabbar-sheet-input"><div id="limit-sheet-chips" class="dabbar-chip-row"></div><label class="dabbar-sheet-label">الحد الشهري</label><input id="limit-sheet-amount" type="number" min="0" placeholder="مثال: 1500" class="dabbar-sheet-input"><div class="dabbar-sheet-btns"><button type="button" id="limit-sheet-cancel" class="dabbar-sheet-cancel">إلغاء</button><button type="button" id="limit-sheet-save" class="dabbar-sheet-save">حفظ الحد</button></div></div></div>
@@ -9272,17 +9290,20 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
             }
 
             if (summary) {
+                summary.classList.add('pv-summary');
                 if (incomeOrBudget) {
-                    const pct = (income && budget) ? Math.min(100, Math.round((total / budget) * 100)) : null;
+                    const progressBase = budget || income;
+                    const pct = Math.max(0, Math.round((total / progressBase) * 100));
+                    const forecastHtml = recurringTotal
+                        ? `<div class="pv-forecast"><span class="pv-forecast-ic"><iconify-icon icon="ph:push-pin-duotone" width="16"></iconify-icon></span><span class="pv-forecast-text">بعد التزاماتك (${fmt(recurringTotal)}) هيفضلك</span><strong>${fmt(afterExpected)}</strong></div>`
+                        : '';
                     summary.innerHTML = `
-                        <div class="planning-hero"><span class="planning-hero-label">💸 المتاح ليك تصرفه دلوقتي</span><strong class="planning-hero-value">${fmt(remaining)}</strong></div>
-                        ${pct !== null ? `<div class="planning-progress-wrap"><div class="planning-progress-track"><div class="planning-progress-fill" style="width:${pct}%"></div></div><span class="planning-progress-pct">صرفت ${pct}% من ميزانيتك</span></div>` : ''}
-                        <div class="planning-breakdown">
-                            ${income ? `<div class="planning-breakdown-row"><span class="k">دخلك الشهر ده</span><span class="v pos">${fmt(income)}</span></div>` : ''}
-                            <div class="planning-breakdown-row"><span class="k">صرفت فعليًا</span><span class="v neg">− ${fmt(total)}</span></div>
+                        <div class="pv-hero"><span class="pv-hero-label">المتاح تصرفه دلوقتي</span><strong class="pv-hero-value">${fmt(remaining)}</strong></div>
+                        <div class="pv-progress">
+                            <div class="pv-track"><div class="pv-fill" style="width:${Math.min(100, pct)}%"></div></div>
+                            <div class="pv-row"><span>صرفت ${pct}% من ${budget ? 'ميزانيتك' : 'دخلك'}</span><span>صرفت ${fmt(total)}</span></div>
                         </div>
-                        <p class="planning-summary-note">"المتاح" = دخلك أو ميزانيتك، ناقص اللي صرفته فعلًا بس.</p>
-                        ${recurringTotal ? `<div class="planning-divider"></div><div class="planning-forecast"><span>لو دفعت التزاماتك المتوقعة (${fmt(recurringTotal)})، هيفضلّلك</span><strong>${fmt(afterExpected)}</strong></div>` : ''}`;
+                        ${forecastHtml}`;
                 } else {
                     summary.innerHTML = '<p class="planning-empty-note">أدخل دخلك أو حد مصروفاتك عشان دبّر يحسبلك المتاح.</p><p class="planning-summary-note">الالتزامات المتكررة للتخطيط فقط، ولا تُخصم تلقائيًا.</p>';
                 }

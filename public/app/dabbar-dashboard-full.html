@@ -4569,6 +4569,10 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
   #dashboard-scroll-down { width: 3.4rem; height: 1.7rem; border-radius: 27px 27px 0 0; display: flex; align-items: flex-end; justify-content: center; padding-bottom: .15rem; border-bottom: 0; }
   #dashboard-scroll-down::before { content: ''; position: absolute; inset: -12px -12px 0 -12px; }
   #dashboard-scroll-down iconify-icon { font-size: 1rem; }
+  /* السهم في نص الشاشة بالظبط فوق خانة ديون: مركّز بالـinset مش بالـtranslate */
+  #dashboard-scroll-down { inset-inline-start: 0; inset-inline-end: 0; margin-inline: auto; transform: translateY(10px); }
+  #dashboard-scroll-down.is-visible { transform: translateY(0); }
+  #dashboard-scroll-down:active { transform: scale(.92); }
 </style>
 </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col overflow-hidden">
@@ -10652,6 +10656,7 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
                 g.count += 1;
                 g.items.push(it);
             });
+            renderPendingReviewReminder(opsListEl);
             if (opsListEl && !opsListEl.dataset.reviewReady) {
                 opsListEl.dataset.reviewReady = 'true';
                 const openReview = (e) => {
@@ -13736,7 +13741,82 @@ function pf2YieldFields() {
                         </div>`;
                 }).join('');
             }
+            attachDraftKindChips(document.getElementById('quick-entry-draft-list'));
             quickStatus(quickEntryDrafts.length > 1 ? `فهمنا ${quickEntryDrafts.length} معاملة — راجعهم ثم أكد التسجيل.` : 'راجع المبلغ والفئة ثم أكد التسجيل.');
+        }
+        // ============ اختيار نوع الحركة المبهمة في شاشة التأكيد: اختياري، ولو اتجاهلت الحركة بتفضل تنبيه في تفاصيل يومك ============
+        const DRAFT_KIND_CHIPS = [['transfer', 'تحويل'], ['income', 'دخل'], ['expense', 'مصروف'], ['loan', 'سلف'], ['debt', 'دين'], ['ignore', 'تجاهل']];
+        const PENDING_REVIEW_KEY = 'dabbar-pending-review';
+        const pendingEsc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+        function readPendingReview() { try { const v = JSON.parse(localStorage.getItem(PENDING_REVIEW_KEY) || '[]'); return Array.isArray(v) ? v : []; } catch (e) { return []; } }
+        function writePendingReview(items) { try { localStorage.setItem(PENDING_REVIEW_KEY, JSON.stringify(items)); } catch (e) {} }
+        function applyDraftKind(draft, kind) {
+            if (kind === 'income') draft.type = 'income';
+            else if (kind === 'expense') draft.type = 'expense';
+            else if (kind === 'transfer') draft.type = 'transfer';
+            else if (kind === 'loan' || kind === 'debt') draft.type = 'debt';
+            draft.user_kind = kind;
+        }
+        function attachDraftKindChips(list) {
+            if (!list) return;
+            Array.from(list.children).forEach((card) => {
+                const holder = card.querySelector('.min-w-0.flex-1');
+                if (!holder) return;
+                const row = document.createElement('div');
+                row.className = 'mt-2 flex flex-wrap gap-1.5';
+                row.innerHTML = DRAFT_KIND_CHIPS.map(([kind, label]) => `<button type="button" data-draft-kind="${kind}" style="border:1px solid rgba(148,163,184,.45);border-radius:999px;padding:3px 9px;font-size:11px;font-weight:700;background:transparent;color:inherit">${label}</button>`).join('');
+                holder.appendChild(row);
+            });
+        }
+        document.getElementById('quick-entry-draft-list')?.addEventListener('click', (e) => {
+            const chip = e.target.closest('[data-draft-kind]');
+            if (!chip) return;
+            const card = chip.closest('#quick-entry-draft-list > div');
+            const list = card?.parentNode;
+            const idx = Array.from(list.children).indexOf(card);
+            const draft = quickEntryDrafts[idx];
+            if (!draft) return;
+            const kind = chip.dataset.draftKind;
+            if (kind === 'ignore') {
+                const items = readPendingReview();
+                items.push({ title: (draft.note && draft.note.trim()) || draft.category || draft.person || 'حركة', amount: draft.amount, currency_code: draft.currency_code });
+                writePendingReview(items);
+                quickEntryDrafts.splice(idx, 1);
+                card.remove();
+                if (!quickEntryDrafts.length) { quickShow('quick-entry-draft', false); quickStatus('اتجاهلت كل الحركات. هتفضل تنبيه في تفاصيل يومك لحد ما تحددها.'); }
+                else document.getElementById('quick-entry-draft-title').textContent = `راجع ${quickEntryDrafts.length} معاملة قبل الحفظ`;
+                return;
+            }
+            applyDraftKind(draft, kind);
+            card.querySelectorAll('[data-draft-kind]').forEach((b) => {
+                const on = b === chip;
+                b.style.cssText = on
+                    ? 'border:1px solid #10b981;border-radius:999px;padding:3px 9px;font-size:11px;font-weight:800;background:rgba(16,185,129,.15);color:#10b981'
+                    : 'border:1px solid rgba(148,163,184,.45);border-radius:999px;padding:3px 9px;font-size:11px;font-weight:700;background:transparent;color:inherit';
+            });
+        });
+        // ============ تنبيه الحركات اللي اتجاهلت في تفاصيل يومك، لحد ما اليوزر يعلّمها "تم" ============
+        function renderPendingReviewReminder(anchor) {
+            if (!anchor || !anchor.parentNode) return;
+            let box = document.getElementById('pending-review-reminder');
+            if (!box) {
+                box = document.createElement('div');
+                box.id = 'pending-review-reminder';
+                anchor.parentNode.insertBefore(box, anchor);
+                box.addEventListener('click', (e) => {
+                    const btn = e.target.closest('[data-pending-clear]');
+                    if (!btn) return;
+                    const items = readPendingReview();
+                    items.splice(Number(btn.dataset.pendingClear), 1);
+                    writePendingReview(items);
+                    renderPendingReviewReminder(anchor);
+                });
+            }
+            const items = readPendingReview();
+            box.className = items.length ? 'mb-3 rounded-2xl border border-amber-400/40 bg-amber-400/10 p-3 space-y-2' : 'hidden';
+            box.innerHTML = items.length
+                ? `<p class="text-[11px] font-black text-amber-500">⚠️ فيه ${items.length} حركة لسه متحددتش نوعها</p>` + items.map((it, i) => `<div class="flex items-center justify-between gap-2 text-[11px] text-slate-600 dark:text-slate-300"><span class="truncate">${pendingEsc(it.title)}</span><span class="shrink-0 font-bold">${fmt(it.amount, it.currency_code)}</span><button type="button" data-pending-clear="${i}" class="shrink-0 text-[10px] font-bold text-amber-500 underline">تم</button></div>`).join('')
+                : '';
         }
         async function analyzeQuickEntry(payload) { if (!requireQuickEntryAccess()) return; if (!navigator.onLine) { quickStatus('الميزة الذكية تحتاج اتصالًا بالإنترنت. استخدم «الإدخال اليدوي» لحفظ العملية الآن.', 'error'); return; } const cycleMsgs = payload.audioBase64 ? ['🎙️ بنسمع كلامك', '🧠 بنفهم العملية', '📝 بنجهز المراجعة'] : payload.imageBase64 ? ['📸 بنقرأ الفاتورة', '🔎 بنفصّل الأصناف', '🧮 بنجهز الإجمالي'] : ['🧠 بنفهم كلامك', '🏷️ بنحدد الفئة', '📝 بنجهز المراجعة']; quickStatusCycle(cycleMsgs); try { const result = await asstApi(payload.imageBase64 ? 'entry_invoice_draft' : 'entry_draft', payload); quickDraft(result.drafts, result.transcript); } catch (e) { if (await dabbarOfflineFallback(payload, e)) return; quickStatus(e.message || 'تعذر فهم العملية.', 'error'); } }
         // ============ لو مفيش نت وأنت كاتب عملية: بنحفظها على الجهاز (المبلغ + وصفك) وتتسجل أوتوماتيك لما النت يرجع ============

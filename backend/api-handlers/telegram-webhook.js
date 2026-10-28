@@ -14,7 +14,7 @@ import { guessCategory } from '../../lib/categoryHints.js';
 import { currencyLabel } from '../../lib/textNormalize.js';
 import { normalizeDigits, extractDeterministicExpense, correctDebtDirections, normalizeFinancialTransaction, reconcileSingleTransaction } from '../../lib/textNormalize.js';
 import { checkVoiceUsage, checkOcrUsage, checkChatUsage, checkTextUsage, refundOcrUsage } from '../../lib/rateLimits.js';
-import { GUIDE_URL, TRIAL_SUMMARY_BASE_URL, ADMIN_TELEGRAM_ID, SUBSCRIPTION_DAYS, SUBSCRIPTION_PRICE_EGP, INSTAPAY_LINK, ADMIN_CONTACT_USERNAME, VOICE_MAX_DURATION_SECONDS, TELEGRAM_WEBHOOK_SECRET } from '../../lib/config.js';
+import { GUIDE_URL, TRIAL_SUMMARY_BASE_URL, ADMIN_TELEGRAM_ID, SUBSCRIPTION_DAYS, SUBSCRIPTION_PRICE_EGP, INSTAPAY_LINK, INSTAPAY_DESTINATION, ADMIN_CONTACT_USERNAME, VOICE_MAX_DURATION_SECONDS, TELEGRAM_WEBHOOK_SECRET } from '../../lib/config.js';
 import { createTrialSummaryToken } from '../../lib/trialToken.js';
 import { getFeatureAccess, subscriptionRequiredResponse } from '../../lib/subscriptionAccess.js';
 
@@ -55,7 +55,7 @@ function buildSubscriptionPrompt(isExpired, trialEnded = false) {
   return (
     `${intro}\n\n` +
     `💳 الاشتراك الشهري: <b>${SUBSCRIPTION_PRICE_EGP} ج.م</b>\n\n` +
-    `1️⃣ حوّل عن طريق إنستا باي على الرقم: <code>${INSTAPAY_LINK}</code>\n` +
+    `1️⃣ حوّل عن طريق إنستا باي إلى <b>${INSTAPAY_DESTINATION}</b> على الرقم: <code>${INSTAPAY_LINK}</code>\n` +
     `2️⃣ صوّر الإيصال، واكتب اسمك اللي حولت بيه في نفس رسالة الصورة (تحتها كتابة)\n` +
     `3️⃣ ابعت الصورة هنا في الشات\n\n` +
     `بمجرد ما نتأكد من التحويل، هيتفعّل اشتراكك على طول وترجع تقدر تستخدم البوت عادي.`

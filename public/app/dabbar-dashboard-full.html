@@ -4452,6 +4452,37 @@ html[data-theme="dark"] .pf-sell-preview.up{color:#6fe3b4}html[data-theme="dark"
         html:not([data-theme="light"]) .daily-focus-title { color: #f1f5f9; }
         html:not([data-theme="light"]) .daily-focus-title::after { content: ''; }
         html[data-theme="light"] .daily-focus-title { color: #0f172a; }
+
+        /* أرقام مالية حساسة: تظل مموهة حتى يفتحها المستخدم داخل جلسة التطبيق */
+        .daily-sensitive-card { position: relative; }
+        .daily-sensitive-card .daily-reveal-btn {
+            position: absolute; inset-inline-start: .65rem; top: .65rem; z-index: 5;
+            border: 1px solid color-mix(in srgb, var(--pm-gold-bright, #10b981) 35%, transparent);
+            background: color-mix(in srgb, var(--pm-surface-hi, #fff) 72%, transparent);
+            color: var(--pm-ink, #0f172a); border-radius: .65rem; padding: .22rem .48rem;
+            font-size: .58rem; font-weight: 900; cursor: pointer; transition: transform .2s ease, opacity .2s ease;
+            backdrop-filter: blur(8px);
+        }
+        .daily-sensitive-card .daily-reveal-btn:active { transform: scale(.95); }
+        .daily-sensitive-card.daily-sensitive-locked #salary-countdown-remaining,
+        .daily-sensitive-card.daily-sensitive-locked #salary-countdown-daily,
+        .daily-sensitive-card.daily-sensitive-locked #salary-countdown-days,
+        .daily-sensitive-card.daily-sensitive-locked #piggybank-saved,
+        .daily-sensitive-card.daily-sensitive-locked #piggybank-streak {
+            filter: blur(9px); user-select: none; transition: filter .34s cubic-bezier(.22, 1, .36, 1);
+        }
+        .daily-sensitive-card.daily-sensitive-locked::after {
+            content: 'اضغط لإظهار الأرقام'; position: absolute; inset: 0; z-index: 2;
+            pointer-events: none; display: grid; place-items: center; padding-top: 1.2rem;
+            color: var(--pm-muted, #64748b); font-size: .58rem; font-weight: 900; opacity: .78;
+        }
+        .daily-sensitive-card.daily-sensitive-unlocking::before {
+            content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+            border-radius: inherit; background: radial-gradient(circle, color-mix(in srgb, var(--pm-gold-bright, #10b981) 18%, transparent), transparent 68%);
+            animation: dailyRevealPulse .55s ease both;
+        }
+        @keyframes dailyRevealPulse { from { opacity: 0; transform: scale(.92); } 45% { opacity: 1; } to { opacity: 0; transform: scale(1.05); } }
+        @media (prefers-reduced-motion: reduce) { .daily-sensitive-card * { transition: none !important; animation: none !important; } }
     </style>
 <style id="dabbar-tune-jun-2026">
 /* كارت "المتبقي من الشهر" و"حصالة اليوم": أصغر وأهدى */
@@ -4502,6 +4533,25 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
 #piggybank-card .grid { gap: .25rem !important; }
 #piggybank-card .dabbar-metric-cta-btn, #piggybank-card .dabbar-wallet-reset-btn { padding: .28rem .5rem !important; font-size: .6rem !important; border-radius: .6rem !important; }
 #piggybank-card .flex.gap-2 { gap: .35rem !important; }
+</style>
+<style>
+  /* زر النزول السريع: ثابت فوق كل التابات، متوسط الحجم، ولا يغطي شريط التنقل */
+  #dashboard-scroll-down {
+    position: fixed; z-index: 80; inset-inline-start: 50%; bottom: 5.85rem;
+    width: 2.9rem; height: 2.9rem; transform: translateX(-50%) translateY(10px);
+    display: grid; place-items: center; border-radius: 999px; cursor: pointer;
+    color: #102019; background: linear-gradient(145deg, var(--pm-gold-bright, #d9f36a), var(--pm-mint, #34d399));
+    border: 2px solid color-mix(in srgb, var(--pm-gold-bright, #d9f36a) 58%, white 12%);
+    box-shadow: 0 10px 26px rgba(0,0,0,.28), 0 0 0 5px color-mix(in srgb, var(--pm-mint, #34d399) 12%, transparent);
+    opacity: 0; pointer-events: none; transition: opacity .25s ease, transform .25s cubic-bezier(.22,1,.36,1), box-shadow .2s ease;
+  }
+  #dashboard-scroll-down.is-visible { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); animation: dashboardArrowFloat 2s ease-in-out infinite; }
+  #dashboard-scroll-down:hover { box-shadow: 0 13px 30px rgba(0,0,0,.34), 0 0 0 7px color-mix(in srgb, var(--pm-mint, #34d399) 16%, transparent); }
+  #dashboard-scroll-down:active { transform: translateX(-50%) scale(.92); }
+  #dashboard-scroll-down iconify-icon { font-size: 1.35rem; font-weight: 900; }
+  @keyframes dashboardArrowFloat { 0%,100% { margin-bottom: 0; } 50% { margin-bottom: -4px; } }
+  @media (max-width: 480px) { #dashboard-scroll-down { bottom: 5.45rem; width: 2.75rem; height: 2.75rem; } }
+  @media (prefers-reduced-motion: reduce) { #dashboard-scroll-down, #dashboard-scroll-down.is-visible { animation: none; transition: opacity .15s ease; } }
 </style>
 </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col overflow-hidden">
@@ -4566,7 +4616,10 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
         </div>
 
         <!-- Scrollable Dashboard Content -->
-        <div class="flex-1 overflow-y-auto">
+        <div class="flex-1 overflow-y-auto" id="dashboard-scroll-container">
+            <button type="button" id="dashboard-scroll-down" aria-label="انزل لأسفل الصفحة" title="انزل لأسفل الصفحة">
+                <iconify-icon icon="ph:caret-double-down-bold" aria-hidden="true"></iconify-icon>
+            </button>
 
         <!-- ===================== TAB: MONTHLY (default) ===================== -->
         <div class="tab-content active fade-up p-5 space-y-4" id="tab-monthly">
@@ -6320,7 +6373,7 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
                     <div class="flex items-start gap-2">
                         <span class="w-5 h-5 rounded-full bg-emerald-500/15 text-emerald-400 flex items-center justify-center font-black text-[10px] shrink-0 mt-0.5">1</span>
                         <div class="flex-1">
-                            <p class="text-slate-300 mb-1.5">حوّل <b id="account-sub-price" class="text-emerald-400">129 ج.م</b> عن طريق إنستا باي على الرقم:</p>
+                            <p class="text-slate-300 mb-1.5">حوّل <b id="account-sub-price" class="text-emerald-400">129 ج.م</b> عن طريق إنستا باي إلى <b id="account-sub-destination" class="text-emerald-400">محفظة اتصالات (Etisalat Cash)</b> على الرقم:</p>
                             <button type="button" id="account-sub-copy-btn" class="w-full flex items-center justify-between gap-2 bg-slate-900 border border-slate-800 rounded-lg px-3 py-2.5">
                                 <span id="account-sub-instapay" class="font-mono text-sm text-slate-100 select-all" dir="ltr">—</span>
                                 <span id="account-sub-copy-label" class="text-[10px] font-bold text-emerald-400 shrink-0">نسخ 📋</span>
@@ -6990,7 +7043,7 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
             setTimeout(() => document.getElementById(btnId)?.click(), 150);
         }
 
-        const CATEGORY_EMOJI = { 'أكل':'🍔', 'مواصلات':'🚕', 'فواتير':'🧾', 'تسوق':'🛍️', 'ترفيه':'🎬', 'صحة':'💊', 'تعليم':'📚', 'منزل وأثاث':'🏠', 'ملابس':'👕', 'اشتراكات':'🔁', 'هدايا وتبرعات':'🎁', 'شخصي وعناية':'🧴', 'مشروبات':'☕', 'بقالة وسوبر ماركت':'🛒', 'بنزين وسيارة':'⛽', 'اتصالات وإنترنت':'📱' };
+        const CATEGORY_EMOJI = { 'أكل':'🍔', 'مواصلات':'🚕', 'فواتير':'🧾', 'تسوق':'🛍️', 'ترفيه':'🎬', 'صحة':'💊', 'تعليم':'📚', 'منزل وأثاث':'🏠', 'إيجار وسكن':'🏠', 'ملابس':'👕', 'اشتراكات':'🔁', 'سفر وإقامة':'✈️', 'رياضة وجيم':'🏋️', 'هدايا وتبرعات':'🎁', 'أطفال وحضانة':'🧒', 'مناسبات وأفراح':'🎉', 'حيوانات أليفة':'🐾', 'شخصي وعناية':'🧴', 'مشروبات':'☕', 'بقالة وسوبر ماركت':'🛒', 'بنزين وسيارة':'⛽', 'صيانة سيارة':'🔧', 'اتصالات وإنترنت':'📱', 'عمل ومشروع':'💼', 'جمعية وأقساط':'🔄', 'رسوم بنكية':'🏦', 'تأمين':'🛡️', 'استثمار وادخار':'📈' };
         const CATEGORY_EMOJI_RULES = [
             [/سفر|طيران|طيارة|رحلة|سياحة|مطار/, '✈️'],
             [/قهوة|كافيه|مشروب|عصير/, '☕'],
@@ -7016,9 +7069,9 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
             return match ? match[1] : '🧩';
         }
         const MONTH_NAMES = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
-        const CATEGORY_BAR_COLOR = { 'أكل':'bg-rose-400', 'مواصلات':'bg-teal-400', 'فواتير':'bg-amber-400', 'تسوق':'bg-violet-400', 'ترفيه':'bg-pink-400', 'صحة':'bg-emerald-400', 'تعليم':'bg-blue-400', 'منزل وأثاث':'bg-orange-400', 'ملابس':'bg-fuchsia-400', 'اشتراكات':'bg-indigo-400', 'هدايا وتبرعات':'bg-amber-500', 'شخصي وعناية':'bg-cyan-400', 'مشروبات':'bg-yellow-600', 'بقالة وسوبر ماركت':'bg-lime-400', 'بنزين وسيارة':'bg-red-400', 'اتصالات وإنترنت':'bg-sky-400' };
+        const CATEGORY_BAR_COLOR = { 'أكل':'bg-rose-400', 'مواصلات':'bg-teal-400', 'فواتير':'bg-amber-400', 'تسوق':'bg-violet-400', 'ترفيه':'bg-pink-400', 'صحة':'bg-emerald-400', 'تعليم':'bg-blue-400', 'منزل وأثاث':'bg-orange-400', 'إيجار وسكن':'bg-yellow-400', 'ملابس':'bg-fuchsia-400', 'اشتراكات':'bg-indigo-400', 'سفر وإقامة':'bg-cyan-400', 'رياضة وجيم':'bg-lime-400', 'هدايا وتبرعات':'bg-amber-500', 'أطفال وحضانة':'bg-rose-400', 'مناسبات وأفراح':'bg-orange-400', 'حيوانات أليفة':'bg-violet-400', 'شخصي وعناية':'bg-cyan-400', 'مشروبات':'bg-yellow-600', 'بقالة وسوبر ماركت':'bg-lime-400', 'بنزين وسيارة':'bg-red-400', 'صيانة سيارة':'bg-slate-400', 'اتصالات وإنترنت':'bg-sky-400', 'عمل ومشروع':'bg-blue-400', 'جمعية وأقساط':'bg-teal-400', 'رسوم بنكية':'bg-indigo-400', 'تأمين':'bg-teal-600', 'استثمار وادخار':'bg-yellow-500' };
         // نفس الألوان بالظبط بس Hex عشان نرسم بيها دائرة الفئات (conic-gradient بيحتاج قيم حقيقية مش أسماء كلاسات Tailwind)
-        const CATEGORY_HEX = { 'أكل':'#fb7185', 'مواصلات':'#2dd4bf', 'فواتير':'#fbbf24', 'تسوق':'#a78bfa', 'ترفيه':'#f472b6', 'صحة':'#34d399', 'تعليم':'#60a5fa', 'منزل وأثاث':'#fb923c', 'ملابس':'#e879f9', 'اشتراكات':'#818cf8', 'هدايا وتبرعات':'#f59e0b', 'شخصي وعناية':'#22d3ee', 'مشروبات':'#ca8a04', 'بقالة وسوبر ماركت':'#a3e635', 'بنزين وسيارة':'#f87171', 'اتصالات وإنترنت':'#38bdf8' };
+        const CATEGORY_HEX = { 'أكل':'#fb7185', 'مواصلات':'#2dd4bf', 'فواتير':'#fbbf24', 'تسوق':'#a78bfa', 'ترفيه':'#f472b6', 'صحة':'#34d399', 'تعليم':'#60a5fa', 'منزل وأثاث':'#fb923c', 'إيجار وسكن':'#fbbf24', 'ملابس':'#e879f9', 'اشتراكات':'#818cf8', 'سفر وإقامة':'#22d3ee', 'رياضة وجيم':'#a3e635', 'هدايا وتبرعات':'#f59e0b', 'أطفال وحضانة':'#fb7185', 'مناسبات وأفراح':'#f97316', 'حيوانات أليفة':'#a78bfa', 'شخصي وعناية':'#22d3ee', 'مشروبات':'#ca8a04', 'بقالة وسوبر ماركت':'#a3e635', 'بنزين وسيارة':'#f87171', 'صيانة سيارة':'#64748b', 'اتصالات وإنترنت':'#38bdf8', 'عمل ومشروع':'#0ea5e9', 'جمعية وأقساط':'#14b8a6', 'رسوم بنكية':'#6366f1', 'تأمين':'#0f766e', 'استثمار وادخار':'#eab308' };
         const CATEGORY_HEX_FALLBACK = '#94a3b8';
 
         const CATEGORY_QUICK_TIPS = {
@@ -9444,7 +9497,7 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
         // ============ بدل ما نستخدم اتنين prompt() منفصلين (مبلغ لوحده، وصف لوحده) بشكل مبعثر — بنفتح فورم واحد مرتب فيه الحقلين مع بعض ============
         let __expenseEditId = null;
         // قائمة فئات المصروف المتاحة في التعديل (نفس فئات الإدخال اليدوي + شخصي وعناية). لو فئة العملية الحالية مش فيها بتتضاف تلقائي.
-        const EXPENSE_EDIT_CATEGORIES = ['أكل', 'مشروبات', 'بقالة وسوبر ماركت', 'مواصلات', 'بنزين وسيارة', 'فواتير', 'اتصالات وإنترنت', 'تسوق', 'ترفيه', 'صحة', 'تعليم', 'منزل وأثاث', 'ملابس', 'اشتراكات', 'هدايا وتبرعات', 'شخصي وعناية', 'أخرى'];
+        const EXPENSE_EDIT_CATEGORIES = ['أكل', 'مشروبات', 'بقالة وسوبر ماركت', 'مواصلات', 'بنزين وسيارة', 'صيانة سيارة', 'فواتير', 'اتصالات وإنترنت', 'تسوق', 'ترفيه', 'سفر وإقامة', 'رياضة وجيم', 'صحة', 'تعليم', 'منزل وأثاث', 'إيجار وسكن', 'ملابس', 'اشتراكات', 'هدايا وتبرعات', 'أطفال وحضانة', 'مناسبات وأفراح', 'حيوانات أليفة', 'شخصي وعناية', 'عمل ومشروع', 'جمعية وأقساط', 'رسوم بنكية', 'تأمين', 'استثمار وادخار', 'أخرى'];
         function fillExpenseEditCategories(current) {
             const select = document.getElementById('expense-edit-category');
             if (!select) return;
@@ -10359,6 +10412,7 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
             barEl.style.width = `${Math.max(spentPercent, spentPercent > 0 ? 3 : 0)}%`;
             // لو نسبة الفلوس المصروفة أعلى من نسبة الأيام اللي عدت، معناه بيصرف أسرع من المفروض — نلوّنه تحذيري
             barEl.style.background = spentPercent > daysPassedPercent ? '#b8862c' : 'var(--pm-gold-bright, #10b981)';
+            applyDailySensitiveState();
         }
         document.getElementById('salary-countdown-setup-btn')?.addEventListener('click', () => {
             document.querySelector('.tab-btn[data-tab="monthly"]')?.click();
@@ -10394,6 +10448,7 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
                 chip.classList.toggle('active', Number(chip.dataset.amt) === piggybankSelectedAmount);
             });
             document.getElementById('piggybank-custom-amount').value = '';
+            applyDailySensitiveState();
         }
         document.querySelectorAll('#piggybank-chip-row .dabbar-wallet-chip[data-amt]').forEach((chip) => {
             chip.addEventListener('click', () => {
@@ -15730,6 +15785,7 @@ function pf2YieldFields() {
             }
             document.getElementById('account-sub-price').textContent = `${subscription.priceEgp} ج.م`;
             document.getElementById('account-sub-instapay').textContent = subscription.instapayNumber || '—';
+            document.getElementById('account-sub-destination').textContent = subscription.instapayDestination || 'محفظة اتصالات (Etisalat Cash)';
             document.getElementById('account-sub-open-bot').href = `https://t.me/${SUB_BOT_USERNAME}`;
 
             const headline = document.getElementById('account-sub-headline');
@@ -16252,10 +16308,46 @@ function pf2YieldFields() {
                 daily.insertBefore(shell, salary);
                 shell.querySelector('[data-focus-panel="salary"]').append(salary, salaryEmpty);
                 shell.querySelector('[data-focus-panel="piggy"]').append(piggy, piggyEmpty);
+                [salary, piggy].forEach((card, index) => {
+                    card.classList.add('daily-sensitive-card');
+                    const button = document.createElement('button');
+                    button.type = 'button';
+                    button.className = 'daily-reveal-btn';
+                    button.dataset.dailyReveal = 'true';
+                    button.setAttribute('aria-label', index === 0 ? 'إظهار أو إخفاء المتبقي من الشهر' : 'إظهار أو إخفاء مبلغ الحصالة');
+                    button.addEventListener('click', (event) => {
+                        event.stopPropagation();
+                        const next = !window.__dailySensitiveRevealed;
+                        window.__dailySensitiveRevealed = next;
+                        try {
+                            if (next) sessionStorage.setItem('dabbar-daily-sensitive-revealed', '1');
+                            else sessionStorage.removeItem('dabbar-daily-sensitive-revealed');
+                        } catch (e) {}
+                        card.classList.add('daily-sensitive-unlocking');
+                        window.setTimeout(() => card.classList.remove('daily-sensitive-unlocking'), 600);
+                        applyDailySensitiveState();
+                    });
+                    card.appendChild(button);
+                });
                 // ============ "شوف يومك بشكل حلو" لازم يبان فوق كارت "المتبقي من الشهر" ============
                 const wrappedOpenBtn = document.getElementById('daily-wrapped-open');
                 if (wrappedOpenBtn) wrappedOpenBtn.after(shell);
                 daily.dataset.focusReady = 'true';
+                applyDailySensitiveState();
+            }
+
+            function applyDailySensitiveState() {
+                if (window.__dailySensitiveRevealed === undefined) {
+                    try { window.__dailySensitiveRevealed = sessionStorage.getItem('dabbar-daily-sensitive-revealed') === '1'; }
+                    catch (e) { window.__dailySensitiveRevealed = false; }
+                }
+                document.querySelectorAll('.daily-sensitive-card').forEach((card) => {
+                    const locked = !window.__dailySensitiveRevealed;
+                    card.classList.toggle('daily-sensitive-locked', locked);
+                    card.classList.toggle('daily-sensitive-unlocked', !locked);
+                    const button = card.querySelector('[data-daily-reveal]');
+                    if (button) button.textContent = locked ? 'إظهار' : 'إخفاء';
+                });
             }
 
             function setupPlanningCard() {
@@ -17300,6 +17392,41 @@ html:not([data-theme="light"]) .asst-goal-daily-days{ color:#bdf23f !important; 
 </script>
 <script>
 (function(){try{var st=document.getElementById('account-currency-status'),sm=document.getElementById('account-currency-summary-status');if(!st||!sm)return;var up=function(){var m=/العملة الحالية:\s*(.+)$/.exec(st.textContent||'');if(m)sm.textContent=m[1];};up();new MutationObserver(up).observe(st,{childList:true,characterData:true,subtree:true});}catch(e){}})();
+</script>
+<script>
+/* سهم نزول موحّد في الشهري/اليومي/المساعد/الحساب وباقي التابات */
+(function () {
+  const init = () => {
+    const scroller = document.getElementById('dashboard-scroll-container');
+    const button = document.getElementById('dashboard-scroll-down');
+    if (!scroller || !button || button.dataset.ready) return;
+    button.dataset.ready = 'true';
+    const activeTab = () => scroller.querySelector('.tab-content.active');
+    const update = () => {
+      const tab = activeTab();
+      const hasRoom = scroller.scrollHeight > scroller.clientHeight + 80;
+      const nearBottom = scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 72;
+      const isVisible = !!tab && !tab.classList.contains('hidden') && hasRoom && !nearBottom;
+      button.classList.toggle('is-visible', isVisible);
+      button.setAttribute('aria-hidden', String(!isVisible));
+    };
+    button.addEventListener('click', () => {
+      const distance = Math.max(260, Math.round(scroller.clientHeight * 0.72));
+      scroller.scrollBy({ top: distance, behavior: 'smooth' });
+    });
+    scroller.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update, { passive: true });
+    document.querySelectorAll('.tab-btn').forEach((tabButton) => tabButton.addEventListener('click', () => {
+      window.setTimeout(() => { scroller.scrollTo({ top: 0, behavior: 'smooth' }); update(); }, 40);
+    }));
+    const observer = new MutationObserver(update);
+    document.querySelectorAll('.tab-content').forEach((tab) => observer.observe(tab, { attributes: true, attributeFilter: ['class'] }));
+    window.setTimeout(update, 250);
+    window.dashboardScrollArrowUpdate = update;
+  };
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });
+  else init();
+})();
 </script>
 </body>
 </html>

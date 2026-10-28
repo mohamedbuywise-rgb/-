@@ -4,7 +4,7 @@ import { getMonthRange, getExpensesBetween, buildCategoryBreakdown, detectRecurr
 import { computeNetByPerson, getGameyaList, getOccasionsSummary } from '../../lib/debts.js';
 import { getDailyPiggybank } from '../../lib/goals.js';
 import { getInvoicesList, getInvoiceDetail } from '../../lib/invoices.js';
-import { MONTH_NAMES, CATEGORY_EMOJI, SUBSCRIPTION_PRICE_EGP, INSTAPAY_LINK } from '../../lib/config.js';
+import { MONTH_NAMES, CATEGORY_EMOJI, SUBSCRIPTION_PRICE_EGP, INSTAPAY_LINK, INSTAPAY_DESTINATION } from '../../lib/config.js';
 import { hasActiveSubscription, getSubscriptionExpiry, isInTrial, getTrialDaysLeft, getActiveSubscribersCount } from '../../lib/users.js';
 import { ensureTrialStarted } from '../../lib/subscriptionAccess.js';
 import { getActiveDays } from '../../lib/activeDays.js';
@@ -584,6 +584,7 @@ export default async function handler(req, res) {
         trialDaysLeft: subTrialDaysLeft,
         priceEgp: SUBSCRIPTION_PRICE_EGP,
         instapayNumber: INSTAPAY_LINK,
+        instapayDestination: INSTAPAY_DESTINATION,
         totalActiveSubscribers: activeSubscribersCount,
       },
       activeDays,

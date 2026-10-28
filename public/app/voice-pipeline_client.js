@@ -20,7 +20,18 @@
 //   const result = await session.result;  // { ok, source, transcript, transactions, provider, error, debug }
 
 export const VOICE_DEFAULTS = {
-  langs: ['ar-EG', 'ar'],   // اللهجة المصرية أولًا، مش لغة الجهاز
+  // Web Speech يعتمد على اللغات التي يوفّرها المتصفح، لذلك نبدأ بلغة الجهاز ثم
+  // نمر على لهجات عربية شائعة ولغات عالمية قبل fallback العام. النص الناتج
+  // يذهب بعد ذلك إلى Groq، فلا نفرض ترجمة أو لهجة واحدة على المصنف.
+  langs: (() => {
+    const browserLang = typeof navigator !== 'undefined' ? String(navigator.language || '').trim() : '';
+    const supported = [
+      'ar-EG', 'ar-SA', 'ar-AE', 'ar-JO', 'ar-LB', 'ar-SY', 'ar-MA', 'ar-DZ', 'ar-TN', 'ar-KW', 'ar-QA',
+      'en-US', 'en-GB', 'en-AU', 'en-IN', 'fr-FR', 'fr-CA', 'es-ES', 'es-MX', 'de-DE', 'it-IT', 'pt-BR',
+      'tr-TR', 'ur-PK', 'hi-IN', 'fa-IR', 'id-ID', 'ms-MY', 'ru-RU', 'zh-CN', 'ja-JP', 'ko-KR', 'nl-NL',
+    ];
+    return [...new Set([browserLang, ...supported].filter(Boolean))];
+  })(),
   maxSeconds: 30,           // نفس VOICE_MAX_DURATION_SECONDS في config.js
   minConfidence: 0.35,      // بيتطبق بس لو المتصفح رجّع confidence > 0 (بعض المتصفحات بترجّع 0 دايمًا)
   minPeakLevel: 0.04,       // أقل مستوى صوت (0..1) يعتبر إن فيه كلام فعلًا
@@ -40,7 +51,7 @@ const REFUSAL_HINTS = /(لا أستطيع|لا استطيع|مقدرش|عذرً�
 //   2) dedupeRuns: أي عبارة اتكررت ورا بعض تتشال
 //   3) transcriptHealth: لو النص لسه مشبوه (تكرار عالي/طويل جدًا) مانبعتوش للتصنيف -> نروح للتسجيل التاني
 //   4) maxChars: سقف على طول النص اللي بيتبعت للسيرفر
-export const VOICE_PIPELINE_VERSION = '2026-10-17.1';
+export const VOICE_PIPELINE_VERSION = '2026-10-28.1';
 
 const IS_ANDROID = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent || '');
 const normSeg = (t) => String(t || '').replace(/[\u064B-\u0652\u0640]/g, '').replace(/\s+/g, ' ').trim();

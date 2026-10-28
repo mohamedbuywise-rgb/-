@@ -189,11 +189,17 @@ function validateAiItems(aiItems, rawText, parsed) {
     };
     if (candidate.type === 'transfer') {
       normalized.direction = direction || ruleDirection || 'out';
-      normalized.needs_review = raw.needs_review === undefined ? Boolean(normalized.counterparty) : Boolean(raw.needs_review);
+      // أي تحويل لطرف آخر لازم يمر على المراجعة، حتى لو الـ AI رجّع false بالخطأ.
+      // التحويل بين حسابات المستخدم نفسه فقط يمكن اعتماده بدون مراجعة.
+      normalized.needs_review = Boolean(normalized.counterparty) || raw.needs_review === true;
     }
     accepted.push(normalized);
   }
   return accepted;
+}
+
+function looksLikeBankSms(text) {
+  return /(debit(?:ed)?|credit(?:ed)?|charged|purchase|payment|withdraw(?:al)?|deposit|transfer|virement|paiement|retrait|depot|transaction|account|card|balance|الرصيد|خصم|ائتمان|دفع|شراء|سحب|ايداع|تحويل|معامله|بطاقه|حساب|محفظه|بنجاح|تمت)/i.test(String(text || ''));
 }
 
 function markLowConfidence(item) {
@@ -252,7 +258,7 @@ export default async function handler(req, res) {
   let bankMatch = matchBankSender(senderName) || detectBankFromText(rawText);
   if (!bankMatch) {
     // مرسل مش معروف: لو مش رقم شخصي والرسالة واضحة جدًا كعملية بنكية، بنقبلها كـ "بنك/محفظة" عامة بدل ما نضيّعها.
-    if (!looksLikePersonalNumber(senderName) && ruleConfidence === 'high') {
+    if (!looksLikePersonalNumber(senderName) && (ruleConfidence === 'high' || looksLikeBankSms(rawText))) {
       bankMatch = { ...GENERIC_BANK, label: senderName ? senderName.slice(0, 40) : GENERIC_BANK.label };
     } else {
       return res.status(200).json({ ok: true, skipped: true, code: 'unknown_sender', reason: 'مرسل غير معروف كبنك/محفظة، اتجاهلت.' });

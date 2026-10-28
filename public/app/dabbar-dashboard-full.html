@@ -77,6 +77,17 @@
         .daily-group > summary::-webkit-details-marker { display: none; }
         .daily-group > summary::marker { content: ''; }
         .daily-group-chev { transition: transform .2s ease; display: inline-block; }
+        /* كبسولة "للمراجعة" جوه صف التحويل */
+        .pending-chip { background: rgba(217,119,6,.14); color: #b45309; border-radius: 999px; padding: 1px 8px; font: 800 .62rem 'Cairo',sans-serif; line-height: 1.6; }
+        html:not([data-theme="light"]) .pending-chip { background: rgba(251,176,32,.16); color: #fbbf24; }
+        .pending-box { margin: .2rem 0 .35rem; border-radius: .9rem; background: rgba(217,119,6,.08); padding: .15rem .65rem; }
+        html:not([data-theme="light"]) .pending-box { background: rgba(251,176,32,.09); }
+        .pending-row { display: flex; align-items: center; justify-content: space-between; gap: .5rem; padding: .5rem 0; }
+        .pending-row + .pending-row { border-top: 1px solid rgba(148,163,184,.2); }
+        .pending-sub { font-size: .62rem; font-weight: 700; color: #b45309; }
+        html:not([data-theme="light"]) .pending-sub { color: #fbbf24; }
+        .pending-done { flex-shrink: 0; border-radius: .6rem; padding: .15rem .65rem; font: 800 .65rem 'Cairo',sans-serif; background: rgba(217,119,6,.16); color: #b45309; }
+        html:not([data-theme="light"]) .pending-done { background: rgba(251,176,32,.2); color: #fbbf24; }
         .daily-group[open] .daily-group-chev { transform: rotate(180deg); }
 
         /* ============ شيت "عمليات الدخل" — بديل العرض الإن-لاين القديم ============ */
@@ -4579,6 +4590,68 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
   html[data-theme="dark"] .qd-review { border-color: rgba(245,158,11,.55) !important; background: rgba(245,158,11,.12) !important; }
   html[data-theme="dark"] .qd-review-label { color: #fbbf24; }
 </style>
+<style id="pf-detail-compact">
+/* تفاصيل الأصل: نسخة مدمجة عشان تكفي في شاشة واحدة من غير سكرول طويل */
+#portfolio-sheet .portfolio-asset-detail { padding: .5rem .7rem .65rem; }
+#portfolio-sheet .pf-d-head { display: flex; align-items: center; justify-content: space-between; gap: .5rem; flex-wrap: wrap; }
+#portfolio-sheet .portfolio-detail-value { font-size: 1.25rem; line-height: 1.3; margin: 0; }
+#portfolio-sheet .portfolio-detail-badge { font-size: .64rem; padding: .12rem .5rem; margin: 0; }
+#portfolio-sheet .portfolio-detail-chart { height: 42px; margin: .3rem 0 .35rem; }
+#portfolio-sheet .portfolio-detail-chart svg { height: 100%; width: 100%; }
+#portfolio-sheet .portfolio-detail-stat-grid { gap: .35rem; margin: .35rem 0; }
+#portfolio-sheet .portfolio-detail-stat { padding: .35rem .55rem; border-radius: 10px; display: flex; flex-direction: column; justify-content: center; }
+#portfolio-sheet .portfolio-detail-stat span { font-size: .56rem; margin-bottom: 0; }
+#portfolio-sheet .portfolio-detail-stat strong { font-size: .76rem; line-height: 1.4; }
+#portfolio-sheet .portfolio-detail-weight { padding: .35rem .55rem; margin: .35rem 0; border-radius: 10px; }
+#portfolio-sheet .portfolio-detail-weight-top { margin-bottom: .25rem; }
+#portfolio-sheet .portfolio-detail-weight-bar { height: 5px; }
+#portfolio-sheet .portfolio-detail-meta-row { padding: .25rem 0; font-size: .62rem; }
+#portfolio-sheet .portfolio-detail-actions { margin-top: .35rem; gap: .35rem; }
+#portfolio-sheet .portfolio-detail-edit-btn, #portfolio-sheet .portfolio-detail-sell-btn { padding: .38rem; font-size: .68rem; }
+#portfolio-sheet .portfolio-detail-delete-btn { flex-basis: 2.2rem; }
+</style>
+<style id="planning-card-compact">
+/* كارت الدخل والميزانية: نسخة مدمجة (شكل A) — مسافات أقل، من غير جملة الشرح، وصفوف رفيعة */
+#planning-card { padding: .75rem .85rem !important; }
+#planning-card > * + * { margin-top: .5rem !important; }
+#planning-card > p { display: none !important; }
+#planning-card #planning-income, #planning-card #planning-budget { padding: .4rem .5rem !important; font-size: 1rem !important; border-radius: .8rem !important; margin-top: .2rem !important; }
+#planning-card #planning-summary.pv-summary { gap: .35rem !important; }
+#planning-card .pv-hero { gap: .05rem !important; }
+#planning-card .pv-hero-value { font-size: 1.5rem !important; line-height: 1.15 !important; }
+#planning-card .pv-progress { gap: .25rem !important; }
+#planning-card .pv-track { height: 6px !important; }
+#planning-card .pv-forecast { padding: .35rem .6rem !important; font-size: 10.5px !important; }
+#planning-card details { margin-top: .3rem !important; padding-top: 0 !important; border-top: 0 !important; min-height: 0 !important; }
+#planning-card details > summary { padding: .35rem .6rem !important; min-height: 0 !important; line-height: 1.4 !important; }
+#planning-card .planning-collapse-ic { width: 1.5rem !important; height: 1.5rem !important; }
+#planning-card > div.border-t { border-top: 0 !important; padding-top: .35rem !important; }
+#planning-card #planning-save, #planning-card #planning-reset { padding-top: .5rem !important; padding-bottom: .5rem !important; }
+</style>
+<style id="piggybank-lock-hint-lift">
+/* جملة "اضغط لإظهار الأرقام" في كارت حصالة اليوم: نرفعها شوية عشان تبقى فوق خانات 50/100/200 */
+.daily-sensitive-card.daily-sensitive-locked:has(#piggybank-saved)::after { padding-top: 0 !important; padding-bottom: 5rem; }
+</style>
+<style id="ledger-filter-style">
+/* آخر عملياتك: فلاتر (الكل/دخل/مصروف/تحويل) + أيقونة ملونة حسب النوع (شكل A) */
+#expense-ledger-card .lf-chips{display:flex;gap:.4rem;overflow-x:auto;scrollbar-width:none;margin:.1rem 0 .4rem}
+#expense-ledger-card .lf-chips::-webkit-scrollbar{display:none}
+#expense-ledger-card .lf-chip{font:800 .66rem 'Cairo',sans-serif;padding:.3rem .7rem;border-radius:999px;border:1px solid rgba(148,163,184,.35);background:transparent;color:#94a3b8;white-space:nowrap;cursor:pointer}
+#expense-ledger-card .lf-chip.on{background:#e2e8f0;color:#0f172a;border-color:#e2e8f0}
+#expense-ledger-card .lf-chip.on.e{background:#f43f5e;border-color:#f43f5e;color:#fff}
+#expense-ledger-card .lf-chip.on.i{background:#10b981;border-color:#10b981;color:#fff}
+#expense-ledger-card .lf-chip.on.t{background:#6366f1;border-color:#6366f1;color:#fff}
+#expense-ledger-list [data-ledger-key][data-lt="e"] > span:first-child{background:rgba(244,63,94,.14)!important;border:1px solid rgba(244,63,94,.25)}
+#expense-ledger-list [data-ledger-key][data-lt="i"] > span:first-child{background:rgba(16,185,129,.16)!important;border:1px solid rgba(16,185,129,.28)}
+#expense-ledger-list [data-ledger-key][data-lt="t"] > span:first-child{background:rgba(99,102,241,.16)!important;border:1px solid rgba(99,102,241,.28)}
+#expense-ledger-list [data-ledger-key].lf-hide{display:none!important}
+#expense-ledger-list .lf-empty{display:none;text-align:center;font-size:.7rem;color:#94a3b8;padding:.9rem 0}
+#expense-ledger-list .lf-empty.show{display:block}
+</style>
+<style id="latin-digits">
+/* كل الأرقام بالإنجليزي وبخط متساوي العرض عشان المبالغ تبان مرتبة */
+html, body { font-variant-numeric: tabular-nums; }
+</style>
 </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col overflow-hidden">
     <script src="./dabbar-offline-store.js"></script>
@@ -5015,7 +5088,7 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
     const category = state.data.category || 'مصروفاتك اليومية';
     const budget = Number(state.data.budget || 0);
     const remaining = budget ? Math.max(0, budget - total) : null;
-    $('dabbar-coach-result').innerHTML = `<div class="dabbar-coach-stat"><b>${total ? total.toLocaleString('ar-EG') + ' ج.م' : '—'}</b><span>إجمالي المسجل</span></div><div class="dabbar-coach-stat"><b>${category}</b><span>أكثر فئة ظاهرة</span></div>${remaining !== null ? `<div class="dabbar-coach-stat"><b>${remaining.toLocaleString('ar-EG')} ج.م</b><span>تقدير المتبقي</span></div>` : ''}<div class="dabbar-coach-stat"><b>جاهز</b><span>أول فرصة توفير بعد اكتمال البيانات</span></div>`;
+    $('dabbar-coach-result').innerHTML = `<div class="dabbar-coach-stat"><b>${total ? total.toLocaleString('ar-EG-u-nu-latn') + ' ج.م' : '—'}</b><span>إجمالي المسجل</span></div><div class="dabbar-coach-stat"><b>${category}</b><span>أكثر فئة ظاهرة</span></div>${remaining !== null ? `<div class="dabbar-coach-stat"><b>${remaining.toLocaleString('ar-EG-u-nu-latn')} ج.م</b><span>تقدير المتبقي</span></div>` : ''}<div class="dabbar-coach-stat"><b>جاهز</b><span>أول فرصة توفير بعد اكتمال البيانات</span></div>`;
   }
   function positionArrow() { const btn = $('quick-entry-text'), arrow = $('dabbar-coach-arrow'); if (!btn || arrow.classList.contains('hidden')) return; const r = btn.getBoundingClientRect(); arrow.style.top = `${Math.max(10, r.top - 39)}px`; arrow.style.left = `${r.left + r.width/2 - 12}px`; }
   function open(step = 0) { state.step = step; backdrop.classList.remove('hidden'); backdrop.setAttribute('aria-hidden','false'); render(); }
@@ -5050,6 +5123,104 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
 })();
 </script>
 
+<script id="ledger-filter-script">
+(function () {
+  let filter = 'all';
+  let attachedList = null, listMo = null;
+  // نوع الصف من السطر الفرعي (مثلاً: "مصروف · بنزين وسيارة" / "دخل" / "تحويل")
+  const kindOf = (row) => {
+    const subs = row.querySelectorAll('p');
+    const txt = ((subs[1] && subs[1].textContent) || row.textContent || '').trim();
+    if (/^(دخل|استرداد)/.test(txt)) return 'i';
+    if (/^مصروف/.test(txt)) return 'e';
+    if (/^(تحويل|سحب|إيداع|ايداع)/.test(txt)) return 't';
+    if (/دخل|استرداد/.test(txt)) return 'i';
+    if (/مصروف/.test(txt)) return 'e';
+    if (/تحويل|سحب|إيداع|ايداع/.test(txt)) return 't';
+    return 'o';
+  };
+  const apply = () => {
+    const list = document.getElementById('expense-ledger-list');
+    if (!list) return;
+    let shown = 0, total = 0;
+    list.querySelectorAll('[data-ledger-key]').forEach((row) => {
+      total++;
+      const k = kindOf(row);
+      row.dataset.lt = k;
+      const hide = filter !== 'all' && k !== filter;
+      row.classList.toggle('lf-hide', hide);
+      if (!hide) shown++;
+    });
+    let empty = list.querySelector('.lf-empty');
+    if (!empty) {
+      empty = document.createElement('div');
+      empty.className = 'lf-empty';
+      empty.textContent = 'مفيش عمليات من النوع ده النهاردة';
+      list.appendChild(empty);
+    }
+    empty.classList.toggle('show', total > 0 && shown === 0);
+  };
+  const ensureChips = () => {
+    const card = document.getElementById('expense-ledger-card');
+    const list = document.getElementById('expense-ledger-list');
+    if (!card || !list || document.getElementById('lf-chips')) return;
+    const wrap = document.createElement('div');
+    wrap.id = 'lf-chips';
+    wrap.className = 'lf-chips';
+    wrap.innerHTML = [['all', 'الكل', ''], ['i', 'دخل', 'i'], ['e', 'مصروف', 'e'], ['t', 'تحويل', 't']]
+      .map(([f, label, c]) => `<button type="button" class="lf-chip${f === 'all' ? ' on' : ''}${c ? ' ' + c : ''}" data-f="${f}">${label}</button>`).join('');
+    list.parentNode.insertBefore(wrap, list);
+    wrap.addEventListener('click', (e) => {
+      const b = e.target.closest('.lf-chip');
+      if (!b) return;
+      filter = b.dataset.f;
+      wrap.querySelectorAll('.lf-chip').forEach((x) => x.classList.toggle('on', x === b));
+      apply();
+    });
+  };
+  const sync = () => {
+    ensureChips();
+    const list = document.getElementById('expense-ledger-list');
+    if (list && list !== attachedList) {
+      attachedList = list;
+      if (listMo) listMo.disconnect();
+      listMo = new MutationObserver(apply);
+      listMo.observe(list, { childList: true });
+      apply();
+    }
+  };
+  new MutationObserver(sync).observe(document.body, { childList: true, subtree: true });
+  sync();
+})();
+</script>
+<script id="latin-digits-script">
+(function () {
+  const MAP = { '٠':'0','١':'1','٢':'2','٣':'3','٤':'4','٥':'5','٦':'6','٧':'7','٨':'8','٩':'9' };
+  const RX = /[٠-٩]/g;
+  const SKIP = { SCRIPT:1, STYLE:1, TEXTAREA:1, INPUT:1, NOSCRIPT:1 };
+  const fixNode = (node) => {
+    const v = node.nodeValue;
+    if (!v || !RX.test(v)) { RX.lastIndex = 0; return; }
+    RX.lastIndex = 0;
+    node.nodeValue = v.replace(RX, (d) => MAP[d]);
+  };
+  const walk = (root) => {
+    if (!root) return;
+    if (root.nodeType === 3) { const p = root.parentNode; if (p && !SKIP[p.nodeName]) fixNode(root); return; }
+    if (root.nodeType !== 1 || SKIP[root.nodeName]) return;
+    const it = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, { acceptNode: (n) => (n.parentNode && !SKIP[n.parentNode.nodeName]) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT });
+    let n; const list = []; while ((n = it.nextNode())) list.push(n);
+    list.forEach(fixNode);
+  };
+  walk(document.body);
+  new MutationObserver((muts) => {
+    muts.forEach((m) => {
+      if (m.type === 'characterData') walk(m.target);
+      m.addedNodes && m.addedNodes.forEach((nd) => walk(nd));
+    });
+  }).observe(document.body, { childList: true, subtree: true, characterData: true });
+})();
+</script>
 </body>) عشان يبقوا برة أي كونتينر عنده overflow/transform ممكن يكسر الـ position:fixed بتاعهم -->
 
             <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-3" id="monthly-categories-card">
@@ -6954,7 +7125,8 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
     <div id="portfolio-sheet" class="fixed inset-0 z-50 hidden items-end justify-center bg-black/70 backdrop-blur-sm">
         <div class="w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-t-3xl" style="background:var(--pm-canvas);">
             <div class="sticky top-0 z-10 flex items-center justify-between gap-3 px-4 pt-4 pb-3" style="background:var(--pm-canvas);border-bottom:1px solid var(--pm-hairline);">
-                <h3 class="text-sm font-black" style="color:var(--pm-ink);">محفظتك الاستثمارية</h3>
+                <div class="min-w-0"><h3 class="text-sm font-black" style="color:var(--pm-ink);">محفظتك الاستثمارية</h3><p id="portfolio-sheet-mask-hint" class="hidden text-[10px] font-bold" style="color:var(--pm-muted);">الأرقام مخفية — اضغط 👁️ للإظهار</p></div>
+                <button id="portfolio-sheet-eye" type="button" class="ms-auto flex h-8 w-8 items-center justify-center rounded-full shrink-0 text-sm" style="background:var(--pm-surface-soft);color:var(--pm-muted);" title="إخفاء/إظهار الأرصدة" aria-label="إخفاء أو إظهار الأرصدة">👁️</button>
                 <button id="portfolio-sheet-close" type="button" class="flex h-8 w-8 items-center justify-center rounded-full shrink-0" style="background:var(--pm-surface-soft);color:var(--pm-muted);" aria-label="إغلاق">✕</button>
             </div>
             <div id="portfolio-sheet-slot" class="px-4 pb-6 pt-2"></div>
@@ -7129,7 +7301,7 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
         }
         const CURRENCY_LABELS = { EGP: 'ج.م', USD: 'دولار', EUR: 'يورو', GBP: 'جنيه إسترليني', SAR: 'ريال سعودي', AED: 'درهم', KWD: 'دينار كويتي', QAR: 'ريال قطري' };
         const currencyCode = (code) => String(code || 'EGP').toUpperCase();
-        const fmt = (n, code = 'EGP') => { const source = currencyCode(code); const target = window.__displayCurrency || 'EGP'; const rate = Number(window.__displayCurrencyEgpRate || 1); const value = source === 'EGP' && target !== 'EGP' && rate > 0 ? Number(n) / rate : Number(n); const label = source === 'EGP' ? (CURRENCY_LABELS[target] || target) : (CURRENCY_LABELS[source] || source); return `${value.toLocaleString('ar-EG', { maximumFractionDigits: 2 })} ${label}`; };
+        const fmt = (n, code = 'EGP') => { const source = currencyCode(code); const target = window.__displayCurrency || 'EGP'; const rate = Number(window.__displayCurrencyEgpRate || 1); const value = source === 'EGP' && target !== 'EGP' && rate > 0 ? Number(n) / rate : Number(n); const label = source === 'EGP' ? (CURRENCY_LABELS[target] || target) : (CURRENCY_LABELS[source] || source); return `${value.toLocaleString('ar-EG-u-nu-latn', { maximumFractionDigits: 2 })} ${label}`; };
         const typeLabel = (type) => ({ expense: 'مصروف', income: 'دخل', purchase: 'شراء', asset: 'أصل', transfer: 'تحويل', refund: 'استرداد', debt: 'دين', invoice: 'فاتورة' }[type] || 'عملية مالية');
 
         // ============ الوضع الفاتح/الغامق — بيتخزن في localStorage على جهاز المستخدم ============
@@ -8704,9 +8876,15 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
                     if (firstPaint) {
                         window.__displayCurrency = firstPaint.displayCurrency || window.__displayCurrency || 'EGP';
                         window.__displayCurrencyEgpRate = Number(firstPaint.displayCurrencyEgpRate || 1);
+                        // الدخل والميزانية: نعرض النسخة المحلية المحفوظة فورًا مع أول رسم بدل ما نستنى طلب السيرفر (كانت بتظهر فاضية لحد آخر التحميل)
+                        window.__dashboardData = firstPaint;
+                        try { const localPlan = JSON.parse(localStorage.getItem(planningSettingsKey()) || 'null'); if (localPlan && !window.__financialSettings) window.__financialSettings = localPlan; } catch (planErr) {}
                         renderDashboardData(firstPaint, true);
+                        try { renderBalanceCard(firstPaint.month || {}); renderSalaryCountdown(); } catch (planErr) {}
                     }
                 } catch (cacheErr) { /* مفيش كاش: هنستنى السيرفر عادي */ }
+                // نبدأ طلب إعدادات الدخل والميزانية بالتوازي مع طلب الداشبورد بدل ما نستنى الداشبورد يخلص الأول
+                window.__planningPrefetch = fetch('/api/financial-actions', { headers: { Authorization: `Bearer ${accessToken}` }, cache: 'no-store' }).then((r) => (r.ok ? r.json() : null)).catch(() => null);
                 const pushUIPromise = refreshPushUI();
                 disableQuickAccessLegacy();
                 await loadDashboard(true); // أول تحميل — الربط اختياري والداش تفتح للحساب المستقل عادي
@@ -8983,7 +9161,7 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
                     label.textContent = navigator.onLine ? 'آخر نسخة محفوظة على الجهاز — جاري التحديث' : 'وضع عدم الاتصال — آخر نسخة محفوظة على الجهاز';
                 } else {
                     const now = new Date();
-                    label.textContent = `آخر تحديث ${now.toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' })}`;
+                    label.textContent = `آخر تحديث ${now.toLocaleTimeString('ar-EG-u-nu-latn', { hour: '2-digit', minute: '2-digit' })}`;
                 }
             }
         }
@@ -9073,7 +9251,7 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
             const dotsEl = document.getElementById('active-days-dots');
             if (!totalEl || !dotsEl) return;
             const total = Math.max(0, Number(activeDays?.totalActiveDays || 0));
-            totalEl.textContent = `${total.toLocaleString('ar-EG')} يوم`;
+            totalEl.textContent = `${total.toLocaleString('ar-EG-u-nu-latn')} يوم`;
             const days = Array.isArray(activeDays?.lastSevenDays) ? activeDays.lastSevenDays : [];
             const fallbackLabels = ['ن', 'ث', 'ر', 'خ', 'ج', 'س', 'ح'];
             dotsEl.innerHTML = Array.from({ length: 7 }, (_, index) => {
@@ -9089,7 +9267,7 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
         function planningSettingsKey() { return `dabbar-financial-settings-${window.__dashboardData?.telegramUserId || currentUser?.id || 'guest'}`; }
         function defaultPlanningSettings() { return { monthlyIncome: 0, monthlyBudget: 0, categoryBudgets: {}, recurringExpenses: [], balanceCategories: {} }; }
         function planningSettings() { return window.__financialSettings || defaultPlanningSettings(); }
-        function formatPlanningNumber(value) { return Number(value || 0).toLocaleString('ar-EG'); }
+        function formatPlanningNumber(value) { return Number(value || 0).toLocaleString('ar-EG-u-nu-latn'); }
         function ensurePlanningUI() {
             if (document.getElementById('planning-card')) return;
             const monthly = document.getElementById('tab-monthly');
@@ -9107,7 +9285,7 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
                 <details class="group border-t border-slate-800 pt-3"><summary class="flex cursor-pointer list-none items-center gap-2.5 rounded-xl bg-slate-900/60 px-3 py-2.5 text-[10px] font-bold text-slate-400"><span class="planning-collapse-ic"><iconify-icon icon="ph:repeat-duotone" width="15"></iconify-icon></span><span class="flex-1">التزامات شهرية متوقعة (إيجار / اشتراكات)</span><span class="text-slate-600 transition group-open:rotate-180">⌄</span></summary>
                 <div class="mt-2 space-y-2"><p class="text-[9px] text-slate-500">للتخطيط فقط — لا تُضاف للصرف الفعلي إلا عند تسجيلها.</p><div id="recurring-total" class="dabbar-commit-total"></div><div id="recurring-list" class="space-y-1.5"></div><button type="button" id="recurring-list-toggle" class="dabbar-list-toggle hidden">عرض الكل</button><button id="recurring-add" type="button" class="dabbar-fab-add">+ إضافة التزام جديد</button></div></details>
                 <div class="flex gap-2 border-t border-slate-800 pt-3"><button id="planning-save" type="button" class="flex-1 rounded-xl bg-emerald-500 py-2.5 text-xs font-black text-slate-950">حفظ خطتي</button><button id="planning-reset" type="button" title="إدارة ومسح خطة الدخل والميزانية" class="rounded-xl border border-slate-700/60 px-3 py-2.5 text-xs text-slate-500">إدارة</button></div>
-                <div class="dabbar-sheet-backdrop" id="limit-sheet"><div class="dabbar-sheet"><h3 class="text-xs font-black text-slate-100 mb-2">إضافة حد لفئة</h3><label class="dabbar-sheet-label">اسم الفئة</label><input id="limit-sheet-name" type="text" maxlength="40" placeholder="اكتب اسم الفئة أو اختار من تحت" class="dabbar-sheet-input"><div id="limit-sheet-chips" class="dabbar-chip-row"></div><label class="dabbar-sheet-label">الحد الشهري</label><input id="limit-sheet-amount" type="number" min="0" placeholder="مثال: 1500" class="dabbar-sheet-input"><div class="dabbar-sheet-btns"><button type="button" id="limit-sheet-cancel" class="dabbar-sheet-cancel">إلغاء</button><button type="button" id="limit-sheet-save" class="dabbar-sheet-save">حفظ الحد</button></div></div></div>
+                <div class="dabbar-sheet-backdrop" id="limit-sheet"><div class="dabbar-sheet"><h3 id="limit-sheet-title" class="text-xs font-black text-slate-100 mb-2">إضافة حد لفئة</h3><p id="limit-sheet-hint" class="hidden text-[10px] text-slate-400 mb-2"></p><label class="dabbar-sheet-label">اسم الفئة</label><input id="limit-sheet-name" type="text" maxlength="40" placeholder="اكتب اسم الفئة أو اختار من تحت" class="dabbar-sheet-input"><div id="limit-sheet-chips" class="dabbar-chip-row"></div><label class="dabbar-sheet-label" style="display:flex;align-items:center;gap:.4rem">الحد الشهري <span id="limit-sheet-suggest-tag" class="hidden rounded-full px-2 py-[1px] text-[9px] font-black" style="background:rgba(244,198,72,.18);color:#b45309;border:1px solid rgba(244,198,72,.45)">مقترح</span></label><input id="limit-sheet-amount" type="number" min="0" placeholder="مثال: 1500" class="dabbar-sheet-input"><div class="dabbar-sheet-btns"><button type="button" id="limit-sheet-cancel" class="dabbar-sheet-cancel">إلغاء</button><button type="button" id="limit-sheet-save" class="dabbar-sheet-save">حفظ الحد</button></div></div></div>
                 <div class="dabbar-sheet-backdrop" id="commit-sheet"><div class="dabbar-sheet"><h3 id="commit-sheet-title" class="text-xs font-black text-slate-100 mb-2">إضافة التزام جديد</h3><label class="dabbar-sheet-label">اسم الالتزام</label><input id="commit-sheet-name" type="text" placeholder="مثال: اشتراك نتفليكس، إيجار الشقة..." class="dabbar-sheet-input"><div class="dabbar-live-preview"><span class="commitment-icon" data-tone="default" id="commit-sheet-icon-wrap"><iconify-icon id="commit-sheet-icon" icon="ph:push-pin-duotone" width="18"></iconify-icon></span><span class="dabbar-live-preview-tag" id="commit-sheet-tag">اكتب اسم عشان الأيقونة تتحدد تلقائي</span></div><label class="dabbar-sheet-label">المبلغ الشهري</label><input id="commit-sheet-amount" type="number" min="0" placeholder="مثال: 250" class="dabbar-sheet-input"><div class="dabbar-sheet-btns"><button type="button" id="commit-sheet-cancel" class="dabbar-sheet-cancel">إلغاء</button><button type="button" id="commit-sheet-save" class="dabbar-sheet-save">حفظ الالتزام</button></div></div></div>`;
             monthly.insertBefore(wrap, quick.parentNode === monthly ? quick.nextSibling : null);
             const ledger = document.createElement('section');
@@ -9141,7 +9319,15 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
             bindDabbarListToggle(document.getElementById('recurring-list'), document.getElementById('recurring-list-toggle'), 4);
             document.getElementById('limit-sheet-cancel').addEventListener('click', closeLimitSheet);
             document.getElementById('limit-sheet-save').addEventListener('click', saveLimitFromSheet);
-            document.getElementById('limit-sheet-name').addEventListener('input', renderLimitSheetChips);
+            document.getElementById('limit-sheet-amount').addEventListener('input', () => setLimitSuggestTag(false));
+            document.getElementById('limit-sheet-name').addEventListener('input', () => {
+                const typedName = document.getElementById('limit-sheet-name')?.value.trim() || '';
+                const existing = limitSheetRefresh(typedName, 0);
+                const amtEl = document.getElementById('limit-sheet-amount');
+                if (existing > 0 && amtEl && !amtEl.value) amtEl.value = existing;
+                if (existing > 0) setLimitSuggestTag(false);
+                renderLimitSheetChips();
+            });
             document.getElementById('limit-sheet').addEventListener('click', (e) => { if (e.target.id === 'limit-sheet') closeLimitSheet(); });
             document.getElementById('commit-sheet-cancel').addEventListener('click', closeCommitSheet);
             document.getElementById('commit-sheet-save').addEventListener('click', saveCommitFromSheet);
@@ -9195,11 +9381,29 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
 
         // ============ شيت إضافة حد فئة — خطوة واحدة (اسم + مبلغ) مع اقتراحات من فئات الشهر اللي لسه مالهاش حد
         // بيقبل تعبئة مبدئية (اسم + مبلغ مقترح) عشان كارت "فرص التوفير" يفتحه بالأرقام الحقيقية جاهزة، فيبقى ضغطة واحدة = حفظ فعلي ============
+        function limitSheetRefresh(name, suggested) {
+            const budgets = planningSettings().categoryBudgets || {};
+            const existing = name ? Number(budgets[name] || 0) : 0;
+            const titleEl = document.getElementById('limit-sheet-title');
+            const hintEl = document.getElementById('limit-sheet-hint');
+            if (titleEl) titleEl.textContent = existing > 0 ? 'تعديل حد الفئة' : 'إضافة حد لفئة';
+            if (hintEl) {
+                hintEl.classList.toggle('hidden', !(existing > 0));
+                hintEl.textContent = existing > 0 ? `الحد الحالي: ${fmt(existing)} — عدّله واحفظ` : '';
+            }
+            return existing;
+        }
+        function setLimitSuggestTag(on) {
+            document.getElementById('limit-sheet-suggest-tag')?.classList.toggle('hidden', !on);
+        }
         function openLimitSheet(prefillName, prefillAmount) {
             const nameEl = document.getElementById('limit-sheet-name');
             const amtEl = document.getElementById('limit-sheet-amount');
             if (nameEl) nameEl.value = prefillName || '';
-            if (amtEl) amtEl.value = prefillAmount ? Math.max(0, Math.round(prefillAmount)) : '';
+            const existing = limitSheetRefresh(prefillName || '', Number(prefillAmount || 0));
+            // لو الفئة ليها حد متسجل قبل كده، بنفتح بيه عشان التعديل؛ غير كده بنقترح المبلغ
+            if (amtEl) amtEl.value = existing > 0 ? existing : (prefillAmount ? Math.max(0, Math.round(prefillAmount)) : '');
+            setLimitSuggestTag(!existing && Number(prefillAmount || 0) > 0 && !!(amtEl && amtEl.value));
             renderLimitSheetChips();
             document.getElementById('limit-sheet')?.classList.add('open');
             setTimeout(() => { if (prefillName && amtEl) amtEl.focus(); else nameEl?.focus(); }, 150);
@@ -9230,6 +9434,7 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
             window.__financialSettings = settings;
             closeLimitSheet();
             savePlanningSettings();
+            if (typeof loadSavingsOpportunities === 'function') loadSavingsOpportunities().catch(() => {});
         }
 
         // ============ شيت إضافة التزام — خطوة واحدة (اسم + مبلغ) مع معاينة الأيقونة التلقائية حية وهو بيكتب ============
@@ -9606,7 +9811,9 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
 
             let settings = null;
             let serverReachable = false;
-            try { const res = await fetch('/api/financial-actions', { headers: { Authorization: `Bearer ${accessToken}` }, cache: 'no-store' }); if (res.ok) { settings = (await res.json()).settings; serverReachable = true; } } catch {}
+            const prefetched = window.__planningPrefetch; window.__planningPrefetch = null;
+            if (prefetched) { try { const j = await prefetched; if (j && j.settings) { settings = j.settings; serverReachable = true; } } catch {} }
+            if (!serverReachable) { try { const res = await fetch('/api/financial-actions', { headers: { Authorization: `Bearer ${accessToken}` }, cache: 'no-store' }); if (res.ok) { settings = (await res.json()).settings; serverReachable = true; } } catch {} }
 
             let local = null;
             try { local = JSON.parse(localStorage.getItem(planningSettingsKey()) || 'null'); } catch {}
@@ -9923,7 +10130,7 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
         let periodIsOpen = false; // الكارت دايمًا يبدأ مقفول ويفتح بالضغط فقط
         function periodUiGet(key) { try { return localStorage.getItem(key) === '1'; } catch (e) { return false; } }
         function periodUiSet(key, on) { try { if (on) localStorage.setItem(key, '1'); else localStorage.removeItem(key); } catch (e) {} }
-        function periodNum(n) { return Number(n || 0).toLocaleString('ar-EG'); }
+        function periodNum(n) { return Number(n || 0).toLocaleString('ar-EG-u-nu-latn'); }
         function setPeriodActivePreset(days) {
             document.querySelectorAll('.period-preset').forEach((b) => {
                 const on = days != null && (b.dataset.days === String(days));
@@ -9994,7 +10201,7 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
                     const d = new Date(item.created_at);
                     const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
                     let g = groups[groups.length - 1];
-                    if (!g || g.key !== key) { g = { key, label: d.toLocaleDateString('ar-EG', { year: 'numeric', month: 'numeric', day: 'numeric' }), total: 0, rows: [] }; groups.push(g); }
+                    if (!g || g.key !== key) { g = { key, label: d.toLocaleDateString('ar-EG-u-nu-latn', { year: 'numeric', month: 'numeric', day: 'numeric' }), total: 0, rows: [] }; groups.push(g); }
                     g.total += Number(item.amount) || 0;
                     g.rows.push(item);
                 });
@@ -10105,7 +10312,7 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
                 [...incomeItems]
                     .sort((a, b) => new Date(b.date) - new Date(a.date))
                     .forEach((it) => {
-                        const dayKey = new Date(it.date).toLocaleDateString('ar-EG', { day: 'numeric', month: 'long' });
+                        const dayKey = new Date(it.date).toLocaleDateString('ar-EG-u-nu-latn', { day: 'numeric', month: 'long' });
                         if (!dayGroups.has(dayKey)) dayGroups.set(dayKey, { items: [], total: 0 });
                         const g = dayGroups.get(dayKey);
                         g.items.push(it);
@@ -10136,7 +10343,7 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
 
             const openIncomeSheet = () => {
                 const { incomeItems, incomeTotal } = window.__incomeSheetData;
-                incomeSheetMonth.textContent = new Date().toLocaleDateString('ar-EG', { month: 'long' });
+                incomeSheetMonth.textContent = new Date().toLocaleDateString('ar-EG-u-nu-latn', { month: 'long' });
                 incomeSheetCount.textContent = incomeItems.length > 0 ? `${incomeItems.length} ${incomeItems.length === 1 ? 'عملية' : 'عمليات'}` : '— عملية';
                 incomeSheetTotal.textContent = incomeTotal > 0 ? fmt(incomeTotal) : '—';
                 renderIncomeSheetBody();
@@ -10563,7 +10770,7 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
             window.__flowData = flow || { items: [] };
             paintInsightCard('-daily', getDailyCategoryInsight(today));
             document.getElementById('daily-date').textContent =
-                new Date().toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long' });
+                new Date().toLocaleDateString('ar-EG-u-nu-latn', { weekday: 'long', day: 'numeric', month: 'long' });
             document.getElementById('daily-total').textContent = fmt(today.total);
             document.getElementById('daily-count').textContent = `${today.count} عملية`;
             document.getElementById('daily-avg').textContent = fmt(
@@ -10573,7 +10780,7 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
                 today.count > 0 ? `سجلت ${today.count} عملية النهاردة.` : 'سجّل أول عملية النهاردة وهتلاقيها هنا.';
 
             document.getElementById('daily-day-date').textContent =
-                new Date().toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long' });
+                new Date().toLocaleDateString('ar-EG-u-nu-latn', { weekday: 'long', day: 'numeric', month: 'long' });
             // ============ عمليات النهاردة = مصاريف + كل الحركات البنكية (دخل/إيداع/سحب/تحويل) مرتبة بالوقت ============
             const todayMovements = Array.isArray(today.movements) ? today.movements : [];
             const todayRows = [...today.items, ...todayMovements.map((m) => ({ ...m, __movement: true }))]
@@ -10590,7 +10797,7 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
                 const color = inflow ? 'text-emerald-400' : outflow ? 'text-rose-400' : 'text-slate-300';
                 const sign = inflow ? '+' : outflow ? '-' : '';
                 const title = (m.description && m.description.trim()) || m.counterparty || label;
-                const time = new Date(m.created_at).toLocaleTimeString('ar-EG', { hour: 'numeric', minute: '2-digit' });
+                const time = new Date(m.created_at).toLocaleTimeString('ar-EG-u-nu-latn', { hour: 'numeric', minute: '2-digit' });
                 const bank = m.bank_label ? `<p class="text-[9px] font-bold text-emerald-400/90 mt-0.5">🏦 ${escHtml(m.bank_label)}${escHtml(acctText(m.bank_key, m.account_last4))}</p>` : '';
                 const review = m.needs_review ? '<span class="text-[9px] font-bold text-amber-400"> ⚠️ تحتاج مراجعة ‹</span>' : '';
                 return `
@@ -10619,7 +10826,7 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
                         <span class="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-sm">${getCategoryEmoji(it.category)}</span>
                         <div class="min-w-0">
                             <p class="truncate text-xs font-semibold text-slate-200">${(it.description && it.description.trim()) || it.category}</p>
-                            <p class="text-[10px] text-slate-500">${it.category} · ${new Date(it.created_at).toLocaleTimeString('ar-EG', { hour: 'numeric', minute: '2-digit' })}</p>
+                            <p class="text-[10px] text-slate-500">${it.category} · ${new Date(it.created_at).toLocaleTimeString('ar-EG-u-nu-latn', { hour: 'numeric', minute: '2-digit' })}</p>
                             ${bankTag}
                         </div>
                     </div>
@@ -10661,7 +10868,25 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
                 g.count += 1;
                 g.items.push(it);
             });
-            renderPendingReviewReminder(opsListEl);
+            // ============ الحركات اللي لسه متحددش نوعها: كبسولة كهرمانية جوه صف "تحويل" نفسه بدل صندوق منفصل ============
+            const pendingItems = readPendingReview();
+            if (pendingItems.length) {
+                let pg = Array.from(groupsMap.values()).find((g) => String(g.label).startsWith('تحويل'));
+                if (!pg) { pg = { emoji: '🔁', label: 'تحويل', color: 'text-slate-300', sign: '', total: 0, count: 0, items: [] }; groupsMap.set('m:تحويل', pg); }
+                pg.pending = pendingItems;
+            }
+            if (opsListEl && !opsListEl.dataset.pendingReady) {
+                opsListEl.dataset.pendingReady = 'true';
+                opsListEl.addEventListener('click', (e) => {
+                    const btn = e.target.closest('[data-pending-clear]');
+                    if (!btn) return;
+                    e.preventDefault();
+                    const list = readPendingReview();
+                    list.splice(Number(btn.dataset.pendingClear), 1);
+                    writePendingReview(list);
+                    renderDaily(window.__todayData, window.__flowData);
+                });
+            }
             if (opsListEl && !opsListEl.dataset.reviewReady) {
                 opsListEl.dataset.reviewReady = 'true';
                 const openReview = (e) => {
@@ -10677,6 +10902,9 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
                 const rowsHtml = g.items.map((it, i) => it.__movement ? renderTodayMovementRow(it, i, g.items.length) : renderExpenseRow(it, i, g.items.length)).join('');
                 const currency = g.items[0]?.currency_code;
                 const wasOpen = prevOpenLabels.has(g.label);
+                const pendingList = g.pending || [];
+                const pendingN = pendingList.length;
+                const pendingHtml = pendingN ? `<div class="pending-box">${pendingList.map((it, i) => `<div class="pending-row"><div class="min-w-0"><p class="truncate text-xs font-semibold text-slate-200">${pendingEsc(it.title)}</p><p class="pending-sub">نوعها لسه متحددش</p></div><span class="shrink-0 text-xs font-bold text-slate-300">${fmt(it.amount, it.currency_code)}</span><button type="button" data-pending-clear="${i}" class="pending-done">تم</button></div>`).join('')}</div>` : '';
                 return `
                     <details class="daily-group"${wasOpen ? ' open' : ''}>
                         <summary class="flex items-center justify-between gap-2 py-2.5 cursor-pointer">
@@ -10684,7 +10912,7 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
                                 <span class="w-8 h-8 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-sm">${g.emoji}</span>
                                 <div class="flex min-w-0 items-baseline gap-1.5">
                                     <p class="truncate text-xs font-semibold text-slate-200" data-group-label="${escHtml(g.label)}">${escHtml(g.label)}</p>
-                                    <p class="shrink-0 text-[10px] text-slate-500">${g.count} ${g.count === 1 ? 'عملية' : 'عمليات'}</p>
+                                    <p class="shrink-0 text-[10px] text-slate-500">${g.count} ${g.count === 1 ? 'عملية' : 'عمليات'}</p>${pendingN ? `<span class="pending-chip shrink-0">⚠️ ${pendingN} للمراجعة</span>` : ''}
                                 </div>
                             </div>
                             <div class="flex shrink-0 items-center gap-1.5">
@@ -10692,7 +10920,7 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
                                 <span class="daily-group-chev text-slate-500 text-[10px]">▾</span>
                             </div>
                         </summary>
-                        <div class="pr-2">${rowsHtml}</div>
+                        <div class="pr-2">${pendingHtml}${rowsHtml}</div>
                     </details>`;
             };
             const allGroups = Array.from(groupsMap.values());
@@ -11010,7 +11238,7 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
         function categoryDayGroupsHtml(entries, catName) {
             return entries.map(([dateKey, dayItems]) => {
                 const dayTotal = dayItems.reduce((sum, it) => sum + Number(it.amount || 0), 0);
-                const label = new Date(dateKey).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' });
+                const label = new Date(dateKey).toLocaleDateString('ar-EG-u-nu-latn', { day: 'numeric', month: 'short' });
                 return `<div class="cat-day-group" data-day-key="${dateKey}">
                     <div class="cat-day-head"><span>${label}</span><b>${fmt(dayTotal)}</b></div>
                     ${dayItems.map((it) => `
@@ -11464,7 +11692,7 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
 
             bannersWrap.innerHTML = bannerItems.map(({ r, days, key }) => {
                 const amountText = r.amount ? ` — ${fmt(r.amount)}` : '';
-                const dateText = new Date(r.due_date + 'T00:00:00').toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'short' });
+                const dateText = new Date(r.due_date + 'T00:00:00').toLocaleDateString('ar-EG-u-nu-latn', { weekday: 'long', day: 'numeric', month: 'short' });
                 return `<div class="dabbar-reminder-banner ${toneOf(days)}" data-banner-key="${debtEscape(key)}">
                     <div class="dabbar-reminder-banner-icon">${iconOf(days)}</div>
                     <div class="dabbar-reminder-banner-body">
@@ -11484,7 +11712,7 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
                 soonSection.classList.remove('hidden');
                 soonList.innerHTML = soonItems.map(({ r, days }) => {
                     const amountText = r.amount ? `<span class="dsc-amt">${fmt(r.amount)}</span>` : '';
-                    const dateText = new Date(r.due_date + 'T00:00:00').toLocaleDateString('ar-EG', { weekday: 'short', day: 'numeric', month: 'short' });
+                    const dateText = new Date(r.due_date + 'T00:00:00').toLocaleDateString('ar-EG-u-nu-latn', { weekday: 'short', day: 'numeric', month: 'short' });
                     const pillText = days < 0 ? 'متأخر' : days === 0 ? 'النهاردة' : days === 1 ? 'بكرة' : 'بعد يومين';
                     return `<div class="dabbar-soon-card ${days <= 1 ? 'urgent' : ''}">
                         <span class="dsc-ic">${iconOf(days)}</span>
@@ -11545,7 +11773,7 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
                         installmentsListEl.innerHTML = summary + sorted.map((r) => {
                             const st = statusOf(r);
                             const left = Number(r.installments_remaining || 0);
-                            const dateText = new Date(r.due_date + 'T00:00:00').toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long' });
+                            const dateText = new Date(r.due_date + 'T00:00:00').toLocaleDateString('ar-EG-u-nu-latn', { weekday: 'long', day: 'numeric', month: 'long' });
                             const totalLeft = left * Number(r.amount || 0);
                             return `
                             <div class="installment-card rounded-2xl border border-slate-800 bg-slate-950/60 overflow-hidden">
@@ -11599,7 +11827,7 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
                             const data = await r.json().catch(() => ({}));
                             if (r.ok) {
                                 const done = data.reminder?.done || Number(data.reminder?.installments_remaining) <= 0;
-                                const nextText = data.reminder?.due_date ? new Date(data.reminder.due_date + 'T00:00:00').toLocaleDateString('ar-EG', { day: 'numeric', month: 'long' }) : '';
+                                const nextText = data.reminder?.due_date ? new Date(data.reminder.due_date + 'T00:00:00').toLocaleDateString('ar-EG-u-nu-latn', { day: 'numeric', month: 'long' }) : '';
                                 quickStatus(done ? '🎉 مبروك! خلّصت القسط كله.' : `✅ اتسجل الدفع${nextText ? ` — القسط الجاي ${nextText}` : ''}`, 'success');
                                 loadReminders();
                                 // ============ بعد تسجيل دفع القسط: نفتح فورم المصروف اليدوي معبّي (نفس فكرة زرار "تسجيل تسديد" في الديون) ============
@@ -11619,7 +11847,7 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
                 listEl.innerHTML = reminders.length ? reminders.map((r) => {
                     const hasAmount = r.amount !== null && r.amount !== undefined && r.amount !== '';
                     const amountText = hasAmount ? `<span class="text-[13px] font-black text-emerald-300 shrink-0 whitespace-nowrap">${fmt(r.amount)}</span>` : '';
-                    const fullDateText = new Date(r.due_date + 'T00:00:00').toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long' });
+                    const fullDateText = new Date(r.due_date + 'T00:00:00').toLocaleDateString('ar-EG-u-nu-latn', { weekday: 'long', day: 'numeric', month: 'long' });
                     return `
                     <div class="reminder-item-card rounded-2xl border border-slate-800 bg-slate-950/60 overflow-hidden">
                         <div class="reminder-item-toggle flex items-center gap-2.5 p-3.5 cursor-pointer" data-rem-toggle="${debtEscape(r.id)}" role="button" tabindex="0" aria-expanded="false">
@@ -11783,7 +12011,7 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
             const listEl = document.getElementById('gameya-list');
             if (!gameyaList || !gameyaList.length) { listEl.innerHTML = '<p class="text-[11px] text-slate-500 text-center py-2">مفيش جمعيات مسجلة لسه.</p>'; return; }
             listEl.innerHTML = gameyaList.map((g) => {
-                const turnDateLabel = new Date(g.turnDate).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long' });
+                const turnDateLabel = new Date(g.turnDate).toLocaleDateString('ar-EG-u-nu-latn', { year: 'numeric', month: 'long' });
                 const progressPercent = g.groupSize ? Math.min(((g.myTurn - g.monthsRemaining) / g.myTurn) * 100, 100) : 0;
                 const membersHtml = (g.memberNames || []).map((name) => {
                     const isMe = name.trim() === 'أنا';
@@ -11941,7 +12169,7 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
             if (!summary.items || !summary.items.length) { listEl.innerHTML = '<p class="text-[11px] text-slate-500 text-center py-2">مفيش مناسبات مسجلة لسه.</p>'; return; }
             listEl.innerHTML = summary.items.map((it) => `
                 <div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-3 flex items-center justify-between">
-                    <div><p class="text-xs font-semibold text-slate-200">${debtEscape(it.personName)}</p><p class="text-[10px] text-slate-500">${debtEscape(it.occasionType)} · ${new Date(it.date).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short' })}${it.linkedToDebt ? ' · مربوطة بدين' : ''}</p></div>
+                    <div><p class="text-xs font-semibold text-slate-200">${debtEscape(it.personName)}</p><p class="text-[10px] text-slate-500">${debtEscape(it.occasionType)} · ${new Date(it.date).toLocaleDateString('ar-EG-u-nu-latn', { day: 'numeric', month: 'short' })}${it.linkedToDebt ? ' · مربوطة بدين' : ''}</p></div>
                     <div class="flex items-center gap-2"><span class="text-xs font-bold text-emerald-400">${fmt(it.amount)}</span><button type="button" class="occasion-edit-btn text-slate-500 text-xs" data-occasion-id="${it.id}" aria-label="تعديل المناسبة">✎</button><button type="button" class="occasion-delete-btn text-slate-500 text-xs" data-occasion-id="${it.id}">🗑</button></div>
                 </div>`).join('');
             applyDabbarListPreview(listEl, document.getElementById('occasions-list-toggle'), 2);
@@ -12044,7 +12272,7 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
             const emptyHtml = '<div class="st-empty"><b>🧾</b>مفيش رسائل تصفية دلوقتي</div>';
             const dismissed = JSON.parse(localStorage.getItem('dabbar-dismissed-settlements') || '{}');
             const items = (__debtHistory.settlements || []).filter((s) => !dismissed[`${s.settled_at}:${s.person_name}`]);
-            const fmtDate = (v) => { const d = new Date(v); return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' }); };
+            const fmtDate = (v) => { const d = new Date(v); return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString('ar-EG-u-nu-latn', { day: 'numeric', month: 'long', year: 'numeric' }); };
             const check = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.2 4.2L19 7"/></svg>';
             root.innerHTML = items.length ? items.map((s) => `<div class="debt-settlement-card"><span class="st-ico">${check}</span><div class="st-body"><div class="st-top"><span class="st-title">تمت التصفية</span><span class="st-chip">الحساب صفر</span></div><p class="st-text">اتصفى الحساب بينك وبين <strong>${debtEscape(s.person_name)}</strong>، وكل التعاملات المالية هتلاقيها في كشف الحساب.</p><div class="st-meta"><span class="st-date">${debtEscape(fmtDate(s.settled_at))}</span><button type="button" class="st-open" data-open-statement="${debtEscape(s.person_name)}">كشف الحساب</button></div></div><button type="button" class="st-x" data-dismiss-settlement="${debtEscape(`${s.settled_at}:${s.person_name}`)}" aria-label="إغلاق">×</button></div>`).join('') : emptyHtml;
             root.querySelectorAll('[data-open-statement]').forEach((btn) => btn.addEventListener('click', () => openPersonDebtDetail(btn.dataset.openStatement, true)));
@@ -12118,7 +12346,7 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
                 const net = data.relevantNet; netLineEl.textContent = net === 0 ? 'متصفي 🤝' : (net > 0 ? `ليك عنده ${fmt(net)}` : `عليك له ${fmt(Math.abs(net))}`); netLineEl.className = `inline-flex items-center mt-1.5 rounded-full px-2.5 py-1 text-[11px] font-black ${net > 0 ? 'bg-emerald-500/15 text-emerald-400' : net < 0 ? 'bg-rose-500/15 text-rose-400' : 'bg-slate-700/40 text-slate-400'}`;
                 window.__personDebtCurrent = { name: personName, net };
                 if (settleBtn) { settleBtn.classList.toggle('hidden', net === 0); settleBtn.textContent = net > 0 ? 'تسجيل تسديد — استلمت الفلوس' : 'تسجيل تسديد — إنت رجّعتله'; }
-                listEl.innerHTML = data.transactions.length ? data.transactions.map((t) => `<div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-3 flex items-center gap-2.5"><span class="w-9 h-9 shrink-0 rounded-xl bg-slate-800/70 flex items-center justify-center text-sm">${t.isRepayment ? '↩️' : (t.direction === 'lent' ? '📤' : '📥')}</span><div class="min-w-0 flex-1"><p class="text-xs font-semibold text-slate-200 truncate">${t.isRepayment ? (t.direction === 'lent' ? 'إنت رجّعت' : 'رجّعلك') : (t.direction === 'lent' ? 'إنت ديت' : 'إنت استلفت')}${t.note ? ` — ${debtEscape(t.note)}` : ''}</p><p class="text-[10px] text-slate-500 mt-0.5">${new Date(t.createdAt).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' })}</p></div><div class="flex items-center gap-2 shrink-0"><span class="text-xs font-bold ${t.direction === 'lent' ? 'text-emerald-400' : 'text-rose-400'}">${fmt(t.amount)}</span>${eternal && t.id ? `<button type="button" class="text-slate-400 hover:text-rose-400 text-lg" data-delete-debt="${debtEscape(t.id)}" aria-label="حذف المعاملة">×</button>` : ''}</div></div>`).join('') : '<p class="text-xs text-slate-500 text-center p-4">مفيش عمليات.</p>';
+                listEl.innerHTML = data.transactions.length ? data.transactions.map((t) => `<div class="bg-slate-950/60 border border-slate-800 rounded-2xl p-3 flex items-center gap-2.5"><span class="w-9 h-9 shrink-0 rounded-xl bg-slate-800/70 flex items-center justify-center text-sm">${t.isRepayment ? '↩️' : (t.direction === 'lent' ? '📤' : '📥')}</span><div class="min-w-0 flex-1"><p class="text-xs font-semibold text-slate-200 truncate">${t.isRepayment ? (t.direction === 'lent' ? 'إنت رجّعت' : 'رجّعلك') : (t.direction === 'lent' ? 'إنت ديت' : 'إنت استلفت')}${t.note ? ` — ${debtEscape(t.note)}` : ''}</p><p class="text-[10px] text-slate-500 mt-0.5">${new Date(t.createdAt).toLocaleDateString('ar-EG-u-nu-latn', { day: 'numeric', month: 'short', year: 'numeric' })}</p></div><div class="flex items-center gap-2 shrink-0"><span class="text-xs font-bold ${t.direction === 'lent' ? 'text-emerald-400' : 'text-rose-400'}">${fmt(t.amount)}</span>${eternal && t.id ? `<button type="button" class="text-slate-400 hover:text-rose-400 text-lg" data-delete-debt="${debtEscape(t.id)}" aria-label="حذف المعاملة">×</button>` : ''}</div></div>`).join('') : '<p class="text-xs text-slate-500 text-center p-4">مفيش عمليات.</p>';
                 listEl.querySelectorAll('[data-delete-debt]').forEach((btn) => btn.addEventListener('click', (e) => { e.stopPropagation(); openDebtDeleteConfirm(btn.dataset.deleteDebt, personName); }));
             } catch (e) { listEl.innerHTML = `<p class="text-xs text-rose-400 text-center p-4">${debtEscape(e.message || 'حصل خطأ، جرب تاني.')}</p>`; }
         }
@@ -12297,7 +12525,7 @@ function pfToast(msg) {
                     if (!(proceeds > 0) || (qty && !(sellQty > 0))) { prev.textContent = ''; prev.className = 'pf-sell-preview'; return null; }
                     const gainDisp = proceeds - (cost * fraction) / pf2Rate();
                     prev.className = `pf-sell-preview ${gainDisp >= 0 ? 'up' : 'down'}`;
-                    prev.textContent = `${gainDisp >= 0 ? 'مكسب' : 'خسارة'} تقريبي: ${Math.abs(Math.round(gainDisp)).toLocaleString('ar-EG')} ${pf2CurLabel()}`;
+                    prev.textContent = `${gainDisp >= 0 ? 'مكسب' : 'خسارة'} تقريبي: ${Math.abs(Math.round(gainDisp)).toLocaleString('ar-EG-u-nu-latn')} ${pf2CurLabel()}`;
                     return { proceeds, sellQty };
                 };
                 panel.addEventListener('input', calc);
@@ -12321,7 +12549,7 @@ function pfToast(msg) {
 function pfFmtWhole(n) {
             if (pfMasked()) return '••••';
             const v = Math.round(Number(n || 0) / pf2Rate());
-            return `${v.toLocaleString('ar-EG')} ${pf2CurLabel()}`;
+            return `${v.toLocaleString('ar-EG-u-nu-latn')} ${pf2CurLabel()}`;
         }
         function pfFitText(el, text, sizes) {
             if (!el) return;
@@ -12482,20 +12710,20 @@ function pfFmtWhole(n) {
             const weightPct = portfolioTotal > 0 ? Math.min(100, Math.round((currentAmount / portfolioTotal) * 1000) / 10) : null;
 
             detailEl.innerHTML = `
-                <div class="portfolio-detail-value">${pfFmt(currentAmount)}</div>
-                ${hasCostBasis ? `<span class="portfolio-detail-badge ${isUp ? 'up' : 'down'}">${trendArrowSvg(isUp)} ${Math.abs(gainPct)}% (${isUp ? '+' : '-'}${pfFmt(Math.abs(gainAmount))} منذ الشراء)</span>` : ''}
+                <div class="pf-d-head"><div class="portfolio-detail-value">${pfFmt(currentAmount)}</div>
+                ${hasCostBasis ? `<span class="portfolio-detail-badge ${isUp ? 'up' : 'down'}">${trendArrowSvg(isUp)} ${Math.abs(gainPct)}% (${isUp ? '+' : '-'}${pfFmt(Math.abs(gainAmount))})</span>` : ''}</div>
                 <div class="portfolio-detail-chart">${buildPortfolioSparkline(history, isUp)}</div>
                 <div class="portfolio-detail-stat-grid">
                     <div class="portfolio-detail-stat"><span>سعر الوحدة الآن</span><strong>${unitPriceEgp ? `${pfFmt(unitPriceEgp)}` : pfFmt(currentAmount)}</strong></div>
                     <div class="portfolio-detail-stat"><span>قيمة الشراء</span><strong>${hasCostBasis ? pfFmt(costBasis) : '—'}</strong></div>
                     ${hasCostBasis ? `<div class="portfolio-detail-stat ${isUp ? 'up' : 'down'}"><span>الربح / الخسارة</span><strong>${isUp ? '+' : '-'}${pfFmt(Math.abs(gainAmount))}</strong></div>` : ''}
-                    ${Number(asset.quantity) > 0 ? `<div class="portfolio-detail-stat"><span>الكمية</span><strong>${Number(asset.quantity).toLocaleString('ar-EG')}${asset.unit ? ' ' + String(asset.unit).replace(/[<>&"]/g, '') : ''}</strong></div>` : ''}
+                    ${Number(asset.quantity) > 0 ? `<div class="portfolio-detail-stat"><span>الكمية</span><strong>${Number(asset.quantity).toLocaleString('ar-EG-u-nu-latn')}${asset.unit ? ' ' + String(asset.unit).replace(/[<>&"]/g, '') : ''}</strong></div>` : ''}
                 </div>
                 ${weightPct != null ? `<div class="portfolio-detail-weight">
                     <div class="portfolio-detail-weight-top"><span>${weightPct}%</span><span>بيمثل كام % من محفظتك</span></div>
                     <div class="portfolio-detail-weight-bar"><div class="portfolio-detail-weight-fill" style="width:${weightPct}%"></div></div>
                 </div>` : ''}
-                <div class="portfolio-detail-meta-row"><span>تاريخ آخر تحديث</span><strong>${new Date(asset.updated_at || asset.created_at).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' })}</strong></div>
+                <div class="portfolio-detail-meta-row"><span>تاريخ آخر تحديث</span><strong>${new Date(asset.updated_at || asset.created_at).toLocaleDateString('ar-EG-u-nu-latn', { year: 'numeric', month: 'long', day: 'numeric' })}</strong></div>
                 <div class="portfolio-detail-actions">
                     <button type="button" class="portfolio-detail-edit-btn">تعديل الأصل</button>
                     <button type="button" class="portfolio-detail-sell-btn">بعت الأصل</button>
@@ -12656,15 +12884,24 @@ function pfFmtWhole(n) {
 
 (function bindPortfolioExtras() {
             const eye = document.getElementById('portfolio-eye-btn');
-            const syncEye = () => { if (eye) eye.textContent = pfMasked() ? '🙈' : '👁️'; };
+            const sheetEye = document.getElementById('portfolio-sheet-eye');
+            const maskHint = document.getElementById('portfolio-sheet-mask-hint');
+            const syncEye = () => {
+                const m = pfMasked();
+                if (eye) eye.textContent = m ? '🙈' : '👁️';
+                if (sheetEye) sheetEye.textContent = m ? '🙈' : '👁️';
+                if (maskHint) maskHint.classList.toggle('hidden', !m);
+            };
             syncEye();
-            eye?.addEventListener('click', (event) => {
+            const toggleMask = (event) => {
                 event.preventDefault(); event.stopPropagation();
                 try { localStorage.setItem('dabbar-hide-balances', pfMasked() ? '0' : '1'); } catch (_) {}
                 syncEye();
                 window.__portfolioDetailCache = {};
                 renderPortfolio(window.__portfolioState, undefined);
-            });
+            };
+            eye?.addEventListener('click', toggleMask);
+            sheetEye?.addEventListener('click', toggleMask);
             document.getElementById('portfolio-filters')?.addEventListener('click', (e) => {
                 const b = e.target.closest('.pf-chip'); if (!b) return;
                 window.__pfFilter = b.dataset.f === 'الكل' ? null : b.dataset.f;
@@ -12770,7 +13007,7 @@ function pf2Rate() { const r = Number(window.__displayCurrencyEgpRate || 1); con
         function pf2UpdateSummary() {
             const box = document.getElementById('pf2-summary'); if (!box) return;
             let t = '';
-            const r = (n) => `${Math.round(n).toLocaleString('ar-EG')} ${pf2CurLabel()}`;
+            const r = (n) => `${Math.round(n).toLocaleString('ar-EG-u-nu-latn')} ${pf2CurLabel()}`;
             if (pf2Type === 'gold' || pf2Type === 'silver') {
                 const w = pf2N('wt'), c = pf2N('cost');
                 if (w && c) t = `متوسط سعر الجرام اللي اشتريت بيه: ${r(c / w)}`;
@@ -13750,7 +13987,7 @@ function pf2YieldFields() {
             quickStatus(quickEntryDrafts.length > 1 ? `فهمنا ${quickEntryDrafts.length} معاملة — راجعهم ثم أكد التسجيل.` : 'راجع المبلغ والفئة ثم أكد التسجيل.');
         }
         // ============ اختيار نوع الحركة المبهمة في شاشة التأكيد: اختياري، ولو اتجاهلت الحركة بتفضل تنبيه في تفاصيل يومك ============
-        const DRAFT_KIND_CHIPS = [['transfer', 'تحويل'], ['income', 'دخل'], ['expense', 'مصروف'], ['loan', 'سلف'], ['debt', 'دين'], ['ignore', 'تجاهل']];
+        const DRAFT_KIND_CHIPS = [['transfer', 'تحويل'], ['income', 'دخل'], ['expense', 'مصروف'], ['loan', 'سلف'], ['debt', 'دين']];
         const PENDING_REVIEW_KEY = 'dabbar-pending-review';
         const pendingEsc = (v) => String(v ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
         function readPendingReview() { try { const v = JSON.parse(localStorage.getItem(PENDING_REVIEW_KEY) || '[]'); return Array.isArray(v) ? v : []; } catch (e) { return []; } }
@@ -13790,16 +14027,6 @@ function pf2YieldFields() {
             const draft = quickEntryDrafts[idx];
             if (!draft) return;
             const kind = chip.dataset.draftKind;
-            if (kind === 'ignore') {
-                const items = readPendingReview();
-                items.push({ title: (draft.note && draft.note.trim()) || draft.category || draft.person || 'حركة', amount: draft.amount, currency_code: draft.currency_code });
-                writePendingReview(items);
-                quickEntryDrafts.splice(idx, 1);
-                card.remove();
-                if (!quickEntryDrafts.length) { quickShow('quick-entry-draft', false); quickStatus('اتجاهلت كل الحركات. هتفضل تنبيه في تفاصيل يومك لحد ما تحددها.'); }
-                else document.getElementById('quick-entry-draft-title').textContent = `راجع ${quickEntryDrafts.length} معاملة قبل الحفظ`;
-                return;
-            }
             applyDraftKind(draft, kind);
             card.querySelectorAll('[data-draft-kind]').forEach((b) => {
                 const on = b === chip;
@@ -13808,29 +14035,6 @@ function pf2YieldFields() {
                     : 'border:1px solid rgba(148,163,184,.45);border-radius:999px;padding:1px 6px;font-size:9.5px;font-weight:700;background:transparent;color:inherit;line-height:1.5';
             });
         });
-        // ============ تنبيه الحركات اللي اتجاهلت في تفاصيل يومك، لحد ما اليوزر يعلّمها "تم" ============
-        function renderPendingReviewReminder(anchor) {
-            if (!anchor || !anchor.parentNode) return;
-            let box = document.getElementById('pending-review-reminder');
-            if (!box) {
-                box = document.createElement('div');
-                box.id = 'pending-review-reminder';
-                anchor.parentNode.insertBefore(box, anchor);
-                box.addEventListener('click', (e) => {
-                    const btn = e.target.closest('[data-pending-clear]');
-                    if (!btn) return;
-                    const items = readPendingReview();
-                    items.splice(Number(btn.dataset.pendingClear), 1);
-                    writePendingReview(items);
-                    renderPendingReviewReminder(anchor);
-                });
-            }
-            const items = readPendingReview();
-            box.className = items.length ? 'mb-3 rounded-2xl border border-amber-400/40 bg-amber-400/10 p-3 space-y-2' : 'hidden';
-            box.innerHTML = items.length
-                ? `<p class="text-[11px] font-black text-amber-500">⚠️ فيه ${items.length} حركة لسه متحددتش نوعها</p>` + items.map((it, i) => `<div class="flex items-center justify-between gap-2 text-[11px] text-slate-600 dark:text-slate-300"><span class="truncate">${pendingEsc(it.title)}</span><span class="shrink-0 font-bold">${fmt(it.amount, it.currency_code)}</span><button type="button" data-pending-clear="${i}" class="shrink-0 text-[10px] font-bold text-amber-500 underline">تم</button></div>`).join('')
-                : '';
-        }
         async function analyzeQuickEntry(payload) { if (!requireQuickEntryAccess()) return; if (!navigator.onLine) { quickStatus('الميزة الذكية تحتاج اتصالًا بالإنترنت. استخدم «الإدخال اليدوي» لحفظ العملية الآن.', 'error'); return; } const cycleMsgs = payload.audioBase64 ? ['🎙️ بنسمع كلامك', '🧠 بنفهم العملية', '📝 بنجهز المراجعة'] : payload.imageBase64 ? ['📸 بنقرأ الفاتورة', '🔎 بنفصّل الأصناف', '🧮 بنجهز الإجمالي'] : ['🧠 بنفهم كلامك', '🏷️ بنحدد الفئة', '📝 بنجهز المراجعة']; quickStatusCycle(cycleMsgs); try { const result = await asstApi(payload.imageBase64 ? 'entry_invoice_draft' : 'entry_draft', payload); quickDraft(result.drafts, result.transcript); } catch (e) { if (await dabbarOfflineFallback(payload, e)) return; quickStatus(e.message || 'تعذر فهم العملية.', 'error'); } }
         // ============ لو مفيش نت وأنت كاتب عملية: بنحفظها على الجهاز (المبلغ + وصفك) وتتسجل أوتوماتيك لما النت يرجع ============
         async function dabbarOfflineFallback(payload, error) {
@@ -13907,7 +14111,7 @@ function pf2YieldFields() {
                 if (backdrop.classList.contains('show') && noField) { try { amountEl?.focus({ preventScroll: true }); } catch (e) {} }
             }, 260);
             const monthLbl = document.getElementById('quick-manual-month-label');
-            if (monthLbl) monthLbl.textContent = `📅 هتتسجّل في: ${new Date().toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' })}`;
+            if (monthLbl) monthLbl.textContent = `📅 هتتسجّل في: ${new Date().toLocaleDateString('ar-EG-u-nu-latn', { day: 'numeric', month: 'long', year: 'numeric' })}`;
         }
         function closeQuickManualPopup() {
             setQuickManualSettleMode(false); // نرجّع أزرار الاتجاه للإدخال العادي
@@ -14033,7 +14237,7 @@ function pf2YieldFields() {
             }
             function build() {
                 const r = new Recognition();
-                r.lang = 'ar-EG'; r.continuous = true; r.interimResults = true; r.maxAlternatives = 1;
+                r.lang = 'ar-EG-u-nu-latn'; r.continuous = true; r.interimResults = true; r.maxAlternatives = 1;
                 r.onstart = () => { mic.classList.add('is-listening'); mic.setAttribute('aria-label', 'إيقاف الإملاء'); };
                 r.onresult = (event) => {
                     let transcript = '';
@@ -14301,7 +14505,7 @@ function pf2YieldFields() {
         let bmSearch = '';
         let bmLoadedOnce = false;
         let bmCache = {}; // كاش بالفترة عشان التبديل بين "الشهر ده" و"٧ أيام" و"الكل" يبقى فوري بدل ما يستنى نداء الشبكة كل مرة
-        const bmFmt = (n) => Number(n || 0).toLocaleString('ar-EG', { maximumFractionDigits: 0 });
+        const bmFmt = (n) => Number(n || 0).toLocaleString('ar-EG-u-nu-latn', { maximumFractionDigits: 0 });
 
         function openBankMovementsSheet() {
             document.getElementById('bank-movements-sheet').classList.remove('hidden');
@@ -14435,7 +14639,7 @@ function pf2YieldFields() {
             const diff = Math.round((today - day) / 86400000);
             if (diff === 0) return 'اليوم';
             if (diff === 1) return 'أمس';
-            return day.toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long' });
+            return day.toLocaleDateString('ar-EG-u-nu-latn', { weekday: 'long', day: 'numeric', month: 'long' });
         }
         function bmRenderList() {
             const list = document.getElementById('bank-movements-list');
@@ -14473,7 +14677,7 @@ function pf2YieldFields() {
                     const sign = dir === 'out' ? '-' : dir === 'in' ? '+' : '';
                     const desc = debtEscape(m.description || m.counterparty || BM_TYPE_LABELS[m.event_type] || m.label || '');
                     const brand = bmGetBankBrand(m);
-                    const time = new Date(m.created_at).toLocaleTimeString('ar-EG', { hour: 'numeric', minute: '2-digit' });
+                    const time = new Date(m.created_at).toLocaleTimeString('ar-EG-u-nu-latn', { hour: 'numeric', minute: '2-digit' });
                     const typeLabel = BM_TYPE_LABELS[m.event_type] || m.label || '';
                     const bk = bmBankKey(m); const l4 = bmAcctLast4(m);
                     const acctChip = l4
@@ -15226,7 +15430,7 @@ function pf2YieldFields() {
             document.getElementById('invd-icon').className = `w-10 h-10 rounded-xl border ${bg} flex items-center justify-center text-lg shrink-0`;
             document.getElementById('invd-icon').textContent = icon;
             document.getElementById('invd-merchant').textContent = inv.merchant || (inv.is_debt ? (inv.debt_person || 'دين') : 'فاتورة');
-            const dateStr = new Date(inv.created_at).toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' });
+            const dateStr = new Date(inv.created_at).toLocaleDateString('ar-EG-u-nu-latn', { day: 'numeric', month: 'long', year: 'numeric' });
             document.getElementById('invd-meta').textContent = `${dateStr}${inv.invoice_number ? ` — فاتورة #${inv.invoice_number}` : ''}`;
 
             const itemsEl = document.getElementById('invd-items');
@@ -15490,7 +15694,7 @@ function pf2YieldFields() {
                 emptyNote.classList.add('hidden');
 
                 document.getElementById('daily-wrapped-date').textContent =
-                    new Date().toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long' });
+                    new Date().toLocaleDateString('ar-EG-u-nu-latn', { weekday: 'long', day: 'numeric', month: 'long' });
                 document.getElementById('daily-wrapped-total').textContent = fmt(today.total);
                 document.getElementById('daily-wrapped-count').textContent = `${today.count} عملية`;
 
@@ -15526,7 +15730,7 @@ function pf2YieldFields() {
         });
         document.getElementById('daily-wrapped-share-btn').addEventListener('click', async () => {
             const today = window.__todayData;
-            const dateLabel = new Date().toLocaleDateString('ar-EG', { weekday: 'long', day: 'numeric', month: 'long' });
+            const dateLabel = new Date().toLocaleDateString('ar-EG-u-nu-latn', { weekday: 'long', day: 'numeric', month: 'long' });
             const text = today
                 ? `يوم ${dateLabel}:\n💰 صرفت ${fmt(today.total)}\n📊 ${today.count} عملية\n\nمع دبّر — محاسبك الشخصي`
                 : 'دبّر — محاسبك الشخصي';
@@ -15888,7 +16092,7 @@ function pf2YieldFields() {
                 const activeBot = document.getElementById('account-sub-open-bot');
                 if (activeHeadline) activeHeadline.textContent = '✅ اشتراك VIP مُفعل';
                 if (activeSubline) {
-                    const expiry = subscription.expiresAt ? new Date(subscription.expiresAt).toLocaleDateString('ar-EG', { day: 'numeric', month: 'long', year: 'numeric' }) : '—';
+                    const expiry = subscription.expiresAt ? new Date(subscription.expiresAt).toLocaleDateString('ar-EG-u-nu-latn', { day: 'numeric', month: 'long', year: 'numeric' }) : '—';
                     activeSubline.textContent = `اشتراكك شغال لحد ${expiry}. كل الميزات المتقدمة مفتوحة — من هنا تقدر تراجع حالة اشتراكك.`;
                 }
                 activeForm?.classList.add('hidden');
@@ -16038,7 +16242,7 @@ function pf2YieldFields() {
             const activeDaysCount = window.__dashboardData?.activeDays?.totalActiveDays || 0;
             const total = sub.totalActiveSubscribers;
             document.getElementById('honor-board-subscribers-line').textContent = total
-                ? `🏅 من ضمن ${total.toLocaleString('ar-EG')} مشترك نشط بيدعمون دبّر`
+                ? `🏅 من ضمن ${total.toLocaleString('ar-EG-u-nu-latn')} مشترك نشط بيدعمون دبّر`
                 : '🏅 من مشتركين دبّر النشطين';
             document.getElementById('honor-board-message').innerHTML =
                 `شكرًا يا <b>${displayName}</b> 🙏 استمرارك معانا (${activeDaysCount} يوم نشط لحد دلوقتي) هو اللي بيخلينا نكمل ونطوّر أكتر.<br>جدد اشتراكك واحتفظ بمكانك بين الداعمين 🚀`;
@@ -16496,7 +16700,7 @@ function pf2YieldFields() {
                     const currentBase = Number(currentSettings.monthlyIncome || currentSettings.monthlyBudget || 0);
                     const currentTotal = Number(window.__dashboardData?.month?.total || 0);
                     headerSummary.textContent = currentBase
-                        ? `المتاح دلوقتي: ${typeof fmt === 'function' ? fmt(Math.max(0, currentBase - currentTotal)) : Math.max(0, currentBase - currentTotal).toLocaleString('ar-EG')}`
+                        ? `المتاح دلوقتي: ${typeof fmt === 'function' ? fmt(Math.max(0, currentBase - currentTotal)) : Math.max(0, currentBase - currentTotal).toLocaleString('ar-EG-u-nu-latn')}`
                         : 'اضغط لإضافة دخلك أو ميزانيتك';
                     headerMain.appendChild(headerSummary);
                 }
@@ -16579,7 +16783,7 @@ function pf2YieldFields() {
                         const person = escape(item.person_name || '—');
                         const note = item.note ? ` — ${escape(item.note)}` : '';
                         const amount = fmt(item.amount, item.currency_code);
-                        const time = new Date(item.created_at).toLocaleTimeString('ar-EG', { hour: 'numeric', minute: '2-digit' });
+                        const time = new Date(item.created_at).toLocaleTimeString('ar-EG-u-nu-latn', { hour: 'numeric', minute: '2-digit' });
                         return `<div class="dabbar-flow-row"><div class="flow-main"><p class="flow-title">${incoming ? 'واصل من' : 'واصل لـ'} ${person}</p><p class="flow-sub">${escape(time)}${note}</p></div><strong class="flow-amount ${incoming ? 'is-in' : 'is-out'}">${incoming ? '+' : '−'}${escape(amount)}</strong></div>`;
                     }).join('') : '<p class="rounded-2xl border border-slate-800 p-4 text-center text-xs text-slate-500">مفيش حركة سيولة مسجلة النهاردة.</p>';
                 };
@@ -17072,7 +17276,7 @@ function dabbarReward(){
   if(first){n=(st.last===ymd(y))?n+1:1}
   var early=d.getHours()<10,xp=first?(early?20:10):5;
   try{localStorage.setItem(K,JSON.stringify({last:today,count:n,xp:(st.xp||0)+xp}))}catch(e){}
-  var ar=function(v){return Number(v).toLocaleString('ar-EG')},pos=((n-1)%7)+1,gift=(n%7===0),dots='';
+  var ar=function(v){return Number(v).toLocaleString('ar-EG-u-nu-latn')},pos=((n-1)%7)+1,gift=(n%7===0),dots='';
   for(var i=1;i<=7;i++){var c=i<=pos?'f':(i===pos+1?'n':''),t=i<=pos?'✓':(i===7?'🎁':ar(i));
     dots+='<span class="pop '+c+'" style="--i:'+(i+1)+'">'+t+'</span>'}
   var title=gift?'🎁 كملت أسبوع كامل!':(n>1?'🔥 '+ar(n)+' أيام ورا بعض!':'🔥 بدأت سلسلتك!');
@@ -17532,11 +17736,29 @@ html:not([data-theme="light"]) .asst-goal-daily-days{ color:#bdf23f !important; 
     // نقلناه لآخر الـbody عشان يتمركز على الشاشة كلها مش على حاوية الصفحة
     document.body.appendChild(button);
     const activeTab = () => scroller.querySelector('.tab-content.active');
+    // لو أي نافذة/شيت مفتوح (محفظة، حركات بنكية، Wrapped، فورمات...) السهم يختفي — بيظهر بس لما تكون في الصفحة نفسها
+    let overlayIsOpen = false;
+    const checkOverlay = () => {
+      const vw = window.innerWidth, vh = window.innerHeight;
+      const els = document.querySelectorAll('.fixed.inset-0, [role="dialog"], [id$="-sheet"], [id$="-backdrop"], [id$="-modal"], [class*="backdrop"], [class*="-sheet"]');
+      let open = false;
+      for (const el of els) {
+        if (el === button || el.contains(button) || el.classList.contains('hidden')) continue;
+        const cs = getComputedStyle(el);
+        if (cs.position !== 'fixed' || cs.display === 'none' || cs.visibility === 'hidden' || Number(cs.opacity) < 0.05 || cs.pointerEvents === 'none') continue;
+        const r = el.getBoundingClientRect();
+        if (r.width >= vw * 0.8 && r.height >= vh * 0.5) { open = true; break; }
+      }
+      overlayIsOpen = open;
+      update();
+    };
+    let overlayRaf = 0;
+    const scheduleOverlayCheck = () => { if (overlayRaf) return; overlayRaf = requestAnimationFrame(() => { overlayRaf = 0; checkOverlay(); }); };
     const update = () => {
       const tab = activeTab();
       const hasRoom = scroller.scrollHeight > scroller.clientHeight + 80;
       const nearBottom = scroller.scrollTop + scroller.clientHeight >= scroller.scrollHeight - 72;
-      const isVisible = !!tab && !tab.classList.contains('hidden') && hasRoom && !nearBottom;
+      const isVisible = !!tab && !tab.classList.contains('hidden') && hasRoom && !nearBottom && !overlayIsOpen;
       button.classList.toggle('is-visible', isVisible);
       button.setAttribute('aria-hidden', String(!isVisible));
     };
@@ -17551,8 +17773,10 @@ html:not([data-theme="light"]) .asst-goal-daily-days{ color:#bdf23f !important; 
     }));
     const observer = new MutationObserver(update);
     document.querySelectorAll('.tab-content').forEach((tab) => observer.observe(tab, { attributes: true, attributeFilter: ['class'] }));
-    window.setTimeout(update, 250);
-    window.dashboardScrollArrowUpdate = update;
+    new MutationObserver(scheduleOverlayCheck).observe(document.body, { attributes: true, attributeFilter: ['class', 'style', 'hidden'], subtree: true, childList: true });
+    document.addEventListener('transitionend', scheduleOverlayCheck, true);
+    window.setTimeout(checkOverlay, 250);
+    window.dashboardScrollArrowUpdate = () => { checkOverlay(); };
   };
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, { once: true });
   else init();

@@ -4456,7 +4456,7 @@ html[data-theme="dark"] .pf-sell-preview.up{color:#6fe3b4}html[data-theme="dark"
         /* أرقام مالية حساسة: تظل مموهة حتى يفتحها المستخدم داخل جلسة التطبيق */
         .daily-sensitive-card { position: relative; }
         .daily-sensitive-card .daily-reveal-btn {
-            position: absolute; inset-inline-start: .65rem; top: .65rem; z-index: 5;
+            position: absolute; inset-inline-end: .65rem; top: .65rem; z-index: 5;
             border: 1px solid color-mix(in srgb, var(--pm-gold-bright, #10b981) 35%, transparent);
             background: color-mix(in srgb, var(--pm-surface-hi, #fff) 72%, transparent);
             color: var(--pm-ink, #0f172a); border-radius: .65rem; padding: .22rem .48rem;
@@ -4538,7 +4538,7 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
   /* زر النزول السريع: ثابت فوق كل التابات، متوسط الحجم، ولا يغطي شريط التنقل */
   #dashboard-scroll-down {
     position: fixed; z-index: 80; inset-inline-start: 50%; bottom: 5.85rem;
-    width: 2.9rem; height: 2.9rem; transform: translateX(-50%) translateY(10px);
+    width: 2.4rem; height: 2.4rem; transform: translateX(-50%) translateY(10px);
     display: grid; place-items: center; border-radius: 999px; cursor: pointer;
     color: #102019; background: linear-gradient(145deg, var(--pm-gold-bright, #d9f36a), var(--pm-mint, #34d399));
     border: 2px solid color-mix(in srgb, var(--pm-gold-bright, #d9f36a) 58%, white 12%);
@@ -4548,10 +4548,15 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
   #dashboard-scroll-down.is-visible { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); animation: dashboardArrowFloat 2s ease-in-out infinite; }
   #dashboard-scroll-down:hover { box-shadow: 0 13px 30px rgba(0,0,0,.34), 0 0 0 7px color-mix(in srgb, var(--pm-mint, #34d399) 16%, transparent); }
   #dashboard-scroll-down:active { transform: translateX(-50%) scale(.92); }
-  #dashboard-scroll-down iconify-icon { font-size: 1.35rem; font-weight: 900; }
+  html[data-theme="light"] #dashboard-scroll-down { box-shadow: 0 10px 24px rgba(15,23,42,.22), 0 0 0 5px rgba(16,185,129,.18); border-color: #ffffff; }
+  html[data-theme="dark"] #dashboard-scroll-down { box-shadow: 0 10px 26px rgba(0,0,0,.45), 0 0 0 5px rgba(52,211,153,.16); }
+  #dashboard-scroll-down iconify-icon { font-size: 1.1rem; font-weight: 900; }
   @keyframes dashboardArrowFloat { 0%,100% { margin-bottom: 0; } 50% { margin-bottom: -4px; } }
-  @media (max-width: 480px) { #dashboard-scroll-down { bottom: 5.45rem; width: 2.75rem; height: 2.75rem; } }
+  @media (max-width: 480px) { #dashboard-scroll-down { bottom: 5.45rem; width: 2.2rem; height: 2.2rem; } }
   @media (prefers-reduced-motion: reduce) { #dashboard-scroll-down, #dashboard-scroll-down.is-visible { animation: none; transition: opacity .15s ease; } }
+/* زرار "إظهار" في كارت المتبقي/الحصالة: لون مناسب للنهاري والليلي */
+  html[data-theme="light"] .daily-sensitive-card .daily-reveal-btn { background: #ffffff; color: #0b3d2c; border-color: rgba(16,185,129,.5); box-shadow: 0 2px 8px rgba(15,23,42,.12); }
+  html[data-theme="dark"] .daily-sensitive-card .daily-reveal-btn { background: rgba(15,32,27,.9); color: #d7fbe9; border-color: rgba(110,231,183,.4); box-shadow: 0 2px 10px rgba(0,0,0,.35); }
 </style>
 </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col overflow-hidden">
@@ -10565,9 +10570,9 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
                 const title = (m.description && m.description.trim()) || m.counterparty || label;
                 const time = new Date(m.created_at).toLocaleTimeString('ar-EG', { hour: 'numeric', minute: '2-digit' });
                 const bank = m.bank_label ? `<p class="text-[9px] font-bold text-emerald-400/90 mt-0.5">🏦 ${escHtml(m.bank_label)}${escHtml(acctText(m.bank_key, m.account_last4))}</p>` : '';
-                const review = m.needs_review ? '<span class="text-[9px] font-bold text-amber-400"> ⚠️ تحتاج مراجعة</span>' : '';
+                const review = m.needs_review ? '<span class="text-[9px] font-bold text-amber-400"> ⚠️ تحتاج مراجعة ‹</span>' : '';
                 return `
-                    <div class="flex items-center justify-between gap-2 py-2 ${i < total - 1 ? 'border-b border-slate-800/60' : ''}">
+                    <div class="flex items-center justify-between gap-2 py-2 ${i < total - 1 ? 'border-b border-slate-800/60' : ''} ${m.needs_review ? 'cursor-pointer rounded-lg active:bg-amber-500/10' : ''}" ${m.needs_review ? 'data-bm-review="1" role="button" tabindex="0" aria-label="مراجعة الحركة"' : ''}>
                         <div class="flex min-w-0 items-center gap-2.5">
                             <span class="w-8 h-8 rounded-xl bg-sky-500/10 border border-sky-500/20 flex items-center justify-center text-sm">${icon}</span>
                             <div class="min-w-0">
@@ -10634,6 +10639,17 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
                 g.count += 1;
                 g.items.push(it);
             });
+            if (opsListEl && !opsListEl.dataset.reviewReady) {
+                opsListEl.dataset.reviewReady = 'true';
+                const openReview = (e) => {
+                    if (!e.target.closest('[data-bm-review]')) return;
+                    e.preventDefault();
+                    openBankMovementsSheet();
+                    document.querySelector('#bank-movements-filters [data-filter="review"]')?.click();
+                };
+                opsListEl.addEventListener('click', openReview);
+                opsListEl.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') openReview(e); });
+            }
             const renderGroup = (g) => {
                 const rowsHtml = g.items.map((it, i) => it.__movement ? renderTodayMovementRow(it, i, g.items.length) : renderExpenseRow(it, i, g.items.length)).join('');
                 const currency = g.items[0]?.currency_code;

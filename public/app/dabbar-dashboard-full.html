@@ -5157,7 +5157,23 @@ html, body { font-variant-numeric: tabular-nums; }
   let filter = 'all';
   let attachedList = null, listMo = null;
   // نوع الصف من السطر الفرعي (مثلاً: "مصروف · بنزين وسيارة" / "دخل" / "تحويل")
+  const PAINT = {
+    e: { bg: 'rgba(244,63,94,.16)', ink: '#fb7185' },
+    i: { bg: 'rgba(16,185,129,.18)', ink: '#34d399' },
+    t: { bg: 'rgba(99,102,241,.2)', ink: '#a5b4fc' }
+  };
+  const paintKind = (row, k) => {
+    const ps = row.querySelectorAll('p');
+    const sub = ps[ps.length - 1];
+    if (!sub || !PAINT[k]) return;
+    const light = document.documentElement.getAttribute('data-theme') === 'light';
+    const c = light ? { e: ['#fee2e2', '#b91c1c'], i: ['#d1fae5', '#047857'], t: ['#e0e7ff', '#4338ca'] }[k] : [PAINT[k].bg, PAINT[k].ink];
+    sub.style.cssText = `display:inline-block;margin-top:.15rem;padding:.02rem .45rem;border-radius:999px;font-weight:700;line-height:1.5;background:${c[0]};color:${c[1]}`;
+  };
   const kindOf = (row) => {
+    const titleEl = row.querySelector('p');
+    const title = (titleEl && titleEl.textContent) || '';
+    if (/تحويل|سحب|إيداع|ايداع/.test(title)) return 't';
     const subs = row.querySelectorAll('p');
     const txt = ((subs[1] && subs[1].textContent) || row.textContent || '').trim();
     if (/^(دخل|استرداد)/.test(txt)) return 'i';
@@ -5176,6 +5192,7 @@ html, body { font-variant-numeric: tabular-nums; }
       total++;
       const k = kindOf(row);
       row.dataset.lt = k;
+      paintKind(row, k);
       const hide = filter !== 'all' && k !== filter;
       row.classList.toggle('lf-hide', hide);
       if (!hide) shown++;
@@ -11121,6 +11138,13 @@ html, body { font-variant-numeric: tabular-nums; }
                         setTimeout(() => {
                             const availableBox = document.getElementById('available-collapsible');
                             if (availableBox) availableBox.open = true;
+                            const planningWrap = document.getElementById('planning-card');
+                            if (planningWrap && planningWrap.classList.contains('planning-card-collapsed')) {
+                                const hdr = planningWrap.children[0];
+                                if (hdr && planningWrap.querySelector('[data-planning-action="collapse"]')) hdr.click();
+                                else planningWrap.classList.remove('planning-card-collapsed');
+                                try { localStorage.setItem('dabbar-planning-card-state', 'expanded'); } catch (e) {}
+                            }
                             const target = document.getElementById('category-budgets-list') || document.getElementById('planning-card');
                             let anc = target;
                             while (anc) {

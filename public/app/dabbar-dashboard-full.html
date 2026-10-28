@@ -4573,6 +4573,11 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
   #dashboard-scroll-down { inset-inline-start: 0; inset-inline-end: 0; margin-inline: auto; transform: translateY(10px); }
   #dashboard-scroll-down.is-visible { transform: translateY(0); }
   #dashboard-scroll-down:active { transform: scale(.92); }
+  /* الحركات المحتاجة مراجعة: تمييز بلون برتقالي يناسب النهاري والليلي */
+  .qd-review { border: 1px solid #f59e0b !important; background: #fff7e6 !important; }
+  .qd-review-label { font-size: 10px; font-weight: 900; color: #b45309; margin: 0 0 2px; }
+  html[data-theme="dark"] .qd-review { border-color: rgba(245,158,11,.55) !important; background: rgba(245,158,11,.12) !important; }
+  html[data-theme="dark"] .qd-review-label { color: #fbbf24; }
 </style>
 </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col overflow-hidden">
@@ -13757,14 +13762,22 @@ function pf2YieldFields() {
             else if (kind === 'loan' || kind === 'debt') draft.type = 'debt';
             draft.user_kind = kind;
         }
+        // الحركات المبهمة بس (تحويل محتاج مراجعة) بتاخد الاختيارات واللون، باقي الحركات تفضل زي ما هي
+        const isReviewDraft = (d) => !!d && (d.type === 'transfer' || d.needs_review === true);
         function attachDraftKindChips(list) {
             if (!list) return;
-            Array.from(list.children).forEach((card) => {
+            Array.from(list.children).forEach((card, idx) => {
+                if (!isReviewDraft(quickEntryDrafts[idx])) return;
                 const holder = card.querySelector('.min-w-0.flex-1');
                 if (!holder) return;
+                card.classList.add('qd-review');
+                const label = document.createElement('p');
+                label.className = 'qd-review-label';
+                label.textContent = '⚠️ محتاجة مراجعة، اختار نوعها';
                 const row = document.createElement('div');
-                row.className = 'mt-2 flex flex-wrap gap-1.5';
-                row.innerHTML = DRAFT_KIND_CHIPS.map(([kind, label]) => `<button type="button" data-draft-kind="${kind}" style="border:1px solid rgba(148,163,184,.45);border-radius:999px;padding:3px 9px;font-size:11px;font-weight:700;background:transparent;color:inherit">${label}</button>`).join('');
+                row.className = 'mt-1.5 flex flex-wrap gap-1';
+                row.innerHTML = DRAFT_KIND_CHIPS.map(([kind, label]) => `<button type="button" data-draft-kind="${kind}" style="border:1px solid rgba(148,163,184,.45);border-radius:999px;padding:1px 6px;font-size:9.5px;font-weight:700;background:transparent;color:inherit;line-height:1.5">${label}</button>`).join('');
+                holder.appendChild(label);
                 holder.appendChild(row);
             });
         }
@@ -13791,8 +13804,8 @@ function pf2YieldFields() {
             card.querySelectorAll('[data-draft-kind]').forEach((b) => {
                 const on = b === chip;
                 b.style.cssText = on
-                    ? 'border:1px solid #10b981;border-radius:999px;padding:3px 9px;font-size:11px;font-weight:800;background:rgba(16,185,129,.15);color:#10b981'
-                    : 'border:1px solid rgba(148,163,184,.45);border-radius:999px;padding:3px 9px;font-size:11px;font-weight:700;background:transparent;color:inherit';
+                    ? 'border:1px solid #10b981;border-radius:999px;padding:1px 6px;font-size:9.5px;font-weight:800;background:rgba(16,185,129,.15);color:#10b981;line-height:1.5'
+                    : 'border:1px solid rgba(148,163,184,.45);border-radius:999px;padding:1px 6px;font-size:9.5px;font-weight:700;background:transparent;color:inherit;line-height:1.5';
             });
         });
         // ============ تنبيه الحركات اللي اتجاهلت في تفاصيل يومك، لحد ما اليوزر يعلّمها "تم" ============

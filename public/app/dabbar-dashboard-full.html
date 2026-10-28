@@ -4494,7 +4494,15 @@ html[data-theme="dark"] .pf-sell-preview.up{color:#6fe3b4}html[data-theme="dark"
         }
         @keyframes dailyRevealPulse { from { opacity: 0; transform: scale(.92); } 45% { opacity: 1; } to { opacity: 0; transform: scale(1.05); } }
         @media (prefers-reduced-motion: reduce) { .daily-sensitive-card * { transition: none !important; animation: none !important; } }
-    </style>
+    
+/* تفاصيل يومك: أول ٣ عمليات بس، والباقي بيتفتح بزرار، وفي حالة الفتح القايمة بتسكرول جوه صندوق */
+.grp-extra { display: none; }
+.grp-rows.grp-expanded .grp-extra { display: block; }
+.grp-rows.is-long.grp-expanded { max-height: 260px; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; padding-inline-start: .15rem; }
+.grp-toggle { width: 100%; margin: .3rem 0 .15rem; padding: .3rem; border-radius: .6rem; border: 1px dashed rgba(16,185,129,.45); background: transparent; color: #10b981; font: 800 .62rem 'Cairo', sans-serif; cursor: pointer; }
+html:not([data-theme="light"]) .grp-toggle { color: #9fe870; border-color: rgba(159,232,112,.4); }
+html[data-theme="light"] .grp-toggle { color: #087a59; }
+</style>
 <style id="dabbar-tune-jun-2026">
 /* كارت "المتبقي من الشهر" و"حصالة اليوم": أصغر وأهدى */
 #salary-countdown-card, #piggybank-card { padding: .7rem .8rem !important; border-radius: 1.1rem !important; }
@@ -4576,6 +4584,12 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
   html[data-theme="light"] #salary-countdown-bar { background: #0f9d6e !important; }
   html[data-theme="light"] #salary-countdown-bar[data-state="warn"] { background: #c26a12 !important; }
   html[data-theme="light"] #salary-countdown-bar[data-state="over"] { background: #b3432f !important; }
+  /* الوضع الليلي: الشريط واضح على الخلفية الداكنة (الـfill بيتعدّل حسب الحالة) */
+  html:not([data-theme="light"]) #salary-countdown-card .dabbar-metric-track { background: rgba(255,255,255,.16) !important; }
+  html:not([data-theme="light"]) #salary-countdown-bar { background: #bdf23f !important; }
+  html:not([data-theme="light"]) #salary-countdown-bar[data-state="warn"] { background: #f5b83d !important; }
+  html:not([data-theme="light"]) #salary-countdown-bar[data-state="over"] { background: #fb7185 !important; }
+  #salary-countdown-card #salary-countdown-bar { min-height: 0; }
 /* سهم نص دايرة لازق فوق شريط التابات: الضلع المسطح تحت، وفيه منطقة ضغط أكبر */
   #dashboard-scroll-down { width: 3.4rem; height: 1.7rem; border-radius: 27px 27px 0 0; display: flex; align-items: flex-end; justify-content: center; padding-bottom: .15rem; border-bottom: 0; }
   #dashboard-scroll-down::before { content: ''; position: absolute; inset: -12px -12px 0 -12px; }
@@ -4647,6 +4661,21 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
 #expense-ledger-list [data-ledger-key].lf-hide{display:none!important}
 #expense-ledger-list .lf-empty{display:none;text-align:center;font-size:.7rem;color:#94a3b8;padding:.9rem 0}
 #expense-ledger-list .lf-empty.show{display:block}
+
+/* آخر عملياتك: تاج ملون صغير للنوع (دخل/مصروف/تحويل) + ألوان الفلاتر دايمًا */
+#expense-ledger-card .lf-chip.e { color: #fb7185; border-color: rgba(244,63,94,.45); }
+#expense-ledger-card .lf-chip.i { color: #34d399; border-color: rgba(16,185,129,.45); }
+#expense-ledger-card .lf-chip.t { color: #a5b4fc; border-color: rgba(99,102,241,.45); }
+#expense-ledger-list [data-ledger-key][data-lt] > div > p:last-child { display: inline-block; margin-top: .15rem; padding: .02rem .45rem; border-radius: 999px; font-size: .56rem !important; font-weight: 700; line-height: 1.5; }
+#expense-ledger-list [data-ledger-key][data-lt="e"] > div > p:last-child { background: rgba(244,63,94,.16); color: #fb7185; }
+#expense-ledger-list [data-ledger-key][data-lt="i"] > div > p:last-child { background: rgba(16,185,129,.18); color: #34d399; }
+#expense-ledger-list [data-ledger-key][data-lt="t"] > div > p:last-child { background: rgba(99,102,241,.2); color: #a5b4fc; }
+html[data-theme="light"] #expense-ledger-list [data-ledger-key][data-lt="e"] > div > p:last-child { background: #fee2e2; color: #b91c1c; }
+html[data-theme="light"] #expense-ledger-list [data-ledger-key][data-lt="i"] > div > p:last-child { background: #d1fae5; color: #047857; }
+html[data-theme="light"] #expense-ledger-list [data-ledger-key][data-lt="t"] > div > p:last-child { background: #e0e7ff; color: #4338ca; }
+html[data-theme="light"] #expense-ledger-card .lf-chip.e { color: #be123c; }
+html[data-theme="light"] #expense-ledger-card .lf-chip.i { color: #047857; }
+html[data-theme="light"] #expense-ledger-card .lf-chip.t { color: #4338ca; }
 </style>
 <style id="latin-digits">
 /* كل الأرقام بالإنجليزي وبخط متساوي العرض عشان المبالغ تبان مرتبة */
@@ -10899,7 +10928,16 @@ html, body { font-variant-numeric: tabular-nums; }
                 opsListEl.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') openReview(e); });
             }
             const renderGroup = (g) => {
-                const rowsHtml = g.items.map((it, i) => it.__movement ? renderTodayMovementRow(it, i, g.items.length) : renderExpenseRow(it, i, g.items.length)).join('');
+                const GROUP_PREVIEW = 3;
+                const isLong = g.items.length > GROUP_PREVIEW;
+                const rowsHtml = (() => {
+                    const inner = g.items.map((it, i) => {
+                        const h = it.__movement ? renderTodayMovementRow(it, i, g.items.length) : renderExpenseRow(it, i, g.items.length);
+                        return i >= GROUP_PREVIEW ? `<div class="grp-extra">${h}</div>` : h;
+                    }).join('');
+                    const btn = isLong ? `<button type="button" class="grp-toggle" data-total="${g.items.length}">عرض كل الـ${g.items.length} ▾</button>` : '';
+                    return `<div class="grp-rows${isLong ? ' is-long' : ''}">${inner}</div>${btn}`;
+                })();
                 const currency = g.items[0]?.currency_code;
                 const wasOpen = prevOpenLabels.has(g.label);
                 const pendingList = g.pending || [];
@@ -10925,6 +10963,17 @@ html, body { font-variant-numeric: tabular-nums; }
             };
             const allGroups = Array.from(groupsMap.values());
             if (opsListEl) opsListEl.innerHTML = allGroups.map(renderGroup).join('');
+            if (opsListEl && !opsListEl.dataset.grpBound) {
+                opsListEl.dataset.grpBound = '1';
+                opsListEl.addEventListener('click', (e) => {
+                    const b = e.target.closest('.grp-toggle');
+                    if (!b) return;
+                    e.preventDefault();
+                    const rows = b.previousElementSibling;
+                    const open = rows.classList.toggle('grp-expanded');
+                    b.textContent = open ? 'إخفاء ▴' : `عرض كل الـ${b.dataset.total} ▾`;
+                });
+            }
             emptyEl?.classList.toggle('hidden', todayRows.length > 0);
             bindDabbarListToggle(opsListEl, opsToggleBtn, 4);
             applyDabbarListPreview(opsListEl, opsToggleBtn, 4);
@@ -11067,8 +11116,22 @@ html, body { font-variant-numeric: tabular-nums; }
                         e.stopPropagation();
                         const monthlyTabBtn = document.querySelector('.tab-btn[data-tab="monthly"]');
                         if (monthlyTabBtn && !monthlyTabBtn.classList.contains('active-tab')) monthlyTabBtn.click();
+                        // ============ زرار «حدّد حد للفئة» بيوديك على قسم «الدخل والميزانية» ويفتحه (كل الأقسام اللي فوقه)،
+                        // وبعدين يفتح شيت حد الفئة. ============
                         setTimeout(() => {
-                            openLimitSheet(btn.dataset.savingsLimitName, Number(btn.dataset.savingsLimitAmount || 0));
+                            const availableBox = document.getElementById('available-collapsible');
+                            if (availableBox) availableBox.open = true;
+                            const target = document.getElementById('category-budgets-list') || document.getElementById('planning-card');
+                            let anc = target;
+                            while (anc) {
+                                if (anc.tagName === 'DETAILS') anc.open = true;
+                                anc = anc.parentElement;
+                            }
+                            const planning = document.getElementById('planning-card');
+                            (planning || target)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            setTimeout(() => {
+                                openLimitSheet(btn.dataset.savingsLimitName, Number(btn.dataset.savingsLimitAmount || 0));
+                            }, 450);
                         }, 150);
                     });
                 });

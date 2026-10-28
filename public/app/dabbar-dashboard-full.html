@@ -4545,18 +4545,30 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
     box-shadow: 0 10px 26px rgba(0,0,0,.28), 0 0 0 5px color-mix(in srgb, var(--pm-mint, #34d399) 12%, transparent);
     opacity: 0; pointer-events: none; transition: opacity .25s ease, transform .25s cubic-bezier(.22,1,.36,1), box-shadow .2s ease;
   }
-  #dashboard-scroll-down.is-visible { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); animation: dashboardArrowFloat 2s ease-in-out infinite; }
+  #dashboard-scroll-down.is-visible { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); animation: none; }
   #dashboard-scroll-down:hover { box-shadow: 0 13px 30px rgba(0,0,0,.34), 0 0 0 7px color-mix(in srgb, var(--pm-mint, #34d399) 16%, transparent); }
   #dashboard-scroll-down:active { transform: translateX(-50%) scale(.92); }
-  html[data-theme="light"] #dashboard-scroll-down { box-shadow: 0 10px 24px rgba(15,23,42,.22), 0 0 0 5px rgba(16,185,129,.18); border-color: #ffffff; }
-  html[data-theme="dark"] #dashboard-scroll-down { box-shadow: 0 10px 26px rgba(0,0,0,.45), 0 0 0 5px rgba(52,211,153,.16); }
+  html[data-theme="light"] #dashboard-scroll-down { box-shadow: 0 -4px 14px rgba(15,23,42,.22); border-color: #ffffff; }
+  html[data-theme="dark"] #dashboard-scroll-down { box-shadow: 0 -4px 14px rgba(0,0,0,.45); }
   #dashboard-scroll-down iconify-icon { font-size: 1.1rem; font-weight: 900; }
   @keyframes dashboardArrowFloat { 0%,100% { margin-bottom: 0; } 50% { margin-bottom: -4px; } }
-  @media (max-width: 480px) { #dashboard-scroll-down { bottom: 5.45rem; width: 2.2rem; height: 2.2rem; } }
+  @media (max-width: 480px) { #dashboard-scroll-down { bottom: 4.9rem; width: 3.4rem; height: 1.7rem; } }
   @media (prefers-reduced-motion: reduce) { #dashboard-scroll-down, #dashboard-scroll-down.is-visible { animation: none; transition: opacity .15s ease; } }
 /* زرار "إظهار" في كارت المتبقي/الحصالة: لون مناسب للنهاري والليلي */
   html[data-theme="light"] .daily-sensitive-card .daily-reveal-btn { background: #ffffff; color: #0b3d2c; border-color: rgba(16,185,129,.5); box-shadow: 0 2px 8px rgba(15,23,42,.12); }
   html[data-theme="dark"] .daily-sensitive-card .daily-reveal-btn { background: rgba(15,32,27,.9); color: #d7fbe9; border-color: rgba(110,231,183,.4); box-shadow: 0 2px 10px rgba(0,0,0,.35); }
+/* الإظهار/الإخفاء في شريط علوي خاص بيه، والعنوان والـchip تحته: مفيش تغطية */
+  #salary-countdown-card.daily-sensitive-card { padding-top: 2.6rem !important; }
+  .daily-sensitive-card .daily-reveal-btn.daily-reveal-inline { position: static; flex-shrink: 0; }
+  /* مؤشر الباقي من الميزانية: واضح في النهاري والليلي */
+  html[data-theme="light"] #salary-countdown-card .dabbar-metric-track { background: rgba(15,23,42,.1) !important; }
+  html[data-theme="light"] #salary-countdown-bar { background: #0f9d6e !important; }
+  html[data-theme="light"] #salary-countdown-bar[data-state="warn"] { background: #c26a12 !important; }
+  html[data-theme="light"] #salary-countdown-bar[data-state="over"] { background: #b3432f !important; }
+/* سهم نص دايرة لازق فوق شريط التابات: الضلع المسطح تحت، وفيه منطقة ضغط أكبر */
+  #dashboard-scroll-down { width: 3.4rem; height: 1.7rem; border-radius: 27px 27px 0 0; display: flex; align-items: flex-end; justify-content: center; padding-bottom: .15rem; border-bottom: 0; }
+  #dashboard-scroll-down::before { content: ''; position: absolute; inset: -12px -12px 0 -12px; }
+  #dashboard-scroll-down iconify-icon { font-size: 1rem; }
 </style>
 </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col overflow-hidden">
@@ -10402,7 +10414,7 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
                 remainingEl.textContent = `عديت بـ ${fmt(Math.abs(remaining))}`;
                 remainingEl.className = 'text-xl font-black text-rose-500';
                 dailyEl.textContent = '0 ج.م';
-                barEl.style.width = '100%'; barEl.style.background = '#b3432f';
+                barEl.style.width = '100%'; barEl.style.background = '#b3432f'; barEl.dataset.state = 'over';
                 card.classList.add('border-rose-500/30'); card.classList.remove('border-emerald-500/25');
                 return;
             }
@@ -10417,6 +10429,7 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
             barEl.style.width = `${Math.max(spentPercent, spentPercent > 0 ? 3 : 0)}%`;
             // لو نسبة الفلوس المصروفة أعلى من نسبة الأيام اللي عدت، معناه بيصرف أسرع من المفروض — نلوّنه تحذيري
             barEl.style.background = spentPercent > daysPassedPercent ? '#b8862c' : 'var(--pm-gold-bright, #10b981)';
+            barEl.dataset.state = spentPercent > daysPassedPercent ? 'warn' : 'ok';
             applyDailySensitiveState();
         }
         document.getElementById('salary-countdown-setup-btn')?.addEventListener('click', () => {
@@ -16343,7 +16356,13 @@ function pf2YieldFields() {
                         window.setTimeout(() => card.classList.remove('daily-sensitive-unlocking'), 600);
                         applyDailySensitiveState();
                     });
-                    card.appendChild(button);
+                    if (index === 1) {
+                        // الحصالة: الزرار في صف العنوان، آخر واحد على الشمال، جنب الـchip
+                        button.classList.add('daily-reveal-inline');
+                        (card.querySelector(':scope > .justify-between') || card).appendChild(button);
+                    } else {
+                        card.appendChild(button);
+                    }
                 });
                 // ============ "شوف يومك بشكل حلو" لازم يبان فوق كارت "المتبقي من الشهر" ============
                 const wrappedOpenBtn = document.getElementById('daily-wrapped-open');
@@ -17417,6 +17436,8 @@ html:not([data-theme="light"]) .asst-goal-daily-days{ color:#bdf23f !important; 
     const button = document.getElementById('dashboard-scroll-down');
     if (!scroller || !button || button.dataset.ready) return;
     button.dataset.ready = 'true';
+    // نقلناه لآخر الـbody عشان يتمركز على الشاشة كلها مش على حاوية الصفحة
+    document.body.appendChild(button);
     const activeTab = () => scroller.querySelector('.tab-content.active');
     const update = () => {
       const tab = activeTab();

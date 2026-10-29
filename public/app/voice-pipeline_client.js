@@ -8,13 +8,12 @@
 //      والمستخدم يتكلم تاني ويدوس إيقاف -> الصوت بيتبعت للسيرفر (Gemini ثم Whisper Large V3).
 //   3) لو الميكروفون سكوت تقريبًا في مرحلة التسجيل -> مفيش نداء مدفوع، بنقول "ما سمعتش حاجة".
 //
-// الملف مستقل عن باقي الداشبورد: انت اللي بتديله دالتين (classifyText / classifyAudio) بيلفّوا الـ fetch بتاعك الموجود.
+// الملف مستقل عن باقي الداشبورد: يستقبل classifyText فقط؛ لا يسجل ولا يرفع أي ملف صوت.
 //
 //   const session = startVoiceCapture({
 //     onStatus: (s) => setMicState(s),   // 'starting' | 'listening' | 'processing' | 'retry' | 'uploading'
 //     onInterim: (t) => showLiveText(t),
 //     classifyText:  async (text) => ({ transactions }),
-//     classifyAudio: async ({ audioBase64, mimeType }) => ({ success, transcript, transactions, provider }),
 //   });
 //   stopBtn.onclick = () => session.stop();
 //   const result = await session.result;  // { ok, source, transcript, transactions, provider, error, debug }
@@ -26,13 +25,14 @@ export const VOICE_DEFAULTS = {
   langs: (() => {
     const browserLang = typeof navigator !== 'undefined' ? String(navigator.language || '').trim() : '';
     const supported = [
-      'ar-EG', 'ar-SA', 'ar-AE', 'ar-JO', 'ar-LB', 'ar-SY', 'ar-MA', 'ar-DZ', 'ar-TN', 'ar-KW', 'ar-QA',
-      'en-US', 'en-GB', 'en-AU', 'en-IN', 'fr-FR', 'fr-CA', 'es-ES', 'es-MX', 'de-DE', 'it-IT', 'pt-BR',
-      'tr-TR', 'ur-PK', 'hi-IN', 'fa-IR', 'id-ID', 'ms-MY', 'ru-RU', 'zh-CN', 'ja-JP', 'ko-KR', 'nl-NL',
+      'ar-EG', 'ar-SA', 'ar-AE', 'ar-KW', 'ar-QA', 'ar-BH', 'ar-OM', 'ar-YE', 'ar-IQ', 'ar-JO', 'ar-LB', 'ar-SY', 'ar-PS', 'ar-MA', 'ar-DZ', 'ar-TN', 'ar-LY', 'ar-SD', 'ar-MR', 'ar-SO', 'ar-DJ', 'ar-KM', 'en-US',
     ];
-    return [...new Set([browserLang, ...supported].filter(Boolean))];
+    let saved = '';
+    try { saved = typeof localStorage !== 'undefined' ? String(localStorage.getItem('dabbar-voice-lang') || '') : ''; } catch (_) {}
+    // اللغة اللي المستخدم اختارها أولًا، بعدها المصري (مش لغة المتصفح: كانت بتبوّظ التعرّف لو الجهاز إنجليزي)
+    return [...new Set([saved, 'ar-EG', browserLang, ...supported].filter(Boolean))];
   })(),
-  maxSeconds: 30,           // نفس VOICE_MAX_DURATION_SECONDS في config.js
+  maxSeconds: 30,           // نفس VOICE_MAX_DURATION_SECONDS في config.js — الجلسة بتفضل مفتوحة لحد 30 ثانية حتى مع السكوت
   minConfidence: 0.35,      // بيتطبق بس لو المتصفح رجّع confidence > 0 (بعض المتصفحات بترجّع 0 دايمًا)
   minPeakLevel: 0.04,       // أقل مستوى صوت (0..1) يعتبر إن فيه كلام فعلًا
   minAudioBytes: 1500,      // نفس VOICE_MIN_AUDIO_BYTES في config.js
@@ -41,7 +41,7 @@ export const VOICE_DEFAULTS = {
 };
 
 const ARABIC_LETTERS = /[\u0600-\u06FF]/;
-const MEANINGFUL_CHARS = /[\u0600-\u06FFa-zA-Z0-9\u0660-\u0669]/g;
+const MEANINGFUL_CHARS = /[\p{L}\p{N}]/gu; // أي لغة
 const REFUSAL_HINTS = /(لا أستطيع|لا استطيع|مقدرش|عذرًا|عذرا|آسف|i can't|i cannot|unable to|sorry)/i;
 
 // ============ عدّة تنضيف نص Web Speech (مشكلة التكرار على أندرويد) ============
@@ -51,7 +51,7 @@ const REFUSAL_HINTS = /(لا أستطيع|لا استطيع|مقدرش|عذرً�
 //   2) dedupeRuns: أي عبارة اتكررت ورا بعض تتشال
 //   3) transcriptHealth: لو النص لسه مشبوه (تكرار عالي/طويل جدًا) مانبعتوش للتصنيف -> نروح للتسجيل التاني
 //   4) maxChars: سقف على طول النص اللي بيتبعت للسيرفر
-export const VOICE_PIPELINE_VERSION = '2026-10-28.1';
+export const VOICE_PIPELINE_VERSION = '2026-10-30.webspeech-langpick';
 
 const IS_ANDROID = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent || '');
 const normSeg = (t) => String(t || '').replace(/[\u064B-\u0652\u0640]/g, '').replace(/\s+/g, ' ').trim();
@@ -140,10 +140,7 @@ export function isUsableTranscript(text) {
   if (!meaningful || meaningful / compact.length < 0.6) return false; // رموز/طلاسم
   if (/(.)\1{5,}/u.test(compact)) return false;                       // تكرار غريب
   if (REFUSAL_HINTS.test(t) && t.length < 120) return false;
-  const hasArabic = ARABIC_LETTERS.test(t);
-  const hasDigit = /[0-9\u0660-\u0669]/.test(t);
-  const hasLatin = /[a-zA-Z]/.test(t);
-  return hasArabic || (hasLatin && hasDigit);
+  return /\p{L}/u.test(t); // أي لغة (اللغة بيختارها المستخدم، فمش بنفلتر على العربي بس)
 }
 
 export function isWebSpeechSupported() {
@@ -200,25 +197,20 @@ function createPeakMeter(stream) {
 // بتبدأ جلسة تسجيل. بترجّع { stop, cancel, result } — result Promise بيتحل دايمًا (مش بيرمي).
 export function startVoiceCapture(options = {}) {
   const opt = { ...VOICE_DEFAULTS, ...options };
-  const { onStatus = () => {}, onInterim = () => {}, onActivity = () => {}, classifyText, classifyAudio } = opt;
+  const { onStatus = () => {}, onInterim = () => {}, onActivity = () => {}, classifyText } = opt;
 
-  let cancelled = false;
   let finished = false;
-  let phase = 'speech'; // 'speech' | 'record'
-  let speechStopRequested = false;
-  let speechDecided = false;
-  let recordStopRequested = false;
+  let cancelled = false;
+  let stopRequested = false;
   let recognition = null;
-  let recorder = null;
-  let stream = null;
-  let meter = null;
   let maxTimer = null;
   let graceTimer = null;
-  const debug = {}; // مؤقت: للتشخيص بس
-  const chunks = [];
-
-  // حالة Web Speech
-  const speech = { cumulative: false, segments: [], confidences: [], prevSegments: [], prevConfs: [], restarts: 0, startedAt: 0, error: null, ended: false, langIndex: 0, retrying: false, events: [], audioStartAt: 0, pendingStop: false, t0: Date.now() };
+  let restartTimer = null;
+  let langIndex = 0;
+  let finalSegments = [];
+  let interimText = '';
+  let lastError = '';
+  const debug = { version: VOICE_PIPELINE_VERSION, mode: 'webspeech-only' };
 
   let resolveResult;
   const result = new Promise((resolve) => { resolveResult = resolve; });
@@ -226,8 +218,10 @@ export function startVoiceCapture(options = {}) {
   const cleanup = () => {
     clearTimeout(maxTimer);
     clearTimeout(graceTimer);
-    try { if (meter) meter.close(); } catch { /* ignore */ }
-    try { if (stream) stream.getTracks().forEach((t) => t.stop()); } catch { /* ignore */ }
+    clearTimeout(restartTimer);
+    try { recognition?.abort(); } catch (_) {}
+    recognition = null;
+    onActivity(false);
   };
 
   const finish = (value) => {
@@ -237,287 +231,117 @@ export function startVoiceCapture(options = {}) {
     resolveResult({ ...value, debug });
   };
 
-  // ---- اختيار أفضل نص من نتيجة Web Speech ----
-  const collectFromEvent = (event) => {
-    const items = [];
-    for (let i = 0; i < event.results.length; i += 1) {
-      const res = event.results[i];
-      // أول بديل يعدّي فحص الجودة، وإلا أول بديل
-      let chosen = null;
-      for (let a = 0; a < res.length; a += 1) {
-        if (isUsableTranscript(res[a].transcript)) { chosen = res[a]; break; }
-      }
-      chosen = chosen || res[0];
-      if (!chosen) continue;
-      const text = String(chosen.transcript || '').trim();
-      // النتيجة اللي لسه بتتكوّن (مش نهائية) بناخدها برضه: لو المستخدم وقّف قبل ما تتثبّت منخسرش كلامه
-      if (text) items.push({ text, conf: res.isFinal && chosen.confidence > 0 ? chosen.confidence : 0 });
+  const currentText = () => dedupeRuns([...finalSegments, interimText].filter(Boolean).join(' ').trim());
+
+  const chooseText = (result) => {
+    for (let i = 0; i < result.length; i += 1) {
+      const candidate = String(result[i]?.transcript || '').trim();
+      if (candidate && isUsableTranscript(candidate)) return candidate;
     }
-    if (IS_ANDROID || speech.cumulative || hasGrowth(items)) speech.cumulative = true;
-    const kept = speech.cumulative ? collapseChains(items) : items;
-    speech.segments = [...speech.prevSegments, ...kept.map((k) => k.text)];
-    speech.confidences = [...speech.prevConfs, ...kept.filter((k) => k.conf > 0).map((k) => k.conf)];
-    return dedupeRuns(speech.segments.join(' '));
+    return String(result[0]?.transcript || '').trim();
   };
 
-  const webSpeechText = () => {
-    // تنضيف نهائي عبر كل الجلسات (لو المحرك اتقفل واتفتح وسط الكلام)
-    const merged = speech.cumulative ? collapseChains(speech.segments.map((text) => ({ text }))).map((k) => k.text) : speech.segments;
-    const text = dedupeRuns(merged.join(' ')).trim();
+  const finishSpeech = async () => {
+    if (finished) return;
+    const text = currentText();
     const health = transcriptHealth(text, opt.maxChars);
+    debug.transcript = text;
     debug.health = health.reason;
-    debug.cleaned = text;
-    if (!health.ok) return '';
-    const conf = speech.confidences.length
-      ? speech.confidences.reduce((a, b) => a + b, 0) / speech.confidences.length
-      : 0;
-    if (conf > 0 && conf < opt.minConfidence) return ''; // ثقة واطية = نروح للسحابة
-    return text;
-  };
-
-  // ================= المرحلة 1: Web Speech لوحده =================
-  const decideSpeech = async () => {
-    if (speechDecided || finished) return;
-    speechDecided = true;
-    clearTimeout(maxTimer);
-    clearTimeout(graceTimer);
+    debug.languagesTried = langIndex + 1;
     if (cancelled) return finish({ ok: false, source: null, error: 'cancelled' });
-
-    const text = webSpeechText();
-    debug.version = VOICE_PIPELINE_VERSION;
-    debug.speech = {
-      supported: isWebSpeechSupported(),
-      lang: recognition?.lang,
-      speechError: speech.error,
-      events: speech.events.join(','),
-      segments: speech.segments,
-      confidences: speech.confidences,
-      usable: !!text,
-      rawSegments: speech.segments.length,
-      cumulative: speech.cumulative,
-    };
-
-    // نص سليم -> تصنيف نصي رخيص، وخلاص
-    if (text && typeof classifyText === 'function') {
-      onStatus('processing');
-      try {
-        const out = await classifyText(text);
-        return finish({
-          ok: true,
-          source: 'webspeech',
-          transcript: text,
-          transactions: out?.transactions || [],
-          provider: 'webspeech',
-        });
-      } catch (err) {
-        // فشل التصنيف النصي = مشكلة شبكة/سيرفر، مش مشكلة تفريغ؛ إرسال الصوت مش هيحلها
-        return finish({ ok: false, source: 'webspeech', transcript: text, error: 'classify-failed' });
-      }
+    if (lastError === 'not-allowed' || lastError === 'service-not-allowed') return finish({ ok: false, source: null, error: 'mic-denied' });
+    if (!health.ok) return finish({ ok: false, source: null, error: 'silence' });
+    if (typeof classifyText !== 'function') return finish({ ok: false, source: 'webspeech', transcript: text, error: 'classify-failed' });
+    onStatus('processing');
+    try {
+      const out = await classifyText(text);
+      return finish({ ok: true, source: 'webspeech', transcript: text, transactions: out?.transactions || [], provider: 'webspeech' });
+    } catch (_) {
+      return finish({ ok: false, source: 'webspeech', transcript: text, error: 'classify-failed' });
     }
-
-    // الميكروفون نفسه مرفوض: التسجيل هيفشل بنفس السبب
-    if (speech.error === 'not-allowed') return finish({ ok: false, source: null, error: 'mic-denied' });
-
-    // Web Speech ما جابش نص: نبدأ مرحلة التسجيل ونطلب من المستخدم يتكلم تاني
-    return startRecordPhase(true);
   };
 
   const startRecognition = () => {
+    if (finished || cancelled || stopRequested) return;
     const Ctor = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!Ctor) return finish({ ok: false, source: null, error: 'unsupported' });
     const rec = new Ctor();
     recognition = rec;
-    rec.lang = opt.langs[speech.langIndex] || 'ar-EG';
-    rec.continuous = true; // مايقفلش لوحده عند أول وقفة كلام — بيكمّل لحد ما المستخدم يدوس "إيقاف وتحليل"
-    speech.startedAt = Date.now();
+    rec.lang = opt.langs[langIndex] || opt.langs[0] || 'ar-EG';
+    rec.continuous = true;
     rec.interimResults = true;
     rec.maxAlternatives = 3;
+    debug.lang = rec.lang;
 
-    ['start', 'audiostart', 'soundstart', 'soundend', 'speechstart', 'speechend', 'audioend', 'end'].forEach((n) => {
-      rec.addEventListener(n, () => {
-        speech.events.push(`${n}@${Date.now() - speech.t0}`);
-        if (n === 'audiostart') {
-          speech.audioStartAt = Date.now();
-          onStatus('listening'); // المحرك بدأ يسمع فعلًا، مش قبل كده
-          if (speech.pendingStop) doSpeechStop();
-        }
-        if (n === 'soundstart' || n === 'speechstart') onActivity(true);
-        if (n === 'speechend' || n === 'soundend') onActivity(false);
-      });
-    });
+    rec.onstart = () => { if (!finished && !stopRequested) onStatus('listening'); };
+    rec.onsoundstart = () => onActivity(true);
+    rec.onspeechstart = () => onActivity(true);
+    rec.onsoundend = () => onActivity(false);
+    rec.onspeechend = () => onActivity(false);
     rec.onresult = (event) => {
-      speech.events.push('result');
-      const preview = collectFromEvent(event);
+      let live = '';
+      for (let i = event.resultIndex || 0; i < event.results.length; i += 1) {
+        const item = event.results[i];
+        const text = chooseText(item);
+        if (!text) continue;
+        if (item.isFinal) finalSegments.push(text);
+        else live += ` ${text}`;
+      }
+      interimText = live.trim();
+      const preview = currentText();
+      if (preview) onInterim(preview);
       onActivity(true);
-      onInterim(preview);
     };
     rec.onerror = (event) => {
-      speech.events.push(`error:${event.error}`); // بنسجّل حتى 'aborted' عشان التشخيص
-      if (event.error === 'language-not-supported' && speech.langIndex + 1 < opt.langs.length) {
-        speech.langIndex += 1;
-        speech.retrying = true; // المتصفح هيطلّع onend بعد الخطأ، وهناك هنعيد المحاولة باللغة التالية
+      const error = String(event?.error || 'unknown');
+      lastError = error;
+      debug.error = error;
+      if (error === 'language-not-supported' && langIndex + 1 < opt.langs.length) {
+        langIndex += 1;
         return;
       }
-      if (event.error !== 'aborted') speech.error = event.error;
+      if (error === 'aborted' || error === 'no-speech') return;
+      if (['not-allowed', 'service-not-allowed', 'audio-capture'].includes(error)) stopRequested = true;
     };
     rec.onend = () => {
-      if (rec !== recognition) return;
-      if (speech.retrying) {
-        speech.retrying = false;
-        if (!finished && !speechStopRequested) startRecognition();
-        return;
-      }
-      // المتصفح قفل المحرك لوحده (صمت/حد زمني) والمستخدم لسه ما ضغطش إيقاف: نفتحه تاني ونكمّل
-      const fatal = ['not-allowed', 'service-not-allowed', 'audio-capture', 'network'].includes(speech.error);
-      if (!speechStopRequested && !cancelled && !finished && !fatal && speech.restarts < 60) {
-        const quick = Date.now() - speech.startedAt < 400; // قفل فوري = مشكلة، مانعملش loop سريع
-        speech.restarts += 1;
-        speech.prevSegments = speech.segments.slice();
-        speech.prevConfs = speech.confidences.slice();
-        speech.events.push('restart');
-        onActivity(false);
-        setTimeout(() => { if (!finished && !speechStopRequested && !cancelled) startRecognition(); }, quick ? 400 : 60);
-        return;
-      }
-      speech.ended = true;
-      // اتقفل بعد ما المستخدم ضغط إيقاف (أو خطأ نهائي): نقرر
-      decideSpeech();
+      if (rec !== recognition || finished) return;
+      onActivity(false);
+      if (stopRequested || cancelled) return finishSpeech();
+      // Chrome/Safari often close Web Speech after a short pause; reopen it without
+      // touching getUserMedia or starting a second recorder, preserving the text.
+      clearTimeout(restartTimer);
+      restartTimer = setTimeout(() => startRecognition(), 30);
     };
-    try {
-      rec.start();
-    } catch (err) {
-      speech.error = 'start-failed';
-      speech.ended = true;
-      setTimeout(decideSpeech, 0);
+    try { rec.start(); } catch (_) {
+      clearTimeout(restartTimer);
+      restartTimer = setTimeout(() => startRecognition(), 50);
     }
   };
 
-  const MIN_LISTEN_MS = 1200;
-
-  const doSpeechStop = () => {
-    if (speechStopRequested) return;
-    const wait = speech.audioStartAt ? speech.audioStartAt + MIN_LISTEN_MS - Date.now() : 0;
-    if (wait > 0) { setTimeout(doSpeechStop, wait); return; }
-    speechStopRequested = true;
+  const stop = () => {
+    if (finished || stopRequested) return;
+    stopRequested = true;
     clearTimeout(maxTimer);
-    if (recognition && !speech.ended) {
-      try { recognition.stop(); } catch { /* ignore */ }
-      graceTimer = setTimeout(() => {
-        try { recognition.abort(); } catch { /* ignore */ }
-        speech.ended = true;
-        decideSpeech();
-      }, opt.stopGraceMs);
-    } else {
-      decideSpeech();
-    }
+    if (recognition) {
+      try { recognition.stop(); } catch (_) { finishSpeech(); }
+      graceTimer = setTimeout(() => finishSpeech(), opt.stopGraceMs);
+    } else finishSpeech();
   };
 
-  const stopSpeech = () => {
-    if (speechStopRequested) return;
-    // لو المحرك لسه ما بدأش يسمع، نستنى audiostart وبعدها نوقف
-    if (!speech.audioStartAt && recognition && !speech.ended) { speech.pendingStop = true; return; }
-    doSpeechStop();
-  };
-
-  // ================= المرحلة 2: تسجيل للسيرفر =================
-  const startRecordPhase = async (afterSpeechFailure) => {
-    phase = 'record';
-    if (typeof classifyAudio !== 'function') {
-      return finish({ ok: false, source: null, error: afterSpeechFailure ? 'silence' : 'no-fallback' });
-    }
-    if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
-      return finish({ ok: false, source: null, error: 'unsupported' });
-    }
-    if (afterSpeechFailure) onStatus('retry');
-    try {
-      // نفس إعدادات الداشبورد القديمة (echoCancellation/autoGainControl مقفولين) لأنها اتجرّبت على أندرويد
-      try {
-        stream = await navigator.mediaDevices.getUserMedia({
-          audio: { channelCount: 1, noiseSuppression: true, echoCancellation: false, autoGainControl: false },
-        });
-      } catch (innerErr) {
-        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      }
-    } catch (err) {
-      return finish({ ok: false, source: null, error: 'mic-denied' });
-    }
-    if (cancelled || finished) { cleanup(); return undefined; }
-
-    meter = createPeakMeter(stream);
-    try {
-      const mime = pickRecorderMime();
-      recorder = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
-      recorder.ondataavailable = (e) => { if (e.data && e.data.size) chunks.push(e.data); };
-      recorder.start(250);
-    } catch (err) {
-      return finish({ ok: false, source: null, error: 'unsupported' });
-    }
-    onStatus('listening');
-    maxTimer = setTimeout(stopRecord, opt.maxSeconds * 1000);
-    return undefined;
-  };
-
-  const decideRecord = async () => {
-    if (cancelled) return finish({ ok: false, source: null, error: 'cancelled' });
-    onStatus('processing');
-    debug.record = {
-      peak: Number((meter?.getPeak() || 0).toFixed(2)),
-      audioBytes: chunks.reduce((n, c) => n + c.size, 0),
-    };
-    const blob = chunks.length ? new Blob(chunks, { type: chunks[0].type || recorder?.mimeType || 'audio/webm' }) : null;
-    if (!blob || blob.size < opt.minAudioBytes) {
-      return finish({ ok: false, source: null, error: 'silence' });
-    }
-    if (meter && meter.getPeak() < opt.minPeakLevel) {
-      return finish({ ok: false, source: null, error: 'silence' }); // منصرفش على صمت
-    }
-    try {
-      onStatus('uploading');
-      const mimeType = (blob.type || 'audio/webm').split(';')[0];
-      const audioBase64 = await blobToBase64(blob);
-      const out = await classifyAudio({ audioBase64, mimeType });
-      if (out && out.success !== false) {
-        return finish({
-          ok: true,
-          source: 'server',
-          transcript: out.transcript || '',
-          transactions: out.transactions || [],
-          provider: out.provider || null,
-        });
-      }
-      return finish({ ok: false, source: 'server', error: out?.error || 'transcription-failed' });
-    } catch (err) {
-      return finish({ ok: false, source: 'server', error: 'network' });
-    }
-  };
-
-  function stopRecord() {
-    if (recordStopRequested) return;
-    recordStopRequested = true;
-    clearTimeout(maxTimer);
-    if (recorder && recorder.state !== 'inactive') {
-      recorder.onstop = () => { decideRecord(); };
-      try { recorder.stop(); } catch { decideRecord(); }
-    } else {
-      decideRecord();
-    }
-  }
-
-  // ---- التشغيل ----
   onStatus('starting');
-  if (isWebSpeechSupported()) {
+  if (!isWebSpeechSupported()) finish({ ok: false, source: null, error: 'unsupported' });
+  else {
     startRecognition();
-    maxTimer = setTimeout(stopSpeech, opt.maxSeconds * 1000);
-  } else {
-    startRecordPhase(false);
+    maxTimer = setTimeout(stop, opt.maxSeconds * 1000);
   }
 
   return {
     result,
-    stop: () => { if (phase === 'speech') stopSpeech(); else stopRecord(); },
+    stop,
     cancel: () => {
+      if (finished) return;
       cancelled = true;
-      try { if (recognition) recognition.abort(); } catch { /* ignore */ }
-      try { if (recorder && recorder.state !== 'inactive') recorder.stop(); } catch { /* ignore */ }
+      stopRequested = true;
       finish({ ok: false, source: null, error: 'cancelled' });
     },
   };

@@ -4601,7 +4601,11 @@ html:not([data-theme="light"]) .acct-list > #dbo-reopen-btn { border-bottom-colo
   /* الحركات المحتاجة مراجعة: تمييز بلون برتقالي يناسب النهاري والليلي */
   .qd-review { border: 1px solid #f59e0b !important; background: #fff7e6 !important; }
   .qd-review-label { font-size: 10px; font-weight: 900; color: #b45309; margin: 0 0 2px; }
-  html[data-theme="dark"] .qd-review { border-color: rgba(245,158,11,.55) !important; background: rgba(245,158,11,.12) !important; }
+  html[data-theme="dark"] .qd-review { border-color: #f59e0b !important; background: rgba(16,185,129,.10) !important; }
+  /* صف الأنواع (تحويل/دخل/مصروف/سلف/دين) على سطر واحد، والرقم يصغر شوية عشان يتسع */
+  .qd-review-row { display: flex; flex-wrap: nowrap; gap: 3px; min-width: 0; overflow: hidden; }
+  .qd-review-row [data-draft-kind] { padding: 1px 4px !important; font-size: 8.5px !important; white-space: nowrap; flex: 0 1 auto; min-width: 0; }
+  .qd-review span.shrink-0.font-black { font-size: .8rem; line-height: 1.2; }
   html[data-theme="dark"] .qd-review-label { color: #fbbf24; }
 </style>
 <style id="pf-detail-compact">
@@ -4680,6 +4684,19 @@ html[data-theme="light"] #expense-ledger-card .lf-chip.t { color: #4338ca; }
 <style id="latin-digits">
 /* كل الأرقام بالإنجليزي وبخط متساوي العرض عشان المبالغ تبان مرتبة */
 html, body { font-variant-numeric: tabular-nums; }
+</style>
+<style id="voice-lang-css">
+#voice-lang-sheet{position:fixed;inset:0;z-index:99999;display:flex;align-items:flex-end;justify-content:center;background:rgba(15,23,42,.45)}
+#voice-lang-sheet.hidden{display:none}
+.vl-panel{width:100%;max-width:440px;box-sizing:border-box;padding:14px 14px calc(14px + env(safe-area-inset-bottom,0px));background:#fff;background:var(--pm-surface-hi,#fff);color:#17202b;color:var(--pm-ink,#17202b);border-radius:22px 22px 0 0;box-shadow:0 -10px 30px rgba(0,0,0,.18)}
+.vl-panel h4{margin:0;font-size:15px;font-weight:900}
+.vl-sub{margin:2px 0 10px;font-size:11px;line-height:1.6;color:#5b6673;color:var(--pm-muted,#5b6673)}
+.vl-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.vl-opt{min-height:42px;padding:0 10px;border-radius:12px;border:1px solid rgba(120,130,140,.35);background:transparent;color:inherit;font:inherit;font-size:13px;font-weight:700;text-align:center;cursor:pointer}
+.vl-opt[aria-pressed="true"]{border:2px solid #087a59;background:rgba(8,122,89,.13);font-weight:900}
+.vl-ok{margin-top:10px;width:100%;min-height:44px;border:0;border-radius:14px;background:#087a59;color:#fff;font:inherit;font-size:14px;font-weight:900;cursor:pointer}
+.vl-chip{display:inline-flex;align-items:center;gap:4px;min-height:28px;max-width:52%;padding:0 10px;border-radius:14px;border:1px solid rgba(190,18,60,.28);background:rgba(190,18,60,.10);color:inherit;font:inherit;font-size:11px;font-weight:700;white-space:nowrap;cursor:pointer}
+.vl-chip span{overflow:hidden;text-overflow:ellipsis}
 </style>
 </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col overflow-hidden">
@@ -4862,7 +4879,7 @@ html, body { font-variant-numeric: tabular-nums; }
             </div>
             <div class="qm-actions flex gap-2"><button id="quick-manual-save" class="flex-1 rounded-xl py-2.5 text-xs font-black" style="background:linear-gradient(145deg,var(--pm-gold-bright),var(--pm-gold));color:#14150f;" type="button">حفظ العملية</button><button id="quick-manual-cancel" class="rounded-xl border px-3 py-2.5 text-xs" style="border-color:var(--pm-hairline);color:var(--pm-muted);" type="button">إلغاء</button></div></div>
                 <div id="quick-entry-recording" class="hidden rounded-2xl border border-rose-200 bg-rose-50 p-3 text-center text-xs text-rose-700 dark:border-rose-500/30 dark:bg-rose-500/10 dark:text-rose-200">
-                    <div class="flex items-center justify-between gap-2"><span class="font-black">جاري التسجيل... <span id="quick-entry-recording-type-label" class="font-bold"></span></span><button id="quick-entry-recording-cancel" class="flex h-7 w-7 items-center justify-center rounded-full bg-white/70 text-sm font-black text-rose-500 transition hover:bg-white" type="button" aria-label="إلغاء التسجيل">✕</button></div>
+                    <div class="flex items-center justify-between gap-2"><span class="font-black">جاري التسجيل... <span id="quick-entry-recording-type-label" class="font-bold"></span></span><button id="quick-voice-lang-chip" type="button" class="vl-chip" aria-label="تغيير لغة الكلام"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/></svg><span id="quick-voice-lang-name">العربية (مصر)</span></button><button id="quick-entry-recording-cancel" class="flex h-7 w-7 items-center justify-center rounded-full bg-white/70 text-sm font-black text-rose-500 transition hover:bg-white" type="button" aria-label="إلغاء التسجيل">✕</button></div>
                     <div id="quick-entry-recording-time" class="mt-1 font-black">00:00</div>
                     <div class="quick-wave-shell live mt-2" aria-label="موجة الصوت أثناء التسجيل"><span class="quick-wave-live-dot" aria-hidden="true"></span><canvas id="quick-entry-live-waveform" class="quick-wave-canvas live-canvas" height="58"></canvas></div>
                     <div class="mt-2 flex gap-2"><button id="quick-entry-stop" class="flex-1 rounded-xl bg-rose-500 px-4 py-2 font-bold text-white" type="button">إيقاف وتحليل</button><button id="quick-entry-recording-cancel-bottom" class="rounded-xl bg-white/70 px-3 py-2 font-bold text-rose-500 transition hover:bg-white" type="button">إلغاء</button></div>
@@ -14099,7 +14116,7 @@ function pf2YieldFields() {
                 label.className = 'qd-review-label';
                 label.textContent = '⚠️ محتاجة مراجعة، اختار نوعها';
                 const row = document.createElement('div');
-                row.className = 'mt-1.5 flex flex-wrap gap-1';
+                row.className = 'qd-review-row mt-1.5';
                 row.innerHTML = DRAFT_KIND_CHIPS.map(([kind, label]) => `<button type="button" data-draft-kind="${kind}" style="border:1px solid rgba(148,163,184,.45);border-radius:999px;padding:1px 6px;font-size:9.5px;font-weight:700;background:transparent;color:inherit;line-height:1.5">${label}</button>`).join('');
                 holder.appendChild(label);
                 holder.appendChild(row);
@@ -15066,10 +15083,57 @@ function pf2YieldFields() {
             'transcription-failed': 'ما قدرتش أفهم الصوت. جرب تاني أو اكتب المصروف.',
             'network': 'مشكلة في الاتصال. تأكد من الإنترنت وجرب تاني.',
         };
+        // ============ لغة الصوت: اختيار مرة واحدة وتتحفظ ============
+        const VOICE_LANG_KEY = 'dabbar-voice-lang';
+        const VOICE_LANG_LIST = [['ar-EG','العربية (مصر)'],['ar-SA','العربية (السعودية)'],['ar-AE','العربية (الإمارات)'],['ar-KW','العربية (الكويت)'],['ar-QA','العربية (قطر)'],['ar-BH','العربية (البحرين)'],['ar-OM','العربية (عُمان)'],['ar-YE','العربية (اليمن)'],['ar-IQ','العربية (العراق)'],['ar-JO','العربية (الأردن)'],['ar-LB','العربية (لبنان)'],['ar-SY','العربية (سوريا)'],['ar-PS','العربية (فلسطين)'],['ar-MA','العربية (المغرب)'],['ar-DZ','العربية (الجزائر)'],['ar-TN','العربية (تونس)'],['ar-LY','العربية (ليبيا)'],['ar-SD','العربية (السودان)'],['ar-MR','العربية (موريتانيا)'],['ar-SO','العربية (الصومال)'],['ar-DJ','العربية (جيبوتي)'],['ar-KM','العربية (جزر القمر)'],['en-US','English']];
+        const voiceLangLabel = (c) => (VOICE_LANG_LIST.find((l) => l[0] === c) || [c, c])[1];
+        function getVoiceLang() { try { const v = localStorage.getItem(VOICE_LANG_KEY); return VOICE_LANG_LIST.some((l) => l[0] === v) ? v : null; } catch (e) { return null; } }
+        function setVoiceLang(v) { try { localStorage.setItem(VOICE_LANG_KEY, v); } catch (e) {} }
+        // التخمين الأول: لغة التطبيق (عربي => مصري)، وإلا لغة المتصفح، وإلا مصري
+        function guessVoiceLang() {
+            const app = String(document.documentElement.lang || 'ar').toLowerCase();
+            if (app.startsWith('ar')) return 'ar-EG';
+            const nav = String(navigator.language || app);
+            return (VOICE_LANG_LIST.find((l) => l[0].toLowerCase() === nav.toLowerCase()) || VOICE_LANG_LIST.find((l) => l[0].slice(0, 2) === nav.slice(0, 2).toLowerCase()) || VOICE_LANG_LIST[0])[0];
+        }
+        function updateVoiceLangChip(code) { const el = document.getElementById('quick-voice-lang-name'); if (el) el.textContent = voiceLangLabel(code); }
+        function askVoiceLang(preselect) {
+            const sheet = document.getElementById('voice-lang-sheet');
+            const grid = document.getElementById('vl-grid');
+            const fallback = getVoiceLang() || guessVoiceLang();
+            if (!sheet || !grid) return Promise.resolve(fallback);
+            if (!grid.children.length) grid.innerHTML = VOICE_LANG_LIST.map((l) => `<button type="button" class="vl-opt" data-lang="${l[0]}" aria-pressed="false">${l[1]}</button>`).join('');
+            let sel = preselect || fallback;
+            const paint = () => grid.querySelectorAll('.vl-opt').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.lang === sel)));
+            paint();
+            sheet.classList.remove('hidden');
+            sheet.querySelector('.vl-ok')?.focus();
+            return new Promise((resolve) => {
+                const onKey = (e) => { if (e.key === 'Escape') done(null); };
+                const done = (val) => { sheet.classList.add('hidden'); sheet.onclick = null; document.removeEventListener('keydown', onKey); resolve(val); };
+                document.addEventListener('keydown', onKey);
+                sheet.onclick = (e) => {
+                    const opt = e.target.closest('.vl-opt');
+                    if (opt) { sel = opt.dataset.lang; paint(); return; }
+                    if (e.target.closest('.vl-ok')) { setVoiceLang(sel); updateVoiceLangChip(sel); done(sel); return; }
+                    if (e.target === sheet) done(null);
+                };
+            });
+        }
+        // تغيير اللغة وقت التسجيل: نوقف التسجيل الحالي، نختار، ونبدأ من جديد
+        document.getElementById('quick-voice-lang-chip')?.addEventListener('click', async () => {
+            const cur = getVoiceLang() || guessVoiceLang();
+            cancelQuickVoice();
+            const picked = await askVoiceLang(cur);
+            if (picked) setTimeout(() => document.getElementById('quick-entry-voice')?.click(), 60);
+        });
         document.getElementById('quick-entry-voice')?.addEventListener('click', async () => {
             if (!requireQuickEntryAccess()) return;
             if (quickVoiceSession) return;
             if (quickEntryRecorder?.state === 'recording') return;
+            let vLang = getVoiceLang();
+            if (!vLang) { vLang = await askVoiceLang(); if (!vLang) return; } // أول مرة بس
+            updateVoiceLangChip(vLang);
             const mod = voicePipelineMod || await loadVoicePipeline(); // لو اتحمّل مسبقًا: مفيش await، فالبداية بتحصل جوه الضغطة مباشرة
             if (!mod) return legacyQuickVoiceStart(); // الملف مش موجود جنب الداشبورد: نرجع للتسجيل القديم
             if (!navigator.mediaDevices?.getUserMedia) return quickStatus('المتصفح ده مش بيدعم التسجيل الصوتي.', 'error');
@@ -15079,6 +15143,7 @@ function pf2YieldFields() {
             quickShow('quick-entry-voice-preview', false);
             const stopTimer = () => { clearInterval(quickEntryTimer); quickEntryTimer = null; };
             const session = mod.startVoiceCapture({
+                langs: [...new Set([vLang, 'ar-EG', 'en-US'])],
                 onActivity: (on) => { speechWaveActiveUntil = on ? performance.now() + 900 : 0; },
                 onStatus: (s) => {
                     if (s === 'listening') {
@@ -17869,5 +17934,6 @@ html:not([data-theme="light"]) .asst-goal-daily-days{ color:#bdf23f !important; 
   else init();
 })();
 </script>
+<div id="voice-lang-sheet" class="hidden" role="dialog" aria-modal="true" aria-labelledby="vl-title"><div class="vl-panel"><h4 id="vl-title">هتتكلم بأنهي لغة؟</h4><p class="vl-sub">هنفتكر اختيارك، فمش هتسأل تاني. تقدر تغيّره من زرار اللغة وقت التسجيل.</p><div id="vl-grid" class="vl-grid"></div><button type="button" class="vl-ok">تمام</button></div></div>
 </body>
 </html>

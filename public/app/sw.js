@@ -1,9 +1,10 @@
 // v2: لازم نغيّر الاسم عشان أي جهاز عنده الكاش القديم (اللي كان بيحفظ ردود الـ API غلط)
 // يمسحه فورًا ويبدأ من كاش جديد فاضي — خطوة activate تحت بتمسح أي CACHE_NAME قديم تلقائي.
-const CACHE_NAME = 'dabbar-cache-v21';
+const CACHE_NAME = 'dabbar-cache-v22';
 const PRECACHE_URLS = [
   './dabbar-onboarding.html',
   './dabbar-dashboard-full.html',
+  './voice-pipeline.client.js',
   './dabbar-quick-add.html',
   './manifest.json',
   './icons/icon-192.png',

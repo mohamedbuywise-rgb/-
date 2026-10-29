@@ -15066,7 +15066,7 @@ function pf2YieldFields() {
         function stopSpeechWave() { if (speechWaveRaf) cancelAnimationFrame(speechWaveRaf); speechWaveRaf = null; speechWaveActiveUntil = 0; }
         async function loadVoicePipeline() {
             if (voicePipelineMod !== null) return voicePipelineMod;
-            for (const path of ['./voice-pipeline.client.js', './voice-pipeline_client.js']) {
+            for (const path of ['./voice-pipeline.client.js?v=2026-10-30-v2', './voice-pipeline_client.js?v=2026-10-30-v2']) {
                 try { voicePipelineMod = await import(path); return voicePipelineMod; } catch (e) { console.warn('DABBAR_VOICE_PIPELINE_LOAD_FAILED', path, e); }
             }
             voicePipelineMod = false;
@@ -15076,13 +15076,28 @@ function pf2YieldFields() {
         window.addEventListener('load', () => setTimeout(() => { loadVoicePipeline().catch(() => {}); }, 1500));
         const VOICE_ERROR_MESSAGES = {
             'mic-denied': 'الميكروفون مش مسموح. اسمح للتطبيق بالميكروفون من إعدادات المتصفح.',
-            'silence': 'ما سمعتش حاجة. قرّب من الميكروفون وجرب تاني.',
+            'silence': 'ما سمعتش أي صوت. تأكد إن الميكروفون شغال وقرّب منه وجرب تاني.',
+            'unclear': 'سمعت صوت بس ما قدرتش أحوّله لكلام. اتكلم بوضوح وقرّب شوية، أو غيّر لغة الصوت من الشارة فوق وجرب تاني.',
+            'mic-busy': 'الميكروفون مش متاح دلوقتي. اقفل أي تطبيق بيستخدمه (تسجيل/مكالمة/بلوتوث) وجرب تاني.',
+            'lang-unsupported': 'لغة الصوت دي مش مدعومة على جهازك. اختار لغة تانية من الشارة فوق.',
             'unsupported': 'المتصفح ده مش بيدعم التسجيل الصوتي.',
             'no-fallback': 'ما قدرتش أفهم الصوت. جرب تاني أو اكتب المصروف.',
             'classify-failed': 'فهمت كلامك بس حصل خطأ أثناء التحليل. جرب تاني.',
             'transcription-failed': 'ما قدرتش أفهم الصوت. جرب تاني أو اكتب المصروف.',
-            'network': 'مشكلة في الاتصال. تأكد من الإنترنت وجرب تاني.',
+            'network': 'التعرّف على الصوت محتاج إنترنت شغّال. تأكد من الاتصال وجرب تاني.',
         };
+        // ============ تشخيص الصوت: افتح الداشبورد بـ ?voicedebug=1 لتفعيله (voicedebug=0 لإيقافه) — بيظهر سبب الفشل تحت الرسالة ============
+        try {
+            const vdm = /[?&]voicedebug=([01])/.exec(location.search);
+            if (vdm) localStorage.setItem('dabbar-voice-debug', vdm[1]);
+        } catch (e) {}
+        function voiceDebugSuffix(r) {
+            try {
+                if (localStorage.getItem('dabbar-voice-debug') !== '1') return '';
+                const d = (r && r.debug) || {};
+                return ` [${r.error || 'ok'} | ${d.lang || '-'} | صوت:${d.soundHeard ? 'أه' : 'لا'} | نتائج:${d.results || 0} | جلسات:${d.sessions || 0} | أخطاء:${(d.errors || []).join(',') || '-'} | ${d.version || ''}]`;
+            } catch (e) { return ''; }
+        }
         // ============ لغة الصوت: اختيار مرة واحدة وتتحفظ ============
         const VOICE_LANG_KEY = 'dabbar-voice-lang';
         const VOICE_LANG_LIST = [['ar-EG','العربية (مصر)'],['ar-SA','العربية (السعودية)'],['ar-AE','العربية (الإمارات)'],['ar-KW','العربية (الكويت)'],['ar-QA','العربية (قطر)'],['ar-BH','العربية (البحرين)'],['ar-OM','العربية (عُمان)'],['ar-YE','العربية (اليمن)'],['ar-IQ','العربية (العراق)'],['ar-JO','العربية (الأردن)'],['ar-LB','العربية (لبنان)'],['ar-SY','العربية (سوريا)'],['ar-PS','العربية (فلسطين)'],['ar-MA','العربية (المغرب)'],['ar-DZ','العربية (الجزائر)'],['ar-TN','العربية (تونس)'],['ar-LY','العربية (ليبيا)'],['ar-SD','العربية (السودان)'],['ar-MR','العربية (موريتانيا)'],['ar-SO','العربية (الصومال)'],['ar-DJ','العربية (جيبوتي)'],['ar-KM','العربية (جزر القمر)'],['en-US','English']];
@@ -15180,9 +15195,10 @@ function pf2YieldFields() {
             stopTimer();
             quickShow('quick-entry-recording', false);
             stopSpeechWave();
+            try { window.__dabbarVoiceLast = result; console.warn('DABBAR_VOICE_RESULT', result.ok ? 'ok' : result.error, result.debug); } catch (e) {}
             if (result.error === 'cancelled') { quickStatus(''); return; }
             if (result.ok) { quickDraft(result.transactions, result.transcript, result.source); return; }
-            quickStatus((result.error === 'classify-failed' || result.error === 'network') && lastError?.message ? lastError.message : (VOICE_ERROR_MESSAGES[result.error] || 'حصل خطأ في التسجيل. جرب تاني.'), 'error');
+            quickStatus((result.error === 'classify-failed' || result.error === 'network') && lastError?.message ? lastError.message : ((VOICE_ERROR_MESSAGES[result.error] || 'حصل خطأ في التسجيل. جرب تاني.') + voiceDebugSuffix(result)), 'error');
         });
         document.getElementById('quick-entry-stop')?.addEventListener('click', stopQuickEntryRecording);
         document.getElementById('quick-entry-recording-cancel')?.addEventListener('click', cancelQuickVoice);

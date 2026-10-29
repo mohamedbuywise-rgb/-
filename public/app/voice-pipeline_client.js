@@ -1,27 +1,31 @@
-// voice-pipeline_client.js — الجزء اللي بيشتغل في المتصفح من استراتيجية الصوت في "دبّر"
+// voice-pipeline.client.js — الجزء اللي بيشتغل في المتصفح من استراتيجية الصوت في "دبّر"
 //
-// الفكرة (مرحلتين، الميكروفون بيتفتح مرة واحدة في كل مرحلة):
-//   1) Web Speech API (مجاني) لوحده، بلهجة مصرية ar-EG، من غير أي تسجيل موازي.
-//      (على أندرويد فتح الميكروفون للتسجيل مع Web Speech في نفس الوقت كان بيخلّي Web Speech يسمع صمت.)
-//      لو النص سليم (isUsableTranscript) -> بيتبعت *كنص بس* للتصنيف (موديل رخيص). مفيش صوت بيتبعت خالص.
-//   2) لو Web Speech فشل / مش مدعوم / النص طلاسم -> بيبدأ تسجيل تاني (status = 'retry' ثم 'listening')
-//      والمستخدم يتكلم تاني ويدوس إيقاف -> الصوت بيتبعت للسيرفر (Gemini ثم Whisper Large V3).
-//   3) لو الميكروفون سكوت تقريبًا في مرحلة التسجيل -> مفيش نداء مدفوع، بنقول "ما سمعتش حاجة".
+// الفكرة: Web Speech API (مجاني) لوحده، من غير أي تسجيل موازي (على أندرويد فتح الميكروفون مرتين = صمت).
+// النص بيتبعت *كنص بس* لـ classifyText. مفيش صوت بيتبعت للسيرفر.
 //
-// الملف مستقل عن باقي الداشبورد: يستقبل classifyText فقط؛ لا يسجل ولا يرفع أي ملف صوت.
+// تعديلات v2 (2026-10-30) — تشخيص "ما سمعتش حاجة" رغم إن الموجات شغالة:
+//   1) النص بقى بيتبني من event.results كلها لكل جلسة تعرّف (مش push عند كل isFinal).
+//      كروم أندرويد بيرجّع نتايج تراكمية فكان النص بيتكرر -> فحص "repetitive" يرفضه -> رسالة "ما سمعتش".
+//   2) collapseChains كانت متعرّفة ومش مستخدمة — دلوقتي بتتطبق.
+//   3) النص المكرر/الطويل مابقاش بيتم رفضه: بيتنضّف ويتقصّ، والرفض بس لو النص طلاسم/فاضي.
+//   4) أسباب الفشل بقت دقيقة: silence (مفيش صوت) / unclear (صوت من غير نص) / network / mic-busy /
+//      lang-unsupported / mic-denied، بدل ما كله يطلع "ما سمعتش".
+//   5) خطأ network و audio-capture كانوا بيتتجاهلوا في لوب إعادة التشغيل — دلوقتي بيوقفوا ويظهروا.
+//   6) ضغط "إيقاف" وقت الفجوة بين جلستين (إعادة التشغيل) بيقفل فورًا بالنص اللي اتجمع.
+//   7) debug كامل في result.debug (لغة، جلسات، أخطاء، سمع صوت ولا لأ).
 //
 //   const session = startVoiceCapture({
-//     onStatus: (s) => setMicState(s),   // 'starting' | 'listening' | 'processing' | 'retry' | 'uploading'
+//     onStatus: (s) => setMicState(s),   // 'starting' | 'listening' | 'processing'
 //     onInterim: (t) => showLiveText(t),
-//     classifyText:  async (text) => ({ transactions }),
+//     onActivity: (on) => animateWave(on),
+//     classifyText: async (text) => ({ transactions }),
 //   });
 //   stopBtn.onclick = () => session.stop();
 //   const result = await session.result;  // { ok, source, transcript, transactions, provider, error, debug }
 
+export const VOICE_PIPELINE_VERSION = '2026-10-30.webspeech-sessions-v2';
+
 export const VOICE_DEFAULTS = {
-  // Web Speech يعتمد على اللغات التي يوفّرها المتصفح، لذلك نبدأ بلغة الجهاز ثم
-  // نمر على لهجات عربية شائعة ولغات عالمية قبل fallback العام. النص الناتج
-  // يذهب بعد ذلك إلى Groq، فلا نفرض ترجمة أو لهجة واحدة على المصنف.
   langs: (() => {
     const browserLang = typeof navigator !== 'undefined' ? String(navigator.language || '').trim() : '';
     const supported = [
@@ -29,34 +33,20 @@ export const VOICE_DEFAULTS = {
     ];
     let saved = '';
     try { saved = typeof localStorage !== 'undefined' ? String(localStorage.getItem('dabbar-voice-lang') || '') : ''; } catch (_) {}
-    // اللغة اللي المستخدم اختارها أولًا، بعدها المصري (مش لغة المتصفح: كانت بتبوّظ التعرّف لو الجهاز إنجليزي)
     return [...new Set([saved, 'ar-EG', browserLang, ...supported].filter(Boolean))];
   })(),
-  maxSeconds: 30,           // نفس VOICE_MAX_DURATION_SECONDS في config.js — الجلسة بتفضل مفتوحة لحد 30 ثانية حتى مع السكوت
-  minConfidence: 0.35,      // بيتطبق بس لو المتصفح رجّع confidence > 0 (بعض المتصفحات بترجّع 0 دايمًا)
-  minPeakLevel: 0.04,       // أقل مستوى صوت (0..1) يعتبر إن فيه كلام فعلًا
-  minAudioBytes: 1500,      // نفس VOICE_MIN_AUDIO_BYTES في config.js
-  stopGraceMs: 4000,        // أقصى انتظار بعد stop() لحد ما Web Speech يقفل
-  maxChars: 600,            // أقصى طول نص يتبعت للتصنيف (30 ثانية كلام ≈ 450 حرف)
+  maxSeconds: 30,
+  stopGraceMs: 4000,   // أقصى انتظار بعد stop() لحد ما Web Speech يقفل
+  restartDelayMs: 150, // الفجوة قبل إعادة تشغيل التعرّف (30ms كانت سريعة على أندرويد)
+  maxChars: 600,       // أقصى طول نص يتبعت للتصنيف
 };
 
-const ARABIC_LETTERS = /[\u0600-\u06FF]/;
-const MEANINGFUL_CHARS = /[\p{L}\p{N}]/gu; // أي لغة
+const MEANINGFUL_CHARS = /[\p{L}\p{N}]/gu;
 const REFUSAL_HINTS = /(لا أستطيع|لا استطيع|مقدرش|عذرًا|عذرا|آسف|i can't|i cannot|unable to|sorry)/i;
+const HAS_DIGIT = /[0-9\u0660-\u0669]/;
 
-// ============ عدّة تنضيف نص Web Speech (مشكلة التكرار على أندرويد) ============
-// كروم أندرويد مع continuous=true بيرجّع كل نتيجة *تراكمية*: "بقول" -> "بقول لك" -> "بقول لك النهارده"...
-// وأحيانًا الكلمات نفسها بتتعدّل بين نتيجة والتانية. الحماية على 4 طبقات:
-//   1) collapseChains: نتائج بتكمّل بعض = نسخة واحدة (الأحدث/الأطول)
-//   2) dedupeRuns: أي عبارة اتكررت ورا بعض تتشال
-//   3) transcriptHealth: لو النص لسه مشبوه (تكرار عالي/طويل جدًا) مانبعتوش للتصنيف -> نروح للتسجيل التاني
-//   4) maxChars: سقف على طول النص اللي بيتبعت للسيرفر
-export const VOICE_PIPELINE_VERSION = '2026-10-30.webspeech-langpick';
-
-const IS_ANDROID = typeof navigator !== 'undefined' && /Android/i.test(navigator.userAgent || '');
 const normSeg = (t) => String(t || '').replace(/[\u064B-\u0652\u0640]/g, '').replace(/\s+/g, ' ').trim();
 const toWords = (t) => normSeg(t).split(' ').filter(Boolean);
-const HAS_DIGIT = /[0-9\u0660-\u0669]/;
 
 // هل النتيجة next مكمّلة/تعديل لـ prev؟
 function relation(prev, next) {
@@ -70,7 +60,6 @@ function relation(prev, next) {
     if (!ok) { prefix = false; break; }
   }
   if (prefix) return a.length === b.length && normSeg(prev) === normSeg(next) ? 'same' : 'prefix';
-  // تعديل جوه نفس الجملة: أول كلمة واحدة و75% من الكلمات مشتركة
   if (a.length >= 4 && b.length >= 3 && a[0] === b[0]) {
     const setB = new Set(b);
     if (a.filter((w) => setB.has(w)).length / a.length >= 0.75) return 'revision';
@@ -78,31 +67,22 @@ function relation(prev, next) {
   return null;
 }
 
-// items: [{ text, conf }] بترتيبها. بترجّع النتايج من غير التراكم.
+// items: [{ text }] بترتيبها. بترجّع النتايج من غير التراكم.
 export function collapseChains(items) {
   const out = [];
   for (const it of items) {
-    if (!it.text) continue;
+    if (!it || !it.text) continue;
     const last = out[out.length - 1];
     const rel = last ? relation(last.text, it.text) : null;
     if (!rel) { out.push(it); continue; }
     const lw = toWords(last.text).length;
     const nw = toWords(it.text).length;
     if (rel === 'revision' || nw >= lw) out[out.length - 1] = it; // الأحدث يكسب
-    // لو الجديد أقصر (بادئة بس): نسيب الأطول
   }
   return out;
 }
 
-// فيه نمط تراكمي واضح (كل نتيجة أطول من اللي قبلها وبتبدأ بيها)؟
-function hasGrowth(items) {
-  for (let i = 1; i < items.length; i += 1) {
-    if (relation(items[i - 1].text, items[i].text) === 'prefix' && toWords(items[i].text).length !== toWords(items[i - 1].text).length) return true;
-  }
-  return false;
-}
-
-// عبارة (1..6 كلمات) اتكررت ورا بعض -> نسخة واحدة. الأرقام محتاجة 3 تكرارات (احتمال تكون فعلًا مصروفين).
+// عبارة (1..6 كلمات) اتكررت ورا بعض -> نسخة واحدة. الأرقام محتاجة 3 تكرارات (ممكن تكون فعلًا مصروفين).
 export function dedupeRuns(text) {
   let tokens = toWords(text);
   let changed = true;
@@ -121,7 +101,19 @@ export function dedupeRuns(text) {
   return tokens.join(' ');
 }
 
-// فحص أخير: هل النص معقول يتبعت للتصنيف؟
+// نص معقول يتبعت للتصنيف؟ (بيرفض بس الطلاسم/الفاضي/رسائل الرفض — مش التكرار ولا الطول)
+export function isUsableTranscript(text) {
+  const t = String(text || '').trim();
+  if (t.length < 2) return false;
+  const compact = t.replace(/\s+/g, '');
+  const meaningful = (compact.match(MEANINGFUL_CHARS) || []).length;
+  if (!meaningful || meaningful / compact.length < 0.6) return false;
+  if (/(.)\1{5,}/u.test(compact)) return false;
+  if (REFUSAL_HINTS.test(t) && t.length < 120) return false;
+  return /\p{L}/u.test(t);
+}
+
+// للتشخيص بس (مابقاش بيرفض في المسار الرئيسي)
 export function transcriptHealth(text, maxChars = VOICE_DEFAULTS.maxChars) {
   const t = String(text || '').trim();
   if (!isUsableTranscript(t)) return { ok: false, reason: 'unusable' };
@@ -131,67 +123,19 @@ export function transcriptHealth(text, maxChars = VOICE_DEFAULTS.maxChars) {
   return { ok: true, reason: null };
 }
 
-// ============ فحص جودة النص (نفس منطق isUsableTranscript في groq.js) ============
-export function isUsableTranscript(text) {
-  const t = String(text || '').trim();
-  if (t.length < 2) return false;
-  const compact = t.replace(/\s+/g, '');
-  const meaningful = (compact.match(MEANINGFUL_CHARS) || []).length;
-  if (!meaningful || meaningful / compact.length < 0.6) return false; // رموز/طلاسم
-  if (/(.)\1{5,}/u.test(compact)) return false;                       // تكرار غريب
-  if (REFUSAL_HINTS.test(t) && t.length < 120) return false;
-  return /\p{L}/u.test(t); // أي لغة (اللغة بيختارها المستخدم، فمش بنفلتر على العربي بس)
+// تنضيف نهائي: شيل التكرار وقصّ الطول عند آخر مسافة بدل الرفض
+function prepareTranscript(text, maxChars) {
+  let s = dedupeRuns(String(text || '').trim());
+  if (s.length > maxChars) {
+    s = s.slice(0, maxChars);
+    const i = s.lastIndexOf(' ');
+    if (i > maxChars * 0.6) s = s.slice(0, i);
+  }
+  return s.trim();
 }
 
 export function isWebSpeechSupported() {
   return typeof window !== 'undefined' && !!(window.SpeechRecognition || window.webkitSpeechRecognition);
-}
-
-function pickRecorderMime() {
-  if (typeof MediaRecorder === 'undefined') return '';
-  const candidates = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus'];
-  return candidates.find((m) => MediaRecorder.isTypeSupported(m)) || '';
-}
-
-function blobToBase64(blob) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result).split(',')[1] || '');
-    reader.onerror = () => reject(reader.error || new Error('read failed'));
-    reader.readAsDataURL(blob);
-  });
-}
-
-// بيراقب أعلى مستوى صوت اتسمع (0..1) عشان نعرف لو التسجيل صمت قبل ما ندفع في نداء سحابي
-function createPeakMeter(stream) {
-  const Ctx = window.AudioContext || window.webkitAudioContext;
-  if (!Ctx) return { getPeak: () => 1, close() {} }; // مفيش قياس متاح: منمنعش الفولباك
-  let peak = 0;
-  const meterStart = Date.now();
-  let timer = null;
-  let ctx = null;
-  try {
-    ctx = new Ctx();
-    const source = ctx.createMediaStreamSource(stream);
-    const analyser = ctx.createAnalyser();
-    analyser.fftSize = 512;
-    source.connect(analyser);
-    const data = new Uint8Array(analyser.fftSize);
-    timer = setInterval(() => {
-      analyser.getByteTimeDomainData(data);
-      if (Date.now() - meterStart < 400) return; // تجاهل طقّة فتح الميكروفون
-      for (let i = 0; i < data.length; i += 1) peak = Math.max(peak, Math.abs(data[i] - 128) / 128);
-    }, 80);
-  } catch {
-    return { getPeak: () => 1, close() {} };
-  }
-  return {
-    getPeak: () => peak,
-    close() {
-      if (timer) clearInterval(timer);
-      if (ctx && ctx.state !== 'closed') ctx.close().catch(() => {});
-    },
-  };
 }
 
 // بتبدأ جلسة تسجيل. بترجّع { stop, cancel, result } — result Promise بيتحل دايمًا (مش بيرمي).
@@ -202,15 +146,29 @@ export function startVoiceCapture(options = {}) {
   let finished = false;
   let cancelled = false;
   let stopRequested = false;
+  let fatal = false;
   let recognition = null;
+  let recActive = false;
   let maxTimer = null;
   let graceTimer = null;
   let restartTimer = null;
   let langIndex = 0;
-  let finalSegments = [];
-  let interimText = '';
   let lastError = '';
-  const debug = { version: VOICE_PIPELINE_VERSION, mode: 'webspeech-only' };
+
+  const committed = []; // نص كل جلسة تعرّف خلصت
+  let liveText = '';    // نص الجلسة الشغالة حاليًا (مبني من event.results كلها)
+
+  const stats = { sessions: 0, results: 0, soundHeard: false, speechHeard: false, errors: [] };
+  const debug = { version: VOICE_PIPELINE_VERSION, mode: 'webspeech-only', ...stats };
+  const syncDebug = () => {
+    debug.sessions = stats.sessions;
+    debug.results = stats.results;
+    debug.soundHeard = stats.soundHeard;
+    debug.speechHeard = stats.speechHeard;
+    debug.errors = [...stats.errors];
+    debug.langsTried = langIndex + 1;
+    debug.lastError = lastError || null;
+  };
 
   let resolveResult;
   const result = new Promise((resolve) => { resolveResult = resolve; });
@@ -219,38 +177,53 @@ export function startVoiceCapture(options = {}) {
     clearTimeout(maxTimer);
     clearTimeout(graceTimer);
     clearTimeout(restartTimer);
-    try { recognition?.abort(); } catch (_) {}
+    const rec = recognition;
     recognition = null;
+    recActive = false;
+    try { rec?.abort(); } catch (_) {}
     onActivity(false);
   };
 
   const finish = (value) => {
     if (finished) return;
     finished = true;
+    syncDebug();
     cleanup();
     resolveResult({ ...value, debug });
   };
 
-  const currentText = () => dedupeRuns([...finalSegments, interimText].filter(Boolean).join(' ').trim());
+  const currentText = () => {
+    const parts = committed.map((text) => ({ text }));
+    if (liveText) parts.push({ text: liveText });
+    return dedupeRuns(collapseChains(parts).map((p) => p.text).join(' ').trim());
+  };
 
-  const chooseText = (result) => {
-    for (let i = 0; i < result.length; i += 1) {
-      const candidate = String(result[i]?.transcript || '').trim();
+  const chooseText = (res) => {
+    for (let i = 0; i < res.length; i += 1) {
+      const candidate = String(res[i]?.transcript || '').trim();
       if (candidate && isUsableTranscript(candidate)) return candidate;
     }
-    return String(result[0]?.transcript || '').trim();
+    return String(res[0]?.transcript || '').trim();
+  };
+
+  const failureReason = (text) => {
+    if (lastError === 'not-allowed' || lastError === 'service-not-allowed') return 'mic-denied';
+    if (lastError === 'network') return 'network';
+    if (lastError === 'audio-capture') return 'mic-busy';
+    if (lastError === 'language-not-supported') return 'lang-unsupported';
+    if (text || stats.speechHeard || stats.soundHeard) return 'unclear'; // سمع صوت بس مطلعش نص مفهوم
+    return 'silence';                                                    // فعلًا مفيش صوت
   };
 
   const finishSpeech = async () => {
     if (finished) return;
-    const text = currentText();
-    const health = transcriptHealth(text, opt.maxChars);
+    const raw = currentText();
+    const text = prepareTranscript(raw, opt.maxChars);
+    debug.rawTranscript = raw;
     debug.transcript = text;
-    debug.health = health.reason;
-    debug.languagesTried = langIndex + 1;
+    debug.health = transcriptHealth(raw, opt.maxChars).reason;
     if (cancelled) return finish({ ok: false, source: null, error: 'cancelled' });
-    if (lastError === 'not-allowed' || lastError === 'service-not-allowed') return finish({ ok: false, source: null, error: 'mic-denied' });
-    if (!health.ok) return finish({ ok: false, source: null, error: 'silence' });
+    if (!isUsableTranscript(text)) return finish({ ok: false, source: null, error: failureReason(text) });
     if (typeof classifyText !== 'function') return finish({ ok: false, source: 'webspeech', transcript: text, error: 'classify-failed' });
     onStatus('processing');
     try {
@@ -267,54 +240,63 @@ export function startVoiceCapture(options = {}) {
     if (!Ctor) return finish({ ok: false, source: null, error: 'unsupported' });
     const rec = new Ctor();
     recognition = rec;
+    liveText = '';
     rec.lang = opt.langs[langIndex] || opt.langs[0] || 'ar-EG';
     rec.continuous = true;
     rec.interimResults = true;
     rec.maxAlternatives = 3;
     debug.lang = rec.lang;
+    stats.sessions += 1;
 
     rec.onstart = () => { if (!finished && !stopRequested) onStatus('listening'); };
-    rec.onsoundstart = () => onActivity(true);
-    rec.onspeechstart = () => onActivity(true);
+    rec.onsoundstart = () => { stats.soundHeard = true; onActivity(true); };
+    rec.onspeechstart = () => { stats.speechHeard = true; onActivity(true); };
     rec.onsoundend = () => onActivity(false);
     rec.onspeechend = () => onActivity(false);
     rec.onresult = (event) => {
-      let live = '';
-      for (let i = event.resultIndex || 0; i < event.results.length; i += 1) {
-        const item = event.results[i];
-        const text = chooseText(item);
-        if (!text) continue;
-        if (item.isFinal) finalSegments.push(text);
-        else live += ` ${text}`;
+      if (rec !== recognition) return;
+      // event.results = كل نتائج الجلسة دي (تراكمية على أندرويد). بنبني النص منها كلها بدل push عند كل isFinal.
+      const items = [];
+      for (let i = 0; i < event.results.length; i += 1) {
+        const text = chooseText(event.results[i]);
+        if (text) items.push({ text });
       }
-      interimText = live.trim();
+      liveText = dedupeRuns(collapseChains(items).map((it) => it.text).join(' ').trim());
+      stats.results += 1;
+      stats.soundHeard = true;
       const preview = currentText();
       if (preview) onInterim(preview);
       onActivity(true);
     };
     rec.onerror = (event) => {
       const error = String(event?.error || 'unknown');
+      if (!stats.errors.includes(error) && stats.errors.length < 8) stats.errors.push(error);
+      if (error === 'aborted' || error === 'no-speech') return;
       lastError = error;
-      debug.error = error;
       if (error === 'language-not-supported' && langIndex + 1 < opt.langs.length) {
-        langIndex += 1;
+        langIndex += 1; // onend هيعيد التشغيل باللغة اللي بعدها
+        lastError = '';
         return;
       }
-      if (error === 'aborted' || error === 'no-speech') return;
-      if (['not-allowed', 'service-not-allowed', 'audio-capture'].includes(error)) stopRequested = true;
+      if (['not-allowed', 'service-not-allowed', 'audio-capture', 'network', 'language-not-supported'].includes(error)) fatal = true;
     };
     rec.onend = () => {
       if (rec !== recognition || finished) return;
+      recActive = false;
       onActivity(false);
-      if (stopRequested || cancelled) return finishSpeech();
-      // Chrome/Safari often close Web Speech after a short pause; reopen it without
-      // touching getUserMedia or starting a second recorder, preserving the text.
+      if (liveText) { committed.push(liveText); liveText = ''; }
+      if (stopRequested || cancelled || fatal) return finishSpeech();
+      // كروم/سامسونج بيقفل Web Speech بعد وقفة قصيرة: نعيد فتحه من غير ما نلمس getUserMedia ونحتفظ بالنص.
       clearTimeout(restartTimer);
-      restartTimer = setTimeout(() => startRecognition(), 30);
+      stats.restarts = (stats.restarts || 0) + 1;
+      restartTimer = setTimeout(() => startRecognition(), opt.restartDelayMs);
     };
-    try { rec.start(); } catch (_) {
+    try {
+      rec.start();
+      recActive = true;
+    } catch (_) {
       clearTimeout(restartTimer);
-      restartTimer = setTimeout(() => startRecognition(), 50);
+      restartTimer = setTimeout(() => startRecognition(), 250);
     }
   };
 
@@ -322,10 +304,15 @@ export function startVoiceCapture(options = {}) {
     if (finished || stopRequested) return;
     stopRequested = true;
     clearTimeout(maxTimer);
-    if (recognition) {
-      try { recognition.stop(); } catch (_) { finishSpeech(); }
+    clearTimeout(restartTimer);
+    if (recognition && recActive) {
+      try { recognition.stop(); } catch (_) { return finishSpeech(); }
       graceTimer = setTimeout(() => finishSpeech(), opt.stopGraceMs);
-    } else finishSpeech();
+    } else {
+      // مفيش جلسة شغالة (فجوة إعادة التشغيل): اقفل فورًا بالنص المتجمّع
+      if (liveText) { committed.push(liveText); liveText = ''; }
+      finishSpeech();
+    }
   };
 
   onStatus('starting');

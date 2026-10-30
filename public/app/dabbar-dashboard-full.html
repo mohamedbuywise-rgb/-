@@ -4439,13 +4439,13 @@ html[data-theme="dark"] .pf-sell-preview.up{color:#6fe3b4}html[data-theme="dark"
         .acct-list > details[open] > summary { border-bottom: 1px solid rgba(148,163,184,.14); }
 
         /* ===== فرص التوفير: كل فرصة = عنوان واضح للإجراء + سبب + المبلغ ===== */
-        .sv-item { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: .15rem .7rem; padding: .75rem .85rem; border-radius: 1rem; border: 1px solid rgba(148,163,184,.22); background: rgba(255,255,255,.04); }
-        .sv-ic { width: 2.1rem; height: 2.1rem; border-radius: .8rem; display: flex; align-items: center; justify-content: center; font-size: 1rem; background: rgba(189,242,63,.12); grid-row: span 2; }
+        .sv-item { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: .05rem .5rem; padding: .4rem .6rem; border-radius: .75rem; border: 1px solid rgba(148,163,184,.22); background: rgba(255,255,255,.04); }
+        .sv-ic { width: 1.65rem; height: 1.65rem; border-radius: .6rem; display: flex; align-items: center; justify-content: center; font-size: .82rem; background: rgba(189,242,63,.12); grid-row: span 2; }
         .sv-txt { min-width: 0; text-align: right; }
-        .sv-title { font-size: .8rem; font-weight: 900; color: #f1f5f9; line-height: 1.5; }
-        .sv-sub { font-size: .66rem; font-weight: 600; color: #94a3b8; line-height: 1.6; margin-top: .1rem; }
-        .sv-amt { font-size: .85rem; font-weight: 900; color: #bdf23f; white-space: nowrap; font-variant-numeric: tabular-nums; align-self: start; }
-        .sv-btn { grid-column: 2 / 4; justify-self: start; margin-top: .35rem; border: 1px solid rgba(189,242,63,.4); background: rgba(189,242,63,.14); color: #bdf23f; border-radius: .7rem; padding: .35rem .7rem; font-family: inherit; font-size: .66rem; font-weight: 800; cursor: pointer; }
+        .sv-title { font-size: .72rem; font-weight: 900; color: #f1f5f9; line-height: 1.35; }
+        .sv-sub { font-size: .6rem; font-weight: 600; color: #94a3b8; line-height: 1.4; margin-top: 0; }
+        .sv-amt { font-size: .75rem; font-weight: 900; color: #bdf23f; white-space: nowrap; font-variant-numeric: tabular-nums; align-self: start; }
+        .sv-btn { grid-column: 2 / 4; justify-self: start; margin-top: .15rem; border: 1px solid rgba(189,242,63,.4); background: rgba(189,242,63,.14); color: #bdf23f; border-radius: .6rem; padding: .18rem .5rem; font-family: inherit; font-size: .6rem; font-weight: 800; cursor: pointer; }
         html[data-theme="light"] .sv-item { background: #ffffff; border-color: #d9e6df; }
         html[data-theme="light"] .sv-ic { background: #e6f6ef; }
         html[data-theme="light"] .sv-title { color: #0f172a; }
@@ -4680,6 +4680,15 @@ html[data-theme="light"] #expense-ledger-list [data-ledger-key][data-lt="t"] > d
 html[data-theme="light"] #expense-ledger-card .lf-chip.e { color: #be123c; }
 html[data-theme="light"] #expense-ledger-card .lf-chip.i { color: #047857; }
 html[data-theme="light"] #expense-ledger-card .lf-chip.t { color: #4338ca; }
+/* آخر عملياتك (شكل A): لون المبلغ حسب النوع — مصروف أحمر / دخل أخضر / تحويل صادر بنفسجي (التحويل الوارد أخضر) + أيقونة أكبر */
+#expense-ledger-list .ledger-amt-e { color: #fb7185 !important; }
+#expense-ledger-list .ledger-amt-i { color: #34d399 !important; }
+#expense-ledger-list .ledger-amt-t { color: #818cf8 !important; }
+html[data-theme="light"] #expense-ledger-list .ledger-amt-e { color: #be123c !important; }
+html[data-theme="light"] #expense-ledger-list .ledger-amt-i { color: #047857 !important; }
+html[data-theme="light"] #expense-ledger-list .ledger-amt-t { color: #4338ca !important; }
+#expense-ledger-list [data-ledger-key] > span:first-child { width: 2.25rem !important; height: 2.25rem !important; border-radius: .8rem !important; font-size: 1.05rem; flex-shrink: 0; }
+#expense-ledger-list [data-ledger-key] > span.ledger-amt-e, #expense-ledger-list [data-ledger-key] > span.ledger-amt-i, #expense-ledger-list [data-ledger-key] > span.ledger-amt-t { font-size: .8rem !important; font-weight: 800; white-space: nowrap; }
 </style>
 <style id="latin-digits">
 /* كل الأرقام بالإنجليزي وبخط متساوي العرض عشان المبالغ تبان مرتبة */
@@ -6098,6 +6107,14 @@ html, body { font-variant-numeric: tabular-nums; }
                 </div>
             </div>
 
+            <a href="/app/hekaya.html" id="account-hekaya-card" class="flex items-center gap-3 rounded-3xl border border-emerald-500/25 bg-gradient-to-br from-emerald-500/10 to-teal-500/5 p-4 no-underline active:opacity-70 transition">
+                <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/15 text-xl" aria-hidden="true">📰</span>
+                <span class="flex-1 min-w-0 text-right">
+                    <span class="flex items-center gap-2"><b class="text-sm font-black text-emerald-400">الحكاية الأسبوعية</b><span class="text-[9px] font-black px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">جديد</span></span>
+                    <small class="block text-[11px] text-slate-400 mt-0.5 leading-relaxed">مقال الأسبوع وفيديو حكاوي مالية ونقاش مع الناس</small>
+                </span>
+                <span class="text-slate-500 text-lg" aria-hidden="true">‹</span>
+            </a>
             <details id="account-currency-card" class="acct-sub-collapse">
                 <summary class="acct-sub-summary">
                     <span class="acct-sub-summary-ic" aria-hidden="true"><iconify-icon class="acct-doc-ic" icon="ph:coins-duotone"></iconify-icon></span>
@@ -8921,7 +8938,7 @@ html, body { font-variant-numeric: tabular-nums; }
                 currentUser = session.user;
                 updateBrandGreeting();
                 // بيحدّث accessToken أوتوماتيك لما Supabase يجدد الجلسة في الخلفية (كل ما الجلسة تتجدد يبعت TOKEN_REFRESHED)
-                // من غير ده، كانت التوكن بتفضل قديمة وبيظهر "انتهت صلاحية الجلسة" غلط حتى لو المستخدم لسه فاتح الصفحة
+                // من غير ده، كانت التوكن بتفضل قديمة وبيظهر رسالة انتهاء الجلسة غلط حتى لو المستخدم لسه فاتح الصفحة
                 sb.auth.onAuthStateChange((event, newSession) => {
                     if (event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN') {
                         if (newSession) { accessToken = newSession.access_token; currentUser = newSession.user; }
@@ -9165,7 +9182,12 @@ html, body { font-variant-numeric: tabular-nums; }
                     signal: controller.signal,
                 });
                 const data = await res.json().catch(() => ({}));
-                if (!res.ok) throw new Error(data.error || 'فشل تحميل البيانات');
+                if (!res.ok) {
+                    const authErr = new Error('auth');
+                    authErr.isAuth = res.status === 401;
+                    if (!authErr.isAuth) authErr.message = data.error || 'فشل تحميل البيانات';
+                    throw authErr;
+                }
                 return data;
             } finally {
                 clearTimeout(timeoutId);
@@ -9247,6 +9269,15 @@ html, body { font-variant-numeric: tabular-nums; }
                 try { await window.DabbarOfflineStore?.saveDashboard(currentUser?.id || 'guest', data); } catch (cacheErr) { console.warn('dashboard IDB cache save failed', cacheErr); }
             } catch (e) {
                 console.error(`dashboard-data fetch failed (attempt ${attempt}/${MAX_ATTEMPTS}):`, e);
+                // انتهاء الجلسة: بنجدد التوكن بهدوء ونعيد التحميل مرة واحدة، من غير أي رسالة للمستخدم
+                if (e.isAuth && attempt < MAX_ATTEMPTS) {
+                    try {
+                        const sessionNow = await getSessionResilient();
+                        if (sessionNow) { accessToken = sessionNow.access_token; currentUser = sessionNow.user; }
+                        else { const { data: rr } = await sb.auth.refreshSession(); if (rr?.session) { accessToken = rr.session.access_token; currentUser = rr.session.user; } }
+                    } catch (refreshErr) { console.warn('silent session refresh failed', refreshErr); }
+                    if (accessToken) { __dashboardRetryTimer = setTimeout(() => loadDashboard(isInitialLoad, attempt + 1), 300); return; }
+                }
                 const isTimeoutOrNetwork = e.name === 'AbortError' || e.message === 'Failed to fetch' || !navigator.onLine;
                 // خطأ شبكة/تايم آوت عابر: نعيد المحاولة تلقائيًا بتأخير بسيط وبهدوء تام، من غير أي مؤشر على الشاشة
                 if (isTimeoutOrNetwork && navigator.onLine && attempt < MAX_ATTEMPTS) {
@@ -9263,7 +9294,7 @@ html, body { font-variant-numeric: tabular-nums; }
                 } else {
                 // منسيبش الخطأ ده يودّي المستخدم لصفحة onboarding خالص، بس نوريله رسالة واضحة مع زرار "حاول تاني"
                 // (البانر الهادي اتشال؛ ده هيظهر بس في حالة الفشل التام من غير أي كاش نعرضه بدله)
-                const message = isTimeoutOrNetwork ? 'في تأخير في تحميل بياناتك دلوقتي. جرب تاني أو اتأكد من الإنترنت.' : (e.message || 'مقدرناش نجيب بياناتك دلوقتي.');
+                const message = isTimeoutOrNetwork ? 'في تأخير في تحميل بياناتك دلوقتي. جرب تاني أو اتأكد من الإنترنت.' : (e.isAuth ? 'مقدرناش نجيب بياناتك دلوقتي.' : (e.message || 'مقدرناش نجيب بياناتك دلوقتي.'));
                 const errorEl = document.getElementById('dashboard-load-error');
                 const errorText = document.getElementById('dashboard-load-error-text');
                 const retryBtn = document.getElementById('dashboard-load-retry-btn');
@@ -9757,8 +9788,8 @@ html, body { font-variant-numeric: tabular-nums; }
                     .slice(0, __ledgerHighlightCount)
                     .forEach(({ key }) => fallbackHighlightKeys.add(key));
             }
-            const expenseRows = expenseRowsData.map(({ item, key }) => `<div class="flex items-center gap-2 border-b border-slate-800/50 py-2 last:border-0" data-ledger-key="${key}" data-created-at="${item.created_at || ''}"><span class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10">${getCategoryEmoji(item.category)}</span><div class="min-w-0 flex-1"><p class="truncate text-[11px] font-bold text-slate-200">${(item.description || item.category || 'مصروف').replace(/[<>]/g, '')}</p><p class="text-[9px] text-slate-500">مصروف · ${item.category || 'عام'}</p></div><span class="text-[11px] font-bold text-rose-400">-${fmt(item.amount, item.currency_code)}</span><button type="button" data-expense-edit="${item.id}" data-expense-amount="${item.amount}" data-expense-description="${(item.description || '').replace(/"/g, '&quot;')}" data-expense-category="${String(item.category || '').replace(/"/g, '&quot;')}" class="text-[11px] text-slate-500 hover:text-emerald-400" aria-label="تعديل العملية">✎</button><button type="button" data-expense-delete="${item.id}" class="text-[11px] text-slate-500 hover:text-rose-400" aria-label="حذف العملية">✕</button></div>`).join('');
-            const eventRows = eventRowsData.map(({ event, key }) => { const inflow = event.direction === 'inflow' || event.event_type === 'income'; const icon = event.event_type === 'income' ? '💰' : event.event_type === 'asset' ? '📦' : event.event_type === 'transfer' ? '↔️' : '🧾'; return `<div class="flex items-center gap-2 border-b border-slate-800/50 py-2 last:border-0" data-ledger-key="${key}" data-created-at="${event.created_at || ''}"><span class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10">${icon}</span><div class="min-w-0 flex-1"><p class="truncate text-[11px] font-bold text-slate-200">${(event.description || event.category || typeLabel(event.event_type)).replace(/[<>]/g, '')}</p><p class="text-[9px] text-slate-500">${typeLabel(event.event_type)}${event.category ? ` · ${event.category}` : ''}</p></div><span class="text-[11px] font-bold ${inflow ? 'text-emerald-400' : 'text-amber-300'}">${inflow ? '+' : '-'}${fmt(event.amount, event.currency_code)}</span><button type="button" data-event-edit="${event.id}" data-event-amount="${event.amount}" data-event-description="${(event.description || '').replace(/"/g, '&quot;')}" class="text-[11px] text-slate-500 hover:text-emerald-400" aria-label="تعديل الدخل">✎</button><button type="button" data-event-delete="${event.id}" class="text-[11px] text-slate-500 hover:text-rose-400" aria-label="حذف الدخل">✕</button></div>`; }).join('');
+            const expenseRows = expenseRowsData.map(({ item, key }) => `<div class="flex items-center gap-2 border-b border-slate-800/50 py-2 last:border-0" data-ledger-key="${key}" data-created-at="${item.created_at || ''}"><span class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10">${getCategoryEmoji(item.category)}</span><div class="min-w-0 flex-1"><p class="truncate text-[11px] font-bold text-slate-200">${(item.description || item.category || 'مصروف').replace(/[<>]/g, '')}</p><p class="text-[9px] text-slate-500">مصروف · ${item.category || 'عام'}</p></div><span class="text-[11px] font-bold ledger-amt-e">-${fmt(item.amount, item.currency_code)}</span><button type="button" data-expense-edit="${item.id}" data-expense-amount="${item.amount}" data-expense-description="${(item.description || '').replace(/"/g, '&quot;')}" data-expense-category="${String(item.category || '').replace(/"/g, '&quot;')}" class="text-[11px] text-slate-500 hover:text-emerald-400" aria-label="تعديل العملية">✎</button><button type="button" data-expense-delete="${item.id}" class="text-[11px] text-slate-500 hover:text-rose-400" aria-label="حذف العملية">✕</button></div>`).join('');
+            const eventRows = eventRowsData.map(({ event, key }) => { const inflow = event.direction === 'inflow' || event.event_type === 'income'; const isXfer = ['transfer', 'withdrawal', 'deposit'].includes(event.event_type); const kindLabel = event.event_type === 'transfer' ? (inflow ? 'تحويل وارد' : 'تحويل صادر') : event.event_type === 'withdrawal' ? 'سحب' : event.event_type === 'deposit' ? 'إيداع' : `${typeLabel(event.event_type)}${event.category ? ` · ${event.category}` : ''}`; const amtCls = inflow ? 'ledger-amt-i' : (isXfer ? 'ledger-amt-t' : 'ledger-amt-e'); const icon = event.event_type === 'income' ? '💰' : event.event_type === 'asset' ? '📦' : event.event_type === 'transfer' ? '↔️' : '🧾'; return `<div class="flex items-center gap-2 border-b border-slate-800/50 py-2 last:border-0" data-ledger-key="${key}" data-created-at="${event.created_at || ''}"><span class="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-500/10">${icon}</span><div class="min-w-0 flex-1"><p class="truncate text-[11px] font-bold text-slate-200">${(event.description || event.category || typeLabel(event.event_type)).replace(/[<>]/g, '')}</p><p class="text-[9px] text-slate-500">${kindLabel}</p></div><span class="text-[11px] font-bold ${amtCls}">${inflow ? '+' : '-'}${fmt(event.amount, event.currency_code)}</span><button type="button" data-event-edit="${event.id}" data-event-amount="${event.amount}" data-event-description="${(event.description || '').replace(/"/g, '&quot;')}" class="text-[11px] text-slate-500 hover:text-emerald-400" aria-label="تعديل الدخل">✎</button><button type="button" data-event-delete="${event.id}" class="text-[11px] text-slate-500 hover:text-rose-400" aria-label="حذف الدخل">✕</button></div>`; }).join('');
             if (list) list.innerHTML = expenseRows + eventRows || '<div class="ledger-empty-hint"><span>سجّل أول عملية عشان تظهر هنا للمراجعة</span><span class="ledger-empty-hint-icon" aria-hidden="true">🧾</span></div>';
             // ============ هايلايت كل عملية اتسجلت فعليًا في آخر ٢٠ ثانية (بالاعتماد على created_at الحقيقي بتاعها مش مكانها في الليست) — عشان لو سجّل ١٠ عمليات دفعة واحدة أو ورا بعض كل وحدة تتمّيز بذاتها ============
             let firstFreshRow = null;
@@ -12519,14 +12550,15 @@ html, body { font-variant-numeric: tabular-nums; }
         // ============================================================
         // ============ المحفظة الاستثمارية — بيانات حقيقية من portfolio_assets ==========
         // ============================================================
+        // أيقونات الأصول: مكتبة Lucide (ISC، مجانية) — بنفس اللون الثابت لكل نوع في الكارت
         const PORTFOLIO_ASSET_ICONS = {
-            gold: 'ph:coins-duotone', silver: 'ph:medal-duotone',
-            bitcoin: 'simple-icons:bitcoin', ethereum: 'simple-icons:ethereum',
-            crypto: 'ph:currency-circle-dollar-duotone', cash: 'ph:money-duotone',
-            realestate: 'ph:buildings-duotone', funds: 'ph:chart-line-up-duotone',
-            stocks: 'ph:chart-line-up-duotone', silverbar: 'ph:coins-duotone',
-            cert: 'ph:certificate-duotone', deposit: 'ph:piggy-bank-duotone', fx: 'ph:currency-dollar-duotone',
-            default: 'ph:briefcase-duotone',
+            gold: 'lucide:coins', silver: 'lucide:medal',
+            bitcoin: 'lucide:bitcoin', ethereum: 'lucide:hexagon',
+            crypto: 'lucide:circle-dollar-sign', cash: 'lucide:banknote',
+            realestate: 'lucide:building-2', funds: 'lucide:chart-line',
+            stocks: 'lucide:trending-up', silverbar: 'lucide:coins',
+            cert: 'lucide:award', deposit: 'lucide:piggy-bank', fx: 'lucide:globe',
+            default: 'lucide:briefcase',
         };
 
         function getPortfolioAssetPresentation(asset) {

@@ -7,6 +7,7 @@ import cronDailyHandler from '../backend/api-handlers/cron-daily.js';
 import dashboardDataHandler from '../backend/api-handlers/dashboard-data.js';
 import currencyPreferenceHandler from '../backend/api-handlers/currency-preference.js';
 import financialActionsHandler from '../backend/api-handlers/financial-actions.js';
+import hekayaHandler from '../backend/api-handlers/hekaya.js';
 import importDataHandler from '../backend/api-handlers/import-data.js';
 import bankStatementImportHandler from '../backend/api-handlers/bank-statement-import.js';
 import archiveMonthPdfHandler from '../backend/api-handlers/archive-month-pdf.js';
@@ -36,6 +37,7 @@ const handlers = {
   'dashboard-data': dashboardDataHandler,
   'currency-preference': currencyPreferenceHandler,
   'financial-actions': financialActionsHandler,
+  hekaya: hekayaHandler,
   'import-data': importDataHandler,
   'bank-statement-import': bankStatementImportHandler,
   'archive-month-pdf': archiveMonthPdfHandler,

@@ -6107,14 +6107,19 @@ html, body { font-variant-numeric: tabular-nums; }
                 </div>
             </div>
 
-            <a href="/app/hekaya.html" id="account-hekaya-card" class="flex items-center gap-3 rounded-3xl border border-emerald-500/25 bg-gradient-to-br from-emerald-500/10 to-teal-500/5 p-4 no-underline active:opacity-70 transition">
-                <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/15 text-xl" aria-hidden="true">📰</span>
-                <span class="flex-1 min-w-0 text-right">
-                    <span class="flex items-center gap-2"><b class="text-sm font-black text-emerald-400">الحكاية الأسبوعية</b><span class="text-[9px] font-black px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300">جديد</span></span>
-                    <small class="block text-[11px] text-slate-400 mt-0.5 leading-relaxed">مقال الأسبوع وفيديو حكاوي مالية ونقاش مع الناس</small>
-                </span>
-                <span class="text-slate-500 text-lg" aria-hidden="true">‹</span>
-            </a>
+            <details id="account-hekaya-card" class="acct-sub-collapse">
+                <summary class="acct-sub-summary">
+                    <span class="acct-sub-summary-ic" aria-hidden="true" style="box-shadow:0 0 0 1px rgba(251,191,36,.35)"><iconify-icon class="acct-doc-ic" icon="ph:newspaper-duotone"></iconify-icon></span>
+                    <span class="acct-sub-summary-txt">
+                        <span class="flex items-center gap-2"><b>الحكاية الأسبوعية</b><span class="text-[9px] font-black px-2 py-0.5 rounded-full bg-amber-400/15 text-amber-300 border border-amber-400/30">بريميوم</span></span>
+                        <small>مقال الأسبوع وفيديو وتصويت ونقاش مع الناس</small>
+                    </span>
+                    <span class="acct-sub-chev" aria-hidden="true">⌄</span>
+                </summary>
+                <div class="acct-sub-body">
+                <a href="/app/hekaya.html" onclick="try{sessionStorage.setItem('dabbar-return-tab','account')}catch(e){}" class="flex items-center justify-center rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs px-4 py-2.5 no-underline">افتح النشرة</a>
+                </div>
+            </details>
             <details id="account-currency-card" class="acct-sub-collapse">
                 <summary class="acct-sub-summary">
                     <span class="acct-sub-summary-ic" aria-hidden="true"><iconify-icon class="acct-doc-ic" icon="ph:coins-duotone"></iconify-icon></span>
@@ -17983,5 +17988,17 @@ html:not([data-theme="light"]) .asst-goal-daily-days{ color:#bdf23f !important; 
 })();
 </script>
 <div id="voice-lang-sheet" class="hidden" role="dialog" aria-modal="true" aria-labelledby="vl-title"><div class="vl-panel"><h4 id="vl-title">هتتكلم بأنهي لغة؟</h4><p class="vl-sub">هنفتكر اختيارك، فمش هتسأل تاني. تقدر تغيّره من زرار اللغة وقت التسجيل.</p><div id="vl-grid" class="vl-grid"></div><button type="button" class="vl-ok">تمام</button></div></div>
+<script>
+(function(){
+  try{
+    const t=sessionStorage.getItem('dabbar-return-tab');
+    if(!t) return;
+    sessionStorage.removeItem('dabbar-return-tab');
+    const go=()=>document.querySelector(`.tab-btn[data-tab="${t}"]`)?.click();
+    if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',()=>setTimeout(go,150));
+    else setTimeout(go,150);
+  }catch(e){}
+})();
+</script>
 </body>
 </html>

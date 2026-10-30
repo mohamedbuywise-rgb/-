@@ -12,16 +12,21 @@ header b{font-size:15px}
 main{max-width:720px;margin:0 auto;padding:16px}
 .card{background:#fff;border:1px solid #e1ebe6;border-radius:16px;padding:16px;margin-bottom:14px}
 h3{margin:0 0 10px;font-size:15px}
-label{display:block;font-size:12px;font-weight:800;color:#334155;margin:10px 0 5px}
+label{display:block;font-size:12px;font-weight:800;color:#334155;margin:12px 0 5px}
 input,textarea,select{width:100%;border:1px solid #cfdcd6;border-radius:12px;padding:10px 12px;font:600 14px 'Cairo',sans-serif;background:#fff}
 textarea{min-height:200px;line-height:1.9;resize:vertical}
 .hint{font-size:11px;color:#64748b;margin-top:4px}
 .row{display:flex;gap:10px}.row>*{flex:1}
 .btns{display:flex;gap:8px;margin-top:14px}
 button{border:none;border-radius:12px;padding:12px 14px;font:800 14px 'Cairo',sans-serif;cursor:pointer;flex:1}
-.g{background:#0f766e;color:#fff}.w{background:#fff;color:#0f766e;border:1.5px solid #0f766e}.r{background:#fff;color:#b91c1c;border:1.5px solid #fca5a5}
+button:disabled{opacity:.5;cursor:default}
+.g{background:#0f766e;color:#fff}.w{background:#fff;color:#0f766e;border:1.5px solid #0f766e}
 .msg{font-size:13px;font-weight:700;margin-top:10px;min-height:18px}
 .msg.ok{color:#047857}.msg.err{color:#b91c1c}
+.cover{display:flex;gap:12px;align-items:center;border:1.5px dashed #94a3b8;border-radius:14px;padding:12px;background:#f8fafc}
+.cover img{width:150px;height:84px;object-fit:cover;border-radius:10px;background:#e2e8f0;flex:none}
+.cover .ph{width:150px;height:84px;border-radius:10px;background:#e2e8f0;display:flex;align-items:center;justify-content:center;color:#64748b;font-size:12px;font-weight:700;flex:none}
+.cover input[type=file]{border:none;padding:0;font-size:12px}
 .item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid #eef3f0;gap:10px}
 .item:last-child{border:none}
 .badge{font-size:11px;font-weight:800;padding:3px 9px;border-radius:999px}
@@ -44,29 +49,43 @@ button{border:none;border-radius:12px;padding:12px 14px;font:800 14px 'Cairo',sa
 
 <main id="app" style="display:none">
   <section class="card">
-    <h3>عدد جديد</h3>
+    <h3 id="formTitle">عدد جديد</h3>
     <input type="hidden" id="id">
     <div class="row">
       <div><label>رقم العدد</label><input id="issue_no" type="number" min="1"></div>
-      <div><label>أسبوع</label><input id="week_start" type="date"></div>
+      <div><label>تاريخ الأسبوع (اختياري)</label><input id="week_start" type="date"></div>
     </div>
+
     <label>العنوان</label>
     <input id="title" placeholder="مثال: الفلوس الصغيرة اللي بتضيع">
     <label>سطر تعريفي</label>
     <input id="subtitle" placeholder="جملة قصيرة تحت العنوان">
     <label>الموضوع</label>
-    <select id="topic"><option value="">بدون</option><option>توفير</option><option>استثمار</option><option>ديون</option><option>عادات مالية</option></select>
+    <input id="topic" list="topics" placeholder="اكتب الموضوع أو اختار">
+    <datalist id="topics"><option>الميزانية</option><option>الادخار</option><option>الديون</option><option>الاشتراكات</option><option>عادات مالية</option></datalist>
+
     <label>رابط الفيديو (يوتيوب)</label>
     <input id="video_url" placeholder="https://www.youtube.com/watch?v=...">
     <div class="hint" id="ytHint">الفيديو بيتشغّل على يوتيوب، ومش بيترفع على دبّر.</div>
-    <label>رابط صورة الغلاف (اختياري)</label>
-    <input id="cover_url" placeholder="https://...">
-    <label>سؤال الاستفتاء (اختياري)</label>
+
+    <label>صورة الغلاف / صورة الفيديو</label>
+    <div class="cover">
+      <div id="coverPrev" class="ph">مفيش صورة</div>
+      <div style="flex:1;min-width:0">
+        <input type="file" id="coverFile" accept="image/jpeg,image/png,image/webp">
+        <div class="hint" id="coverHint">ارفع صورة (JPG / PNG / WEBP) أقل من ٢ ميجا. هتتضغط تلقائياً.</div>
+      </div>
+    </div>
+    <input type="hidden" id="cover_url">
+
+    <label>عنوان الاستفتاء (اختياري، مطلوب لو فيه خيارات)</label>
     <input id="poll_question" placeholder="مثال: أنهي مصروف بيوجعك أكتر؟">
-    <label>خيارات الاستفتاء (سطر لكل خيار، من ٢ لـ٦)</label>
+    <label>خيارات الاستفتاء (سطر لكل خيار، من ٢ لـ ٦)</label>
     <textarea id="poll_options" style="min-height:90px" placeholder="المواصلات والبنزين&#10;القهوة والأكل برا&#10;الاشتراكات المنسية"></textarea>
+
     <label>المقال</label>
     <textarea id="article_md" placeholder="اكتب المقال هنا. سطر فاضي = فقرة جديدة. ابدأ السطر بـ ## لعنوان فرعي، و> لاقتباس، و- لبند."></textarea>
+
     <div class="btns">
       <button class="w" id="saveBtn">حفظ كمسودة</button>
       <button class="g" id="pubBtn">نشر العدد</button>
@@ -94,6 +113,38 @@ async function call(action,method='GET',body){
 function ytOk(u){return !u||/(?:v=|youtu\.be\/|embed\/|shorts\/)[A-Za-z0-9_-]{11}/.test(u)||/^[A-Za-z0-9_-]{11}$/.test(u)}
 $('#video_url').oninput=e=>{const ok=ytOk(e.target.value.trim());$('#ytHint').textContent=ok?'✓ الفيديو اتعرف، هيتشغّل على يوتيوب.':'الرابط مش صحيح، لازم يكون رابط يوتيوب.';$('#ytHint').style.color=ok?'#047857':'#b91c1c'};
 
+function setCover(url){
+  $('#cover_url').value=url||'';
+  $('#coverPrev').outerHTML=url?`<img id="coverPrev" src="${url}" alt="">`:'<div id="coverPrev" class="ph">مفيش صورة</div>';
+}
+
+// ضغط الصورة في المتصفح قبل الرفع (أقصى عرض 1280، JPEG)
+function compress(file){
+  return new Promise((resolve,reject)=>{
+    const img=new Image();
+    img.onload=()=>{
+      const scale=Math.min(1,1280/img.width);
+      const c=document.createElement('canvas');
+      c.width=Math.round(img.width*scale);c.height=Math.round(img.height*scale);
+      c.getContext('2d').drawImage(img,0,0,c.width,c.height);
+      const dataUrl=c.toDataURL('image/jpeg',0.85);
+      resolve({contentType:'image/jpeg',data:dataUrl.split(',')[1]});
+    };
+    img.onerror=()=>reject(new Error('الصورة مش مقروءة'));
+    img.src=URL.createObjectURL(file);
+  });
+}
+$('#coverFile').onchange=async e=>{
+  const f=e.target.files[0]; if(!f) return;
+  $('#coverHint').textContent='بيترفع...';
+  try{
+    const {contentType,data}=await compress(f);
+    const r=await call('admin_upload_cover','POST',{content_type:contentType,data_base64:data});
+    setCover(r.url);
+    $('#coverHint').textContent='✓ اترفعت الصورة.';
+  }catch(err){$('#coverHint').textContent=err.message;}
+};
+
 function form(){return{id:$('#id').value||undefined,issue_no:$('#issue_no').value,week_start:$('#week_start').value||null,title:$('#title').value,subtitle:$('#subtitle').value,topic:$('#topic').value,video_url:$('#video_url').value,cover_url:$('#cover_url').value,article_md:$('#article_md').value,poll_question:$('#poll_question').value,poll_options:$('#poll_options').value}}
 async function save(publish){
   try{
@@ -113,12 +164,13 @@ async function loadList(){
   document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>edit(b.dataset.edit));
 }
 async function edit(id){
-  // بنجيب الأعداد تاني ونعبّي الفورم من الداتا (مختصر: الـlist بيرجع الحقول الأساسية)
   const {issues}=await call('admin_list');
-  const i=issues.find(x=>x.id===id);
-  if(!i)return;
-  $('#id').value=i.id;$('#issue_no').value=i.issue_no;$('#title').value=i.title||'';$('#subtitle').value=i.subtitle||'';$('#topic').value=i.topic||'';$('#week_start').value=i.week_start||'';$('#video_url').value=i.video_url||'';$('#cover_url').value=i.cover_url||'';$('#article_md').value=i.article_md||'';$('#poll_question').value=i.poll_question||'';$('#poll_options').value=(i.poll_options||[]).join('\n');
+  const i=issues.find(x=>x.id===id); if(!i) return;
+  $('#formTitle').textContent='تعديل العدد '+i.issue_no;
+  $('#id').value=i.id;$('#issue_no').value=i.issue_no;$('#title').value=i.title||'';$('#subtitle').value=i.subtitle||'';$('#topic').value=i.topic||'';$('#week_start').value=i.week_start||'';$('#video_url').value=i.video_url||'';$('#article_md').value=i.article_md||'';$('#poll_question').value=i.poll_question||'';$('#poll_options').value=(i.poll_options||[]).join('\n');
+  setCover(i.cover_url||'');
   msg('فتحت العدد للتعديل.',true);
+  window.scrollTo({top:0,behavior:'smooth'});
 }
 
 $('#loginBtn').onclick=async()=>{sessionStorage.setItem('hekayaPw',$('#pw').value);

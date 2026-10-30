@@ -7,59 +7,86 @@
 <style>
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 body{margin:0;font-family:'Cairo',system-ui,sans-serif;background:#f5f8f6;color:#0f172a}
-.wrap{max-width:560px;margin:0 auto;padding-bottom:40px}
-.mast{background:radial-gradient(120% 90% at 100% 0%,#0f766e 0%,transparent 60%),linear-gradient(170deg,#03261e,#065f46);color:#ecfdf5;padding:22px 20px 28px;border-radius:0 0 28px 28px}
-.mast .top{display:flex;justify-content:space-between;align-items:center;font-size:13px;font-weight:900}
-.mast .top span.iss{font-size:11px;font-weight:800;background:rgba(255,255,255,.12);padding:6px 11px;border-radius:999px}
-.mast .kick{font-size:12px;font-weight:800;color:#6ee7b7;margin-top:24px}
-.mast h1{font-size:38px;line-height:1.15;margin:6px 0 8px;font-weight:900}
-.mast p{margin:0;color:#c7f5e3;font-size:14px;line-height:1.8;max-width:420px}
+.wrap{max-width:560px;margin:0 auto;padding-bottom:48px}
+.mast{background:radial-gradient(120% 90% at 100% 0%,#0f766e 0%,transparent 60%),linear-gradient(170deg,#03261e,#065f46);color:#ecfdf5;padding:18px 20px 26px;border-radius:0 0 28px 28px}
+.mast .top{display:flex;justify-content:space-between;align-items:center;font-size:12px;font-weight:800}
+.mast .iss{font-size:11px;font-weight:800;background:rgba(255,255,255,.12);padding:6px 11px;border-radius:999px}
+.mast .kick{font-size:12px;font-weight:800;color:#6ee7b7;margin-top:22px}
+.mast h1{font-size:34px;line-height:1.2;margin:6px 0 8px;font-weight:900}
+.mast p{margin:0;color:#c7f5e3;font-size:14px;line-height:1.8}
+.back{display:inline-block;color:#c7f5e3;font-size:12px;font-weight:800;text-decoration:none;margin-bottom:8px}
 .card{background:#fff;border:1px solid #e3ebe7;border-radius:20px;padding:18px;margin:14px 16px 0}
 .eyebrow{font-size:11px;font-weight:800;color:#047857}
+/* فيديو بشكل يوتيوب */
+.vid{display:block;position:relative;margin:14px 16px 0;border-radius:18px;overflow:hidden;aspect-ratio:16/9;background:linear-gradient(135deg,#052e25,#0b1220);text-decoration:none;color:#fff}
+.vid img{width:100%;height:100%;object-fit:cover;display:block}
+.vid .play{position:absolute;inset:0;margin:auto;width:58px;height:58px;border-radius:50%;background:rgba(255,255,255,.92);color:#047857;display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:0 6px 20px rgba(0,0,0,.3)}
+.vid .chip{position:absolute;top:10px;right:10px;background:#e11d48;font-size:10px;font-weight:800;padding:4px 10px;border-radius:999px}
+.cover{width:calc(100% - 32px);margin:14px 16px 0;border-radius:18px;display:block;aspect-ratio:16/9;object-fit:cover}
 .art h2{font-size:19px;margin:18px 0 8px;line-height:1.45}
 .art p{font-size:14.5px;line-height:2;color:#334155;margin:0 0 10px}
 .art blockquote{border-right:4px solid #10b981;background:#f0fdf7;padding:12px 16px;border-radius:14px;margin:14px 0;font-size:15px;line-height:1.9;font-weight:800;color:#065f46}
 .art ul{padding-right:20px;margin:0 0 10px;color:#334155;font-size:14.5px;line-height:1.9}
-.cover{width:100%;border-radius:16px;margin-top:12px;display:block;max-height:260px;object-fit:cover}
-.player{display:block;text-decoration:none;position:relative;height:200px;border-radius:20px;overflow:hidden;background:radial-gradient(120% 100% at 80% 0%,#0f766e,transparent 60%),linear-gradient(135deg,#052e25,#0b1220);color:#fff;margin:14px 16px 0}
-.player .chip{position:absolute;top:14px;right:14px;background:#e11d48;font-size:10px;font-weight:800;padding:4px 10px;border-radius:999px}
-.player .pb{position:absolute;left:50%;top:46%;transform:translate(-50%,-50%);width:62px;height:62px;border-radius:50%;background:rgba(255,255,255,.95);color:#047857;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:900}
-.player .ttl{position:absolute;right:16px;left:16px;bottom:16px;font-size:15px;font-weight:900;line-height:1.5}
+/* ردود الفعل */
 .reacts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 16px 0}
-.reacts button{border:1px solid #e3ebe7;background:#fff;border-radius:16px;padding:10px 0;font:800 12px 'Cairo',sans-serif;cursor:pointer;color:#0f172a}
-.reacts button b{display:block;font-size:18px;margin-bottom:2px}
+.reacts button{border:1px solid #e3ebe7;background:#fff;border-radius:16px;padding:12px 0 10px;font:800 12px 'Cairo',sans-serif;cursor:pointer;color:#334155;display:flex;flex-direction:column;align-items:center;gap:4px;transition:transform .12s}
+.reacts button:active{transform:scale(.95)}
+.reacts button i{font-style:normal;font-size:20px}
+.reacts button b{font-size:13px;color:#0f172a}
 .reacts button.on{background:#ecfdf5;border-color:#34d399;color:#047857}
-h3.sec{font-size:16px;font-weight:900;margin:22px 16px 8px}
-.cform{margin:0 16px;background:#fff;border:1px solid #e3ebe7;border-radius:18px;padding:10px;display:flex;gap:8px}
-.cform input{flex:1;border:none;outline:none;font:600 14px 'Cairo',sans-serif;background:transparent;padding:6px}
-.cform button{border:none;background:#10b981;color:#fff;border-radius:12px;padding:0 16px;font:800 13px 'Cairo',sans-serif;cursor:pointer}
-.login{margin:0 16px;font-size:13px;color:#475569;background:#fff;border:1px dashed #94a3b8;border-radius:14px;padding:12px;text-align:center}
-.login a{color:#047857;font-weight:800}
-.c{margin:10px 16px 0;background:#fff;border:1px solid #e3ebe7;border-radius:18px;padding:14px}
-.who{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:800}
-.av{width:28px;height:28px;border-radius:50%;background:#d1fae5;color:#047857;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;flex:none}
-.who small{margin-right:auto;color:#94a3b8;font-weight:600;font-size:11px}
-.cb{font-size:13.5px;line-height:1.9;color:#334155;margin:8px 0 4px}
-.acts button{background:none;border:none;font:800 12px 'Cairo',sans-serif;color:#64748b;cursor:pointer;padding:0}
-.rep{margin:8px 0 0 12px;border-right:2px solid #d1fae5;padding-right:10px}
-.rep .c{margin:8px 0 0;padding:10px 12px;background:#f8fafc;border-radius:14px}
-.arch a{display:flex;gap:12px;align-items:center;text-decoration:none;color:#0f172a;background:#fff;border:1px solid #e3ebe7;border-radius:16px;padding:12px;margin:8px 16px 0}
-.arch a b{font-size:14px;display:block}.arch a small{color:#64748b;font-size:11px}
-.arch .n{width:44px;height:44px;border-radius:14px;background:#d1fae5;color:#047857;display:flex;align-items:center;justify-content:center;font-weight:900;flex:none}
-.empty{text-align:center;color:#64748b;padding:60px 20px;font-size:15px;font-weight:700}
+/* الاستفتاء */
 .poll{margin:14px 16px 0;background:#fff;border:1px solid #e3ebe7;border-radius:20px;padding:18px}
-.poll button{display:block;width:100%;text-align:right;border:1px solid #e3ebe7;background:#fff;border-radius:16px;padding:12px 14px;margin-top:8px;font:700 13.5px 'Cairo',sans-serif;cursor:pointer;position:relative;overflow:hidden;color:#0f172a}
-.poll button span{position:relative;z-index:1}
-.poll button i{position:absolute;inset:0 auto 0 0;width:0;background:#d1fae5;transition:width .5s;z-index:0}
+.poll h3{margin:4px 0 2px;font-size:17px;line-height:1.5}
+.poll .meta{margin:0 0 6px;font-size:12px;color:#64748b}
+.poll button{display:block;width:100%;text-align:right;border:1px solid #e3ebe7;background:#fff;border-radius:14px;padding:12px 14px;margin-top:8px;font:700 13.5px 'Cairo',sans-serif;cursor:pointer;position:relative;overflow:hidden;color:#0f172a}
+.poll button i{position:absolute;inset:0 auto 0 0;width:0;background:#d1fae5;transition:width .6s;z-index:0}
+.poll button span{position:relative;z-index:1;display:flex;justify-content:space-between;gap:8px}
 .poll button.on{border-color:#34d399}
 .poll button:disabled{cursor:default}
-.back{display:inline-block;color:#c7f5e3;font-size:12px;font-weight:800;text-decoration:none;margin-bottom:10px}
-.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#0f172a;color:#fff;font-size:13px;font-weight:700;padding:10px 16px;border-radius:999px;opacity:0;transition:opacity .3s;pointer-events:none}
+/* النقاش */
+h3.sec{font-size:17px;font-weight:900;margin:26px 16px 10px;display:flex;align-items:center;gap:8px}
+h3.sec small{font-size:12px;color:#64748b;font-weight:700}
+.composer{margin:0 16px;background:#fff;border:1px solid #e3ebe7;border-radius:999px;padding:6px 6px 6px 6px;display:flex;align-items:center;gap:6px;box-shadow:0 4px 14px rgba(15,23,42,.04)}
+.composer input{flex:1;min-width:0;border:none;outline:none;font:600 14px 'Cairo',sans-serif;background:transparent;padding:8px 12px}
+.btn-send{border:none;background:#10b981;color:#fff;border-radius:999px;padding:9px 16px;font:800 13px 'Cairo',sans-serif;cursor:pointer;flex:none}
+.btn-send:disabled{opacity:.5}
+.login-note{margin:0 16px;font-size:13px;color:#475569;background:#fff;border:1px dashed #94a3b8;border-radius:14px;padding:12px;text-align:center}
+.login-note a{color:#047857;font-weight:800}
+.thread{margin:12px 16px 0;background:#fff;border:1px solid #e3ebe7;border-radius:18px;padding:14px}
+.who{display:flex;align-items:center;gap:9px}
+.av{width:32px;height:32px;border-radius:50%;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;flex:none}
+.who .nm{font-size:13px;font-weight:800}
+.who .tm{margin-right:auto;font-size:11px;color:#94a3b8;font-weight:600;white-space:nowrap}
+.mine{font-size:10px;font-weight:800;background:#ecfdf5;color:#047857;padding:1px 7px;border-radius:999px;margin-right:4px}
+.cb{font-size:14px;line-height:1.9;color:#1e293b;margin:8px 0 2px;white-space:pre-wrap;word-break:break-word}
+.acts{display:flex;gap:16px;margin-top:4px;font-size:12px;font-weight:800;color:#64748b}
+.acts button{background:none;border:none;font:800 12px 'Cairo',sans-serif;color:#64748b;cursor:pointer;padding:4px 0;display:flex;align-items:center;gap:4px}
+.acts button.liked{color:#e11d48}
+.acts button:active{transform:scale(.94)}
+.replies{margin:10px 0 0 14px;padding-right:12px;border-right:2px solid #d1fae5;display:flex;flex-direction:column;gap:10px}
+.reply{background:#f8fafc;border-radius:14px;padding:10px 12px}
+.reply .av{width:26px;height:26px;font-size:11px}
+.reply .cb{font-size:13px;margin-top:6px}
+.inline{margin-top:10px;display:none;gap:6px;align-items:center;background:#f8fafc;border:1px solid #e3ebe7;border-radius:999px;padding:4px 4px 4px 4px}
+.inline.open{display:flex}
+.inline input{flex:1;min-width:0;border:none;outline:none;background:transparent;font:600 13px 'Cairo',sans-serif;padding:7px 10px}
+.inline .x{border:none;background:none;color:#64748b;font:800 12px 'Cairo',sans-serif;cursor:pointer;padding:6px 8px}
+.empty{margin:14px 16px 0;text-align:center;color:#64748b;padding:26px 20px;font-size:14px;font-weight:700;background:#fff;border:1px dashed #cbd5e1;border-radius:18px}
+.arch{margin:0 16px}
+.arch a{display:flex;gap:12px;align-items:center;text-decoration:none;color:#0f172a;background:#fff;border:1px solid #e3ebe7;border-radius:16px;padding:12px;margin-top:8px}
+.arch b{font-size:14px;display:block}.arch small{color:#64748b;font-size:11px}
+.arch .n{width:44px;height:44px;border-radius:14px;background:#d1fae5;color:#047857;display:flex;align-items:center;justify-content:center;font-weight:900;flex:none}
+.close{position:fixed;top:calc(env(safe-area-inset-top,0px) + 12px);left:12px;z-index:20;width:38px;height:38px;border-radius:50%;border:none;background:rgba(3,38,30,.55);color:#fff;font:900 18px 'Cairo',sans-serif;cursor:pointer;backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center}
+.close:active{transform:scale(.92)}
+.toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:#0f172a;color:#fff;font-size:13px;font-weight:700;padding:10px 16px;border-radius:999px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:9}
 .toast.show{opacity:1}
+.skeleton{margin:16px;height:220px;border-radius:20px;background:linear-gradient(90deg,#e8efec,#f5f8f6,#e8efec);background-size:200% 100%;animation:sh 1.2s infinite}
+@keyframes sh{to{background-position:-200% 0}}
 </style>
 </head>
 <body>
-<div class="wrap" id="root"><div class="empty">بنحمّل العدد...</div></div>
+<button class="close" id="closeBtn" aria-label="إغلاق">✕</button>
+<div class="wrap" id="root"><div class="skeleton"></div></div>
 <div class="toast" id="toast"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -70,6 +97,17 @@ const sb=window.supabase?window.supabase.createClient(SUPABASE_URL,SUPABASE_ANON
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const AR=n=>Number(n||0).toLocaleString('ar-EG-u-nu-latn');
+const PALETTE=['#0d9488','#4f46e5','#e11d48','#d97706','#7c3aed','#0891b2'];
+const colorFor=s=>PALETTE[[...String(s)].reduce((a,c)=>a+c.charCodeAt(0),0)%PALETTE.length];
+const initial=s=>(String(s||'م').trim().charAt(0)||'م');
+function ago(d){
+  const s=(Date.now()-new Date(d).getTime())/1000;
+  if(s<60) return 'دلوقتي';
+  const m=s/60; if(m<60) return `منذ ${AR(Math.floor(m))} دقيقة`;
+  const h=m/60; if(h<24) return `منذ ${AR(Math.floor(h))} ساعة`;
+  const dd=h/24; if(dd<7) return `منذ ${AR(Math.floor(dd))} يوم`;
+  return new Date(d).toLocaleDateString('ar-EG');
+}
 const toast=m=>{const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),1800)};
 const qs=new URLSearchParams(location.search);
 const wantNo=qs.get('n');
@@ -80,6 +118,7 @@ async function api(action,{method='GET',body}={}){
   const r=await fetch(`${API}?action=${action}`,{method,headers,body:body?JSON.stringify(body):undefined});
   const j=await r.json().catch(()=>({}));if(!r.ok||j.ok===false)throw new Error(j.error||'حصل خطأ');return j;
 }
+
 function mdLite(src){
   const out=[];let para=[];let list=[];
   const flushP=()=>{if(para.length){out.push(`<p>${esc(para.join(' '))}</p>`);para=[]}};
@@ -94,83 +133,152 @@ function mdLite(src){
   });
   flushP();flushL();return out.join('');
 }
-function commentHtml(c,isReply){
-  return `<div class="${isReply?'rep':'c'}" data-id="${c.id}">
-    <div class="${isReply?'c':''}" ${isReply?'style="margin:0;padding:10px 12px;background:#f8fafc;border-radius:14px;border:1px solid #e3ebe7"':''}>
-      <div class="who"><span class="av">${esc((c.author_name||'م').trim().charAt(0))}</span>${esc(c.author_name)}<small>${new Date(c.created_at).toLocaleDateString('ar-EG')}</small></div>
-      <div class="cb" ${isReply?'style="font-size:12.5px;margin:6px 0 0"':''}>${esc(c.body)}</div>
-      ${isReply?'':`<div class="acts"><button data-reply="${c.id}">رد</button></div>`}
-    </div>
-    ${(c.replies||[]).map(r=>commentHtml(r,true)).join('')}
+
+function commentBody(c,isReply){
+  const liked=c.liked?'liked':'';
+  return `
+  <div class="who">
+    <span class="av" style="background:${colorFor(c.author_name)}">${esc(initial(c.author_name))}</span>
+    <span class="nm">${esc(c.author_name)}</span>${c.is_mine?'<span class="mine">أنت</span>':''}
+    <span class="tm">${ago(c.created_at)}</span>
+  </div>
+  <div class="cb">${esc(c.body)}</div>
+  <div class="acts">
+    <button class="${liked}" data-like="${c.id}">${c.liked?'❤️':'🤍'} <span>${AR(c.likes)}</span></button>
+    ${isReply?'':`<button data-reply="${c.id}" data-name="${esc(c.author_name)}">↩︎ رد</button>`}
   </div>`;
 }
-function render(issue,archive){
+function commentHtml(c){
+  const replies=(c.replies||[]);
+  return `<div class="thread" data-cid="${c.id}">
+    ${commentBody(c,false)}
+    <div class="inline" id="rf-${c.id}">
+      <input placeholder="اكتب ردك..." maxlength="500" data-input="${c.id}">
+      <button class="btn-send" data-send="${c.id}">نشر</button>
+      <button class="x" data-cancel="${c.id}">إلغاء</button>
+    </div>
+    ${replies.length?`<div class="replies">${replies.map(r=>`<div class="reply">${commentBody(r,true)}</div>`).join('')}</div>`:''}
+  </div>`;
+}
+
+function composerHtml(loggedIn){
+  if(!loggedIn) return `<div class="login-note">سجّل دخول عشان تشارك في النقاش · <a href="/account">تسجيل الدخول</a></div>`;
+  return `<div class="composer"><input id="cIn" maxlength="500" placeholder="اكتب تجربتك أو سؤالك..."><button class="btn-send" id="cSend">نشر</button></div>`;
+}
+
+function render(issue,archive,loggedIn){
   if(!issue){$('#root').innerHTML='<div class="empty">النشرة الجاية قريب ✨</div>';return}
-  const v=issue.video_id?`<a class="player" href="https://www.youtube.com/watch?v=${esc(issue.video_id)}" target="_blank" rel="noopener"><span class="chip">فيديو الأسبوع</span><div class="pb">▶</div><div class="ttl">${esc(issue.title)}</div></a>`:'';
   const R=issue.reactions||{};
+  const hasVid=!!issue.video_id;
+  const media = hasVid
+    ? `<a class="vid" href="https://www.youtube.com/watch?v=${esc(issue.video_id)}" target="_blank" rel="noopener">
+        ${issue.cover_url?`<img src="${esc(issue.cover_url)}" alt="${esc(issue.title)}">`:''}
+        <span class="chip">فيديو الأسبوع</span><span class="play">▶</span></a>`
+    : (issue.cover_url?`<img class="cover" src="${esc(issue.cover_url)}" alt="${esc(issue.title)}">`:'');
+  const poll = issue.poll ? (()=>{
+    const total=issue.poll.counts.reduce((a,b)=>a+b,0);
+    const voted=issue.poll.myVote!==null;
+    return `<div class="poll">
+      <div class="eyebrow">استفتاء المجتمع</div>
+      <h3>${esc(issue.poll.question)}</h3>
+      <p class="meta">${AR(total)} صوت${voted?'':' · اختار عشان تشوف النتيجة'}</p>
+      <div id="pollOpts">${issue.poll.options.map((o,i)=>{
+        const pct=total?Math.round(issue.poll.counts[i]/total*100):0;
+        return `<button data-o="${i}" class="${issue.poll.myVote===i?'on':''}" ${voted||!loggedIn?'disabled':''}>
+          <i style="width:${voted?pct:0}%"></i><span><b style="font-weight:800">${esc(o)}${issue.poll.myVote===i?' ✓':''}</b>${voted?`<b style="font-weight:900">${AR(pct)}٪</b>`:''}</span></button>`}).join('')}</div>
+    </div>`;})() : '';
+  const topCount=(issue.comments||[]).reduce((a,c)=>a+1+(c.replies||[]).length,0);
   $('#root').innerHTML=`
   <header class="mast">
-    <a class="back" href="/account">← رجوع لحسابي</a>
+    <a class="back" href="#" data-close>← رجوع لحسابي</a>
     <div class="top"><span>دبّر · الحكاية</span><span class="iss">العدد ${AR(issue.issue_no)}${issue.topic?' · '+esc(issue.topic):''}</span></div>
     <div class="kick">النشرة الأسبوعية</div>
     <h1>${esc(issue.title)}</h1>
     ${issue.subtitle?`<p>${esc(issue.subtitle)}</p>`:''}
   </header>
-  ${v}
-  <article class="card art" style="margin-top:14px">
-    ${issue.cover_url?`<img class="cover" src="${esc(issue.cover_url)}" alt="">`:''}
-    ${mdLite(issue.article_md)}
-  </article>
+  ${media}
+  <article class="card art">${mdLite(issue.article_md)}</article>
   <div class="reacts" id="reacts">
-    <button data-r="fire"><b>🔥</b>مفيد · <span>${AR(R.fire)}</span></button>
-    <button data-r="think"><b>🤔</b>فكرتني · <span>${AR(R.think)}</span></button>
-    <button data-r="money"><b>💸</b>عملتها · <span>${AR(R.money)}</span></button>
+    <button data-r="fire" class="${(issue.myReactions||[]).includes('fire')?'on':''}"><i>🔥</i><b>مفيد · ${AR(R.fire)}</b></button>
+    <button data-r="think" class="${(issue.myReactions||[]).includes('think')?'on':''}"><i>🤔</i><b>فكرتني · ${AR(R.think)}</b></button>
+    <button data-r="money" class="${(issue.myReactions||[]).includes('money')?'on':''}"><i>💸</i><b>عملتها · ${AR(R.money)}</b></button>
   </div>
-  ${issue.poll?`<div class="poll"><div class="eyebrow">استفتاء المجتمع</div><h3 style="margin:6px 0 4px;font-size:17px">${esc(issue.poll.question)}</h3><p style="margin:0;font-size:12px;color:#64748b">${AR(issue.poll.counts.reduce((a,b)=>a+b,0))} صوت</p><div id="pollOpts"></div></div>`:''}
-  <h3 class="sec">النقاش</h3>
-  <div id="login-slot"></div>
-  <div class="cform" id="cform" style="display:none"><input id="cIn" maxlength="500" placeholder="اكتب تجربتك أو سؤالك..."><button id="cSend">نشر</button></div>
-  <div id="comments">${(issue.comments||[]).map(c=>commentHtml(c,false)).join('')||'<div class="login" style="margin-top:10px">كن أول واحد يعلّق</div>'}</div>
+  ${poll}
+  <h3 class="sec">النقاش <small>${AR(topCount)} تعليق</small></h3>
+  ${composerHtml(loggedIn)}
+  <div id="comments">${(issue.comments||[]).length
+    ? (issue.comments||[]).map(commentHtml).join('')
+    : '<div class="empty">محدش كتب حاجة لسه… ابدأ النقاش 💬</div>'}</div>
   ${archive&&archive.length>1?`<h3 class="sec">أعداد قبل كده</h3><div class="arch">${archive.filter(a=>a.id!==issue.id).map(a=>`<a href="?n=${a.issue_no}"><div class="n">${AR(a.issue_no)}</div><div><b>${esc(a.title)}</b><small>${esc(a.topic||'')}</small></div></a>`).join('')}</div>`:''}
   `;
-  drawPoll(issue);
-  wire(issue);
+  wire(issue,loggedIn);
 }
-function drawPoll(issue){
-  const P=issue.poll; if(!P) return;
-  const total=P.counts.reduce((a,b)=>a+b,0);
-  const box=$('#pollOpts'); if(!box) return;
-  box.innerHTML=P.options.map((o,i)=>{const pct=total?Math.round(P.counts[i]/total*100):0;const voted=P.myVote!==null;
-    return `<button data-o="${i}" class="${P.myVote===i?'on':''}" ${voted?'disabled':''}><i style="width:${voted?pct:0}%"></i><span>${esc(o)}${voted?` · ${AR(pct)}٪`:''}</span></button>`}).join('');
-  box.querySelectorAll('button[data-o]').forEach(b=>b.onclick=async()=>{
-    const t=await token(); if(!t){toast('سجّل دخول عشان تصوّت');return}
+
+function wire(issue,loggedIn){
+  // ردود الفعل على العدد
+  document.querySelectorAll('#reacts button').forEach(b=>b.onclick=async()=>{
+    if(!loggedIn){toast('سجّل دخول الأول');return}
+    try{await api('react',{method:'POST',body:{issue_id:issue.id,kind:b.dataset.r}});load(issue.issue_no)}catch(e){toast(e.message)}
+  });
+  // الاستفتاء
+  document.querySelectorAll('#pollOpts button[data-o]').forEach(b=>b.onclick=async()=>{
+    if(!loggedIn){toast('سجّل دخول عشان تصوّت');return}
     try{await api('vote',{method:'POST',body:{issue_id:issue.id,option_index:Number(b.dataset.o)}});toast('صوتك اتسجّل 📊');load(issue.issue_no)}catch(e){toast(e.message)}
   });
-}
-async function wire(issue){
-  const t=await token();
-  $('#login-slot').innerHTML=t?'':'<div class="login">سجّل دخول عشان تشارك في النقاش · <a href="/account">تسجيل الدخول</a></div>';
-  $('#cform').style.display=t?'flex':'none';
-  document.querySelectorAll('#reacts button').forEach(b=>{if((issue.myReactions||[]).includes(b.dataset.r))b.classList.add('on')});
-  document.querySelectorAll('#reacts button').forEach(b=>b.onclick=async()=>{
-    if(!t){toast('سجّل دخول الأول');return}
-    try{await api('react',{method:'POST',body:{issue_id:issue.id,kind:b.dataset.r}});toast('اتسجّل تفاعلك ✨');load(issue.issue_no)}catch(e){toast(e.message)}
+  // التعليق الرئيسي
+  const send=$('#cSend');
+  if(send) send.onclick=()=>postComment(issue,null,$('#cIn').value,send);
+  const cin=$('#cIn');
+  if(cin) cin.onkeydown=e=>{if(e.key==='Enter')send.click()};
+  // لايك على التعليق
+  document.querySelectorAll('[data-like]').forEach(b=>b.onclick=async()=>{
+    if(!loggedIn){toast('سجّل دخول عشان تعمل لايك');return}
+    try{await api('comment_like',{method:'POST',body:{comment_id:b.dataset.like}});load(issue.issue_no,true)}catch(e){toast(e.message)}
   });
-  $('#cSend')&&($('#cSend').onclick=async()=>{const v=$('#cIn').value.trim();if(!v){toast('اكتب تعليقك الأول');return}
-    try{await api('comment',{method:'POST',body:{issue_id:issue.id,body:v}});$('#cIn').value='';toast('اتنشر تعليقك 🙌');load(issue.issue_no)}catch(e){toast(e.message)}});
-  document.querySelectorAll('[data-reply]').forEach(b=>b.onclick=async()=>{
-    if(!t){toast('سجّل دخول عشان ترد');return}
-    const v=prompt('ردك:');if(!v||!v.trim())return;
-    try{await api('comment',{method:'POST',body:{issue_id:issue.id,parent_id:b.dataset.reply,body:v.trim()}});toast('اتنشر ردك');load(issue.issue_no)}catch(e){toast(e.message)}});
+  // فتح خانة الرد
+  document.querySelectorAll('[data-reply]').forEach(b=>b.onclick=()=>{
+    if(!loggedIn){toast('سجّل دخول عشان ترد');return}
+    document.querySelectorAll('.inline.open').forEach(x=>x.classList.remove('open'));
+    const box=$('#rf-'+b.dataset.reply); box.classList.add('open');
+    const inp=box.querySelector('input'); inp.placeholder='ردّ على '+b.dataset.name+'...'; inp.focus();
+  });
+  document.querySelectorAll('[data-cancel]').forEach(b=>b.onclick=()=>$('#rf-'+b.dataset.cancel).classList.remove('open'));
+  document.querySelectorAll('[data-send]').forEach(b=>b.onclick=()=>{
+    const id=b.dataset.send;
+    postComment(issue,id,document.querySelector(`[data-input="${id}"]`).value,b);
+  });
 }
-async function load(no){
+
+async function postComment(issue,parentId,raw,btn){
+  const body=String(raw||'').trim();
+  if(!body){toast('اكتب الأول');return}
+  btn.disabled=true;
   try{
+    await api('comment',{method:'POST',body:{issue_id:issue.id,parent_id:parentId||undefined,body}});
+    toast('اتنشر تعليقك 🙌');
+    load(issue.issue_no);
+  }catch(e){toast(e.message);btn.disabled=false}
+}
+
+let lastIssueNo=null;
+async function load(no,keepScroll){
+  try{
+    const y=window.scrollY;
     const {issues}=await api('list');
     if(!issues.length){render(null);return}
     const {issue}=await api(no?`current&n=${encodeURIComponent(no)}`:'current');
-    render(issue||null,issues);
+    const loggedIn=!!(await token());
+    render(issue||null,issues,loggedIn);
+    lastIssueNo=issue?.issue_no;
+    if(keepScroll) window.scrollTo(0,y);
   }catch(e){$('#root').innerHTML=`<div class="empty">${esc(e.message)}</div>`}
 }
+function closeHekaya(e){
+  if(e) e.preventDefault();
+  if(history.length>1) history.back(); else location.href='/';
+}
+document.getElementById('closeBtn').onclick=closeHekaya;
+document.addEventListener('click',e=>{const a=e.target.closest('[data-close]'); if(a) closeHekaya(e)});
 load(wantNo);
 </script>
 </body>

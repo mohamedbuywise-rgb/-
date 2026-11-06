@@ -22,23 +22,17 @@ body{font-family:'Tajawal',sans-serif;background:#fff;color:var(--ink)}
 h1{font:800 26px/1.45 'Cairo';margin-top:18px}
 .sub{color:var(--mut);font-size:16px;line-height:1.8;max-width:300px;margin-top:6px}
 /* install button */
-.btn{position:relative;display:flex;align-items:center;justify-content:center;gap:10px;width:100%;max-width:340px;height:54px;margin-top:26px;border:0;border-radius:10px;background:var(--b);color:#fff;font:700 17px 'Cairo';overflow:hidden;cursor:pointer}
+.btn{position:relative;display:flex;align-items:center;justify-content:center;gap:10px;width:100%;max-width:340px;height:54px;margin-top:26px;border:0;border-radius:10px;background:var(--b);color:#fff;font:700 17px 'Cairo';cursor:pointer}
 .btn:active{background:#067A56}
-.btn .fill{position:absolute;inset:0;background:#067A56;transform-origin:right;transform:scaleX(0)}
-.btn>*{position:relative}
-.ic{width:26px;height:26px;flex:none}
-.ic .ring{fill:none;stroke:rgba(255,255,255,.28);stroke-width:2}
-.ic .prog{fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-dasharray:62.83;stroke-dashoffset:62.83;transform:rotate(-90deg);transform-origin:12px 12px;opacity:0}
+.btn:disabled{cursor:default}
+.ic{width:22px;height:22px;flex:none;display:none}
 .ic .arr{fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-.ic .chk{fill:none;stroke:#fff;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:20;stroke-dashoffset:20;opacity:0}
-.btn.run .ring,.btn.run .prog{opacity:1}
-.btn.run .arr{animation:drop 1s ease-in-out infinite}
+.spin{width:22px;height:22px;flex:none;display:none;border-radius:50%;border:2.5px solid rgba(255,255,255,.35);border-top-color:#fff;animation:spin .8s linear infinite}
+.btn.idle .ic{display:block}
+.btn.run{background:#067A56}
+.btn.run .spin{display:block}
 .btn.done{background:#0E2A20}
-.btn.done .ring{opacity:1;stroke:#fff}
-.btn.done .prog,.btn.done .arr{opacity:0;animation:none}
-.btn.done .chk{opacity:1;animation:draw .4s ease forwards}
-@keyframes drop{0%{transform:translateY(-3px);opacity:0}30%{opacity:1}70%{opacity:1}100%{transform:translateY(4px);opacity:0}}
-@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes spin{to{transform:rotate(360deg)}}
 .plats{display:flex;gap:18px;margin-top:18px;color:var(--mut);font-size:14px}
 .plats span{display:flex;align-items:center;gap:6px}
 .plats svg{width:18px;height:18px;fill:var(--mut)}
@@ -77,20 +71,20 @@ ol svg{width:18px;height:18px;vertical-align:-4px;stroke:var(--b);fill:none;stro
   <h1>ثبّت دبّر</h1>
   <div class="seg"><button data-p="and"><svg><use href="#i-and"/></svg>Android</button><button data-p="ios"><svg><use href="#i-ios"/></svg>iPhone</button></div>
   <ol class="js-steps"></ol>
-  <button class="btn js-install"><span class="fill"></span><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><circle class="ring" cx="12" cy="12" r="10"/><circle class="prog" cx="12" cy="12" r="10"/><path class="arr" d="M12 6.5v8m0 0l-3-3m3 3l3-3M8 18h8"/><path class="chk" d="M7.8 12.4l3 3 5.4-5.8"/></svg><span class="lb">تثبيت التطبيق</span></button>
+  <button class="btn js-install idle"><svg class="ic" viewBox="0 0 24 24" aria-hidden="true"><path class="arr" d="M12 6.5v8m0 0l-3-3m3 3l3-3M8 18h8"/></svg><span class="spin" aria-hidden="true"></span><span class="lb">تثبيت التطبيق</span></button>
 </main>
 
 <div class="mask" id="mask"><div class="sheet"><h2>إزاي تثبّت دبّر</h2><ol class="js-steps"></ol><button class="close" id="close">تمام</button></div></div>
 
 <script>
 (function(){
-  var plat=/iPad|iPhone|iPod/.test(navigator.userAgent)?'ios':'and', dp=null, timer=null, cyc=null;
+  var plat=/iPad|iPhone|iPod/.test(navigator.userAgent)?'ios':'and', dp=null, cyc=null, installed=false;
   var SH='<svg viewBox="0 0 24 24"><path d="M12 15V4m0 0L8.5 7.5M12 4l3.5 3.5M6 11H5a1 1 0 00-1 1v8a1 1 0 001 1h14a1 1 0 001-1v-8a1 1 0 00-1-1h-1"/></svg>';
   var DT='<svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1" fill="currentColor"/><circle cx="12" cy="12" r="1" fill="currentColor"/><circle cx="12" cy="19" r="1" fill="currentColor"/></svg>';
   var PL='<svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M12 8.5v7M8.5 12h7"/></svg>';
   var S={
     and:['اضغط <b style="all:unset;font-weight:700">تثبيت التطبيق</b> من الزرار اللي تحت','أكّد من النافذة اللي هتظهر','افتح <b style="all:unset;font-weight:700">دبّر</b> من شاشتك الرئيسية'],
-    ios:['افتح الصفحة في Safari واضغط زرار المشاركة '+SH,'اختار <b style="all:unset;font-weight:700">إضافة إلى الشاشة الرئيسية</b> '+PL,'اضغط <b style="all:unset;font-weight:700">إضافة</b> وافتح دبّر من شاشتك']
+    ios:['افتح الصفحة في Safari أو Chrome <b style="all:unset;font-weight:700">العادي</b> واضغط زرار المشاركة '+SH,'اختار <b style="all:unset;font-weight:700">إضافة إلى الشاشة الرئيسية</b> '+PL,'اضغط <b style="all:unset;font-weight:700">إضافة</b> وافتح دبّر من شاشتك']
   };
   var F={and:['افتح قايمة المتصفح '+DT,'اختار <b style="all:unset;font-weight:700">تثبيت التطبيق</b> أو <b style="all:unset;font-weight:700">إضافة إلى الشاشة الرئيسية</b>','افتح <b style="all:unset;font-weight:700">دبّر</b> من شاشتك الرئيسية'],ios:S.ios};
   function steps(){
@@ -98,47 +92,26 @@ ol svg{width:18px;height:18px;vertical-align:-4px;stroke:var(--b);fill:none;stro
     document.querySelectorAll('.js-steps').forEach(function(o){o.innerHTML=L(o.closest('.sheet')?F[plat]:S[plat])});
     document.querySelectorAll('[data-p]').forEach(function(b){b.classList.toggle('on',b.dataset.p===plat)});
   }
-  function setPlat(p){plat=p;steps();reset()}
-  function reset(){
-    clearInterval(timer);clearInterval(ramp);
-    document.querySelectorAll('.js-install').forEach(function(b){b.className='btn js-install';b.querySelector('.lb').textContent='تثبيت التطبيق';b.querySelector('.prog').style.strokeDashoffset=62.83;b.querySelector('.fill').style.transform='scaleX(0)';b.disabled=false});
-  }
-  var installed=false,ramp=0;
-  function paint(b,p,txt){b.querySelector('.prog').style.strokeDashoffset=62.83*(1-p);b.querySelector('.fill').style.transform='scaleX('+p+')';if(txt)b.querySelector('.lb').textContent=txt}
-  function finish(b){clearInterval(timer);clearInterval(ramp);paint(b,1);b.classList.remove('run');b.classList.add('done');b.disabled=true;b.querySelector('.lb').textContent='تم التثبيت، افتح دبّر من شاشتك'}
-  /* الأنيميشن مربوط بالتثبيت الفعلي: بيتقدم تدريجي ومش بيوصل 100% غير لما كروم يبعت appinstalled (أو الوضع يبقى standalone)،
-     ساعتها بيكمل لـ 100% بسلاسة. يعني لو التثبيت خد 13 ثانية، الأنيميشن بيخلص عند الـ 13 ثانية. */
-  function complete(b){
-    if(!b||b.classList.contains('done'))return;
-    if(!b.classList.contains('run'))run(b);
-    clearInterval(timer);clearInterval(ramp);
-    var pg=parseFloat(b.querySelector('.fill').style.transform.replace(/[^0-9.]/g,''))||0.5;
-    var t0=Date.now(),from=pg;
-    ramp=setInterval(function(){
-      var x=Math.min((Date.now()-t0)/450,1),p=from+(1-from)*(1-Math.pow(1-x,3));
-      paint(b,p,'جاري التثبيت '+Math.round(p*100)+'%');
-      if(x>=1)finish(b);
-    },30);
-  }
-  function run(b){
-    if(b.classList.contains('run')||b.classList.contains('done'))return;
-    var t0=Date.now(),lb=b.querySelector('.lb');
-    b.disabled=true;b.classList.add('run');
-    timer=setInterval(function(){
-      var t=(Date.now()-t0)/1000,p=0.9*(1-Math.exp(-t/5))+0.08*(1-Math.exp(-t/45)); /* بيقرّب من 98% ويستنى التأكيد الحقيقي */
-      paint(b,p,t<20?'جاري التثبيت '+Math.round(p*100)+'%':'بنخلّص التثبيت...');
-    },40);
-    if(installed)complete(b);
-  }
+  function setBtn(b,state,txt){b.className='btn js-install '+state;b.querySelector('.lb').textContent=txt;b.disabled=(state!=='idle')}
+  function reset(){document.querySelectorAll('.js-install').forEach(function(b){setBtn(b,'idle','تثبيت التطبيق')})}
+  function running(){document.querySelectorAll('.js-install').forEach(function(b){setBtn(b,'run','بيتم تثبيت دبّر...')})}
+  function done(){document.querySelectorAll('.js-install').forEach(function(b){setBtn(b,'done','تم تثبيت دبّر')})}
+  function setPlat(p){plat=p;steps();if(!installed)reset()}
   function sheet(on){
     var m=document.getElementById('mask');m.classList.toggle('on',on);clearInterval(cyc);
     if(on){var li=m.querySelectorAll('li'),i=0;cyc=setInterval(function(){li.forEach(function(e,k){e.classList.toggle('act',k===i)});i=(i+1)%li.length},1500)}
   }
   window.addEventListener('beforeinstallprompt',function(e){e.preventDefault();dp=e});
-  window.addEventListener('appinstalled',function(){installed=true;document.querySelectorAll('.js-install').forEach(function(b){if(b.classList.contains('run')||b.classList.contains('done'))complete(b);else run(b)})});
+  window.addEventListener('appinstalled',function(){installed=true;done()});
   if((window.matchMedia&&matchMedia('(display-mode: standalone)').matches)||navigator.standalone){location.replace('app/dabbar-onboarding.html')}
   document.querySelectorAll('.js-install').forEach(function(b){b.addEventListener('click',function(){
-    if(dp){dp.prompt();dp.userChoice.then(function(r){dp=null;if(r.outcome==='accepted')run(b)});return}
+    if(installed||b.classList.contains('run'))return;
+    if(dp){
+      var p=dp;dp=null;
+      p.prompt();
+      p.userChoice.then(function(r){if(r.outcome==='accepted'){running()}else{reset()}}).catch(reset);
+      return;
+    }
     sheet(true);
   })});
   document.getElementById('close').onclick=function(){sheet(false)};

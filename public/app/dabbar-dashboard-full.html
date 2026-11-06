@@ -3909,7 +3909,8 @@ html[data-theme="light"] .quick-workspace-switcher, html:not([data-theme="light"
     margin:0 !important; width:1.7rem !important; height:1.7rem !important; font-size:.95rem !important; flex:none;
 }
 #quick-expense-content .q-modes > .quick-entry-tab > span:last-child { font-size:.74rem !important; font-weight:800; }
-#quick-expense-content .q-modes > #quick-entry-text {
+#quick-expense-content .q-modes > .quick-entry-tab.is-active,
+#quick-expense-content .q-modes > button.is-active {
     background: rgb(240,247,227) !important;
     background: color-mix(in srgb, var(--db-accent) 11%, var(--cs-panel)) !important;
     border-color: rgba(189,242,63,0.42) !important;
@@ -4703,9 +4704,42 @@ html, body { font-variant-numeric: tabular-nums; }
 .vl-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
 .vl-opt{min-height:42px;padding:0 10px;border-radius:12px;border:1px solid rgba(120,130,140,.35);background:transparent;color:inherit;font:inherit;font-size:13px;font-weight:700;text-align:center;cursor:pointer}
 .vl-opt[aria-pressed="true"]{border:2px solid #087a59;background:rgba(8,122,89,.13);font-weight:900}
+.vl-ar-sub{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.vl-ar-sub[hidden]{display:none}
+.vl-group{grid-column:1/-1}
+#voice-lang-sheet .vl-opt{min-height:36px;font-size:12px}
+#voice-lang-sheet .vl-panel{padding-top:.8rem;padding-bottom:.8rem}
 .vl-ok{margin-top:10px;width:100%;min-height:44px;border:0;border-radius:14px;background:#087a59;color:#fff;font:inherit;font-size:14px;font-weight:900;cursor:pointer}
 .vl-chip{display:inline-flex;align-items:center;gap:4px;min-height:28px;max-width:52%;padding:0 10px;border-radius:14px;border:1px solid rgba(190,18,60,.28);background:rgba(190,18,60,.10);color:inherit;font:inherit;font-size:11px;font-weight:700;white-space:nowrap;cursor:pointer}
 .vl-chip span{overflow:hidden;text-overflow:ellipsis}
+</style>
+<style id="dabbar-quick-log-tweaks">
+#quick-entry-invoice, #quick-entry-multi-btn { display:none !important; }
+#quick-expense-detail.qe2-detail { display:block !important; max-height:none !important; opacity:1 !important; margin-top:.7rem !important; animation:none !important; transition:none !important; }
+#qe2-chevron { display:none !important; }
+#qe2-dock { cursor:default; }
+</style>
+<style id="dabbar-list-pager">
+.dabbar-pager { display:flex; align-items:center; justify-content:space-between; gap:.5rem; margin-top:.5rem; font-size:.66rem; font-weight:800; color:#8a97a8; }
+.dabbar-pager button { border:1px solid var(--pm-hairline); border-radius:.7rem; padding:.35rem .7rem; background:transparent; color:inherit; font:inherit; cursor:pointer; }
+.dabbar-pager button:disabled { opacity:.35; cursor:default; }
+#subscriptions-list.dabbar-paged, #recurring-purchases-list.dabbar-paged, #all-categories-list.dabbar-paged { border:1px solid var(--pm-hairline); border-radius:1rem; padding:.2rem .7rem; background:var(--pm-surface-soft, transparent); }
+#subscriptions-list.dabbar-paged > *, #recurring-purchases-list.dabbar-paged > * { min-width:0; }
+.dabbar-pager { margin-top:.4rem; font-size:.6rem; gap:.35rem; }
+#all-categories-list > div { transition: filter .25s ease, opacity .25s ease; }
+#all-categories-list:has(.category-items:not(.hidden)) > div:not(:has(.category-items:not(.hidden))) { filter: blur(2.5px); opacity: .45; }
+
+.dabbar-pager button { padding:.2rem .5rem; font-size:.6rem; border-radius:.55rem; }
+</style>
+<style id="dabbar-ledger-compact">
+#expense-ledger-list [data-ledger-key] { padding-top:.32rem !important; padding-bottom:.32rem !important; gap:.45rem !important; }
+#expense-ledger-list [data-ledger-key] > span:first-child { width:1.75rem !important; height:1.75rem !important; border-radius:.55rem !important; font-size:.85rem !important; }
+#expense-ledger-list [data-ledger-key] > div > *:first-child { font-size:.72rem !important; line-height:1.25 !important; }
+#expense-ledger-list [data-ledger-key] > div > p:last-child { font-size:.56rem !important; margin-top:.05rem !important; }
+#expense-ledger-list [data-ledger-key] > span.ledger-amt-e, #expense-ledger-list [data-ledger-key] > span.ledger-amt-i, #expense-ledger-list [data-ledger-key] > span.ledger-amt-t { font-size:.74rem !important; }
+#expense-ledger-list [data-ledger-key] button { min-width:1.9rem !important; min-height:1.9rem !important; }
+#quick-entry-invoice, #quick-entry-multi-btn, .quick-secondary-row { display:none !important; }
+#quick-expense-content .q-modes { grid-template-columns: repeat(3, minmax(0,1fr)) !important; }
 </style>
 </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col overflow-hidden">
@@ -4829,11 +4863,11 @@ html, body { font-variant-numeric: tabular-nums; }
             <section id="quick-entry-card" class="relative bg-gradient-to-br from-emerald-50 via-white to-teal-50 border border-emerald-200 rounded-[28px] p-4 space-y-3 shadow-[0_12px_35px_rgba(16,185,129,.14)] dark:bg-slate-950/60 dark:from-slate-950/60 dark:via-slate-950/60 dark:to-slate-900 dark:border-slate-800" aria-label="إضافة عملية مالية">
                 <div id="dabbar-celebrate-fx" aria-hidden="true"></div>
                 <div id="dabbar-magic-fx" aria-hidden="true"></div>
-                <div class="q-head qe2-dock" id="qe2-dock" data-quick-workspace="expense" role="button" tabindex="0" aria-expanded="false" aria-controls="quick-expense-detail"><div class="q-icon" aria-hidden="true">✨</div><div class="q-titles"><h3 class="q-title" id="qe2-title">سجّل مصروفك بسرعة</h3><p class="q-sub" id="qe2-sub">كتابة، صوت، أو فاتورة — في ثواني</p></div><span id="dabbar-magic-chip" class="dabbar-magic-chip" hidden><span class="dabbar-magic-chip-dot"></span><span id="dabbar-magic-label">جاهز يفهمها</span></span><span class="qe2-chevron" id="qe2-chevron" aria-hidden="true">‹</span></div>
+                <div class="q-head qe2-dock" id="qe2-dock" data-quick-workspace="expense" role="button" tabindex="0" aria-expanded="false" aria-controls="quick-expense-detail"><div class="q-icon" aria-hidden="true">✨</div><div class="q-titles"><h3 class="q-title" id="qe2-title">سجّل مصروفك بسرعة</h3><p class="q-sub" id="qe2-sub">كتابة أو صوت — في ثواني</p></div><span id="dabbar-magic-chip" class="dabbar-magic-chip" hidden><span class="dabbar-magic-chip-dot"></span><span id="dabbar-magic-label">جاهز يفهمها</span></span><span class="qe2-chevron" id="qe2-chevron" aria-hidden="true">‹</span></div>
                 <div id="quick-expense-content"><div id="quick-expense-detail" class="qe2-detail">
                 <div id="quick-entry-subscription-lock" class="hidden items-center justify-between gap-3 rounded-2xl border px-3 py-2.5 text-[11px]" style="border-color:rgba(8,122,89,0.4);border-color:color-mix(in srgb,var(--pm-gold-bright) 40%,transparent);background:rgb(230,242,238);background:color-mix(in srgb,var(--pm-gold-bright) 10%,var(--pm-surface-hi));color:var(--pm-ink);"><div class="flex items-center gap-2"><span id="quick-entry-vip-badge" class="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-lg" style="background:linear-gradient(145deg,var(--pm-gold-bright),var(--pm-gold));color:var(--pm-ink);">💎</span><span><strong class="block" style="color:var(--pm-gold-bright);">التصنيف الذكي بقى ميزة VIP</strong><span style="color:var(--pm-muted);">الإدخال اليدوي شغال زي العادة — فعّل VIP للصوت والفواتير والـ AI.</span></span></div><button id="quick-entry-open-subscription" type="button" class="shrink-0 rounded-xl px-3 py-2 text-[10px] font-black" style="background:linear-gradient(145deg,var(--pm-gold-bright),var(--pm-gold));color:var(--pm-ink);">فعّل VIP</button></div>
                 
-                <div class="grid grid-cols-3 gap-2 q-modes"><button id="quick-entry-text" class="quick-entry-tab rounded-2xl border px-2 py-3 text-center shadow-sm transition" type="button" style="border-color:rgba(8,122,89,0.5);border-color:color-mix(in srgb,var(--pm-gold-bright) 50%,transparent);background:linear-gradient(145deg,rgb(211,231,225),var(--pm-surface-hi));background:linear-gradient(145deg,color-mix(in srgb,var(--pm-gold-bright) 18%,var(--pm-surface-hi)),var(--pm-surface-hi));"><span class="mx-auto mb-1 flex h-9 w-9 items-center justify-center rounded-full text-xl" style="background:rgba(8,122,89,0.18);background:color-mix(in srgb,var(--pm-gold-bright) 18%,transparent);">✍️</span><span class="block text-[11px] font-bold" style="color:var(--pm-ink);">كتابة</span></button><button id="quick-entry-voice" class="quick-entry-tab rounded-2xl border px-2 py-3 text-center shadow-sm transition" type="button" style="border-color:var(--pm-hairline);background:var(--pm-surface-hi);"><span class="mx-auto mb-1 flex h-9 w-9 items-center justify-center rounded-full text-xl" style="background:rgba(8,122,89,0.12);background:color-mix(in srgb,var(--pm-gold-bright) 12%,transparent);">🎙️</span><span class="block text-[11px] font-bold" style="color:var(--pm-ink);">صوت</span></button><button id="quick-entry-invoice" class="quick-entry-tab rounded-2xl border px-2 py-3 text-center shadow-sm transition" type="button" style="border-color:var(--pm-hairline);background:var(--pm-surface-hi);"><span class="mx-auto mb-1 flex h-9 w-9 items-center justify-center rounded-full text-xl" style="background:rgba(8,122,89,0.12);background:color-mix(in srgb,var(--pm-gold-bright) 12%,transparent);">📸</span><span class="block text-[11px] font-bold" style="color:var(--pm-ink);">فاتورة</span></button></div><div class="grid grid-cols-2 gap-2 quick-secondary-row"><button id="quick-entry-manual" type="button" class="quick-secondary-btn"><span aria-hidden="true">✍️</span><span>يدوي من غير AI</span></button><button id="quick-entry-multi-btn" type="button" class="quick-secondary-btn"><span aria-hidden="true">🧾</span><span>فاتورة طويلة</span></button></div><p class="q-foot text-[10px]" style="color:var(--pm-muted);"><span class="gem" aria-hidden="true">💎</span><span>الصوت والفاتورة الذكية VIP — الكتابة والتسجيل اليدوي متاحين دايمًا.</span></p>
+                <div class="grid grid-cols-3 gap-2 q-modes"><button id="quick-entry-text" class="quick-entry-tab rounded-2xl border px-2 py-3 text-center shadow-sm transition" type="button" style="border-color:rgba(8,122,89,0.5);border-color:color-mix(in srgb,var(--pm-gold-bright) 50%,transparent);background:linear-gradient(145deg,rgb(211,231,225),var(--pm-surface-hi));background:linear-gradient(145deg,color-mix(in srgb,var(--pm-gold-bright) 18%,var(--pm-surface-hi)),var(--pm-surface-hi));"><span class="mx-auto mb-1 flex h-9 w-9 items-center justify-center rounded-full text-xl" style="background:rgba(8,122,89,0.18);background:color-mix(in srgb,var(--pm-gold-bright) 18%,transparent);">✍️</span><span class="block text-[11px] font-bold" style="color:var(--pm-ink);">كتابة</span></button><button id="quick-entry-voice" class="quick-entry-tab rounded-2xl border px-2 py-3 text-center shadow-sm transition" type="button" style="border-color:var(--pm-hairline);background:var(--pm-surface-hi);"><span class="mx-auto mb-1 flex h-9 w-9 items-center justify-center rounded-full text-xl" style="background:rgba(8,122,89,0.12);background:color-mix(in srgb,var(--pm-gold-bright) 12%,transparent);">🎙️</span><span class="block text-[11px] font-bold" style="color:var(--pm-ink);">صوت</span></button><button id="quick-entry-invoice" class="quick-entry-tab rounded-2xl border px-2 py-3 text-center shadow-sm transition" type="button" style="border-color:var(--pm-hairline);background:var(--pm-surface-hi);"><span class="mx-auto mb-1 flex h-9 w-9 items-center justify-center rounded-full text-xl" style="background:rgba(8,122,89,0.12);background:color-mix(in srgb,var(--pm-gold-bright) 12%,transparent);">📸</span><span class="block text-[11px] font-bold" style="color:var(--pm-ink);">فاتورة</span></button><button id="quick-entry-manual" type="button" class="quick-secondary-btn" style="flex-direction:column;padding:.85rem .3rem;border-style:solid;border-radius:1rem;font-size:.7rem;gap:.25rem;"><span aria-hidden="true">✍️</span><span>يدوي من غير AI</span></button></div><div class="grid grid-cols-2 gap-2 quick-secondary-row"><button id="quick-entry-multi-btn" type="button" class="quick-secondary-btn"><span aria-hidden="true">🧾</span><span>فاتورة طويلة</span></button></div><p class="q-foot text-[10px]" style="color:var(--pm-muted);"><span class="gem" aria-hidden="true">💎</span><span>الصوت الذكي والكتابة الذكية VIP — الإدخال اليدوي متاح دايمًا.</span></p>
                 <input type="file" id="quick-entry-multi-input" accept="image/*" multiple class="hidden">
                 <input type="file" id="quick-entry-invoice-input" accept="image/*" class="hidden">
                 <div id="quick-entry-scanning" class="hidden dabbar-scan-box rounded-2xl p-3 text-center"><div class="mx-auto mb-2 flex h-10 w-10 items-center justify-center rounded-xl dabbar-scan-box-icon text-xl shadow-sm"><span style="display:inline-block;animation:dabbar-scan-spin 1s linear infinite">⟳</span></div><p class="text-xs font-bold dabbar-scan-box-title">بنقرأ الفاتورة...</p><p class="mt-1 text-[10px] dabbar-scan-box-sub">دبّر بيستخرج المبلغ والأصناف</p></div>
@@ -4913,8 +4947,9 @@ html, body { font-variant-numeric: tabular-nums; }
                 var linkedCards = document.querySelectorAll('.qe2-linked-card');
                 if (!dock || !detail) return;
                 function openDetail() { detail.classList.add('qe2-open'); dock.setAttribute('aria-expanded', 'true'); }
-                function closeDetail() { detail.classList.remove('qe2-open'); dock.setAttribute('aria-expanded', 'false'); }
+                function closeDetail() { openDetail(); }
                 function toggleDetail() { detail.classList.contains('qe2-open') ? closeDetail() : openDetail(); }
+                openDetail();
                 dock.addEventListener('click', function (e) { if (e.target.closest('#qe2-quickmic')) return; toggleDetail(); });
                 dock.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleDetail(); } });
                 if (mic) {
@@ -4936,7 +4971,7 @@ html, body { font-variant-numeric: tabular-nums; }
             </script>
 
             <!-- كارت "المتاح ليك تصرفه" الموحّد: بديل صافي ثروتك، بيظهر بس لما العميل يحدد دخله أو ميزانيته -->
-            <details id="available-collapsible" class="dabbar-collapsible-section relative overflow-hidden rounded-3xl p-4 shadow-lg dabbar-savings-card" open>
+            <details id="available-collapsible" class="dabbar-collapsible-section relative overflow-hidden rounded-3xl p-4 shadow-lg dabbar-savings-card">
                 <summary class="dabbar-collapsible-summary" id="available-collapsible-summary">
                     <span class="dabbar-collapsible-summary-label">💰 الدخل والميزانية الشهر ده</span>
                     <span class="dabbar-collapsible-chev" aria-hidden="true">⌄</span>
@@ -5194,7 +5229,7 @@ html, body { font-variant-numeric: tabular-nums; }
     if (!sub || !PAINT[k]) return;
     const light = document.documentElement.getAttribute('data-theme') === 'light';
     const c = light ? { e: ['#fee2e2', '#b91c1c'], i: ['#d1fae5', '#047857'], t: ['#e0e7ff', '#4338ca'] }[k] : [PAINT[k].bg, PAINT[k].ink];
-    sub.style.cssText = `display:inline-block;margin-top:.15rem;padding:.02rem .45rem;border-radius:999px;font-weight:700;line-height:1.5;background:${c[0]};color:${c[1]}`;
+    sub.style.cssText = `font-weight:700;color:${c[1]};background:none;padding:0;border-radius:0;`;
   };
   const kindOf = (row) => {
     const titleEl = row.querySelector('p');
@@ -5966,7 +6001,7 @@ html, body { font-variant-numeric: tabular-nums; }
 
 
             <!-- Smart Receipt Scanner -->
-            <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-2.5">
+            <div class="bg-slate-950/60 border border-slate-800 rounded-3xl p-4 space-y-2.5 hidden">
                 <h4 class="text-xs font-bold text-slate-300 flex items-center gap-1.5 justify-between">
                     <span class="flex items-center gap-1.5">📸 امسح فاتورة</span>
                     <span id="asst-receipt-usage" class="hidden text-[9.5px] font-semibold text-slate-500 bg-slate-900 border border-slate-800 rounded-full px-2 py-0.5"></span>
@@ -6107,19 +6142,6 @@ html, body { font-variant-numeric: tabular-nums; }
                 </div>
             </div>
 
-            <details id="account-hekaya-card" class="acct-sub-collapse">
-                <summary class="acct-sub-summary">
-                    <span class="acct-sub-summary-ic" aria-hidden="true" style="box-shadow:0 0 0 1px rgba(251,191,36,.35)"><iconify-icon class="acct-doc-ic" icon="ph:newspaper-duotone"></iconify-icon></span>
-                    <span class="acct-sub-summary-txt">
-                        <span class="flex items-center gap-2"><b>الحكاية الأسبوعية</b><span class="text-[9px] font-black px-2 py-0.5 rounded-full bg-amber-400/15 text-amber-300 border border-amber-400/30">بريميوم</span></span>
-                        <small>مقال الأسبوع وفيديو وتصويت ونقاش مع الناس</small>
-                    </span>
-                    <span class="acct-sub-chev" aria-hidden="true">⌄</span>
-                </summary>
-                <div class="acct-sub-body">
-                <a href="/app/hekaya.html" onclick="try{sessionStorage.setItem('dabbar-return-tab','account')}catch(e){}" class="flex items-center justify-center rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs px-4 py-2.5 no-underline">افتح النشرة</a>
-                </div>
-            </details>
             <details id="account-currency-card" class="acct-sub-collapse">
                 <summary class="acct-sub-summary">
                     <span class="acct-sub-summary-ic" aria-hidden="true"><iconify-icon class="acct-doc-ic" icon="ph:coins-duotone"></iconify-icon></span>
@@ -9606,6 +9628,31 @@ html, body { font-variant-numeric: tabular-nums; }
             // وهو حر ينزل يشوفها وقت ما يحب ============
         }
 
+        // ============ تقسيم الليستة لصفحات (4 في كل صفحة) بأزرار السابق/التالي بدل السكرول الطويل ============
+        function paginateList(listEl, toggleBtnEl, limit) {
+            if (!listEl) return;
+            if (toggleBtnEl) toggleBtnEl.classList.add('hidden');
+            const rows = Array.from(listEl.children).filter((el) => el.tagName !== 'P');
+            listEl.classList.toggle('dabbar-paged', rows.length > limit);
+            const pageCount = Math.max(1, Math.ceil(rows.length / limit));
+            let page = Math.min(Number(listEl.dataset.page || 0), pageCount - 1);
+            listEl.dataset.page = String(page);
+            rows.forEach((r, i) => r.classList.toggle('dabbar-row-hidden', i < page * limit || i >= (page + 1) * limit));
+            let pager = listEl.parentElement.querySelector(`[data-pager-for="${listEl.id}"]`);
+            if (rows.length <= limit) { if (pager) pager.remove(); return; }
+            if (!pager) {
+                pager = document.createElement('div');
+                pager.className = 'dabbar-pager';
+                pager.setAttribute('data-pager-for', listEl.id);
+                pager.innerHTML = '<button type="button" data-pg="next">التالي ›</button><span data-pg="label"></span><button type="button" data-pg="prev">‹ السابق</button>';
+                listEl.insertAdjacentElement('afterend', pager);
+                pager.querySelector('[data-pg="prev"]').onclick = () => { listEl.dataset.page = String(Number(listEl.dataset.page || 0) - 1); paginateList(listEl, toggleBtnEl, limit); };
+                pager.querySelector('[data-pg="next"]').onclick = () => { listEl.dataset.page = String(Number(listEl.dataset.page || 0) + 1); paginateList(listEl, toggleBtnEl, limit); };
+            }
+            pager.querySelector('[data-pg="label"]').textContent = `صفحة ${page + 1} من ${pageCount}`;
+            pager.querySelector('[data-pg="prev"]').disabled = page === 0;
+            pager.querySelector('[data-pg="next"]').disabled = page >= pageCount - 1;
+        }
         // ============ بريفيو موحّد لأي ليستة طويلة: بيورّي أول N عنصر بس ويسيب زرار "عرض الكل" — الصفوف كلها لسه موجودة في الـ DOM (عشان منكسرش أي reconciliation)، بس متخبّية بـ CSS ============
         function applyDabbarListPreview(containerEl, toggleBtnEl, limit) {
             if (!containerEl || !toggleBtnEl) return;
@@ -11155,7 +11202,9 @@ html, body { font-variant-numeric: tabular-nums; }
                         icon: '🛍️', amount: amt,
                         title: topCat ? `قلل صرفك على ${escHtmlLocal(topCat.name)} بـ ${fmt(amt)}` : `قلل الصرف على الكماليات بـ ${fmt(amt)}`,
                         sub: topCat ? `صرفت ${fmt(topCat.amount)} هنا من ${fmt(monthTotal)} (${topCatPercent}%)` : 'التسوق والترفيه وغيرهم',
-                        btn: topCat ? { label: '🎯 حدّد حد للفئة', attr: `data-savings-limit-name="${escHtmlLocal(topCat.name)}" data-savings-limit-amount="${Math.max(0, Math.round(topCat.amount - amt))}"` } : null,
+                        btn: topCat
+                            ? { label: '🎯 حدّد حد للفئة', attr: `data-savings-limit-name="${escHtmlLocal(topCat.name)}" data-savings-limit-amount="${Math.max(0, Math.round(topCat.amount - amt))}"` }
+                            : { label: 'وريني التصنيفات', attr: 'data-savings-cta="categories"' },
                     });
                 }
 
@@ -11228,12 +11277,21 @@ html, body { font-variant-numeric: tabular-nums; }
 
         // ============ من كارت "فرص التوفير" — يودّي المستخدم لمكان الاشتراكات أو الفئة اللي فيها فرصة التوفير ============
         function goToSavingsTarget(target, categoryName) {
-            const monthlyTabBtn = document.querySelector('.tab-btn[data-tab="monthly"]');
-            if (monthlyTabBtn && !monthlyTabBtn.classList.contains('active-tab')) monthlyTabBtn.click();
+            // الاشتراكات والفئات بتعيش في تاب «التصنيفات» مش «شهري»، فلازم نفتح تاب التصنيفات نفسه
+            const categoriesTabBtn = document.querySelector('.tab-btn[data-tab="categories"]');
+            if (categoriesTabBtn && !categoriesTabBtn.classList.contains('active-tab')) categoriesTabBtn.click();
             setTimeout(() => {
                 if (target === 'subscriptions') {
                     const el = document.getElementById('subscriptions-card');
-                    if (el) { el.open = true; el.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+                    if (!el) return;
+                    el.open = true;
+                    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    el.style.transition = 'box-shadow .3s ease';
+                    el.style.boxShadow = '0 0 0 2px #10b981';
+                    setTimeout(() => { el.style.boxShadow = ''; }, 1800);
+                } else if (target === 'categories') {
+                    const list = document.getElementById('all-categories-list');
+                    if (list) list.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 } else if (target === 'category' && categoryName) {
                     const toggle = Array.from(document.querySelectorAll('[data-cat-name]')).find((n) => n.getAttribute('data-cat-name') === categoryName)?.closest('.category-toggle');
                     if (toggle) { toggle.click(); toggle.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
@@ -11337,8 +11395,7 @@ html, body { font-variant-numeric: tabular-nums; }
                 }));
             }
             const subsToggleBtn = document.getElementById('subscriptions-list-toggle');
-            bindDabbarListToggle(listEl, subsToggleBtn, 4);
-            applyDabbarListPreview(listEl, subsToggleBtn, 4);
+            paginateList(listEl, subsToggleBtn, 4);
 
             if (purchasesCountEl) {
                 if (purchases.length) { purchasesCountEl.textContent = purchases.length; purchasesCountEl.classList.remove('hidden'); }
@@ -11362,8 +11419,7 @@ html, body { font-variant-numeric: tabular-nums; }
                 }
             }
             const purchasesToggleBtn = document.getElementById('recurring-purchases-toggle');
-            bindDabbarListToggle(purchasesListEl, purchasesToggleBtn, 3);
-            applyDabbarListPreview(purchasesListEl, purchasesToggleBtn, 3);
+            paginateList(purchasesListEl, purchasesToggleBtn, 4);
         }
 
         // ============ تجميع عمليات الفئة حسب اليوم + كارت الإحصائيات + صندوق سكرول داخلي بدل الليستة المسطّحة اللي كانت بتطوّل الصفحة كلها ============
@@ -11377,10 +11433,9 @@ html, body { font-variant-numeric: tabular-nums; }
         }
         function categoryDayGroupsHtml(entries, catName) {
             return entries.map(([dateKey, dayItems]) => {
-                const dayTotal = dayItems.reduce((sum, it) => sum + Number(it.amount || 0), 0);
-                const label = new Date(dateKey).toLocaleDateString('ar-EG-u-nu-latn', { day: 'numeric', month: 'short' });
+                                const label = new Date(dateKey).toLocaleDateString('ar-EG-u-nu-latn', { day: 'numeric', month: 'short' });
                 return `<div class="cat-day-group" data-day-key="${dateKey}">
-                    <div class="cat-day-head"><span>${label}</span><b>${fmt(dayTotal)}</b></div>
+                    <div class="cat-day-head"><span>${label}</span></div>
                     ${dayItems.map((it) => `
                         <div class="cat-tx-row"><span>${it.desc || catName}</span><b>${fmt(it.amount)}</b></div>
                     `).join('')}
@@ -11398,7 +11453,7 @@ html, body { font-variant-numeric: tabular-nums; }
                 const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
                 groups = groups.filter(([dateKey]) => new Date(dateKey).getTime() >= cutoff);
             }
-            const initialCount = range === '7' ? groups.length : 4;
+            const initialCount = range === '7' ? groups.length : 2;
             const visible = groups.slice(0, initialCount);
             const hidden = groups.slice(initialCount);
             box.innerHTML = visible.length ? categoryDayGroupsHtml(visible, data.catName) : '<p class="text-[10px] text-slate-500 py-2">مفيش عمليات في المدة دي.</p>';
@@ -11452,8 +11507,8 @@ html, body { font-variant-numeric: tabular-nums; }
                     window.__categoryDayGroups = window.__categoryDayGroups || {};
                     window.__categoryDayGroups[idx] = { groups: dayGroups, catName: c.name };
                     const statsHtml = items.length ? `
-                        <div class="cat-stat-line"><span><b>${items.length}</b> عملية</span><span>متوسط <b>${fmt(Math.round(c.amount / items.length))}</b></span><span><b>${dayGroups.length}</b> أيام</span></div>` : '';
-                    const initialGroups = dayGroups.slice(0, 4);
+                        <div class="cat-stat-line"><span><b>${items.length}</b> عملية</span><span>متوسط <b>${fmt(Math.round(c.amount / items.length))}</b></span></div>` : '';
+                    const initialGroups = dayGroups.slice(0, 2);
                     const hiddenGroupsCount = dayGroups.length - initialGroups.length;
                     const itemsHtml = items.length ? `
                         ${limitBoxHtml}
@@ -11480,6 +11535,7 @@ html, body { font-variant-numeric: tabular-nums; }
                     </div>
                 `;
                 }).join('');
+                paginateList(listEl, null, 4);
 
                 listEl.querySelectorAll('.category-toggle').forEach((btn) => {
                     btn.addEventListener('click', () => {
@@ -15137,7 +15193,7 @@ function pf2YieldFields() {
         }
         // ============ لغة الصوت: اختيار مرة واحدة وتتحفظ ============
         const VOICE_LANG_KEY = 'dabbar-voice-lang';
-        const VOICE_LANG_LIST = [['ar-EG','العربية (مصر)'],['ar-SA','العربية (السعودية)'],['ar-AE','العربية (الإمارات)'],['ar-KW','العربية (الكويت)'],['ar-QA','العربية (قطر)'],['ar-BH','العربية (البحرين)'],['ar-OM','العربية (عُمان)'],['ar-YE','العربية (اليمن)'],['ar-IQ','العربية (العراق)'],['ar-JO','العربية (الأردن)'],['ar-LB','العربية (لبنان)'],['ar-SY','العربية (سوريا)'],['ar-PS','العربية (فلسطين)'],['ar-MA','العربية (المغرب)'],['ar-DZ','العربية (الجزائر)'],['ar-TN','العربية (تونس)'],['ar-LY','العربية (ليبيا)'],['ar-SD','العربية (السودان)'],['ar-MR','العربية (موريتانيا)'],['ar-SO','العربية (الصومال)'],['ar-DJ','العربية (جيبوتي)'],['ar-KM','العربية (جزر القمر)'],['en-US','English']];
+        const VOICE_LANG_LIST = [['ar-EG','العربية (مصر)'],['ar-SA','العربية (السعودية)'],['ar-AE','العربية (الإمارات)'],['ar-KW','العربية (الكويت)'],['ar-QA','العربية (قطر)'],['ar-BH','العربية (البحرين)'],['ar-OM','العربية (عُمان)'],['ar-YE','العربية (اليمن)'],['ar-IQ','العربية (العراق)'],['ar-JO','العربية (الأردن)'],['ar-LB','العربية (لبنان)'],['ar-SY','العربية (سوريا)'],['ar-PS','العربية (فلسطين)'],['ar-MA','العربية (المغرب)'],['ar-DZ','العربية (الجزائر)'],['ar-TN','العربية (تونس)'],['ar-LY','العربية (ليبيا)'],['ar-SD','العربية (السودان)'],['ar-MR','العربية (موريتانيا)'],['ar-SO','العربية (الصومال)'],['ar-DJ','العربية (جيبوتي)'],['ar-KM','العربية (جزر القمر)'],['en-US','English'],['fr-FR','Français'],['es-ES','Español'],['ru-RU','Русский'],['de-DE','Deutsch'],['it-IT','Italiano'],['pt-BR','Português'],['tr-TR','Türkçe']];
         const voiceLangLabel = (c) => (VOICE_LANG_LIST.find((l) => l[0] === c) || [c, c])[1];
         function getVoiceLang() { try { const v = localStorage.getItem(VOICE_LANG_KEY); return VOICE_LANG_LIST.some((l) => l[0] === v) ? v : null; } catch (e) { return null; } }
         function setVoiceLang(v) { try { localStorage.setItem(VOICE_LANG_KEY, v); } catch (e) {} }
@@ -15154,9 +15210,24 @@ function pf2YieldFields() {
             const grid = document.getElementById('vl-grid');
             const fallback = getVoiceLang() || guessVoiceLang();
             if (!sheet || !grid) return Promise.resolve(fallback);
-            if (!grid.children.length) grid.innerHTML = VOICE_LANG_LIST.map((l) => `<button type="button" class="vl-opt" data-lang="${l[0]}" aria-pressed="false">${l[1]}</button>`).join('');
+            if (!grid.children.length) {
+                const ar = VOICE_LANG_LIST.filter((l) => l[0].startsWith('ar-'));
+                const others = VOICE_LANG_LIST.filter((l) => !l[0].startsWith('ar-'));
+                const btn = (l) => `<button type="button" class="vl-opt" data-lang="${l[0]}" aria-pressed="false">${l[1]}</button>`;
+                grid.innerHTML = `<button type="button" class="vl-opt vl-group" data-group="ar" aria-expanded="false">العربية ‹</button>`
+                    + `<div class="vl-ar-sub" hidden>${ar.map(btn).join('')}</div>`
+                    + others.map(btn).join('');
+            }
             let sel = preselect || fallback;
-            const paint = () => grid.querySelectorAll('.vl-opt').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.lang === sel)));
+            const paint = () => {
+                grid.querySelectorAll('.vl-opt[data-lang]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.lang === sel)));
+                const isAr = String(sel).startsWith('ar-');
+                const g = grid.querySelector('.vl-group');
+                if (g) g.setAttribute('aria-pressed', String(isAr));
+                if (g) g.textContent = isAr ? `${voiceLangLabel(sel)} ˅` : 'العربية ‹';
+                const sub = grid.querySelector('.vl-ar-sub');
+                if (sub) sub.hidden = !(sub.dataset.open === '1' || isAr);
+            };
             paint();
             sheet.classList.remove('hidden');
             sheet.querySelector('.vl-ok')?.focus();
@@ -15165,7 +15236,9 @@ function pf2YieldFields() {
                 const done = (val) => { sheet.classList.add('hidden'); sheet.onclick = null; document.removeEventListener('keydown', onKey); resolve(val); };
                 document.addEventListener('keydown', onKey);
                 sheet.onclick = (e) => {
-                    const opt = e.target.closest('.vl-opt');
+                    const grp = e.target.closest('.vl-group');
+                    if (grp) { const sub = grid.querySelector('.vl-ar-sub'); if (sub) sub.dataset.open = sub.hidden ? '1' : '0'; if (sub) sub.hidden = !sub.hidden; return; }
+                    const opt = e.target.closest('.vl-opt[data-lang]');
                     if (opt) { sel = opt.dataset.lang; paint(); return; }
                     if (e.target.closest('.vl-ok')) { setVoiceLang(sel); updateVoiceLangChip(sel); done(sel); return; }
                     if (e.target === sheet) done(null);
@@ -16446,9 +16519,7 @@ function pf2YieldFields() {
 
             const activeDaysCount = window.__dashboardData?.activeDays?.totalActiveDays || 0;
             const total = sub.totalActiveSubscribers;
-            document.getElementById('honor-board-subscribers-line').textContent = total
-                ? `🏅 من ضمن ${total.toLocaleString('ar-EG-u-nu-latn')} مشترك نشط بيدعمون دبّر`
-                : '🏅 من مشتركين دبّر النشطين';
+            document.getElementById('honor-board-subscribers-line').textContent = '🏅 من ضمن المشتركين النشطين اللي بيدعمون دبّر';
             document.getElementById('honor-board-message').innerHTML =
                 `شكرًا يا <b>${displayName}</b> 🙏 استمرارك معانا (${activeDaysCount} يوم نشط لحد دلوقتي) هو اللي بيخلينا نكمل ونطوّر أكتر.<br>جدد اشتراكك واحتفظ بمكانك بين الداعمين 🚀`;
 
@@ -17998,6 +18069,29 @@ html:not([data-theme="light"]) .asst-goal-daily-days{ color:#bdf23f !important; 
     if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',()=>setTimeout(go,150));
     else setTimeout(go,150);
   }catch(e){}
+})();
+</script>
+<script>
+/* الدخل والميزانية: مفتوح أول مرة بس، وبعد كده بيفتكر اختيار العميل (فتح/قفل) */
+(function () {
+  var KEY = 'dabbar-available-open';
+  var box = document.getElementById('available-collapsible');
+  if (!box) return;
+  var saved = null;
+  try { saved = localStorage.getItem(KEY); } catch (e) {}
+  box.open = saved === null ? true : saved === '1';
+  box.addEventListener('toggle', function () {
+    try { localStorage.setItem(KEY, box.open ? '1' : '0'); } catch (e) {}
+  });
+})();
+</script>
+<script id="dabbar-quick-mode-active">
+(function(){
+  const bar = document.querySelector('#quick-expense-content .q-modes');
+  if (!bar) return;
+  bar.querySelectorAll(':scope > button').forEach((b) => b.addEventListener('click', () => {
+    bar.querySelectorAll(':scope > button').forEach((x) => x.classList.toggle('is-active', x === b));
+  }));
 })();
 </script>
 </body>

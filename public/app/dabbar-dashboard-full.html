@@ -4769,12 +4769,13 @@ html #quick-expense-content .q-modes > button > span:first-child {
     background:transparent !important; font-size:.95rem !important; line-height:1 !important;
 }
 html #quick-expense-content .q-modes > button > span:last-child { font-size:.8rem !important; font-weight:800 !important; color:inherit !important; }
-html #quick-expense-content .q-modes > #quick-entry-voice {
+/* الأخضر يظهر بس على الزرار اللي اتضغط آخر مرة (كتابة / صوت / يدوي) */
+html #quick-expense-content .q-modes > button.is-active {
     background:color-mix(in srgb, var(--db-accent) 22%, var(--cs-panel)) !important;
     border-color:color-mix(in srgb, var(--db-accent) 55%, transparent) !important;
     box-shadow:0 0 0 2px color-mix(in srgb, var(--db-accent) 14%, transparent) !important;
 }
-html #quick-expense-content .q-modes > #quick-entry-voice > span:last-child { font-weight:900 !important; }
+html #quick-expense-content .q-modes > button.is-active > span:last-child { font-weight:900 !important; }
 html #quick-expense-content .q-modes > #quick-entry-manual { font-size:.8rem !important; }
 html #quick-expense-content .q-foot { justify-content:center !important; text-align:center !important; }
 </style>
@@ -18140,6 +18141,31 @@ html:not([data-theme="light"]) .asst-goal-daily-days{ color:#bdf23f !important; 
   bar.querySelectorAll(':scope > button').forEach((b) => b.addEventListener('click', () => {
     bar.querySelectorAll(':scope > button').forEach((x) => x.classList.toggle('is-active', x === b));
   }));
+})();
+</script>
+<script>
+/* تمييز زرار الإدخال اللي اتضغط: الأخضر يفضل على اللي اتضغط بس */
+(function () {
+    var ids = ['quick-entry-text', 'quick-entry-voice', 'quick-entry-manual'];
+    var resetTimer = null;
+    function clearAll() {
+        ids.forEach(function (x) {
+            var o = document.getElementById(x);
+            if (o) o.classList.remove('is-active');
+        });
+    }
+    ids.forEach(function (id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('click', function () {
+            ids.forEach(function (other) {
+                var o = document.getElementById(other);
+                if (o) o.classList.toggle('is-active', other === id);
+            });
+            clearTimeout(resetTimer);
+            resetTimer = setTimeout(clearAll, 10000);
+        });
+    });
 })();
 </script>
 </body>

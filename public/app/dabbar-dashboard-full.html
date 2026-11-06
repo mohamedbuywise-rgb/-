@@ -4740,6 +4740,12 @@ html, body { font-variant-numeric: tabular-nums; }
 #expense-ledger-list [data-ledger-key] button { min-width:1.9rem !important; min-height:1.9rem !important; }
 #quick-entry-invoice, #quick-entry-multi-btn, .quick-secondary-row { display:none !important; }
 #quick-expense-content .q-modes { grid-template-columns: repeat(3, minmax(0,1fr)) !important; }
+#quick-expense-content .q-modes > #quick-entry-invoice { display:none !important; }
+#honor-board-card .honor-loyalty-body { zoom:.76; }
+#expense-ledger-list [data-ledger-key] > button { width:auto !important; min-width:1.4rem !important; padding:0 .12rem !important; margin:0 !important; flex:none !important; }
+#expense-ledger-list [data-ledger-key] > span.ledger-amt-e, #expense-ledger-list [data-ledger-key] > span.ledger-amt-i, #expense-ledger-list [data-ledger-key] > span.ledger-amt-t { margin:0 !important; flex:none !important; }
+#expense-ledger-list [data-ledger-key] { gap:.3rem !important; }
+#push-notifications-card { zoom:.86; }
 </style>
 </head>
 <body class="bg-slate-950 text-slate-100 h-[100dvh] flex flex-col overflow-hidden">
